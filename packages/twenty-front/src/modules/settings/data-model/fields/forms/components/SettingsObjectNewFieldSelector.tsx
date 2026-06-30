@@ -11,7 +11,8 @@ import { type FieldType } from '@/settings/data-model/types/FieldType';
 import { type SettingsFieldType } from '@/settings/data-model/types/SettingsFieldType';
 import { SettingsTextInput } from '@/ui/input/components/SettingsTextInput';
 import { styled } from '@linaria/react';
-import { t } from '@lingui/core/macro';
+import { type MessageDescriptor } from '@lingui/core';
+import { useLingui } from '@lingui/react/macro';
 import { Section } from '@react-email/components';
 import { useContext, useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
@@ -70,16 +71,22 @@ export const SettingsObjectNewFieldSelector = ({
   excludedFieldTypes = [],
   objectNamePlural,
 }: SettingsObjectNewFieldSelectorProps) => {
+  const { t } = useLingui();
   const { theme } = useContext(ThemeContext);
   const { control, setValue } =
     useFormContext<SettingsDataModelFieldTypeFormValues>();
   const [searchQuery, setSearchQuery] = useState('');
+  const translateLabel = (label: string | MessageDescriptor) =>
+    typeof label === 'string' ? label : t(label);
+
   const fieldTypeConfigs = Object.entries<SettingsFieldTypeConfig<any>>(
     SETTINGS_FIELD_TYPE_CONFIGS,
   ).filter(
     ([key, config]) =>
       !excludedFieldTypes.includes(key as SettingsFieldType) &&
-      config.label.toLowerCase().includes(searchQuery.toLowerCase()),
+      translateLabel(config.label)
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase()),
   );
 
   const { resetDefaultValueField: resetBooleanDefaultValueField } =
@@ -141,44 +148,42 @@ export const SettingsObjectNewFieldSelector = ({
                   {fieldTypeConfigs
                     .filter(([, config]) => config.category === category)
                     .filter(([key]) => key !== FieldMetadataType.RELATION)
-                    .map(
-                      ([key, config]) =>
-                        [
-                          key,
-                          key === FieldMetadataType.MORPH_RELATION
-                            ? { ...config, label: t`Relation` }
-                            : config,
-                        ] as [string, SettingsFieldTypeConfig<any>],
-                    )
-                    .map(([key, config]) => (
-                      <StyledCardContainer key={key}>
-                        <UndecoratedLink
-                          to={getSettingsPath(
-                            SettingsPath.ObjectNewFieldConfigure,
-                            { objectNamePlural },
-                            { fieldType: key },
-                          )}
-                          fullWidth
-                          onClick={() => {
-                            setValue('type', key as SettingsFieldType);
-                            resetDefaultValueField(key as SettingsFieldType);
-                          }}
-                        >
-                          <SettingsCard
-                            key={key}
-                            Icon={
-                              <StyledFieldTypeIconContainer>
-                                <config.Icon
-                                  size={theme.icon.size.xl}
-                                  stroke={theme.icon.stroke.sm}
-                                />
-                              </StyledFieldTypeIconContainer>
-                            }
-                            title={config.label}
-                          />
-                        </UndecoratedLink>
-                      </StyledCardContainer>
-                    ))}
+                    .map(([key, config]) => {
+                      const label =
+                        key === FieldMetadataType.MORPH_RELATION
+                          ? t`Relation`
+                          : translateLabel(config.label);
+
+                      return (
+                        <StyledCardContainer key={key}>
+                          <UndecoratedLink
+                            to={getSettingsPath(
+                              SettingsPath.ObjectNewFieldConfigure,
+                              { objectNamePlural },
+                              { fieldType: key },
+                            )}
+                            fullWidth
+                            onClick={() => {
+                              setValue('type', key as SettingsFieldType);
+                              resetDefaultValueField(key as SettingsFieldType);
+                            }}
+                          >
+                            <SettingsCard
+                              key={key}
+                              Icon={
+                                <StyledFieldTypeIconContainer>
+                                  <config.Icon
+                                    size={theme.icon.size.xl}
+                                    stroke={theme.icon.stroke.sm}
+                                  />
+                                </StyledFieldTypeIconContainer>
+                              }
+                              title={label}
+                            />
+                          </UndecoratedLink>
+                        </StyledCardContainer>
+                      );
+                    })}
                 </StyledContainer>
               </Section>
             ))}

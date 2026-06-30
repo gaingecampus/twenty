@@ -11,11 +11,21 @@ import { isFieldTypeSupportedInSettings } from '@/settings/data-model/utils/isFi
 import { type SettingsObjectDetailTableItem } from '~/pages/settings/data-model/types/SettingsObjectDetailTableItem';
 import { getSettingsObjectFieldType } from '~/pages/settings/data-model/utils/getSettingsObjectFieldType';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
+import { type MessageDescriptor } from '@lingui/core';
+import { useLingui } from '@lingui/react/macro';
 
 export const useMapFieldMetadataItemToSettingsObjectDetailTableItem = (
   objectMetadataItem: EnrichedObjectMetadataItem,
 ) => {
+  const { t } = useLingui();
   const getRelationMetadata = useGetRelationMetadata();
+  const translateLabel = (label: string | MessageDescriptor | undefined) => {
+    if (!isDefined(label)) {
+      return '';
+    }
+
+    return typeof label === 'string' ? label : t(label);
+  };
 
   const currentWorkspace = useAtomStateValue(currentWorkspaceState);
   const workspaceCustomApplicationId =
@@ -48,8 +58,10 @@ export const useMapFieldMetadataItemToSettingsObjectDetailTableItem = (
       dataType:
         isDefined(relationObjectMetadataItem?.labelPlural) ||
         isFieldTypeSupportedInSettings(fieldMetadataType)
-          ? getSettingsFieldTypeConfig(fieldMetadataType as SettingsFieldType)
-              ?.label
+          ? translateLabel(
+              getSettingsFieldTypeConfig(fieldMetadataType as SettingsFieldType)
+                ?.label,
+            )
           : '',
       label: fieldMetadataItem.label,
       identifierType: identifierType,
