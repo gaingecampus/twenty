@@ -60,3 +60,8 @@ output/playwright/
 screenshots/
 !**/public/screenshots/
 !**/assets/screenshots/
+
+**/params.*.json
+!**/params.example.json
+docker-compose.env
+deploy/ec2/cloudformation/AWS_REGION=*

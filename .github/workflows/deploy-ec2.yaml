@@ -1,0 +1,246 @@
+name: Deploy EC2
+
+permissions:
+  contents: read
+  id-token: write
+
+on:
+  push:
+    branches:
+      - gainge
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Deployment environment
+        required: true
+        default: staging
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+      image_tag:
+        description: Optional image tag. Defaults to the short commit SHA.
+        required: false
+        type: string
+      deploy_to_ec2:
+        description: Run the EC2 docker compose deployment after pushing the image.
+        required: true
+        default: true
+        type: boolean
+
+defaults:
+  run:
+    shell: bash --noprofile --norc -euo pipefail {0}
+
+jobs:
+  deploy:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    environment: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'staging' }}
+    env:
+      AWS_REGION: ${{ vars.AWS_REGION }}
+      AWS_ROLE_ARN: ${{ vars.AWS_ROLE_ARN }}
+      ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY }}
+      EC2_INSTANCE_ID: ${{ vars.EC2_INSTANCE_ID }}
+      EC2_APP_DIR: ${{ vars.EC2_APP_DIR || '/opt/twenty/deploy/ec2' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      - name: Validate deployment inputs
+        env:
+          SHOULD_DEPLOY_TO_EC2: ${{ github.event_name == 'push' || inputs.deploy_to_ec2 }}
+        run: |
+          required_env_vars=(AWS_REGION AWS_ROLE_ARN ECR_REPOSITORY)
+
+          if [ "${SHOULD_DEPLOY_TO_EC2}" = "true" ]; then
+            required_env_vars+=(EC2_INSTANCE_ID)
+          fi
+
+          missing_env_vars=()
+          for env_var_name in "${required_env_vars[@]}"; do
+            if [ -z "${!env_var_name:-}" ]; then
+              missing_env_vars+=("${env_var_name}")
+            fi
+          done
+
+          if [ "${#missing_env_vars[@]}" -gt 0 ]; then
+            echo "Missing GitHub environment variable(s): ${missing_env_vars[*]}" >&2
+            exit 1
+          fi
+
+      - name: Configure AWS web identity
+        run: |
+          token_response="$(curl -sSf \
+            -H "Authorization: bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=sts.amazonaws.com")"
+          token_file="${RUNNER_TEMP}/aws-web-identity-token"
+          jq -r '.value' <<<"${token_response}" >"${token_file}"
+
+          {
+            echo "AWS_DEFAULT_REGION=${AWS_REGION}"
+            echo "AWS_REGION=${AWS_REGION}"
+            echo "AWS_ROLE_ARN=${AWS_ROLE_ARN}"
+            echo "AWS_WEB_IDENTITY_TOKEN_FILE=${token_file}"
+          } >>"${GITHUB_ENV}"
+
+      - name: Resolve image tag
+        id: values
+        env:
+          INPUT_IMAGE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.image_tag || '' }}
+        run: |
+          image_tag="${INPUT_IMAGE_TAG}"
+          if [ -z "${image_tag}" ]; then
+            image_tag="${GITHUB_SHA::12}"
+          fi
+
+          echo "image_tag=${image_tag}" >>"${GITHUB_OUTPUT}"
+
+      - name: Build and push image
+        id: image
+        env:
+          IMAGE_TAG: ${{ steps.values.outputs.image_tag }}
+        run: |
+          bash deploy/ec2/scripts/build-and-push.sh
+
+      - name: Deploy image on EC2
+        if: ${{ github.event_name == 'push' || inputs.deploy_to_ec2 }}
+        env:
+          IMAGE_URI: ${{ steps.image.outputs.image_uri }}
+          IMAGE_TAG: ${{ steps.values.outputs.image_tag }}
+        run: |
+          if [ -z "${EC2_INSTANCE_ID}" ]; then
+            echo "Set EC2_INSTANCE_ID as a GitHub environment variable." >&2
+            exit 1
+          fi
+
+          echo "Waiting for EC2 instance status checks..."
+          aws ec2 wait instance-status-ok \
+            --instance-ids "${EC2_INSTANCE_ID}"
+
+          echo "Waiting for SSM agent to come online..."
+          for attempt in $(seq 1 30); do
+            ping_status="$(aws ssm describe-instance-information \
+              --filters "Key=InstanceIds,Values=${EC2_INSTANCE_ID}" \
+              --query "InstanceInformationList[0].PingStatus" \
+              --output text 2>/dev/null || true)"
+
+            if [ "${ping_status}" = "Online" ]; then
+              echo "SSM agent is online."
+              break
+            fi
+
+            if [ "${attempt}" = "30" ]; then
+              echo "SSM agent did not become online. Last status: ${ping_status}" >&2
+              exit 1
+            fi
+
+            echo "Waiting for SSM agent (${attempt}/30, status: ${ping_status})"
+            sleep 10
+          done
+
+          compose_file_b64="$(base64 -w 0 deploy/ec2/docker-compose.prod.yml)"
+          env_example_b64=""
+          if [ -f deploy/ec2/docker-compose.env.example ]; then
+            env_example_b64="$(base64 -w 0 deploy/ec2/docker-compose.env.example)"
+          fi
+          bootstrap_script_b64="$(base64 -w 0 deploy/ec2/scripts/bootstrap-ec2.sh)"
+          build_script_b64="$(base64 -w 0 deploy/ec2/scripts/build-and-push.sh)"
+          deploy_script_b64="$(base64 -w 0 deploy/ec2/scripts/deploy-on-ec2.sh)"
+          upgrade_script_b64="$(base64 -w 0 deploy/ec2/scripts/run-upgrade.sh)"
+
+          commands_json="$(jq -n \
+            --arg appDir "${EC2_APP_DIR}" \
+            --arg imageUri "${IMAGE_URI}" \
+            --arg composeFileB64 "${compose_file_b64}" \
+            --arg envExampleB64 "${env_example_b64}" \
+            --arg bootstrapScriptB64 "${bootstrap_script_b64}" \
+            --arg buildScriptB64 "${build_script_b64}" \
+            --arg deployScriptB64 "${deploy_script_b64}" \
+            --arg upgradeScriptB64 "${upgrade_script_b64}" \
+            '{
+              commands: ([
+                "set -euo pipefail",
+                "mkdir -p " + ($appDir | @sh) + "/scripts",
+                "cd " + ($appDir | @sh),
+                "printf %s " + ($composeFileB64 | @sh) + " | base64 -d > docker-compose.prod.yml"
+              ]
+              + (
+                if $envExampleB64 == "" then
+                  []
+                else
+                  [
+                    "printf %s " + ($envExampleB64 | @sh) + " | base64 -d > docker-compose.env.example"
+                  ]
+                end
+              )
+              + [
+                "printf %s " + ($bootstrapScriptB64 | @sh) + " | base64 -d > scripts/bootstrap-ec2.sh",
+                "printf %s " + ($buildScriptB64 | @sh) + " | base64 -d > scripts/build-and-push.sh",
+                "printf %s " + ($deployScriptB64 | @sh) + " | base64 -d > scripts/deploy-on-ec2.sh",
+                "printf %s " + ($upgradeScriptB64 | @sh) + " | base64 -d > scripts/run-upgrade.sh",
+                "chmod +x scripts/*.sh",
+                "EC2_APP_DIR=" + ($appDir | @sh) + " bash scripts/bootstrap-ec2.sh",
+                "if [ ! -f docker-compose.env ]; then echo Missing docker-compose.env in " + ($appDir | @sh) + " >&2; exit 1; fi",
+                "tmp_file=$(mktemp)",
+                "awk -v image=" + ($imageUri | @sh) + " '\''BEGIN { updated = 0 } /^TWENTY_IMAGE=/ { print \"TWENTY_IMAGE=\" image; updated = 1; next } { print } END { if (updated == 0) print \"TWENTY_IMAGE=\" image }'\'' docker-compose.env > \"$tmp_file\"",
+                "mv \"$tmp_file\" docker-compose.env",
+                "bash scripts/run-upgrade.sh",
+                "bash scripts/deploy-on-ec2.sh"
+              ])
+            }')"
+
+          command_id="$(aws ssm send-command \
+            --instance-ids "${EC2_INSTANCE_ID}" \
+            --document-name "AWS-RunShellScript" \
+            --comment "Deploy Twenty ${IMAGE_TAG}" \
+            --parameters "${commands_json}" \
+            --query "Command.CommandId" \
+            --output text)"
+
+          echo "SSM command id: ${command_id}"
+
+          deployment_status="Pending"
+          invocation=""
+
+          for attempt in $(seq 1 240); do
+            if ! invocation="$(aws ssm get-command-invocation \
+              --command-id "${command_id}" \
+              --instance-id "${EC2_INSTANCE_ID}" \
+              --query "{Status:Status,StandardOutputContent:StandardOutputContent,StandardErrorContent:StandardErrorContent}" \
+              --output json 2>&1)"; then
+              echo "Waiting for SSM command invocation (${attempt}/240)"
+
+              if [ "${attempt}" = "240" ]; then
+                echo "${invocation}" >&2
+                exit 1
+              fi
+
+              sleep 5
+              continue
+            fi
+
+            deployment_status="$(jq -r '.Status' <<<"${invocation}")"
+            echo "SSM deployment status: ${deployment_status} (${attempt}/240)"
+
+            case "${deployment_status}" in
+              Success|Failed|Cancelled|TimedOut|Cancelling)
+                echo "${invocation}"
+                break
+                ;;
+            esac
+
+            if [ "${attempt}" = "240" ]; then
+              echo "${invocation}"
+              echo "EC2 deployment timed out while SSM command was still ${deployment_status}" >&2
+              exit 1
+            fi
+
+            sleep 5
+          done
+
+          if [ "${deployment_status}" != "Success" ]; then
+            echo "EC2 deployment failed with status: ${deployment_status}" >&2
+            exit 1
+          fi

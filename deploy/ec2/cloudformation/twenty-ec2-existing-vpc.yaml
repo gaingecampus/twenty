@@ -1,0 +1,954 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Twenty regional stack for an existing VPC with RDS PostgreSQL, ElastiCache Redis, S3, ECR, EC2 app host, ALB, CloudFront, and GitHub OIDC deployment IAM.
+
+Parameters:
+  ProjectName:
+    Type: String
+    AllowedPattern: '^[a-z][a-z0-9-]{2,30}$'
+  Environment:
+    Type: String
+    Default: staging
+    AllowedValues:
+      - dev
+      - staging
+      - prod
+
+  ExistingVpcId:
+    Type: AWS::EC2::VPC::Id
+    Description: Existing VPC ID. This template never creates a new VPC.
+  ExistingSubnetIds:
+    Type: List<AWS::EC2::Subnet::Id>
+    Description: Existing subnet IDs shared by CloudFront origin ALB, app EC2, RDS, and Redis.
+  AdminCidr:
+    Type: String
+    Default: ''
+    Description: Optional CIDR allowed to SSH to EC2. Leave empty to disable SSH ingress.
+  KeyName:
+    Type: String
+    Default: ''
+    Description: Optional EC2 key pair name, not a .pem file name. Leave empty and use SSM Session Manager.
+
+  ServerUrl:
+    Type: String
+    Default: ''
+    Description: Optional public URL used by Twenty. Leave empty to use the generated CloudFront domain.
+  InstanceType:
+    Type: String
+    Default: t3.medium
+  AppRootVolumeSize:
+    Type: Number
+    Default: 50
+    MinValue: 20
+    Description: EC2 root EBS volume size in GiB. Docker images need more than the Amazon Linux default.
+  AmiSsmParameterName:
+    Type: String
+    Default: /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64
+  ContainerPort:
+    Type: Number
+    Default: 3000
+  HealthCheckPath:
+    Type: String
+    Default: /healthz
+  CloudFrontAcmCertificateArn:
+    Type: String
+    Default: ''
+    Description: Optional ACM certificate ARN in us-east-1 for CloudFront aliases.
+  AlbAcmCertificateArn:
+    Type: String
+    Default: ''
+    Description: Optional regional ACM certificate ARN for HTTPS between CloudFront and the ALB. Requires AlbOriginDomainName.
+  AlbOriginDomainName:
+    Type: String
+    Default: ''
+    Description: Optional DNS name that resolves to the ALB and matches AlbAcmCertificateArn. Leave empty to keep HTTP origin.
+  CloudFrontAliases:
+    Type: CommaDelimitedList
+    Default: ''
+  OriginHeaderName:
+    Type: String
+    Default: x-twenty-origin
+  OriginHeaderValue:
+    Type: String
+    NoEcho: true
+    MinLength: 16
+    Description: Secret header value CloudFront sends to the ALB origin.
+
+  DatabaseName:
+    Type: String
+    Default: gainge_crm
+    AllowedPattern: '^[a-zA-Z][a-zA-Z0-9_]{1,63}$'
+  DatabaseUsername:
+    Type: String
+    Default: gainge_root
+    NoEcho: true
+  DatabaseEngineVersion:
+    Type: String
+    Default: ''
+    Description: Optional PostgreSQL engine version. Leave empty to use the RDS regional default.
+  DatabaseInstanceClass:
+    Type: String
+    Default: db.t4g.micro
+  DatabaseAllocatedStorage:
+    Type: Number
+    Default: 20
+    MinValue: 20
+  DatabaseMaxAllocatedStorage:
+    Type: Number
+    Default: 100
+    MinValue: 20
+  DatabaseBackupRetentionDays:
+    Type: Number
+    Default: 7
+    MinValue: 1
+    MaxValue: 35
+  DatabaseDeletionProtection:
+    Type: String
+    Default: 'false'
+    AllowedValues:
+      - 'true'
+      - 'false'
+
+  RedisNodeType:
+    Type: String
+    Default: cache.t4g.micro
+  RedisEngineVersion:
+    Type: String
+    Default: '7.1'
+
+  S3BucketName:
+    Type: String
+    Default: ''
+    Description: Optional globally unique bucket name. Leave empty to let CloudFormation name it.
+  EncryptionKey:
+    Type: String
+    NoEcho: true
+    MinLength: 32
+    Description: Generate with openssl rand -base64 32 and store securely.
+  AppSecretValue:
+    Type: String
+    NoEcho: true
+    MinLength: 32
+    Description: Generate with openssl rand -base64 32 and store securely.
+
+  GitHubOwner:
+    Type: String
+  GitHubRepo:
+    Type: String
+  CreateGitHubOidcProvider:
+    Type: String
+    Default: 'false'
+    AllowedValues:
+      - 'true'
+      - 'false'
+
+Conditions:
+  EnableSshIngress: !Not [!Equals [!Ref AdminCidr, '']]
+  HasKeyName: !Not [!Equals [!Ref KeyName, '']]
+  HasS3BucketName: !Not [!Equals [!Ref S3BucketName, '']]
+  HasServerUrl: !Not [!Equals [!Ref ServerUrl, '']]
+  HasDatabaseEngineVersion: !Not [!Equals [!Ref DatabaseEngineVersion, '']]
+  HasCloudFrontCertificate:
+    !Not [!Equals [!Ref CloudFrontAcmCertificateArn, '']]
+  HasAlbCertificate: !Not [!Equals [!Ref AlbAcmCertificateArn, '']]
+  HasAlbOriginDomainName: !Not [!Equals [!Ref AlbOriginDomainName, '']]
+  UseHttpsAlbOrigin: !And
+    - !Condition HasAlbCertificate
+    - !Condition HasAlbOriginDomainName
+  HasCloudFrontAliases: !Not
+    - !Equals
+      - !Join ['', !Ref CloudFrontAliases]
+      - ''
+  CreateOidcProvider: !Equals [!Ref CreateGitHubOidcProvider, 'true']
+
+Resources:
+  AlbSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: !Sub '${ProjectName}-${Environment}-alb-sg'
+      VpcId: !Ref ExistingVpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectName}-${Environment}-alb-sg'
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+
+  AppSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: !Sub '${ProjectName}-${Environment}-app-sg'
+      VpcId: !Ref ExistingVpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: !Ref ContainerPort
+          ToPort: !Ref ContainerPort
+          SourceSecurityGroupId: !Ref AlbSecurityGroup
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectName}-${Environment}-app-sg'
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+
+  AppSshIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Condition: EnableSshIngress
+    Properties:
+      GroupId: !Ref AppSecurityGroup
+      IpProtocol: tcp
+      FromPort: 22
+      ToPort: 22
+      CidrIp: !Ref AdminCidr
+
+  AlbHttpsIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Condition: UseHttpsAlbOrigin
+    Properties:
+      GroupId: !Ref AlbSecurityGroup
+      IpProtocol: tcp
+      FromPort: 443
+      ToPort: 443
+      CidrIp: 0.0.0.0/0
+
+  DatabaseSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: !Sub '${ProjectName}-${Environment}-db-sg'
+      VpcId: !Ref ExistingVpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 5432
+          ToPort: 5432
+          SourceSecurityGroupId: !Ref AppSecurityGroup
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectName}-${Environment}-db-sg'
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+
+  RedisSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: !Sub '${ProjectName}-${Environment}-redis-sg'
+      VpcId: !Ref ExistingVpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 6379
+          ToPort: 6379
+          SourceSecurityGroupId: !Ref AppSecurityGroup
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectName}-${Environment}-redis-sg'
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+
+  ApplicationRepository:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: !Sub '${ProjectName}-${Environment}'
+      ImageScanningConfiguration:
+        ScanOnPush: true
+      ImageTagMutability: MUTABLE
+      EncryptionConfiguration:
+        EncryptionType: AES256
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectName}-${Environment}'
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+
+  FilesBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketName: !If [HasS3BucketName, !Ref S3BucketName, !Ref AWS::NoValue]
+      VersioningConfiguration:
+        Status: Enabled
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectName}-${Environment}-files'
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+
+  DatabaseSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub '/${ProjectName}/${Environment}/database'
+      Description: !Sub 'PostgreSQL credentials for ${ProjectName} ${Environment}'
+      GenerateSecretString:
+        SecretStringTemplate: !Sub '{"username":"${DatabaseUsername}","dbname":"${DatabaseName}"}'
+        GenerateStringKey: password
+        PasswordLength: 32
+        ExcludeCharacters: '"@/\$`!#%&*()[]{}<>?|;:'
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectName}-${Environment}-database-secret'
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+
+  AppSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub '/${ProjectName}/${Environment}/app'
+      Description: !Sub 'Twenty runtime secrets for ${ProjectName} ${Environment}'
+      SecretString: !Sub |
+        {
+          "ENCRYPTION_KEY": "${EncryptionKey}",
+          "FALLBACK_ENCRYPTION_KEY": "",
+          "APP_SECRET": "${AppSecretValue}"
+        }
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectName}-${Environment}-app-secret'
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+
+  DatabaseSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: !Sub '${ProjectName}-${Environment} database subnets'
+      SubnetIds: !Ref ExistingSubnetIds
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectName}-${Environment}-db-subnets'
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+
+  DatabaseInstance:
+    Type: AWS::RDS::DBInstance
+    DeletionPolicy: Snapshot
+    UpdateReplacePolicy: Snapshot
+    Properties:
+      DBInstanceIdentifier: !Sub '${ProjectName}-${Environment}-db'
+      Engine: postgres
+      EngineVersion: !If
+        - HasDatabaseEngineVersion
+        - !Ref DatabaseEngineVersion
+        - !Ref AWS::NoValue
+      DBInstanceClass: !Ref DatabaseInstanceClass
+      AllocatedStorage: !Ref DatabaseAllocatedStorage
+      MaxAllocatedStorage: !Ref DatabaseMaxAllocatedStorage
+      StorageType: gp3
+      StorageEncrypted: true
+      DBName: !Ref DatabaseName
+      MasterUsername: !Sub '{{resolve:secretsmanager:${DatabaseSecret}:SecretString:username}}'
+      MasterUserPassword: !Sub '{{resolve:secretsmanager:${DatabaseSecret}:SecretString:password}}'
+      DBSubnetGroupName: !Ref DatabaseSubnetGroup
+      VPCSecurityGroups:
+        - !Ref DatabaseSecurityGroup
+      BackupRetentionPeriod: !Ref DatabaseBackupRetentionDays
+      CopyTagsToSnapshot: true
+      DeletionProtection: !Ref DatabaseDeletionProtection
+      PubliclyAccessible: false
+      Port: 5432
+      AutoMinorVersionUpgrade: true
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectName}-${Environment}-db'
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+
+  DatabaseSecretAttachment:
+    Type: AWS::SecretsManager::SecretTargetAttachment
+    Properties:
+      SecretId: !Ref DatabaseSecret
+      TargetId: !Ref DatabaseInstance
+      TargetType: AWS::RDS::DBInstance
+
+  RedisSubnetGroup:
+    Type: AWS::ElastiCache::SubnetGroup
+    Properties:
+      Description: !Sub '${ProjectName}-${Environment}'
+      SubnetIds: !Ref ExistingSubnetIds
+
+  RedisReplicationGroup:
+    Type: AWS::ElastiCache::ReplicationGroup
+    Properties:
+      ReplicationGroupDescription: !Sub '${ProjectName}-${Environment}'
+      Engine: redis
+      EngineVersion: !Ref RedisEngineVersion
+      CacheNodeType: !Ref RedisNodeType
+      NumCacheClusters: 1
+      AutomaticFailoverEnabled: false
+      CacheSubnetGroupName: !Ref RedisSubnetGroup
+      SecurityGroupIds:
+        - !Ref RedisSecurityGroup
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectName}-${Environment}-redis'
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+
+  AppInstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${ProjectName}-${Environment}-app-ec2-role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+      Policies:
+        - PolicyName: TwentyRuntimeAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ecr:BatchCheckLayerAvailability
+                  - ecr:BatchGetImage
+                  - ecr:GetAuthorizationToken
+                  - ecr:GetDownloadUrlForLayer
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                Resource:
+                  - !Ref DatabaseSecret
+                  - !Ref AppSecret
+              - Effect: Allow
+                Action:
+                  - s3:DeleteObject
+                  - s3:GetObject
+                  - s3:PutObject
+                Resource: !Sub '${FilesBucket.Arn}/*'
+              - Effect: Allow
+                Action:
+                  - s3:ListBucket
+                Resource: !GetAtt FilesBucket.Arn
+              - Effect: Allow
+                Action:
+                  - cloudformation:SignalResource
+                Resource: !Sub 'arn:${AWS::Partition}:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/${AWS::StackName}/*'
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectName}-${Environment}-app-ec2-role'
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+
+  AppInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      InstanceProfileName: !Sub '${ProjectName}-${Environment}-app-profile'
+      Roles:
+        - !Ref AppInstanceRole
+
+  AppInstance:
+    Type: AWS::EC2::Instance
+    CreationPolicy:
+      ResourceSignal:
+        Count: 1
+        Timeout: PT30M
+    Properties:
+      ImageId: !Sub '{{resolve:ssm:${AmiSsmParameterName}}}'
+      InstanceType: !Ref InstanceType
+      IamInstanceProfile: !Ref AppInstanceProfile
+      KeyName: !If [HasKeyName, !Ref KeyName, !Ref AWS::NoValue]
+      SubnetId: !Select [0, !Ref ExistingSubnetIds]
+      BlockDeviceMappings:
+        - DeviceName: /dev/xvda
+          Ebs:
+            VolumeSize: !Ref AppRootVolumeSize
+            VolumeType: gp3
+            Encrypted: true
+      SecurityGroupIds:
+        - !Ref AppSecurityGroup
+      MetadataOptions:
+        HttpEndpoint: enabled
+        HttpTokens: required
+      UserData:
+        Fn::Base64: !Sub
+          - |
+            #!/bin/bash
+            set -euo pipefail
+            trap 'signal_status=$?; /opt/aws/bin/cfn-signal -e "$signal_status" --stack "${AWS::StackName}" --resource AppInstance --region "${AWS::Region}" || true' EXIT
+
+            retry() {
+              for attempt in $(seq 1 5); do
+                if "$@"; then
+                  return 0
+                fi
+
+                echo "Retrying command ($attempt/5): $*" >&2
+                sleep 10
+              done
+
+              return 1
+            }
+
+            retry dnf install -y awscli-2 aws-cfn-bootstrap jq
+
+            mkdir -p /opt/twenty/deploy/ec2
+
+            db_secret_json="$(retry aws secretsmanager get-secret-value \
+              --region ${AWS::Region} \
+              --secret-id ${DatabaseSecretArn} \
+              --query SecretString \
+              --output text)"
+            app_secret_json="$(retry aws secretsmanager get-secret-value \
+              --region ${AWS::Region} \
+              --secret-id ${AppSecretArn} \
+              --query SecretString \
+              --output text)"
+
+            db_user="$(jq -r '.username' <<<"$db_secret_json")"
+            db_password="$(jq -r '.password' <<<"$db_secret_json")"
+            encryption_key="$(jq -r '.ENCRYPTION_KEY' <<<"$app_secret_json")"
+            fallback_encryption_key="$(jq -r '.FALLBACK_ENCRYPTION_KEY // ""' <<<"$app_secret_json")"
+            app_secret="$(jq -r '.APP_SECRET // ""' <<<"$app_secret_json")"
+
+            cat > /opt/twenty/deploy/ec2/docker-compose.env <<EOF
+            AWS_REGION=${AWS::Region}
+            TWENTY_IMAGE=${RepositoryUri}:latest
+            SERVER_URL=${PublicServerUrl}
+            TWENTY_HOST_PORT=${ContainerPort}
+            PG_DATABASE_URL=postgres://$db_user:$db_password@${DatabaseHost}:${DatabasePort}/${DatabaseName}
+            PG_SSL_ALLOW_SELF_SIGNED=true
+            PGSSLMODE=require
+            REDIS_URL=redis://${RedisHost}:6379
+            ENCRYPTION_KEY=$encryption_key
+            FALLBACK_ENCRYPTION_KEY=$fallback_encryption_key
+            APP_SECRET=$app_secret
+            STORAGE_TYPE=s3
+            STORAGE_S3_REGION=${AWS::Region}
+            STORAGE_S3_NAME=${BucketName}
+            STORAGE_S3_ENDPOINT=
+            STORAGE_S3_ACCESS_KEY_ID=
+            STORAGE_S3_SECRET_ACCESS_KEY=
+            STORAGE_S3_PRESIGNED_URL_ENABLED=true
+            STORAGE_S3_PRESIGNED_URL_BASE=
+            STORAGE_S3_PRESIGNED_URL_EXPIRES_IN=900
+            IS_CONFIG_VARIABLES_IN_DB_ENABLED=true
+            EOF
+
+            chmod 600 /opt/twenty/deploy/ec2/docker-compose.env
+          - RepositoryUri: !GetAtt ApplicationRepository.RepositoryUri
+            PublicServerUrl: !If
+              - HasServerUrl
+              - !Ref ServerUrl
+              - !Sub 'https://${CloudFrontDistribution.DomainName}'
+            DatabaseSecretArn: !Ref DatabaseSecret
+            AppSecretArn: !Ref AppSecret
+            DatabaseHost: !GetAtt DatabaseInstance.Endpoint.Address
+            DatabasePort: !GetAtt DatabaseInstance.Endpoint.Port
+            RedisHost: !GetAtt RedisReplicationGroup.PrimaryEndPoint.Address
+            BucketName: !Ref FilesBucket
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectName}-${Environment}-app'
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+
+  TargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: !Sub '${ProjectName}-${Environment}-app-tg'
+      VpcId: !Ref ExistingVpcId
+      Protocol: HTTP
+      Port: !Ref ContainerPort
+      TargetType: instance
+      HealthCheckEnabled: true
+      HealthCheckPath: !Ref HealthCheckPath
+      HealthCheckProtocol: HTTP
+      Matcher:
+        HttpCode: 200-399
+      Targets:
+        - Id: !Ref AppInstance
+          Port: !Ref ContainerPort
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectName}-${Environment}-app-tg'
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+
+  LoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: !Sub '${ProjectName}-${Environment}-alb'
+      Type: application
+      Scheme: internet-facing
+      IpAddressType: ipv4
+      SecurityGroups:
+        - !Ref AlbSecurityGroup
+      Subnets: !Ref ExistingSubnetIds
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectName}-${Environment}-alb'
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+
+  HttpListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref LoadBalancer
+      Port: 80
+      Protocol: HTTP
+      DefaultActions:
+        - Type: fixed-response
+          FixedResponseConfig:
+            StatusCode: '403'
+            ContentType: text/plain
+            MessageBody: Forbidden
+
+  CloudFrontOnlyRule:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Properties:
+      ListenerArn: !Ref HttpListener
+      Priority: 10
+      Conditions:
+        - Field: http-header
+          HttpHeaderConfig:
+            HttpHeaderName: !Ref OriginHeaderName
+            Values:
+              - !Ref OriginHeaderValue
+      Actions:
+        - Type: forward
+          TargetGroupArn: !Ref TargetGroup
+
+  HttpsListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Condition: UseHttpsAlbOrigin
+    Properties:
+      LoadBalancerArn: !Ref LoadBalancer
+      Port: 443
+      Protocol: HTTPS
+      Certificates:
+        - CertificateArn: !Ref AlbAcmCertificateArn
+      DefaultActions:
+        - Type: fixed-response
+          FixedResponseConfig:
+            StatusCode: '403'
+            ContentType: text/plain
+            MessageBody: Forbidden
+
+  HttpsCloudFrontOnlyRule:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Condition: UseHttpsAlbOrigin
+    Properties:
+      ListenerArn: !Ref HttpsListener
+      Priority: 10
+      Conditions:
+        - Field: http-header
+          HttpHeaderConfig:
+            HttpHeaderName: !Ref OriginHeaderName
+            Values:
+              - !Ref OriginHeaderValue
+      Actions:
+        - Type: forward
+          TargetGroupArn: !Ref TargetGroup
+
+  CloudFrontNoCachePolicy:
+    Type: AWS::CloudFront::CachePolicy
+    Properties:
+      CachePolicyConfig:
+        Name: !Sub '${ProjectName}-${Environment}-no-cache'
+        Comment: !Sub '${ProjectName} ${Environment} dynamic app traffic'
+        DefaultTTL: 0
+        MaxTTL: 0
+        MinTTL: 0
+        ParametersInCacheKeyAndForwardedToOrigin:
+          EnableAcceptEncodingBrotli: false
+          EnableAcceptEncodingGzip: false
+          CookiesConfig:
+            CookieBehavior: none
+          HeadersConfig:
+            HeaderBehavior: none
+          QueryStringsConfig:
+            QueryStringBehavior: none
+
+  CloudFrontAllViewerOriginRequestPolicy:
+    Type: AWS::CloudFront::OriginRequestPolicy
+    Properties:
+      OriginRequestPolicyConfig:
+        Name: !Sub '${ProjectName}-${Environment}-all-viewer'
+        Comment: !Sub '${ProjectName} ${Environment} forwards app and CORS request context'
+        CookiesConfig:
+          CookieBehavior: all
+        HeadersConfig:
+          HeaderBehavior: allViewerAndWhitelistCloudFront
+          Headers:
+            - CloudFront-Forwarded-Proto
+        QueryStringsConfig:
+          QueryStringBehavior: all
+
+  CloudFrontHttpsOriginRequestPolicy:
+    Type: AWS::CloudFront::OriginRequestPolicy
+    Properties:
+      OriginRequestPolicyConfig:
+        Name: !Sub '${ProjectName}-${Environment}-https-origin'
+        Comment: !Sub '${ProjectName} ${Environment} forwards app context without viewer Host'
+        CookiesConfig:
+          CookieBehavior: all
+        HeadersConfig:
+          HeaderBehavior: allExcept
+          Headers:
+            - Host
+        QueryStringsConfig:
+          QueryStringBehavior: all
+
+  CloudFrontDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        Comment: !Sub '${ProjectName}-${Environment}'
+        HttpVersion: http2
+        Aliases:
+          !If [HasCloudFrontAliases, !Ref CloudFrontAliases, !Ref AWS::NoValue]
+        Origins:
+          - Id: app-alb
+            DomainName: !If
+              - UseHttpsAlbOrigin
+              - !Ref AlbOriginDomainName
+              - !GetAtt LoadBalancer.DNSName
+            CustomOriginConfig:
+              OriginProtocolPolicy: !If
+                - UseHttpsAlbOrigin
+                - https-only
+                - http-only
+              HTTPPort: 80
+              HTTPSPort: 443
+              OriginSSLProtocols:
+                - TLSv1.2
+            OriginCustomHeaders:
+              - HeaderName: !Ref OriginHeaderName
+                HeaderValue: !Ref OriginHeaderValue
+        DefaultCacheBehavior:
+          TargetOriginId: app-alb
+          ViewerProtocolPolicy: redirect-to-https
+          Compress: true
+          AllowedMethods:
+            - GET
+            - HEAD
+            - OPTIONS
+            - PUT
+            - POST
+            - PATCH
+            - DELETE
+          CachedMethods:
+            - GET
+            - HEAD
+          CachePolicyId: !Ref CloudFrontNoCachePolicy
+          OriginRequestPolicyId: !If
+            - UseHttpsAlbOrigin
+            - !Ref CloudFrontHttpsOriginRequestPolicy
+            - !Ref CloudFrontAllViewerOriginRequestPolicy
+        ViewerCertificate: !If
+          - HasCloudFrontCertificate
+          - AcmCertificateArn: !Ref CloudFrontAcmCertificateArn
+            SslSupportMethod: sni-only
+            MinimumProtocolVersion: TLSv1.2_2021
+          - CloudFrontDefaultCertificate: true
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectName}-${Environment}-cf'
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+
+  GitHubOidcProvider:
+    Type: AWS::IAM::OIDCProvider
+    Condition: CreateOidcProvider
+    Properties:
+      Url: https://token.actions.githubusercontent.com
+      ClientIdList:
+        - sts.amazonaws.com
+      ThumbprintList:
+        - 6938fd4d98bab03faadb97b34396831e3780aea1
+      Tags:
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+
+  GitHubActionsRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${ProjectName}-${Environment}-github-actions-role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated: !If
+                - CreateOidcProvider
+                - !Ref GitHubOidcProvider
+                - !Sub 'arn:aws:iam::${AWS::AccountId}:oidc-provider/token.actions.githubusercontent.com'
+            Action: sts:AssumeRoleWithWebIdentity
+            Condition:
+              StringEquals:
+                token.actions.githubusercontent.com:aud: sts.amazonaws.com
+              StringLike:
+                token.actions.githubusercontent.com:sub: !Sub 'repo:${GitHubOwner}/${GitHubRepo}:environment:${Environment}'
+      Policies:
+        - PolicyName: BuildAndDeploy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ecr:GetAuthorizationToken
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - ecr:BatchCheckLayerAvailability
+                  - ecr:CompleteLayerUpload
+                  - ecr:DescribeRepositories
+                  - ecr:InitiateLayerUpload
+                  - ecr:PutImage
+                  - ecr:UploadLayerPart
+                Resource: !GetAtt ApplicationRepository.Arn
+              - Effect: Allow
+                Action:
+                  - ec2:DescribeInstances
+                  - ec2:DescribeInstanceStatus
+                  - ssm:DescribeInstanceInformation
+                  - ssm:GetCommandInvocation
+                  - ssm:SendCommand
+                Resource: '*'
+      Tags:
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+
+Outputs:
+  VpcId:
+    Value: !Ref ExistingVpcId
+    Export:
+      Name: !Sub '${ProjectName}-${Environment}-vpc-id'
+  SubnetIds:
+    Value: !Join [',', !Ref ExistingSubnetIds]
+    Export:
+      Name: !Sub '${ProjectName}-${Environment}-subnet-ids'
+  AlbSecurityGroupId:
+    Value: !Ref AlbSecurityGroup
+    Export:
+      Name: !Sub '${ProjectName}-${Environment}-alb-sg-id'
+  AppSecurityGroupId:
+    Value: !Ref AppSecurityGroup
+    Export:
+      Name: !Sub '${ProjectName}-${Environment}-app-sg-id'
+  DatabaseSecurityGroupId:
+    Value: !Ref DatabaseSecurityGroup
+    Export:
+      Name: !Sub '${ProjectName}-${Environment}-db-sg-id'
+  RedisSecurityGroupId:
+    Value: !Ref RedisSecurityGroup
+    Export:
+      Name: !Sub '${ProjectName}-${Environment}-redis-sg-id'
+  EcrRepositoryName:
+    Value: !Ref ApplicationRepository
+    Export:
+      Name: !Sub '${ProjectName}-${Environment}-ecr-repository-name'
+  EcrRepositoryUri:
+    Value: !GetAtt ApplicationRepository.RepositoryUri
+    Export:
+      Name: !Sub '${ProjectName}-${Environment}-ecr-repository-uri'
+  AppInstanceId:
+    Value: !Ref AppInstance
+    Export:
+      Name: !Sub '${ProjectName}-${Environment}-app-instance-id'
+  GitHubActionsRoleArn:
+    Value: !GetAtt GitHubActionsRole.Arn
+    Export:
+      Name: !Sub '${ProjectName}-${Environment}-github-actions-role-arn'
+  LoadBalancerDnsName:
+    Value: !GetAtt LoadBalancer.DNSName
+  CloudFrontDistributionId:
+    Value: !Ref CloudFrontDistribution
+  CloudFrontDomainName:
+    Value: !GetAtt CloudFrontDistribution.DomainName
+  PublicServerUrl:
+    Value: !If
+      - HasServerUrl
+      - !Ref ServerUrl
+      - !Sub 'https://${CloudFrontDistribution.DomainName}'
+  DatabaseEndpointAddress:
+    Value: !GetAtt DatabaseInstance.Endpoint.Address
+    Export:
+      Name: !Sub '${ProjectName}-${Environment}-db-endpoint-address'
+  DatabaseEndpointPort:
+    Value: !GetAtt DatabaseInstance.Endpoint.Port
+    Export:
+      Name: !Sub '${ProjectName}-${Environment}-db-endpoint-port'
+  RedisEndpointAddress:
+    Value: !GetAtt RedisReplicationGroup.PrimaryEndPoint.Address
+    Export:
+      Name: !Sub '${ProjectName}-${Environment}-redis-endpoint-address'
+  FilesBucketName:
+    Value: !Ref FilesBucket
+    Export:
+      Name: !Sub '${ProjectName}-${Environment}-files-bucket-name'
+  FilesBucketArn:
+    Value: !GetAtt FilesBucket.Arn
+    Export:
+      Name: !Sub '${ProjectName}-${Environment}-files-bucket-arn'
+  AppSecretArn:
+    Value: !Ref AppSecret
+    Export:
+      Name: !Sub '${ProjectName}-${Environment}-app-secret-arn'
+  DatabaseSecretArn:
+    Value: !Ref DatabaseSecret
+    Export:
+      Name: !Sub '${ProjectName}-${Environment}-db-secret-arn'
