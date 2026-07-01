@@ -13,6 +13,7 @@ import { ConnectedAccountEntity } from 'src/engine/metadata-modules/connected-ac
 import { MessageChannelEntity } from 'src/engine/metadata-modules/message-channel/entities/message-channel.entity';
 import { GlobalWorkspaceOrmManager } from 'src/engine/twenty-orm/global-workspace-datasource/global-workspace-orm.manager';
 import { buildSystemAuthContext } from 'src/engine/twenty-orm/utils/build-system-auth-context.util';
+import { type AttachmentWorkspaceEntity } from 'src/modules/attachment/standard-objects/attachment.workspace-entity';
 import { type MessageParticipantWorkspaceEntity } from 'src/modules/messaging/common/standard-objects/message-participant.workspace-entity';
 import { type MessageThreadWorkspaceEntity } from 'src/modules/messaging/common/standard-objects/message-thread.workspace-entity';
 import { type WorkspaceMemberWorkspaceEntity } from 'src/modules/workspace-member/standard-objects/workspace-member.workspace-entity';
@@ -42,6 +43,7 @@ export class TimelineMessagingService {
       | 'participantCount'
       | 'read'
       | 'visibility'
+      | 'hasAttachments'
     >[];
     totalNumberOfThreads: number;
   }> {
@@ -209,6 +211,48 @@ export class TimelineMessagingService {
           },
           {},
         );
+      },
+      authContext,
+    );
+  }
+
+  public async getThreadHasAttachmentsByThreadId(
+    messageThreadIds: string[],
+    workspaceId: string,
+  ): Promise<{
+    [key: string]: boolean;
+  }> {
+    if (messageThreadIds.length === 0) {
+      return {};
+    }
+
+    const authContext = buildSystemAuthContext(workspaceId);
+
+    return this.globalWorkspaceOrmManager.executeInWorkspaceContext(
+      async () => {
+        const attachmentRepository =
+          await this.globalWorkspaceOrmManager.getRepository<AttachmentWorkspaceEntity>(
+            workspaceId,
+            'attachment',
+          );
+
+        const threadAttachmentRows = await attachmentRepository
+          .createQueryBuilder('attachment')
+          .select('message.messageThreadId', 'messageThreadId')
+          .innerJoin('attachment.targetMessage', 'message')
+          .where('message.messageThreadId = ANY(:messageThreadIds)', {
+            messageThreadIds,
+          })
+          .groupBy('message.messageThreadId')
+          .getRawMany<{ messageThreadId: string }>();
+
+        return threadAttachmentRows.reduce<{
+          [key: string]: boolean;
+        }>((threadHasAttachmentsAcc, { messageThreadId }) => {
+          threadHasAttachmentsAcc[messageThreadId] = true;
+
+          return threadHasAttachmentsAcc;
+        }, {});
       },
       authContext,
     );

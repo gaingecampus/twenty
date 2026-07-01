@@ -55,12 +55,19 @@ export class GetMessagesService {
         workspaceId,
       );
 
+    const threadHasAttachmentsByThreadId =
+      await this.timelineMessagingService.getThreadHasAttachmentsByThreadId(
+        messageThreadIds,
+        workspaceId,
+      );
+
     return {
       totalNumberOfThreads,
       timelineThreads: formatThreads(
         messageThreads,
         threadParticipantsByThreadId,
         threadVisibilityByThreadId,
+        threadHasAttachmentsByThreadId,
       ),
       relatedPersonIds: personIds,
     };

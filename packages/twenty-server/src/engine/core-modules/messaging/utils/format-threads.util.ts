@@ -14,12 +14,16 @@ export const formatThreads = (
     | 'participantCount'
     | 'read'
     | 'visibility'
+    | 'hasAttachments'
   >[],
   threadParticipantsByThreadId: {
     [key: string]: MessageParticipantWorkspaceEntity[];
   },
   threadVisibilityByThreadId: {
     [key: string]: MessageChannelVisibility;
+  },
+  threadHasAttachmentsByThreadId: {
+    [key: string]: boolean;
   },
 ): TimelineThreadDTO[] => {
   return threads
@@ -40,6 +44,9 @@ export const formatThreads = (
           visibility === MessageChannelVisibility.SHARE_EVERYTHING
             ? thread.lastMessageBody
             : FIELD_RESTRICTED_ADDITIONAL_PERMISSIONS_REQUIRED,
+        hasAttachments:
+          visibility === MessageChannelVisibility.SHARE_EVERYTHING &&
+          (threadHasAttachmentsByThreadId[thread.id] ?? false),
         ...extractParticipantSummary(threadParticipantsByThreadId[thread.id]),
         visibility,
         read: true,
