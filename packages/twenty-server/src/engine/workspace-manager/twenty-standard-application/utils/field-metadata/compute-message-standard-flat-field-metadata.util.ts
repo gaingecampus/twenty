@@ -424,4 +424,27 @@ export const buildMessageStandardFlatFieldMetadatas = ({
     twentyStandardApplicationId,
     now,
   }),
+  attachments: createStandardRelationFieldFlatMetadata({
+    objectName,
+    workspaceId,
+    context: {
+      type: FieldMetadataType.RELATION,
+      morphId: null,
+      fieldName: 'attachments',
+      label: i18nLabel(msg`Attachments`),
+      description: i18nLabel(msg`Files attached to this email message`),
+      icon: 'IconPaperclip',
+      isNullable: true,
+      isUIEditable: false,
+      targetObjectName: 'attachment',
+      targetFieldName: 'targetMessage',
+      settings: {
+        relationType: RelationType.ONE_TO_MANY,
+      },
+    },
+    standardObjectMetadataRelatedEntityIds,
+    dependencyFlatEntityMaps,
+    twentyStandardApplicationId,
+    now,
+  }),
 });

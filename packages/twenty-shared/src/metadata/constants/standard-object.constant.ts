@@ -53,6 +53,18 @@ export const STANDARD_OBJECTS = {
       targetWorkflow: {
         universalIdentifier: '20202020-f1e8-4c9d-8a7b-3f5e1d2c9a8b',
       },
+      targetMessage: {
+        universalIdentifier: '20202020-e1a1-4e01-8e01-9a1b2c3d4e01',
+      },
+      emailExternalAttachmentId: {
+        universalIdentifier: '20202020-e1a2-4e02-8e02-9a1b2c3d4e02',
+      },
+      attachmentKind: {
+        universalIdentifier: '20202020-e1a3-4e03-8e03-9a1b2c3d4e03',
+      },
+      externalUrl: {
+        universalIdentifier: '20202020-e1a4-4e04-8e04-9a1b2c3d4e04',
+      },
       position: {
         universalIdentifier: 'cef8f62c-cd46-4444-8cbb-17d463b7464a',
       },
@@ -84,6 +96,9 @@ export const STANDARD_OBJECTS = {
       },
       workflowIdIndex: {
         universalIdentifier: 'fadeab4b-79ee-4173-af79-72c51fbad888',
+      },
+      messageIdIndex: {
+        universalIdentifier: '20202020-e1c1-4c01-8c01-9a1b2c3d4c01',
       },
     },
     views: {
@@ -1479,6 +1494,9 @@ export const STANDARD_OBJECTS = {
       },
       deliveryStatus: {
         universalIdentifier: '209254fa-2b89-429d-a72a-c401c4bd5a78',
+      },
+      attachments: {
+        universalIdentifier: '20202020-e1b5-4f01-8f01-9a1b2c3d4f01',
       },
       createdBy: {
         universalIdentifier: '6e52bde4-ed41-4462-aa70-121e496270b4',
