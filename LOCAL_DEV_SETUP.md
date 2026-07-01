@@ -246,7 +246,8 @@ aws cloudformation deploy \
 
 ### GitHub Actions에 등록할 Environment variables
 
-GitHub repository의 `Settings > Environments > staging > Variables`에 아래 값을 등록합니다.
+GitHub repository의 `Settings > Environments > staging > Variables`와
+`Settings > Environments > prod > Variables`에 아래 값을 등록합니다.
 
 - `AWS_REGION`: 예 `ap-northeast-2`
 - `AWS_ROLE_ARN`: CloudFormation output의 `GitHubActionsRoleArn`
@@ -261,6 +262,12 @@ CloudFormation 생성 후 Outputs에서 아래 값을 확인해 GitHub Environme
 - `GitHubActionsRoleArn` -> `AWS_ROLE_ARN`
 - `EcrRepositoryName` -> `ECR_REPOSITORY`
 - `AppInstanceId` -> `EC2_INSTANCE_ID`
+
+`Deploy EC2` 워크플로우는 GitHub OIDC로 AWS Role을 Assume합니다. 기존
+CloudFormation stack을 사용 중이라면 최신 템플릿으로 stack을 업데이트해
+`GitHubActionsRole` trust policy가 `dev`, `staging`, `prod` GitHub Environment를
+모두 허용하도록 반영해야 합니다. 반영되지 않은 상태에서 `environment=prod`로
+수동 실행하면 `sts:AssumeRoleWithWebIdentity` 권한 오류가 발생할 수 있습니다.
 
 ### AWS Parameter Store
 

@@ -839,7 +839,10 @@ Resources:
               StringEquals:
                 token.actions.githubusercontent.com:aud: sts.amazonaws.com
               StringLike:
-                token.actions.githubusercontent.com:sub: !Sub 'repo:${GitHubOwner}/${GitHubRepo}:environment:${Environment}'
+                token.actions.githubusercontent.com:sub:
+                  - !Sub 'repo:${GitHubOwner}/${GitHubRepo}:environment:dev'
+                  - !Sub 'repo:${GitHubOwner}/${GitHubRepo}:environment:staging'
+                  - !Sub 'repo:${GitHubOwner}/${GitHubRepo}:environment:prod'
       Policies:
         - PolicyName: BuildAndDeploy
           PolicyDocument:
