@@ -6,6 +6,7 @@ import {
   MessageParticipantRole,
 } from 'twenty-shared/types';
 import { isDefined } from 'twenty-shared/utils';
+import { In } from 'typeorm';
 
 import { type MessageChannelEntity } from 'src/engine/metadata-modules/message-channel/entities/message-channel.entity';
 import { InjectMessageQueue } from 'src/engine/core-modules/message-queue/decorators/message-queue.decorator';
@@ -30,6 +31,11 @@ import {
 import { MessagingMessageService } from 'src/modules/messaging/message-import-manager/services/messaging-message.service';
 import { type MessageWithParticipants } from 'src/modules/messaging/message-import-manager/types/message';
 import { MessagingMessageParticipantService } from 'src/modules/messaging/message-participant-manager/services/messaging-message-participant.service';
+import { MessagingEmailAttachmentPendingCacheService } from 'src/modules/messaging/email-attachment/services/messaging-email-attachment-pending-cache.service';
+import { MessagingEmailAttachmentService } from 'src/modules/messaging/email-attachment/services/messaging-email-attachment.service';
+import { MessagingPersistEmailAttachmentsJob } from 'src/modules/messaging/email-attachment/jobs/messaging-persist-email-attachments.job';
+import { type MessageParticipantWorkspaceEntity } from 'src/modules/messaging/common/standard-objects/message-participant.workspace-entity';
+import { hasDriveLinksInMessageBody } from 'src/modules/messaging/message-import-manager/drivers/gmail/utils/extract-drive-links-from-html.util';
 import { isWorkEmail } from 'src/utils/is-work-email';
 
 @Injectable()
@@ -37,10 +43,14 @@ export class MessagingSaveMessagesAndEnqueueContactCreationService {
   constructor(
     @InjectMessageQueue(MessageQueue.contactCreationQueue)
     private readonly messageQueueService: MessageQueueService,
+    @InjectMessageQueue(MessageQueue.messagingQueue)
+    private readonly messagingQueueService: MessageQueueService,
     private readonly messageService: MessagingMessageService,
     private readonly messageParticipantService: MessagingMessageParticipantService,
     private readonly messageFolderAssociationService: MessagingMessageFolderAssociationService,
     private readonly globalWorkspaceOrmManager: GlobalWorkspaceOrmManager,
+    private readonly messagingEmailAttachmentPendingCacheService: MessagingEmailAttachmentPendingCacheService,
+    private readonly messagingEmailAttachmentService: MessagingEmailAttachmentService,
   ) {}
 
   async saveMessagesAndEnqueueContactCreation(
@@ -48,9 +58,13 @@ export class MessagingSaveMessagesAndEnqueueContactCreationService {
     messageChannel: MessageChannelEntity,
     connectedAccount: ConnectedAccountEntity,
     workspaceId: string,
+    options?: {
+      outboundAttachmentFileIds?: string[];
+    },
   ) {
     const handleAliases = connectedAccount.handleAliases || [];
     const authContext = buildSystemAuthContext(workspaceId);
+    let messageIdsWithPendingAttachments: string[] = [];
 
     const participantsWithMessageId =
       await this.globalWorkspaceOrmManager.executeInWorkspaceContext(
@@ -115,6 +129,69 @@ export class MessagingSaveMessagesAndEnqueueContactCreationService {
                   : [];
               });
 
+              const pendingAttachmentMessageIds: string[] = [];
+
+              for (const message of messagesToSave) {
+                const messageId = messageExternalIdsAndIdsMap.get(
+                  message.externalId,
+                );
+
+                if (!isDefined(messageId)) {
+                  continue;
+                }
+
+                const outboundAttachmentFileIds =
+                  options?.outboundAttachmentFileIds ?? [];
+
+                if (outboundAttachmentFileIds.length > 0) {
+                  await this.messagingEmailAttachmentPendingCacheService.setPendingContext(
+                    {
+                      workspaceId,
+                      messageId,
+                      context: {
+                        messageExternalId: message.externalId,
+                        connectedAccountId: connectedAccount.id,
+                        connectedAccountProvider: connectedAccount.provider,
+                        direction: message.direction,
+                        attachments: [],
+                        outboundAttachmentFileIds,
+                      },
+                    },
+                  );
+                  pendingAttachmentMessageIds.push(messageId);
+
+                  continue;
+                }
+
+                const hasMimeAttachments = message.attachments.length > 0;
+                const hasHtmlBody = isDefined(message.htmlBody);
+                const hasDriveLinks = hasDriveLinksInMessageBody({
+                  htmlBody: message.htmlBody,
+                  textBody: message.text,
+                });
+
+                if (!hasMimeAttachments && !hasHtmlBody && !hasDriveLinks) {
+                  continue;
+                }
+
+                await this.messagingEmailAttachmentPendingCacheService.setPendingContext(
+                  {
+                    workspaceId,
+                    messageId,
+                    context: {
+                      messageExternalId: message.externalId,
+                      connectedAccountId: connectedAccount.id,
+                      connectedAccountProvider: connectedAccount.provider,
+                      direction: message.direction,
+                      attachments: message.attachments,
+                      htmlBody: message.htmlBody,
+                      textBody: message.text,
+                    },
+                  },
+                );
+                pendingAttachmentMessageIds.push(messageId);
+              }
+
               await this.messageParticipantService.saveMessageParticipants(
                 participantsWithMessageId,
                 workspaceId,
@@ -152,6 +229,8 @@ export class MessagingSaveMessagesAndEnqueueContactCreationService {
                 transactionManager,
               );
 
+              messageIdsWithPendingAttachments = pendingAttachmentMessageIds;
+
               return participantsWithMessageId;
             },
           );
@@ -159,6 +238,11 @@ export class MessagingSaveMessagesAndEnqueueContactCreationService {
         authContext,
         { lite: true },
       );
+
+    await this.enqueueEmailAttachmentPersistJobs({
+      workspaceId,
+      messageIds: messageIdsWithPendingAttachments,
+    });
 
     if (
       messageChannel.isContactAutoCreationEnabled &&
@@ -178,5 +262,93 @@ export class MessagingSaveMessagesAndEnqueueContactCreationService {
         },
       );
     }
+  }
+
+  private async enqueueEmailAttachmentPersistJobs({
+    workspaceId,
+    messageIds,
+  }: {
+    workspaceId: string;
+    messageIds: string[];
+  }): Promise<void> {
+    if (messageIds.length === 0) {
+      return;
+    }
+
+    const authContext = buildSystemAuthContext(workspaceId);
+
+    await this.globalWorkspaceOrmManager.executeInWorkspaceContext(
+      async () => {
+        const messageParticipantRepository =
+          await this.globalWorkspaceOrmManager.getRepository<MessageParticipantWorkspaceEntity>(
+            workspaceId,
+            'messageParticipant',
+          );
+
+        const participants = await messageParticipantRepository.find({
+          where: {
+            messageId: In(messageIds),
+          },
+        });
+
+        const participantsByMessageId = participants.reduce<
+          Map<string, MessageParticipantWorkspaceEntity[]>
+        >((accumulator, participant) => {
+          if (!isDefined(participant.messageId)) {
+            return accumulator;
+          }
+
+          const existingParticipants =
+            accumulator.get(participant.messageId) ?? [];
+
+          existingParticipants.push(participant);
+          accumulator.set(participant.messageId, existingParticipants);
+
+          return accumulator;
+        }, new Map());
+
+        for (const messageId of messageIds) {
+          const messageParticipants = participantsByMessageId.get(messageId);
+
+          if (
+            !isDefined(messageParticipants) ||
+            messageParticipants.length === 0
+          ) {
+            continue;
+          }
+
+          const pendingContext =
+            await this.messagingEmailAttachmentPendingCacheService.getPendingContext(
+              {
+                workspaceId,
+                messageId,
+              },
+            );
+
+          if (
+            !isDefined(pendingContext) ||
+            !this.messagingEmailAttachmentService.hasTargetPersonsForPendingContext(
+              {
+                participants: messageParticipants,
+                pendingContext,
+              },
+            )
+          ) {
+            continue;
+          }
+
+          await this.messagingQueueService.add(
+            MessagingPersistEmailAttachmentsJob.name,
+            {
+              workspaceId,
+              messageId,
+              participants: messageParticipants,
+            },
+          );
+        }
+      },
+      authContext,
+      { lite: true },
+    );
   }
 }

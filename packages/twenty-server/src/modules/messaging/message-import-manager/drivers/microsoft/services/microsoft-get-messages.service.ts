@@ -16,6 +16,7 @@ import { formatAddressObjectAsParticipants } from 'src/modules/messaging/message
 import { safeParseEmailAddress } from 'src/modules/messaging/message-import-manager/utils/safe-parse-email-address.util';
 
 import { MicrosoftFetchByBatchService } from './microsoft-fetch-by-batch.service';
+import { MicrosoftFetchAttachmentsService } from './microsoft-fetch-attachments.service';
 import { MicrosoftMessagesImportErrorHandler } from './microsoft-messages-import-error-handler.service';
 
 type ConnectedAccountType = Pick<
@@ -29,6 +30,7 @@ export class MicrosoftGetMessagesService {
 
   constructor(
     private readonly microsoftFetchByBatchService: MicrosoftFetchByBatchService,
+    private readonly microsoftFetchAttachmentsService: MicrosoftFetchAttachmentsService,
     private readonly microsoftMessagesImportErrorHandler: MicrosoftMessagesImportErrorHandler,
   ) {}
 
@@ -48,7 +50,32 @@ export class MicrosoftGetMessagesService {
         connectedAccount,
       );
 
-      return messages;
+      const messageIdsWithAttachments = batchResponses.flatMap(
+        (batchResponse) =>
+          (batchResponse.responses ?? [])
+            .filter(
+              (response) =>
+                response.status === 200 &&
+                response.body?.hasAttachments === true &&
+                response.body?.id,
+            )
+            .map((response) => response.body?.id as string),
+      );
+
+      if (messageIdsWithAttachments.length === 0) {
+        return messages;
+      }
+
+      const attachmentsByMessageId =
+        await this.microsoftFetchAttachmentsService.fetchAttachmentsByMessageIds({
+          messageIds: messageIdsWithAttachments,
+          connectedAccount,
+        });
+
+      return messages.map((message) => ({
+        ...message,
+        attachments: attachmentsByMessageId.get(message.externalId) ?? [],
+      }));
     } catch (error) {
       this.microsoftMessagesImportErrorHandler.handleError(error);
 

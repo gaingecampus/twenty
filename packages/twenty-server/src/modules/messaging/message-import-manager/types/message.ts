@@ -16,16 +16,24 @@ export type Message = Omit<
   | 'messageCampaign'
   | 'messageCampaignId'
   | 'deliveryStatus'
+  | 'attachments'
 > & {
-  attachments: {
-    filename: string;
-  }[];
+  attachments: MessageImportAttachment[];
   externalId: string;
   messageThreadExternalId: string;
   direction: MessageDirection;
   messageFolderIds?: string[];
   messageFolderExternalIds?: string[];
   labelIds?: string[];
+  htmlBody?: string;
+};
+
+export type MessageImportAttachment = {
+  filename: string;
+  externalId?: string;
+  mimeType?: string;
+  size?: number;
+  inlineContentBase64?: string;
 };
 
 export type MessageAttachment = {

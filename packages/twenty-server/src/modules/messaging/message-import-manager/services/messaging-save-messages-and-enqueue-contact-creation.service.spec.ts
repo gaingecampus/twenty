@@ -21,6 +21,8 @@ import { MessagingMessageService } from 'src/modules/messaging/message-import-ma
 import { MessagingSaveMessagesAndEnqueueContactCreationService } from 'src/modules/messaging/message-import-manager/services/messaging-save-messages-and-enqueue-contact-creation.service';
 import { type MessageWithParticipants } from 'src/modules/messaging/message-import-manager/types/message';
 import { MessagingMessageParticipantService } from 'src/modules/messaging/message-participant-manager/services/messaging-message-participant.service';
+import { MessagingEmailAttachmentPendingCacheService } from 'src/modules/messaging/email-attachment/services/messaging-email-attachment-pending-cache.service';
+import { MessagingEmailAttachmentService } from 'src/modules/messaging/email-attachment/services/messaging-email-attachment.service';
 
 describe('MessagingSaveMessagesAndEnqueueContactCreationService', () => {
   let service: MessagingSaveMessagesAndEnqueueContactCreationService;
@@ -127,6 +129,25 @@ describe('MessagingSaveMessagesAndEnqueueContactCreationService', () => {
           },
         },
         {
+          provide: getQueueToken(MessageQueue.messagingQueue),
+          useValue: {
+            add: jest.fn().mockResolvedValue(undefined),
+          },
+        },
+        {
+          provide: MessagingEmailAttachmentPendingCacheService,
+          useValue: {
+            setPendingContext: jest.fn().mockResolvedValue(undefined),
+            getPendingContext: jest.fn().mockResolvedValue(undefined),
+          },
+        },
+        {
+          provide: MessagingEmailAttachmentService,
+          useValue: {
+            hasTargetPersonsForPendingContext: jest.fn().mockReturnValue(false),
+          },
+        },
+        {
           provide: getRepositoryToken(ObjectMetadataEntity),
           useValue: {
             findOneOrFail: jest.fn(),
@@ -167,6 +188,9 @@ describe('MessagingSaveMessagesAndEnqueueContactCreationService', () => {
             getGlobalWorkspaceDataSource: jest
               .fn()
               .mockResolvedValue(datasourceInstance),
+            getRepository: jest.fn().mockResolvedValue({
+              find: jest.fn().mockResolvedValue([]),
+            }),
             executeInWorkspaceContext: jest
               .fn()
               .mockImplementation((fn: () => any, _authContext?: any) => fn()),

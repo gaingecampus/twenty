@@ -72,6 +72,7 @@ export const parseAndFormatGmailMessage = (
     participants,
     text: extractMessageBodyText(isHtml ? { html: body } : { text: body }),
     attachments,
+    htmlBody: isHtml ? body : undefined,
     messageFolderExternalIds: labelIds,
     labelIds,
   };

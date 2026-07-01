@@ -56,6 +56,7 @@ import { MessagingSaveMessagesAndEnqueueContactCreationService } from 'src/modul
 import { provideWorkspaceScopedRepository } from 'src/engine/twenty-orm/workspace-scoped-repository/provide-workspace-scoped-repository';
 import { MessageParticipantManagerModule } from 'src/modules/messaging/message-participant-manager/message-participant-manager.module';
 import { MessagingMonitoringModule } from 'src/modules/messaging/monitoring/messaging-monitoring.module';
+import { MessagingEmailAttachmentModule } from 'src/modules/messaging/email-attachment/messaging-email-attachment.module';
 @Module({
   imports: [
     RefreshTokensManagerModule,
@@ -84,6 +85,7 @@ import { MessagingMonitoringModule } from 'src/modules/messaging/monitoring/mess
     MessagingMessageCleanerModule,
     WorkspaceEventEmitterModule,
     ConnectedAccountModule,
+    MessagingEmailAttachmentModule,
   ],
   providers: [
     provideWorkspaceScopedRepository(MessageChannelEntity),

@@ -179,9 +179,27 @@ export class ImapGetMessagesService {
       text,
       receivedAt: parsed.date ? new Date(parsed.date) : null,
       direction: computeMessageDirection(senderAddress, connectedAccount),
-      attachments: (parsed.attachments || []).map((attachment) => ({
-        filename: attachment.filename || 'unnamed-attachment',
-      })),
+      attachments: (parsed.attachments || [])
+        .filter((attachment) => !attachment.filename?.endsWith('.ics'))
+        .map((attachment, attachmentIndex) => {
+          const attachmentContent =
+            typeof attachment.content === 'string'
+              ? Buffer.from(attachment.content)
+              : attachment.content instanceof ArrayBuffer
+                ? Buffer.from(attachment.content)
+                : attachment.content
+                  ? Buffer.from(attachment.content)
+                  : undefined;
+          const contentLength = attachmentContent?.byteLength ?? 0;
+
+          return {
+            filename: attachment.filename || 'unnamed-attachment',
+            externalId: `${attachment.filename ?? 'attachment'}-${attachmentIndex}-${contentLength}`,
+            mimeType: attachment.mimeType,
+            size: contentLength,
+            inlineContentBase64: attachmentContent?.toString('base64'),
+          };
+        }),
       participants: extractParticipantsFromParsedEmail(parsed),
       messageFolderExternalIds: [folderExternalId],
     };
