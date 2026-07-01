@@ -1,11 +1,13 @@
 import { styled } from '@linaria/react';
 import { useState } from 'react';
 
+import { EmailThreadMessageAttachments } from '@/activities/emails/components/EmailThreadMessageAttachments';
 import { EmailThreadMessageBody } from '@/activities/emails/components/EmailThreadMessageBody';
 import { EmailThreadMessageBodyPreview } from '@/activities/emails/components/EmailThreadMessageBodyPreview';
 import { EmailThreadMessageReceivers } from '@/activities/emails/components/EmailThreadMessageReceivers';
 import { EmailThreadMessageSender } from '@/activities/emails/components/EmailThreadMessageSender';
 import { EmailThreadNotShared } from '@/activities/emails/components/EmailThreadNotShared';
+import { type Attachment } from '@/activities/files/types/Attachment';
 import { type EmailThreadMessageParticipant } from '@/activities/emails/types/EmailThreadMessageParticipant';
 import { FIELD_RESTRICTED_ADDITIONAL_PERMISSIONS_REQUIRED } from 'twenty-shared/constants';
 import { MessageParticipantRole } from 'twenty-shared/types';
@@ -41,6 +43,7 @@ type EmailThreadMessageProps = {
   sentAt: string;
   sender: EmailThreadMessageParticipant;
   participants: EmailThreadMessageParticipant[];
+  attachments?: Attachment[];
   isExpanded?: boolean;
   hideBottomBorder?: boolean;
 };
@@ -50,6 +53,7 @@ export const EmailThreadMessage = ({
   sentAt,
   sender,
   participants,
+  attachments = [],
   isExpanded = false,
   hideBottomBorder = false,
 }: EmailThreadMessageProps) => {
@@ -82,7 +86,13 @@ export const EmailThreadMessage = ({
             visibility={MessageChannelVisibility.METADATA}
           />
         ) : isOpen ? (
-          <EmailThreadMessageBody body={body} isDisplayed />
+          <>
+            <EmailThreadMessageBody body={body} isDisplayed />
+            <EmailThreadMessageAttachments
+              attachments={attachments}
+              isDisplayed
+            />
+          </>
         ) : (
           <EmailThreadMessageBodyPreview body={body} />
         )}

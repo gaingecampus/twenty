@@ -78,6 +78,7 @@ export const EmailThreadWidget = ({
             participants={message.messageParticipants}
             body={message.text}
             sentAt={message.receivedAt}
+            attachments={message.attachments}
           />
         ))}
         <EmailThreadIntermediaryMessages messages={intermediaryMessages} />
@@ -87,6 +88,7 @@ export const EmailThreadWidget = ({
           participants={lastMessage.messageParticipants}
           body={lastMessage.text}
           sentAt={lastMessage.receivedAt}
+          attachments={lastMessage.attachments}
           isExpanded
           hideBottomBorder={!isComposerOpen}
         />

@@ -8,6 +8,7 @@ import { useContext } from 'react';
 import { CoreObjectNameSingular } from 'twenty-shared/types';
 import { isDefined } from 'twenty-shared/utils';
 import { Avatar } from 'twenty-ui/data-display';
+import { IconPaperclip } from 'twenty-ui/icon';
 import { ThemeContext, themeCssVariables } from 'twenty-ui/theme-constants';
 import {
   MessageChannelVisibility,
@@ -68,9 +69,18 @@ const StyledBody = styled.span`
 `;
 
 const StyledReceivedAt = styled.div`
+  align-items: center;
+  display: flex;
   font-size: ${themeCssVariables.font.size.sm};
   font-weight: ${themeCssVariables.font.weight.regular};
+  gap: ${themeCssVariables.spacing[1]};
   padding: ${themeCssVariables.spacing[0]} ${themeCssVariables.spacing[1]};
+`;
+
+const StyledAttachmentIcon = styled.div`
+  align-items: center;
+  color: ${themeCssVariables.font.color.tertiary};
+  display: flex;
 `;
 
 type EmailThreadPreviewProps = {
@@ -179,6 +189,11 @@ export const EmailThreadPreview = ({ thread }: EmailThreadPreviewProps) => {
         )}
       </StyledSubjectAndBody>
       <StyledReceivedAt>
+        {thread.hasAttachments && (
+          <StyledAttachmentIcon>
+            <IconPaperclip size={14} />
+          </StyledAttachmentIcon>
+        )}
         {formatToHumanReadableDate(thread.lastMessageReceivedAt)}
       </StyledReceivedAt>
     </ActivityRow>

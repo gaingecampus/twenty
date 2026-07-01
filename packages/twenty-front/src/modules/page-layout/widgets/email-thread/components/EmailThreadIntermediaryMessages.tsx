@@ -33,6 +33,7 @@ export const EmailThreadIntermediaryMessages = ({
         participants={message.messageParticipants}
         body={message.text}
         sentAt={message.receivedAt}
+        attachments={message.attachments}
       />
     ))
   ) : (
