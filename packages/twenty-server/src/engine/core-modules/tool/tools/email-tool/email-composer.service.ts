@@ -422,6 +422,7 @@ export class EmailComposerService {
         inReplyTo,
         threadExternalId,
         references,
+        attachmentFileIds: (files ?? []).map((file) => file.id),
       },
     };
   }

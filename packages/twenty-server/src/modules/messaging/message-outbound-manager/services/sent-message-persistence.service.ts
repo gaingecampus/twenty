@@ -32,6 +32,9 @@ export class SentMessagePersistenceService {
       messageChannel,
       messageChannel.connectedAccount,
       input.workspaceId,
+      {
+        outboundAttachmentFileIds: input.attachmentFileIds,
+      },
     );
   }
 }

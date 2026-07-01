@@ -11,4 +11,5 @@ export type PersistSentMessageInput = {
   inReplyTo?: string;
   parentThreadExternalId?: string;
   workspaceId: string;
+  attachmentFileIds?: string[];
 };

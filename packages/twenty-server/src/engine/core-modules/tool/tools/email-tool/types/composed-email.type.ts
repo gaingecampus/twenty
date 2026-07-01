@@ -14,4 +14,5 @@ export type ComposedEmail = {
   inReplyTo?: string;
   threadExternalId?: string;
   references?: string[];
+  attachmentFileIds: string[];
 };
