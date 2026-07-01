@@ -1,6 +1,7 @@
 import { type FieldFilesValue } from '@/object-record/record-field/ui/types/FieldMetadata';
 
 import { type AttachmentFileCategory } from './AttachmentFileCategory';
+import { type AttachmentKind } from '@/activities/files/constants/attachment-kind.constant';
 
 export type { AttachmentFileCategory };
 
@@ -26,6 +27,17 @@ export type Attachment = {
   targetOpportunityId?: string | null;
   targetDashboardId?: string | null;
   targetWorkflowId?: string | null;
+  targetMessageId?: string | null;
+  targetMessage?: {
+    id: string;
+    subject: string | null;
+    messageThreadId: string | null;
+    messageThread?: {
+      id: string;
+    } | null;
+  } | null;
+  attachmentKind?: AttachmentKind | null;
+  externalUrl?: string | null;
   createdBy?: {
     source: string;
     workspaceMemberId: string | null;

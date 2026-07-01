@@ -18,6 +18,7 @@ import {
   type AttachmentWithFile,
   filterAttachmentsWithFile,
 } from '@/activities/files/utils/filterAttachmentsWithFile';
+import { filterExternalLinkAttachments } from '@/activities/files/utils/filterExternalLinkAttachments';
 import { getAttachmentUrl } from '@/activities/utils/getAttachmentUrl';
 import { useHasPermissionFlag } from '@/settings/roles/hooks/useHasPermissionFlag';
 import { useModal } from '@/ui/layout/modal/hooks/useModal';
@@ -28,6 +29,7 @@ import { IconButton } from 'twenty-ui/input';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 import { PermissionFlagType } from '~/generated-metadata/graphql';
 import { AttachmentRow } from './AttachmentRow';
+import { ExternalLinkAttachmentRow } from './ExternalLinkAttachmentRow';
 
 const DocumentViewer = lazy(() =>
   import('@/activities/files/components/DocumentViewer').then((module) => ({
@@ -140,6 +142,9 @@ export const AttachmentList = ({
   const { openModal, closeModal } = useModal();
 
   const attachmentsWithFile = filterAttachmentsWithFile(attachments);
+  const externalLinkAttachments = filterExternalLinkAttachments(attachments);
+  const totalAttachmentCount =
+    attachmentsWithFile.length + externalLinkAttachments.length;
 
   const onUploadFile = async (file: File) => {
     await uploadAttachmentFile(file, targetableObject);
@@ -170,11 +175,12 @@ export const AttachmentList = ({
 
   return (
     <>
-      {attachmentsWithFile.length > 0 && (
+      {totalAttachmentCount > 0 && (
         <StyledContainer>
           <StyledTitleBar>
             <StyledTitle>
-              {title} <StyledCount>{attachmentsWithFile.length}</StyledCount>
+              {title}{' '}
+              <StyledCount>{totalAttachmentCount}</StyledCount>
             </StyledTitle>
             {button}
           </StyledTitleBar>
@@ -195,6 +201,12 @@ export const AttachmentList = ({
                     onPreview={
                       isAttachmentPreviewEnabled ? handlePreview : undefined
                     }
+                  />
+                ))}
+                {externalLinkAttachments.map((attachment) => (
+                  <ExternalLinkAttachmentRow
+                    key={attachment.id}
+                    attachment={attachment}
                   />
                 ))}
               </ActivityList>

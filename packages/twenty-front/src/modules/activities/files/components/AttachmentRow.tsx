@@ -1,5 +1,6 @@
 import { ActivityRow } from '@/activities/components/ActivityRow';
 import { AttachmentDropdown } from '@/activities/files/components/AttachmentDropdown';
+import { AttachmentSourceLabel } from '@/activities/files/components/AttachmentSourceLabel';
 import { downloadFile } from '@/activities/files/utils/downloadFile';
 import { useDestroyOneRecord } from '@/object-record/hooks/useDestroyOneRecord';
 import { useUpdateOneRecord } from '@/object-record/hooks/useUpdateOneRecord';
@@ -68,6 +69,10 @@ const StyledLink = styled.a`
 `;
 
 const StyledLinkContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${themeCssVariables.spacing['0.5']};
+  min-width: 0;
   overflow: auto;
   width: 100%;
 `;
@@ -174,7 +179,7 @@ export const AttachmentRow = ({
         } as GenericFieldContextType
       }
     >
-      <ActivityRow disabled>
+      <ActivityRow disabled autoHeight>
         <StyledLeftContent>
           <FileIcon fileCategory={fileCategory} thumbnailUrl={fileUrl} />
           {isEditing ? (
@@ -198,6 +203,7 @@ export const AttachmentRow = ({
                   text={`${attachmentFileName}${attachmentFileExtension}`}
                 />
               </StyledLink>
+              <AttachmentSourceLabel attachment={attachment} />
             </StyledLinkContainer>
           )}
         </StyledLeftContent>
