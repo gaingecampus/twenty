@@ -5,6 +5,7 @@ import { MessagingMessageCleanerModule } from 'src/modules/messaging/message-cle
 import { MessagingImportManagerModule } from 'src/modules/messaging/message-import-manager/messaging-import-manager.module';
 import { MessageParticipantManagerModule } from 'src/modules/messaging/message-participant-manager/message-participant-manager.module';
 import { MessagingMonitoringModule } from 'src/modules/messaging/monitoring/messaging-monitoring.module';
+import { MessagingEmailAttachmentModule } from 'src/modules/messaging/email-attachment/messaging-email-attachment.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { MessagingMonitoringModule } from 'src/modules/messaging/monitoring/mess
     MessageParticipantManagerModule,
     MessagingBlocklistManagerModule,
     MessagingMonitoringModule,
+    MessagingEmailAttachmentModule,
   ],
   providers: [],
   exports: [MessagingImportManagerModule],
