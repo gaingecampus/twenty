@@ -9,15 +9,33 @@ import { isDefined } from 'twenty-shared/utils';
 import { AvatarOrIcon } from 'twenty-ui/data-display';
 import { ThemeContext, themeCssVariables } from 'twenty-ui/theme-constants';
 
-type FileIconSize = 'small' | 'medium';
+type FileIconSize = 'small' | 'medium' | 'large';
 
 const THUMBNAIL_SIZE_PX_BY_FILE_ICON_SIZE: Record<FileIconSize, number> = {
   small: 14,
   medium: 24,
+  large: 80,
+};
+
+const ICON_CONTAINER_PADDING_PX_BY_FILE_ICON_SIZE: Record<
+  Exclude<FileIconSize, 'small'>,
+  number
+> = {
+  medium: 5,
+  large: 16,
+};
+
+const ICON_SIZE_BY_FILE_ICON_SIZE: Record<
+  Exclude<FileIconSize, 'small'>,
+  'sm' | 'md' | 'lg'
+> = {
+  medium: 'sm',
+  large: 'lg',
 };
 
 const StyledIconContainer = styled.div<{
   background: string;
+  paddingPx: number;
 }>`
   align-items: center;
   background: ${({ background }) => background};
@@ -26,7 +44,7 @@ const StyledIconContainer = styled.div<{
   display: flex;
   flex-shrink: 0;
   justify-content: center;
-  padding: 5px;
+  padding: ${({ paddingPx }) => paddingPx}px;
 `;
 
 const StyledThumbnail = styled.img<{ sizePx: number }>`
@@ -79,12 +97,20 @@ export const FileIcon = ({
     );
   }
 
+  const iconSize = ICON_SIZE_BY_FILE_ICON_SIZE[size];
+  const iconContainerPadding =
+    ICON_CONTAINER_PADDING_PX_BY_FILE_ICON_SIZE[size];
+
   return (
     <StyledIconContainer
       background={iconColors[fileCategory] ?? theme.color.gray}
+      paddingPx={iconContainerPadding}
     >
       {isDefined(Icon) && (
-        <Icon size={theme.icon.size.sm} stroke={theme.icon.stroke.sm} />
+        <Icon
+          size={theme.icon.size[iconSize]}
+          stroke={theme.icon.stroke[iconSize]}
+        />
       )}
     </StyledIconContainer>
   );
