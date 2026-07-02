@@ -52,6 +52,13 @@ export const findActivityTargetsOperationSignatureFactory: RecordGqlOperationSig
       updatedAt: true,
       [objectNameSingular]: {
         ...activityFieldKeys,
+        bodyV2: {
+          blocknote: true,
+          markdown: true,
+        },
+        attachments: {
+          id: true,
+        },
         [targetObjectMetadataItem.namePlural]:
           generateDepthRecordGqlFieldsFromObject({
             objectMetadataItems,

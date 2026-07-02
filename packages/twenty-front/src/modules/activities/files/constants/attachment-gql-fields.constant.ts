@@ -9,6 +9,8 @@ export const ATTACHMENT_GQL_FIELDS = {
   attachmentKind: true,
   externalUrl: true,
   targetMessageId: true,
+  targetNoteId: true,
+  targetTaskId: true,
   createdBy: true,
   file: {
     fileId: true,
@@ -24,6 +26,14 @@ export const ATTACHMENT_GQL_FIELDS = {
     messageThread: {
       id: true,
     },
+  },
+  targetNote: {
+    id: true,
+    title: true,
+  },
+  targetTask: {
+    id: true,
+    title: true,
   },
   __typename: true,
 } satisfies RecordGqlOperationGqlRecordFields;
