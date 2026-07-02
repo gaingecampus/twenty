@@ -139,8 +139,54 @@ docker run --rm \
 
     yarn command:prod cache:flush
     yarn command:prod upgrade
+    yarn command:prod sync-twenty-standard-application
     yarn command:prod cron:register:all
     yarn command:prod cache:flush
+
+    assert_upgrade_status_is_healthy() {
+      local upgrade_status_output
+      upgrade_status_output="$(yarn command:prod upgrade:status --failed-only)"
+      printf "%s\n" "${upgrade_status_output}"
+
+      local upgrade_status_plain
+      upgrade_status_plain="$(printf "%s\n" "${upgrade_status_output}" | sed "s/\x1b\[[0-9;]*m//g")"
+
+      if [ -z "${upgrade_status_plain}" ]; then
+        echo "Upgrade status check failed: empty output." >&2
+        exit 1
+      fi
+
+      if echo "${upgrade_status_plain}" | grep -q "Failed to retrieve upgrade status"; then
+        echo "Upgrade status check failed: could not retrieve upgrade status." >&2
+        exit 1
+      fi
+
+      if ! echo "${upgrade_status_plain}" | grep -q "APP_VERSION:"; then
+        echo "Upgrade status check failed: unexpected output format." >&2
+        exit 1
+      fi
+
+      if echo "${upgrade_status_plain}" | grep -qE "[1-9][0-9]* behind|[1-9][0-9]* failed"; then
+        echo "Upgrade status check failed: instance or workspace upgrades are behind or failed." >&2
+        exit 1
+      fi
+
+      if echo "${upgrade_status_plain}" | grep -A 5 "^Instance" | grep -qE "Status:[[:space:]]+(Behind|Failed)"; then
+        echo "Upgrade status check failed: instance upgrade is behind or failed." >&2
+        exit 1
+      fi
+
+      if echo "${upgrade_status_plain}" | grep -E "^  Instance:" | grep -qE "(Behind|Failed)"; then
+        echo "Upgrade status check failed: instance upgrade summary is behind or failed." >&2
+        exit 1
+      fi
+    }
+
+    echo "Checking upgrade status..."
+    assert_upgrade_status_is_healthy
   '
 
 echo "Database upgrade and cron registration completed."
+echo ""
+echo "If server/worker containers are already running, restart them to load fresh metadata cache:"
+echo "  docker compose --env-file ${ENV_FILE} -f ${DEPLOY_DIR}/docker-compose.prod.yml up -d"

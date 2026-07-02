@@ -10,7 +10,13 @@ import { TWENTY_STANDARD_ALL_METADATA_NAME } from 'src/engine/workspace-manager/
 import { computeTwentyStandardApplicationAllFlatEntityMaps } from 'src/engine/workspace-manager/twenty-standard-application/utils/twenty-standard-application-all-flat-entity-maps.constant';
 import { WorkspaceMigrationBuilderException } from 'src/engine/workspace-manager/workspace-migration/exceptions/workspace-migration-builder-exception';
 import { WorkspaceMigrationValidateBuildAndRunService } from 'src/engine/workspace-manager/workspace-migration/services/workspace-migration-validate-build-and-run-service';
+import { type InferDeletionFromMissingEntities } from 'src/engine/workspace-manager/workspace-migration/workspace-migration-builder/types/infer-deletion-from-missing-entities.type';
 import { FromToAllUniversalFlatEntityMaps } from 'src/engine/workspace-manager/workspace-migration/types/workspace-migration-orchestrator.type';
+
+export type SynchronizeTwentyStandardApplicationResult = {
+  totalActions: number;
+  actionCountsByTypeAndMetadataName: Record<string, number>;
+};
 
 // TODO completely deprecate this file once we've created the twenty-standard twenty-app manifest
 @Injectable()
@@ -24,9 +30,13 @@ export class TwentyStandardApplicationService {
 
   async synchronizeTwentyStandardApplicationOrThrow({
     workspaceId,
+    inferDeletionFromMissingEntities,
+    dryRun,
   }: {
     workspaceId: string;
-  }) {
+    inferDeletionFromMissingEntities?: InferDeletionFromMissingEntities;
+    dryRun?: boolean;
+  }): Promise<SynchronizeTwentyStandardApplicationResult> {
     const { twentyStandardFlatApplication } =
       await this.applicationService.findWorkspaceTwentyStandardAndCustomApplicationOrThrow(
         {
@@ -73,7 +83,8 @@ export class TwentyStandardApplicationService {
         {
           buildOptions: {
             isSystemBuild: true,
-            inferDeletionFromMissingEntities: true,
+            inferDeletionFromMissingEntities:
+              inferDeletionFromMissingEntities ?? true,
             applicationUniversalIdentifier:
               twentyStandardFlatApplication.universalIdentifier,
           },
@@ -83,6 +94,7 @@ export class TwentyStandardApplicationService {
             featureFlagsMap,
           },
           idByUniversalIdentifierByMetadataName,
+          dryRun,
         },
       );
 
@@ -92,5 +104,19 @@ export class TwentyStandardApplicationService {
         'Multiple validation errors occurred while synchronizing twenty-standard application',
       );
     }
+
+    const actionCountsByTypeAndMetadataName: Record<string, number> = {};
+
+    for (const action of validateAndBuildResult.workspaceMigration.actions) {
+      const key = `${action.type}:${action.metadataName}`;
+
+      actionCountsByTypeAndMetadataName[key] =
+        (actionCountsByTypeAndMetadataName[key] ?? 0) + 1;
+    }
+
+    return {
+      totalActions: validateAndBuildResult.workspaceMigration.actions.length,
+      actionCountsByTypeAndMetadataName,
+    };
   }
 }

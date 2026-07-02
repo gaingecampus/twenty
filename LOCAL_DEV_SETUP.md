@@ -172,17 +172,15 @@ gainge 브랜치에 push
 -> Docker image 빌드
 -> AWS ECR에 image push
 -> EC2에 SSM으로 배포 명령 실행
--> DB 초기화 또는 마이그레이션 실행
--> upgrade 실행
--> cron 작업 등록
+-> run-upgrade.sh (DB migrate, upgrade, 표준 메타데이터 sync, cron 등록)
 -> docker compose pull
 -> docker compose up -d
 -> /healthz 확인
 ```
 
-DB가 처음 만들어진 상태라면 `database:init:prod`로 초기화하고, 이미 초기화된 DB라면 `database:migrate:prod --force --include-slow`로 마이그레이션을 실행합니다. 이후 `cache:flush`, `upgrade`, `cron:register:all`, `cache:flush`를 실행한 뒤 앱을 다시 띄웁니다.
+EC2 접속 후 컨테이너 확인, 로그, 수동 upgrade, 재시작 등 **원격 운영 명령**은 아래 문서를 참고하세요.
 
-운영 환경에서도 로컬과 동일하게 메일 재수집, 캘린더 동기화, 워크플로우 같은 반복 작업이 필요하므로 배포 중 `cron:register:all`을 실행해 Redis에 cron 작업을 등록합니다.
+- [deploy/ec2/EC2_OPERATIONS.md](deploy/ec2/EC2_OPERATIONS.md)
 
 현재 push 자동 배포는 GitHub Environment `staging` 기준으로 실행됩니다. `prod`로 자동 배포하려면 `.github/workflows/deploy-ec2.yaml`의 push 기본 environment를 `prod`로 바꿔야 합니다.
 
