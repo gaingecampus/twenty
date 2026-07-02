@@ -1,30 +1,22 @@
 import { ActivityRow } from '@/activities/components/ActivityRow';
 import { AttachmentDropdown } from '@/activities/files/components/AttachmentDropdown';
 import { AttachmentSourceLabel } from '@/activities/files/components/AttachmentSourceLabel';
-import { downloadFile } from '@/activities/files/utils/downloadFile';
-import { useDestroyOneRecord } from '@/object-record/hooks/useDestroyOneRecord';
-import { useUpdateOneRecord } from '@/object-record/hooks/useUpdateOneRecord';
+import { useAttachmentItemActions } from '@/activities/files/hooks/useAttachmentItemActions';
 import {
   FieldContext,
   type GenericFieldContextType,
 } from '@/object-record/record-field/ui/contexts/FieldContext';
-import { getFileCategoryFromExtension } from '@/object-record/record-field/ui/utils/getFileCategoryFromExtension';
 import { SettingsTextInput } from '@/ui/input/components/SettingsTextInput';
 import { styled } from '@linaria/react';
-import { useState, useContext } from 'react';
-import { getSafeUrl, isDefined } from 'twenty-shared/utils';
+import { useContext } from 'react';
+import { getSafeUrl } from 'twenty-shared/utils';
 
 import { type AttachmentWithFile } from '@/activities/files/utils/filterAttachmentsWithFile';
 import { FileIcon } from '@/file/components/FileIcon';
-import { useHasPermissionFlag } from '@/settings/roles/hooks/useHasPermissionFlag';
-import { CoreObjectNameSingular } from 'twenty-shared/types';
 import { IconCalendar } from 'twenty-ui/icon';
 import { OverflowingTextWithTooltip } from 'twenty-ui/surfaces';
 import { ThemeContext, themeCssVariables } from 'twenty-ui/theme-constants';
-import { isNavigationModifierPressed } from 'twenty-ui/utilities';
-import { PermissionFlagType } from '~/generated-metadata/graphql';
 import { formatToHumanReadableDate } from '~/utils/date-utils';
-import { getFileNameAndExtension } from '~/utils/file/getFileNameAndExtension';
 
 const StyledLeftContent = styled.div`
   align-items: center;
@@ -87,89 +79,22 @@ export const AttachmentRow = ({
   onPreview,
 }: AttachmentRowProps) => {
   const { theme } = useContext(ThemeContext);
-  const [isEditing, setIsEditing] = useState(false);
 
-  const hasDownloadPermission = useHasPermissionFlag(
-    PermissionFlagType.DOWNLOAD_FILE,
-  );
-
-  const { name: originalFileName, extension: attachmentFileExtension } =
-    getFileNameAndExtension(attachment.file.label);
-
-  const [attachmentFileName, setAttachmentFileName] =
-    useState(originalFileName);
-
-  const fileCategory = getFileCategoryFromExtension(attachment.file.extension);
-
-  const fileUrl = attachment.file.url;
-
-  const { destroyOneRecord: destroyOneAttachment } = useDestroyOneRecord({
-    objectNameSingular: CoreObjectNameSingular.Attachment,
-  });
-
-  const handleDelete = () => {
-    destroyOneAttachment(attachment.id);
-  };
-
-  const { updateOneRecord } = useUpdateOneRecord();
-
-  const handleRename = () => {
-    setIsEditing(true);
-  };
-
-  const saveAttachmentName = () => {
-    setIsEditing(false);
-
-    const newFileName = `${attachmentFileName}${attachmentFileExtension}`;
-
-    updateOneRecord({
-      objectNameSingular: CoreObjectNameSingular.Attachment,
-      idToUpdate: attachment.id,
-      updateOneRecordInput: {
-        name: newFileName,
-        file: [
-          {
-            fileId: attachment.file.fileId,
-            label: newFileName,
-          },
-        ],
-      },
-    });
-  };
-
-  const handleOnBlur = () => {
-    saveAttachmentName();
-  };
-
-  const handleOnChange = (newFileName: string) => {
-    setAttachmentFileName(newFileName);
-  };
-
-  const handleOnKeyDown = (e: React.KeyboardEvent) => {
-    if (e.nativeEvent.isComposing || e.keyCode === 229) {
-      return;
-    }
-    if (e.key === 'Enter') {
-      saveAttachmentName();
-    }
-  };
-
-  const handleDownload = () => {
-    downloadFile(fileUrl, `${attachmentFileName}${attachmentFileExtension}`);
-  };
-
-  const handleOpenDocument = (e: React.MouseEvent) => {
-    // Cmd/Ctrl+click opens new tab, right click opens context menu
-    if (isNavigationModifierPressed(e) === true) {
-      return;
-    }
-
-    // Only prevent default and use preview if onPreview is provided
-    if (isDefined(onPreview)) {
-      e.preventDefault();
-      onPreview(attachment);
-    }
-  };
+  const {
+    attachmentFileName,
+    fileCategory,
+    fileUrl,
+    fullFileName,
+    handleDelete,
+    handleDownload,
+    handleOnBlur,
+    handleOnChange,
+    handleOnKeyDown,
+    handleOpenDocument,
+    handleRename,
+    hasDownloadPermission,
+    isEditing,
+  } = useAttachmentItemActions({ attachment, onPreview });
 
   return (
     <FieldContext.Provider
@@ -199,9 +124,7 @@ export const AttachmentRow = ({
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <OverflowingTextWithTooltip
-                  text={`${attachmentFileName}${attachmentFileExtension}`}
-                />
+                <OverflowingTextWithTooltip text={fullFileName} />
               </StyledLink>
               <AttachmentSourceLabel attachment={attachment} />
             </StyledLinkContainer>

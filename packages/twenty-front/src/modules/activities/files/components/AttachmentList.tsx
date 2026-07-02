@@ -4,6 +4,11 @@ import { lazy, type ReactElement, Suspense, useState } from 'react';
 import { createPortal } from 'react-dom';
 
 import { DropZone } from '@/activities/files/components/DropZone';
+import { AttachmentGrid } from '@/activities/files/components/AttachmentGrid';
+import {
+  ATTACHMENT_VIEW_MODE,
+  type AttachmentViewMode,
+} from '@/activities/files/constants/attachment-view-mode.constant';
 import { useUploadAttachmentFile } from '@/activities/files/hooks/useUploadAttachmentFile';
 import { type Attachment } from '@/activities/files/types/Attachment';
 import { downloadFile } from '@/activities/files/utils/downloadFile';
@@ -24,8 +29,8 @@ import { useHasPermissionFlag } from '@/settings/roles/hooks/useHasPermissionFla
 import { useModal } from '@/ui/layout/modal/hooks/useModal';
 import { ScrollWrapper } from '@/ui/utilities/scroll/components/ScrollWrapper';
 import { isDefined } from 'twenty-shared/utils';
-import { IconDownload, IconX } from 'twenty-ui/icon';
-import { IconButton } from 'twenty-ui/input';
+import { IconDownload, IconLayoutGrid, IconList, IconX } from 'twenty-ui/icon';
+import { IconButton, LightIconButton } from 'twenty-ui/input';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 import { PermissionFlagType } from '~/generated-metadata/graphql';
 import { AttachmentRow } from './AttachmentRow';
@@ -114,6 +119,18 @@ const StyledButtonContainer = styled.div`
   gap: ${themeCssVariables.spacing[1]};
 `;
 
+const StyledTitleActions = styled.div`
+  align-items: center;
+  display: flex;
+  gap: ${themeCssVariables.spacing[2]};
+`;
+
+const StyledViewToggle = styled.div`
+  align-items: center;
+  display: flex;
+  gap: ${themeCssVariables.spacing['0.5']};
+`;
+
 export const PREVIEW_MODAL_ID = 'preview-modal';
 
 export const AttachmentList = ({
@@ -124,6 +141,9 @@ export const AttachmentList = ({
 }: AttachmentListProps) => {
   const { uploadAttachmentFile } = useUploadAttachmentFile();
   const [isDraggingFile, setIsDraggingFile] = useState(false);
+  const [viewMode, setViewMode] = useState<AttachmentViewMode>(
+    ATTACHMENT_VIEW_MODE.LIST,
+  );
   const [previewedAttachment, setPreviewedAttachment] =
     useState<AttachmentWithFile | null>(null);
 
@@ -173,16 +193,56 @@ export const AttachmentList = ({
     downloadFile(attachmentUrl, previewedAttachment.name);
   };
 
+  const previewHandler = isAttachmentPreviewEnabled ? handlePreview : undefined;
+
+  const attachmentContent =
+    viewMode === ATTACHMENT_VIEW_MODE.GRID ? (
+      <AttachmentGrid attachments={attachments} onPreview={previewHandler} />
+    ) : (
+      <ActivityList>
+        {attachmentsWithFile.map((attachment) => (
+          <AttachmentRow
+            key={attachment.id}
+            attachment={attachment}
+            onPreview={previewHandler}
+          />
+        ))}
+        {externalLinkAttachments.map((attachment) => (
+          <ExternalLinkAttachmentRow
+            key={attachment.id}
+            attachment={attachment}
+          />
+        ))}
+      </ActivityList>
+    );
+
   return (
     <>
       {totalAttachmentCount > 0 && (
         <StyledContainer>
           <StyledTitleBar>
             <StyledTitle>
-              {title}{' '}
-              <StyledCount>{totalAttachmentCount}</StyledCount>
+              {title} <StyledCount>{totalAttachmentCount}</StyledCount>
             </StyledTitle>
-            {button}
+            <StyledTitleActions>
+              <StyledViewToggle>
+                <LightIconButton
+                  Icon={IconLayoutGrid}
+                  active={viewMode === ATTACHMENT_VIEW_MODE.GRID}
+                  accent="tertiary"
+                  aria-label={t`Gallery view`}
+                  onClick={() => setViewMode(ATTACHMENT_VIEW_MODE.GRID)}
+                />
+                <LightIconButton
+                  Icon={IconList}
+                  active={viewMode === ATTACHMENT_VIEW_MODE.LIST}
+                  accent="tertiary"
+                  aria-label={t`List view`}
+                  onClick={() => setViewMode(ATTACHMENT_VIEW_MODE.LIST)}
+                />
+              </StyledViewToggle>
+              {button}
+            </StyledTitleActions>
           </StyledTitleBar>
           <StyledDropZoneContainer
             onDragEnter={() => hasUploadPermission && setIsDraggingFile(true)}
@@ -193,23 +253,7 @@ export const AttachmentList = ({
                 onUploadFiles={onUploadFiles}
               />
             ) : (
-              <ActivityList>
-                {attachmentsWithFile.map((attachment) => (
-                  <AttachmentRow
-                    key={attachment.id}
-                    attachment={attachment}
-                    onPreview={
-                      isAttachmentPreviewEnabled ? handlePreview : undefined
-                    }
-                  />
-                ))}
-                {externalLinkAttachments.map((attachment) => (
-                  <ExternalLinkAttachmentRow
-                    key={attachment.id}
-                    attachment={attachment}
-                  />
-                ))}
-              </ActivityList>
+              attachmentContent
             )}
           </StyledDropZoneContainer>
         </StyledContainer>
