@@ -1,5 +1,6 @@
 import { type FieldFilesValue } from '@/object-record/record-field/ui/types/FieldMetadata';
 
+import { type AttachmentEmailDirection } from '@/activities/files/constants/attachment-email-direction.constant';
 import { type AttachmentFileCategory } from './AttachmentFileCategory';
 import { type AttachmentKind } from '@/activities/files/constants/attachment-kind.constant';
 
@@ -36,6 +37,15 @@ export type Attachment = {
       id: string;
     } | null;
   } | null;
+  targetNote?: {
+    id: string;
+    title: string | null;
+  } | null;
+  targetTask?: {
+    id: string;
+    title: string | null;
+  } | null;
+  emailDirection?: AttachmentEmailDirection;
   attachmentKind?: AttachmentKind | null;
   externalUrl?: string | null;
   createdBy?: {

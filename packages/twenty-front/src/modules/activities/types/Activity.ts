@@ -7,4 +7,5 @@ export type Activity = {
     blocknote: string | null;
     markdown: string | null;
   };
+  attachments?: Array<{ id: string }> | null;
 };
