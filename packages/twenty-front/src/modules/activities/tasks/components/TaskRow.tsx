@@ -1,13 +1,14 @@
 import { styled } from '@linaria/react';
 import { t } from '@lingui/core/macro';
 
-import { ActivityTargetsInlineCell } from '@/activities/inline-cell/components/ActivityTargetsInlineCell';
-import { getActivitySummary } from '@/activities/utils/getActivitySummary';
-import { beautifyExactDate, hasDatePassed } from '~/utils/date-utils';
-
+import { ActivityAttachmentIcon } from '@/activities/components/ActivityAttachmentIcon';
 import { ActivityRow } from '@/activities/components/ActivityRow';
+import { ActivityTargetsInlineCell } from '@/activities/inline-cell/components/ActivityTargetsInlineCell';
 import { useActivityTargetsComponentInstanceId } from '@/activities/inline-cell/hooks/useActivityTargetsComponentInstanceId';
 import { type Task } from '@/activities/types/Task';
+import { activityHasAttachments } from '@/activities/utils/activityHasAttachments';
+import { getActivitySummary } from '@/activities/utils/getActivitySummary';
+import { beautifyExactDate, hasDatePassed } from '~/utils/date-utils';
 import { useOpenRecordInSidePanel } from '@/side-panel/hooks/useOpenRecordInSidePanel';
 import { CoreObjectNameSingular } from 'twenty-shared/types';
 import { StopPropagationContainer } from '@/object-record/record-board/record-board-card/components/StopPropagationContainer';
@@ -90,6 +91,7 @@ export const TaskRow = ({ task }: { task: Task }) => {
   const { openRecordInSidePanel } = useOpenRecordInSidePanel();
 
   const body = getActivitySummary(task?.bodyV2?.blocknote ?? null);
+  const hasAttachments = activityHasAttachments(task);
 
   const { completeTask } = useCompleteTask(task);
 
@@ -127,6 +129,7 @@ export const TaskRow = ({ task }: { task: Task }) => {
         </StyledTaskBody>
       </StyledLeftSideContainer>
       <StyledRightSideContainer>
+        {hasAttachments && <ActivityAttachmentIcon />}
         {task.dueAt && (
           <StyledDueDate
             isPast={hasDatePassed(task.dueAt) && task.status === 'TODO'}

@@ -1,9 +1,11 @@
 import { styled } from '@linaria/react';
 import { t } from '@lingui/core/macro';
 
+import { ActivityAttachmentIcon } from '@/activities/components/ActivityAttachmentIcon';
 import { ActivityTargetsInlineCell } from '@/activities/inline-cell/components/ActivityTargetsInlineCell';
 import { useActivityTargetsComponentInstanceId } from '@/activities/inline-cell/hooks/useActivityTargetsComponentInstanceId';
 import { type Note } from '@/activities/types/Note';
+import { activityHasAttachments } from '@/activities/utils/activityHasAttachments';
 import { getActivityPreview } from '@/activities/utils/getActivityPreview';
 import { useOpenRecordInSidePanel } from '@/side-panel/hooks/useOpenRecordInSidePanel';
 import { CoreObjectNameSingular } from 'twenty-shared/types';
@@ -62,7 +64,14 @@ const StyledFooter = styled.div`
   gap: ${themeCssVariables.spacing[1]};
   justify-content: center;
   padding: ${themeCssVariables.spacing[2]};
+  position: relative;
   width: calc(100% - ${themeCssVariables.spacing[4]});
+`;
+
+const StyledFooterAttachmentIcon = styled.div`
+  margin-left: auto;
+  position: absolute;
+  right: ${themeCssVariables.spacing[2]};
 `;
 
 export const NoteTile = ({
@@ -75,6 +84,7 @@ export const NoteTile = ({
   const { openRecordInSidePanel } = useOpenRecordInSidePanel();
 
   const body = getActivityPreview(note?.bodyV2?.blocknote ?? null);
+  const hasAttachments = activityHasAttachments(note);
 
   const baseComponentInstanceId = `note-card-${note.id}-targets`;
   const componentInstanceId = useActivityTargetsComponentInstanceId(
@@ -113,6 +123,11 @@ export const NoteTile = ({
             />
           </RecordFieldsScopeContextProvider>
         </FieldContextProvider>
+        {hasAttachments && (
+          <StyledFooterAttachmentIcon>
+            <ActivityAttachmentIcon />
+          </StyledFooterAttachmentIcon>
+        )}
       </StyledFooter>
     </StyledCard>
   );
