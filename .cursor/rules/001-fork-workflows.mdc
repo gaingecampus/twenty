@@ -1,0 +1,10 @@
+---
+description: 포크 커밋/PR/리뷰 워크플로
+globs: []
+alwaysApply: true
+---
+
+# 포크 워크플로
+
+커밋·PR·리뷰 절차의 단일 원본은 `GAINGE_WORKFLOWS.md`입니다.
+내용이 컨텍스트에 없으면 Read 도구로 읽으세요.

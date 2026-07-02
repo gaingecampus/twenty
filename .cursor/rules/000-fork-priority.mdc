@@ -1,0 +1,21 @@
+---
+description: 포크 전용 우선 규칙 (가장 먼저 읽기)
+globs: []
+alwaysApply: true
+---
+
+# GAINGE Twenty 포크 — upstream 아님
+
+이 저장소는 **twentyhq/twenty upstream을 포크한 GAINGE 커스텀 저장소**입니다.
+
+## 단일 원본 (내용은 아래 파일만 수정)
+
+| 파일 | 내용 |
+|------|------|
+| `GAINGE_CONTEXT.md` | 포크 정체성·우선순위·개인 선호·충돌 해석 |
+| `GAINGE_RUNBOOK.md` | 로컬 실행·배포·운영 |
+| `GAINGE_WORKFLOWS.md` | 커밋/PR 워크플로 |
+
+위 내용이 컨텍스트에 없으면 **다른 작업 전에** Read 도구로 읽으세요.
+환경·실행·배포 작업은 `GAINGE_RUNBOOK.md`를 **최우선**으로 따릅니다.
+`sessionStart` hook이 세 파일 전체를 주입합니다.
