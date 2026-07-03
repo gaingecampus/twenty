@@ -3,8 +3,11 @@ import { contextStoreCurrentViewIdComponentState } from '@/context-store/states/
 import { contextStoreCurrentViewTypeComponentState } from '@/context-store/states/contextStoreCurrentViewTypeComponentState';
 import { ContextStoreViewType } from '@/context-store/types/ContextStoreViewType';
 import { useResetRecordBoardSelection } from '@/object-record/record-board/hooks/useResetRecordBoardSelection';
+import { useRecordGallerySelection } from '@/object-record/record-gallery/states/selectors/useRecordGallerySelection';
+import { recordIndexViewTypeState } from '@/object-record/record-index/states/recordIndexViewTypeState';
 import { useResetTableRowSelection } from '@/object-record/record-table/hooks/internal/useResetTableRowSelection';
 import { getRecordIndexIdFromObjectNamePluralAndViewId } from '@/object-record/utils/getRecordIndexIdFromObjectNamePluralAndViewId';
+import { ViewType } from '@/views/types/ViewType';
 import { useAtomComponentStateCallbackState } from '@/ui/utilities/state/jotai/hooks/useAtomComponentStateCallbackState';
 import { useAtomComponentStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomComponentStateValue';
 import { useStore } from 'jotai';
@@ -48,6 +51,9 @@ export const useResetRecordIndexSelection = (
   const { resetRecordBoardSelection } =
     useResetRecordBoardSelection(recordIndexId);
 
+  const { resetRecordSelection: resetRecordGallerySelection } =
+    useRecordGallerySelection(recordIndexId);
+
   const resetRecordIndexSelection = useCallback(() => {
     if (!hasValidContext) {
       return;
@@ -56,6 +62,13 @@ export const useResetRecordIndexSelection = (
     const contextStoreCurrentViewType = store.get(
       contextStoreCurrentViewTypeAtom,
     );
+
+    const recordIndexViewType = store.get(recordIndexViewTypeState.atom);
+
+    if (recordIndexViewType === ViewType.GALLERY) {
+      resetRecordGallerySelection();
+      return;
+    }
 
     switch (contextStoreCurrentViewType) {
       case ContextStoreViewType.Table:
@@ -71,6 +84,7 @@ export const useResetRecordIndexSelection = (
     contextStoreCurrentViewTypeAtom,
     resetTableRowSelection,
     resetRecordBoardSelection,
+    resetRecordGallerySelection,
   ]);
 
   return { resetRecordIndexSelection };

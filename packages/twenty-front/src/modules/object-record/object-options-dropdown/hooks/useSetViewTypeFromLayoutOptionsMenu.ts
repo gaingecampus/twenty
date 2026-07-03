@@ -83,6 +83,18 @@ export const useSetViewTypeFromLayoutOptionsMenu = () => {
           setRecordIndexViewType(viewType);
           return;
         }
+        case ViewType.GALLERY: {
+          if (shouldChangeIcon(currentView.icon, currentView.type)) {
+            updateCurrentViewParams.icon =
+              viewTypeIconMapping(viewType).displayName;
+          }
+          updateCurrentViewParams.mainGroupByFieldMetadataId = null;
+          updateCurrentViewParams.calendarFieldMetadataId = null;
+          updateCurrentViewParams.calendarLayout = null;
+          await updateCurrentView(updateCurrentViewParams);
+          setRecordIndexViewType(viewType);
+          return;
+        }
         case ViewType.CALENDAR: {
           if (availableFieldsForCalendar.length === 0) {
             throw new Error('No date fields for calendar');
@@ -151,6 +163,12 @@ export const useSetViewTypeFromLayoutOptionsMenu = () => {
     if (
       oldViewType === ViewType.CALENDAR &&
       oldIcon === viewTypeIconMapping(ViewType.CALENDAR).displayName
+    ) {
+      return true;
+    }
+    if (
+      oldViewType === ViewType.GALLERY &&
+      oldIcon === viewTypeIconMapping(ViewType.GALLERY).displayName
     ) {
       return true;
     }

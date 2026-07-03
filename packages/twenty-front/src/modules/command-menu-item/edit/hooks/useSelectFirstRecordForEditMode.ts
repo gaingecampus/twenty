@@ -1,6 +1,7 @@
 import { MAIN_CONTEXT_STORE_INSTANCE_ID } from '@/context-store/constants/MainContextStoreInstanceId';
 import { getRecordIndexId } from '@/command-menu-item/edit/utils/getRecordIndexId';
 import { isRecordBoardCardSelectedComponentFamilyState } from '@/object-record/record-board/states/isRecordBoardCardSelectedComponentFamilyState';
+import { isRecordGalleryCardSelectedComponentFamilyState } from '@/object-record/record-gallery/record-gallery-card/states/isRecordGalleryCardSelectedComponentFamilyState';
 import { useResetRecordIndexSelection } from '@/object-record/record-index/hooks/useResetRecordIndexSelection';
 import { recordIndexViewTypeState } from '@/object-record/record-index/states/recordIndexViewTypeState';
 import { recordIndexAllRecordIdsComponentSelector } from '@/object-record/record-index/states/selectors/recordIndexAllRecordIdsComponentSelector';
@@ -53,6 +54,16 @@ export const useSelectFirstRecordForEditMode = () => {
       case ViewType.KANBAN: {
         store.set(
           isRecordBoardCardSelectedComponentFamilyState.atomFamily({
+            instanceId: recordIndexId,
+            familyKey: firstRecordId,
+          }),
+          true,
+        );
+        break;
+      }
+      case ViewType.GALLERY: {
+        store.set(
+          isRecordGalleryCardSelectedComponentFamilyState.atomFamily({
             instanceId: recordIndexId,
             familyKey: firstRecordId,
           }),

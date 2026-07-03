@@ -2,6 +2,7 @@ import { ObjectOptionsDropdownMenuViewName } from '@/object-record/object-option
 import { OBJECT_OPTIONS_DROPDOWN_ID } from '@/object-record/object-options-dropdown/constants/ObjectOptionsDropdownId';
 import { useObjectOptionsDropdown } from '@/object-record/object-options-dropdown/hooks/useObjectOptionsDropdown';
 import { useObjectOptionsForBoard } from '@/object-record/object-options-dropdown/hooks/useObjectOptionsForBoard';
+import { visibleRecordFieldsComponentSelector } from '@/object-record/record-field/states/visibleRecordFieldsComponentSelector';
 import { recordIndexCalendarLayoutState } from '@/object-record/record-index/states/recordIndexCalendarLayoutState';
 import { recordIndexGroupFieldMetadataItemComponentState } from '@/object-record/record-index/states/recordIndexGroupFieldMetadataComponentState';
 import { DropdownContent } from '@/ui/layout/dropdown/components/DropdownContent';
@@ -11,6 +12,7 @@ import { GenericDropdownContentWidth } from '@/ui/layout/dropdown/constants/Gene
 import { SelectableList } from '@/ui/layout/selectable-list/components/SelectableList';
 import { SelectableListItem } from '@/ui/layout/selectable-list/components/SelectableListItem';
 import { selectedItemIdComponentState } from '@/ui/layout/selectable-list/states/selectedItemIdComponentState';
+import { useAtomComponentSelectorValue } from '@/ui/utilities/state/jotai/hooks/useAtomComponentSelectorValue';
 import { useAtomComponentStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomComponentStateValue';
 import { useSetAtomComponentState } from '@/ui/utilities/state/jotai/hooks/useSetAtomComponentState';
 import { useGetCurrentViewOnly } from '@/views/hooks/useGetCurrentViewOnly';
@@ -82,13 +84,21 @@ export const ObjectOptionsDropdownCustomView = ({
     recordIndexCalendarLayoutState,
   );
 
+  const visibleRecordFields = useAtomComponentSelectorValue(
+    visibleRecordFieldsComponentSelector,
+    recordIndexId,
+  );
+
   const { visibleBoardFields } = useObjectOptionsForBoard({
     objectNameSingular: objectMetadataItem.nameSingular,
     recordBoardId: recordIndexId,
     viewBarId: recordIndexId,
   });
 
-  const visibleFieldsCount = visibleBoardFields.length;
+  const visibleFieldsCount =
+    customViewData?.type === ViewType.KANBAN
+      ? visibleBoardFields.length
+      : visibleRecordFields.length;
 
   const { destroyViewFromCurrentState } = useDestroyViewFromCurrentState();
   const setViewPickerReferenceViewId = useSetAtomComponentState(
@@ -113,7 +123,10 @@ export const ObjectOptionsDropdownCustomView = ({
     ...(customViewData?.type === ViewType.CALENDAR
       ? ['CalendarDateField', 'CalendarView']
       : []),
-    ...(customViewData?.type !== ViewType.CALENDAR ? ['Group'] : []),
+    ...(customViewData?.type !== ViewType.CALENDAR &&
+    customViewData?.type !== ViewType.GALLERY
+      ? ['Group']
+      : []),
     'Delete view',
   ];
 
@@ -231,7 +244,8 @@ export const ObjectOptionsDropdownCustomView = ({
               hasSubMenu
             />
           </SelectableListItem>
-          {customViewData?.type !== ViewType.CALENDAR && (
+          {customViewData?.type !== ViewType.CALENDAR &&
+            customViewData?.type !== ViewType.GALLERY && (
             <div id="group-by-menu-item">
               <SelectableListItem
                 itemId="Group"

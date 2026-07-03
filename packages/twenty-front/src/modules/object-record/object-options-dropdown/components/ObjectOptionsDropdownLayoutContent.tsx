@@ -1,6 +1,7 @@
 import { OBJECT_OPTIONS_DROPDOWN_ID } from '@/object-record/object-options-dropdown/constants/ObjectOptionsDropdownId';
 import { useObjectOptionsDropdown } from '@/object-record/object-options-dropdown/hooks/useObjectOptionsDropdown';
 import { useSetViewTypeFromLayoutOptionsMenu } from '@/object-record/object-options-dropdown/hooks/useSetViewTypeFromLayoutOptionsMenu';
+import { visibleRecordFieldsComponentSelector } from '@/object-record/record-field/states/visibleRecordFieldsComponentSelector';
 import { recordIndexCalendarLayoutState } from '@/object-record/record-index/states/recordIndexCalendarLayoutState';
 import { recordIndexGroupFieldMetadataItemComponentState } from '@/object-record/record-index/states/recordIndexGroupFieldMetadataComponentState';
 import { recordIndexOpenRecordInState } from '@/object-record/record-index/states/recordIndexOpenRecordInState';
@@ -14,6 +15,7 @@ import { SelectableList } from '@/ui/layout/selectable-list/components/Selectabl
 import { SelectableListItem } from '@/ui/layout/selectable-list/components/SelectableListItem';
 import { selectedItemIdComponentState } from '@/ui/layout/selectable-list/states/selectedItemIdComponentState';
 import { useAtomComponentStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomComponentStateValue';
+import { useAtomComponentSelectorValue } from '@/ui/utilities/state/jotai/hooks/useAtomComponentSelectorValue';
 import { useGetCurrentViewOnly } from '@/views/hooks/useGetCurrentViewOnly';
 import { useUpdateCurrentView } from '@/views/hooks/useUpdateCurrentView';
 import { type GraphQLView } from '@/views/types/GraphQLView';
@@ -36,6 +38,7 @@ import {
   IconLayoutList,
   IconLayoutNavbar,
   IconLayoutSidebarRight,
+  IconListDetails,
   IconTable,
 } from 'twenty-ui/icon';
 import { OverflowingTextWithTooltip } from 'twenty-ui/surfaces';
@@ -48,7 +51,7 @@ import {
 export const ObjectOptionsDropdownLayoutContent = () => {
   const { t } = useLingui();
 
-  const { objectMetadataItem, resetContent, onContentChange, dropdownId } =
+  const { objectMetadataItem, resetContent, onContentChange, dropdownId, recordIndexId } =
     useObjectOptionsDropdown();
 
   const { currentView } = useGetCurrentViewOnly();
@@ -89,6 +92,13 @@ export const ObjectOptionsDropdownLayoutContent = () => {
     useGetAvailableFieldsForCalendar();
   const { closeDropdown } = useCloseDropdown();
 
+  const visibleRecordFields = useAtomComponentSelectorValue(
+    visibleRecordFieldsComponentSelector,
+    recordIndexId,
+  );
+
+  const visibleFieldsCount = visibleRecordFields.length;
+
   const handleSelectKanbanViewType = async () => {
     if (isDefaultView) {
       return;
@@ -124,11 +134,13 @@ export const ObjectOptionsDropdownLayoutContent = () => {
     ViewType.TABLE,
     ...(isDefaultView ? [] : [ViewType.KANBAN]),
     ...(!isDefaultView ? [ViewType.CALENDAR] : []),
+    ...(!isDefaultView ? [ViewType.GALLERY] : []),
     ViewOpenRecordIn.SIDE_PANEL,
     ...(currentView?.type === ViewType.KANBAN ? ['Group'] : []),
     ...(currentView?.type === ViewType.CALENDAR
       ? ['CalendarView', 'CalendarDateField']
       : []),
+    ...(currentView?.type === ViewType.GALLERY ? ['Fields'] : []),
     ...(currentView?.type !== ViewType.TABLE ? ['Compact view'] : []),
   ];
 
@@ -217,6 +229,39 @@ export const ObjectOptionsDropdownLayoutContent = () => {
                 onClick={handleSelectKanbanViewType}
               />
             </SelectableListItem>
+            <SelectableListItem
+              itemId={ViewType.GALLERY}
+              onEnter={() => {
+                setAndPersistViewType(ViewType.GALLERY);
+              }}
+            >
+              <MenuItemSelect
+                LeftIcon={viewTypeIconMapping(ViewType.GALLERY)}
+                text={t(getViewTypeLabel(ViewType.GALLERY))}
+                disabled={isDefaultView}
+                focused={selectedItemId === ViewType.GALLERY}
+                contextualText={
+                  isDefaultView ? (
+                    <>
+                      {nbsp}·{nbsp}
+                      <OverflowingTextWithTooltip
+                        text={t`Not available for default view`}
+                      />
+                    </>
+                  ) : undefined
+                }
+                contextualTextPosition="right"
+                selected={currentView?.type === ViewType.GALLERY}
+                onClick={async () => {
+                  if (isDefaultView) {
+                    return;
+                  }
+                  if (currentView?.type !== ViewType.GALLERY) {
+                    await setAndPersistViewType(ViewType.GALLERY);
+                  }
+                }}
+              />
+            </SelectableListItem>
           </DropdownMenuItemsContainer>
           <DropdownMenuSeparator />
           <DropdownMenuItemsContainer scrollable={false}>
@@ -257,6 +302,22 @@ export const ObjectOptionsDropdownLayoutContent = () => {
                   />
                 </SelectableListItem>
               </>
+            )}
+            {currentView?.type === ViewType.GALLERY && (
+              <SelectableListItem
+                itemId="Fields"
+                onEnter={() => onContentChange('fields')}
+              >
+                <MenuItem
+                  focused={selectedItemId === 'Fields'}
+                  onClick={() => onContentChange('fields')}
+                  LeftIcon={IconListDetails}
+                  text={t`Fields`}
+                  contextualText={t`${visibleFieldsCount} shown`}
+                  contextualTextPosition="right"
+                  hasSubMenu
+                />
+              </SelectableListItem>
             )}
             <SelectableListItem
               itemId={ViewOpenRecordIn.SIDE_PANEL}
