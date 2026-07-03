@@ -3,6 +3,7 @@ import { msg } from '@lingui/core/macro';
 import {
   IconCalendar,
   type IconComponent,
+  IconLayoutGrid,
   IconLayoutKanban,
   IconTable,
 } from 'twenty-ui/icon';
@@ -16,6 +17,7 @@ export const VIEW_TYPE_LABELS = {
   [ViewType.TABLE]: msg`Table`,
   [ViewType.KANBAN]: msg`Kanban`,
   [ViewType.CALENDAR]: msg`Calendar`,
+  [ViewType.GALLERY]: msg`Gallery`,
   [ViewType.FIELDS_WIDGET]: msg`Fields widget`,
   [ViewType.TABLE_WIDGET]: msg`Table widget`,
 } satisfies Record<ViewTypeLabelKey, MessageDescriptor>;
@@ -29,6 +31,7 @@ const VIEW_TYPE_ICON_MAPPING = [
   { icon: IconLayoutKanban, value: ViewType.KANBAN },
   { icon: IconTable, value: ViewType.TABLE },
   { icon: IconCalendar, value: ViewType.CALENDAR },
+  { icon: IconLayoutGrid, value: ViewType.GALLERY },
 ] as const satisfies {
   icon: IconComponent;
   value: ViewType;
