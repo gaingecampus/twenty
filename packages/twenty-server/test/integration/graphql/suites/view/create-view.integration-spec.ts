@@ -83,6 +83,31 @@ describe('Create core view', () => {
     });
   });
 
+  it('should create a gallery view', async () => {
+    const { data, errors } = await createOneView({
+      input: {
+        name: 'Gallery View',
+        objectMetadataId: testObjectMetadataId,
+        icon: 'IconLayoutGrid',
+        type: ViewType.GALLERY,
+      },
+      expectToFail: false,
+    });
+
+    expect(errors).toBeUndefined();
+    assertViewStructure(data.createView, {
+      name: 'Gallery View',
+      objectMetadataId: testObjectMetadataId,
+      mainGroupByFieldMetadataId: null,
+      type: ViewType.GALLERY,
+      key: null,
+      icon: 'IconLayoutGrid',
+      position: 0,
+      isCompact: false,
+      openRecordIn: ViewOpenRecordIn.SIDE_PANEL,
+    });
+  });
+
   it('should create a view with minimum required fields', async () => {
     const input = {
       name: 'Minimal View',
