@@ -244,6 +244,8 @@ export class ProcessNestedRelationsV2Helper {
         aggregate,
         sourceFieldName,
         targetObjectNameSingular,
+        nestedRelations,
+        selectedFields,
       });
 
     this.assignRelationResults({
@@ -356,6 +358,8 @@ export class ProcessNestedRelationsV2Helper {
     aggregate,
     sourceFieldName,
     targetObjectNameSingular,
+    nestedRelations,
+    selectedFields,
   }: {
     // oxlint-disable-next-line typescript/no-explicit-any
     referenceQueryBuilder: WorkspaceSelectQueryBuilder<any>;
@@ -370,6 +374,8 @@ export class ProcessNestedRelationsV2Helper {
     aggregate: Record<string, any>;
     sourceFieldName: string;
     targetObjectNameSingular: string;
+    nestedRelations: FindOptionsRelations<ObjectLiteral>;
+    selectedFields: Record<string, unknown> | undefined;
     // oxlint-disable-next-line typescript/no-explicit-any
   }): Promise<{ relationResults: any[]; relationAggregatedFieldsResult: any }> {
     if (ids.length === 0) {
@@ -409,6 +415,20 @@ export class ProcessNestedRelationsV2Helper {
         },
         {},
       );
+    }
+
+    const shouldSkipRelationHydrate =
+      relationType === RelationType.ONE_TO_MANY &&
+      isDefined(aggregateForRelation) &&
+      Object.keys(aggregateForRelation).length > 0 &&
+      Object.keys(nestedRelations).length === 0 &&
+      this.shouldSkipRelationHydrateForAggregateOnly(selectedFields);
+
+    if (shouldSkipRelationHydrate) {
+      return {
+        relationResults: [],
+        relationAggregatedFieldsResult,
+      };
     }
 
     const queryBuilderOptions = referenceQueryBuilder.getFindOptions();
@@ -556,5 +576,19 @@ export class ProcessNestedRelationsV2Helper {
 
     parentObjectRecordsAggregatedValues[sourceFieldName] =
       relationAggregatedFieldsResult;
+  }
+
+  private shouldSkipRelationHydrateForAggregateOnly(
+    selectedFields: Record<string, unknown> | undefined,
+  ): boolean {
+    if (!isDefined(selectedFields)) {
+      return true;
+    }
+
+    const selectedFieldKeys = Object.keys(selectedFields).filter(
+      (fieldKey) => fieldKey !== 'id' && selectedFields[fieldKey] !== false,
+    );
+
+    return selectedFieldKeys.length === 0;
   }
 }
