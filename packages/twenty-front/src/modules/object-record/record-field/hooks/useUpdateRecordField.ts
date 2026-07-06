@@ -20,13 +20,18 @@ export const useUpdateRecordField = (
       partialRecordField: Partial<
         Pick<RecordField, 'isVisible' | 'size' | 'position'>
       >,
+      viewFieldId?: string,
     ) => {
       const existingRecordFields = store.get(currentRecordFields);
 
-      const foundRecordFieldInCurrentRecordFields = existingRecordFields.find(
-        (existingRecordField) =>
-          existingRecordField.fieldMetadataItemId === fieldMetadataItemId,
-      );
+      const foundRecordFieldInCurrentRecordFields = isDefined(viewFieldId)
+        ? existingRecordFields.find(
+            (existingRecordField) => existingRecordField.id === viewFieldId,
+          )
+        : existingRecordFields.find(
+            (existingRecordField) =>
+              existingRecordField.fieldMetadataItemId === fieldMetadataItemId,
+          );
 
       if (!isDefined(foundRecordFieldInCurrentRecordFields)) {
         throw new Error(
@@ -37,10 +42,14 @@ export const useUpdateRecordField = (
       store.set(currentRecordFields, (previousRecordFields) => {
         const newCurrentRecordFields = [...previousRecordFields];
 
-        const indexOfRecordFieldToUpdate = newCurrentRecordFields.findIndex(
-          (existingRecordField) =>
-            existingRecordField.fieldMetadataItemId === fieldMetadataItemId,
-        );
+        const indexOfRecordFieldToUpdate = isDefined(viewFieldId)
+          ? newCurrentRecordFields.findIndex(
+              (existingRecordField) => existingRecordField.id === viewFieldId,
+            )
+          : newCurrentRecordFields.findIndex(
+              (existingRecordField) =>
+                existingRecordField.fieldMetadataItemId === fieldMetadataItemId,
+            );
 
         newCurrentRecordFields[indexOfRecordFieldToUpdate] = {
           ...newCurrentRecordFields[indexOfRecordFieldToUpdate],

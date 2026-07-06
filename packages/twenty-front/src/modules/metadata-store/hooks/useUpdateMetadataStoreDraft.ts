@@ -152,8 +152,13 @@ export const useUpdateMetadataStoreDraft = () => {
         );
 
         if (existingIndex >= 0) {
-          if (!isDeeplyEqual(newItems[existingIndex], newItem)) {
-            newItems[existingIndex] = newItem;
+          const mergedItem = {
+            ...newItems[existingIndex],
+            ...newItem,
+          };
+
+          if (!isDeeplyEqual(newItems[existingIndex], mergedItem)) {
+            newItems[existingIndex] = mergedItem;
           }
         } else {
           newItems = [...newItems, newItem];

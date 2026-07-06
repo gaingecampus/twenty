@@ -2,8 +2,10 @@ import { labelIdentifierFieldMetadataItemSelector } from '@/object-metadata/stat
 import { type EnrichedObjectMetadataItem } from '@/object-metadata/types/EnrichedObjectMetadataItem';
 import { formatFieldMetadataItemAsColumnDefinition } from '@/object-metadata/utils/formatFieldMetadataItemAsColumnDefinition';
 import { currentRecordFieldsComponentState } from '@/object-record/record-field/states/currentRecordFieldsComponentState';
+import { recordIndexFieldDefinitionsState } from '@/object-record/record-index/states/recordIndexFieldDefinitionsState';
 import { useAtomComponentStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomComponentStateValue';
 import { useAtomFamilySelectorValue } from '@/ui/utilities/state/jotai/hooks/useAtomFamilySelectorValue';
+import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 import { isDefined } from 'twenty-shared/utils';
 
 export const useRecordIndexFieldMetadataDerivedStates = (
@@ -22,6 +24,16 @@ export const useRecordIndexFieldMetadataDerivedStates = (
   const currentRecordFields = useAtomComponentStateValue(
     currentRecordFieldsComponentState,
     recordIndexId,
+  );
+
+  const recordIndexFieldDefinitions = useAtomStateValue(
+    recordIndexFieldDefinitionsState,
+  );
+
+  const fieldDefinitionByViewFieldId = Object.fromEntries(
+    recordIndexFieldDefinitions
+      .filter((fieldDefinition) => isDefined(fieldDefinition.viewFieldId))
+      .map((fieldDefinition) => [fieldDefinition.viewFieldId, fieldDefinition]),
   );
 
   const recordFieldByFieldMetadataItemId = Object.fromEntries(
@@ -59,6 +71,7 @@ export const useRecordIndexFieldMetadataDerivedStates = (
     fieldMetadataItemByFieldMetadataItemId,
     labelIdentifierFieldMetadataItem,
     fieldDefinitionByFieldMetadataItemId,
+    fieldDefinitionByViewFieldId,
     recordFieldByFieldMetadataItemId,
   };
 };

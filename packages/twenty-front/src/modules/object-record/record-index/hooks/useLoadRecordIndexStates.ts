@@ -1,5 +1,6 @@
 import { contextStoreTargetedRecordsRuleComponentState } from '@/context-store/states/contextStoreTargetedRecordsRuleComponentState';
 import { useGetFieldMetadataItemByIdOrThrow } from '@/object-metadata/hooks/useGetFieldMetadataItemById';
+import { objectMetadataItemsSelector } from '@/object-metadata/states/objectMetadataItemsSelector';
 import { availableFieldMetadataItemsForFilterFamilySelector } from '@/object-metadata/states/availableFieldMetadataItemsForFilterFamilySelector';
 import { availableFieldMetadataItemsForSortFamilySelector } from '@/object-metadata/states/availableFieldMetadataItemsForSortFamilySelector';
 import { flattenedFieldMetadataItemsSelector } from '@/object-metadata/states/flattenedFieldMetadataItemsSelector';
@@ -135,6 +136,8 @@ export const useLoadRecordIndexStates = () => {
       const newFieldDefinitions = mapViewFieldsToColumnDefinitions({
         viewFields: view.viewFields,
         columnDefinitions,
+        objectMetadataItem,
+        objectMetadataItems: store.get(objectMetadataItemsSelector.atom),
       });
 
       const recordFields = view.viewFields
