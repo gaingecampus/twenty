@@ -23,6 +23,7 @@ import { BillingModule } from 'src/engine/core-modules/billing/billing.module';
 import { BillingGraphqlApiExceptionFilter } from 'src/engine/core-modules/billing/filters/billing-graphql-api-exception.filter';
 import { CacheStorageModule } from 'src/engine/core-modules/cache-storage/cache-storage.module';
 import { TimelineCalendarEventModule } from 'src/engine/core-modules/calendar/timeline-calendar-event.module';
+import { RelationRollupAggregatesModule } from 'src/engine/core-modules/relation-rollup/relation-rollup-aggregates.module';
 import { CaptchaModule } from 'src/engine/core-modules/captcha/captcha.module';
 import { CloudflareModule } from 'src/engine/core-modules/cloudflare/cloudflare.module';
 import { CodeInterpreterModule } from 'src/engine/core-modules/code-interpreter/code-interpreter.module';
@@ -108,6 +109,7 @@ import { FileModule } from './file/file.module';
     AppTokenModule,
     TimelineMessagingModule,
     TimelineCalendarEventModule,
+    RelationRollupAggregatesModule,
     UserModule,
     WorkspaceModule,
     WorkspaceInvitationModule,
@@ -181,6 +183,7 @@ import { FileModule } from './file/file.module';
     FeatureFlagModule,
     TimelineMessagingModule,
     TimelineCalendarEventModule,
+    RelationRollupAggregatesModule,
     UserModule,
     WorkspaceModule,
     WorkspaceInvitationModule,
