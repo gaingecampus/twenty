@@ -24,6 +24,8 @@ cd /opt/twenty/deploy/ec2
 
 `EC2_INSTANCE_ID`는 GitHub Environment variables에 등록된 값입니다.
 
+배포가 무중단인지, 배포 중 MCP·Redis 큐·REST/GraphQL이 어떻게 동작하는지는 [DEPLOYMENT_AND_APIS.md](DEPLOYMENT_AND_APIS.md)를 참고하세요.
+
 ## docker compose 사용 시 주의
 
 `docker-compose.prod.yml`은 `docker-compose.env`의 값(`TWENTY_IMAGE`, `PG_DATABASE_URL` 등)을 읽습니다.  

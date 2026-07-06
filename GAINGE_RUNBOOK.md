@@ -181,6 +181,7 @@ gainge 브랜치에 push
 EC2 접속 후 컨테이너 확인, 로그, 수동 upgrade, 재시작 등 **원격 운영 명령**은 아래 문서를 참고하세요.
 
 - [deploy/ec2/EC2_OPERATIONS.md](deploy/ec2/EC2_OPERATIONS.md)
+- [deploy/ec2/DEPLOYMENT_AND_APIS.md](deploy/ec2/DEPLOYMENT_AND_APIS.md) — 무중단 여부, 배포 중 큐·MCP 동작, REST/GraphQL/MCP 비교
 
 현재 push 자동 배포는 GitHub Environment `staging` 기준으로 실행됩니다. `prod`로 자동 배포하려면 `.github/workflows/deploy-ec2.yaml`의 push 기본 environment를 `prod`로 바꿔야 합니다.
 

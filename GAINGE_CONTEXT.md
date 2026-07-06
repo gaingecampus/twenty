@@ -32,13 +32,42 @@ upstream 관례보다 이 파일과 `GAINGE_RUNBOOK.md`를 우선 참고하세�
 
 ## 개인 선호
 
-<!-- 아래에 선호 사항을 채워 넣으세요 -->
-
-- [ ] 응답 언어:
+- [x] 응답 언어: 한국어
 - [ ] 커밋 메시지 언어:
 - [ ] 커밋 메시지 형식:
 - [ ] 기본 브랜치 네이밍:
 - [ ] 기타:
+
+## 운영 설정 — Admin Panel 우선
+
+운영·배포 환경에서 `twenty-server` 설정값(API 키, LLM 키 등)을 넣거나 바꿀 때는 **코드·인프라 변경 전에** 아래를 먼저 확인하고 안내합니다.
+
+### 기본 원칙
+
+1. **Admin Panel → Config Variables**에서 설정 가능한 항목이면, 그 방법을 **첫 답변**으로 제시합니다.
+2. docker-compose, CloudFormation, Secrets Manager, `.env` 배포 파이프라인 변경은 **사용자가 명시적으로 원할 때만** 제안합니다.
+3. 코드 변경이 필요한지 판단하기 전에 `packages/twenty-server/src/engine/core-modules/twenty-config/config-variables.ts`에서 해당 키가 있는지, `isEnvOnly: true`인지 확인합니다.
+
+### 판단 기준
+
+| 조건 | 권장 방법 |
+|------|-----------|
+| Config Variables에 있고 `isEnvOnly` 아님 | **Admin Panel** (운영 EC2는 `IS_CONFIG_VARIABLES_IN_DB_ENABLED=true`) |
+| `isEnvOnly: true` (예: `PG_DATABASE_URL`, `ENCRYPTION_KEY`) | env / Secrets Manager / 배포 설정 |
+| 사용자가 “배포 파이프라인에 박아 넣고 싶다”고 명시 | 그때 인프라·compose 변경 검토 |
+
+### 예시
+
+- `GOOGLE_API_KEY`, `OPENAI_API_KEY`, `ANTHROPIC_API_KEY` 등 LLM 키 → Admin Panel 우선
+- DB URL, 암호화 키, S3 자격 증명 → env / Secrets Manager (Admin으로 불가)
+
+### AI 답변 형식
+
+설정 요청을 받으면:
+
+1. Admin Panel 경로와 설정 가능 여부를 먼저 안내
+2. 이미 Admin에서 설정했다면 추가 배포 작업 불필요함을 명시
+3. 인프라 변경은 “대안” 또는 “명시 요청 시”에만 언급
 
 ## 포크 구조
 
@@ -48,7 +77,7 @@ upstream 관례보다 이 파일과 `GAINGE_RUNBOOK.md`를 우선 참고하세�
 - GAINGE 컨텍스트: `GAINGE_CONTEXT.md`
 - 커스텀 디렉토리:
 - upstream과 다른 점:
-- 이 포크에서 우선하는 패턴:
+- 이 포크에서 우선하는 패턴: **운영 설정은 Admin Panel Config Variables 우선** (`GAINGE_CONTEXT.md` § 운영 설정 참고)
 
 ## 충돌 해석
 
