@@ -10,6 +10,7 @@ import { AggregateOperations } from 'twenty-shared/types';
 
 import { UUIDScalarType } from 'src/engine/api/graphql/workspace-schema-builder/graphql-types/scalars';
 import { type ViewFieldOverrides } from 'src/engine/metadata-modules/view-field/entities/view-field.entity';
+import { RelationRollupSettingsDTO } from 'src/engine/metadata-modules/view-field/dtos/relation-rollup-settings.dto';
 
 registerEnumType(AggregateOperations, { name: 'AggregateOperations' });
 
@@ -38,6 +39,9 @@ export class ViewFieldDTO {
 
   @Field(() => UUIDScalarType, { nullable: true })
   viewFieldGroupId?: string | null;
+
+  @Field(() => RelationRollupSettingsDTO, { nullable: true })
+  relationRollup?: RelationRollupSettingsDTO | null;
 
   @Field(() => UUIDScalarType, { nullable: false })
   workspaceId: string;

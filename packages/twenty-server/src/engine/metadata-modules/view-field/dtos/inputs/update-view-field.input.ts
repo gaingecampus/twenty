@@ -13,6 +13,7 @@ import {
 import { AggregateOperations } from 'twenty-shared/types';
 
 import { UUIDScalarType } from 'src/engine/api/graphql/workspace-schema-builder/graphql-types/scalars';
+import { RelationRollupSettingsDTO } from 'src/engine/metadata-modules/view-field/dtos/relation-rollup-settings.dto';
 
 @InputType()
 class UpdateViewFieldInputUpdates {
@@ -40,6 +41,12 @@ class UpdateViewFieldInputUpdates {
   @IsUUID()
   @Field(() => UUIDScalarType, { nullable: true })
   viewFieldGroupId?: string | null;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => RelationRollupSettingsDTO)
+  @Field(() => RelationRollupSettingsDTO, { nullable: true })
+  relationRollup?: RelationRollupSettingsDTO | null;
 }
 
 @InputType()

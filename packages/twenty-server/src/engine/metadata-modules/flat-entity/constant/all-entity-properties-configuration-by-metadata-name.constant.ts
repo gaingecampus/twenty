@@ -495,6 +495,12 @@ export const ALL_ENTITY_PROPERTIES_CONFIGURATION_BY_METADATA_NAME = {
       universalProperty: undefined,
       isOverridable: true,
     },
+    relationRollup: {
+      toCompare: true,
+      toStringify: true,
+      universalProperty: undefined,
+      isOverridable: false,
+    },
     viewFieldGroupId: {
       toStringify: false,
       universalProperty: 'viewFieldGroupUniversalIdentifier',

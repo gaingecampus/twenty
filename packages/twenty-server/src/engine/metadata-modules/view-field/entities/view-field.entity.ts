@@ -12,6 +12,7 @@ import {
 } from 'typeorm';
 import {
   AggregateOperations,
+  type RelationRollupSettings,
   type SerializedRelation,
 } from 'twenty-shared/types';
 
@@ -40,7 +41,7 @@ export type ViewFieldOverrides = {
   ['fieldMetadataId', 'viewId'],
   {
     unique: true,
-    where: '"deletedAt" IS NULL',
+    where: '"deletedAt" IS NULL AND "relationRollup" IS NULL',
   },
 )
 export class ViewFieldEntity
@@ -87,6 +88,9 @@ export class ViewFieldEntity
   })
   @Column({ nullable: false, default: false, type: 'boolean' })
   isSystemSideEffect: boolean;
+
+  @Column({ nullable: true, type: 'jsonb', default: null })
+  relationRollup: RelationRollupSettings | null = null;
 
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;

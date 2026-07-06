@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 
 import { msg, t } from '@lingui/core/macro';
 import { ALL_METADATA_NAME } from 'twenty-shared/metadata';
-import { ViewType } from 'twenty-shared/types';
-import { isDefined } from 'twenty-shared/utils';
+import { type RelationRollupSettings, ViewType } from 'twenty-shared/types';
+import { fastDeepEqual, isDefined } from 'twenty-shared/utils';
 
 import { findFlatEntityByUniversalIdentifier } from 'src/engine/metadata-modules/flat-entity/utils/find-flat-entity-by-universal-identifier.util';
 import { findManyFlatEntityByUniversalIdentifierInUniversalFlatEntityMapsOrThrow } from 'src/engine/metadata-modules/flat-entity/utils/find-many-flat-entity-by-universal-identifier-in-universal-flat-entity-maps-or-throw.util';
@@ -14,6 +14,13 @@ import { getEmptyFlatEntityValidationError } from 'src/engine/workspace-manager/
 import { FlatEntityUpdateValidationArgs } from 'src/engine/workspace-manager/workspace-migration/workspace-migration-builder/types/universal-flat-entity-update-validation-args.type';
 import { UniversalFlatEntityValidationArgs } from 'src/engine/workspace-manager/workspace-migration/workspace-migration-builder/types/universal-flat-entity-validation-args.type';
 import { validateLabelIdentifierFieldMetadataIdFlatViewField } from 'src/engine/workspace-manager/workspace-migration/workspace-migration-builder/validators/utils/validate-label-identifier-field-metadata-id-flat-view-field.util';
+
+const areRelationRollupSettingsEqual = (
+  firstRelationRollup: RelationRollupSettings,
+  secondRelationRollup: RelationRollupSettings,
+): boolean => {
+  return fastDeepEqual(firstRelationRollup, secondRelationRollup);
+};
 
 @Injectable()
 export class FlatViewFieldValidatorService {
@@ -227,12 +234,47 @@ export class FlatViewFieldValidatorService {
         universalIdentifiers: flatView.viewFieldUniversalIdentifiers,
         flatEntityMaps: optimisticFlatViewFieldMaps,
       });
+
+    const isCreatingRelationRollupViewField = isDefined(
+      flatViewFieldToValidate.relationRollup,
+    );
+
     const equivalentExistingFlatViewFieldExists = otherFlatViewFields.some(
-      (flatViewField) =>
-        flatViewField.viewUniversalIdentifier ===
-          flatViewFieldToValidate.viewUniversalIdentifier &&
-        flatViewField.fieldMetadataUniversalIdentifier ===
-          flatViewFieldToValidate.fieldMetadataUniversalIdentifier,
+      (flatViewField) => {
+        const isSameViewAndField =
+          flatViewField.viewUniversalIdentifier ===
+            flatViewFieldToValidate.viewUniversalIdentifier &&
+          flatViewField.fieldMetadataUniversalIdentifier ===
+            flatViewFieldToValidate.fieldMetadataUniversalIdentifier;
+
+        if (!isSameViewAndField) {
+          return false;
+        }
+
+        const existingIsRelationRollupViewField = isDefined(
+          flatViewField.relationRollup,
+        );
+
+        if (!isCreatingRelationRollupViewField) {
+          return !existingIsRelationRollupViewField;
+        }
+
+        if (!existingIsRelationRollupViewField) {
+          return false;
+        }
+
+        if (
+          !isDefined(flatViewField.relationRollup) ||
+          !isDefined(flatViewFieldToValidate.relationRollup)
+        ) {
+          return false;
+        }
+
+        return areRelationRollupSettingsEqual(
+          flatViewField.relationRollup,
+          flatViewFieldToValidate.relationRollup,
+        );
+      },
     );
 
     if (equivalentExistingFlatViewFieldExists) {

@@ -264,6 +264,11 @@ export type { RecordGqlOperationVariables } from './RecordGqlOperationVariables'
 export type { RelationAndMorphRelationFieldMetadataType } from './RelationAndMorphRelationFieldMetadataType';
 export type { RelationCreationPayload } from './RelationCreationPayload';
 export { RelationOnDeleteAction } from './RelationOnDeleteAction.type';
+export type {
+  RelationRollupFilterSnapshot,
+  RelationRollupFilterGroupSnapshot,
+  RelationRollupSettings,
+} from './RelationRollupSettings';
 export { RelationType } from './RelationType';
 export type { RelationUpdatePayload } from './RelationUpdatePayload';
 export type { RemoveSuffix } from './RemoveSuffix.type';

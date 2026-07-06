@@ -120,6 +120,7 @@ export const createStandardViewFieldFlatMetadata = <
     isVisible,
     size,
     aggregateOperation,
+    relationRollup: null,
     isActive: true,
     isSystemSideEffect: false,
     overrides: null,

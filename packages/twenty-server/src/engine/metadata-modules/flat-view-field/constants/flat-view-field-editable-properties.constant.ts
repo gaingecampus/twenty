@@ -6,4 +6,5 @@ export const FLAT_VIEW_FIELD_EDITABLE_PROPERTIES = [
   'position',
   'aggregateOperation',
   'viewFieldGroupId',
+  'relationRollup',
 ] as const satisfies MetadataEntityPropertyName<'viewField'>[];

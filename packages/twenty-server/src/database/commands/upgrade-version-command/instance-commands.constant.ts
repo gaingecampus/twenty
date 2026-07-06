@@ -83,6 +83,7 @@ import { AddServerTriggerSettingsToLogicFunctionFastInstanceCommand } from 'src/
 import { CreateDpaAgreementCoreTableFastInstanceCommand } from 'src/database/commands/upgrade-version-command/2-17/2-17-instance-command-fast-1801000020000-create-dpa-agreement-core-table';
 import { CreateApplicationTranslationCoreTableFastInstanceCommand } from 'src/database/commands/upgrade-version-command/2-17/2-17-instance-command-fast-1801000100000-create-application-translation-core-table';
 import { AddGalleryViewTypeFastInstanceCommand } from 'src/database/commands/upgrade-version-command/2-19/2-19-instance-command-fast-1802000000002-add-gallery-view-type';
+import { AddViewFieldRelationRollupFastInstanceCommand } from 'src/database/commands/upgrade-version-command/2-19/2-19-instance-command-fast-1802000000003-add-view-field-relation-rollup';
 
 export const INSTANCE_COMMANDS = [
   AddViewFieldGroupIdIndexOnViewFieldFastInstanceCommand,
@@ -168,4 +169,5 @@ export const INSTANCE_COMMANDS = [
   CreateDpaAgreementCoreTableFastInstanceCommand,
   CreateApplicationTranslationCoreTableFastInstanceCommand,
   AddGalleryViewTypeFastInstanceCommand,
+  AddViewFieldRelationRollupFastInstanceCommand,
 ];

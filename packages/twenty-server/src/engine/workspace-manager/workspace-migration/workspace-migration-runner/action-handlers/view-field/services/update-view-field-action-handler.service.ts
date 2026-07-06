@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
+import { type QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
+
 import { WorkspaceMigrationRunnerActionHandler } from 'src/engine/workspace-manager/workspace-migration/workspace-migration-runner/interfaces/workspace-migration-runner-action-handler-service.interface';
 
 import { findFlatEntityByUniversalIdentifierOrThrow } from 'src/engine/metadata-modules/flat-entity/utils/find-flat-entity-by-universal-identifier-or-throw.util';
@@ -72,7 +74,10 @@ export class UpdateViewFieldActionHandlerService extends WorkspaceMigrationRunne
     const viewFieldRepository =
       queryRunner.manager.getRepository<ViewFieldEntity>(ViewFieldEntity);
 
-    await viewFieldRepository.update({ id: entityId, workspaceId }, update);
+    await viewFieldRepository.update(
+      { id: entityId, workspaceId },
+      update as QueryDeepPartialEntity<ViewFieldEntity>,
+    );
   }
 
   async executeForWorkspaceSchema(
