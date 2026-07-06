@@ -1,3 +1,4 @@
+import { type FieldMetadataItem } from '@/object-metadata/types/FieldMetadataItem';
 import { type FieldMetadataItemRelation } from '@/object-metadata/types/FieldMetadataItemRelation';
 import { type ZodHelperLiteral } from '@/object-record/record-field/ui/types/ZodHelperLiteral';
 import { type ObjectRecord } from '@/object-record/types/ObjectRecord';
@@ -7,6 +8,7 @@ import {
   type AllowedAddressSubField,
   type FieldMetadataMultiItemSettings,
   type FileCategory,
+  type RelationRollupSettings,
 } from 'twenty-shared/types';
 import { type ThemeColor } from 'twenty-ui/theme';
 import { z } from 'zod';
@@ -199,6 +201,14 @@ export type FieldFilesMetadata = BaseFieldMetadata & {
   settings?: FieldMetadataMultiItemSettings | null;
 };
 
+export type FieldRelationRollupMetadata = BaseFieldMetadata & {
+  viewFieldId: string;
+  relationRollup: RelationRollupSettings;
+  relationFieldMetadataItem: FieldMetadataItem;
+  aggregateFieldMetadataItem?: FieldMetadataItem;
+  settings?: null;
+};
+
 export type FieldMetadata =
   | FieldBooleanMetadata
   | FieldCurrencyMetadata
@@ -216,6 +226,7 @@ export type FieldMetadata =
   | FieldRatingMetadata
   | FieldRelationMetadata
   | FieldMorphRelationMetadata
+  | FieldRelationRollupMetadata
   | FieldSelectMetadata
   | FieldMultiSelectMetadata
   | FieldTextMetadata

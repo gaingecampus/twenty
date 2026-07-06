@@ -1,3 +1,5 @@
+import { type RelationRollupSettings } from 'twenty-shared/types';
+
 import { type RecordBoardFieldDefinition } from '@/object-record/record-board/types/RecordBoardFieldDefinition';
 import { type FieldMetadata } from '@/object-record/record-field/ui/types/FieldMetadata';
 import { type AggregateOperations } from '@/object-record/record-table/constants/AggregateOperations';
@@ -13,6 +15,7 @@ export type ViewField = {
   size: number;
   aggregateOperation?: AggregateOperations | null;
   viewFieldGroupId?: string | null;
+  relationRollup?: RelationRollupSettings | null;
   definition?:
     | ColumnDefinition<FieldMetadata>
     | RecordBoardFieldDefinition<FieldMetadata>;

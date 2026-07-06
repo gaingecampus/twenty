@@ -164,6 +164,16 @@ describe('mapViewFieldsToColumnDefinitions', () => {
     const actualColumnDefinitions = mapViewFieldsToColumnDefinitions({
       columnDefinitions,
       viewFields,
+      objectMetadataItem: {
+        id: 'object-id',
+        nameSingular: 'company',
+        namePlural: 'companies',
+        fields: [
+          { id: '1', label: 'Field 1', name: 'field1', type: FieldMetadataType.TEXT },
+          { id: '2', label: 'Field 2', name: 'field2', type: FieldMetadataType.TEXT },
+          { id: '3', label: 'Field 3', name: 'field3', type: FieldMetadataType.TEXT },
+        ],
+      } as never,
     });
 
     expect(actualColumnDefinitions).toEqual(expectedColumnDefinitions);

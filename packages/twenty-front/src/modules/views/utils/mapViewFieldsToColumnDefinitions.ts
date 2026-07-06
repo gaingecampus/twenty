@@ -1,4 +1,6 @@
+import { type EnrichedObjectMetadataItem } from '@/object-metadata/types/EnrichedObjectMetadataItem';
 import { type FieldMetadata } from '@/object-record/record-field/ui/types/FieldMetadata';
+import { buildRelationRollupColumnDefinitionFromViewField } from '@/object-record/relation-rollup/utils/buildRelationRollupColumnDefinitionFromViewField';
 import { type ColumnDefinition } from '@/object-record/record-table/types/ColumnDefinition';
 import { mapArrayToObject } from '~/utils/array/mapArrayToObject';
 import { moveArrayItem } from '~/utils/array/moveArrayItem';
@@ -10,9 +12,13 @@ import { type ViewField } from '@/views/types/ViewField';
 export const mapViewFieldsToColumnDefinitions = ({
   columnDefinitions,
   viewFields,
+  objectMetadataItem,
+  objectMetadataItems = [objectMetadataItem],
 }: {
   columnDefinitions: ColumnDefinition<FieldMetadata>[];
   viewFields: ViewField[];
+  objectMetadataItem: EnrichedObjectMetadataItem;
+  objectMetadataItems?: EnrichedObjectMetadataItem[];
 }): ColumnDefinition<FieldMetadata>[] => {
   let labelIdentifierFieldMetadataId = '';
 
@@ -23,6 +29,40 @@ export const mapViewFieldsToColumnDefinitions = ({
 
   const columnDefinitionsFromViewFields = viewFields
     .map((viewField) => {
+      if (isDefined(viewField.relationRollup)) {
+        const relationFieldMetadataItem = objectMetadataItem.fields.find(
+          (field) => field.id === viewField.fieldMetadataId,
+        );
+
+        if (!isDefined(relationFieldMetadataItem)) {
+          return null;
+        }
+
+        const targetObjectMetadataItem = objectMetadataItems.find(
+          (objectMetadataItemToFind) =>
+            objectMetadataItemToFind.id ===
+            relationFieldMetadataItem.relation?.targetObjectMetadata.id,
+        );
+
+        const aggregateFieldMetadataItem = isDefined(
+          viewField.relationRollup.aggregateFieldMetadataUniversalIdentifier,
+        )
+          ? targetObjectMetadataItem?.fields.find(
+              (field) =>
+                field.universalIdentifier ===
+                viewField.relationRollup
+                  ?.aggregateFieldMetadataUniversalIdentifier,
+            )
+          : undefined;
+
+        return buildRelationRollupColumnDefinitionFromViewField({
+          viewField,
+          relationFieldMetadataItem,
+          aggregateFieldMetadataItem,
+          objectMetadataNameSingular: objectMetadataItem.nameSingular,
+        });
+      }
+
       const correspondingColumnDefinition =
         columnDefinitionsByFieldMetadataId[viewField.fieldMetadataId];
 
@@ -58,15 +98,12 @@ export const mapViewFieldsToColumnDefinitions = ({
     })
     .filter(isDefined);
 
-  // No label identifier set for this object
   if (!labelIdentifierFieldMetadataId) return columnDefinitionsFromViewFields;
 
   const labelIdentifierIndex = columnDefinitionsFromViewFields.findIndex(
     ({ fieldMetadataId }) => fieldMetadataId === labelIdentifierFieldMetadataId,
   );
 
-  // Label identifier field found in view fields
-  // => move it to the start of the list
   return moveArrayItem(columnDefinitionsFromViewFields, {
     fromIndex: labelIdentifierIndex,
     toIndex: 0,
