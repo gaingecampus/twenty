@@ -126,6 +126,7 @@ export const WorkflowEditActionFindRecords = ({
 
   const {
     fieldDefinitionByFieldMetadataItemId,
+    fieldDefinitionByViewFieldId,
     fieldMetadataItemByFieldMetadataItemId,
     labelIdentifierFieldMetadataItem,
     recordFieldByFieldMetadataItemId,
@@ -230,6 +231,7 @@ export const WorkflowEditActionFindRecords = ({
                 labelIdentifierFieldMetadataItem,
                 recordFieldByFieldMetadataItemId,
                 fieldDefinitionByFieldMetadataItemId,
+                fieldDefinitionByViewFieldId,
                 fieldMetadataItemByFieldMetadataItemId,
               }}
             >

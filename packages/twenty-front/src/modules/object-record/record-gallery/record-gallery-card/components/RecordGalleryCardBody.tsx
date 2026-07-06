@@ -13,12 +13,14 @@ import {
   type RecordUpdateHookParams,
 } from '@/object-record/record-field/ui/contexts/FieldContext';
 import { RecordFieldComponentInstanceContext } from '@/object-record/record-field/ui/states/contexts/RecordFieldComponentInstanceContext';
+import { getFieldDefinitionForRecordField } from '@/object-record/record-field/utils/getFieldDefinitionForRecordField';
 import { useRecordIndexContextOrThrow } from '@/object-record/record-index/contexts/RecordIndexContext';
 import { RecordInlineCell } from '@/object-record/record-inline-cell/components/RecordInlineCell';
 import { getRecordFieldInputInstanceId } from '@/object-record/utils/getRecordFieldInputId';
 import { useAtomComponentSelectorValue } from '@/ui/utilities/state/jotai/hooks/useAtomComponentSelectorValue';
 import { useSetAtomComponentState } from '@/ui/utilities/state/jotai/hooks/useSetAtomComponentState';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
+import { isDefined } from 'twenty-shared/utils';
 
 type RecordGalleryCardBodyProps = {
   recordId: string;
@@ -49,6 +51,7 @@ export const RecordGalleryCardBody = ({
   const {
     labelIdentifierFieldMetadataItem,
     fieldDefinitionByFieldMetadataItemId,
+    fieldDefinitionByViewFieldId,
     objectPermissionsByObjectMetadataId,
   } = useRecordIndexContextOrThrow();
 
@@ -76,11 +79,18 @@ export const RecordGalleryCardBody = ({
       padding={`0 ${themeCssVariables.spacing[1]} ${themeCssVariables.spacing[1]}`}
     >
       {visibleRecordFieldsExceptLabelIdentifier.map((recordField, index) => {
-        const correspondingFieldDefinition =
-          fieldDefinitionByFieldMetadataItemId[recordField.fieldMetadataItemId];
+        const correspondingFieldDefinition = getFieldDefinitionForRecordField({
+          recordField,
+          fieldDefinitionByViewFieldId,
+          fieldDefinitionByFieldMetadataItemId,
+        });
+
+        if (!isDefined(correspondingFieldDefinition)) {
+          return null;
+        }
 
         return (
-          <StopPropagationContainer key={recordField.fieldMetadataItemId}>
+          <StopPropagationContainer key={recordField.id}>
             <FieldContext.Provider
               value={{
                 recordId,

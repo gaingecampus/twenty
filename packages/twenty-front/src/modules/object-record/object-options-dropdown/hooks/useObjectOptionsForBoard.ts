@@ -13,8 +13,12 @@ import { recordIndexFieldDefinitionsState } from '@/object-record/record-index/s
 import { type ColumnDefinition } from '@/object-record/record-table/types/ColumnDefinition';
 import { useAtomComponentStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomComponentStateValue';
 import { useAtomState } from '@/ui/utilities/state/jotai/hooks/useAtomState';
+import { contextStoreCurrentViewIdComponentState } from '@/context-store/states/contextStoreCurrentViewIdComponentState';
 import { useSaveCurrentViewFields } from '@/views/hooks/useSaveCurrentViewFields';
-import { mapRecordFieldToViewField } from '@/views/utils/mapRecordFieldToViewField';
+import { useGetViewFromState } from '@/views/hooks/useGetViewFromState';
+import { mapRecordFieldToViewFieldFromCurrentView } from '@/views/utils/mapRecordFieldToViewFieldFromCurrentView';
+import { useAtomComponentStateCallbackState } from '@/ui/utilities/state/jotai/hooks/useAtomComponentStateCallbackState';
+import { useStore } from 'jotai';
 import { produce } from 'immer';
 import { findByProperty, isDefined } from 'twenty-shared/utils';
 import { v4 } from 'uuid';
@@ -35,6 +39,20 @@ export const useObjectOptionsForBoard = ({
     useAtomState(recordIndexFieldDefinitionsState);
 
   const { saveViewFields } = useSaveCurrentViewFields();
+  const store = useStore();
+  const { getViewFromState } = useGetViewFromState();
+  const currentViewIdCallbackState = useAtomComponentStateCallbackState(
+    contextStoreCurrentViewIdComponentState,
+  );
+
+  const getCurrentViewFields = useCallback(() => {
+    const currentViewId = store.get(currentViewIdCallbackState);
+    const currentView = isDefined(currentViewId)
+      ? getViewFromState(currentViewId)
+      : undefined;
+
+    return currentView?.viewFields ?? [];
+  }, [currentViewIdCallbackState, getViewFromState, store]);
 
   const { objectMetadataItem } = useObjectMetadataItem({
     objectNameSingular,
@@ -103,7 +121,12 @@ export const useObjectOptionsForBoard = ({
         toIndex: result.destination.index - 1,
       });
 
-      saveViewFields([mapRecordFieldToViewField(updatedRecordField)]);
+      saveViewFields([
+        mapRecordFieldToViewFieldFromCurrentView(
+          updatedRecordField,
+          getCurrentViewFields(),
+        ),
+      ]);
 
       const modifiedRecordIndexFieldDefinitions = produce(
         recordIndexFieldDefinitions,
@@ -127,6 +150,7 @@ export const useObjectOptionsForBoard = ({
       setRecordIndexFieldDefinitions,
       recordIndexFieldDefinitions,
       reorderVisibleRecordFields,
+      getCurrentViewFields,
     ],
   );
 
@@ -172,7 +196,12 @@ export const useObjectOptionsForBoard = ({
 
         upsertRecordField(recordFieldToUpsert);
 
-        saveViewFields([mapRecordFieldToViewField(recordFieldToUpsert)]);
+        saveViewFields([
+          mapRecordFieldToViewFieldFromCurrentView(
+            recordFieldToUpsert,
+            getCurrentViewFields(),
+          ),
+        ]);
 
         const correspondingAvailableColumnDefinition =
           availableColumnDefinitions.find(
@@ -211,7 +240,12 @@ export const useObjectOptionsForBoard = ({
           isVisible: shouldShowFieldMetadataItem,
         };
 
-        saveViewFields([mapRecordFieldToViewField(updatedRecordField)]);
+        saveViewFields([
+          mapRecordFieldToViewFieldFromCurrentView(
+            updatedRecordField,
+            getCurrentViewFields(),
+          ),
+        ]);
 
         const modifiedRecordIndexFieldDefinitions = produce(
           recordIndexFieldDefinitions,
@@ -239,6 +273,7 @@ export const useObjectOptionsForBoard = ({
       saveViewFields,
       recordIndexFieldDefinitions,
       availableColumnDefinitions,
+      getCurrentViewFields,
     ],
   );
 

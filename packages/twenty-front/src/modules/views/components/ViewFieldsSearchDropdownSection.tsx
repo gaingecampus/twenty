@@ -3,13 +3,12 @@ import { getLabelIdentifierFieldMetadataItem } from '@/object-metadata/utils/get
 import { useObjectOptionsForBoard } from '@/object-record/object-options-dropdown/hooks/useObjectOptionsForBoard';
 import { ObjectOptionsDropdownContext } from '@/object-record/object-options-dropdown/states/contexts/ObjectOptionsDropdownContext';
 import { useChangeRecordFieldVisibility } from '@/object-record/record-field/hooks/useChangeRecordFieldVisibility';
-import { visibleRecordFieldsComponentSelector } from '@/object-record/record-field/states/visibleRecordFieldsComponentSelector';
+import { useTableColumnPickerItems } from '@/object-record/record-table/hooks/useTableColumnPickerItems';
 import { DropdownMenuItemsContainer } from '@/ui/layout/dropdown/components/DropdownMenuItemsContainer';
-import { useAtomComponentSelectorValue } from '@/ui/utilities/state/jotai/hooks/useAtomComponentSelectorValue';
 import { ViewType } from '@/views/types/ViewType';
 import { useLingui } from '@lingui/react/macro';
-import { useContext } from 'react';
-import { IconEye, IconEyeOff, useIcons } from 'twenty-ui/icon';
+import { useContext, useMemo } from 'react';
+import { IconEye, IconEyeOff, IconSum, useIcons } from 'twenty-ui/icon';
 import { MenuItem } from 'twenty-ui/navigation';
 
 type ViewFieldsSearchDropdownSectionProps = {
@@ -40,59 +39,91 @@ export const ViewFieldsSearchDropdownSection = ({
       ? handleBoardFieldVisibilityChange
       : changeRecordFieldVisibility;
 
+  const {
+    allRollupViewFields,
+    isRegularColumnVisible,
+  } = useTableColumnPickerItems({
+    objectMetadataItem,
+    recordIndexId,
+  });
+
   const { activeFieldMetadataItems } = useActiveFieldMetadataItems({
     objectMetadataItem,
   });
 
-  const visibleRecordFields = useAtomComponentSelectorValue(
-    visibleRecordFieldsComponentSelector,
-  );
-
-  const visibleFieldIds = new Set(
-    visibleRecordFields.map((recordField) => recordField.fieldMetadataItemId),
-  );
-
   const fieldMetadataItemLabelIdentifier =
     getLabelIdentifierFieldMetadataItem(objectMetadataItem);
 
-  const filteredFields = activeFieldMetadataItems.filter(
-    (fieldMetadataItem) => {
-      return fieldMetadataItem.label
-        .toLowerCase()
-        .includes(searchInput.toLowerCase());
-    },
+  const normalizedSearch = searchInput.toLowerCase();
+
+  const filteredRegularFields = activeFieldMetadataItems.filter(
+    (fieldMetadataItem) =>
+      fieldMetadataItem.label.toLowerCase().includes(normalizedSearch),
   );
+
+  const filteredRollupFields = allRollupViewFields.filter((item) =>
+    item.label.toLowerCase().includes(normalizedSearch),
+  );
+
+  const searchResultItems = useMemo(() => {
+    const regularItems = filteredRegularFields.map((fieldMetadataItem) => ({
+      key: `regular-${fieldMetadataItem.id}`,
+      label: fieldMetadataItem.label,
+      isVisible: isRegularColumnVisible(fieldMetadataItem.id),
+      isLabelIdentifier:
+        fieldMetadataItem.id === fieldMetadataItemLabelIdentifier?.id,
+      LeftIcon: getIcon(fieldMetadataItem.icon),
+      onToggle: () =>
+        handleChangeFieldVisibility({
+          fieldMetadataId: fieldMetadataItem.id,
+          isVisible: !isRegularColumnVisible(fieldMetadataItem.id),
+        }),
+    }));
+
+    const rollupItems = filteredRollupFields.map((item) => ({
+      key: `rollup-${item.recordField.id}`,
+      label: item.label,
+      isVisible: item.recordField.isVisible,
+      isLabelIdentifier: false,
+      LeftIcon: IconSum,
+      onToggle: () =>
+        handleChangeFieldVisibility({
+          fieldMetadataId: item.fieldMetadataItem.id,
+          viewFieldId: item.recordField.id,
+          isVisible: !item.recordField.isVisible,
+        }),
+    }));
+
+    return [...rollupItems, ...regularItems];
+  }, [
+    fieldMetadataItemLabelIdentifier?.id,
+    filteredRegularFields,
+    filteredRollupFields,
+    getIcon,
+    handleChangeFieldVisibility,
+    isRegularColumnVisible,
+  ]);
 
   return (
     <DropdownMenuItemsContainer>
-      {filteredFields.length > 0 ? (
-        filteredFields.map((fieldMetadataItem) => {
-          const isVisible = visibleFieldIds.has(fieldMetadataItem.id);
-          const isLabelIdentifier =
-            fieldMetadataItem.id === fieldMetadataItemLabelIdentifier?.id;
-
-          return (
-            <MenuItem
-              key={fieldMetadataItem.id}
-              LeftIcon={getIcon(fieldMetadataItem.icon)}
-              iconButtons={
-                isLabelIdentifier
-                  ? undefined
-                  : [
-                      {
-                        Icon: isVisible ? IconEyeOff : IconEye,
-                        onClick: () =>
-                          handleChangeFieldVisibility({
-                            fieldMetadataId: fieldMetadataItem.id,
-                            isVisible: !isVisible,
-                          }),
-                      },
-                    ]
-              }
-              text={fieldMetadataItem.label}
-            />
-          );
-        })
+      {searchResultItems.length > 0 ? (
+        searchResultItems.map((item) => (
+          <MenuItem
+            key={item.key}
+            LeftIcon={item.LeftIcon}
+            iconButtons={
+              item.isLabelIdentifier
+                ? undefined
+                : [
+                    {
+                      Icon: item.isVisible ? IconEyeOff : IconEye,
+                      onClick: item.onToggle,
+                    },
+                  ]
+            }
+            text={item.label}
+          />
+        ))
       ) : (
         <MenuItem disabled text={t`No results`} accent="placeholder" />
       )}

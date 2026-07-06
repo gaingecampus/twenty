@@ -38,8 +38,8 @@ export const RecordTableHeaderDnd = () => {
 
       {isDefined(firstScrollableRecordField) && (
         <RecordTableHeaderSortableCell
-          key={firstScrollableRecordField.fieldMetadataItemId}
-          id={firstScrollableRecordField.fieldMetadataItemId}
+          key={firstScrollableRecordField.id}
+          id={firstScrollableRecordField.id}
           index={0}
           group={RECORD_TABLE_HEADER_DROPPABLE_ID}
           disabled={isRecordTableColumnHeadersReadOnly}
@@ -51,7 +51,7 @@ export const RecordTableHeaderDnd = () => {
       )}
 
       {recordFieldsWithoutFirstTwo.map((recordField, index) => (
-        <React.Fragment key={recordField.fieldMetadataItemId}>
+        <React.Fragment key={recordField.id}>
           <RecordTableHeaderDroppableSlot
             droppableId={RECORD_TABLE_HEADER_DROPPABLE_ID}
             index={index + 1}
@@ -60,13 +60,12 @@ export const RecordTableHeaderDnd = () => {
             <RecordTableHeaderDropTarget index={index + 1} compact />
           </RecordTableHeaderDroppableSlot>
           <RecordTableHeaderSortableCell
-            id={recordField.fieldMetadataItemId}
+            id={recordField.id}
             index={index + 1}
             group={RECORD_TABLE_HEADER_DROPPABLE_ID}
             disabled={isRecordTableColumnHeadersReadOnly}
           >
             <RecordTableHeaderCell
-              key={recordField.fieldMetadataItemId}
               recordField={recordField}
               recordFieldIndex={index + 2}
             />

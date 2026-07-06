@@ -83,6 +83,7 @@ const meta: Meta<typeof RecordCalendarMonth> = {
 
       const {
         fieldDefinitionByFieldMetadataItemId,
+        fieldDefinitionByViewFieldId,
         fieldMetadataItemByFieldMetadataItemId,
         labelIdentifierFieldMetadataItem,
         recordFieldByFieldMetadataItemId,
@@ -109,6 +110,7 @@ const meta: Meta<typeof RecordCalendarMonth> = {
             labelIdentifierFieldMetadataItem,
             recordFieldByFieldMetadataItemId,
             fieldDefinitionByFieldMetadataItemId,
+            fieldDefinitionByViewFieldId,
             fieldMetadataItemByFieldMetadataItemId,
           }}
         >

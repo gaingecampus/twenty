@@ -160,6 +160,7 @@ const meta: Meta = {
             recordIndexId: 'recordIndexId',
             viewBarInstanceId: 'recordIndexId',
             fieldDefinitionByFieldMetadataItemId,
+            fieldDefinitionByViewFieldId: {},
             fieldMetadataItemByFieldMetadataItemId,
             labelIdentifierFieldMetadataItem,
             recordFieldByFieldMetadataItemId,

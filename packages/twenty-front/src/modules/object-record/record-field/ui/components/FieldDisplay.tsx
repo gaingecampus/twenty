@@ -26,6 +26,8 @@ import { MorphRelationManyToOneFieldDisplay } from '@/object-record/record-field
 import { MorphRelationOneToManyFieldDisplay } from '@/object-record/record-field/ui/meta-types/display/components/MorphRelationOneToManyFieldDisplay';
 import { isFieldMorphRelationManyToOne } from '@/object-record/record-field/ui/types/guards/isFieldMorphRelationManyToOne';
 import { isFieldMorphRelationOneToMany } from '@/object-record/record-field/ui/types/guards/isFieldMorphRelationOneToMany';
+import { RelationRollupFieldDisplay } from '@/object-record/record-field/ui/meta-types/display/components/RelationRollupFieldDisplay';
+import { isFieldRelationRollup } from '@/object-record/record-field/ui/types/guards/isFieldRelationRollup';
 import { isFieldRelationManyToOne } from '@/object-record/record-field/ui/types/guards/isFieldRelationManyToOne';
 import { isFieldRelationOneToMany } from '@/object-record/record-field/ui/types/guards/isFieldRelationOneToMany';
 import { isDefined } from 'twenty-shared/utils';
@@ -74,6 +76,8 @@ export const FieldDisplay = () => {
 
   return isChipDisplay ? (
     <ChipFieldDisplay />
+  ) : isFieldRelationRollup(fieldDefinition) ? (
+    <RelationRollupFieldDisplay />
   ) : isFieldRelationManyToOne(fieldDefinition) ? (
     <RelationToOneFieldDisplay />
   ) : isFieldRelationOneToMany(fieldDefinition) ? (

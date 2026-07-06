@@ -27,7 +27,6 @@ import { useStore } from 'jotai';
 import { useCallback, useState } from 'react';
 import {
   findById,
-  findByProperty,
   throwIfNotDefined,
 } from 'twenty-shared/utils';
 
@@ -52,7 +51,7 @@ export const useResizeTableHeader = () => {
     useAtomComponentState(resizedFieldMetadataIdComponentState);
 
   const recordField = visibleRecordFields.find(
-    findByProperty('fieldMetadataItemId', resizedFieldMetadataId),
+    (visibleRecordField) => visibleRecordField.id === resizedFieldMetadataId,
   );
 
   const { resetTableRowSelection } = useResetTableRowSelection();
@@ -180,9 +179,13 @@ export const useResizeTableHeader = () => {
     setResizedFieldMetadataId(null);
 
     if (nextWidth !== recordField.size) {
-      const updatedRecordField = updateRecordField(resizedFieldMetadataId, {
-        size: nextWidth,
-      });
+      const updatedRecordField = updateRecordField(
+        recordField.fieldMetadataItemId,
+        {
+          size: nextWidth,
+        },
+        recordField.id,
+      );
 
       saveRecordFields([updatedRecordField]);
     }

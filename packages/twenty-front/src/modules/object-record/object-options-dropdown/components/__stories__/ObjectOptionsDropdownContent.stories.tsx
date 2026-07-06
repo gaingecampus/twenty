@@ -79,6 +79,7 @@ const createStory = (contentId: ObjectOptionsContentId | null): Story => ({
 
       const {
         fieldDefinitionByFieldMetadataItemId,
+        fieldDefinitionByViewFieldId,
         fieldMetadataItemByFieldMetadataItemId,
         labelIdentifierFieldMetadataItem,
         recordFieldByFieldMetadataItemId,
@@ -99,6 +100,7 @@ const createStory = (contentId: ObjectOptionsContentId | null): Story => ({
             recordIndexId: instanceId,
             viewBarInstanceId: instanceId,
             fieldDefinitionByFieldMetadataItemId,
+            fieldDefinitionByViewFieldId,
             fieldMetadataItemByFieldMetadataItemId,
             labelIdentifierFieldMetadataItem,
             recordFieldByFieldMetadataItemId,

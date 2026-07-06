@@ -8,8 +8,10 @@ import { RECORD_TABLE_COLUMN_CHECKBOX_WIDTH } from '@/object-record/record-table
 import { RECORD_TABLE_COLUMN_DRAG_AND_DROP_WIDTH } from '@/object-record/record-table/constants/RecordTableColumnDragAndDropWidth';
 import { useReorderVisibleRecordFields } from '@/object-record/record-field/hooks/useReorderVisibleRecordFields';
 import { resolveRecordTableHeaderDrop } from '@/object-record/record-table/record-table-header/dnd/utils/resolveRecordTableHeaderDrop';
+import { contextStoreCurrentViewIdComponentState } from '@/context-store/states/contextStoreCurrentViewIdComponentState';
 import { useSaveCurrentViewFields } from '@/views/hooks/useSaveCurrentViewFields';
-import { mapRecordFieldToViewField } from '@/views/utils/mapRecordFieldToViewField';
+import { useGetViewFromState } from '@/views/hooks/useGetViewFromState';
+import { mapRecordFieldToViewFieldFromCurrentView } from '@/views/utils/mapRecordFieldToViewFieldFromCurrentView';
 import { useAtomComponentStateCallbackState } from '@/ui/utilities/state/jotai/hooks/useAtomComponentStateCallbackState';
 import { isRecordTableHeaderDropProcessingComponentState } from '@/object-record/record-table/record-table-header/states/isRecordTableHeaderDropProcessingComponentState';
 import { useDragSelect } from '@/ui/utilities/drag-select/hooks/useDragSelect';
@@ -61,6 +63,10 @@ export const useRecordTableHeaderDndKit = (): {
   const { reorderVisibleRecordFields } =
     useReorderVisibleRecordFields(recordTableId);
   const { saveViewFields } = useSaveCurrentViewFields();
+  const { getViewFromState } = useGetViewFromState();
+  const currentViewIdCallbackState = useAtomComponentStateCallbackState(
+    contextStoreCurrentViewIdComponentState,
+  );
   const { setDragSelectionStartEnabled } = useDragSelect();
   const { getScrollWrapperElement } = useScrollWrapperHTMLElement();
 
@@ -179,7 +185,17 @@ export const useRecordTableHeaderDndKit = (): {
       toIndex: resolvedDrop.destinationIndex + 1,
     });
 
-    saveViewFields([mapRecordFieldToViewField(updatedRecordField)]);
+    const currentViewId = store.get(currentViewIdCallbackState);
+    const currentView = isDefined(currentViewId)
+      ? getViewFromState(currentViewId)
+      : undefined;
+
+    saveViewFields([
+      mapRecordFieldToViewFieldFromCurrentView(
+        updatedRecordField,
+        currentView?.viewFields ?? [],
+      ),
+    ]);
   };
 
   const contextValues: RecordTableHeaderDndKitContextValues = {

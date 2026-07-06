@@ -12,6 +12,7 @@ import { RecordIndexContainerContextStoreNumberOfSelectedRecordsEffect } from '@
 import { RecordIndexEmptyStateNotShared } from '@/object-record/record-index/components/RecordIndexEmptyStateNotShared';
 import { RecordIndexLoadBaseOnContextStoreEffect } from '@/object-record/record-index/components/RecordIndexLoadBaseOnContextStoreEffect';
 import { RecordIndexPageHeader } from '@/object-record/record-index/components/RecordIndexPageHeader';
+import { RecordIndexRelationRollupFetchEffect } from '@/object-record/relation-rollup/components/RecordIndexRelationRollupFetchEffect';
 import { RecordIndexViewFieldsSSESyncEffect } from '@/object-record/record-index/components/RecordIndexViewFieldsSSESyncEffect';
 import { useHandleIndexIdentifierClick } from '@/object-record/record-index/hooks/useHandleIndexIdentifierClick';
 import { useRecordIndexFieldMetadataDerivedStates } from '@/object-record/record-index/hooks/useRecordIndexFieldMetadataDerivedStates';
@@ -56,6 +57,7 @@ export const RecordIndexContainerGater = () => {
 
   const {
     fieldDefinitionByFieldMetadataItemId,
+    fieldDefinitionByViewFieldId,
     fieldMetadataItemByFieldMetadataItemId,
     labelIdentifierFieldMetadataItem,
     recordFieldByFieldMetadataItemId,
@@ -80,6 +82,7 @@ export const RecordIndexContainerGater = () => {
           labelIdentifierFieldMetadataItem,
           fieldMetadataItemByFieldMetadataItemId,
           fieldDefinitionByFieldMetadataItemId,
+          fieldDefinitionByViewFieldId,
         }}
       >
         <ViewComponentInstanceContext.Provider
@@ -117,6 +120,7 @@ export const RecordIndexContainerGater = () => {
           </RecordComponentInstanceContextsWrapper>
           <RecordIndexLoadBaseOnContextStoreEffect />
           <RecordIndexViewFieldsSSESyncEffect />
+          <RecordIndexRelationRollupFetchEffect />
         </ViewComponentInstanceContext.Provider>
       </RecordIndexContextProvider>
     </>

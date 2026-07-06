@@ -10,7 +10,7 @@ import { ViewFieldsVisibleDropdownSection } from '@/views/components/ViewFieldsV
 import { useLingui } from '@lingui/react/macro';
 import { isNonEmptyString } from '@sniptt/guards';
 import { useState } from 'react';
-import { IconChevronLeft, IconEyeOff } from 'twenty-ui/icon';
+import { IconChevronLeft, IconSum, IconEyeOff } from 'twenty-ui/icon';
 import { MenuItemNavigate } from 'twenty-ui/navigation';
 
 export const ObjectOptionsDropdownFieldsContent = () => {
@@ -45,6 +45,11 @@ export const ObjectOptionsDropdownFieldsContent = () => {
           <ViewFieldsVisibleDropdownSection />
           <DropdownMenuSeparator />
           <DropdownMenuItemsContainer scrollable={false}>
+            <MenuItemNavigate
+              onClick={() => onContentChange('addRelationRollupColumn')}
+              LeftIcon={IconSum}
+              text={t`Add aggregate column`}
+            />
             <MenuItemNavigate
               onClick={() => onContentChange('hiddenFields')}
               LeftIcon={IconEyeOff}

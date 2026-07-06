@@ -4,6 +4,8 @@ import { useContext } from 'react';
 import { fieldMetadataItemByIdSelector } from '@/object-metadata/states/fieldMetadataItemByIdSelector';
 import { isFieldMetadataItemLabelIdentifierSelector } from '@/object-metadata/states/isFieldMetadataItemLabelIdentifierSelector';
 import { type RecordField } from '@/object-record/record-field/types/RecordField';
+import { getFieldDefinitionForRecordField } from '@/object-record/record-field/utils/getFieldDefinitionForRecordField';
+import { useRecordIndexContextOrThrow } from '@/object-record/record-index/contexts/RecordIndexContext';
 import { shouldCompactRecordTableFirstColumnComponentState } from '@/object-record/record-table/states/shouldCompactRecordTableFirstColumnComponentState';
 import { useAtomComponentStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomComponentStateValue';
 import { useAtomFamilySelectorValue } from '@/ui/utilities/state/jotai/hooks/useAtomFamilySelectorValue';
@@ -54,6 +56,17 @@ export const RecordTableColumnHead = ({
 }: RecordTableColumnHeadProps) => {
   const { theme } = useContext(ThemeContext);
 
+  const {
+    fieldDefinitionByFieldMetadataItemId,
+    fieldDefinitionByViewFieldId,
+  } = useRecordIndexContextOrThrow();
+
+  const fieldDefinition = getFieldDefinitionForRecordField({
+    recordField,
+    fieldDefinitionByViewFieldId,
+    fieldDefinitionByFieldMetadataItemId,
+  });
+
   const correspondingFieldMetadataItem = useAtomFamilySelectorValue(
     fieldMetadataItemByIdSelector,
     { fieldMetadataItemId: recordField.fieldMetadataItemId },
@@ -61,7 +74,8 @@ export const RecordTableColumnHead = ({
 
   const { getIcon } = useIcons();
   const Icon = getIcon(
-    correspondingFieldMetadataItem.foundFieldMetadataItem?.icon,
+    fieldDefinition?.iconName ??
+      correspondingFieldMetadataItem.foundFieldMetadataItem?.icon,
   );
 
   const isLabelIdentifier = useAtomFamilySelectorValue(
@@ -82,7 +96,8 @@ export const RecordTableColumnHead = ({
         <Icon size={theme.icon.size.md} />
       </StyledIcon>
       <StyledText>
-        {correspondingFieldMetadataItem.foundFieldMetadataItem?.label}
+        {fieldDefinition?.label ??
+          correspondingFieldMetadataItem.foundFieldMetadataItem?.label}
       </StyledText>
     </StyledTitle>
   );

@@ -90,7 +90,7 @@ export const RecordTableHeaderCell = ({
         'header-cell',
         getRecordTableColumnFieldWidthClassName(recordFieldIndex),
       )}
-      key={recordField.fieldMetadataItemId}
+      key={recordField.id}
       onPointerCancel={handlePointerCancel}
       onPointerDown={handlePointerDown}
       onPointerUp={handlePointerUp}

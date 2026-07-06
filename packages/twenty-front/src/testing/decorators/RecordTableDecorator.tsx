@@ -167,6 +167,7 @@ const InternalTableContextProviders = ({
         labelIdentifierFieldMetadataItem,
         recordFieldByFieldMetadataItemId,
         fieldDefinitionByFieldMetadataItemId,
+        fieldDefinitionByViewFieldId: {},
         fieldMetadataItemByFieldMetadataItemId,
       }}
     >

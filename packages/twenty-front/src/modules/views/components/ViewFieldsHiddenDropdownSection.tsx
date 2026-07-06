@@ -1,13 +1,11 @@
-import { useActiveFieldMetadataItems } from '@/object-metadata/hooks/useActiveFieldMetadataItems';
 import { useObjectOptionsForBoard } from '@/object-record/object-options-dropdown/hooks/useObjectOptionsForBoard';
 import { ObjectOptionsDropdownContext } from '@/object-record/object-options-dropdown/states/contexts/ObjectOptionsDropdownContext';
 import { useChangeRecordFieldVisibility } from '@/object-record/record-field/hooks/useChangeRecordFieldVisibility';
-import { currentRecordFieldsComponentState } from '@/object-record/record-field/states/currentRecordFieldsComponentState';
+import { useTableColumnPickerItems } from '@/object-record/record-table/hooks/useTableColumnPickerItems';
 import { DropdownMenuItemsContainer } from '@/ui/layout/dropdown/components/DropdownMenuItemsContainer';
-import { useAtomComponentStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomComponentStateValue';
 import { ViewType } from '@/views/types/ViewType';
 import { useContext } from 'react';
-import { IconEye, useIcons } from 'twenty-ui/icon';
+import { IconEye, IconSum, useIcons } from 'twenty-ui/icon';
 import { MenuItem } from 'twenty-ui/navigation';
 
 export const ViewFieldsHiddenDropdownSection = () => {
@@ -29,50 +27,65 @@ export const ViewFieldsHiddenDropdownSection = () => {
       ? handleBoardFieldVisibilityChange
       : changeRecordFieldVisibility;
 
-  const currentRecordFields = useAtomComponentStateValue(
-    currentRecordFieldsComponentState,
-  );
-
-  const visibleRecordFields = currentRecordFields.filter(
-    (recordFieldToFilter) => recordFieldToFilter.isVisible === true,
-  );
-
-  const { activeFieldMetadataItems } = useActiveFieldMetadataItems({
+  const { hiddenViewFields, hiddenRegularFields } = useTableColumnPickerItems({
     objectMetadataItem,
+    recordIndexId,
   });
 
-  const availableFieldMetadataItemsToShow = activeFieldMetadataItems.filter(
-    (fieldMetadataItemToFilter) =>
-      !visibleRecordFields
-        .map((recordField) => recordField.fieldMetadataItemId)
-        .includes(fieldMetadataItemToFilter.id),
-  );
-
   const { getIcon } = useIcons();
+
+  const hasHiddenItems =
+    hiddenViewFields.length > 0 || hiddenRegularFields.length > 0;
 
   return (
     <>
       <DropdownMenuItemsContainer>
-        {availableFieldMetadataItemsToShow.length > 0 &&
-          availableFieldMetadataItemsToShow.map((fieldMetadataItem) => {
-            return (
-              <MenuItem
-                key={fieldMetadataItem.id}
-                LeftIcon={getIcon(fieldMetadataItem.icon)}
-                iconButtons={[
-                  {
-                    Icon: IconEye,
-                    onClick: () =>
-                      handleChangeFieldVisibility({
-                        fieldMetadataId: fieldMetadataItem.id,
-                        isVisible: true,
-                      }),
-                  },
-                ]}
-                text={fieldMetadataItem.label}
-              />
-            );
-          })}
+        {hasHiddenItems &&
+          hiddenViewFields.map((item) => (
+            <MenuItem
+              key={item.recordField.id}
+              LeftIcon={
+                item.isRollup ? IconSum : getIcon(item.fieldMetadataItem.icon)
+              }
+              onClick={() =>
+                handleChangeFieldVisibility({
+                  fieldMetadataId: item.fieldMetadataItem.id,
+                  viewFieldId: item.recordField.id,
+                  isVisible: true,
+                })
+              }
+              iconButtons={[
+                {
+                  Icon: IconEye,
+                  onClick: () =>
+                    handleChangeFieldVisibility({
+                      fieldMetadataId: item.fieldMetadataItem.id,
+                      viewFieldId: item.recordField.id,
+                      isVisible: true,
+                    }),
+                },
+              ]}
+              text={item.label}
+            />
+          ))}
+        {hasHiddenItems &&
+          hiddenRegularFields.map((fieldMetadataItem) => (
+            <MenuItem
+              key={fieldMetadataItem.id}
+              LeftIcon={getIcon(fieldMetadataItem.icon)}
+              iconButtons={[
+                {
+                  Icon: IconEye,
+                  onClick: () =>
+                    handleChangeFieldVisibility({
+                      fieldMetadataId: fieldMetadataItem.id,
+                      isVisible: true,
+                    }),
+                },
+              ]}
+              text={fieldMetadataItem.label}
+            />
+          ))}
       </DropdownMenuItemsContainer>
     </>
   );

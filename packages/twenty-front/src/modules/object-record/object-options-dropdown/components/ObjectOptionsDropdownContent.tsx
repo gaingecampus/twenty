@@ -1,4 +1,5 @@
 import { ObjectOptionsDropdownAddRecordGroupContent } from '@/object-record/object-options-dropdown/components/ObjectOptionsDropdownAddRecordGroupContent';
+import { ObjectOptionsDropdownAddRelationRollupColumnContent } from '@/object-record/object-options-dropdown/components/ObjectOptionsDropdownAddRelationRollupColumnContent';
 import { ObjectOptionsDropdownCalendarFieldsContent } from '@/object-record/object-options-dropdown/components/ObjectOptionsDropdownCalendarFieldsContent';
 import { ObjectOptionsDropdownCalendarViewContent } from '@/object-record/object-options-dropdown/components/ObjectOptionsDropdownCalendarViewContent';
 import { ObjectOptionsDropdownFieldsContent } from '@/object-record/object-options-dropdown/components/ObjectOptionsDropdownFieldsContent';
@@ -41,6 +42,8 @@ export const ObjectOptionsDropdownContent = () => {
       return <ObjectOptionsDropdownCalendarFieldsContent />;
     case 'visibility':
       return <ObjectOptionsDropdownVisibilityContent />;
+    case 'addRelationRollupColumn':
+      return <ObjectOptionsDropdownAddRelationRollupColumnContent />;
     default:
       return <ObjectOptionsDropdownMenuContent />;
   }

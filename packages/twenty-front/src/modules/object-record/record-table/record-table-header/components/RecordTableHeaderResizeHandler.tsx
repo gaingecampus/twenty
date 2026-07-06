@@ -27,14 +27,13 @@ export const RecordTableHeaderResizeHandler = ({
   const [resizedFieldMetadataId, setResizedFieldMetadataId] =
     useAtomComponentState(resizedFieldMetadataIdComponentState);
 
-  const isResizing =
-    recordField?.fieldMetadataItemId === resizedFieldMetadataId;
+  const isResizing = recordField?.id === resizedFieldMetadataId;
 
   const { setDragSelectionStartEnabled } = useDragSelect();
 
   const handlePointerDown = () => {
     setDragSelectionStartEnabled(false);
-    setResizedFieldMetadataId(recordField?.fieldMetadataItemId);
+    setResizedFieldMetadataId(recordField?.id);
   };
 
   return (

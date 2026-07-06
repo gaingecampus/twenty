@@ -22,12 +22,15 @@ import {
   IconEyeOff,
   IconFilter,
   IconSortDescending,
+  IconSum,
 } from 'twenty-ui/icon';
 import { MenuItem } from 'twenty-ui/navigation';
 
 export type RecordTableColumnHeadDropdownMenuProps = {
   recordField: RecordField;
   objectMetadataId: string;
+  isRelationRollupColumn?: boolean;
+  onEditAggregateColumn?: () => void;
 };
 
 const StyledDropdownMenuItemsContainerWrapper = styled.div`
@@ -37,6 +40,8 @@ const StyledDropdownMenuItemsContainerWrapper = styled.div`
 export const RecordTableColumnHeadDropdownMenu = ({
   recordField,
   objectMetadataId,
+  isRelationRollupColumn = false,
+  onEditAggregateColumn,
 }: RecordTableColumnHeadDropdownMenuProps) => {
   const { t } = useLingui();
 
@@ -53,15 +58,12 @@ export const RecordTableColumnHeadDropdownMenu = ({
   const secondVisibleRecordField = visibleRecordFields[1];
   const canMove = isLabelIdentifier !== true;
   const canMoveLeft =
-    recordField.fieldMetadataItemId !==
-      secondVisibleRecordField?.fieldMetadataItemId && canMove;
+    recordField.id !== secondVisibleRecordField?.id && canMove;
 
   const lastVisibleRecordField =
     visibleRecordFields[visibleRecordFields.length - 1];
 
-  const canMoveRight =
-    recordField.fieldMetadataItemId !==
-      lastVisibleRecordField?.fieldMetadataItemId && canMove;
+  const canMoveRight = recordField.id !== lastVisibleRecordField?.id && canMove;
 
   const { recordTableId } = useRecordTableContextOrThrow();
 
@@ -72,7 +74,7 @@ export const RecordTableColumnHeadDropdownMenu = ({
   const { changeRecordFieldVisibility } =
     useChangeRecordFieldVisibility(recordTableId);
 
-  const dropdownId = recordField.fieldMetadataItemId + '-header';
+  const dropdownId = recordField.id + '-header';
 
   const { closeDropdown } = useCloseDropdown();
 
@@ -85,19 +87,20 @@ export const RecordTableColumnHeadDropdownMenu = ({
   const handleColumnMoveLeft = () => {
     if (!canMoveLeft) return;
 
-    moveTableColumn('left', recordField.fieldMetadataItemId);
+    moveTableColumn('left', recordField.id);
   };
 
   const handleColumnMoveRight = () => {
     if (!canMoveRight) return;
 
-    moveTableColumn('right', recordField.fieldMetadataItemId);
+    moveTableColumn('right', recordField.id);
   };
 
   const handleColumnVisibility = async () => {
     closeDropdownAndToggleScroll();
     await changeRecordFieldVisibility({
       fieldMetadataId: recordField.fieldMetadataItemId,
+      viewFieldId: recordField.id,
       isVisible: false,
     });
   };
@@ -134,14 +137,21 @@ export const RecordTableColumnHeadDropdownMenu = ({
     <DropdownContent>
       <StyledDropdownMenuItemsContainerWrapper>
         <DropdownMenuItemsContainer>
-          {isFilterable && (
+          {isRelationRollupColumn && (
+            <MenuItem
+              LeftIcon={IconSum}
+              onClick={() => onEditAggregateColumn?.()}
+              text={t`Edit aggregate column`}
+            />
+          )}
+          {isFilterable && !isRelationRollupColumn && (
             <MenuItem
               LeftIcon={IconFilter}
               onClick={handleFilterClick}
               text={t`Filter`}
             />
           )}
-          {isSortable && (
+          {isSortable && !isRelationRollupColumn && (
             <MenuItem
               LeftIcon={IconSortDescending}
               onClick={handleSortClick}

@@ -1,13 +1,13 @@
 import { useCallback, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 
-import { useActiveFieldMetadataItems } from '@/object-metadata/hooks/useActiveFieldMetadataItems';
-import { type FieldMetadataItem } from '@/object-metadata/types/FieldMetadataItem';
 import { useChangeRecordFieldVisibility } from '@/object-record/record-field/hooks/useChangeRecordFieldVisibility';
-import { type FieldMetadata } from '@/object-record/record-field/ui/types/FieldMetadata';
 import { useRecordTableContextOrThrow } from '@/object-record/record-table/contexts/RecordTableContext';
-import { type ColumnDefinition } from '@/object-record/record-table/types/ColumnDefinition';
+import { useTableColumnPickerItems } from '@/object-record/record-table/hooks/useTableColumnPickerItems';
+import { RelationRollupColumnPickerContent } from '@/object-record/relation-rollup/components/RelationRollupColumnPickerContent';
 import { DropdownContent } from '@/ui/layout/dropdown/components/DropdownContent';
+import { DropdownMenuHeader } from '@/ui/layout/dropdown/components/DropdownMenuHeader/DropdownMenuHeader';
+import { DropdownMenuHeaderLeftComponent } from '@/ui/layout/dropdown/components/DropdownMenuHeader/internal/DropdownMenuHeaderLeftComponent';
 import { DropdownMenuItemsContainer } from '@/ui/layout/dropdown/components/DropdownMenuItemsContainer';
 import { DropdownMenuSearchInput } from '@/ui/layout/dropdown/components/DropdownMenuSearchInput';
 import { DropdownMenuSeparator } from '@/ui/layout/dropdown/components/DropdownMenuSeparator';
@@ -17,15 +17,17 @@ import { useSetAtomState } from '@/ui/utilities/state/jotai/hooks/useSetAtomStat
 import { useLingui } from '@lingui/react/macro';
 import { SettingsPath } from 'twenty-shared/types';
 import { getSettingsPath } from 'twenty-shared/utils';
-import { IconSettings, useIcons } from 'twenty-ui/icon';
-import { MenuItem, UndecoratedLink } from 'twenty-ui/navigation';
+import { IconChevronLeft, IconSettings, IconSum, useIcons } from 'twenty-ui/icon';
+import { MenuItem, MenuItemNavigate, UndecoratedLink } from 'twenty-ui/navigation';
+
+type PlusButtonView = 'main' | 'addAggregateColumn';
 
 export const RecordTableHeaderPlusButtonContent = () => {
   const { t } = useLingui();
   const [searchInput, setSearchInput] = useState('');
+  const [currentView, setCurrentView] = useState<PlusButtonView>('main');
 
-  const { objectMetadataItem, recordTableId, visibleRecordFields } =
-    useRecordTableContextOrThrow();
+  const { objectMetadataItem, recordTableId } = useRecordTableContextOrThrow();
 
   const { closeDropdown } = useCloseDropdown();
 
@@ -34,12 +36,31 @@ export const RecordTableHeaderPlusButtonContent = () => {
   const { changeRecordFieldVisibility } =
     useChangeRecordFieldVisibility(recordTableId);
 
-  const handleAddColumn = useCallback(
-    async (
-      column: Pick<ColumnDefinition<FieldMetadata>, 'fieldMetadataId'>,
-    ) => {
+  const {
+    addableRegularFields,
+    hiddenRollupViewFields,
+    hiddenViewFields,
+  } = useTableColumnPickerItems({
+    objectMetadataItem,
+    recordIndexId: recordTableId,
+  });
+
+  const handleAddRegularColumn = useCallback(
+    async (fieldMetadataId: string) => {
       closeDropdown();
-      await changeRecordFieldVisibility({ ...column, isVisible: true });
+      await changeRecordFieldVisibility({ fieldMetadataId, isVisible: true });
+    },
+    [changeRecordFieldVisibility, closeDropdown],
+  );
+
+  const handleShowHiddenViewField = useCallback(
+    async (fieldMetadataId: string, viewFieldId: string) => {
+      closeDropdown();
+      await changeRecordFieldVisibility({
+        fieldMetadataId,
+        viewFieldId,
+        isVisible: true,
+      });
     },
     [changeRecordFieldVisibility, closeDropdown],
   );
@@ -49,38 +70,59 @@ export const RecordTableHeaderPlusButtonContent = () => {
     navigationMemorizedUrlState,
   );
 
-  const { activeFieldMetadataItems } = useActiveFieldMetadataItems({
-    objectMetadataItem,
-  });
+  const normalizedSearch = searchInput.toLowerCase();
 
-  const availableFieldMetadataItemsToShow = activeFieldMetadataItems.filter(
-    (fieldMetadataItemToFilter) =>
-      !visibleRecordFields
-        .map((recordField) => recordField.fieldMetadataItemId)
-        .includes(fieldMetadataItemToFilter.id),
+  const filteredHiddenRollupViewFields = hiddenRollupViewFields.filter(
+    (item) => item.label.toLowerCase().includes(normalizedSearch),
   );
 
-  const filteredFieldMetadataItems = availableFieldMetadataItemsToShow.filter(
-    (fieldMetadataItem) => {
-      return fieldMetadataItem.label
-        .toLowerCase()
-        .includes(searchInput.toLowerCase());
-    },
+  const filteredHiddenRegularViewFields = hiddenViewFields
+    .filter((item) => !item.isRollup)
+    .filter((item) => item.label.toLowerCase().includes(normalizedSearch));
+
+  const filteredAddableRegularFields = addableRegularFields.filter(
+    (fieldMetadataItem) =>
+      fieldMetadataItem.label.toLowerCase().includes(normalizedSearch),
   );
 
-  const handleFieldMetadataItemMenuItemClick = async (
-    fieldMetadataItem: FieldMetadataItem,
-  ) => {
-    await handleAddColumn({
-      fieldMetadataId: fieldMetadataItem.id,
-    });
-  };
+  const hasSearchResults =
+    filteredHiddenRollupViewFields.length > 0 ||
+    filteredHiddenRegularViewFields.length > 0 ||
+    filteredAddableRegularFields.length > 0;
 
-  const hasAvailableFields = availableFieldMetadataItemsToShow.length > 0;
+  const hasAvailableItems =
+    hiddenRollupViewFields.length > 0 ||
+    hiddenViewFields.some((item) => !item.isRollup) ||
+    addableRegularFields.length > 0;
+
+  const handleAggregateColumnSuccess = useCallback(() => {
+    closeDropdown();
+    setCurrentView('main');
+  }, [closeDropdown]);
+
+  if (currentView === 'addAggregateColumn') {
+    return (
+      <DropdownContent>
+        <DropdownMenuHeader
+          StartComponent={
+            <DropdownMenuHeaderLeftComponent
+              onClick={() => setCurrentView('main')}
+              Icon={IconChevronLeft}
+            />
+          }
+        >
+          {t`Add aggregate column`}
+        </DropdownMenuHeader>
+        <RelationRollupColumnPickerContent
+          onSuccess={handleAggregateColumnSuccess}
+        />
+      </DropdownContent>
+    );
+  }
 
   return (
     <DropdownContent>
-      {hasAvailableFields && (
+      {hasAvailableItems && (
         <>
           <DropdownMenuSearchInput
             autoFocus
@@ -92,28 +134,62 @@ export const RecordTableHeaderPlusButtonContent = () => {
         </>
       )}
       <DropdownMenuItemsContainer>
-        {filteredFieldMetadataItems.length > 0 ? (
-          filteredFieldMetadataItems.map((fieldMetadataItem) => (
-            <MenuItem
-              key={fieldMetadataItem.id}
-              onClick={() =>
-                handleFieldMetadataItemMenuItemClick(fieldMetadataItem)
-              }
-              LeftIcon={getIcon(fieldMetadataItem.icon)}
-              text={fieldMetadataItem.label}
-            />
-          ))
+        {hasSearchResults ? (
+          <>
+            {filteredHiddenRollupViewFields.map((item) => (
+              <MenuItem
+                key={item.recordField.id}
+                onClick={() =>
+                  handleShowHiddenViewField(
+                    item.fieldMetadataItem.id,
+                    item.recordField.id,
+                  )
+                }
+                LeftIcon={IconSum}
+                text={item.label}
+              />
+            ))}
+            {filteredHiddenRegularViewFields.map((item) => (
+              <MenuItem
+                key={item.recordField.id}
+                onClick={() =>
+                  handleShowHiddenViewField(
+                    item.fieldMetadataItem.id,
+                    item.recordField.id,
+                  )
+                }
+                LeftIcon={getIcon(item.fieldMetadataItem.icon)}
+                text={item.label}
+              />
+            ))}
+            {filteredAddableRegularFields.map((fieldMetadataItem) => (
+              <MenuItem
+                key={fieldMetadataItem.id}
+                onClick={() => handleAddRegularColumn(fieldMetadataItem.id)}
+                LeftIcon={getIcon(fieldMetadataItem.icon)}
+                text={fieldMetadataItem.label}
+              />
+            ))}
+          </>
         ) : (
           <MenuItem
             disabled
             accent="placeholder"
             text={
-              hasAvailableFields
+              hasAvailableItems
                 ? t`No results`
                 : t`All fields are already visible`
             }
           />
         )}
+      </DropdownMenuItemsContainer>
+      <DropdownMenuSeparator />
+      <DropdownMenuItemsContainer scrollable={false}>
+        <MenuItemNavigate
+          onClick={() => setCurrentView('addAggregateColumn')}
+          LeftIcon={IconSum}
+          text={t`Add aggregate column`}
+        />
       </DropdownMenuItemsContainer>
       <DropdownMenuSeparator />
       <DropdownMenuItemsContainer scrollable={false}>

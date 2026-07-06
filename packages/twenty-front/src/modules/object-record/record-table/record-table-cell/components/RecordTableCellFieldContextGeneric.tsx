@@ -3,6 +3,7 @@ import { getObjectPermissionsForObject } from '@/object-metadata/utils/getObject
 import { isLabelIdentifierField } from '@/object-metadata/utils/isLabelIdentifierField';
 import { isRecordFieldReadOnly } from '@/object-record/read-only/utils/isRecordFieldReadOnly';
 import { type RecordField } from '@/object-record/record-field/types/RecordField';
+import { getFieldDefinitionForRecordField } from '@/object-record/record-field/utils/getFieldDefinitionForRecordField';
 import { FieldContext } from '@/object-record/record-field/ui/contexts/FieldContext';
 import { isFieldRelationManyToOne } from '@/object-record/record-field/ui/types/guards/isFieldRelationManyToOne';
 import { isFieldRelationOneToMany } from '@/object-record/record-field/ui/types/guards/isFieldRelationOneToMany';
@@ -38,10 +39,18 @@ export const RecordTableCellFieldContextGeneric = ({
   const {
     objectPermissionsByObjectMetadataId,
     fieldDefinitionByFieldMetadataItemId,
+    fieldDefinitionByViewFieldId,
   } = useRecordIndexContextOrThrow();
 
-  const fieldDefinition =
-    fieldDefinitionByFieldMetadataItemId[recordField.fieldMetadataItemId];
+  const fieldDefinition = getFieldDefinitionForRecordField({
+    recordField,
+    fieldDefinitionByViewFieldId,
+    fieldDefinitionByFieldMetadataItemId,
+  });
+
+  if (!isDefined(fieldDefinition)) {
+    return null;
+  }
 
   const updateRecord = useContext(RecordTableUpdateContext);
   const getIsMetadataItemFromStandardApplication =
