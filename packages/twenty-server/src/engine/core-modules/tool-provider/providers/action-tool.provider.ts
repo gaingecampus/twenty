@@ -29,6 +29,7 @@ import { HttpTool } from 'src/engine/core-modules/tool/tools/http-tool/http-tool
 import { NavigateAppTool } from 'src/engine/core-modules/tool/tools/navigate-tool/navigate-app-tool';
 import { ExtractJsonPathsTool } from 'src/engine/core-modules/tool/tools/output-navigation-tool/extract-json-paths-tool';
 import { SearchOutputTool } from 'src/engine/core-modules/tool/tools/output-navigation-tool/search-output-tool';
+import { RegisterFileOnRecordTool } from 'src/engine/core-modules/tool/tools/register-file-on-record-tool/register-file-on-record-tool';
 import { SearchHelpCenterTool } from 'src/engine/core-modules/tool/tools/search-help-center-tool/search-help-center-tool';
 import { type ToolOutput } from 'src/engine/core-modules/tool/types/tool-output.type';
 import { type Tool } from 'src/engine/core-modules/tool/types/tool.type';
@@ -50,6 +51,7 @@ export class ActionToolProvider implements ToolProvider {
     private readonly navigateAppTool: NavigateAppTool,
     private readonly extractJsonPathsTool: ExtractJsonPathsTool,
     private readonly searchOutputTool: SearchOutputTool,
+    private readonly registerFileOnRecordTool: RegisterFileOnRecordTool,
     private readonly codeInterpreterService: CodeInterpreterService,
     private readonly permissionsService: PermissionsService,
     private readonly i18nService: I18nService,
@@ -64,6 +66,7 @@ export class ActionToolProvider implements ToolProvider {
       ['navigate_app', this.navigateAppTool],
       ['extract_json_paths', this.extractJsonPathsTool],
       ['search_output', this.searchOutputTool],
+      ['register_file_on_record', this.registerFileOnRecordTool],
     ]);
   }
 
@@ -191,6 +194,24 @@ export class ActionToolProvider implements ToolProvider {
       );
     }
 
+    const hasUploadFilePermission =
+      await this.permissionsService.hasToolPermission(
+        context.rolePermissionConfig,
+        context.workspaceId,
+        PermissionFlagType.UPLOAD_FILE,
+      );
+
+    if (hasUploadFilePermission) {
+      descriptors.push(
+        this.buildDescriptor(
+          'register_file_on_record',
+          this.registerFileOnRecordTool,
+          includeSchemas,
+          context.locale,
+        ),
+      );
+    }
+
     return descriptors;
   }
 
@@ -213,6 +234,9 @@ export class ActionToolProvider implements ToolProvider {
       userWorkspaceId: context.userWorkspaceId,
       threadId: context.threadId,
       onCodeExecutionUpdate: context.onCodeExecutionUpdate,
+      authContext: context.authContext,
+      rolePermissionConfig: context.rolePermissionConfig,
+      actorContext: context.actorContext,
     });
   }
 

@@ -216,7 +216,17 @@ export class DatabaseToolProvider implements ToolProvider {
         }
       }
 
-      if (permission.canUpdateObjectRecords && canBeManagedByAutomation) {
+      // Attachment file registration must go through register_file_on_record.
+      // Hiding create/update prevents AI from reassigning existing attachments
+      // by filename (morph FK updates) or bypassing FilesField upload.
+      const canWriteAttachmentViaCrud =
+        objectMetadata.nameSingular !== 'attachment';
+
+      if (
+        permission.canUpdateObjectRecords &&
+        canBeManagedByAutomation &&
+        canWriteAttachmentViaCrud
+      ) {
         descriptors.push({
           name: `create_one_${snakeSingular}`,
           ...getCrudToolLabels(
@@ -352,7 +362,7 @@ export class DatabaseToolProvider implements ToolProvider {
         });
       }
 
-      if (permission.canSoftDeleteObjectRecords) {
+      if (permission.canSoftDeleteObjectRecords && canWriteAttachmentViaCrud) {
         descriptors.push({
           name: `delete_one_${snakeSingular}`,
           ...getCrudToolLabels(

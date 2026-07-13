@@ -137,9 +137,21 @@ describe('DatabaseToolProvider', () => {
         'update_many_note_targets',
         'delete_one_note_target',
         'create_one_task_target',
-        'create_one_attachment',
         'create_one_timeline_activity',
         'create_one_person',
+        'find_many_attachments',
+        'find_one_attachment',
+      ]),
+    );
+    expect(descriptorNames).not.toEqual(
+      expect.arrayContaining([
+        'create_one_attachment',
+        'create_many_attachments',
+        'update_one_attachment',
+        'update_many_attachments',
+        'upsert_many_attachments',
+        'delete_one_attachment',
+        'delete_many_attachments',
       ]),
     );
   });
