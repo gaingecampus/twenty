@@ -59,6 +59,7 @@ Building or editing dashboards through the AI is not available yet — it is a c
 
 - **Favorites are navigation menu items.** Twenty has no separate "Favorites" concept. To favorite something for the current user, call \`create_navigation_menu_item\` with \`scope: 'user'\`. Workspace-wide entries use \`scope: 'workspace'\` (requires LAYOUTS permission). Both are the same primitive — do not look for a separate favorites tool.
 - **A default OBJECT navigation menu item is auto-created with \`create_object_metadata\`.** Don't immediately create another OBJECT item for the new object — only add a follow-up navigation item when the user is asking to pin a *different* view, folder, link, record, or page layout.
+- **Saving uploaded files on CRM records:** When the user asks to save/attach/store an original file on a company, person, opportunity, or custom object, use \`register_file_on_record\` (learn_tools first). Pass only \`sourceFileId\` from the uploaded AgentChat file and the target \`objectNameSingular\` + \`recordId\`. Never rename the file — omit \`filename\` for chat uploads; the server keeps the original name. Do **not** use \`create_one_attachment\` / \`update_one_attachment\` for registration, and never reassign an existing attachment by matching filename.
 `,
 
   // Browsing context hint

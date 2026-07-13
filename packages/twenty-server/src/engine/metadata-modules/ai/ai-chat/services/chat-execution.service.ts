@@ -55,7 +55,7 @@ import {
 import { AI_CHAT_TOOL_NAMES_TO_PRELOAD } from 'src/engine/metadata-modules/ai/ai-chat/constants/ai-chat-tool-names-to-preload.const';
 import { MessagePruningService } from 'src/engine/metadata-modules/ai/ai-chat/services/message-pruning.service';
 import { SystemPromptBuilderService } from 'src/engine/metadata-modules/ai/ai-chat/services/system-prompt-builder.service';
-import { type ExtractedFile } from 'src/engine/metadata-modules/ai/ai-chat/types/extracted-file.type';
+import { collectChatUploadedFiles } from 'src/engine/metadata-modules/ai/ai-chat/utils/collect-chat-uploaded-files.util';
 import { extractCodeInterpreterFiles } from 'src/engine/metadata-modules/ai/ai-chat/utils/extract-code-interpreter-files.util';
 import {
   getCacheProviderOptions,
@@ -225,28 +225,21 @@ export class ChatExecutionService {
 
     const isCodeInterpreterEnabled = this.codeInterpreterService.isEnabled();
 
+    // Collect from original messages before replaceUnsupportedFileParts strips
+    // unsupported MIME types to text placeholders (losing fileId). Also before
+    // extractCodeInterpreterFiles removes spreadsheet/doc parts.
+    const storedFiles = collectChatUploadedFiles(messages);
+
     let processedMessages: UIMessage[] = replaceUnsupportedFileParts(
       messages,
       modelConfig.modalities,
       isCodeInterpreterEnabled,
     );
 
-    let storedFiles: Array<{
-      filename: string;
-      fileId: string;
-    }> = [];
-
     if (isCodeInterpreterEnabled) {
       const extracted = extractCodeInterpreterFiles(processedMessages);
 
       processedMessages = extracted.processedMessages;
-
-      if (extracted.extractedFiles.length > 0) {
-        storedFiles = await this.storeExtractedFiles(
-          extracted.extractedFiles,
-          workspace.id,
-        );
-      }
     }
 
     if (isDefined(browsingContext)) {
@@ -703,15 +696,5 @@ export class ChatExecutionService {
     context += `\nUse get_view_query_parameters tool with this viewId to get the exact filter/sort parameters for querying records.`;
 
     return context;
-  }
-
-  private async storeExtractedFiles(
-    files: ExtractedFile[],
-    _workspaceId: string,
-  ): Promise<Array<{ filename: string; fileId: string }>> {
-    return files.map((file) => ({
-      filename: file.filename,
-      fileId: file.fileId,
-    }));
   }
 }

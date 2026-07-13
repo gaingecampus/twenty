@@ -204,16 +204,17 @@ ${parts.join('\n')}`;
     return `
 ## Uploaded Files
 
-The user has uploaded the following files:
+The user has uploaded the following files (use these fileIds — including images):
 ${fileList}
 
-**IMPORTANT**: Use the \`code_interpreter\` tool to analyze these files.
-When calling code_interpreter, include the files parameter with these values (use fileId to reference uploaded files):
+File IDs for tools:
 \`\`\`json
 ${filesJson}
 \`\`\`
 
-In your Python code, access files at \`/home/user/{filename}\`.`;
+When the user asks to save, attach, or store an original file on a CRM record (company, person, opportunity, or custom object), call \`register_file_on_record\` with \`sourceFileId\` set to the uploaded fileId above and the target \`objectNameSingular\` + \`recordId\` (you may use browsing context when the user is on a record page and explicitly asks to save there). Do **not** pass \`filename\` with \`sourceFileId\` — the server preserves the original uploaded name. Do **not** use \`create_one_attachment\` / \`update_one_attachment\` for file registration, and never reassign an existing attachment by matching filename.
+
+For spreadsheet/document analysis with \`code_interpreter\`, include the files parameter with the fileId values above. In Python, access those files at \`/home/user/{filename}\`.`;
   }
 
   buildSkillCatalogSection(skillCatalog: FlatSkill[]): string {

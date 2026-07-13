@@ -16,6 +16,19 @@ jest.mock('@/activities/files/hooks/useRelatedPersonIdsForAttachments', () => ({
   useRelatedPersonIdsForAttachments: jest.fn(),
 }));
 
+jest.mock('@/object-metadata/hooks/useObjectMetadataItem', () => ({
+  useObjectMetadataItem: jest.fn(() => ({
+    objectMetadataItem: { id: 'attachment-metadata-id' },
+  })),
+}));
+
+jest.mock(
+  '@/browser-event/hooks/useListenToObjectRecordOperationBrowserEvent',
+  () => ({
+    useListenToObjectRecordOperationBrowserEvent: jest.fn(),
+  }),
+);
+
 describe('useAttachments', () => {
   afterEach(() => {
     jest.clearAllMocks();
@@ -58,16 +71,17 @@ describe('useAttachments', () => {
     useFindManyRecordsMock.useFindManyRecords.mockImplementation(
       ({ objectNameSingular }: { objectNameSingular: string }) => {
         if (objectNameSingular === CoreObjectNameSingular.NoteTarget) {
-          return { records: [], loading: false };
+          return { records: [], loading: false, refetch: jest.fn() };
         }
 
         if (objectNameSingular === CoreObjectNameSingular.TaskTarget) {
-          return { records: [], loading: false };
+          return { records: [], loading: false, refetch: jest.fn() };
         }
 
         return {
           records: mockAttachments,
           loading: false,
+          refetch: jest.fn(),
         };
       },
     );
@@ -112,6 +126,7 @@ describe('useAttachments', () => {
           return {
             records: [{ id: 'note-target-1', note: { id: 'note-1' } }],
             loading: false,
+            refetch: jest.fn(),
           };
         }
 
@@ -119,12 +134,14 @@ describe('useAttachments', () => {
           return {
             records: [{ id: 'task-target-1', task: { id: 'task-1' } }],
             loading: false,
+            refetch: jest.fn(),
           };
         }
 
         return {
           records: [],
           loading: false,
+          refetch: jest.fn(),
         };
       },
     );
@@ -192,12 +209,13 @@ describe('useAttachments', () => {
         ) {
           expect(skip).toBe(true);
 
-          return { records: [], loading: false };
+          return { records: [], loading: false, refetch: jest.fn() };
         }
 
         return {
           records: [],
           loading: false,
+          refetch: jest.fn(),
         };
       },
     );
@@ -240,16 +258,17 @@ describe('useAttachments', () => {
     useFindManyRecordsMock.useFindManyRecords.mockImplementation(
       ({ objectNameSingular }: { objectNameSingular: string }) => {
         if (objectNameSingular === CoreObjectNameSingular.NoteTarget) {
-          return { records: [], loading: false };
+          return { records: [], loading: false, refetch: jest.fn() };
         }
 
         if (objectNameSingular === CoreObjectNameSingular.TaskTarget) {
-          return { records: [], loading: false };
+          return { records: [], loading: false, refetch: jest.fn() };
         }
 
         return {
           records: [],
           loading: false,
+          refetch: jest.fn(),
         };
       },
     );
@@ -308,21 +327,28 @@ describe('useAttachments', () => {
           });
 
           return {
-            records: [{ id: 'note-target-1', note: { id: 'note-on-employee' } }],
+            records: [
+              { id: 'note-target-1', note: { id: 'note-on-employee' } },
+            ],
             loading: false,
+            refetch: jest.fn(),
           };
         }
 
         if (objectNameSingular === CoreObjectNameSingular.TaskTarget) {
           return {
-            records: [{ id: 'task-target-1', task: { id: 'task-on-employee' } }],
+            records: [
+              { id: 'task-target-1', task: { id: 'task-on-employee' } },
+            ],
             loading: false,
+            refetch: jest.fn(),
           };
         }
 
         return {
           records: [],
           loading: false,
+          refetch: jest.fn(),
         };
       },
     );
