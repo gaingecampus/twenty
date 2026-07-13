@@ -11,9 +11,12 @@ import { SidePanelToggleButton } from '@/side-panel/components/SidePanelToggleBu
 import { PageCardHeader } from '@/ui/layout/page/components/PageCardHeader';
 import { useAtomComponentStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomComponentStateValue';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
+import { isNonEmptyString } from '@sniptt/guards';
 import { styled } from '@linaria/react';
 import { t } from '@lingui/core/macro';
 import { isDefined } from 'twenty-shared/utils';
+import { IconInfoCircle } from 'twenty-ui/icon';
+import { AppTooltip, TooltipDelay } from 'twenty-ui/surfaces';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 
 const StyledTitleWithSelectedRecords = styled.div`
@@ -32,6 +35,19 @@ const StyledSelectedRecordsCount = styled.div`
   padding-left: ${themeCssVariables.spacing['0.5']};
 `;
 
+const StyledTitleWithDescription = styled.div`
+  align-items: center;
+  display: flex;
+  gap: ${themeCssVariables.spacing[1]};
+  min-width: 0;
+`;
+
+const StyledInfoIcon = styled(IconInfoCircle)`
+  color: ${themeCssVariables.font.color.tertiary};
+  cursor: default;
+  flex-shrink: 0;
+`;
+
 export const RecordIndexPageHeader = () => {
   const { findObjectMetadataItemByNamePlural } =
     useFilteredObjectMetadataItems();
@@ -48,6 +64,11 @@ export const RecordIndexPageHeader = () => {
     findObjectMetadataItemByNamePlural(objectNamePlural);
 
   const label = objectMetadataItem?.labelPlural ?? objectNamePlural;
+  const description = objectMetadataItem?.description;
+  const hasDescription = isNonEmptyString(description);
+  const tooltipId = isDefined(objectMetadataItem)
+    ? `record-index-object-description-${objectMetadataItem.id}`
+    : undefined;
 
   const pageHeaderTitle =
     contextStoreNumberOfSelectedRecords > 0 ? (
@@ -60,6 +81,23 @@ export const RecordIndexPageHeader = () => {
       </StyledTitleWithSelectedRecords>
     ) : (
       label
+    );
+
+  const titleWithDescription =
+    hasDescription && isDefined(tooltipId) ? (
+      <StyledTitleWithDescription>
+        {pageHeaderTitle}
+        <StyledInfoIcon id={tooltipId} size={14} />
+        <AppTooltip
+          anchorSelect={`#${tooltipId}`}
+          content={description}
+          place="bottom"
+          delay={TooltipDelay.shortDelay}
+          positionStrategy="fixed"
+        />
+      </StyledTitleWithDescription>
+    ) : (
+      pageHeaderTitle
     );
 
   const contextStoreCurrentViewId = useAtomComponentStateValue(
@@ -75,7 +113,7 @@ export const RecordIndexPageHeader = () => {
       icon={
         <RecordIndexPageHeaderIcon objectMetadataItem={objectMetadataItem} />
       }
-      title={pageHeaderTitle}
+      title={titleWithDescription}
       actionButton={
         isDefined(contextStoreCurrentViewId) ? (
           <>
