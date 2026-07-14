@@ -59,6 +59,7 @@ upstream 관례보다 이 파일과 `GAINGE_RUNBOOK.md`를 우선 참고하세�
 ### 예시
 
 - `GOOGLE_API_KEY`, `OPENAI_API_KEY`, `ANTHROPIC_API_KEY` 등 LLM 키 → Admin Panel 우선
+- `CODE_INTERPRETER_TYPE`, `E2B_API_KEY` (엑셀/CSV 분석용) → Admin Panel 우선. 상세는 [`GAINGE_RUNBOOK.md`](GAINGE_RUNBOOK.md) § AI 채팅 파일 분석과 Code Interpreter / E2B
 - DB URL, 암호화 키, S3 자격 증명 → env / Secrets Manager (Admin으로 불가)
 
 ### AI 답변 형식
