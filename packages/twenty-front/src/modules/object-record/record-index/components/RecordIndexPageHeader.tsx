@@ -6,6 +6,7 @@ import { isLayoutCustomizationModeEnabledState } from '@/layout-customization/st
 import { useNumberFormat } from '@/localization/hooks/useNumberFormat';
 import { useFilteredObjectMetadataItems } from '@/object-metadata/hooks/useFilteredObjectMetadataItems';
 import { RecordIndexPageHeaderIcon } from '@/object-record/record-index/components/RecordIndexPageHeaderIcon';
+import { RecordIndexPageHeaderSearchInput } from '@/object-record/record-index/components/RecordIndexPageHeaderSearchInput';
 import { useRecordIndexContextOrThrow } from '@/object-record/record-index/contexts/RecordIndexContext';
 import { SidePanelToggleButton } from '@/side-panel/components/SidePanelToggleButton';
 import { PageCardHeader } from '@/ui/layout/page/components/PageCardHeader';
@@ -117,6 +118,7 @@ export const RecordIndexPageHeader = () => {
       actionButton={
         isDefined(contextStoreCurrentViewId) ? (
           <>
+            <RecordIndexPageHeaderSearchInput label={label} />
             <RecordIndexCommandMenu />
             {!isLayoutCustomizationModeEnabled && <SidePanelToggleButton />}
           </>
