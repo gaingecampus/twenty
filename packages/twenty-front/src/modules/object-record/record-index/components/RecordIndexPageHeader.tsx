@@ -115,10 +115,14 @@ export const RecordIndexPageHeader = () => {
         <RecordIndexPageHeaderIcon objectMetadataItem={objectMetadataItem} />
       }
       title={titleWithDescription}
+      centerContent={
+        isDefined(contextStoreCurrentViewId) ? (
+          <RecordIndexPageHeaderSearchInput label={label} />
+        ) : undefined
+      }
       actionButton={
         isDefined(contextStoreCurrentViewId) ? (
           <>
-            <RecordIndexPageHeaderSearchInput label={label} />
             <RecordIndexCommandMenu />
             {!isLayoutCustomizationModeEnabled && <SidePanelToggleButton />}
           </>

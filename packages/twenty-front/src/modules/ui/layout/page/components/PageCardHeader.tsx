@@ -19,19 +19,29 @@ type PageCardHeaderProps = {
   title?: ReactNode;
   tag?: ReactNode;
   actionButton?: ReactNode;
+  centerContent?: ReactNode;
   centerTitle?: boolean;
   titleColor?: string;
 };
 
-const StyledHeader = styled.div<{ centerTitle?: boolean }>`
+type HeaderLayout = 'default' | 'centerTitle' | 'centerContent';
+
+const StyledHeader = styled.div<{ headerLayout: HeaderLayout }>`
   align-items: center;
   background-color: ${themeCssVariables.background.secondary};
   border-bottom: 1px solid ${themeCssVariables.border.color.medium};
   box-sizing: border-box;
   column-gap: ${themeCssVariables.spacing[2]};
   display: grid;
-  grid-template-columns: ${({ centerTitle }) =>
-    centerTitle ? 'minmax(0, 1fr) auto minmax(0, 1fr)' : 'minmax(0, 1fr) auto'};
+  /* Balanced side columns keep center content truly centered; right 1fr
+     also gives pinned command buttons room to measure and render. */
+  grid-template-columns: ${({ headerLayout }) => {
+    if (headerLayout === 'centerTitle' || headerLayout === 'centerContent') {
+      return 'minmax(0, 1fr) auto minmax(0, 1fr)';
+    }
+
+    return 'minmax(0, auto) minmax(0, 1fr)';
+  }};
   min-height: ${SIDE_PANEL_TOP_BAR_HEIGHT}px;
   padding: 0 ${themeCssVariables.spacing[3]};
   width: 100%;
@@ -66,11 +76,22 @@ const StyledCenteredTitle = styled(StyledTitle)`
   overflow: hidden;
 `;
 
-const StyledRight = styled.div<{ centerTitle?: boolean }>`
+const StyledCenterContent = styled.div`
+  align-items: center;
+  display: flex;
+  grid-column: 2;
+  justify-content: center;
+  justify-self: center;
+  max-width: 100%;
+  min-width: 0;
+`;
+
+const StyledRight = styled.div<{ headerLayout: HeaderLayout }>`
   align-items: center;
   display: flex;
   gap: ${themeCssVariables.spacing[2]};
-  grid-column: ${({ centerTitle }) => (centerTitle ? 3 : 2)};
+  grid-column: ${({ headerLayout }) =>
+    headerLayout === 'default' ? 2 : 3};
   justify-content: flex-end;
   justify-self: end;
   min-width: 0;
@@ -84,6 +105,7 @@ export const PageCardHeader = ({
   title,
   tag,
   actionButton,
+  centerContent,
   centerTitle = false,
   titleColor,
 }: PageCardHeaderProps) => {
@@ -92,7 +114,14 @@ export const PageCardHeader = ({
 
   const hasTitleContent =
     !isMobile && (isDefined(icon) || isDefined(title) || isDefined(tag));
-  const shouldCenterTitle = centerTitle && hasTitleContent;
+  const shouldCenterTitle = centerTitle && hasTitleContent && !centerContent;
+  const hasCenterContent = isDefined(centerContent);
+
+  const headerLayout: HeaderLayout = shouldCenterTitle
+    ? 'centerTitle'
+    : hasCenterContent
+      ? 'centerContent'
+      : 'default';
 
   const titleContent = (
     <>
@@ -103,7 +132,7 @@ export const PageCardHeader = ({
   );
 
   return (
-    <StyledHeader centerTitle={shouldCenterTitle}>
+    <StyledHeader headerLayout={headerLayout}>
       <StyledLeft>
         {!isNavigationDrawerExpanded && (
           <NavigationDrawerCollapseButton direction="right" />
@@ -120,8 +149,11 @@ export const PageCardHeader = ({
           {titleContent}
         </StyledCenteredTitle>
       )}
+      {hasCenterContent && (
+        <StyledCenterContent>{centerContent}</StyledCenterContent>
+      )}
       <StyledRight
-        centerTitle={shouldCenterTitle}
+        headerLayout={headerLayout}
         data-click-outside-id={PAGE_ACTION_CONTAINER_CLICK_OUTSIDE_ID}
       >
         {actionButton}
