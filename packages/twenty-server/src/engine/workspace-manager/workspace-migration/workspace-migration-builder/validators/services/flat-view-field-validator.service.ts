@@ -6,7 +6,7 @@ import { type RelationRollupSettings, ViewType } from 'twenty-shared/types';
 import { fastDeepEqual, isDefined } from 'twenty-shared/utils';
 
 import { findFlatEntityByUniversalIdentifier } from 'src/engine/metadata-modules/flat-entity/utils/find-flat-entity-by-universal-identifier.util';
-import { findManyFlatEntityByUniversalIdentifierInUniversalFlatEntityMapsOrThrow } from 'src/engine/metadata-modules/flat-entity/utils/find-many-flat-entity-by-universal-identifier-in-universal-flat-entity-maps-or-throw.util';
+import { findManyFlatEntityByUniversalIdentifierInUniversalFlatEntityMaps } from 'src/engine/metadata-modules/flat-entity/utils/find-many-flat-entity-by-universal-identifier-in-universal-flat-entity-maps.util';
 import { isViewFieldInLowestPosition } from 'src/engine/metadata-modules/flat-view-field/utils/is-view-field-in-lowest-position.util';
 import { ViewExceptionCode } from 'src/engine/metadata-modules/view/exceptions/view.exception';
 import { FailedFlatEntityValidation } from 'src/engine/workspace-manager/workspace-migration/workspace-migration-builder/builders/types/failed-flat-entity-validation.type';
@@ -107,17 +107,16 @@ export class FlatViewFieldValidatorService {
       flatObjectMetadata.labelIdentifierFieldMetadataUniversalIdentifier ===
         updatedFlatViewField.fieldMetadataUniversalIdentifier
     ) {
+      // Application-scoped sync maps omit Custom view fields on Standard views
       const otherFlatViewFields =
-        findManyFlatEntityByUniversalIdentifierInUniversalFlatEntityMapsOrThrow(
-          {
-            universalIdentifiers: flatView.viewFieldUniversalIdentifiers.filter(
-              (viewFieldUniversalIdentifier) =>
-                viewFieldUniversalIdentifier !==
-                updatedFlatViewField.universalIdentifier,
-            ),
-            flatEntityMaps: optimisticFlatViewFieldMaps,
-          },
-        );
+        findManyFlatEntityByUniversalIdentifierInUniversalFlatEntityMaps({
+          universalIdentifiers: flatView.viewFieldUniversalIdentifiers.filter(
+            (viewFieldUniversalIdentifier) =>
+              viewFieldUniversalIdentifier !==
+              updatedFlatViewField.universalIdentifier,
+          ),
+          flatEntityMaps: optimisticFlatViewFieldMaps,
+        });
 
       validationResult.errors.push(
         ...validateLabelIdentifierFieldMetadataIdFlatViewField({
@@ -229,8 +228,9 @@ export class FlatViewFieldValidatorService {
       return validationResult;
     }
 
+    // Application-scoped sync maps omit Custom view fields on Standard views
     const otherFlatViewFields =
-      findManyFlatEntityByUniversalIdentifierInUniversalFlatEntityMapsOrThrow({
+      findManyFlatEntityByUniversalIdentifierInUniversalFlatEntityMaps({
         universalIdentifiers: flatView.viewFieldUniversalIdentifiers,
         flatEntityMaps: optimisticFlatViewFieldMaps,
       });
