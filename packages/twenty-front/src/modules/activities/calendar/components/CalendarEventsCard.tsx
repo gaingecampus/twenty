@@ -12,6 +12,7 @@ import { CustomResolverFetchMoreLoader } from '@/activities/components/CustomRes
 import { SkeletonLoader } from '@/activities/components/SkeletonLoader';
 import { useCustomResolver } from '@/activities/hooks/useCustomResolver';
 import { useSubscribeTimelineToParticipantChanges } from '@/activities/hooks/useSubscribeTimelineToParticipantChanges';
+import { useObjectMetadataItem } from '@/object-metadata/hooks/useObjectMetadataItem';
 import { useTargetRecord } from '@/ui/layout/contexts/useTargetRecord';
 import { H3Title } from 'twenty-ui/typography';
 import {
@@ -88,6 +89,11 @@ export const CalendarEventsCard = () => {
   };
 
   const objectName = targetRecord.targetObjectNameSingular;
+  const { objectMetadataItem } = useObjectMetadataItem({
+    objectNameSingular: objectName,
+  });
+  const objectLabel =
+    objectMetadataItem?.labelSingular ?? objectName;
 
   if (firstQueryLoading) {
     return <SkeletonLoader />;
@@ -103,7 +109,7 @@ export const CalendarEventsCard = () => {
             {t`No Events`}
           </AnimatedPlaceholderEmptyTitle>
           <AnimatedPlaceholderEmptySubTitle>
-            {t`No events have been scheduled with this ${objectName} yet.`}
+            {t`No events have been scheduled with this ${objectLabel} yet.`}
           </AnimatedPlaceholderEmptySubTitle>
         </AnimatedPlaceholderEmptyTextContainer>
       </AnimatedPlaceholderEmptyContainer>

@@ -6,10 +6,34 @@ import { isDefined } from 'twenty-shared/utils';
 import { translateStandardLabel } from 'src/engine/core-modules/i18n/utils/translate-standard-label.util';
 import { type FieldMetadataDTO } from 'src/engine/metadata-modules/field-metadata/dtos/field-metadata.dto';
 
+const shouldTranslateBuiltInFieldLabel = ({
+  isSystem,
+  fieldName,
+  sourceValue,
+  labelKey,
+}: {
+  isSystem: boolean | undefined;
+  fieldName: string | undefined;
+  sourceValue: string;
+  labelKey: 'label' | 'description' | 'icon';
+}): boolean => {
+  if (labelKey === 'icon') {
+    return false;
+  }
+
+  // System fields on custom objects still use English source labels (Creation date, …)
+  if (isSystem === true) {
+    return true;
+  }
+
+  // Default Name field on custom objects is not marked isSystem but is built-in
+  return fieldName === 'name' && sourceValue === 'Name';
+};
+
 export const resolveFieldMetadataStandardOverride = (
   fieldMetadata: Pick<
     FieldMetadataDTO,
-    'label' | 'description' | 'icon' | 'standardOverrides'
+    'label' | 'description' | 'icon' | 'standardOverrides' | 'isSystem' | 'name'
   >,
   labelKey: 'label' | 'description' | 'icon',
   locale: keyof typeof APP_LOCALES | undefined,
@@ -20,7 +44,25 @@ export const resolveFieldMetadataStandardOverride = (
   const safeLocale = locale ?? SOURCE_LOCALE;
 
   if (!isStandardApp && !isDefined(applicationCatalog)) {
-    return fieldMetadata[labelKey] ?? '';
+    const sourceValue = fieldMetadata[labelKey] ?? '';
+
+    if (
+      shouldTranslateBuiltInFieldLabel({
+        isSystem: fieldMetadata.isSystem,
+        fieldName: fieldMetadata.name,
+        sourceValue,
+        labelKey,
+      })
+    ) {
+      return translateStandardLabel({
+        sourceValue,
+        isStandardApp: true,
+        applicationCatalog: undefined,
+        i18nInstance,
+      });
+    }
+
+    return sourceValue;
   }
 
   if (labelKey === 'icon' && isDefined(fieldMetadata.standardOverrides?.icon)) {

@@ -10,6 +10,7 @@ import { type CommandMenuItemDTO } from 'src/engine/metadata-modules/command-men
 import { EngineComponentKey } from 'src/engine/metadata-modules/command-menu-item/enums/engine-component-key.enum';
 import { buildNavigationInterpolationContext } from 'src/engine/metadata-modules/command-menu-item/utils/build-navigation-interpolation-context.util';
 import { isObjectMetadataCommandMenuItemPayload } from 'src/engine/metadata-modules/command-menu-item/utils/is-object-metadata-command-menu-item-payload.util';
+import { resolveCommandMenuItemLabel } from 'src/engine/metadata-modules/command-menu-item/utils/resolve-command-menu-item-label.util';
 import { type ObjectMetadataDTO } from 'src/engine/metadata-modules/object-metadata/dtos/object-metadata.dto';
 
 export const interpolateNavigationCommandMenuItemField = ({
@@ -17,6 +18,7 @@ export const interpolateNavigationCommandMenuItemField = ({
   fieldName,
   objectMetadata,
   isStandardApp,
+  twentyStandardApplicationId,
   locale,
   i18nInstance,
   applicationCatalog,
@@ -25,25 +27,38 @@ export const interpolateNavigationCommandMenuItemField = ({
   fieldName: 'label' | 'shortLabel' | 'icon';
   objectMetadata: ObjectMetadataDTO | null;
   isStandardApp: boolean;
+  twentyStandardApplicationId: string;
   locale: keyof typeof APP_LOCALES | undefined;
   i18nInstance: I18n;
   applicationCatalog?: Record<string, string>;
 }): string | undefined => {
   const rawValue = commandMenuItem[fieldName];
 
+  if (!isNonEmptyString(rawValue)) {
+    return rawValue;
+  }
+
+  // Icons are keys/templates, not user-facing copy
+  const translatedValue =
+    fieldName === 'icon'
+      ? rawValue
+      : resolveCommandMenuItemLabel({
+          label: rawValue,
+          applicationId: commandMenuItem.applicationId,
+          twentyStandardApplicationId,
+          i18nInstance,
+          applicationCatalog,
+        });
+
   if (
     commandMenuItem.engineComponentKey !== EngineComponentKey.NAVIGATION ||
     !isObjectMetadataCommandMenuItemPayload(commandMenuItem.payload)
   ) {
-    return rawValue;
+    return translatedValue;
   }
 
   if (!isDefined(objectMetadata)) {
     return undefined;
-  }
-
-  if (!isNonEmptyString(rawValue)) {
-    return rawValue;
   }
 
   const context = buildNavigationInterpolationContext({
@@ -56,8 +71,8 @@ export const interpolateNavigationCommandMenuItemField = ({
 
   return (
     interpolateCommandMenuItemTemplate({
-      label: rawValue,
+      label: translatedValue,
       context,
-    }) ?? rawValue
+    }) ?? translatedValue
   );
 };

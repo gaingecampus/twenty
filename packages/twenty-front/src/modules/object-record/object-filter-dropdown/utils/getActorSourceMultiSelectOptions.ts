@@ -1,4 +1,5 @@
 import { type SelectableItem } from '@/object-record/select/types/SelectableItem';
+import { t } from '@lingui/core/macro';
 import {
   IconApi,
   IconCsv,
@@ -16,54 +17,54 @@ export const getActorSourceMultiSelectOptions = (
   return [
     {
       id: 'MANUAL',
-      name: 'User',
+      name: t`User`,
       isSelected: selectedSourceNames.includes('MANUAL'),
       AvatarIcon: IconUserCircle,
       isIconInverted: true,
     },
     {
       id: 'IMPORT',
-      name: 'Import',
+      name: t`Import`,
       isSelected: selectedSourceNames.includes('IMPORT'),
       AvatarIcon: IconCsv,
       isIconInverted: true,
     },
     {
       id: 'API',
-      name: 'Api',
+      name: t`Api`,
       isSelected: selectedSourceNames.includes('API'),
       AvatarIcon: IconApi,
       isIconInverted: true,
     },
     {
       id: 'EMAIL',
-      name: 'Email',
+      name: t`Email`,
       isSelected: selectedSourceNames.includes('EMAIL'),
       AvatarIcon: IconGmail,
     },
     {
       id: 'CALENDAR',
-      name: 'Calendar',
+      name: t`Calendar`,
       isSelected: selectedSourceNames.includes('CALENDAR'),
       AvatarIcon: IconGoogleCalendar,
     },
     {
       id: 'WORKFLOW',
-      name: 'Workflow',
+      name: t`Workflow`,
       isSelected: selectedSourceNames.includes('WORKFLOW'),
       AvatarIcon: IconSettingsAutomation,
       isIconInverted: true,
     },
     {
       id: 'WEBHOOK',
-      name: 'Webhook',
+      name: t`Webhook`,
       isSelected: selectedSourceNames.includes('WEBHOOK'),
       AvatarIcon: IconWebhook,
       isIconInverted: true,
     },
     {
       id: 'SYSTEM',
-      name: 'System',
+      name: t`System`,
       isSelected: selectedSourceNames.includes('SYSTEM'),
       AvatarIcon: IconRobot,
       isIconInverted: true,

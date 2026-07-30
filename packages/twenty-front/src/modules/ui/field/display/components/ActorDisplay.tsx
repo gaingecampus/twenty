@@ -85,9 +85,14 @@ export const ActorDisplay = ({
 }: ActorDisplayProps) => {
   const LeftIcon = getLeftIcon({ source, context });
 
+  const label =
+    source === 'SYSTEM' && (name === 'System' || !name)
+      ? t`System`
+      : (name ?? '');
+
   return (
     <Chip
-      label={name ?? ''}
+      label={label}
       clickable={false}
       emptyLabel={t`Untitled`}
       variant={ChipVariant.Transparent}
@@ -95,7 +100,7 @@ export const ActorDisplay = ({
         <AvatarOrIcon
           placeholderColorSeed={workspaceMemberId ?? undefined}
           avatarType={workspaceMemberId ? 'rounded' : 'squared'}
-          placeholder={name}
+          placeholder={label}
           Icon={LeftIcon}
           avatarUrl={getAbsoluteImageUrl(avatarUrl ?? undefined)}
         />

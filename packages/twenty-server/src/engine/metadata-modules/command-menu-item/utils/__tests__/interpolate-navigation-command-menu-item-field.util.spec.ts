@@ -10,6 +10,8 @@ import {
 } from 'src/engine/metadata-modules/flat-command-menu-item/utils/build-navigation-flat-command-menu-item.util';
 import { type ObjectMetadataDTO } from 'src/engine/metadata-modules/object-metadata/dtos/object-metadata.dto';
 
+const STANDARD_APPLICATION_ID = 'standard-app-id';
+
 const mockI18nInstance = {
   _: (messageId: string) => messageId,
 } as unknown as I18n;
@@ -34,10 +36,18 @@ const baseCommandMenuItem = {
   availabilityType: CommandMenuItemAvailabilityType.GLOBAL,
   payload: { objectMetadataItemId: 'obj-id-1' },
   workspaceId: 'ws-id-1',
+  applicationId: STANDARD_APPLICATION_ID,
   isActive: true,
   isSystemSideEffect: false,
   createdAt: new Date(),
   updatedAt: new Date(),
+};
+
+const defaultArgs = {
+  locale: undefined as undefined,
+  isStandardApp: true,
+  twentyStandardApplicationId: STANDARD_APPLICATION_ID,
+  i18nInstance: mockI18nInstance,
 };
 
 describe('interpolateNavigationCommandMenuItemField', () => {
@@ -46,9 +56,7 @@ describe('interpolateNavigationCommandMenuItemField', () => {
       commandMenuItem: baseCommandMenuItem,
       fieldName: 'label',
       objectMetadata: mockObjectMetadata,
-      locale: undefined,
-      isStandardApp: true,
-      i18nInstance: mockI18nInstance,
+      ...defaultArgs,
     });
 
     expect(result).toBe('Go to People');
@@ -59,9 +67,7 @@ describe('interpolateNavigationCommandMenuItemField', () => {
       commandMenuItem: baseCommandMenuItem,
       fieldName: 'shortLabel',
       objectMetadata: mockObjectMetadata,
-      locale: undefined,
-      isStandardApp: true,
-      i18nInstance: mockI18nInstance,
+      ...defaultArgs,
     });
 
     expect(result).toBe('People');
@@ -72,9 +78,7 @@ describe('interpolateNavigationCommandMenuItemField', () => {
       commandMenuItem: baseCommandMenuItem,
       fieldName: 'icon',
       objectMetadata: mockObjectMetadata,
-      locale: undefined,
-      isStandardApp: true,
-      i18nInstance: mockI18nInstance,
+      ...defaultArgs,
     });
 
     expect(result).toBe('IconUser');
@@ -92,9 +96,7 @@ describe('interpolateNavigationCommandMenuItemField', () => {
       commandMenuItem: nonNavigationItem,
       fieldName: 'label',
       objectMetadata: null,
-      locale: undefined,
-      isStandardApp: true,
-      i18nInstance: mockI18nInstance,
+      ...defaultArgs,
     });
 
     expect(result).toBe('Create New Record');
@@ -105,9 +107,7 @@ describe('interpolateNavigationCommandMenuItemField', () => {
       commandMenuItem: baseCommandMenuItem,
       fieldName: 'label',
       objectMetadata: null,
-      locale: undefined,
-      isStandardApp: true,
-      i18nInstance: mockI18nInstance,
+      ...defaultArgs,
     });
 
     expect(result).toBeUndefined();
@@ -123,9 +123,7 @@ describe('interpolateNavigationCommandMenuItemField', () => {
       commandMenuItem: itemWithoutShortLabel,
       fieldName: 'shortLabel',
       objectMetadata: mockObjectMetadata,
-      locale: undefined,
-      isStandardApp: true,
-      i18nInstance: mockI18nInstance,
+      ...defaultArgs,
     });
 
     expect(result).toBeUndefined();
@@ -142,9 +140,7 @@ describe('interpolateNavigationCommandMenuItemField', () => {
       commandMenuItem: baseCommandMenuItem,
       fieldName: 'label',
       objectMetadata: customObjectMetadata,
-      locale: undefined,
-      isStandardApp: true,
-      i18nInstance: mockI18nInstance,
+      ...defaultArgs,
     });
 
     expect(result).toBe('Go to Custom Objects');
@@ -160,9 +156,7 @@ describe('interpolateNavigationCommandMenuItemField', () => {
       commandMenuItem: baseCommandMenuItem,
       fieldName: 'icon',
       objectMetadata: customObjectMetadata,
-      locale: undefined,
-      isStandardApp: true,
-      i18nInstance: mockI18nInstance,
+      ...defaultArgs,
     });
 
     expect(result).toBe('IconCustom');
@@ -178,9 +172,7 @@ describe('interpolateNavigationCommandMenuItemField', () => {
       commandMenuItem: itemWithPathPayload,
       fieldName: 'label',
       objectMetadata: null,
-      locale: undefined,
-      isStandardApp: true,
-      i18nInstance: mockI18nInstance,
+      ...defaultArgs,
     });
 
     expect(result).toBe(NAVIGATION_INTERPOLATED_LABEL);
@@ -196,9 +188,7 @@ describe('interpolateNavigationCommandMenuItemField', () => {
       commandMenuItem: itemWithLiteralLabel,
       fieldName: 'label',
       objectMetadata: mockObjectMetadata,
-      locale: undefined,
-      isStandardApp: true,
-      i18nInstance: mockI18nInstance,
+      ...defaultArgs,
     });
 
     expect(result).toBe('Go to People');

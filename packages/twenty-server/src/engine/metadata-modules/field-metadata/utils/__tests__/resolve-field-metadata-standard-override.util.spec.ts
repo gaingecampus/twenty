@@ -27,6 +27,8 @@ describe('resolveFieldMetadataStandardOverride', () => {
         description: 'Custom Description',
         icon: 'custom-icon',
         isCustom: true,
+        isSystem: false,
+        name: 'customLabel',
         standardOverrides: undefined,
       };
 
@@ -47,6 +49,8 @@ describe('resolveFieldMetadataStandardOverride', () => {
         description: 'Custom Description',
         icon: 'custom-icon',
         isCustom: true,
+        isSystem: false,
+        name: 'status',
         standardOverrides: undefined,
       };
 
@@ -64,6 +68,59 @@ describe('resolveFieldMetadataStandardOverride', () => {
       expect(result).toBe('Status');
       expect(mockGenerateMessageId).not.toHaveBeenCalled();
       expect(mockI18n._).not.toHaveBeenCalled();
+    });
+
+    it('should translate system field labels on custom objects', () => {
+      const fieldMetadata = {
+        label: 'Creation date',
+        description: 'Creation date',
+        icon: 'IconCalendar',
+        isCustom: true,
+        isSystem: true,
+        name: 'createdAt',
+        standardOverrides: undefined,
+      };
+
+      mockGenerateMessageId.mockReturnValue('creation-date.message.id');
+      mockI18n._.mockReturnValue('생성일');
+
+      const result = resolveFieldMetadataStandardOverride(
+        fieldMetadata,
+        'label',
+        'ko-KR',
+        mockI18n,
+        false,
+      );
+
+      expect(result).toBe('생성일');
+      expect(mockGenerateMessageId).toHaveBeenCalledWith('Creation date');
+      expect(mockI18n._).toHaveBeenCalledWith('creation-date.message.id');
+    });
+
+    it('should translate the default Name field on custom objects', () => {
+      const fieldMetadata = {
+        label: 'Name',
+        description: 'Name',
+        icon: 'IconAbc',
+        isCustom: true,
+        isSystem: false,
+        name: 'name',
+        standardOverrides: undefined,
+      };
+
+      mockGenerateMessageId.mockReturnValue('name.message.id');
+      mockI18n._.mockReturnValue('이름');
+
+      const result = resolveFieldMetadataStandardOverride(
+        fieldMetadata,
+        'label',
+        'ko-KR',
+        mockI18n,
+        false,
+      );
+
+      expect(result).toBe('이름');
+      expect(mockGenerateMessageId).toHaveBeenCalledWith('Name');
     });
 
     it('should return the field value for custom description field', () => {

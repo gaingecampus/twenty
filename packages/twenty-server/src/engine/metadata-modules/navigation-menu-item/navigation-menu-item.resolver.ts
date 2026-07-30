@@ -9,12 +9,16 @@ import {
 } from '@nestjs/graphql';
 
 import { isDefined } from 'twenty-shared/utils';
+import { SOURCE_LOCALE } from 'twenty-shared/translations';
 
 import { UUIDScalarType } from 'src/engine/api/graphql/workspace-schema-builder/graphql-types/scalars';
 import { ApiKeyEntity } from 'src/engine/core-modules/api-key/api-key.entity';
 import { ApplicationEntity } from 'src/engine/core-modules/application/application.entity';
 import { getWorkspaceAuthContext } from 'src/engine/core-modules/auth/storage/workspace-auth-context.storage';
+import { I18nService } from 'src/engine/core-modules/i18n/i18n.service';
+import { type I18nContext } from 'src/engine/core-modules/i18n/types/i18n-context.type';
 import { WorkspaceEntity } from 'src/engine/core-modules/workspace/workspace.entity';
+import { type IDataloaders } from 'src/engine/dataloaders/dataloader.interface';
 import { AuthApiKey } from 'src/engine/decorators/auth/auth-api-key.decorator';
 import { AuthUserWorkspaceId } from 'src/engine/decorators/auth/auth-user-workspace-id.decorator';
 import { AuthWorkspace } from 'src/engine/decorators/auth/auth-workspace.decorator';
@@ -27,6 +31,7 @@ import { RecordIdentifierDTO } from 'src/engine/metadata-modules/navigation-menu
 import { UpdateOneNavigationMenuItemInput } from 'src/engine/metadata-modules/navigation-menu-item/dtos/update-navigation-menu-item.input';
 import { NavigationMenuItemGraphqlApiExceptionInterceptor } from 'src/engine/metadata-modules/navigation-menu-item/interceptors/navigation-menu-item-graphql-api-exception.interceptor';
 import { NavigationMenuItemService } from 'src/engine/metadata-modules/navigation-menu-item/navigation-menu-item.service';
+import { resolveNavigationMenuItemName } from 'src/engine/metadata-modules/navigation-menu-item/utils/resolve-navigation-menu-item-name.util';
 import { WorkspaceMigrationGraphqlApiExceptionInterceptor } from 'src/engine/workspace-manager/workspace-migration/interceptors/workspace-migration-graphql-api-exception.interceptor';
 
 @UseGuards(WorkspaceAuthGuard)
@@ -38,7 +43,42 @@ import { WorkspaceMigrationGraphqlApiExceptionInterceptor } from 'src/engine/wor
 export class NavigationMenuItemResolver {
   constructor(
     private readonly navigationMenuItemService: NavigationMenuItemService,
+    private readonly i18nService: I18nService,
   ) {}
+
+  @ResolveField(() => String, { nullable: true })
+  async name(
+    @Parent() navigationMenuItem: NavigationMenuItemDTO,
+    @Context() context: { loaders: IDataloaders } & I18nContext,
+    @AuthWorkspace() workspace: WorkspaceEntity,
+  ): Promise<string | null> {
+    if (!isDefined(navigationMenuItem.name)) {
+      return null;
+    }
+
+    const standardApplicationId =
+      await context.loaders.standardApplicationIdLoader.load({
+        workspaceId: workspace.id,
+      });
+
+    const applicationCatalog = isDefined(navigationMenuItem.applicationId)
+      ? await context.loaders.applicationTranslationCatalogLoader.load({
+          applicationId: navigationMenuItem.applicationId,
+          workspaceId: workspace.id,
+          locale: context.req.locale ?? SOURCE_LOCALE,
+        })
+      : undefined;
+
+    return resolveNavigationMenuItemName({
+      name: navigationMenuItem.name,
+      applicationId: navigationMenuItem.applicationId,
+      twentyStandardApplicationId: standardApplicationId,
+      i18nInstance: this.i18nService.getI18nInstance(
+        context.req.locale ?? SOURCE_LOCALE,
+      ),
+      applicationCatalog,
+    });
+  }
 
   @Query(() => [NavigationMenuItemDTO])
   @UseGuards(NoPermissionGuard)

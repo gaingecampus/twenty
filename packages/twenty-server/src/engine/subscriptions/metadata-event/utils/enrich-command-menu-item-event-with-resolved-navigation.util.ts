@@ -5,6 +5,7 @@ import {
   isDefined,
 } from 'twenty-shared/utils';
 
+import { translateStandardLabel } from 'src/engine/core-modules/i18n/utils/translate-standard-label.util';
 import { EngineComponentKey } from 'src/engine/metadata-modules/command-menu-item/enums/engine-component-key.enum';
 import { buildNavigationInterpolationContext } from 'src/engine/metadata-modules/command-menu-item/utils/build-navigation-interpolation-context.util';
 import { isObjectMetadataCommandMenuItemPayload } from 'src/engine/metadata-modules/command-menu-item/utils/is-object-metadata-command-menu-item-payload.util';
@@ -27,14 +28,32 @@ export const enrichCommandMenuItemEventWithResolvedNavigation = ({
   locale,
   i18nInstance,
 }: EnrichCommandMenuItemEventArgs): FlatCommandMenuItem => {
+  const isStandardApp = belongsToTwentyStandardApp(record);
+  const enriched = { ...record };
+
+  for (const field of ['label', 'shortLabel'] as const) {
+    const rawValue = record[field];
+
+    if (!isDefined(rawValue)) {
+      continue;
+    }
+
+    enriched[field] = translateStandardLabel({
+      sourceValue: rawValue,
+      isStandardApp,
+      applicationCatalog: undefined,
+      i18nInstance,
+    });
+  }
+
   if (record.engineComponentKey !== EngineComponentKey.NAVIGATION) {
-    return record;
+    return enriched;
   }
 
   const payload = record.payload;
 
   if (!isObjectMetadataCommandMenuItemPayload(payload)) {
-    return record;
+    return enriched;
   }
 
   const objectMetadataItemId = payload.objectMetadataItemId;
@@ -45,7 +64,7 @@ export const enrichCommandMenuItemEventWithResolvedNavigation = ({
   });
 
   if (!isDefined(flatObjectMetadata)) {
-    return record;
+    return enriched;
   }
 
   const context = buildNavigationInterpolationContext({
@@ -55,10 +74,8 @@ export const enrichCommandMenuItemEventWithResolvedNavigation = ({
     i18nInstance,
   });
 
-  const enriched = { ...record };
-
   for (const field of ['label', 'shortLabel', 'icon'] as const) {
-    const rawValue = record[field];
+    const rawValue = enriched[field];
 
     const resolvedValue = interpolateCommandMenuItemTemplate({
       label: rawValue,

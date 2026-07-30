@@ -60,6 +60,8 @@ const makeNavigationRecord = (
     payload: { objectMetadataItemId: OBJECT_METADATA_ID },
     position: 1,
     isPinned: false,
+    applicationUniversalIdentifier:
+      TWENTY_STANDARD_APPLICATION.universalIdentifier,
     ...overrides,
   }) as unknown as FlatCommandMenuItem;
 
@@ -103,7 +105,9 @@ describe('enrichCommandMenuItemEventWithResolvedNavigation', () => {
       i18nInstance: mockI18nInstance,
     });
 
-    expect(result).toBe(record);
+    expect(result.label).toBe('Create New Record');
+    expect(result.shortLabel).toBeUndefined();
+    expect(result.icon).toBe('IconPlus');
   });
 
   it('should return record unchanged when payload has no objectMetadataItemId', () => {
@@ -122,7 +126,9 @@ describe('enrichCommandMenuItemEventWithResolvedNavigation', () => {
       i18nInstance: mockI18nInstance,
     });
 
-    expect(result).toBe(record);
+    expect(result.label).toBe(NAVIGATION_INTERPOLATED_LABEL);
+    expect(result.shortLabel).toBe(NAVIGATION_INTERPOLATED_SHORT_LABEL);
+    expect(result.icon).toBe(NAVIGATION_INTERPOLATED_ICON);
   });
 
   it('should return record unchanged when object metadata is not found in maps', () => {
@@ -141,7 +147,9 @@ describe('enrichCommandMenuItemEventWithResolvedNavigation', () => {
       i18nInstance: mockI18nInstance,
     });
 
-    expect(result).toBe(record);
+    expect(result.label).toBe(NAVIGATION_INTERPOLATED_LABEL);
+    expect(result.shortLabel).toBe(NAVIGATION_INTERPOLATED_SHORT_LABEL);
+    expect(result.icon).toBe(NAVIGATION_INTERPOLATED_ICON);
   });
 
   it('should apply standard overrides when resolving templates', () => {
@@ -207,7 +215,9 @@ describe('enrichCommandMenuItemEventWithResolvedNavigation', () => {
       i18nInstance: mockI18nInstance,
     });
 
-    expect(result).toBe(record);
+    expect(result.label).toBe(NAVIGATION_INTERPOLATED_LABEL);
+    expect(result.shortLabel).toBe(NAVIGATION_INTERPOLATED_SHORT_LABEL);
+    expect(result.icon).toBe(NAVIGATION_INTERPOLATED_ICON);
   });
 
   it('should pass through already-resolved literal labels', () => {

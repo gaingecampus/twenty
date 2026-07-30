@@ -7,6 +7,7 @@ import { Select } from '@/ui/input/components/Select';
 import { useUpdateWorkspaceMemberSettings } from '@/settings/profile/hooks/useUpdateWorkspaceMemberSettings';
 
 import { useInvalidateMetadataStore } from '@/metadata-store/hooks/useInvalidateMetadataStore';
+import { metadataStoreLocaleState } from '@/metadata-store/states/metadataStoreLocaleState';
 import { useStore } from 'jotai';
 import { useLingui } from '@lingui/react/macro';
 import { enUS } from 'date-fns/locale';
@@ -97,6 +98,7 @@ export const LocalePicker = () => {
       // oxlint-disable-next-line no-console
       console.log('Failed to save locale to localStorage:', error);
     }
+    store.set(metadataStoreLocaleState.atom, value);
     invalidateMetadataStore();
   };
 

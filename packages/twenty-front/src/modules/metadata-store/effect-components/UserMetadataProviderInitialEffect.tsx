@@ -8,6 +8,8 @@ import { currentWorkspaceMembersState } from '@/auth/states/currentWorkspaceMemb
 import { currentWorkspaceState } from '@/auth/states/currentWorkspaceState';
 import { isCurrentUserLoadedState } from '@/auth/states/isCurrentUserLoadedState';
 import { useInitializeFormatPreferences } from '@/localization/hooks/useInitializeFormatPreferences';
+import { useInvalidateMetadataStore } from '@/metadata-store/hooks/useInvalidateMetadataStore';
+import { metadataStoreLocaleState } from '@/metadata-store/states/metadataStoreLocaleState';
 import { getDateFnsLocale } from '@/ui/field/display/utils/getDateFnsLocale';
 import { useSetAtomState } from '@/ui/utilities/state/jotai/hooks/useSetAtomState';
 import { type ColorScheme } from '@/workspace-member/types/WorkspaceMember';
@@ -29,6 +31,7 @@ export const UserMetadataProviderInitialEffect = () => {
   const hasAccessTokenPair = useHasAccessTokenPair();
   const store = useStore();
   const [isInitialized, setIsInitialized] = useState(false);
+  const { invalidateMetadataStore } = useInvalidateMetadataStore();
 
   const setCurrentUser = useSetAtomState(currentUserState);
   const setCurrentWorkspace = useSetAtomState(currentWorkspaceState);
@@ -143,9 +146,17 @@ export const UserMetadataProviderInitialEffect = () => {
 
       initializeFormatPreferences(updatedWorkspaceMember);
 
-      dynamicActivate(
-        (workspaceMember.locale as keyof typeof APP_LOCALES) ?? SOURCE_LOCALE,
-      );
+      const memberLocale = updatedWorkspaceMember.locale;
+      const metadataStoreLocale = store.get(metadataStoreLocaleState.atom);
+
+      // IndexedDB caches already-translated labels without locale in the hash.
+      // Invalidate when the member locale differs so Korean (etc.) is refetched.
+      if (metadataStoreLocale !== memberLocale) {
+        invalidateMetadataStore();
+        store.set(metadataStoreLocaleState.atom, memberLocale);
+      }
+
+      dynamicActivate(memberLocale);
     }
 
     if (isDefined(workspaceMembers)) {
@@ -177,6 +188,8 @@ export const UserMetadataProviderInitialEffect = () => {
     setCurrentWorkspaceDeletedMembers,
     updateLocaleCatalog,
     setIsCurrentUserLoaded,
+    invalidateMetadataStore,
+    store,
   ]);
 
   return null;

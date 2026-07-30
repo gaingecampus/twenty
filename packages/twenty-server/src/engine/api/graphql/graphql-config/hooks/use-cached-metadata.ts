@@ -35,7 +35,7 @@ export function useCachedMetadata(config: CacheMetadataPluginConfig): Plugin {
       .digest('hex');
 
     if (operationName === 'FindAllViews') {
-      return `graphql:operations:${operationName}:${workspace.id}:${workspaceMetadataVersion}:${request.userWorkspaceId}:${queryHash}`;
+      return `graphql:operations:${operationName}:${workspace.id}:${workspaceMetadataVersion}:${request.userWorkspaceId}:${locale}:${queryHash}`;
     }
 
     return `graphql:operations:${operationName}:${workspace.id}:${workspaceMetadataVersion}:${locale}:${queryHash}`;
