@@ -74,8 +74,8 @@ export class TwentyStandardApplicationService {
       const fromTo = {
         from: fromSubFlatEntityMaps,
         // Keep workspace-owned customizations (overrides, isActive, layout
-        // config/position) so sync can add missing standard metadata without
-        // resetting UI edits.
+        // config/position, SELECT options/defaultValue) so sync can add missing
+        // standard metadata without resetting UI edits.
         to: preserveWorkspaceOwnedPropertiesOnToFlatEntityMaps({
           fromFlatEntityMaps: fromSubFlatEntityMaps,
           toFlatEntityMaps:

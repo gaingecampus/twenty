@@ -194,6 +194,75 @@ describe('preserveWorkspaceOwnedPropertiesOnToFlatEntityMaps', () => {
     );
   });
 
+  it('should preserve SELECT field options and defaultValue from from-maps', () => {
+    const universalIdentifier = 'stage-field-universal-identifier';
+    const workspaceOptions = [
+      {
+        id: 'option-new-id',
+        value: 'NEW',
+        label: '신규 문의',
+        position: 0,
+        color: 'blue',
+      },
+      {
+        id: 'option-won-id',
+        value: 'WON',
+        label: '성사',
+        position: 1,
+        color: 'green',
+      },
+    ];
+    const fromFlatEntity = getFlatFieldMetadataMock({
+      objectMetadataId: 'object-metadata-id',
+      type: FieldMetadataType.SELECT,
+      universalIdentifier,
+      defaultValue: "'NEW'",
+      options: workspaceOptions,
+    });
+    const toFlatEntity = getFlatFieldMetadataMock({
+      objectMetadataId: 'object-metadata-id',
+      type: FieldMetadataType.SELECT,
+      universalIdentifier,
+      defaultValue: "'SCREENING'",
+      options: [
+        {
+          id: 'standard-option-new-id',
+          value: 'NEW',
+          label: 'New',
+          position: 0,
+          color: 'red',
+        },
+        {
+          id: 'standard-option-screening-id',
+          value: 'SCREENING',
+          label: 'Screening',
+          position: 1,
+          color: 'purple',
+        },
+      ],
+    });
+
+    const result = preserveWorkspaceOwnedPropertiesOnToFlatEntityMaps({
+      fromFlatEntityMaps: {
+        byUniversalIdentifier: {
+          [universalIdentifier]: fromFlatEntity,
+        },
+      },
+      toFlatEntityMaps: {
+        byUniversalIdentifier: {
+          [universalIdentifier]: toFlatEntity,
+        },
+      },
+    });
+
+    expect(result.byUniversalIdentifier[universalIdentifier]?.options).toEqual(
+      workspaceOptions,
+    );
+    expect(
+      result.byUniversalIdentifier[universalIdentifier]?.defaultValue,
+    ).toBe("'NEW'");
+  });
+
   it('should preserve page layout widget configuration and gridPosition', () => {
     const universalIdentifier = 'widget-universal-identifier';
     const fromConfiguration = {
