@@ -12,6 +12,7 @@ import { WorkspaceMigrationBuilderException } from 'src/engine/workspace-manager
 import { WorkspaceMigrationValidateBuildAndRunService } from 'src/engine/workspace-manager/workspace-migration/services/workspace-migration-validate-build-and-run-service';
 import { type InferDeletionFromMissingEntities } from 'src/engine/workspace-manager/workspace-migration/workspace-migration-builder/types/infer-deletion-from-missing-entities.type';
 import { FromToAllUniversalFlatEntityMaps } from 'src/engine/workspace-manager/workspace-migration/types/workspace-migration-orchestrator.type';
+import { preserveWorkspaceOwnedPropertiesOnToFlatEntityMaps } from 'src/engine/workspace-manager/workspace-migration/universal-flat-entity/utils/preserve-workspace-owned-properties-on-to-flat-entity-maps.util';
 
 export type SynchronizeTwentyStandardApplicationResult = {
   totalActions: number;
@@ -64,14 +65,22 @@ export class TwentyStandardApplicationService {
       const flatEntityMapsKey = getMetadataFlatEntityMapsKey(metadataName);
       const fromFlatEntityMaps =
         fromTwentyStandardAllFlatEntityMaps[flatEntityMapsKey];
+      const fromSubFlatEntityMaps = getSubFlatEntityMapsByApplicationIdsOrThrow<
+        MetadataFlatEntity<typeof metadataName>
+      >({
+        applicationIds: [twentyStandardFlatApplication.id],
+        flatEntityMaps: fromFlatEntityMaps,
+      });
       const fromTo = {
-        from: getSubFlatEntityMapsByApplicationIdsOrThrow<
-          MetadataFlatEntity<typeof metadataName>
-        >({
-          applicationIds: [twentyStandardFlatApplication.id],
-          flatEntityMaps: fromFlatEntityMaps,
+        from: fromSubFlatEntityMaps,
+        // Keep workspace-owned customizations (overrides, isActive, layout
+        // config/position) so sync can add missing standard metadata without
+        // resetting UI edits.
+        to: preserveWorkspaceOwnedPropertiesOnToFlatEntityMaps({
+          fromFlatEntityMaps: fromSubFlatEntityMaps,
+          toFlatEntityMaps:
+            toTwentyStandardAllFlatEntityMaps[flatEntityMapsKey],
         }),
-        to: toTwentyStandardAllFlatEntityMaps[flatEntityMapsKey],
       };
 
       // @ts-expect-error Metadata flat entity maps cache key and metadataName colliding
