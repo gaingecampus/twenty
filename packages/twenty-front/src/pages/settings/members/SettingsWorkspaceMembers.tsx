@@ -1,7 +1,7 @@
 import { Trans, useLingui } from '@lingui/react/macro';
 import { SettingsPath } from 'twenty-shared/types';
 import { getSettingsPath } from 'twenty-shared/utils';
-import { IconLock, IconUserPlus, IconUsers } from 'twenty-ui/icon';
+import { IconAt, IconLock, IconUserPlus, IconUsers } from 'twenty-ui/icon';
 
 import { SettingsDiscoveryHeroCard } from '@/settings/components/SettingsDiscoveryHeroCard';
 import { useHasPermissionFlag } from '@/settings/roles/hooks/useHasPermissionFlag';
@@ -11,6 +11,7 @@ import { SettingsTabBar } from '@/settings/components/layout/SettingsTabBar';
 import { useSettingsActiveTabId } from '@/settings/components/layout/useSettingsActiveTabId';
 import { Section } from 'twenty-ui/layout';
 import { PermissionFlagType } from '~/generated-metadata/graphql';
+import { SettingsWorkspaceMembersConnectedAccountsTab } from '~/pages/settings/members/tabs/SettingsWorkspaceMembersConnectedAccountsTab';
 import { SettingsWorkspaceMembersInviteTab } from '~/pages/settings/members/tabs/SettingsWorkspaceMembersInviteTab';
 import { SettingsWorkspaceMembersRolesTab } from '~/pages/settings/members/tabs/SettingsWorkspaceMembersRolesTab';
 import { SettingsWorkspaceMembersTeamTab } from '~/pages/settings/members/tabs/SettingsWorkspaceMembersTeamTab';
@@ -22,6 +23,7 @@ const MEMBERS_TAB_LIST_ID = 'members-tab-list';
 const MEMBERS_TAB_TEAM_ID = 'team';
 const MEMBERS_TAB_INVITE_ID = 'invite';
 const MEMBERS_TAB_ROLES_ID = 'roles';
+const MEMBERS_TAB_CONNECTED_ACCOUNTS_ID = 'connected-accounts';
 
 const SETTINGS_MEMBERS_HERO_INSTANCE_ID_PREFIX = 'settings-members-hero';
 
@@ -29,12 +31,24 @@ export const SettingsWorkspaceMembers = () => {
   const { t } = useLingui();
 
   const hasRolesPermission = useHasPermissionFlag(PermissionFlagType.ROLES);
+  const hasWorkspaceMembersPermission = useHasPermissionFlag(
+    PermissionFlagType.WORKSPACE_MEMBERS,
+  );
 
   const tabs = [
     { id: MEMBERS_TAB_TEAM_ID, title: t`Team`, Icon: IconUsers },
     { id: MEMBERS_TAB_INVITE_ID, title: t`Invite`, Icon: IconUserPlus },
     ...(hasRolesPermission
       ? [{ id: MEMBERS_TAB_ROLES_ID, title: t`Roles`, Icon: IconLock }]
+      : []),
+    ...(hasWorkspaceMembersPermission
+      ? [
+          {
+            id: MEMBERS_TAB_CONNECTED_ACCOUNTS_ID,
+            title: t`Connected accounts`,
+            Icon: IconAt,
+          },
+        ]
       : []),
   ];
 
@@ -50,6 +64,12 @@ export const SettingsWorkspaceMembers = () => {
       case MEMBERS_TAB_ROLES_ID:
         return hasRolesPermission ? (
           <SettingsWorkspaceMembersRolesTab />
+        ) : (
+          <SettingsWorkspaceMembersTeamTab />
+        );
+      case MEMBERS_TAB_CONNECTED_ACCOUNTS_ID:
+        return hasWorkspaceMembersPermission ? (
+          <SettingsWorkspaceMembersConnectedAccountsTab />
         ) : (
           <SettingsWorkspaceMembersTeamTab />
         );
@@ -97,6 +117,16 @@ export const SettingsWorkspaceMembers = () => {
                       id: 'roles',
                       title: t`Roles`,
                       Icon: IconLock,
+                      vimeoId: '1185227242',
+                    },
+                  ]
+                : []),
+              ...(hasWorkspaceMembersPermission
+                ? [
+                    {
+                      id: 'connected-accounts',
+                      title: t`Connected accounts`,
+                      Icon: IconAt,
                       vimeoId: '1185227242',
                     },
                   ]

@@ -1,9 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
+import { isDefined } from 'twenty-shared/utils';
 import { In, IsNull, Repository } from 'typeorm';
 
 import { AppOAuthRevokeService } from 'src/engine/core-modules/application/connection-provider/refresh/services/app-oauth-revoke.service';
+import { UserWorkspaceEntity } from 'src/engine/core-modules/user-workspace/user-workspace.entity';
 import { CALENDAR_CHANNEL_DELETED_EVENT } from 'src/engine/metadata-modules/calendar-channel/constants/calendar-channel-deleted.constant';
 import { CalendarChannelEntity } from 'src/engine/metadata-modules/calendar-channel/entities/calendar-channel.entity';
 import { type CalendarChannelDeletedEvent } from 'src/engine/metadata-modules/calendar-channel/types/calendar-channel-deleted.type';
@@ -12,12 +14,16 @@ import {
   ConnectedAccountException,
   ConnectedAccountExceptionCode,
 } from 'src/engine/metadata-modules/connected-account/connected-account.exception';
+import { type WorkspaceConnectedAccountDTO } from 'src/engine/metadata-modules/connected-account/dtos/workspace-connected-account.dto';
 import { ConnectedAccountEntity } from 'src/engine/metadata-modules/connected-account/entities/connected-account.entity';
 import { type ConnectedAccountDeletedEvent } from 'src/engine/metadata-modules/connected-account/types/connected-account-deleted.type';
 import { MESSAGE_CHANNEL_DELETED_EVENT } from 'src/engine/metadata-modules/message-channel/constants/message-channel-deleted.constant';
 import { MessageChannelEntity } from 'src/engine/metadata-modules/message-channel/entities/message-channel.entity';
 import { type MessageChannelDeletedEvent } from 'src/engine/metadata-modules/message-channel/types/message-channel-deleted.type';
+import { GlobalWorkspaceOrmManager } from 'src/engine/twenty-orm/global-workspace-datasource/global-workspace-orm.manager';
+import { buildSystemAuthContext } from 'src/engine/twenty-orm/utils/build-system-auth-context.util';
 import { WorkspaceEventEmitter } from 'src/engine/workspace-event-emitter/workspace-event-emitter';
+import { type MessageChannelMessageAssociationWorkspaceEntity } from 'src/modules/messaging/common/standard-objects/message-channel-message-association.workspace-entity';
 
 @Injectable()
 export class ConnectedAccountMetadataService {
@@ -30,8 +36,11 @@ export class ConnectedAccountMetadataService {
     private readonly calendarChannelRepository: Repository<CalendarChannelEntity>,
     @InjectRepository(MessageChannelEntity)
     private readonly messageChannelRepository: Repository<MessageChannelEntity>,
+    @InjectRepository(UserWorkspaceEntity)
+    private readonly userWorkspaceRepository: Repository<UserWorkspaceEntity>,
     private readonly appOAuthRevokeService: AppOAuthRevokeService,
     private readonly workspaceEventEmitter: WorkspaceEventEmitter,
+    private readonly globalWorkspaceOrmManager: GlobalWorkspaceOrmManager,
   ) {}
 
   async findByUserWorkspaceId({
@@ -129,6 +138,128 @@ export class ConnectedAccountMetadataService {
     });
 
     return accounts.map((account) => account.id);
+  }
+
+  async findWorkspaceConnectedAccounts({
+    workspaceId,
+  }: {
+    workspaceId: string;
+  }): Promise<WorkspaceConnectedAccountDTO[]> {
+    const accounts = await this.repository.find({
+      where: { workspaceId },
+      relations: {
+        messageChannels: true,
+      },
+      order: { createdAt: 'ASC' },
+    });
+
+    if (accounts.length === 0) {
+      return [];
+    }
+
+    const userWorkspaceIds = [
+      ...new Set(accounts.map((account) => account.userWorkspaceId)),
+    ];
+
+    const userWorkspaces = await this.userWorkspaceRepository.find({
+      where: { id: In(userWorkspaceIds), workspaceId },
+      relations: { user: true },
+    });
+
+    const ownerByUserWorkspaceId = new Map(
+      userWorkspaces.map((userWorkspace) => [
+        userWorkspace.id,
+        {
+          user: userWorkspace.user,
+          avatarUrl: userWorkspace.defaultAvatarUrl ?? null,
+        },
+      ]),
+    );
+
+    const messageChannelIds = accounts.flatMap((account) =>
+      account.messageChannels.map((messageChannel) => messageChannel.id),
+    );
+
+    const messageCountByChannelId =
+      await this.getMessageCountsByMessageChannelIds({
+        workspaceId,
+        messageChannelIds,
+      });
+
+    return accounts.map((account) => {
+      const owner = ownerByUserWorkspaceId.get(account.userWorkspaceId);
+      const primaryMessageChannel =
+        account.messageChannels.find(
+          (messageChannel) => messageChannel.handle === account.handle,
+        ) ?? account.messageChannels[0];
+
+      const messageCount = account.messageChannels.reduce(
+        (total, messageChannel) =>
+          total + (messageCountByChannelId.get(messageChannel.id) ?? 0),
+        0,
+      );
+
+      return {
+        id: account.id,
+        handle: account.handle,
+        provider: account.provider,
+        visibility: account.visibility,
+        userWorkspaceId: account.userWorkspaceId,
+        ownerEmail: owner?.user?.email ?? null,
+        ownerFirstName: owner?.user?.firstName ?? null,
+        ownerLastName: owner?.user?.lastName ?? null,
+        ownerAvatarUrl: owner?.avatarUrl ?? null,
+        syncStatus: isDefined(primaryMessageChannel)
+          ? primaryMessageChannel.syncStatus
+          : null,
+        messageChannelId: primaryMessageChannel?.id ?? null,
+        messageCount,
+        syncedAt: primaryMessageChannel?.syncedAt ?? null,
+        authFailedAt: account.authFailedAt,
+        archivedAt: account.archivedAt,
+        createdAt: account.createdAt,
+      };
+    });
+  }
+
+  private async getMessageCountsByMessageChannelIds({
+    workspaceId,
+    messageChannelIds,
+  }: {
+    workspaceId: string;
+    messageChannelIds: string[];
+  }): Promise<Map<string, number>> {
+    if (messageChannelIds.length === 0) {
+      return new Map();
+    }
+
+    const authContext = buildSystemAuthContext(workspaceId);
+
+    return this.globalWorkspaceOrmManager.executeInWorkspaceContext(
+      async () => {
+        const associationRepository =
+          await this.globalWorkspaceOrmManager.getRepository<MessageChannelMessageAssociationWorkspaceEntity>(
+            workspaceId,
+            'messageChannelMessageAssociation',
+          );
+
+        const rows: Array<{ messageChannelId: string; count: string }> =
+          await associationRepository
+            .createQueryBuilder('association')
+            .select('association.messageChannelId', 'messageChannelId')
+            .addSelect('COUNT(*)', 'count')
+            .where('association.messageChannelId IN (:...messageChannelIds)', {
+              messageChannelIds,
+            })
+            .groupBy('association.messageChannelId')
+            .getRawMany();
+
+        return new Map(
+          rows.map((row) => [row.messageChannelId, Number(row.count)]),
+        );
+      },
+      authContext,
+    );
   }
 
   async create(
