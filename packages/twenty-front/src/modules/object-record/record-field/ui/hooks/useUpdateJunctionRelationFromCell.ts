@@ -3,11 +3,16 @@ import { useStore } from 'jotai';
 import { isDefined } from 'twenty-shared/utils';
 import { v4 } from 'uuid';
 
+import { useApolloCoreClient } from '@/object-metadata/hooks/useApolloCoreClient';
 import { useObjectMetadataItems } from '@/object-metadata/hooks/useObjectMetadataItems';
 import { type FieldMetadataItem } from '@/object-metadata/types/FieldMetadataItem';
 import { getObjectTypename } from '@/object-record/cache/utils/getObjectTypename';
+import { getRecordsFromRecordConnection } from '@/object-record/cache/utils/getRecordsFromRecordConnection';
+import { type RecordGqlOperationFindManyResult } from '@/object-record/graphql/types/RecordGqlOperationFindManyResult';
 import { useCreateOneRecord } from '@/object-record/hooks/useCreateOneRecord';
 import { useDeleteOneRecord } from '@/object-record/hooks/useDeleteOneRecord';
+import { useFindManyRecordsQuery } from '@/object-record/hooks/useFindManyRecordsQuery';
+import { useRestoreManyRecords } from '@/object-record/hooks/useRestoreManyRecords';
 import { type FieldDefinition } from '@/object-record/record-field/ui/types/FieldDefinition';
 import {
   type FieldRelationFromManyValue,
@@ -29,12 +34,84 @@ type UseUpdateJunctionRelationFromCellArgs = {
   recordId: string;
 };
 
+const replaceJunctionRecordInStore = ({
+  store,
+  recordId,
+  fieldName,
+  previousJunctionId,
+  nextJunctionRecord,
+}: {
+  store: ReturnType<typeof useStore>;
+  recordId: string;
+  fieldName: string;
+  previousJunctionId: string;
+  nextJunctionRecord: ObjectRecord;
+}) => {
+  store.set(
+    recordStoreFamilyState.atomFamily(recordId),
+    (currentRecord: ObjectRecord | null | undefined) => {
+      if (!isDefined(currentRecord)) {
+        return currentRecord;
+      }
+
+      const currentFieldValue = currentRecord[fieldName];
+      const updatedJunctionRecords = Array.isArray(currentFieldValue)
+        ? currentFieldValue.map((junctionRecord) =>
+            junctionRecord?.id === previousJunctionId
+              ? nextJunctionRecord
+              : junctionRecord,
+          )
+        : [nextJunctionRecord];
+
+      return {
+        ...currentRecord,
+        [fieldName]: updatedJunctionRecords,
+      };
+    },
+  );
+};
+
+const removeJunctionRecordFromStore = ({
+  store,
+  recordId,
+  fieldName,
+  junctionRecordId,
+}: {
+  store: ReturnType<typeof useStore>;
+  recordId: string;
+  fieldName: string;
+  junctionRecordId: string;
+}) => {
+  store.set(
+    recordStoreFamilyState.atomFamily(recordId),
+    (currentRecord: ObjectRecord | null | undefined) => {
+      if (!isDefined(currentRecord)) {
+        return currentRecord;
+      }
+
+      const currentFieldValue = currentRecord[fieldName];
+
+      if (!Array.isArray(currentFieldValue)) {
+        return currentRecord;
+      }
+
+      return {
+        ...currentRecord,
+        [fieldName]: currentFieldValue.filter(
+          (junctionRecord) => junctionRecord?.id !== junctionRecordId,
+        ),
+      };
+    },
+  );
+};
+
 export const useUpdateJunctionRelationFromCell = ({
   fieldMetadataItem,
   fieldDefinition,
   recordId,
 }: UseUpdateJunctionRelationFromCellArgs) => {
   const { objectMetadataItems } = useObjectMetadataItems();
+  const apolloCoreClient = useApolloCoreClient();
 
   const sourceObjectMetadata = objectMetadataItems.find(
     (item) =>
@@ -65,6 +142,18 @@ export const useUpdateJunctionRelationFromCell = ({
 
   const { deleteOneRecord: deleteJunctionRecord } = useDeleteOneRecord({
     objectNameSingular: junctionObjectNameSingular,
+  });
+
+  const { restoreManyRecords } = useRestoreManyRecords({
+    objectNameSingular: junctionObjectNameSingular,
+  });
+
+  const { findManyRecordsQuery } = useFindManyRecordsQuery({
+    objectNameSingular: junctionObjectNameSingular,
+    recordGqlFields: {
+      id: true,
+      deletedAt: true,
+    },
   });
 
   const store = useStore();
@@ -127,6 +216,7 @@ export const useUpdateJunctionRelationFromCell = ({
           junctionRecords: currentJunctionRecords,
           targetRecordId: morphItem.recordId,
           targetFieldName,
+          targetJoinColumnName,
         });
 
         if (!isDefined(junctionRecordToDelete)) {
@@ -135,37 +225,25 @@ export const useUpdateJunctionRelationFromCell = ({
 
         await deleteJunctionRecord(junctionRecordToDelete.id);
 
-        const recordFromStoreForDelete = store.get(
-          recordStoreFamilyState.atomFamily(recordId),
-        );
-        const currentFieldValue = recordFromStoreForDelete?.[fieldName] as
-          | FieldRelationValue<FieldRelationFromManyValue>
-          | undefined;
+        removeJunctionRecordFromStore({
+          store,
+          recordId,
+          fieldName,
+          junctionRecordId: junctionRecordToDelete.id,
+        });
+      } else {
+        const existingJunctionRecord = findJunctionRecordByTargetId({
+          junctionRecords: currentJunctionRecords,
+          targetRecordId: morphItem.recordId,
+          targetFieldName,
+          targetJoinColumnName,
+        });
 
-        if (
-          !isDefined(currentFieldValue) ||
-          !Array.isArray(currentFieldValue)
-        ) {
+        // Already linked in the store — avoid duplicate INSERT
+        if (isDefined(existingJunctionRecord)) {
           return;
         }
 
-        const updatedJunctionRecords = currentFieldValue.filter(
-          (record) => record.id !== junctionRecordToDelete.id,
-        );
-
-        store.set(
-          recordStoreFamilyState.atomFamily(recordId),
-          (currentRecord: Record<string, unknown> | null | undefined) => {
-            if (!isDefined(currentRecord)) {
-              return currentRecord;
-            }
-            return {
-              ...currentRecord,
-              [fieldName]: updatedJunctionRecords,
-            } as ObjectRecord;
-          },
-        );
-      } else {
         const searchRecord = store.get(
           searchRecordStoreFamilyState.atomFamily(morphItem.recordId),
         );
@@ -196,7 +274,7 @@ export const useUpdateJunctionRelationFromCell = ({
 
         store.set(
           recordStoreFamilyState.atomFamily(recordId),
-          (currentRecord: Record<string, unknown> | null | undefined) => {
+          (currentRecord: ObjectRecord | null | undefined) => {
             if (!isDefined(currentRecord)) {
               return currentRecord;
             }
@@ -209,24 +287,99 @@ export const useUpdateJunctionRelationFromCell = ({
             return {
               ...currentRecord,
               [fieldName]: updatedJunctionRecords,
-            } as ObjectRecord;
+            };
           },
         );
 
-        await createJunctionRecord(newJunctionRecordForApi);
+        try {
+          await createJunctionRecord(newJunctionRecordForApi);
+        } catch (error) {
+          // Soft-deleted or already-active link may still exist in DB
+          const softDeleteInclusiveFilter = {
+            and: [
+              { [sourceJoinColumnName]: { eq: recordId } },
+              { [targetJoinColumnName]: { eq: morphItem.recordId } },
+              {
+                or: [
+                  { deletedAt: { is: 'NULL' } },
+                  { deletedAt: { is: 'NOT_NULL' } },
+                ],
+              },
+            ],
+          };
+
+          const existingLinksResult =
+            await apolloCoreClient.query<RecordGqlOperationFindManyResult>({
+              query: findManyRecordsQuery,
+              variables: {
+                filter: softDeleteInclusiveFilter,
+                limit: 1,
+              },
+              fetchPolicy: 'network-only',
+            });
+
+          const existingLinks = getRecordsFromRecordConnection({
+            recordConnection: {
+              edges:
+                existingLinksResult.data?.[junctionObjectMetadata.namePlural]
+                  ?.edges ?? [],
+              pageInfo: existingLinksResult.data?.[
+                junctionObjectMetadata.namePlural
+              ]?.pageInfo ?? {
+                hasNextPage: false,
+                hasPreviousPage: false,
+                startCursor: '',
+                endCursor: '',
+              },
+            },
+          });
+
+          const existingLink = existingLinks[0];
+
+          if (!isDefined(existingLink)) {
+            removeJunctionRecordFromStore({
+              store,
+              recordId,
+              fieldName,
+              junctionRecordId: newJunctionId,
+            });
+            throw error;
+          }
+
+          if (isDefined(existingLink.deletedAt)) {
+            await restoreManyRecords({
+              idsToRestore: [existingLink.id],
+            });
+          }
+
+          replaceJunctionRecordInStore({
+            store,
+            recordId,
+            fieldName,
+            previousJunctionId: newJunctionId,
+            nextJunctionRecord: {
+              ...junctionRecordForStore,
+              id: existingLink.id,
+              deletedAt: null,
+            },
+          });
+        }
       }
     },
     [
-      store,
+      apolloCoreClient,
       createJunctionRecord,
       deleteJunctionRecord,
       fieldDefinition.metadata.fieldName,
+      findManyRecordsQuery,
       junctionConfig,
       junctionObjectMetadata,
       objectMetadataItems,
       recordId,
+      restoreManyRecords,
       sourceFieldOnJunction,
       sourceObjectMetadata,
+      store,
     ],
   );
 

@@ -14,6 +14,9 @@ import {
 } from '@/object-record/record-field/ui/contexts/FieldInputEventContext';
 import { usePersistField } from '@/object-record/record-field/ui/hooks/usePersistField';
 import { type FieldRelationMetadata } from '@/object-record/record-field/ui/types/FieldMetadata';
+import { extractTargetRecordsFromJunction } from '@/object-record/record-field/ui/utils/junction/extractTargetRecordsFromJunction';
+import { getJunctionConfig } from '@/object-record/record-field/ui/utils/junction/getJunctionConfig';
+import { hasJunctionConfig } from '@/object-record/record-field/ui/utils/junction/hasJunctionConfig';
 import { getRecordFieldCardRelationPickerDropdownId } from '@/object-record/record-show/utils/getRecordFieldCardRelationPickerDropdownId';
 import { recordStoreFamilySelector } from '@/object-record/record-store/states/selectors/recordStoreFamilySelector';
 import { AggregateOperations } from '@/object-record/record-table/constants/AggregateOperations';
@@ -53,6 +56,7 @@ export const RecordDetailRelationSection = ({
   const {
     fieldName,
     relationFieldMetadataId,
+    relationObjectMetadataId,
     relationObjectMetadataNameSingular,
     relationType,
     objectMetadataNameSingular,
@@ -181,6 +185,56 @@ export const RecordDetailRelationSection = ({
 
   const relationRecordsCount = relationAggregateResult?.id?.COUNT ?? 0;
 
+  const isJunctionRelation = hasJunctionConfig(
+    fieldDefinition.metadata.settings,
+  );
+
+  const junctionConfig = isJunctionRelation
+    ? getJunctionConfig({
+        settings: fieldDefinition.metadata.settings,
+        relationObjectMetadataId,
+        sourceObjectMetadataId: objectMetadataItem.id,
+        objectMetadataItems,
+      })
+    : null;
+
+  const recordsWithObjectNameSingular = (() => {
+    if (
+      !isJunctionRelation ||
+      !isDefined(junctionConfig) ||
+      junctionConfig.targetFields.length === 0
+    ) {
+      return relationRecords.map((relationRecord) => ({
+        value: relationRecord,
+        objectNameSingular: relationObjectMetadataNameSingular,
+        fieldMetadataId: relationFieldMetadataId,
+      }));
+    }
+
+    return extractTargetRecordsFromJunction({
+      junctionRecords: relationRecords,
+      targetFields: junctionConfig.targetFields,
+      objectMetadataItems,
+      includeRecord: true,
+    })
+      .map((extracted) => {
+        const targetObjectMetadata = objectMetadataItems.find(
+          (item) => item.id === extracted.objectMetadataId,
+        );
+
+        if (!isDefined(targetObjectMetadata) || !isDefined(extracted.record)) {
+          return null;
+        }
+
+        return {
+          value: extracted.record,
+          objectNameSingular: targetObjectMetadata.nameSingular,
+          fieldMetadataId: relationFieldMetadataId,
+        };
+      })
+      .filter(isDefined);
+  })();
+
   return (
     <FieldInputEventContext.Provider
       value={{
@@ -202,20 +256,14 @@ export const RecordDetailRelationSection = ({
             : undefined
         }
         hideRightAdornmentOnMouseLeave={!isDropdownOpen && !isMobile}
-        areRecordsAvailable={relationRecords.length > 0}
+        areRecordsAvailable={recordsWithObjectNameSingular.length > 0}
         rightAdornment={
           <RecordDetailRelationSectionDropdown loading={loading} />
         }
       >
-        {relationRecords.length > 0 && (
+        {recordsWithObjectNameSingular.length > 0 && (
           <RecordDetailRelationRecordsList
-            recordsWithObjectNameSingular={relationRecords.map(
-              (relationRecord) => ({
-                value: relationRecord,
-                objectNameSingular: relationObjectMetadataNameSingular,
-                fieldMetadataId: relationFieldMetadataId,
-              }),
-            )}
+            recordsWithObjectNameSingular={recordsWithObjectNameSingular}
           />
         )}
       </RecordDetailSectionContainer>

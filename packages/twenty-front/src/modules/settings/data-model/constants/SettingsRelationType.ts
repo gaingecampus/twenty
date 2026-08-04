@@ -1,0 +1,1 @@
+export const SETTINGS_MANY_TO_MANY_RELATION_TYPE = 'MANY_TO_MANY' as const;

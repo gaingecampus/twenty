@@ -1,5 +1,8 @@
+import { isNonEmptyString } from '@sniptt/guards';
+
 import { type FieldMetadataItem } from '@/object-metadata/types/FieldMetadataItem';
 import { type EnrichedObjectMetadataItem } from '@/object-metadata/types/EnrichedObjectMetadataItem';
+import { getRelationJoinColumnName } from '@/object-record/record-field/ui/utils/junction/getRelationJoinColumnName';
 import { isObjectWithId } from '@/object-record/record-field/ui/utils/junction/isObjectWithId';
 import { type ExtractedTargetRecord } from '@/object-record/record-field/ui/utils/junction/types/ExtractedTargetRecord';
 import { type ObjectRecord } from '@/object-record/types/ObjectRecord';
@@ -21,17 +24,33 @@ const tryExtractFromField = (
   fieldName: string,
   objectMetadataId: string,
   includeRecord: boolean,
+  joinColumnName?: string,
 ): ExtractedTargetRecord | null => {
   const targetObject = junctionRecord[fieldName];
 
-  if (!isObjectWithId(targetObject)) {
+  if (isObjectWithId(targetObject)) {
+    return {
+      recordId: targetObject.id,
+      objectMetadataId,
+      ...(includeRecord && { record: targetObject }),
+    };
+  }
+
+  // Nested target may be missing from cache; join column still identifies the link
+  if (!isNonEmptyString(joinColumnName)) {
     return null;
   }
 
+  const targetRecordId = junctionRecord[joinColumnName];
+
+  if (!isNonEmptyString(targetRecordId)) {
+    return null;
+  }
+
+  // record omitted: join column alone cannot build a full ObjectRecord chip payload
   return {
-    recordId: targetObject.id,
+    recordId: targetRecordId,
     objectMetadataId,
-    ...(includeRecord && { record: targetObject }),
   };
 };
 
@@ -65,6 +84,7 @@ const extractFromTargetFields = (
         targetField.name,
         targetObjectMetadata.id,
         includeRecord,
+        getRelationJoinColumnName(targetField),
       );
       if (isDefined(result)) {
         return result;
@@ -107,6 +127,7 @@ const extractFromMorphRelationField = (
         computedFieldName,
         targetObjectMetadata.id,
         includeRecord,
+        getRelationJoinColumnName(targetField, computedFieldName),
       );
       if (isDefined(result)) {
         return result;

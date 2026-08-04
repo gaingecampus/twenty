@@ -1,3 +1,5 @@
+import { isNonEmptyString } from '@sniptt/guards';
+
 import { type FieldMetadataItem } from '@/object-metadata/types/FieldMetadataItem';
 import { type RecordGqlFields } from '@/object-record/graphql/record-gql-fields/types/RecordGqlFields';
 import { buildIdentifierGqlFields } from '@/object-record/graphql/record-gql-fields/utils/buildIdentifierGqlFields';
@@ -5,6 +7,7 @@ import {
   getJunctionConfig,
   type JunctionObjectMetadataItem,
 } from '@/object-record/record-field/ui/utils/junction/getJunctionConfig';
+import { getRelationJoinColumnName } from '@/object-record/record-field/ui/utils/junction/getRelationJoinColumnName';
 import { FieldMetadataType } from 'twenty-shared/types';
 import {
   computeMorphRelationGqlFieldName,
@@ -33,8 +36,11 @@ const buildRegularTargetFieldGqlFields = (
     return {};
   }
 
+  const joinColumnName = getRelationJoinColumnName(targetField);
+
   return {
     [targetField.name]: buildIdentifierGqlFields(targetObjectMetadata),
+    ...(isNonEmptyString(joinColumnName) ? { [joinColumnName]: true } : {}),
   };
 };
 
@@ -66,7 +72,16 @@ const buildMorphTargetFieldGqlFields = (
       targetObjectMetadataNamePlural: targetObjectMetadata.namePlural,
     });
 
+    const joinColumnName = getRelationJoinColumnName(
+      targetField,
+      computedFieldName,
+    );
+
     result[computedFieldName] = buildIdentifierGqlFields(targetObjectMetadata);
+
+    if (isNonEmptyString(joinColumnName)) {
+      result[joinColumnName] = true;
+    }
   }
 
   return result;

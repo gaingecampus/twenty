@@ -169,7 +169,7 @@ describe('extractTargetRecordsFromJunction', () => {
       ]);
     });
 
-    it('should skip junction records with null target', () => {
+    it('should skip junction records with null target and no join column', () => {
       const junctionRecords = [
         createMockJunctionRecord('junction-1', { company: null }),
         createMockJunctionRecord('junction-2', {
@@ -185,6 +185,36 @@ describe('extractTargetRecordsFromJunction', () => {
 
       expect(result).toHaveLength(1);
       expect(result[0].recordId).toBe('company-1');
+    });
+
+    it('should fall back to join column when nested target is null', () => {
+      const junctionRecords = [
+        createMockJunctionRecord('junction-1', {
+          company: null,
+          companyId: 'company-1',
+        }),
+      ];
+
+      const result = extractTargetRecordsFromJunction({
+        junctionRecords,
+        targetFields: [
+          {
+            ...mockTargetField,
+            settings: {
+              relationType: 'MANY_TO_ONE',
+              joinColumnName: 'companyId',
+            },
+          },
+        ],
+        objectMetadataItems: mockObjectMetadataItems,
+      });
+
+      expect(result).toEqual([
+        {
+          recordId: 'company-1',
+          objectMetadataId: 'company-metadata-id',
+        },
+      ]);
     });
   });
 

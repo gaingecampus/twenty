@@ -15,6 +15,7 @@ import { FlatEntityMapsGraphqlApiExceptionFilter } from 'src/engine/metadata-mod
 import { FrontComponentModule } from 'src/engine/metadata-modules/front-component/front-component.module';
 import { LogicFunctionLayerModule } from 'src/engine/metadata-modules/logic-function-layer/logic-function-layer.module';
 import { LogicFunctionModule } from 'src/engine/metadata-modules/logic-function/logic-function.module';
+import { ManyToManyRelationModule } from 'src/engine/metadata-modules/many-to-many-relation/many-to-many-relation.module';
 import { MessageChannelMetadataModule } from 'src/engine/metadata-modules/message-channel/message-channel-metadata.module';
 import { MessageFolderMetadataModule } from 'src/engine/metadata-modules/message-folder/message-folder-metadata.module';
 import { NavigationMenuItemModule } from 'src/engine/metadata-modules/navigation-menu-item/navigation-menu-item.module';
@@ -35,6 +36,7 @@ import { WorkspaceMetadataVersionModule } from 'src/engine/metadata-modules/work
   imports: [
     FieldMetadataModule,
     FrontComponentModule,
+    ManyToManyRelationModule,
     ObjectMetadataModule,
     SearchFieldMetadataModule,
     LogicFunctionModule,

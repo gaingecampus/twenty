@@ -2,7 +2,9 @@ import { useFormContext } from 'react-hook-form';
 
 import { useObjectMetadataItems } from '@/object-metadata/hooks/useObjectMetadataItems';
 import { SettingsDataModelPreviewFormCard } from '@/settings/data-model/components/SettingsDataModelPreviewFormCard';
-import { RELATION_TYPES } from '@/settings/data-model/constants/RelationTypes';
+import { SETTINGS_RELATION_TYPES } from '@/settings/data-model/constants/SettingsRelationTypes';
+import { type SettingsRelationType } from '@/settings/data-model/types/SettingsRelationType';
+import { isSettingsManyToManyRelationType } from '@/settings/data-model/utils/isSettingsManyToManyRelationType';
 import {
   SettingsDataModelFieldRelationForm,
   type SettingsDataModelFieldMorphRelationFormValues,
@@ -64,15 +66,20 @@ export const SettingsDataModelFieldRelationFormCard = ({
 
   const fallbackRelationObjectMetadataItem = objectMetadataItems[0];
 
-  const relationType: RelationType = watch(
+  const relationType: SettingsRelationType = watch(
     'relationType',
     RelationType.ONE_TO_MANY,
   );
+  const isManyToMany = isSettingsManyToManyRelationType(relationType);
 
-  const relationTypeConfig = RELATION_TYPES[relationType];
+  const relationTypeConfig = SETTINGS_RELATION_TYPES[relationType];
+
+  const previewRelationType = isManyToMany
+    ? RelationType.ONE_TO_MANY
+    : relationType;
 
   const oppositeRelationType =
-    relationType === RelationType.MANY_TO_ONE
+    previewRelationType === RelationType.MANY_TO_ONE
       ? RelationType.ONE_TO_MANY
       : RelationType.MANY_TO_ONE;
 
@@ -86,7 +93,7 @@ export const SettingsDataModelFieldRelationFormCard = ({
               label: watch('label'),
               type: FieldMetadataType.RELATION,
               settings: {
-                relationType,
+                relationType: previewRelationType,
                 joinColumnName: 'previewJoinColumnId',
               },
             }}
@@ -96,7 +103,7 @@ export const SettingsDataModelFieldRelationFormCard = ({
               relationObjectMetadataItems[0]?.nameSingular ??
               fallbackRelationObjectMetadataItem.nameSingular
             }
-            pluralizeLabel={watch('relationType') === RelationType.MANY_TO_ONE}
+            pluralizeLabel={previewRelationType === RelationType.MANY_TO_ONE}
           />
           <SettingsDataModelRelationPreviewImage
             src={relationTypeConfig.imageSrc}
@@ -110,7 +117,9 @@ export const SettingsDataModelFieldRelationFormCard = ({
               label: watch('targetFieldLabel'),
               type: FieldMetadataType.RELATION,
               settings: {
-                relationType: oppositeRelationType,
+                relationType: isManyToMany
+                  ? RelationType.ONE_TO_MANY
+                  : oppositeRelationType,
                 joinColumnName: 'previewJoinColumnId',
               },
             }}
@@ -121,7 +130,7 @@ export const SettingsDataModelFieldRelationFormCard = ({
                 : [fallbackRelationObjectMetadataItem.nameSingular]
             }
             fieldPreviewTargetObjectNameSingular={objectNameSingular}
-            pluralizeLabel={watch('relationType') !== RelationType.MANY_TO_ONE}
+            pluralizeLabel={previewRelationType !== RelationType.MANY_TO_ONE}
           />
         </SettingsDataModelFieldRelationPreviewContent>
       }
@@ -132,7 +141,7 @@ export const SettingsDataModelFieldRelationFormCard = ({
             sourceObjectMetadataId={sourceObjectMetadataItem?.id}
             disabled={disabled}
           />
-          {isJunctionRelationsEnabled && (
+          {isJunctionRelationsEnabled && !isManyToMany && (
             <SettingsDataModelFieldRelationJunctionForm
               objectNameSingular={objectNameSingular}
             />

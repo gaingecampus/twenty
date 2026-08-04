@@ -2,13 +2,18 @@ import { useDeleteOneFieldMetadataItem } from '@/object-metadata/hooks/useDelete
 import { useFieldMetadataItem } from '@/object-metadata/hooks/useFieldMetadataItem';
 import { useGetIsMetadataItemCustom } from '@/object-metadata/hooks/useGetIsMetadataItemCustom';
 import { useGetRelationMetadata } from '@/object-metadata/hooks/useGetRelationMetadata';
+import { useObjectMetadataItems } from '@/object-metadata/hooks/useObjectMetadataItems';
 import { type FieldMetadataItem } from '@/object-metadata/types/FieldMetadataItem';
 import { type EnrichedObjectMetadataItem } from '@/object-metadata/types/EnrichedObjectMetadataItem';
 import { isDDLLockedState } from '@/client-config/states/isDDLLockedState';
 import { isObjectMetadataReadOnly } from '@/object-record/read-only/utils/isObjectMetadataReadOnly';
+import { hasJunctionConfig } from '@/object-record/record-field/ui/utils/junction/hasJunctionConfig';
+import { getJunctionConfig } from '@/object-record/record-field/ui/utils/junction/getJunctionConfig';
 import { SettingsItemTypeTag } from '@/settings/components/SettingsItemTypeTag';
 import { SettingsNameCellSecondaryLabel } from '@/settings/components/SettingsNameCellSecondaryLabel';
 import { RELATION_TYPES } from '@/settings/data-model/constants/RelationTypes';
+import { SETTINGS_MANY_TO_MANY_RELATION_TYPE } from '@/settings/data-model/constants/SettingsRelationType';
+import { SETTINGS_RELATION_TYPES } from '@/settings/data-model/constants/SettingsRelationTypes';
 import { SettingsObjectFieldInactiveActionDropdown } from '@/settings/data-model/object-details/components/SettingsObjectFieldDisabledActionDropdown';
 import { TableCell } from '@/ui/layout/table/components/TableCell';
 import { TableRow } from '@/ui/layout/table/components/TableRow';
@@ -98,11 +103,44 @@ export const SettingsObjectRelationItemTableRow = ({
   const Icon = getIcon(fieldMetadataItem.icon);
 
   const getRelationMetadata = useGetRelationMetadata();
+  const { objectMetadataItems } = useObjectMetadataItems();
   const { relationObjectMetadataItem, relationType } =
     useMemo(
       () => getRelationMetadata({ fieldMetadataItem }),
       [fieldMetadataItem, getRelationMetadata],
     ) ?? {};
+
+  const isJunctionRelation = hasJunctionConfig(fieldMetadataItem.settings);
+
+  const junctionFinalTargetObjectMetadataItem = useMemo(() => {
+    if (!isJunctionRelation || !isDefined(relationObjectMetadataItem?.id)) {
+      return undefined;
+    }
+
+    const junctionConfig = getJunctionConfig({
+      settings: fieldMetadataItem.settings,
+      relationObjectMetadataId: relationObjectMetadataItem.id,
+      sourceObjectMetadataId: objectMetadataItem.id,
+      objectMetadataItems,
+    });
+
+    const targetObjectMetadataId =
+      junctionConfig?.targetFields?.[0]?.relation?.targetObjectMetadata.id;
+
+    if (!isDefined(targetObjectMetadataId)) {
+      return undefined;
+    }
+
+    return objectMetadataItems.find(
+      (item) => item.id === targetObjectMetadataId,
+    );
+  }, [
+    fieldMetadataItem.settings,
+    isJunctionRelation,
+    objectMetadataItem.id,
+    objectMetadataItems,
+    relationObjectMetadataItem?.id,
+  ]);
 
   const isDDLLocked = useAtomStateValue(isDDLLockedState);
 
@@ -126,10 +164,6 @@ export const SettingsObjectRelationItemTableRow = ({
       fieldName: fieldMetadataItem.name,
     });
 
-  const isRelatedObjectLinkable = isDefined(
-    relationObjectMetadataItem?.namePlural,
-  );
-
   const isMorphRelation =
     fieldMetadataItem.type === FieldMetadataType.MORPH_RELATION;
 
@@ -142,22 +176,36 @@ export const SettingsObjectRelationItemTableRow = ({
     : relationType;
 
   const relationTypeLabel = (() => {
+    if (isJunctionRelation) {
+      return SETTINGS_RELATION_TYPES[SETTINGS_MANY_TO_MANY_RELATION_TYPE].label;
+    }
     if (isDefined(displayRelationType) === true) {
       return RELATION_TYPES[displayRelationType].label;
     }
     return '';
   })();
 
-  const RelationIcon = displayRelationType
-    ? RELATION_TYPES[displayRelationType].Icon
-    : undefined;
+  const RelationIcon = isJunctionRelation
+    ? SETTINGS_RELATION_TYPES[SETTINGS_MANY_TO_MANY_RELATION_TYPE].Icon
+    : displayRelationType
+      ? RELATION_TYPES[displayRelationType].Icon
+      : undefined;
 
-  const NameIcon = isMorphRelation ? IconRelationManyToMany : Icon;
+  const NameIcon =
+    isMorphRelation || isJunctionRelation ? IconRelationManyToMany : Icon;
+
+  const displayedRelationObjectMetadataItem =
+    junctionFinalTargetObjectMetadataItem ?? relationObjectMetadataItem;
+
+  const isDisplayedRelatedObjectLinkable = isDefined(
+    displayedRelationObjectMetadataItem?.namePlural,
+  );
 
   const targetObjectLabel = isMorphRelation
     ? morphRelationTargetLabel
-    : isRelatedObjectLinkable && isDefined(relationObjectMetadataItem)
-      ? relationObjectMetadataItem.labelPlural
+    : isDisplayedRelatedObjectLinkable &&
+        isDefined(displayedRelationObjectMetadataItem)
+      ? displayedRelationObjectMetadataItem.labelPlural
       : fieldMetadataItem.label;
 
   const fieldLabelSubtitle = isMorphRelation
@@ -165,7 +213,7 @@ export const SettingsObjectRelationItemTableRow = ({
     : fieldMetadataItem.label;
 
   const shouldDisplayFieldLabelAsSubtitle =
-    isMorphRelation || isDefined(relationObjectMetadataItem);
+    isMorphRelation || isDefined(displayedRelationObjectMetadataItem);
 
   return (
     <TableRow
@@ -190,11 +238,13 @@ export const SettingsObjectRelationItemTableRow = ({
           />
         )}
         <StyledNameContainer>
-          {isRelatedObjectLinkable ? (
+          {isDisplayedRelatedObjectLinkable &&
+          isDefined(displayedRelationObjectMetadataItem) ? (
             <StyledLinkContainer>
               <Link
                 to={getSettingsPath(SettingsPath.ObjectDetail, {
-                  objectNamePlural: relationObjectMetadataItem.namePlural,
+                  objectNamePlural:
+                    displayedRelationObjectMetadataItem.namePlural,
                 })}
                 onClick={(event) => event.stopPropagation()}
                 title={targetObjectLabel}

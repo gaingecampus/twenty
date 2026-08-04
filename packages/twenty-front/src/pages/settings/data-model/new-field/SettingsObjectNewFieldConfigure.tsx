@@ -1,9 +1,11 @@
 import { isDDLLockedState } from '@/client-config/states/isDDLLockedState';
+import { useCreateManyToManyRelation } from '@/object-metadata/hooks/useCreateManyToManyRelation';
 import { useFieldMetadataItem } from '@/object-metadata/hooks/useFieldMetadataItem';
 import { useFilteredObjectMetadataItems } from '@/object-metadata/hooks/useFilteredObjectMetadataItems';
 import { SettingsPageContainer } from '@/settings/components/SettingsPageContainer';
 import { SettingsWizardStepBar } from '@/settings/components/layout/SettingsWizardStepBar';
 import { FIELD_NAME_MAXIMUM_LENGTH } from '@/settings/data-model/constants/FieldNameMaximumLength';
+import { isSettingsManyToManyRelationType } from '@/settings/data-model/utils/isSettingsManyToManyRelationType';
 import { SettingsObjectNewFieldHeaderIcon } from '@/settings/data-model/fields/components/SettingsObjectNewFieldHeaderIcon';
 import { SettingsDataModelFieldIconLabelForm } from '@/settings/data-model/fields/forms/components/SettingsDataModelFieldIconLabelForm';
 import { SettingsDataModelFieldSettingsFormCard } from '@/settings/data-model/fields/forms/components/SettingsDataModelFieldSettingsFormCard';
@@ -57,6 +59,7 @@ export const SettingsObjectNewFieldConfigure = () => {
   const activeObjectMetadataItem =
     findObjectMetadataItemByNamePlural(objectNamePlural);
   const { createMetadataField } = useFieldMetadataItem();
+  const { createManyToManyRelation } = useCreateManyToManyRelation();
 
   const formConfig = useForm<SettingsDataModelNewFieldFormValues>({
     mode: 'onTouched',
@@ -105,9 +108,7 @@ export const SettingsObjectNewFieldConfigure = () => {
   ) => {
     setIsSaving(true);
 
-    const createCleanUp = (
-      creationResult: Awaited<ReturnType<typeof createMetadataField>>,
-    ) => {
+    const createCleanUp = (creationResult: { status: string }) => {
       if (creationResult.status === 'successful') {
         navigate(SettingsPath.ObjectDetail, {
           objectNamePlural,
@@ -130,7 +131,42 @@ export const SettingsObjectNewFieldConfigure = () => {
       targetFieldLabel,
       iconOnDestination,
       relationType,
+      junctionLabelSingular,
     } = formValues;
+
+    if (isSettingsManyToManyRelationType(relationType)) {
+      if (
+        !isDefined(morphRelationObjectMetadataIds) ||
+        morphRelationObjectMetadataIds.length !== 1
+      ) {
+        enqueueErrorSnackBar({
+          message: t`Please select exactly one destination object for this many-to-many relation.`,
+        });
+        return setIsSaving(false);
+      }
+
+      if (morphRelationObjectMetadataIds[0] === activeObjectMetadataItem.id) {
+        enqueueErrorSnackBar({
+          message: t`Many-to-many relations cannot point to the same object.`,
+        });
+        return setIsSaving(false);
+      }
+
+      const creationResult = await createManyToManyRelation({
+        sourceObjectMetadataId: activeObjectMetadataItem.id,
+        targetObjectMetadataId: morphRelationObjectMetadataIds[0],
+        sourceFieldLabel: formValues.label,
+        sourceFieldIcon: formValues.icon,
+        targetFieldLabel,
+        targetFieldIcon: iconOnDestination,
+        ...(isDefined(junctionLabelSingular) &&
+          junctionLabelSingular.length > 0 && {
+            junctionLabelSingular,
+          }),
+      });
+
+      return createCleanUp(creationResult);
+    }
 
     switch (true) {
       case morphRelationObjectMetadataIds.length > 1: {

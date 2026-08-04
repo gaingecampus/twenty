@@ -131,4 +131,22 @@ describe('findJunctionRecordByTargetId', () => {
     });
     expect(companyResult?.id).toBe('junction-1');
   });
+
+  it('should find junction record by join column when nested target is missing', () => {
+    const junctionRecords = [
+      createMockJunctionRecord('junction-1', {
+        company: null,
+        companyId: 'company-1',
+      }),
+    ];
+
+    const result = findJunctionRecordByTargetId({
+      junctionRecords,
+      targetRecordId: 'company-1',
+      targetFieldName: 'company',
+      targetJoinColumnName: 'companyId',
+    });
+
+    expect(result?.id).toBe('junction-1');
+  });
 });
