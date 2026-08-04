@@ -13,8 +13,14 @@ import { buildSystemAuthContext } from 'src/engine/twenty-orm/utils/build-system
 import { WorkspaceCacheService } from 'src/engine/workspace-cache/services/workspace-cache.service';
 
 const PERSON_OBJECT_NAME_SINGULAR = 'person';
+const COMPANY_OBJECT_NAME_SINGULAR = 'company';
 
 type RelationWalkRecord = { id: string } & Record<string, unknown>;
+
+type PersonLinkedToCompanyRecord = {
+  id: string;
+  companyId: string | null;
+};
 
 @Injectable()
 export class RelatedPersonIdsService {
@@ -34,6 +40,15 @@ export class RelatedPersonIdsService {
   }): Promise<string[]> {
     if (objectNameSingular === PERSON_OBJECT_NAME_SINGULAR) {
       return [recordId];
+    }
+
+    // Company inbox/calendar should only include people linked via
+    // company.people — not DRI, opportunity POC, or other Person relations
+    if (objectNameSingular === COMPANY_OBJECT_NAME_SINGULAR) {
+      return this.getPersonIdsLinkedToCompany({
+        workspaceId,
+        companyId: recordId,
+      });
     }
 
     const { flatObjectMetadataMaps, flatFieldMetadataMaps } =
@@ -67,6 +82,35 @@ export class RelatedPersonIdsService {
         }
 
         return [...personIds];
+      },
+      buildSystemAuthContext(workspaceId),
+    );
+  }
+
+  private async getPersonIdsLinkedToCompany({
+    workspaceId,
+    companyId,
+  }: {
+    workspaceId: string;
+    companyId: string;
+  }): Promise<string[]> {
+    return this.globalWorkspaceOrmManager.executeInWorkspaceContext(
+      async () => {
+        const personRepository =
+          await this.globalWorkspaceOrmManager.getRepository<PersonLinkedToCompanyRecord>(
+            workspaceId,
+            PERSON_OBJECT_NAME_SINGULAR,
+            { shouldBypassPermissionChecks: true },
+          );
+
+        const people = await personRepository.find({
+          where: {
+            companyId,
+          } as FindOptionsWhere<PersonLinkedToCompanyRecord>,
+          select: { id: true },
+        });
+
+        return people.map((person) => person.id);
       },
       buildSystemAuthContext(workspaceId),
     );
