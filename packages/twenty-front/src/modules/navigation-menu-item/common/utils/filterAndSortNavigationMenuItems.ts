@@ -21,6 +21,9 @@ export const filterAndSortNavigationMenuItems = (
       if (item.type === NavigationMenuItemType.LINK) {
         return true;
       }
+      if (item.type === NavigationMenuItemType.SEPARATOR) {
+        return true;
+      }
       if (item.type === NavigationMenuItemType.PAGE_LAYOUT) {
         return isDefined(item.pageLayoutId);
       }

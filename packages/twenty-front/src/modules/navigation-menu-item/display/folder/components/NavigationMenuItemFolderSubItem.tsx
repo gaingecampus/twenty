@@ -12,6 +12,7 @@ import { useIsNavigationMenuItemEditHighlighted } from '@/navigation-menu-item/d
 import { getNavigationMenuItemObjectNameSingular } from '@/navigation-menu-item/display/object/utils/getNavigationMenuItemObjectNameSingular';
 import { getObjectMetadataForNavigationMenuItem } from '@/navigation-menu-item/display/object/utils/getObjectMetadataForNavigationMenuItem';
 import { getObjectNavigationMenuItemSecondaryLabel } from '@/navigation-menu-item/display/object/utils/getObjectNavigationMenuItemSecondaryLabel';
+import { NavigationMenuItemSeparatorDisplay } from '@/navigation-menu-item/display/separator/components/NavigationMenuItemSeparatorDisplay';
 import { getNavigationMenuItemComputedLink } from '@/navigation-menu-item/display/utils/getNavigationMenuItemComputedLink';
 import { getNavigationMenuItemLabel } from '@/navigation-menu-item/display/utils/getNavigationMenuItemLabel';
 import { objectMetadataItemsSelector } from '@/object-metadata/states/objectMetadataItemsSelector';
@@ -95,6 +96,7 @@ export const NavigationMenuItemFolderSubItem = ({
   const isEditable =
     isDefined(onNavigationMenuItemClick) &&
     (navigationMenuItem.type === NavigationMenuItemType.LINK ||
+      navigationMenuItem.type === NavigationMenuItemType.SEPARATOR ||
       isDefined(objectMetadataItem));
 
   const handleClick =
@@ -109,6 +111,26 @@ export const NavigationMenuItemFolderSubItem = ({
           setLastClickedNavigationMenuItemId(navigationMenuItem.id);
           navigate(computedLink);
         });
+
+  if (navigationMenuItem.type === NavigationMenuItemType.SEPARATOR) {
+    return (
+      <NavigationMenuItemSeparatorDisplay
+        item={navigationMenuItem}
+        editModeProps={{
+          isSelectedInEditMode: isEditHighlightedInNavigationMenu,
+          onEditModeClick: isDefined(onNavigationMenuItemClick)
+            ? () =>
+                onNavigationMenuItemClick({
+                  item: navigationMenuItem,
+                })
+            : undefined,
+        }}
+        isDragging={isDragging}
+        indentationLevel={2}
+        rightOptions={rightOptions}
+      />
+    );
+  }
 
   return (
     <NavigationDrawerSubItem

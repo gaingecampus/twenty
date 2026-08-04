@@ -1687,6 +1687,7 @@ enum NavigationMenuItemType {
   OBJECT
   RECORD
   PAGE_LAYOUT
+  SEPARATOR
 }
 
 type ObjectRecordEventProperties {

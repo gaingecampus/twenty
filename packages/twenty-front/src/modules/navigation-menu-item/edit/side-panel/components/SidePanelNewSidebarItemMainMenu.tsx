@@ -6,6 +6,7 @@ import {
   IconBuildingSkyscraper,
   IconFolder,
   IconLink,
+  IconMinus,
   IconTable,
 } from 'twenty-ui/icon';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
@@ -14,6 +15,7 @@ import { CommandMenuItem } from '@/command-menu/components/CommandMenuItem';
 import { pendingInsertionNavigationMenuItemState } from '@/navigation-menu-item/common/states/pendingInsertionNavigationMenuItemState';
 import { useAddFolderToNavigationMenu } from '@/navigation-menu-item/edit/side-panel/hooks/useAddFolderToNavigationMenu';
 import { useAddLinkToNavigationMenu } from '@/navigation-menu-item/edit/side-panel/hooks/useAddLinkToNavigationMenu';
+import { useAddSeparatorToNavigationMenu } from '@/navigation-menu-item/edit/side-panel/hooks/useAddSeparatorToNavigationMenu';
 import { SidePanelAddToNavigationDroppable } from '@/side-panel/components/SidePanelAddToNavigationDroppable';
 import { SidePanelGroup } from '@/side-panel/components/SidePanelGroup';
 import { SidePanelItemWithAddToNavigationDrag } from '@/side-panel/components/SidePanelItemWithAddToNavigationDrag';
@@ -33,6 +35,7 @@ const MAIN_MENU_ITEM_TYPES = [
   NavigationMenuItemType.RECORD,
   NavigationMenuItemType.FOLDER,
   NavigationMenuItemType.LINK,
+  NavigationMenuItemType.SEPARATOR,
 ] as const;
 
 export const SidePanelNewSidebarItemMainMenu = ({
@@ -46,6 +49,7 @@ export const SidePanelNewSidebarItemMainMenu = ({
   );
   const { handleAddFolder } = useAddFolderToNavigationMenu();
   const { handleAddLink } = useAddLinkToNavigationMenu();
+  const { handleAddSeparator } = useAddSeparatorToNavigationMenu();
 
   const isAddingToFolder = isDefined(
     pendingInsertionNavigationMenuItem?.folderId,
@@ -145,6 +149,21 @@ export const SidePanelNewSidebarItemMainMenu = ({
                     linkId: 'new',
                     name: t`Link label`,
                     link: 'https://www.example.com',
+                  }}
+                />
+              </SelectableListItem>
+              <SelectableListItem
+                itemId={NavigationMenuItemType.SEPARATOR}
+                onEnter={handleAddSeparator}
+              >
+                <SidePanelItemWithAddToNavigationDrag
+                  icon={IconMinus}
+                  label={t`Separator`}
+                  id={NavigationMenuItemType.SEPARATOR}
+                  onClick={handleAddSeparator}
+                  dragIndex={5}
+                  payload={{
+                    type: NavigationMenuItemType.SEPARATOR,
                   }}
                 />
               </SelectableListItem>

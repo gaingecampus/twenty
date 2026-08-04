@@ -67,7 +67,8 @@ export const useFolderPickerSelectionData = () => {
   const includeNoFolderOption =
     (selectedItemType === NavigationMenuItemType.FOLDER &&
       isDefined(selectedFolderId)) ||
-    (selectedItemType === NavigationMenuItemType.LINK &&
+    ((selectedItemType === NavigationMenuItemType.LINK ||
+      selectedItemType === NavigationMenuItemType.SEPARATOR) &&
       isDefined(currentFolderId));
 
   const folders =

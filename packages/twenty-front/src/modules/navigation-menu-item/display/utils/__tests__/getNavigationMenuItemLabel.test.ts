@@ -202,4 +202,18 @@ describe('getNavigationMenuItemLabel', () => {
       );
     });
   });
+
+  describe('when type is SEPARATOR', () => {
+    it('should return "Separator" when name is null', () => {
+      const item = {
+        ...baseItem,
+        type: NavigationMenuItemType.SEPARATOR,
+        name: null,
+      };
+
+      expect(getNavigationMenuItemLabel(item, objectMetadataItems, views)).toBe(
+        'Separator',
+      );
+    });
+  });
 });

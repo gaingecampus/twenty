@@ -27,6 +27,8 @@ export const getNavigationMenuItemLabel = (
       return getRecordNavigationMenuItemLabel(item);
     case NavigationMenuItemType.FOLDER:
       return getFolderNavigationMenuItemLabel(item);
+    case NavigationMenuItemType.SEPARATOR:
+      return item.name ?? 'Separator';
     default:
       return item.name ?? '';
   }

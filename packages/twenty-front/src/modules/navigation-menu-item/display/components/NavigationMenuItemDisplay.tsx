@@ -3,6 +3,7 @@ import { NavigationMenuItemFolder } from '@/navigation-menu-item/display/folder/
 import { NavigationMenuItemLinkDisplay } from '@/navigation-menu-item/display/link/components/NavigationMenuItemLinkDisplay';
 import { NavigationMenuItemObjectDisplay } from '@/navigation-menu-item/display/object/components/NavigationMenuItemObjectDisplay';
 import { NavigationMenuItemPageLayoutDisplay } from '@/navigation-menu-item/display/page-layout/components/NavigationMenuItemPageLayoutDisplay';
+import { NavigationMenuItemSeparatorDisplay } from '@/navigation-menu-item/display/separator/components/NavigationMenuItemSeparatorDisplay';
 import type { NavigationMenuItemSectionContentProps } from '@/navigation-menu-item/display/sections/types/NavigationMenuItemSectionContentProps';
 
 type NavigationMenuItemDisplayProps = NavigationMenuItemSectionContentProps;
@@ -63,6 +64,15 @@ export const NavigationMenuItemDisplay = ({
           onNavigationMenuItemClick={onNavigationMenuItemClick}
           onActiveObjectMetadataItemClick={onActiveObjectMetadataItemClick}
           readOnly={readOnly}
+        />
+      );
+    case NavigationMenuItemType.SEPARATOR:
+      return (
+        <NavigationMenuItemSeparatorDisplay
+          item={item}
+          editModeProps={editModeProps}
+          isDragging={isDragging}
+          rightOptions={rightOptions}
         />
       );
     default:

@@ -198,6 +198,27 @@ export const SidePanelNavigationMenuItemEditPage = () => {
           <SidePanelEditOwnerSection />
         </SidePanelList>
       );
+    case NavigationMenuItemType.SEPARATOR:
+      return (
+        <SidePanelList
+          selectableItemIds={getOrganizeActionsSelectableItemIds(
+            canMoveToOtherFolder,
+          )}
+        >
+          <SidePanelEditOrganizeActions
+            canMoveUp={canMoveUp}
+            canMoveDown={canMoveDown}
+            onMoveUp={onMoveUp}
+            onMoveDown={onMoveDown}
+            onRemove={onRemove}
+            onAddBefore={onAddBefore}
+            onAddAfter={onAddAfter}
+            showMoveToFolder={canMoveToOtherFolder}
+            onMoveToFolder={openFolderPicker}
+          />
+          <SidePanelEditOwnerSection />
+        </SidePanelList>
+      );
     default:
       return (
         <SidePanelList

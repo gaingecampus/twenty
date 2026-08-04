@@ -87,6 +87,12 @@ const createNavigationMenuItemSchema = z.discriminatedUnion('type', [
     name: requiredNameField,
     ...commonOptionalFields,
   }),
+  z.object({
+    type: z.literal(NavigationMenuItemType.SEPARATOR),
+    scope: navigationMenuItemScopeSchema,
+    position: commonOptionalFields.position,
+    folderId: commonOptionalFields.folderId,
+  }),
 ]);
 
 type CreateNavigationMenuItemParams = z.infer<
@@ -99,6 +105,16 @@ const toServiceInput = (
 ): CreateNavigationMenuItemInput => {
   const resolvedUserWorkspaceId =
     params.scope === 'user' ? userWorkspaceId : undefined;
+
+  if (params.type === NavigationMenuItemType.SEPARATOR) {
+    return {
+      type: NavigationMenuItemType.SEPARATOR,
+      userWorkspaceId: resolvedUserWorkspaceId,
+      position: params.position,
+      folderId: params.folderId,
+    };
+  }
+
   const base = {
     type: params.type as NavigationMenuItemType,
     userWorkspaceId: resolvedUserWorkspaceId,
@@ -151,6 +167,7 @@ Type chooses the variant:
 - VIEW: pins a saved view (label auto-derived from the view's name; only pass 'name' for a custom label).
 - RECORD: pins a single record (label auto-derived from the record's identifier; only pass 'name' for a custom label).
 - PAGE_LAYOUT: pins a page layout, e.g. a dashboard (name required — no auto-derivation).
+- SEPARATOR: a horizontal divider line in the sidebar (no name or target required).
 
 Note: creating a new custom object via create_object_metadata already auto-creates an OBJECT navigation menu item — do not double-create.`,
   inputSchema: createNavigationMenuItemSchema,

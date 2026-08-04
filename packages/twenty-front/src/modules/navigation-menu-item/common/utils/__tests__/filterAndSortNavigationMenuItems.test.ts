@@ -291,4 +291,20 @@ describe('filterAndSortNavigationMenuItems', () => {
     expect(result).toHaveLength(1);
     expect(result[0].id).toBe('folder-1');
   });
+
+  it('should keep separator items', () => {
+    const result = filterAndSortNavigationMenuItems(
+      [
+        {
+          id: 'separator-1',
+          type: NavigationMenuItemType.SEPARATOR,
+          position: 1,
+        } as NavigationMenuItem,
+      ],
+      [],
+      [],
+    );
+    expect(result).toHaveLength(1);
+    expect(result[0].id).toBe('separator-1');
+  });
 });

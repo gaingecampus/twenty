@@ -45,6 +45,8 @@ export const getNavigationMenuItemComputedLink = ({
       return getRecordNavigationMenuItemComputedLink(item, objectMetadataItems);
     case NavigationMenuItemType.PAGE_LAYOUT:
       return getPageLayoutNavigationMenuItemComputedLink(item);
+    case NavigationMenuItemType.SEPARATOR:
+      return '';
     default:
       return '';
   }

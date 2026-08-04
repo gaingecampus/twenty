@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   IconColumnInsertRight,
   IconLink,
+  IconMinus,
   IconPlus,
   IconTool,
   useIcons,
@@ -150,6 +151,12 @@ export const WorkspaceSection = () => {
         openNavigationMenuItemInSidePanel({
           pageTitle: t`Edit link`,
           pageIcon: IconLink,
+        });
+        break;
+      case NavigationMenuItemType.SEPARATOR:
+        openNavigationMenuItemInSidePanel({
+          pageTitle: t`Separator`,
+          pageIcon: IconMinus,
         });
         break;
       default:

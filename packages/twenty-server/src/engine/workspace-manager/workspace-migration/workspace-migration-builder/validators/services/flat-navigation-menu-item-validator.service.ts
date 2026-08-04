@@ -62,6 +62,22 @@ export class FlatNavigationMenuItemValidatorService {
           });
         }
         break;
+      case NavigationMenuItemType.SEPARATOR:
+        if (
+          hasTargetRecordId ||
+          hasTargetObjectMetadataId ||
+          hasViewId ||
+          hasLink ||
+          hasPageLayoutId ||
+          (isDefined(name) && name.trim() !== '')
+        ) {
+          errors.push({
+            code: NavigationMenuItemExceptionCode.INVALID_NAVIGATION_MENU_ITEM_INPUT,
+            message: t`SEPARATOR type must not have target fields or a name`,
+            userFriendlyMessage: msg`Separator cannot have a name or target`,
+          });
+        }
+        break;
       case NavigationMenuItemType.OBJECT:
         if (!hasTargetObjectMetadataId) {
           errors.push({

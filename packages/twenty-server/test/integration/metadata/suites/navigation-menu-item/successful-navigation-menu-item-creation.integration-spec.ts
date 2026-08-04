@@ -93,6 +93,25 @@ describe('NavigationMenuItem creation should succeed', () => {
     });
   });
 
+  it('should create a separator navigation menu item', async () => {
+    const { data } = await createNavigationMenuItem({
+      expectToFail: false,
+      input: {
+        type: NavigationMenuItemType.SEPARATOR,
+      },
+    });
+
+    createdNavigationMenuItemId = data?.createNavigationMenuItem?.id;
+
+    expect(data.createNavigationMenuItem).toMatchObject({
+      id: expect.any(String),
+      type: NavigationMenuItemType.SEPARATOR,
+      userWorkspaceId: null,
+      folderId: null,
+      position: expect.any(Number),
+    });
+  });
+
   it('should create navigation menu item with all optional fields', async () => {
     const targetRecordId = faker.string.uuid();
     const folderTargetRecordId = faker.string.uuid();

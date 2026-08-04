@@ -33,9 +33,14 @@ export type AddToNavigationDragPayloadLink = {
   link: string;
 };
 
+export type AddToNavigationDragPayloadSeparator = {
+  type: 'SEPARATOR';
+};
+
 export type AddToNavigationDragPayload =
   | AddToNavigationDragPayloadObject
   | AddToNavigationDragPayloadView
   | AddToNavigationDragPayloadRecord
   | AddToNavigationDragPayloadFolder
-  | AddToNavigationDragPayloadLink;
+  | AddToNavigationDragPayloadLink
+  | AddToNavigationDragPayloadSeparator;

@@ -3835,6 +3835,7 @@ export enum NavigationMenuItemType {
   OBJECT = 'OBJECT',
   PAGE_LAYOUT = 'PAGE_LAYOUT',
   RECORD = 'RECORD',
+  SEPARATOR = 'SEPARATOR',
   VIEW = 'VIEW'
 }
 

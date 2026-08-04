@@ -3,7 +3,7 @@ import { useStore } from 'jotai';
 import { useCallback } from 'react';
 import { NavigationMenuItemType } from 'twenty-shared/types';
 import { isDefined, normalizeUrl } from 'twenty-shared/utils';
-import { IconFolder, IconLink, useIcons } from 'twenty-ui/icon';
+import { IconFolder, IconLink, IconMinus, useIcons } from 'twenty-ui/icon';
 
 import { useEnterLayoutCustomizationMode } from '@/layout-customization/hooks/useEnterLayoutCustomizationMode';
 import { isLayoutCustomizationModeEnabledState } from '@/layout-customization/states/isLayoutCustomizationModeEnabledState';
@@ -219,6 +219,19 @@ export const useHandleAddToNavigationDrop = () => {
               pageIcon: objectMetadataItem
                 ? getIcon(objectMetadataItem.icon)
                 : IconFolder,
+            },
+          );
+          return;
+        }
+        case NavigationMenuItemType.SEPARATOR: {
+          addToWorkspaceAndOpenEdit(
+            {
+              type: NavigationMenuItemType.SEPARATOR,
+            },
+            { targetFolderId: folderId, targetIndex: index },
+            {
+              pageTitle: t`Separator`,
+              pageIcon: IconMinus,
             },
           );
           return;
