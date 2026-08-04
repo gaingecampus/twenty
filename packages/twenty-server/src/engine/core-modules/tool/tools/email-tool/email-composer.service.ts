@@ -52,10 +52,45 @@ export class EmailComposerService {
     private readonly fileService: FileService,
   ) {}
 
-  private async getConnectedAccountOrThrow(
-    connectedAccountId: string,
-    workspaceId: string,
-  ): Promise<ConnectedAccountEntity> {
+  private assertConnectedAccountAccess({
+    connectedAccount,
+    userWorkspaceId,
+  }: {
+    connectedAccount: ConnectedAccountEntity;
+    userWorkspaceId?: string;
+  }): void {
+    if (isDefined(userWorkspaceId)) {
+      if (
+        connectedAccount.visibility !== 'workspace' &&
+        connectedAccount.userWorkspaceId !== userWorkspaceId
+      ) {
+        throw new EmailToolException(
+          `Connected account ${connectedAccount.id} does not belong to user workspace ${userWorkspaceId}`,
+          EmailToolExceptionCode.CONNECTED_ACCOUNT_OWNERSHIP_VIOLATION,
+        );
+      }
+
+      return;
+    }
+
+    // API key / system context: only workspace-shared accounts
+    if (connectedAccount.visibility !== 'workspace') {
+      throw new EmailToolException(
+        `Connected account ${connectedAccount.id} is not workspace-visible`,
+        EmailToolExceptionCode.CONNECTED_ACCOUNT_OWNERSHIP_VIOLATION,
+      );
+    }
+  }
+
+  private async getConnectedAccountOrThrow({
+    connectedAccountId,
+    workspaceId,
+    userWorkspaceId,
+  }: {
+    connectedAccountId: string;
+    workspaceId: string;
+    userWorkspaceId?: string;
+  }): Promise<ConnectedAccountEntity> {
     if (!isValidUuid(connectedAccountId)) {
       throw new EmailToolException(
         `Connected account id is not a valid UUID`,
@@ -83,31 +118,61 @@ export class EmailComposerService {
           );
         }
 
+        this.assertConnectedAccountAccess({
+          connectedAccount,
+          userWorkspaceId,
+        });
+
         return connectedAccount;
       },
       authContext,
     );
   }
 
-  private async getOrThrowFirstConnectedAccountId(
-    workspaceId: string,
-  ): Promise<string> {
+  private async getOrThrowFirstConnectedAccountId({
+    workspaceId,
+    userWorkspaceId,
+  }: {
+    workspaceId: string;
+    userWorkspaceId?: string;
+  }): Promise<string> {
     const authContext = buildSystemAuthContext(workspaceId);
 
     return this.globalWorkspaceOrmManager.executeInWorkspaceContext(
       async () => {
-        const allAccounts = await this.connectedAccountRepository.find({
-          where: { workspaceId, archivedAt: IsNull() },
-        });
+        if (isDefined(userWorkspaceId)) {
+          const ownedAccounts = await this.connectedAccountRepository.find({
+            where: {
+              workspaceId,
+              userWorkspaceId,
+              archivedAt: IsNull(),
+            },
+            order: { createdAt: 'ASC' },
+          });
 
-        if (!allAccounts || allAccounts.length === 0) {
+          if (ownedAccounts.length > 0) {
+            return ownedAccounts[0].id;
+          }
+        }
+
+        const workspaceVisibleAccounts =
+          await this.connectedAccountRepository.find({
+            where: {
+              workspaceId,
+              visibility: 'workspace',
+              archivedAt: IsNull(),
+            },
+            order: { createdAt: 'ASC' },
+          });
+
+        if (workspaceVisibleAccounts.length === 0) {
           throw new EmailToolException(
             'No connected accounts found for this workspace',
             EmailToolExceptionCode.CONNECTED_ACCOUNT_NOT_FOUND,
           );
         }
 
-        return allAccounts[0].id;
+        return workspaceVisibleAccounts[0].id;
       },
       authContext,
     );
@@ -351,14 +416,17 @@ export class EmailComposerService {
     const toRecipientsDisplay = recipients.to.join(', ');
 
     if (!connectedAccountId) {
-      connectedAccountId =
-        await this.getOrThrowFirstConnectedAccountId(workspaceId);
+      connectedAccountId = await this.getOrThrowFirstConnectedAccountId({
+        workspaceId,
+        userWorkspaceId: context.userWorkspaceId,
+      });
     }
 
-    const connectedAccount = await this.getConnectedAccountOrThrow(
+    const connectedAccount = await this.getConnectedAccountOrThrow({
       connectedAccountId,
       workspaceId,
-    );
+      userWorkspaceId: context.userWorkspaceId,
+    });
 
     const messageChannel =
       connectedAccount.provider === ConnectedAccountProvider.EMAIL_GROUP
