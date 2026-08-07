@@ -263,6 +263,126 @@ describe('preserveWorkspaceOwnedPropertiesOnToFlatEntityMaps', () => {
     ).toBe("'NEW'");
   });
 
+  it('should preserve viewGroup position and isVisible from from-maps', () => {
+    const universalIdentifier = 'view-group-universal-identifier';
+    const fromFlatEntity = {
+      universalIdentifier,
+      fieldValue: 'NEW',
+      position: 3,
+      isVisible: false,
+    };
+    const toFlatEntity = {
+      universalIdentifier,
+      fieldValue: 'NEW',
+      position: 0,
+      isVisible: true,
+    };
+
+    const result = preserveWorkspaceOwnedPropertiesOnToFlatEntityMaps({
+      fromFlatEntityMaps: {
+        byUniversalIdentifier: {
+          [universalIdentifier]: fromFlatEntity,
+        },
+      },
+      toFlatEntityMaps: {
+        byUniversalIdentifier: {
+          [universalIdentifier]: toFlatEntity,
+        },
+      },
+    });
+
+    expect(result.byUniversalIdentifier[universalIdentifier]).toEqual({
+      universalIdentifier,
+      fieldValue: 'NEW',
+      position: 3,
+      isVisible: false,
+    });
+  });
+
+  it('should preserve navigationMenuItem sidebar customizations from from-maps', () => {
+    const universalIdentifier = 'nav-item-universal-identifier';
+    const fromFlatEntity = {
+      universalIdentifier,
+      type: 'VIEW',
+      position: 5,
+      folderId: 'workspace-folder-id',
+      folderUniversalIdentifier: 'workspace-folder-universal-id',
+      name: '거래처',
+      icon: 'IconBuilding',
+      color: 'blue',
+      link: null,
+    };
+    const toFlatEntity = {
+      universalIdentifier,
+      type: 'VIEW',
+      position: 1,
+      folderId: null,
+      folderUniversalIdentifier: null,
+      name: 'Companies',
+      icon: 'IconBuildingSkyscraper',
+      color: null,
+      link: null,
+    };
+
+    const result = preserveWorkspaceOwnedPropertiesOnToFlatEntityMaps({
+      fromFlatEntityMaps: {
+        byUniversalIdentifier: {
+          [universalIdentifier]: fromFlatEntity,
+        },
+      },
+      toFlatEntityMaps: {
+        byUniversalIdentifier: {
+          [universalIdentifier]: toFlatEntity,
+        },
+      },
+      metadataName: 'navigationMenuItem',
+    });
+
+    expect(result.byUniversalIdentifier[universalIdentifier]).toEqual({
+      ...toFlatEntity,
+      position: 5,
+      folderId: 'workspace-folder-id',
+      folderUniversalIdentifier: 'workspace-folder-universal-id',
+      name: '거래처',
+      icon: 'IconBuilding',
+      color: 'blue',
+    });
+  });
+
+  it('should not preserve fieldMetadata base icon without navigation scope', () => {
+    const universalIdentifier = 'field-universal-identifier';
+    const fromFlatEntity = getFlatFieldMetadataMock({
+      objectMetadataId: 'object-metadata-id',
+      type: FieldMetadataType.TEXT,
+      universalIdentifier,
+      icon: 'IconWorkspace',
+    });
+    const toFlatEntity = getFlatFieldMetadataMock({
+      objectMetadataId: 'object-metadata-id',
+      type: FieldMetadataType.TEXT,
+      universalIdentifier,
+      icon: 'IconCode',
+    });
+
+    const result = preserveWorkspaceOwnedPropertiesOnToFlatEntityMaps({
+      fromFlatEntityMaps: {
+        byUniversalIdentifier: {
+          [universalIdentifier]: fromFlatEntity,
+        },
+      },
+      toFlatEntityMaps: {
+        byUniversalIdentifier: {
+          [universalIdentifier]: toFlatEntity,
+        },
+      },
+      metadataName: 'fieldMetadata',
+    });
+
+    expect(result.byUniversalIdentifier[universalIdentifier]?.icon).toBe(
+      'IconCode',
+    );
+  });
+
   it('should preserve page layout widget configuration and gridPosition', () => {
     const universalIdentifier = 'widget-universal-identifier';
     const fromConfiguration = {
