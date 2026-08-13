@@ -1,6 +1,6 @@
 import { DateFormat } from '@/localization/constants/DateFormat';
 import { formatDateISOStringToDate } from '@/localization/utils/formatDateISOStringToDate';
-import { enUS } from 'date-fns/locale';
+import { enUS, ko } from 'date-fns/locale';
 
 describe('formatDateISOStringToDate', () => {
   describe('date-only ISO strings (no time component)', () => {
@@ -35,6 +35,17 @@ describe('formatDateISOStringToDate', () => {
       });
 
       expect(result).toBe('2022 Jan 1');
+    });
+
+    it('should render Korean year-first dates with year and day suffixes', () => {
+      const result = formatDateISOStringToDate({
+        date: '2026-08-04',
+        timeZone: 'UTC',
+        dateFormat: DateFormat.YEAR_FIRST,
+        localeCatalog: ko,
+      });
+
+      expect(result).toBe('2026년 8월 4일');
     });
 
     it('should render the same calendar date regardless of the user timezone', () => {
