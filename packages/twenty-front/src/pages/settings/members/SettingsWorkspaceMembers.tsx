@@ -1,14 +1,16 @@
 import { Trans, useLingui } from '@lingui/react/macro';
 import { SettingsPath } from 'twenty-shared/types';
-import { getSettingsPath } from 'twenty-shared/utils';
+import { getSettingsPath, isDefined } from 'twenty-shared/utils';
 import { IconAt, IconLock, IconUserPlus, IconUsers } from 'twenty-ui/icon';
 
+import { currentWorkspaceState } from '@/auth/states/currentWorkspaceState';
 import { SettingsDiscoveryHeroCard } from '@/settings/components/SettingsDiscoveryHeroCard';
 import { useHasPermissionFlag } from '@/settings/roles/hooks/useHasPermissionFlag';
 import { SettingsPageContainer } from '@/settings/components/SettingsPageContainer';
 import { SettingsPageLayout } from '@/settings/components/layout/SettingsPageLayout';
 import { SettingsTabBar } from '@/settings/components/layout/SettingsTabBar';
 import { useSettingsActiveTabId } from '@/settings/components/layout/useSettingsActiveTabId';
+import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 import { Section } from 'twenty-ui/layout';
 import { PermissionFlagType } from '~/generated-metadata/graphql';
 import { SettingsWorkspaceMembersConnectedAccountsTab } from '~/pages/settings/members/tabs/SettingsWorkspaceMembersConnectedAccountsTab';
@@ -30,13 +32,23 @@ const SETTINGS_MEMBERS_HERO_INSTANCE_ID_PREFIX = 'settings-members-hero';
 export const SettingsWorkspaceMembers = () => {
   const { t } = useLingui();
 
+  const currentWorkspace = useAtomStateValue(currentWorkspaceState);
+  const workspaceMembersCount = currentWorkspace?.workspaceMembersCount;
+
   const hasRolesPermission = useHasPermissionFlag(PermissionFlagType.ROLES);
   const hasWorkspaceMembersPermission = useHasPermissionFlag(
     PermissionFlagType.WORKSPACE_MEMBERS,
   );
 
   const tabs = [
-    { id: MEMBERS_TAB_TEAM_ID, title: t`Team`, Icon: IconUsers },
+    {
+      id: MEMBERS_TAB_TEAM_ID,
+      title: t`Team`,
+      Icon: IconUsers,
+      pill: isDefined(workspaceMembersCount)
+        ? String(workspaceMembersCount)
+        : undefined,
+    },
     { id: MEMBERS_TAB_INVITE_ID, title: t`Invite`, Icon: IconUserPlus },
     ...(hasRolesPermission
       ? [{ id: MEMBERS_TAB_ROLES_ID, title: t`Roles`, Icon: IconLock }]

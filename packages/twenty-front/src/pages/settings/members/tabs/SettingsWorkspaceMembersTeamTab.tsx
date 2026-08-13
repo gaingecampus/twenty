@@ -6,6 +6,7 @@ import { useInView } from 'react-intersection-observer';
 import { useDebounce } from 'use-debounce';
 
 import { currentWorkspaceMemberState } from '@/auth/states/currentWorkspaceMemberState';
+import { currentWorkspaceState } from '@/auth/states/currentWorkspaceState';
 import { useFindManyRecords } from '@/object-record/hooks/useFindManyRecords';
 import { Dropdown } from '@/ui/layout/dropdown/components/Dropdown';
 import { DropdownContent } from '@/ui/layout/dropdown/components/DropdownContent';
@@ -19,7 +20,10 @@ import {
   CoreObjectNameSingular,
   SettingsPath,
 } from 'twenty-shared/types';
-import { generateILikeFiltersForCompositeFields } from 'twenty-shared/utils';
+import {
+  generateILikeFiltersForCompositeFields,
+  isDefined,
+} from 'twenty-shared/utils';
 import { Avatar } from 'twenty-ui/data-display';
 import {
   IconArrowUpRight,
@@ -91,6 +95,8 @@ export const SettingsWorkspaceMembersTeamTab = () => {
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const [searchFilter, setSearchFilter] = useState('');
   const currentWorkspaceMember = useAtomStateValue(currentWorkspaceMemberState);
+  const currentWorkspace = useAtomStateValue(currentWorkspaceState);
+  const workspaceMembersCount = currentWorkspace?.workspaceMembersCount;
 
   const [debouncedSearchFilter] = useDebounce(searchFilter, 300);
 
@@ -117,10 +123,15 @@ export const SettingsWorkspaceMembersTeamTab = () => {
     fetchMoreRecords,
     hasNextPage,
     loading,
+    totalCount,
   } = useFindManyRecords<WorkspaceMember>({
     objectNameSingular: CoreObjectNameSingular.WorkspaceMember,
     filter: searchServerFilter,
   });
+
+  const membersCount = isDefined(searchServerFilter)
+    ? workspaceMembersCount
+    : (totalCount ?? workspaceMembersCount);
 
   const handleSearchChange = (text: string) => {
     setSearchFilter(text);
@@ -166,7 +177,11 @@ export const SettingsWorkspaceMembersTeamTab = () => {
   return (
     <Section>
       <H2Title
-        title={t`Manage Members`}
+        title={
+          isDefined(membersCount)
+            ? t`Manage Members · ${membersCount}`
+            : t`Manage Members`
+        }
         description={t`Manage the members of your workspace here`}
       />
       <StyledSearchContainer>
