@@ -3352,7 +3352,7 @@ msgstr "GIN 인덱스는 다중 선택, 배열, JSON 및 검색 벡터 열에서
 #. js-lingui-id: jNgJvX
 #: src/engine/metadata-modules/command-menu-item/constants/standard-command-menu-item-labels.ts
 msgid "Go to ${navigateToObjectMetadataItem.labelPlural}"
-msgstr "$'{navigateToObjectMetadataItem.labelPlural}' 페이지로 이동"
+msgstr "$'{navigateToObjectMetadataItem.labelPlural}'(으)로 이동"
 
 #. js-lingui-id: yLNxLB
 #: src/engine/metadata-modules/command-menu-item/constants/standard-command-menu-item-labels.ts

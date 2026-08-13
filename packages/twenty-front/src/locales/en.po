@@ -8695,6 +8695,11 @@ msgstr "Go to Draft"
 msgid "Go to Settings"
 msgstr "Go to Settings"
 
+#. js-lingui-id: d9yrSE
+#: src/modules/command-menu-item/utils/getCommandMenuItemLabel.ts
+msgid "Go to {objectLabel}"
+msgstr "Go to {objectLabel}"
+
 #. js-lingui-id: FYlHHU
 #: src/modules/settings/data-model/fields/forms/select/components/SettingsDataModelFieldSelectFormOptionRow.tsx
 msgid "Gold"

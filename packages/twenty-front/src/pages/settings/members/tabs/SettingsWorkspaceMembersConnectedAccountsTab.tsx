@@ -3,6 +3,7 @@ import { styled } from '@linaria/react';
 import { Trans, useLingui } from '@lingui/react/macro';
 import { isNonEmptyString } from '@sniptt/guards';
 import { formatDistanceToNow } from 'date-fns';
+import { useContext } from 'react';
 
 import { CoreObjectNamePlural } from '@/object-metadata/types/CoreObjectNamePlural';
 import {
@@ -21,9 +22,10 @@ import {
 } from 'twenty-shared/types';
 import { isDefined } from 'twenty-shared/utils';
 import { Avatar, Status } from 'twenty-ui/data-display';
+import { IconAt } from 'twenty-ui/icon';
 import { H2Title } from 'twenty-ui/typography';
 import { Section } from 'twenty-ui/layout';
-import { themeCssVariables } from 'twenty-ui/theme-constants';
+import { ThemeContext, themeCssVariables } from 'twenty-ui/theme-constants';
 import { useNavigateApp } from '~/hooks/useNavigateApp';
 import { getAbsoluteImageUrl } from '~/utils/image/getAbsoluteImageUrl';
 import { dateLocaleState } from '~/localization/states/dateLocaleState';
@@ -43,8 +45,29 @@ const StyledTableRows = styled.div`
 `;
 
 const StyledEmptyState = styled.div`
+  align-items: center;
+  background-color: ${themeCssVariables.background.secondary};
+  border: 1px dashed ${themeCssVariables.border.color.medium};
+  border-radius: ${themeCssVariables.border.radius.sm};
+  display: flex;
+  flex-direction: column;
+  gap: ${themeCssVariables.spacing[2]};
+  justify-content: center;
+  padding: ${themeCssVariables.spacing[8]} ${themeCssVariables.spacing[4]};
+  text-align: center;
+`;
+
+const StyledEmptyStateTitle = styled.div`
+  color: ${themeCssVariables.font.color.primary};
+  font-size: ${themeCssVariables.font.size.md};
+  font-weight: ${themeCssVariables.font.weight.medium};
+`;
+
+const StyledEmptyStateDescription = styled.div`
   color: ${themeCssVariables.font.color.tertiary};
-  padding: ${themeCssVariables.spacing[4]} 0;
+  font-size: ${themeCssVariables.font.size.sm};
+  line-height: ${themeCssVariables.text.lineHeight.lg};
+  max-width: 360px;
 `;
 
 const StyledOwnerCell = styled.div`
@@ -106,6 +129,7 @@ const formatMessageCount = (messageCount: number): string =>
 
 export const SettingsWorkspaceMembersConnectedAccountsTab = () => {
   const { t } = useLingui();
+  const { theme } = useContext(ThemeContext);
   const navigateApp = useNavigateApp();
   const { localeCatalog } = useAtomStateValue(dateLocaleState);
   const { accounts, loading } = useWorkspaceConnectedAccounts();
@@ -202,7 +226,16 @@ export const SettingsWorkspaceMembersConnectedAccountsTab = () => {
       />
       {loading ? null : accounts.length === 0 ? (
         <StyledEmptyState>
-          <Trans>No connected accounts yet.</Trans>
+          <IconAt
+            size={theme.icon.size.lg}
+            color={theme.font.color.tertiary}
+          />
+          <StyledEmptyStateTitle>
+            <Trans>No connected accounts yet.</Trans>
+          </StyledEmptyStateTitle>
+          <StyledEmptyStateDescription>
+            <Trans>When a member connects an email account, it will appear here.</Trans>
+          </StyledEmptyStateDescription>
         </StyledEmptyState>
       ) : (
         <StyledTableContainer>

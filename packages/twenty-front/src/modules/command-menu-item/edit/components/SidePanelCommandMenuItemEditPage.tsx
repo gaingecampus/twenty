@@ -5,6 +5,7 @@ import { useReorderCommandMenuItemsInDraft } from '@/command-menu-item/edit/hook
 import { useUpdateCommandMenuItemInDraft } from '@/command-menu-item/edit/hooks/useUpdateCommandMenuItemInDraft';
 import { useCurrentCommandMenuContextApi } from '@/command-menu-item/hooks/useCurrentCommandMenuContextApi';
 import { commandMenuItemsSelector } from '@/command-menu-item/states/commandMenuItemsSelector';
+import { getCommandMenuItemLabel } from '@/command-menu-item/utils/getCommandMenuItemLabel';
 import { groupCommandMenuItems } from '@/command-menu-item/utils/groupCommandMenuItems';
 import { COMMAND_MENU_CLICK_OUTSIDE_ID } from '@/command-menu/constants/CommandMenuClickOutsideId';
 import { SidePanelGroup } from '@/side-panel/components/SidePanelGroup';
@@ -83,10 +84,12 @@ export const SidePanelCommandMenuItemEditPage = () => {
   );
 
   const getDisplayLabel = (item: CommandMenuItemFieldsFragment) =>
-    interpolateCommandMenuItemTemplate({
-      label: item.label,
-      context: commandMenuContextApi,
-    }) ?? item.label;
+    getCommandMenuItemLabel(
+      interpolateCommandMenuItemTemplate({
+        label: item.label,
+        context: commandMenuContextApi,
+      }) ?? item.label,
+    );
 
   const { pinned: allPinnedItems, other: allOtherItems } =
     groupCommandMenuItems(editableCommandMenuItems);

@@ -22,6 +22,7 @@ import { multiWorkspaceDropdownState } from '@/ui/navigation/navigation-drawer/s
 import { useColorScheme } from '@/ui/theme/hooks/useColorScheme';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 import { useSetAtomState } from '@/ui/utilities/state/jotai/hooks/useSetAtomState';
+import { type ColorScheme } from '@/workspace-member/types/WorkspaceMember';
 import { styled } from '@linaria/react';
 import { useLingui } from '@lingui/react/macro';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
@@ -78,6 +79,17 @@ export const MultiWorkspaceDropdownDefaultComponents = () => {
   );
 
   const { openSettingsMenu } = useOpenSettingsMenu();
+
+  const getColorSchemeLabel = (scheme: ColorScheme) => {
+    switch (scheme) {
+      case 'System':
+        return t`System`;
+      case 'Dark':
+        return t`Dark`;
+      case 'Light':
+        return t`Light`;
+    }
+  };
 
   const handleSupport = () => {
     window.FrontChat?.('show');
@@ -197,7 +209,9 @@ export const MultiWorkspaceDropdownDefaultComponents = () => {
           text={
             <>
               {t`Theme `}
-              <StyledDescription>{` · ${colorScheme}`}</StyledDescription>
+              <StyledDescription>
+                {` · ${getColorSchemeLabel(colorScheme)}`}
+              </StyledDescription>
             </>
           }
           hasSubMenu={true}

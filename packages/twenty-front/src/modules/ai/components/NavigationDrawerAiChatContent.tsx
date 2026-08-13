@@ -14,6 +14,7 @@ import { agentChatThreadGroupByState } from '@/ai/states/agentChatThreadGroupByS
 import { currentAiChatThreadState } from '@/ai/states/currentAiChatThreadState';
 import { groupThreadsByDate } from '@/ai/utils/groupThreadsByDate';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
+import { dateLocaleState } from '~/localization/states/dateLocaleState';
 
 const StyledContainer = styled.div`
   display: flex;
@@ -61,6 +62,7 @@ export const NavigationDrawerAiChatContent = () => {
     resetNavigationStack: true,
   });
   const agentChatThreadGroupBy = useAtomStateValue(agentChatThreadGroupByState);
+  const { locale } = useAtomStateValue(dateLocaleState);
 
   const { threads, hasNextPage, loading, fetchMoreRef } = useChatThreads();
 
@@ -74,7 +76,9 @@ export const NavigationDrawerAiChatContent = () => {
 
   const isGroupedByDate =
     agentChatThreadGroupBy === AGENT_CHAT_THREAD_GROUP_BY.DATE;
-  const dateGroups = isGroupedByDate ? groupThreadsByDate(threads) : [];
+  const dateGroups = isGroupedByDate
+    ? groupThreadsByDate(threads, new Date(), locale)
+    : [];
   const shouldRenderDateGroups = isGroupedByDate && dateGroups.length > 0;
 
   const filterDropdown = (

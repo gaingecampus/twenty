@@ -1,6 +1,6 @@
 import { i18n } from '@lingui/core';
 import { addDays, format, formatDistanceToNow, subDays } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { fr, ko } from 'date-fns/locale';
 import { SOURCE_LOCALE } from 'twenty-shared/translations';
 import { messages as enMessages } from '~/locales/generated/en';
 import { messages as frMessages } from '~/locales/generated/fr-FR';
@@ -171,6 +171,15 @@ describe('beautifyPastDateRelativeToNowShort', () => {
       '2022-01-01T00:00:00.000Z',
     );
     expect(result).toBe('2y');
+  });
+
+  it('should localize short relative dates for Korean', () => {
+    expect(
+      beautifyPastDateRelativeToNowShort('2023-12-18T00:00:00.000Z', ko),
+    ).toBe('2주');
+    expect(
+      beautifyPastDateRelativeToNowShort('2023-08-01T00:00:00.000Z', ko),
+    ).toBe('5개월');
   });
 
   it('should return empty string and log error for invalid date', () => {

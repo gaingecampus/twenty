@@ -11,7 +11,9 @@ import { isDropdownOpenComponentState } from '@/ui/layout/dropdown/states/isDrop
 import { NavigationDrawerInput } from '@/ui/navigation/navigation-drawer/components/NavigationDrawerInput';
 import { NavigationDrawerItem } from '@/ui/navigation/navigation-drawer/components/NavigationDrawerItem';
 import { useAtomComponentStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomComponentStateValue';
+import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 import { type AgentChatThread } from '~/generated-metadata/graphql';
+import { dateLocaleState } from '~/localization/states/dateLocaleState';
 import { beautifyPastDateRelativeToNowShort } from '~/utils/date-utils';
 
 const StyledRightOptions = styled.div`
@@ -62,6 +64,7 @@ export const NavigationDrawerAiChatThreadItem = ({
   onClick,
 }: NavigationDrawerAiChatThreadItemProps) => {
   const { t } = useLingui();
+  const { localeCatalog } = useAtomStateValue(dateLocaleState);
   const {
     isRenaming,
     draftTitle,
@@ -76,6 +79,7 @@ export const NavigationDrawerAiChatThreadItem = ({
   const displayLabel = thread.title || t`New chat`;
   const timestamp = beautifyPastDateRelativeToNowShort(
     thread.lastMessageAt ?? thread.updatedAt ?? thread.createdAt,
+    localeCatalog,
   );
   const itemMenuDropdownId = getAiChatThreadItemMenuDropdownId(
     thread.id,

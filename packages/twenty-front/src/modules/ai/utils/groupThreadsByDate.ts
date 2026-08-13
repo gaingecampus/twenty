@@ -15,8 +15,8 @@ const getLocalDayDifference = (date: Date, today: Date) =>
 const getMonthGroupId = (date: Date) =>
   `month:${date.getFullYear()}-${date.getMonth() + 1}`;
 
-const formatMonthGroupTitle = (date: Date) =>
-  new Intl.DateTimeFormat(undefined, {
+const formatMonthGroupTitle = (date: Date, locale?: string) =>
+  new Intl.DateTimeFormat(locale, {
     month: 'long',
     year: 'numeric',
   }).format(date);
@@ -24,6 +24,7 @@ const formatMonthGroupTitle = (date: Date) =>
 const getThreadDateGroup = (
   threadActivityAt: Date,
   today: Date,
+  locale?: string,
 ): Omit<AgentChatThreadDateGroup, 'threads'> => {
   const localDayDifference = getLocalDayDifference(threadActivityAt, today);
 
@@ -50,13 +51,14 @@ const getThreadDateGroup = (
 
   return {
     id: getMonthGroupId(threadActivityAt),
-    title: formatMonthGroupTitle(threadActivityAt),
+    title: formatMonthGroupTitle(threadActivityAt, locale),
   };
 };
 
 export const groupThreadsByDate = (
   threads: AgentChatThread[],
   today = new Date(),
+  locale?: string,
 ): AgentChatThreadDateGroup[] => {
   const groupedThreadsByDate = new Map<string, AgentChatThreadDateGroup>();
 
@@ -64,6 +66,7 @@ export const groupThreadsByDate = (
     const threadDateGroup = getThreadDateGroup(
       new Date(thread.lastMessageAt ?? thread.updatedAt),
       today,
+      locale,
     );
     const existingThreadDateGroup = groupedThreadsByDate.get(
       threadDateGroup.id,

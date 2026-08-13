@@ -117,6 +117,7 @@ export const beautifyPastDateRelativeToNow = (
 
 export const beautifyPastDateRelativeToNowShort = (
   pastDate: Date | string | number,
+  locale?: Locale,
 ) => {
   try {
     const parsedDate = parseDate(pastDate);
@@ -127,24 +128,42 @@ export const beautifyPastDateRelativeToNowShort = (
 
     if (diffInSeconds < 60) return t`now`;
 
+    const shouldUseLocalizedDistance =
+      isDefined(locale) && locale.code !== 'en-US' && locale.code !== 'en';
+
+    const formatShort = (count: number, suffix: string, token: string) =>
+      shouldUseLocalizedDistance && isDefined(locale?.formatDistance)
+        ? locale.formatDistance(token, count)
+        : `${count}${suffix}`;
+
     const diffInMinutes = Math.floor(diffInSeconds / 60);
-    if (diffInMinutes < 60) return `${diffInMinutes}m`;
+    if (diffInMinutes < 60) {
+      return formatShort(diffInMinutes, 'm', 'xMinutes');
+    }
 
     const diffInHours = Math.floor(diffInMinutes / 60);
-    if (diffInHours < 24) return `${diffInHours}h`;
+    if (diffInHours < 24) {
+      return formatShort(diffInHours, 'h', 'xHours');
+    }
 
     const diffInDays = Math.floor(diffInHours / 24);
-    if (diffInDays < 7) return `${diffInDays}d`;
+    if (diffInDays < 7) {
+      return formatShort(diffInDays, 'd', 'xDays');
+    }
 
     const diffInWeeks = Math.floor(diffInDays / 7);
-    if (diffInWeeks < 5) return `${diffInWeeks}w`;
+    if (diffInWeeks < 5) {
+      return formatShort(diffInWeeks, 'w', 'xWeeks');
+    }
 
     const diffInMonths = Math.floor(diffInDays / 30);
-    if (diffInMonths < 12) return `${diffInMonths}mo`;
+    if (diffInMonths < 12) {
+      return formatShort(diffInMonths, 'mo', 'xMonths');
+    }
 
     const diffInYears = Math.floor(diffInDays / 365);
 
-    return `${diffInYears}y`;
+    return formatShort(diffInYears, 'y', 'xYears');
   } catch (error) {
     logError(error);
 
