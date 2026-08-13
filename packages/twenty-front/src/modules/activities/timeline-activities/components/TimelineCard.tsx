@@ -4,7 +4,6 @@ import { CustomResolverFetchMoreLoader } from '@/activities/components/CustomRes
 import { SkeletonLoader } from '@/activities/components/SkeletonLoader';
 import { EventList } from '@/activities/timeline-activities/components/EventList';
 import { useTimelineActivities } from '@/activities/timeline-activities/hooks/useTimelineActivities';
-import { useLayoutRenderingContext } from '@/ui/layout/contexts/LayoutRenderingContext';
 import { useTargetRecord } from '@/ui/layout/contexts/useTargetRecord';
 import { t } from '@lingui/core/macro';
 import {
@@ -37,16 +36,8 @@ const StyledMainContainer = styled.div`
   }
 `;
 
-const StyledSidePanelPlaceholderWrapper = styled.div`
-  > * {
-    height: auto;
-    padding-top: ${themeCssVariables.spacing[8]};
-  }
-`;
-
 export const TimelineCard = () => {
   const targetRecord = useTargetRecord();
-  const { isInSidePanel } = useLayoutRenderingContext();
   const {
     timelineActivities,
     firstQueryLoading,
@@ -61,7 +52,7 @@ export const TimelineCard = () => {
   }
 
   if (isTimelineActivitiesEmpty) {
-    const placeholderContent = (
+    return (
       <AnimatedPlaceholderEmptyContainer>
         <AnimatedPlaceholder type="emptyTimeline" />
         <AnimatedPlaceholderEmptyTextContainer>
@@ -73,14 +64,6 @@ export const TimelineCard = () => {
           </AnimatedPlaceholderEmptySubTitle>
         </AnimatedPlaceholderEmptyTextContainer>
       </AnimatedPlaceholderEmptyContainer>
-    );
-
-    return isInSidePanel ? (
-      <StyledSidePanelPlaceholderWrapper>
-        {placeholderContent}
-      </StyledSidePanelPlaceholderWrapper>
-    ) : (
-      placeholderContent
     );
   }
 

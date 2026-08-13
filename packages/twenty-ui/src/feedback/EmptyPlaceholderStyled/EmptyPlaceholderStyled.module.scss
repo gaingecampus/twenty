@@ -43,5 +43,7 @@
   line-height: var(--t-text-line-height-lg);
   max-height: 2.8em;
   overflow: hidden;
+  overflow-wrap: normal;
   width: 50%;
+  word-break: keep-all;
 }
