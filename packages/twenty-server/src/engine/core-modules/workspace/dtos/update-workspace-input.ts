@@ -3,6 +3,7 @@ import { Field, InputType } from '@nestjs/graphql';
 import {
   IsArray,
   IsBoolean,
+  IsIn,
   IsInt,
   IsOptional,
   IsString,
@@ -11,6 +12,7 @@ import {
   Max,
   Min,
 } from 'class-validator';
+import { UI_THEME_IDS } from 'twenty-shared/constants';
 
 import { UUIDScalarType } from 'src/engine/api/graphql/workspace-schema-builder/graphql-types/scalars';
 
@@ -143,4 +145,10 @@ export class UpdateWorkspaceInput {
   @IsBoolean()
   @IsOptional()
   isInternalMessagesImportEnabled?: boolean;
+
+  @Field({ nullable: true })
+  @IsString()
+  @IsIn([...UI_THEME_IDS])
+  @IsOptional()
+  uiTheme?: string;
 }

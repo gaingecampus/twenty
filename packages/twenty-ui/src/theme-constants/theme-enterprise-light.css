@@ -1,0 +1,102 @@
+/* Enterprise overlay — Material Design 3 / Google Blue.
+   Size tokens stay enlarged; color, border, and surface change. */
+
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap');
+
+html.light[data-ui-theme='enterprise'] {
+  font-size: 16px;
+  --t-font-size-xxs: 14px;
+  --t-font-size-xs: 16px;
+  --t-font-size-sm: 16px;
+  --t-font-size-md: 16px;
+  --t-font-size-lg: 22px;
+  --t-font-size-xl: 28px;
+  --t-font-size-xxl: 36px;
+  --t-font-size-label: 16px;
+  --t-label-line-height: 1.4;
+  --t-font-size-section: 20px;
+  --t-section-line-height: 1.4;
+  --t-text-line-height-md: 1.3;
+  --t-text-line-height-lg: 1.5;
+  --t-icon-size-sm: 20;
+  --t-icon-size-md: 22;
+  --t-icon-size-lg: 24;
+  --t-icon-size-xl: 28;
+  --t-text-icon-size-small: 20;
+  --t-text-icon-size-medium: 22;
+  --t-avatar-size-xs: 16px;
+  --t-avatar-size-sm: 16px;
+  --t-avatar-size-md: 20px;
+  --t-avatar-size-lg: 28px;
+  --t-avatar-size-xl: 48px;
+  --t-avatar-font-size-xs: 11px;
+  --t-avatar-font-size-sm: 12px;
+  --t-avatar-font-size-md: 14px;
+  --t-avatar-font-size-lg: 16px;
+  --t-avatar-font-size-xl: 20px;
+  --t-page-card-top-left-radius: 0px;
+  --t-font-family: Roboto, 'Noto Sans KR', sans-serif;
+  --t-font-color-primary: color(display-p3 0.122 0.122 0.122);
+  --t-font-color-secondary: color(display-p3 0.267 0.278 0.286);
+  --t-font-color-tertiary: color(display-p3 0.373 0.388 0.408);
+  --t-font-color-light: color(display-p3 0.502 0.525 0.545);
+  --t-border-radius-xs: 4px;
+  --t-border-radius-sm: 8px;
+  --t-border-radius-md: 12px;
+  --t-border-radius-xl: 16px;
+  --t-control-height-sm: 32px;
+  --t-control-height-md: 32px;
+  --t-page-bar-min-height: 40px;
+  --t-dropdown-width-scale: 1.35;
+  --t-dropdown-section-min-height: 28px;
+  --t-nav-item-height: 40px;
+  --t-nav-item-gap: 8px;
+  --t-nav-item-font-weight: 500;
+  --t-nav-item-radius: 28px;
+  --t-nav-item-active-bg: color(display-p3 0.824 0.89 0.988);
+  --t-nav-item-hover-bg: color(display-p3 0.91 0.918 0.929);
+  --t-nav-item-active-indicator: none;
+  --t-nav-icon-size: 22;
+  --t-nav-icon-tile-size: 28px;
+  --t-nav-icon-tile-bg: transparent;
+  --t-nav-icon-tile-radius: 0px;
+  --t-nav-drawer-bg: color(display-p3 0.973 0.976 0.98);
+  --t-nav-drawer-border-right: 1px solid color(display-p3 0.855 0.863 0.878);
+  --t-workspace-switcher-avatar-size: 32px;
+  --t-workspace-switcher-avatar-font-size: 16px;
+  --t-gray-scale-gray3: color(display-p3 0.91 0.918 0.929);
+  --t-border-color-strong: color(display-p3 0.502 0.525 0.545);
+  --t-border-color-medium: color(display-p3 0.741 0.757 0.776);
+  --t-border-color-light: color(display-p3 0.855 0.863 0.878);
+  --t-border-color-transparent-strong: color(display-p3 0.122 0.439 0.886 / 0.28);
+  --t-background-primary: color(display-p3 1 1 1);
+  --t-background-secondary: color(display-p3 0.973 0.976 0.98);
+  --t-background-tertiary: color(display-p3 0.91 0.918 0.929);
+  --t-background-quaternary: color(display-p3 0.855 0.863 0.878);
+  --t-background-transparent-light: color(display-p3 0.122 0.439 0.886 / 0.08);
+  --t-background-transparent-medium: color(display-p3 0.122 0.439 0.886 / 0.14);
+  --t-background-transparent-blue: color(display-p3 0.122 0.439 0.886 / 0.12);
+  --t-box-shadow-color: color(display-p3 0.122 0.122 0.122 / 0.16);
+  --t-color-blue: color(display-p3 0.102 0.451 0.91);
+  --t-color-blue7: color(display-p3 0.66 0.8 0.98);
+  --t-color-blue8: color(display-p3 0.4 0.62 0.94);
+  --t-color-blue9: color(display-p3 0.102 0.451 0.91);
+  --t-color-blue10: color(display-p3 0.09 0.365 0.78);
+  --t-color-blue11: color(display-p3 0.09 0.306 0.651);
+  --t-color-blue12: color(display-p3 0.07 0.22 0.48);
+  --t-accent-primary: color(display-p3 0.824 0.89 0.988);
+  --t-accent-secondary: color(display-p3 0.66 0.8 0.98);
+  --t-accent-tertiary: color(display-p3 0.91 0.941 0.996);
+  --t-accent-accent7: color(display-p3 0.66 0.8 0.98);
+  --t-accent-accent8: color(display-p3 0.4 0.62 0.94);
+  --t-accent-accent9: color(display-p3 0.102 0.451 0.91);
+  --t-accent-accent10: color(display-p3 0.09 0.365 0.78);
+  --t-accent-accent11: color(display-p3 0.09 0.306 0.651);
+  --t-accent-accent12: color(display-p3 0.07 0.22 0.48);
+}
+
+html.light[data-ui-theme='enterprise'] svg.tabler-icon[width='14'],
+html.light[data-ui-theme='enterprise'] svg.tabler-icon[width='12'] {
+  height: calc(var(--t-icon-size-sm) * 1px);
+  width: calc(var(--t-icon-size-sm) * 1px);
+}

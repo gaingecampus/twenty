@@ -7,6 +7,8 @@ import 'react-loading-skeleton/dist/skeleton.css';
 import 'twenty-ui/style.css';
 import 'twenty-ui/theme-light.css';
 import 'twenty-ui/theme-dark.css';
+import 'twenty-ui/theme-enterprise-light.css';
+import 'twenty-ui/theme-enterprise-dark.css';
 import './index.css';
 
 // TODO: REMOVE this after 2026-12-12 — temporary migration of tokenPair from the

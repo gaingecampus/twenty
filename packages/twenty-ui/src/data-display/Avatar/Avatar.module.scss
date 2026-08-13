@@ -26,33 +26,33 @@
 }
 
 .xl {
-  font-size: 16px;
-  height: 40px;
-  width: 40px;
+  font-size: var(--t-avatar-font-size-xl, 16px);
+  height: var(--t-avatar-size-xl, 40px);
+  width: var(--t-avatar-size-xl, 40px);
 }
 
 .lg {
-  font-size: 13px;
-  height: 24px;
-  width: 24px;
+  font-size: var(--t-avatar-font-size-lg, 13px);
+  height: var(--t-avatar-size-lg, 24px);
+  width: var(--t-avatar-size-lg, 24px);
 }
 
 .md {
-  font-size: 12px;
-  height: 16px;
-  width: 16px;
+  font-size: var(--t-avatar-font-size-md, 12px);
+  height: var(--t-avatar-size-md, 16px);
+  width: var(--t-avatar-size-md, 16px);
 }
 
 .sm {
-  font-size: 10px;
-  height: 14px;
-  width: 14px;
+  font-size: var(--t-avatar-font-size-sm, 10px);
+  height: var(--t-avatar-size-sm, 14px);
+  width: var(--t-avatar-size-sm, 14px);
 }
 
 .xs {
-  font-size: 8px;
-  height: 12px;
-  width: 12px;
+  font-size: var(--t-avatar-font-size-xs, 8px);
+  height: var(--t-avatar-size-xs, 12px);
+  width: var(--t-avatar-size-xs, 12px);
 }
 
 .image {

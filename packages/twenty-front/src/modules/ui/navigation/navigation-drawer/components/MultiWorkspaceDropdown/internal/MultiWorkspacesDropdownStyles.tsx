@@ -15,7 +15,12 @@ export const StyledContainer = styled.div<{
   display: flex;
   gap: ${({ isNavigationDrawerExpanded }) =>
     isNavigationDrawerExpanded ? themeCssVariables.spacing[2] : '0'};
-  height: ${themeCssVariables.spacing[7]};
+  height: var(--t-nav-item-height, ${themeCssVariables.spacing[7]});
+  --t-avatar-size-md: var(--t-workspace-switcher-avatar-size, 16px);
+  --t-avatar-font-size-md: var(
+    --t-workspace-switcher-avatar-font-size,
+    12px
+  );
   max-width: 100%;
   min-width: 0;
   opacity: ${({ disabled }) => (disabled ? 0.5 : 1)};

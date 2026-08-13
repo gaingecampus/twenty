@@ -1,6 +1,8 @@
 import { type Preview } from '@storybook/react-vite';
 import '@ui/theme-constants/theme-light.css';
 import '@ui/theme-constants/theme-dark.css';
+import '@ui/theme-constants/theme-enterprise-light.css';
+import '@ui/theme-constants/theme-enterprise-dark.css';
 import { ThemeProvider } from '@ui/theme-constants';
 
 const preview: Preview = {

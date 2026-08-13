@@ -9,7 +9,7 @@ import { themeCssVariables } from 'twenty-ui/theme-constants';
 const StyledItems = styled.div`
   display: flex;
   flex-direction: column;
-  gap: ${themeCssVariables.betweenSiblingsGap};
+  gap: var(--t-nav-item-gap, ${themeCssVariables.betweenSiblingsGap});
 `;
 
 type CollapsibleNavigationDrawerSectionProps = {

@@ -86,6 +86,7 @@ import { AddGalleryViewTypeFastInstanceCommand } from 'src/database/commands/upg
 import { AddViewFieldRelationRollupFastInstanceCommand } from 'src/database/commands/upgrade-version-command/2-19/2-19-instance-command-fast-1802000000003-add-view-field-relation-rollup';
 import { AddNavigationMenuItemSeparatorFastInstanceCommand } from 'src/database/commands/upgrade-version-command/2-19/2-19-instance-command-fast-1802000000004-add-navigation-menu-item-separator';
 import { AddPageLayoutFiltersFastInstanceCommand } from 'src/database/commands/upgrade-version-command/2-19/2-19-instance-command-fast-1802000000005-add-page-layout-filters';
+import { AddWorkspaceUiThemeFastInstanceCommand } from 'src/database/commands/upgrade-version-command/2-19/2-19-instance-command-fast-1802000000006-add-workspace-ui-theme';
 
 export const INSTANCE_COMMANDS = [
   AddViewFieldGroupIdIndexOnViewFieldFastInstanceCommand,
@@ -174,4 +175,5 @@ export const INSTANCE_COMMANDS = [
   AddViewFieldRelationRollupFastInstanceCommand,
   AddNavigationMenuItemSeparatorFastInstanceCommand,
   AddPageLayoutFiltersFastInstanceCommand,
+  AddWorkspaceUiThemeFastInstanceCommand,
 ];

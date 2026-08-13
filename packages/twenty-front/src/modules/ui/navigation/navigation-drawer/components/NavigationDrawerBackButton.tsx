@@ -31,7 +31,7 @@ const StyledIconAndButtonContainer = styled.button`
   font-size: ${themeCssVariables.font.size.md};
   font-weight: ${themeCssVariables.font.weight.medium};
   gap: ${themeCssVariables.spacing[2]};
-  height: ${themeCssVariables.spacing[7]};
+  height: var(--t-nav-item-height, ${themeCssVariables.spacing[7]});
   padding: 2px ${themeCssVariables.spacing[1]} 2px 2px;
   width: fit-content;
   &:hover {

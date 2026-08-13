@@ -47,6 +47,8 @@ const StyledInfoIcon = styled(IconInfoCircle)`
   color: ${themeCssVariables.font.color.tertiary};
   cursor: default;
   flex-shrink: 0;
+  height: calc(var(--t-icon-size-md) * 1px);
+  width: calc(var(--t-icon-size-md) * 1px);
 `;
 
 export const RecordIndexPageHeader = () => {
@@ -88,7 +90,7 @@ export const RecordIndexPageHeader = () => {
     hasDescription && isDefined(tooltipId) ? (
       <StyledTitleWithDescription>
         {pageHeaderTitle}
-        <StyledInfoIcon id={tooltipId} size={14} />
+        <StyledInfoIcon id={tooltipId} />
         <AppTooltip
           anchorSelect={`#${tooltipId}`}
           content={description}

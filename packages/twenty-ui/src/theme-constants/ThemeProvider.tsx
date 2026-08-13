@@ -99,6 +99,14 @@ const applyColorSchemeClass = (colorScheme: 'light' | 'dark') => {
   root.classList.toggle('light', colorScheme === 'light');
 };
 
+const applyUiThemeAttribute = (
+  element: HTMLElement | null,
+  uiTheme: string,
+) => {
+  if (!element?.setAttribute) return;
+  element.setAttribute('data-ui-theme', uiTheme);
+};
+
 export const ThemeContext = createContext<ThemeContextType>({
   theme: themeCssVariables as unknown as ThemeType,
   colorScheme: 'light',
@@ -107,12 +115,14 @@ export const ThemeContext = createContext<ThemeContextType>({
 export const ThemeProvider = ({
   children,
   colorScheme,
+  uiTheme = 'default',
   applyToRoot = true,
   overrides,
   className,
 }: {
   children: React.ReactNode;
   colorScheme: 'light' | 'dark';
+  uiTheme?: string;
   applyToRoot?: boolean;
   overrides?: ThemeOverrides;
   className?: string;
@@ -124,6 +134,7 @@ export const ThemeProvider = ({
   const [theme, setTheme] = useState<ThemeType>(() => {
     if (applyToRoot) {
       applyColorSchemeClass(colorScheme);
+      applyUiThemeAttribute(document.documentElement, uiTheme);
     }
     return computeThemeFromCss();
   });
@@ -136,6 +147,11 @@ export const ThemeProvider = ({
   useLayoutEffect(() => {
     if (applyToRoot) {
       applyColorSchemeClass(colorScheme);
+      applyUiThemeAttribute(document.documentElement, uiTheme);
+    }
+
+    if (isScoped) {
+      applyUiThemeAttribute(wrapperRef.current, uiTheme);
     }
 
     setTheme(
@@ -144,7 +160,7 @@ export const ThemeProvider = ({
       ),
     );
     setScopeContainer(isScoped ? wrapperRef.current : null);
-  }, [colorScheme, applyToRoot, isScoped, overridesKey]);
+  }, [colorScheme, uiTheme, applyToRoot, isScoped, overridesKey]);
 
   const contextValue = { theme, colorScheme };
 
@@ -164,6 +180,7 @@ export const ThemeProvider = ({
         <div
           ref={wrapperRef}
           className={clsx(applyToRoot ? undefined : colorScheme, className)}
+          data-ui-theme={uiTheme}
           style={{ display: 'contents', ...overridesStyle }}
         >
           {children}

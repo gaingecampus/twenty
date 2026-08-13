@@ -18,7 +18,7 @@
   font-family: var(--t-font-family);
   font-weight: var(--t-font-weight-regular);
   gap: var(--t-spacing-1);
-  height: 24px;
+  height: var(--t-control-height-sm, 24px);
   padding: 0 var(--t-spacing-2);
   transition: background 0.1s ease;
   white-space: nowrap;

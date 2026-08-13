@@ -8,7 +8,7 @@ const StyledDropdownMenuSectionLabel = styled.div`
   display: flex;
   font-size: ${themeCssVariables.font.size.xxs};
   justify-content: flex-start;
-  min-height: 20px;
+  min-height: var(--t-dropdown-section-min-height, 20px);
   padding-left: ${themeCssVariables.spacing[1]};
   user-select: none;
   width: auto;

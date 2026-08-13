@@ -4,9 +4,10 @@
 }
 
 .default {
-  font-size: 11px;
+  font-size: var(--t-font-size-label, var(--t-font-size-xs, 11px));
+  line-height: var(--t-label-line-height, 1.2);
 }
 
 .small {
-  font-size: 9px;
+  font-size: var(--t-font-size-xxs, 9px);
 }

@@ -18,7 +18,7 @@ const StyledContainer = styled.div<{ isExpanded: boolean }>`
   flex-direction: ${({ isExpanded }) => (isExpanded ? 'row' : 'column')};
   flex-shrink: 0;
   gap: ${({ isExpanded }) => (isExpanded ? '0' : themeCssVariables.spacing[4])};
-  min-height: ${PAGE_BAR_MIN_HEIGHT}px;
+  min-height: var(--t-page-bar-min-height, ${PAGE_BAR_MIN_HEIGHT}px);
   padding-right: ${themeCssVariables.spacing[2]};
   transition: gap calc(${themeCssVariables.animation.duration.normal} * 1s) ease;
   user-select: none;
@@ -43,9 +43,9 @@ const StyledRightActions = styled.div<{ isExpanded: boolean }>`
 
 const StyledNavigationDrawerCollapseButtonContainer = styled.div`
   > * {
-    height: ${themeCssVariables.spacing[6]};
+    height: var(--t-control-height-sm, ${themeCssVariables.spacing[6]});
     padding-right: 0;
-    width: ${themeCssVariables.spacing[6]};
+    width: var(--t-control-height-sm, ${themeCssVariables.spacing[6]});
   }
 
   @media (max-width: ${MOBILE_VIEWPORT}px) {

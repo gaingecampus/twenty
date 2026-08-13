@@ -1,6 +1,6 @@
 body {
   margin: 0;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--t-font-family);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background: var(--t-background-tertiary);
@@ -12,7 +12,7 @@ html {
 }
 
 button {
-  font-size: 13px;
+  font-size: var(--t-font-size-md);
 }
 
 form {

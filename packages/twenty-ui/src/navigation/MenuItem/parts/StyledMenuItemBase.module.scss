@@ -12,7 +12,9 @@
   flex-direction: row;
   font-size: var(--t-font-size-sm);
   gap: var(--t-spacing-2);
-  height: calc(32px - 2 * var(--vertical-padding));
+  height: calc(
+    var(--t-control-height-md, 32px) - 2 * var(--vertical-padding)
+  );
   justify-content: space-between;
   padding: var(--vertical-padding) var(--horizontal-padding);
   position: relative;

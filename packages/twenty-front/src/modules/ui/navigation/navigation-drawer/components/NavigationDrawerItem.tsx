@@ -83,12 +83,19 @@ type StyledItemProps = Pick<
 const StyledItem = styled.button<StyledItemProps>`
   align-items: center;
   background: ${({ active }) =>
-    active ? themeCssVariables.background.transparent.light : 'transparent'};
+    active
+      ? `var(--t-nav-item-active-bg, ${themeCssVariables.background.transparent.light})`
+      : 'transparent'};
   border: ${({ isSelectedInEditMode }) =>
     isSelectedInEditMode
       ? `1px solid ${themeCssVariables.color.blue}`
       : '1px solid transparent'};
-  border-radius: ${themeCssVariables.border.radius.sm};
+  border-radius: var(
+    --t-nav-item-radius,
+    ${themeCssVariables.border.radius.sm}
+  );
+  box-shadow: ${({ active }) =>
+    active ? 'var(--t-nav-item-active-indicator, none)' : 'none'};
   box-sizing: border-box;
   color: ${({ active, isSoon, variant }) => {
     if (variant === 'tertiary') {
@@ -107,7 +114,7 @@ const StyledItem = styled.button<StyledItemProps>`
   display: flex;
   font-family: ${themeCssVariables.font.family};
   font-size: ${themeCssVariables.font.size.md};
-  height: ${themeCssVariables.spacing[7]};
+  height: var(--t-nav-item-height, ${themeCssVariables.spacing[7]});
   margin-top: ${({ indentationLevel }) =>
     indentationLevel === 2 ? '2px' : '0'};
   min-width: 0;
@@ -127,7 +134,10 @@ const StyledItem = styled.button<StyledItemProps>`
       : `calc(100% - ${themeCssVariables.spacing['1.5']} + ${themeCssVariables.spacing[1]} + ${hasRightOptions ? themeCssVariables.spacing['0.5'] : themeCssVariables.spacing[1]})`};
 
   &:hover {
-    background: ${themeCssVariables.background.transparent.light};
+    background: var(
+      --t-nav-item-hover-bg,
+      ${themeCssVariables.background.transparent.light}
+    );
     color: ${({ variant }) =>
       variant === 'tertiary'
         ? themeCssVariables.font.color.tertiary
@@ -160,7 +170,10 @@ const StyledLabelParent = styled.div`
 `;
 
 const StyledItemLabel = styled.span`
-  font-weight: ${themeCssVariables.font.weight.medium};
+  font-weight: var(
+    --t-nav-item-font-weight,
+    ${themeCssVariables.font.weight.medium}
+  );
 `;
 
 const StyledItemSecondaryLabel = styled.span`
@@ -199,6 +212,26 @@ const StyledIcon = styled.div`
   flex-shrink: 0;
   justify-content: center;
   margin-right: ${themeCssVariables.spacing[2]};
+  --tinted-icon-tile-dimension: var(
+    --t-nav-icon-tile-size,
+    ${themeCssVariables.spacing[4]}
+  );
+
+  &[data-plain-icon='true'] {
+    background: var(--t-nav-icon-tile-bg, transparent);
+    border-radius: var(
+      --t-nav-icon-tile-radius,
+      ${themeCssVariables.border.radius.sm}
+    );
+    height: var(--t-nav-icon-tile-size, auto);
+    width: var(--t-nav-icon-tile-size, auto);
+  }
+
+  svg {
+    height: calc(var(--t-nav-icon-size, var(--t-icon-size-md)) * 1px);
+    min-width: calc(var(--t-nav-icon-size, var(--t-icon-size-md)) * 1px);
+    width: calc(var(--t-nav-icon-size, var(--t-icon-size-md)) * 1px);
+  }
 `;
 
 const StyledIconBackgroundTile = styled.div`
@@ -207,9 +240,9 @@ const StyledIconBackgroundTile = styled.div`
   border-radius: ${themeCssVariables.border.radius.md};
   display: flex;
   flex-shrink: 0;
-  height: ${themeCssVariables.spacing[6]};
+  height: var(--t-nav-icon-tile-size, ${themeCssVariables.spacing[6]});
   justify-content: center;
-  width: ${themeCssVariables.spacing[6]};
+  width: var(--t-nav-icon-tile-size, ${themeCssVariables.spacing[6]});
 `;
 
 const StyledRightOptionsContainer = styled.div`
@@ -373,7 +406,7 @@ export const NavigationDrawerItem = ({
                 </StyledIconBackgroundTile>
               </StyledIcon>
             ) : (
-              <StyledIcon>
+              <StyledIcon data-plain-icon="true">
                 <Icon
                   style={{
                     minWidth: theme.icon.size.md,

@@ -17,6 +17,7 @@ export const UPDATE_WORKSPACE = gql`
       isPasswordAuthEnabled
       isTwoFactorAuthenticationEnforced
       isInternalMessagesImportEnabled
+      uiTheme
       defaultRole {
         ...RoleFragment
       }

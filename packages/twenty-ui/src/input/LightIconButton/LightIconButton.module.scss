@@ -49,15 +49,15 @@
 }
 
 .small {
-  height: var(--t-spacing-6);
-  min-width: var(--t-spacing-6);
-  width: var(--t-spacing-6);
+  height: var(--t-control-height-sm, 24px);
+  min-width: var(--t-control-height-sm, 24px);
+  width: var(--t-control-height-sm, 24px);
 }
 
 .medium {
-  height: var(--t-spacing-8);
-  min-width: var(--t-spacing-8);
-  width: var(--t-spacing-8);
+  height: var(--t-control-height-md, 32px);
+  min-width: var(--t-control-height-md, 32px);
+  width: var(--t-control-height-md, 32px);
 }
 
 .button[data-accent='secondary'] {

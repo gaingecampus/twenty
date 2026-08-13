@@ -37,6 +37,8 @@ const StyledAnimatedContainer = styled.div<{
   max-height: 100%;
   overflow: hidden;
   position: relative;
+  background: var(--t-nav-drawer-bg, transparent);
+  border-right: var(--t-nav-drawer-border-right, none);
   transition: ${({ isResizing }) =>
     isResizing
       ? 'none'

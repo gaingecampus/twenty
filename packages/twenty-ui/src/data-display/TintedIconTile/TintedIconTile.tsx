@@ -3,7 +3,6 @@ import { StyledTintedIconTileContainer } from '@ui/data-display/StyledTintedIcon
 import { getIconTileColorShades } from '@ui/data-display/TintedIconTile/utils/getIconTileColorShades';
 import { DEFAULT_THEME_COLOR_FALLBACK } from '@ui/theme';
 import { useTheme } from '@ui/theme-constants';
-import { isDefined } from '@ui/utilities/utils/isDefined';
 
 export type TintedIconTileProps = {
   Icon: IconComponent;
@@ -22,9 +21,7 @@ export const TintedIconTile = ({
   const style = getIconTileColorShades(color);
   const iconSize = sizeFromProps ?? theme.icon.size.md;
   const iconStroke = strokeFromProps ?? theme.icon.stroke.md;
-  const tileDimension = isDefined(sizeFromProps)
-    ? `${sizeFromProps}px`
-    : undefined;
+  const tileDimension = `${iconSize}px`;
 
   return (
     <StyledTintedIconTileContainer

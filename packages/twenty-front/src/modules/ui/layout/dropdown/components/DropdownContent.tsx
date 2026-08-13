@@ -9,7 +9,8 @@ const StyledInternalBaseDropdownContent = styled.div<{
 
   flex-direction: column;
   height: 100%;
-  width: ${({ widthInPixels }) => widthInPixels}px;
+  width: ${({ widthInPixels }) =>
+    `calc(${widthInPixels}px * var(--t-dropdown-width-scale, 1))`};
 `;
 
 export const DropdownContent = forwardRef(

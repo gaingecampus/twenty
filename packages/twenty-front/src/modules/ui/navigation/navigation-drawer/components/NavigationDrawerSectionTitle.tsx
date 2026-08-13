@@ -14,7 +14,7 @@ const StyledTitle = styled.div`
   align-items: center;
   border-radius: ${themeCssVariables.border.radius.sm};
   display: flex;
-  height: ${themeCssVariables.spacing[7]};
+  height: var(--t-nav-item-height, ${themeCssVariables.spacing[7]});
   justify-content: space-between;
   padding-bottom: ${themeCssVariables.spacing[1]};
   padding-left: ${themeCssVariables.spacing[1]};
