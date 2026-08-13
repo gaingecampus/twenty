@@ -1,0 +1,39 @@
+---
+description: GAINGE CRM Jira 이슈 생성·커밋 연결 규칙
+globs: []
+alwaysApply: true
+---
+
+# CRM Jira 규칙
+
+단일 원본: `GAINGE_WORKFLOWS.md` § Jira 이슈 생성 규칙 (CRM).
+커밋·PR 워크플로와 함께 sessionStart hook으로 주입됩니다.
+
+## 커밋 전 필수
+
+1. 연결할 `AX-XXX` 이슈가 있는지 Jira에서 검색 (`labels = CRM`)
+2. **없으면 먼저 이슈 생성** — 커밋만 먼저 하지 않음
+3. 커밋 첫 줄: `AX-XXX {한 줄 요약}` (한글)
+
+## 이슈 생성 필수값
+
+- 프로젝트: `AX`
+- 라벨: `CRM`
+- 제목 접두어: `[CRM]`
+
+## 제목 형식
+
+| 유형 | 형식 |
+|------|------|
+| 스토리 | `[CRM] 사용자는 {기능} {할 수 있다/볼 수 있다}.` |
+| 작업 | `[CRM] {작업 내용}` |
+| 에픽 | `[CRM] {N차:} {범위 제목}` |
+
+## 스토리 본문
+
+`## 사용자 스토리` → `## 수용 기준 (되면 끝)` → (선택) `## 출처`, `## 연계 이슈`
+
+## Atlassian MCP
+
+`createJiraIssue` 사용 시 `additional_fields: { "labels": ["CRM"] }` 필수.
+상세 템플릿·Epic Link는 `GAINGE_WORKFLOWS.md` 참고.

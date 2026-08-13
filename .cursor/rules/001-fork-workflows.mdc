@@ -6,5 +6,7 @@ alwaysApply: true
 
 # 포크 워크플로
 
-커밋·PR·리뷰 절차의 단일 원본은 `GAINGE_WORKFLOWS.md`입니다.
+커밋·PR·리뷰·**Jira 이슈** 절차의 단일 원본은 `GAINGE_WORKFLOWS.md`입니다.
 내용이 컨텍스트에 없으면 Read 도구로 읽으세요.
+
+CRM Jira 요약 규칙은 `002-fork-jira.mdc`에도 있습니다.

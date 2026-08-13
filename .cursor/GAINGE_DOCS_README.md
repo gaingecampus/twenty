@@ -10,12 +10,13 @@ GAINGE 포크 전용 문서입니다. upstream 파일은 **수정하지 않습�
 |------|------|------|
 | [`GAINGE_CONTEXT.md`](../GAINGE_CONTEXT.md) | ✅ | 포크 정체성·우선순위·개인 선호 |
 | [`GAINGE_RUNBOOK.md`](../GAINGE_RUNBOOK.md) | ✅ | 로컬 실행·배포·운영 |
-| [`GAINGE_WORKFLOWS.md`](../GAINGE_WORKFLOWS.md) | ✅ | 커밋/PR 워크플로 |
+| [`GAINGE_WORKFLOWS.md`](../GAINGE_WORKFLOWS.md) | ✅ | 커밋/PR/Jira 워크플로 |
 
 | 파일 | 수정 | 역할 |
 |------|------|------|
 | [`.cursor/rules/000-fork-priority.mdc`](rules/000-fork-priority.mdc) | ❌ | Cursor에 단일 원본 위치 안내 |
 | [`.cursor/rules/001-fork-workflows.mdc`](rules/001-fork-workflows.mdc) | ❌ | `GAINGE_WORKFLOWS.md` 참조 |
+| [`.cursor/rules/002-fork-jira.mdc`](rules/002-fork-jira.mdc) | ❌ | CRM Jira 이슈·커밋 연결 규칙 요약 |
 | [`.cursor/hooks/inject-fork-context.sh`](../hooks/inject-fork-context.sh) | ❌ | 세션 시작 시 3개 파일 주입 |
 | [`CLAUDE.local.md`](../CLAUDE.local.md) | ❌ | Claude `@import` 연결 |
 
