@@ -1,4 +1,5 @@
 import { ObjectType } from '@nestjs/graphql';
+import { type ChartFilter } from 'twenty-shared/types';
 
 import {
   Column,
@@ -16,10 +17,12 @@ import {
 
 import { WasIntroducedInUpgrade } from 'src/engine/core-modules/upgrade/decorators/was-introduced-in-upgrade.decorator';
 import { ADD_IS_SYSTEM_SIDE_EFFECT_UPGRADE_COMMAND_NAME } from 'src/database/commands/upgrade-version-command/2-15/is-system-side-effect-upgrade-command-name.constant';
+import { ADD_PAGE_LAYOUT_FILTERS_UPGRADE_COMMAND_NAME } from 'src/database/commands/upgrade-version-command/2-19/add-page-layout-filters-upgrade-command-name.constant';
 import { ObjectMetadataEntity } from 'src/engine/metadata-modules/object-metadata/object-metadata.entity';
 import { PageLayoutTabEntity } from 'src/engine/metadata-modules/page-layout-tab/entities/page-layout-tab.entity';
 import { PageLayoutType } from 'src/engine/metadata-modules/page-layout/enums/page-layout-type.enum';
 import { SyncableEntity } from 'src/engine/workspace-manager/types/syncable-entity.interface';
+import { type JsonbProperty } from 'src/engine/workspace-manager/workspace-migration/universal-flat-entity/types/jsonb-property.type';
 
 @Entity({ name: 'pageLayout', schema: 'core' })
 @ObjectType('PageLayout')
@@ -76,6 +79,12 @@ export class PageLayoutEntity
   })
   @Column({ nullable: false, default: false, type: 'boolean' })
   isSystemSideEffect: boolean;
+
+  @WasIntroducedInUpgrade({
+    upgradeCommandName: ADD_PAGE_LAYOUT_FILTERS_UPGRADE_COMMAND_NAME,
+  })
+  @Column({ nullable: true, type: 'jsonb', default: null })
+  filters: JsonbProperty<ChartFilter> | null;
 
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;

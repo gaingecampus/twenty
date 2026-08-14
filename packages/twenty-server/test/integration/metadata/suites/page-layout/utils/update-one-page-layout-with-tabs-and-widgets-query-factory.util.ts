@@ -13,6 +13,7 @@ const DEFAULT_PAGE_LAYOUT_GQL_FIELDS = `
   name
   type
   objectMetadataId
+  filters
   defaultTabToFocusOnMobileAndSidePanelId
   createdAt
   updatedAt
@@ -67,6 +68,7 @@ export const updateOnePageLayoutWithTabsAndWidgetsQueryFactory = ({
       name: input.name,
       type: input.type,
       objectMetadataId: input.objectMetadataId,
+      filters: input.filters,
       tabs: input.tabs,
     },
   },

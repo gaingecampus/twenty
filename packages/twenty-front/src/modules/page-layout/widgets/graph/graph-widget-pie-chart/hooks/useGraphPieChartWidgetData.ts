@@ -1,5 +1,6 @@
 import { useObjectMetadataItemById } from '@/object-metadata/hooks/useObjectMetadataItemById';
 import { type EnrichedObjectMetadataItem } from '@/object-metadata/types/EnrichedObjectMetadataItem';
+import { useMergedChartFilterForWidget } from '@/page-layout/hooks/useMergedChartFilterForWidget';
 import { type PieChartDataItemWithColor } from '@/page-layout/widgets/graph/graph-widget-pie-chart/types/PieChartDataItem';
 import { type GraphColorMode } from '@/page-layout/widgets/graph/types/GraphColorMode';
 import { type RawDimensionValue } from '@/page-layout/widgets/graph/types/RawDimensionValue';
@@ -44,9 +45,17 @@ export const useGraphPieChartWidgetData = ({
     objectId: objectMetadataItemId,
   });
 
+  const mergedChartFilter = useMergedChartFilterForWidget({
+    objectMetadataItemId,
+    widgetFilter: configuration.filter,
+  });
+
   const dataConfiguration = useMemo(
-    () => extractPieChartDataConfiguration(configuration),
-    [configuration],
+    () => ({
+      ...extractPieChartDataConfiguration(configuration),
+      filter: mergedChartFilter,
+    }),
+    [configuration, mergedChartFilter],
   );
 
   const {

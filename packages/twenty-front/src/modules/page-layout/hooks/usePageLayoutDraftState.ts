@@ -28,6 +28,9 @@ export const usePageLayoutDraftState = (pageLayoutIdFromProps?: string) => {
         type: pageLayoutPersisted.type,
         objectMetadataId: pageLayoutPersisted.objectMetadataId,
         tabs: pageLayoutPersisted.tabs,
+        defaultTabToFocusOnMobileAndSidePanelId:
+          pageLayoutPersisted.defaultTabToFocusOnMobileAndSidePanelId,
+        filters: pageLayoutPersisted.filters ?? null,
       })
     : pageLayoutDraft.name.trim().length > 0 || pageLayoutDraft.tabs.length > 0;
 

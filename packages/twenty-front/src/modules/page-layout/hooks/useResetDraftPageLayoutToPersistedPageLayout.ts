@@ -7,6 +7,7 @@ import { fieldsWidgetGroupsPersistedComponentState } from '@/page-layout/states/
 import { fieldsWidgetUngroupedFieldsDraftComponentState } from '@/page-layout/states/fieldsWidgetUngroupedFieldsDraftComponentState';
 import { fieldsWidgetUngroupedFieldsPersistedComponentState } from '@/page-layout/states/fieldsWidgetUngroupedFieldsPersistedComponentState';
 import { pageLayoutCurrentLayoutsComponentState } from '@/page-layout/states/pageLayoutCurrentLayoutsComponentState';
+import { pageLayoutDashboardFiltersOverlayComponentState } from '@/page-layout/states/pageLayoutDashboardFiltersOverlayComponentState';
 import { pageLayoutDraftComponentState } from '@/page-layout/states/pageLayoutDraftComponentState';
 import { pageLayoutPersistedComponentState } from '@/page-layout/states/pageLayoutPersistedComponentState';
 import { recordTableWidgetViewDraftComponentState } from '@/page-layout/states/recordTableWidgetViewDraftComponentState';
@@ -47,6 +48,12 @@ export const useResetDraftPageLayoutToPersistedPageLayout = ({
     pageLayoutCurrentLayoutsComponentState,
     componentInstanceId,
   );
+
+  const pageLayoutDashboardFiltersOverlayState =
+    useAtomComponentStateCallbackState(
+      pageLayoutDashboardFiltersOverlayComponentState,
+      componentInstanceId,
+    );
 
   const activeTabId = activeTabIdComponentState.atomFamily({
     instanceId: tabListInstanceId,
@@ -119,8 +126,11 @@ export const useResetDraftPageLayoutToPersistedPageLayout = ({
         tabs: pageLayoutPersisted.tabs,
         defaultTabToFocusOnMobileAndSidePanelId:
           pageLayoutPersisted.defaultTabToFocusOnMobileAndSidePanelId,
+        filters: pageLayoutPersisted.filters ?? null,
       };
       store.set(pageLayoutDraftState, persistedAsDraft);
+
+      store.set(pageLayoutDashboardFiltersOverlayState, null);
 
       const tabLayouts = convertPageLayoutToTabLayouts(pageLayoutPersisted);
       store.set(pageLayoutCurrentLayoutsState, tabLayouts);
@@ -158,6 +168,7 @@ export const useResetDraftPageLayoutToPersistedPageLayout = ({
     pageLayoutDraftState,
     pageLayoutPersistedState,
     pageLayoutCurrentLayoutsState,
+    pageLayoutDashboardFiltersOverlayState,
     fieldsWidgetGroupsDraftState,
     fieldsWidgetGroupsPersistedState,
     fieldsWidgetUngroupedFieldsDraftState,

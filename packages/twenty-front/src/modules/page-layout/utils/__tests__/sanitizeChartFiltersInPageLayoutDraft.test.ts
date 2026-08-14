@@ -215,4 +215,27 @@ describe('sanitizeChartFiltersInPageLayoutDraft', () => {
       invalidFilter,
     ]);
   });
+
+  it('should drop layout-level filters that reference deleted fields', () => {
+    const validFilter = buildRecordFilter({
+      id: 'filter-1',
+      fieldMetadataId: ACTIVE_FIELD_ID,
+    });
+    const invalidFilter = buildRecordFilter({
+      id: 'filter-2',
+      fieldMetadataId: DELETED_FIELD_ID,
+    });
+
+    const draft = buildDraft([]);
+    draft.filters = buildChartFilters([validFilter, invalidFilter]);
+
+    const result = sanitizeChartFiltersInPageLayoutDraft({
+      pageLayoutDraft: draft,
+      validFieldMetadataIdsByObjectMetadataId: buildValidFieldsMap([
+        ACTIVE_FIELD_ID,
+      ]),
+    });
+
+    expect(result.filters?.recordFilters).toEqual([validFilter]);
+  });
 });

@@ -65,6 +65,7 @@ export const transformPageLayoutEntityToFlatPageLayout = ({
     type: pageLayoutEntity.type,
     objectMetadataId: pageLayoutEntity.objectMetadataId,
     isSystemSideEffect: pageLayoutEntity.isSystemSideEffect,
+    filters: pageLayoutEntity.filters,
     workspaceId: pageLayoutEntity.workspaceId,
     universalIdentifier: pageLayoutEntity.universalIdentifier,
     applicationId: pageLayoutEntity.applicationId,

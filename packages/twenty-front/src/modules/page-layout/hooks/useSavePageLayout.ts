@@ -4,6 +4,7 @@ import { useCreatePendingRecordTableWidgetViews } from '@/page-layout/hooks/useC
 import { useUpdatePageLayoutWithTabsAndWidgets } from '@/page-layout/hooks/useUpdatePageLayoutWithTabsAndWidgets';
 import { PageLayoutComponentInstanceContext } from '@/page-layout/states/contexts/PageLayoutComponentInstanceContext';
 import { pageLayoutCurrentLayoutsComponentState } from '@/page-layout/states/pageLayoutCurrentLayoutsComponentState';
+import { pageLayoutDashboardFiltersOverlayComponentState } from '@/page-layout/states/pageLayoutDashboardFiltersOverlayComponentState';
 import { pageLayoutDraftComponentState } from '@/page-layout/states/pageLayoutDraftComponentState';
 import { pageLayoutPersistedComponentState } from '@/page-layout/states/pageLayoutPersistedComponentState';
 import { type PageLayout } from '@/page-layout/types/PageLayout';
@@ -39,6 +40,12 @@ export const useSavePageLayout = (pageLayoutIdFromProps: string) => {
     pageLayoutId,
   );
 
+  const pageLayoutDashboardFiltersOverlayCallbackState =
+    useAtomComponentStateCallbackState(
+      pageLayoutDashboardFiltersOverlayComponentState,
+      pageLayoutId,
+    );
+
   const { updatePageLayoutWithTabsAndWidgets } =
     useUpdatePageLayoutWithTabsAndWidgets();
 
@@ -57,6 +64,14 @@ export const useSavePageLayout = (pageLayoutIdFromProps: string) => {
     await createPendingRecordTableWidgetViews(pageLayoutId);
 
     const pageLayoutDraft = store.get(pageLayoutDraftCallbackState);
+    const overlayFilters = store.get(
+      pageLayoutDashboardFiltersOverlayCallbackState,
+    );
+
+    const pageLayoutDraftWithFilters = {
+      ...pageLayoutDraft,
+      filters: overlayFilters ?? pageLayoutDraft.filters ?? null,
+    };
 
     const validFieldMetadataIdsByObjectMetadataId = new Map(
       objectMetadataItems.map((objectMetadataItem) => [
@@ -70,7 +85,7 @@ export const useSavePageLayout = (pageLayoutIdFromProps: string) => {
     );
 
     const sanitizedPageLayoutDraft = sanitizeChartFiltersInPageLayoutDraft({
-      pageLayoutDraft,
+      pageLayoutDraft: pageLayoutDraftWithFilters,
       validFieldMetadataIdsByObjectMetadataId,
     });
 
@@ -96,6 +111,17 @@ export const useSavePageLayout = (pageLayoutIdFromProps: string) => {
           pageLayoutCurrentLayoutsCallbackState,
           convertPageLayoutToTabLayouts(persistedLayout),
         );
+        store.set(pageLayoutDraftCallbackState, {
+          id: persistedLayout.id,
+          name: persistedLayout.name,
+          type: persistedLayout.type,
+          objectMetadataId: persistedLayout.objectMetadataId,
+          tabs: persistedLayout.tabs,
+          defaultTabToFocusOnMobileAndSidePanelId:
+            persistedLayout.defaultTabToFocusOnMobileAndSidePanelId,
+          filters: persistedLayout.filters ?? null,
+        });
+        store.set(pageLayoutDashboardFiltersOverlayCallbackState, null);
       }
     }
 
@@ -105,6 +131,7 @@ export const useSavePageLayout = (pageLayoutIdFromProps: string) => {
     createPendingRecordTableWidgetViews,
     objectMetadataItems,
     pageLayoutCurrentLayoutsCallbackState,
+    pageLayoutDashboardFiltersOverlayCallbackState,
     pageLayoutDraftCallbackState,
     pageLayoutId,
     pageLayoutPersistedCallbackState,

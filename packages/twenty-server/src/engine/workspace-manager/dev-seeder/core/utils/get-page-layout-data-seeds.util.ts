@@ -35,6 +35,7 @@ export const getPageLayoutFlatEntitySeeds = ({
       createdAt: now,
       updatedAt: now,
       deletedAt: null,
+      filters: null,
     },
     {
       id: generateSeedId(workspaceId, PAGE_LAYOUT_SEEDS.CUSTOMER_DASHBOARD),
@@ -57,6 +58,7 @@ export const getPageLayoutFlatEntitySeeds = ({
       createdAt: now,
       updatedAt: now,
       deletedAt: null,
+      filters: null,
     },
     {
       id: generateSeedId(workspaceId, PAGE_LAYOUT_SEEDS.TEAM_DASHBOARD),
@@ -79,6 +81,7 @@ export const getPageLayoutFlatEntitySeeds = ({
       createdAt: now,
       updatedAt: now,
       deletedAt: null,
+      filters: null,
     },
     {
       id: generateSeedId(
@@ -104,6 +107,7 @@ export const getPageLayoutFlatEntitySeeds = ({
       createdAt: now,
       updatedAt: now,
       deletedAt: null,
+      filters: null,
     },
   ];
 };

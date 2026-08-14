@@ -77,6 +77,25 @@ describe('convertPageLayoutDraftToUpdateInput', () => {
     expect(result.tabs[0].widgets.map((w) => w.id)).toEqual(['w1', 'w2']);
   });
 
+  it('should include layout-level filters in the update input', () => {
+    const widget = makeWidget({ id: 'w1' });
+    const draft = makeDraft([makeTab('tab-1', [widget])]);
+    draft.filters = {
+      recordFilters: [
+        {
+          id: 'filter-1',
+          fieldMetadataId: 'field-1',
+          operand: 'IS',
+          value: 'member-1',
+        },
+      ],
+    };
+
+    const result = convertPageLayoutDraftToUpdateInput(draft);
+
+    expect(result.filters).toEqual(draft.filters);
+  });
+
   it('should map gridPosition correctly', () => {
     const widget = makeWidget({
       id: 'w1',

@@ -56,5 +56,6 @@ export const fromCreatePageLayoutInputToFlatPageLayoutToCreate = ({
     tabUniversalIdentifiers: [],
     defaultTabToFocusOnMobileAndSidePanelId: null,
     defaultTabToFocusOnMobileAndSidePanelUniversalIdentifier: null,
+    filters: null,
   };
 };

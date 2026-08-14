@@ -44,6 +44,7 @@ export const convertPageLayoutDraftToUpdateInput = (
     name: pageLayoutDraft.name,
     type: pageLayoutDraft.type,
     objectMetadataId: pageLayoutDraft.objectMetadataId ?? null,
+    filters: pageLayoutDraft.filters ?? null,
     tabs: pageLayoutDraft.tabs
       .filter((tab) => tab.isActive)
       .map((tab) => {

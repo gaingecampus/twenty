@@ -11,8 +11,28 @@ export const sanitizeChartFiltersInPageLayoutDraft = ({
   pageLayoutDraft: DraftPageLayout;
   validFieldMetadataIdsByObjectMetadataId: Map<string, Set<string>>;
 }): DraftPageLayout => {
+  const allValidFieldMetadataIds = new Set(
+    [...validFieldMetadataIdsByObjectMetadataId.values()].flatMap(
+      (validFieldMetadataIds) => [...validFieldMetadataIds],
+    ),
+  );
+
+  const layoutFilters = pageLayoutDraft.filters as
+    | ChartFilters
+    | null
+    | undefined;
+
+  const sanitizedLayoutFilters =
+    isDefined(layoutFilters) && allValidFieldMetadataIds.size > 0
+      ? dropChartRecordFiltersWithDeletedFields({
+          chartFilters: layoutFilters,
+          validFieldMetadataIds: allValidFieldMetadataIds,
+        })
+      : layoutFilters;
+
   return {
     ...pageLayoutDraft,
+    filters: sanitizedLayoutFilters ?? pageLayoutDraft.filters ?? null,
     tabs: pageLayoutDraft.tabs.map((tab) => ({
       ...tab,
       widgets: tab.widgets.map((widget) => {

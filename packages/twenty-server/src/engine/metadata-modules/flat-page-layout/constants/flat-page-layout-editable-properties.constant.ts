@@ -4,4 +4,5 @@ export const FLAT_PAGE_LAYOUT_EDITABLE_PROPERTIES = [
   'name',
   'type',
   'objectMetadataId',
+  'filters',
 ] as const satisfies MetadataEntityPropertyName<'pageLayout'>[];

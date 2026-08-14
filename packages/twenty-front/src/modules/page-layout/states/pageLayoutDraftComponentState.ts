@@ -14,6 +14,7 @@ export const pageLayoutDraftComponentState =
       objectMetadataId: null,
       tabs: [],
       defaultTabToFocusOnMobileAndSidePanelId: null,
+      filters: null,
     },
     componentInstanceContext: PageLayoutComponentInstanceContext,
   });

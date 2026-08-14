@@ -114,6 +114,10 @@ export class PageLayoutUpdateService {
       name: updateData.name,
       type: updateData.type,
       objectMetadataId: updateData.objectMetadataId,
+      filters:
+        updateData.filters === undefined
+          ? existingPageLayout.filters
+          : updateData.filters,
       updatedAt: new Date().toISOString(),
     };
 

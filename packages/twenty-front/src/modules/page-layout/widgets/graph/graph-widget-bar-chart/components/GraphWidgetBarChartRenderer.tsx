@@ -1,3 +1,4 @@
+import { useDashboardPageLayoutFilters } from '@/page-layout/hooks/useDashboardPageLayoutFilters';
 import { useIsPageLayoutInEditMode } from '@/page-layout/hooks/useIsPageLayoutInEditMode';
 import { PageLayoutWidgetErrorDisplay } from '@/page-layout/widgets/components/PageLayoutWidgetErrorDisplay';
 import { WidgetSkeletonLoader } from '@/page-layout/widgets/components/WidgetSkeletonLoader';
@@ -60,6 +61,7 @@ export const GraphWidgetBarChartRenderer = () => {
   const navigate = useNavigate();
   const configuration = widget.configuration;
   const isPageLayoutInEditMode = useIsPageLayoutInEditMode();
+  const { dashboardPageLayoutFilters } = useDashboardPageLayoutFilters();
 
   const axisNameDisplay = configuration.axisNameDisplay;
 
@@ -105,6 +107,7 @@ export const GraphWidgetBarChartRenderer = () => {
       viewId: indexViewId,
       timezone: userTimezone,
       firstDayOfTheWeek: userFirstDayOfTheWeek,
+      dashboardPageLayoutFilter: dashboardPageLayoutFilters,
     });
 
     const url = getAppPath(

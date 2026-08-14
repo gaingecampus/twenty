@@ -73,8 +73,8 @@ export class PageLayoutDuplicationService {
         { workspaceId },
       );
 
-    const newFlatPageLayout = fromCreatePageLayoutInputToFlatPageLayoutToCreate(
-      {
+    const createdFlatPageLayout =
+      fromCreatePageLayoutInputToFlatPageLayoutToCreate({
         createPageLayoutInput: {
           name: originalFlatLayout.name,
           type: originalFlatLayout.type,
@@ -83,8 +83,12 @@ export class PageLayoutDuplicationService {
         workspaceId,
         flatApplication: workspaceCustomFlatApplication,
         flatObjectMetadataMaps,
-      },
-    );
+      });
+
+    const newFlatPageLayout = {
+      ...createdFlatPageLayout,
+      filters: originalFlatLayout.filters,
+    };
 
     const optimisticFlatPageLayoutMaps = addFlatEntityToFlatEntityMapsOrThrow({
       flatEntity: newFlatPageLayout,

@@ -1,3 +1,5 @@
+import { andMergeChartFilters } from '@/page-layout/utils/andMergeChartFilters';
+import { pickChartFiltersForObject } from '@/page-layout/utils/pickChartFiltersForObject';
 import { type BuildChartDrilldownQueryParamsInput } from '@/page-layout/widgets/graph/types/BuildChartDrilldownQueryParamsInput';
 import { buildFilterFromChartBucket } from '@/page-layout/widgets/graph/utils/buildFilterFromChartBucket';
 import { buildFilterQueryParams } from '@/page-layout/widgets/graph/utils/buildFilterQueryParams';
@@ -12,13 +14,34 @@ export const buildChartDrilldownQueryParams = ({
   viewId,
   timezone,
   firstDayOfTheWeek,
+  dashboardPageLayoutFilter,
 }: BuildChartDrilldownQueryParamsInput): URLSearchParams => {
   const drilldownQueryParams = new URLSearchParams();
 
-  if (isDefined(configuration.filter)) {
+  const validFieldMetadataIds = new Set(
+    objectMetadataItem.fields
+      .filter((fieldMetadataItem) => fieldMetadataItem.isActive)
+      .map((fieldMetadataItem) => fieldMetadataItem.id),
+  );
+
+  const dashboardFiltersForObject = pickChartFiltersForObject({
+    chartFilters: dashboardPageLayoutFilter,
+    validFieldMetadataIds,
+  });
+
+  const mergedChartFilter = andMergeChartFilters({
+    left: configuration.filter,
+    right: dashboardFiltersForObject,
+  });
+
+  const hasMergedChartFilters =
+    (mergedChartFilter.recordFilters?.length ?? 0) > 0 ||
+    (mergedChartFilter.recordFilterGroups?.length ?? 0) > 0;
+
+  if (hasMergedChartFilters) {
     const chartFilterParams = buildFilterQueryParams({
-      recordFilters: configuration.filter.recordFilters ?? [],
-      recordFilterGroups: configuration.filter.recordFilterGroups ?? [],
+      recordFilters: mergedChartFilter.recordFilters ?? [],
+      recordFilterGroups: mergedChartFilter.recordFilterGroups ?? [],
       objectMetadataItem,
     });
 

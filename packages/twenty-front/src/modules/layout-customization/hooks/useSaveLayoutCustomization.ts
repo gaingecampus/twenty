@@ -11,6 +11,7 @@ import { useCreatePendingRecordTableWidgetViews } from '@/page-layout/hooks/useC
 import { useSavePageLayoutWidgetsData } from '@/page-layout/hooks/useSavePageLayoutWidgetsData';
 import { useUpdatePageLayoutWithTabsAndWidgets } from '@/page-layout/hooks/useUpdatePageLayoutWithTabsAndWidgets';
 import { pageLayoutCurrentLayoutsComponentState } from '@/page-layout/states/pageLayoutCurrentLayoutsComponentState';
+import { pageLayoutDashboardFiltersOverlayComponentState } from '@/page-layout/states/pageLayoutDashboardFiltersOverlayComponentState';
 import { pageLayoutDraftComponentState } from '@/page-layout/states/pageLayoutDraftComponentState';
 import { pageLayoutPersistedComponentState } from '@/page-layout/states/pageLayoutPersistedComponentState';
 import { type DraftPageLayout } from '@/page-layout/types/DraftPageLayout';
@@ -93,6 +94,12 @@ export const useSaveLayoutCustomization = () => {
           continue;
         }
 
+        const overlayFilters = store.get(
+          pageLayoutDashboardFiltersOverlayComponentState.atomFamily({
+            instanceId: pageLayoutId,
+          }),
+        );
+
         const persistedAsDraft: DraftPageLayout = {
           id: persisted.id,
           name: persisted.name,
@@ -101,10 +108,16 @@ export const useSaveLayoutCustomization = () => {
           tabs: persisted.tabs,
           defaultTabToFocusOnMobileAndSidePanelId:
             persisted.defaultTabToFocusOnMobileAndSidePanelId,
+          filters: persisted.filters ?? null,
+        };
+
+        const draftWithFilters: DraftPageLayout = {
+          ...draft,
+          filters: overlayFilters ?? draft.filters ?? null,
         };
 
         const isPageLayoutStructureDirty = !isDeeplyEqual(
-          draft,
+          draftWithFilters,
           persistedAsDraft,
         );
 
@@ -112,7 +125,9 @@ export const useSaveLayoutCustomization = () => {
         await createPendingRecordTableWidgetViews(pageLayoutId);
 
         if (isPageLayoutStructureDirty) {
-          const updateInput = convertPageLayoutDraftToUpdateInput(draft);
+          const updateInput = convertPageLayoutDraftToUpdateInput(
+            draftWithFilters,
+          );
           const result = await updatePageLayoutWithTabsAndWidgets(
             pageLayoutId,
             updateInput,
@@ -137,6 +152,27 @@ export const useSaveLayoutCustomization = () => {
                   instanceId: pageLayoutId,
                 }),
                 convertPageLayoutToTabLayouts(persistedLayout),
+              );
+              store.set(
+                pageLayoutDraftComponentState.atomFamily({
+                  instanceId: pageLayoutId,
+                }),
+                {
+                  id: persistedLayout.id,
+                  name: persistedLayout.name,
+                  type: persistedLayout.type,
+                  objectMetadataId: persistedLayout.objectMetadataId,
+                  tabs: persistedLayout.tabs,
+                  defaultTabToFocusOnMobileAndSidePanelId:
+                    persistedLayout.defaultTabToFocusOnMobileAndSidePanelId,
+                  filters: persistedLayout.filters ?? null,
+                },
+              );
+              store.set(
+                pageLayoutDashboardFiltersOverlayComponentState.atomFamily({
+                  instanceId: pageLayoutId,
+                }),
+                null,
               );
             }
           } else {

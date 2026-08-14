@@ -60,6 +60,7 @@ export const PageLayoutInitializationQueryEffect = ({
         tabs: layout.tabs,
         defaultTabToFocusOnMobileAndSidePanelId:
           layout.defaultTabToFocusOnMobileAndSidePanelId,
+        filters: layout.filters ?? null,
       });
 
       const tabLayouts = convertPageLayoutToTabLayouts(layout);

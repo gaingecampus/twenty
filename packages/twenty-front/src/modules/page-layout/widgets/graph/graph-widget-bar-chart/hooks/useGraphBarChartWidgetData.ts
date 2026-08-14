@@ -1,5 +1,6 @@
 import { useObjectMetadataItemById } from '@/object-metadata/hooks/useObjectMetadataItemById';
 import { type FieldMetadataItemOption } from '@/object-metadata/types/FieldMetadataItem';
+import { useMergedChartFilterForWidget } from '@/page-layout/hooks/useMergedChartFilterForWidget';
 import { type BarChartSeriesWithColor } from '@/page-layout/widgets/graph/graph-widget-bar-chart/types/BarChartSeries';
 import { getEffectiveGroupMode } from '@/page-layout/widgets/graph/graph-widget-bar-chart/utils/getEffectiveGroupMode';
 import { type BarChartDatum } from '@/page-layout/widgets/graph/graph-widget-bar-chart/types/BarChartDatum';
@@ -56,9 +57,17 @@ export const useGraphBarChartWidgetData = ({
     objectId: objectMetadataItemId,
   });
 
+  const mergedChartFilter = useMergedChartFilterForWidget({
+    objectMetadataItemId,
+    widgetFilter: configuration.filter,
+  });
+
   const dataConfiguration = useMemo(
-    () => extractBarChartDataConfiguration(configuration),
-    [configuration],
+    () => ({
+      ...extractBarChartDataConfiguration(configuration),
+      filter: mergedChartFilter,
+    }),
+    [configuration, mergedChartFilter],
   );
 
   const {

@@ -1,5 +1,6 @@
 import { type EnrichedObjectMetadataItem } from '@/object-metadata/types/EnrichedObjectMetadataItem';
 import { type RawDimensionValue } from '@/page-layout/widgets/graph/types/RawDimensionValue';
+import { type ChartFilters } from '@/side-panel/pages/page-layout/types/ChartFilters';
 import { type FirstDayOfTheWeek } from 'twenty-shared/types';
 import {
   type BarChartConfiguration,
@@ -19,4 +20,5 @@ export type BuildChartDrilldownQueryParamsInput = {
   viewId?: string;
   timezone?: string;
   firstDayOfTheWeek: FirstDayOfTheWeek;
+  dashboardPageLayoutFilter?: ChartFilters | null;
 };

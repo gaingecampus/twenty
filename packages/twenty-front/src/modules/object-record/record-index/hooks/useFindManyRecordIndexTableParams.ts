@@ -9,6 +9,7 @@ import { currentRecordFiltersComponentState } from '@/object-record/record-filte
 import { useCurrentRecordGroupDefinition } from '@/object-record/record-group/hooks/useCurrentRecordGroupDefinition';
 import { useRecordGroupFilter } from '@/object-record/record-group/hooks/useRecordGroupFilter';
 import { currentRecordSortsComponentState } from '@/object-record/record-sort/states/currentRecordSortsComponentState';
+import { useOptionalDashboardPageLayoutChartFilterForObject } from '@/page-layout/hooks/useOptionalDashboardPageLayoutChartFilterForObject';
 import { useAtomComponentStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomComponentStateValue';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 import {
@@ -53,6 +54,16 @@ export const useFindManyRecordIndexTableParams = (
     flattenedFieldMetadataItemsSelector,
   );
 
+  const dashboardPageLayoutChartFilter =
+    useOptionalDashboardPageLayoutChartFilterForObject({
+      objectMetadataItemId: objectMetadataItem?.id,
+    });
+
+  const anyFieldFilterValue = useAtomComponentStateValue(
+    anyFieldFilterValueComponentState,
+    instanceId,
+  );
+
   const currentFilters = computeRecordGqlOperationFilter({
     fieldMetadataItems: flattenedFieldMetadataItems,
     recordFilterGroups: currentRecordFilterGroups,
@@ -60,10 +71,12 @@ export const useFindManyRecordIndexTableParams = (
     filterValueDependencies,
   });
 
-  const anyFieldFilterValue = useAtomComponentStateValue(
-    anyFieldFilterValueComponentState,
-    instanceId,
-  );
+  const dashboardPageLayoutGqlFilter = computeRecordGqlOperationFilter({
+    fieldMetadataItems: flattenedFieldMetadataItems,
+    recordFilterGroups: dashboardPageLayoutChartFilter.recordFilterGroups ?? [],
+    recordFilters: dashboardPageLayoutChartFilter.recordFilters ?? [],
+    filterValueDependencies,
+  });
 
   const { recordGqlOperationFilter: anyFieldFilter } =
     turnAnyFieldFilterIntoRecordGqlFilter({
@@ -81,6 +94,7 @@ export const useFindManyRecordIndexTableParams = (
     currentFilters,
     recordGroupFilter,
     anyFieldFilter,
+    dashboardPageLayoutGqlFilter,
   ]);
 
   return {

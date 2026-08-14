@@ -30,6 +30,7 @@ const MOCK_PAGE_LAYOUT: PageLayout = {
   updatedAt: '2024-01-01',
   deletedAt: null,
   defaultTabToFocusOnMobileAndSidePanelId: null,
+  filters: null,
 };
 
 const MOCK_DRAFT_PAGE_LAYOUT = {
@@ -39,6 +40,7 @@ const MOCK_DRAFT_PAGE_LAYOUT = {
   objectMetadataId: 'obj-1',
   tabs: [] as PageLayout['tabs'],
   defaultTabToFocusOnMobileAndSidePanelId: null,
+  filters: null,
 };
 
 const getWrapper =

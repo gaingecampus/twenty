@@ -6,11 +6,14 @@ import {
   IsArray,
   IsEnum,
   IsNotEmpty,
+  IsObject,
   IsOptional,
   IsString,
   IsUUID,
   ValidateNested,
 } from 'class-validator';
+import { GraphQLJSON } from 'graphql-type-json';
+import { type ChartFilter } from 'twenty-shared/types';
 
 import { UUIDScalarType } from 'src/engine/api/graphql/workspace-schema-builder/graphql-types/scalars';
 import { UpdatePageLayoutTabWithWidgetsInput } from 'src/engine/metadata-modules/page-layout-tab/dtos/inputs/update-page-layout-tab-with-widgets.input';
@@ -32,6 +35,11 @@ export class UpdatePageLayoutWithTabsInput {
   @IsUUID()
   @IsOptional()
   objectMetadataId: string | null;
+
+  @Field(() => GraphQLJSON, { nullable: true })
+  @IsObject()
+  @IsOptional()
+  filters?: ChartFilter | null;
 
   @Field(() => [UpdatePageLayoutTabWithWidgetsInput])
   @IsArray()

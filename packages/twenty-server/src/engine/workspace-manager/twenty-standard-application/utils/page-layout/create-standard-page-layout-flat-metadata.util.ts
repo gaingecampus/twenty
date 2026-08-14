@@ -128,5 +128,6 @@ export const createStandardPageLayoutFlatMetadata = ({
     defaultTabToFocusOnMobileAndSidePanelId,
     defaultTabToFocusOnMobileAndSidePanelUniversalIdentifier:
       defaultTabUniversalIdentifier,
+    filters: null,
   };
 };

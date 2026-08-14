@@ -1,6 +1,7 @@
 import { useObjectMetadataItemById } from '@/object-metadata/hooks/useObjectMetadataItemById';
 import { flattenedFieldMetadataItemsSelector } from '@/object-metadata/states/flattenedFieldMetadataItemsSelector';
 import { useFilterValueDependencies } from '@/object-record/record-filter/hooks/useFilterValueDependencies';
+import { useMergedChartFilterForWidget } from '@/page-layout/hooks/useMergedChartFilterForWidget';
 import { dropChartRecordFiltersWithDeletedFields } from '@/side-panel/pages/page-layout/utils/dropChartRecordFiltersWithDeletedFields';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 import {
@@ -45,23 +46,27 @@ export const useGraphWidgetQueryCommon = ({
     flattenedFieldMetadataItemsSelector,
   );
 
+  const mergedChartFilter = useMergedChartFilterForWidget({
+    objectMetadataItemId,
+    widgetFilter: configuration.filter,
+  });
+
   const objectFieldMetadataIds = new Set(
     objectMetadataItem.fields
       .filter((field) => field.isActive)
       .map((field) => field.id),
   );
 
-  const { recordFilters: sanitizedRecordFilters } =
-    dropChartRecordFiltersWithDeletedFields({
-      chartFilters: configuration.filter ?? {},
-      validFieldMetadataIds: objectFieldMetadataIds,
-    });
+  const sanitizedChartFilters = dropChartRecordFiltersWithDeletedFields({
+    chartFilters: mergedChartFilter,
+    validFieldMetadataIds: objectFieldMetadataIds,
+  });
 
   const gqlOperationFilter = computeRecordGqlOperationFilter({
     fieldMetadataItems: flattenedFieldMetadataItems,
     filterValueDependencies,
-    recordFilters: sanitizedRecordFilters ?? [],
-    recordFilterGroups: configuration.filter?.recordFilterGroups ?? [],
+    recordFilters: sanitizedChartFilters.recordFilters ?? [],
+    recordFilterGroups: sanitizedChartFilters.recordFilterGroups ?? [],
   });
 
   return {

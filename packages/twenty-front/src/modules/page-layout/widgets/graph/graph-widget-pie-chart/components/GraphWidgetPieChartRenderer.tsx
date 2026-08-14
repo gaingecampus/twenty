@@ -1,3 +1,4 @@
+import { useDashboardPageLayoutFilters } from '@/page-layout/hooks/useDashboardPageLayoutFilters';
 import { useIsPageLayoutInEditMode } from '@/page-layout/hooks/useIsPageLayoutInEditMode';
 import { PageLayoutWidgetErrorDisplay } from '@/page-layout/widgets/components/PageLayoutWidgetErrorDisplay';
 import { WidgetSkeletonLoader } from '@/page-layout/widgets/components/WidgetSkeletonLoader';
@@ -51,6 +52,7 @@ export const GraphWidgetPieChartRenderer = () => {
   const navigate = useNavigate();
 
   const isPageLayoutInEditMode = useIsPageLayoutInEditMode();
+  const { dashboardPageLayoutFilters } = useDashboardPageLayoutFilters();
   const indexViewId = useAtomFamilySelectorValue(
     indexViewIdFromObjectMetadataItemFamilySelector,
     { objectMetadataItemId: objectMetadataItem.id },
@@ -76,6 +78,7 @@ export const GraphWidgetPieChartRenderer = () => {
       viewId: indexViewId,
       timezone: userTimezone,
       firstDayOfTheWeek: userFirstDayOfTheWeek,
+      dashboardPageLayoutFilter: dashboardPageLayoutFilters,
     });
 
     const url = getAppPath(

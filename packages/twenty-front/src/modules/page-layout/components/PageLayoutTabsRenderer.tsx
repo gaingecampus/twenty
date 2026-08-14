@@ -1,6 +1,7 @@
 import { metadataStoreState } from '@/metadata-store/states/metadataStoreState';
 import { type FlatObjectMetadataItem } from '@/metadata-store/types/FlatObjectMetadataItem';
 import { useObjectMetadataItems } from '@/object-metadata/hooks/useObjectMetadataItems';
+import { DashboardPageLayoutFilterBar } from '@/page-layout/components/DashboardPageLayoutFilterBar';
 import { PageLayoutLeftPanel } from '@/page-layout/components/PageLayoutLeftPanel';
 import { PageLayoutTabList } from '@/page-layout/components/PageLayoutTabList';
 import { PageLayoutTabListEffect } from '@/page-layout/components/PageLayoutTabListEffect';
@@ -28,6 +29,7 @@ import { useMemo } from 'react';
 import { FieldMetadataType } from 'twenty-shared/types';
 import { isDefined } from 'twenty-shared/utils';
 import { useIsMobile } from 'twenty-ui/utilities';
+import { PageLayoutType } from '~/generated-metadata/graphql';
 
 const StyledContainer = styled.div<{ hasPinnedTab: boolean }>`
   display: grid;
@@ -227,6 +229,10 @@ export const PageLayoutTabsRenderer = () => {
             }
             pageLayoutType={currentPageLayout.type}
           />
+        )}
+
+        {layoutType === PageLayoutType.DASHBOARD && (
+          <DashboardPageLayoutFilterBar />
         )}
 
         <StyledScrollWrapperContainer>

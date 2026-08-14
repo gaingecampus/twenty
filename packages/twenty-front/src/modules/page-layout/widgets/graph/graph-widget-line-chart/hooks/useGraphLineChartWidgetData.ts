@@ -1,5 +1,6 @@
 import { useObjectMetadataItemById } from '@/object-metadata/hooks/useObjectMetadataItemById';
 import { type EnrichedObjectMetadataItem } from '@/object-metadata/types/EnrichedObjectMetadataItem';
+import { useMergedChartFilterForWidget } from '@/page-layout/hooks/useMergedChartFilterForWidget';
 import { type LineChartSeriesWithColor } from '@/page-layout/widgets/graph/graph-widget-line-chart/types/LineChartSeriesWithColor';
 import { type GraphColorMode } from '@/page-layout/widgets/graph/types/GraphColorMode';
 import { type RawDimensionValue } from '@/page-layout/widgets/graph/types/RawDimensionValue';
@@ -9,6 +10,7 @@ import { extractLineChartDataConfiguration } from '@/page-layout/widgets/graph/u
 import { parseGraphColor } from '@/page-layout/widgets/graph/utils/parseGraphColor';
 import { useQuery } from '@apollo/client/react';
 import { isString } from '@sniptt/guards';
+import { useMemo } from 'react';
 import { FieldMetadataType } from 'twenty-shared/types';
 import { isDefined } from 'twenty-shared/utils';
 import {
@@ -45,7 +47,18 @@ export const useGraphLineChartWidgetData = ({
     objectId: objectMetadataItemId,
   });
 
-  const dataConfiguration = extractLineChartDataConfiguration(configuration);
+  const mergedChartFilter = useMergedChartFilterForWidget({
+    objectMetadataItemId,
+    widgetFilter: configuration.filter,
+  });
+
+  const dataConfiguration = useMemo(
+    () => ({
+      ...extractLineChartDataConfiguration(configuration),
+      filter: mergedChartFilter,
+    }),
+    [configuration, mergedChartFilter],
+  );
 
   const {
     data: queryData,
