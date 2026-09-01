@@ -33,12 +33,12 @@ const StyledAnimatedContainer = styled.div<{
   isExpanded: boolean;
   isResizing: boolean;
 }>`
+  background: var(--t-nav-drawer-bg, transparent);
+  border-right: var(--t-nav-drawer-border-right, none);
   height: 100%;
   max-height: 100%;
   overflow: hidden;
   position: relative;
-  background: var(--t-nav-drawer-bg, transparent);
-  border-right: var(--t-nav-drawer-border-right, none);
   transition: ${({ isResizing }) =>
     isResizing
       ? 'none'
@@ -59,10 +59,18 @@ const StyledContainer = styled.div<{
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  gap: ${themeCssVariables.spacing[3]};
+  gap: var(--t-nav-drawer-gap, ${themeCssVariables.spacing[3]});
   height: 100%;
-  padding: ${themeCssVariables.spacing[2]} 0 ${themeCssVariables.spacing[4]}
-    ${themeCssVariables.spacing[2]};
+  padding: var(--t-nav-drawer-padding, ${themeCssVariables.spacing[2]})
+    var(
+      --t-nav-drawer-padding-right,
+      var(--t-nav-drawer-padding-x, 0)
+    )
+    ${themeCssVariables.spacing[4]}
+    var(
+      --t-nav-drawer-padding-x,
+      var(--t-nav-drawer-padding, ${themeCssVariables.spacing[2]})
+    );
   width: ${({ isExpanded }) =>
     isExpanded ? `var(${NAVIGATION_DRAWER_WIDTH_VAR})` : '100%'};
   @media (max-width: ${MOBILE_VIEWPORT}px) {

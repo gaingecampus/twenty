@@ -7,9 +7,9 @@
 
 .button {
   align-items: center;
-  background: transparent;
+  background: var(--t-icon-button-bg, transparent);
   border: var(--light-icon-button-border, none);
-  border-radius: var(--t-border-radius-sm);
+  border-radius: var(--t-icon-button-radius, var(--t-border-radius-sm));
   box-shadow: var(--light-icon-button-box-shadow, none);
   color: var(--light-icon-button-color);
   cursor: pointer;
@@ -25,8 +25,8 @@
 
   &:hover {
     background: var(
-      --light-icon-button-hover-bg,
-      var(--t-background-transparent-light)
+      --t-icon-button-hover-bg,
+      var(--light-icon-button-hover-bg, var(--t-background-transparent-light))
     );
   }
 
@@ -49,9 +49,9 @@
 }
 
 .small {
-  height: var(--t-control-height-sm, 24px);
-  min-width: var(--t-control-height-sm, 24px);
-  width: var(--t-control-height-sm, 24px);
+  height: var(--t-icon-button-size-sm, var(--t-control-height-sm, 24px));
+  min-width: var(--t-icon-button-size-sm, var(--t-control-height-sm, 24px));
+  width: var(--t-icon-button-size-sm, var(--t-control-height-sm, 24px));
 }
 
 .medium {

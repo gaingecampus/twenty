@@ -25,11 +25,13 @@ import { AnimatePresence, LayoutGroup } from 'framer-motion';
 import { Outlet } from 'react-router-dom';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 const StyledLayout = styled.div`
-  background: ${themeCssVariables.grayScale.gray3};
+  background: var(--t-app-bg, ${themeCssVariables.grayScale.gray3});
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   height: 100dvh;
   overflow: hidden;
+  padding: var(--t-app-shell-padding, 0);
   position: relative;
   scrollbar-color: ${themeCssVariables.border.color.medium} transparent;
   scrollbar-width: 4px;
@@ -44,17 +46,25 @@ const StyledLayout = styled.div`
     height: auto;
     min-height: 100%;
     overflow: visible;
+    padding: 0;
   }
 `;
 
 const StyledPageContainer = styled.div`
+  background: var(--t-app-shell-bg, transparent);
+  border-radius: var(--t-app-shell-radius, 0);
+  box-shadow: var(--t-app-shell-shadow, none);
   display: flex;
   flex: 1 1 auto;
   flex-direction: row;
   min-height: 0;
   min-width: 0;
+  overflow: hidden;
 
   @media print {
+    background: transparent;
+    border-radius: 0;
+    box-shadow: none;
     display: block;
     min-height: auto;
     min-width: auto;

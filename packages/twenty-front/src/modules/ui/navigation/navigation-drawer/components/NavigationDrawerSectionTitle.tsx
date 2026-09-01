@@ -12,14 +12,31 @@ import { ThemeContext, themeCssVariables } from 'twenty-ui/theme-constants';
 
 const StyledTitle = styled.div`
   align-items: center;
+  border: var(--t-nav-section-title-border, 1px solid transparent);
   border-radius: ${themeCssVariables.border.radius.sm};
+  box-sizing: border-box;
   display: flex;
-  height: var(--t-nav-item-height, ${themeCssVariables.spacing[7]});
+  height: var(
+    --t-nav-section-title-height,
+    var(--t-nav-item-height, ${themeCssVariables.spacing[7]})
+  );
   justify-content: space-between;
-  padding-bottom: ${themeCssVariables.spacing[1]};
-  padding-left: ${themeCssVariables.spacing[1]};
-  padding-right: ${themeCssVariables.spacing['0.5']};
-  padding-top: ${themeCssVariables.spacing[1]};
+  padding-bottom: var(
+    --t-nav-section-title-padding-y,
+    ${themeCssVariables.spacing[1]}
+  );
+  padding-left: var(
+    --t-nav-section-title-padding-x,
+    var(--t-nav-item-padding-x, ${themeCssVariables.spacing[1]})
+  );
+  padding-right: var(
+    --t-nav-section-title-padding-x,
+    var(--t-nav-item-padding-x, ${themeCssVariables.spacing['0.5']})
+  );
+  padding-top: var(
+    --t-nav-section-title-padding-y,
+    ${themeCssVariables.spacing[1]}
+  );
 
   &:hover {
     background-color: ${themeCssVariables.background.transparent.light};

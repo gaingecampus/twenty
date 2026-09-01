@@ -27,7 +27,10 @@ const LazyWorkspaceSectionListDndKit = lazy(() =>
 );
 
 const StyledWorkspaceSectionContentGapOffset = styled.div`
-  margin-top: calc(-1 * ${themeCssVariables.betweenSiblingsGap});
+  margin-top: var(
+    --t-nav-section-content-offset,
+    calc(-1 * ${themeCssVariables.betweenSiblingsGap})
+  );
 `;
 
 type WorkspaceSectionContainerProps = {

@@ -28,9 +28,9 @@ const StyledMainCardWrapper = styled.div`
   box-sizing: border-box;
   display: flex;
   flex: 1 1 0;
-  margin-left: -3px;
+  margin-left: var(--t-page-card-wrapper-margin-left, -3px);
   min-width: 0;
-  padding-left: 4px;
+  padding-left: var(--t-page-card-wrapper-padding-left, 4px);
   width: 0;
 
   @media print {
@@ -45,10 +45,15 @@ const StyledMainCardWrapper = styled.div`
 // oxlint-disable-next-line twenty/no-hardcoded-colors
 const StyledCard = styled.div`
   background: ${themeCssVariables.background.primary};
-  border-radius: var(--t-page-card-top-left-radius, 16px) 0 0 0;
-  box-shadow:
+  border-radius: var(
+    --t-page-card-radius,
+    var(--t-page-card-top-left-radius, 16px) 0 0 0
+  );
+  box-shadow: var(
+    --t-page-card-shadow,
     -4px 0 4px 0 rgba(0, 0, 0, 0.006),
-    0 0 0 1px ${themeCssVariables.border.color.medium};
+    0 0 0 1px ${themeCssVariables.border.color.medium}
+  );
   box-sizing: border-box;
   display: flex;
   flex: 1;
@@ -58,9 +63,11 @@ const StyledCard = styled.div`
   width: 100%;
 
   .dark & {
-    box-shadow:
+    box-shadow: var(
+      --t-page-card-shadow,
       -4px 0 4px 0 rgba(0, 0, 0, 0.03),
-      0 0 0 1px ${themeCssVariables.border.color.medium};
+      0 0 0 1px ${themeCssVariables.border.color.medium}
+    );
   }
 
   @media print {

@@ -12,8 +12,9 @@
 
 .title {
   color: var(--t-font-color-primary);
-  font-size: var(--t-font-size-md);
+  font-size: var(--t-font-size-section, var(--t-font-size-md));
   font-weight: var(--t-font-weight-semi-bold);
+  letter-spacing: var(--t-heading-letter-spacing, 0);
   margin: 0;
 }
 

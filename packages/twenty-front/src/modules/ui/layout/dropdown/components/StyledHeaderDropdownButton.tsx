@@ -10,29 +10,32 @@ export const StyledHeaderDropdownButton = styled.button<StyledDropdownButtonProp
   align-items: center;
   background: ${({ isUnfolded }) =>
     isUnfolded
-      ? themeCssVariables.background.transparent.light
-      : themeCssVariables.background.primary};
-  border: none;
-  border-radius: ${themeCssVariables.border.radius.sm};
+      ? `var(--t-toolbar-chip-active-bg, ${themeCssVariables.background.transparent.light})`
+      : `var(--t-toolbar-chip-bg, ${themeCssVariables.background.primary})`};
+  border: var(--t-toolbar-chip-border, none);
+  border-radius: var(
+    --t-toolbar-chip-radius,
+    ${themeCssVariables.border.radius.sm}
+  );
+  box-sizing: border-box;
   color: ${({ isActive }) =>
     isActive
       ? themeCssVariables.color.blue
       : themeCssVariables.font.color.secondary};
   cursor: pointer;
   display: flex;
-
   font-family: inherit;
-  padding: ${themeCssVariables.spacing[1]};
-
-  padding-left: ${themeCssVariables.spacing[2]};
-  padding-right: ${themeCssVariables.spacing[2]};
-
+  font-size: var(--t-toolbar-chip-font-size, inherit);
+  font-weight: var(--t-toolbar-chip-font-weight, inherit);
+  height: var(--t-toolbar-chip-height, auto);
+  padding: var(--t-toolbar-chip-padding-y, ${themeCssVariables.spacing[1]})
+    var(--t-toolbar-chip-padding-x, ${themeCssVariables.spacing[2]});
   user-select: none;
 
   &:hover {
     background: ${({ isUnfolded }) =>
       isUnfolded
-        ? themeCssVariables.background.transparent.medium
-        : themeCssVariables.background.transparent.light};
+        ? `var(--t-toolbar-chip-active-bg, ${themeCssVariables.background.transparent.medium})`
+        : `var(--t-toolbar-chip-hover-bg, ${themeCssVariables.background.transparent.light})`};
   }
 `;

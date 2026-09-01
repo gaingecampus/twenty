@@ -19,7 +19,7 @@ const StyledSectionInnerContainerMinusScrollPadding = styled.div<{
   width: ${({ isMobile, isMainNavCollapsed }) =>
     isMobile || isMainNavCollapsed
       ? '100%'
-      : `calc(100% - ${themeCssVariables.spacing[2]})`};
+      : `calc(100% - var(--t-nav-section-inset-right, ${themeCssVariables.spacing[2]}))`};
 `;
 
 export const NavigationDrawerSection = ({

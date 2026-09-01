@@ -10,7 +10,10 @@ const StyledList = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${themeCssVariables.betweenSiblingsGap};
-  padding-top: ${themeCssVariables.betweenSiblingsGap};
+  padding-top: var(
+    --t-nav-section-list-padding-top,
+    ${themeCssVariables.betweenSiblingsGap}
+  );
 `;
 
 type WorkspaceSectionListReadOnlyProps = Pick<

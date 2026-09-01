@@ -15,7 +15,7 @@ const StyledContainer = styled.div`
   display: flex;
   flex-direction: column;
 
-  margin-left: ${themeCssVariables.spacing[3]};
+  margin-left: var(--t-view-bar-padding-x, ${themeCssVariables.spacing[3]});
 `;
 
 const StyledTopBar = styled.div`
@@ -26,9 +26,9 @@ const StyledTopBar = styled.div`
   display: flex;
   flex-direction: row;
   font-weight: ${themeCssVariables.font.weight.medium};
-  height: 39px;
+  height: var(--t-view-bar-min-height, 39px);
   justify-content: space-between;
-  padding-right: ${themeCssVariables.spacing[2]};
+  padding-right: var(--t-view-bar-padding-x, ${themeCssVariables.spacing[2]});
 
   z-index: 7;
 `;
@@ -40,7 +40,7 @@ const StyledLeftSection = styled.div`
 const StyledRightSection = styled.div`
   display: flex;
   font-weight: ${themeCssVariables.font.weight.regular};
-  gap: ${themeCssVariables.betweenSiblingsGap};
+  gap: var(--t-toolbar-chip-gap, ${themeCssVariables.betweenSiblingsGap});
 `;
 
 export const TopBar = ({

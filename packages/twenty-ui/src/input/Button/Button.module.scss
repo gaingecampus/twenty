@@ -41,10 +41,10 @@ $gray-scale-light-gray1: color(display-p3 1 1 1);
   flex-direction: row;
   font-family: var(--t-font-family);
   font-size: var(--t-font-size-md);
-  font-weight: 500;
-  gap: var(--t-spacing-1);
+  font-weight: var(--t-button-font-weight, 500);
+  gap: var(--t-button-gap, var(--t-spacing-1));
   justify-content: var(--btn-justify, flex-start);
-  padding: 0 var(--t-spacing-2) 0 var(--t-spacing-2);
+  padding: 0 var(--t-button-padding-x, var(--t-spacing-2));
   text-decoration: none;
   transition: background 0.1s ease;
   white-space: nowrap;
@@ -71,6 +71,11 @@ $gray-scale-light-gray1: color(display-p3 1 1 1);
 
 .small {
   height: var(--t-control-height-sm, 24px);
+  padding: 0
+    var(
+      --t-button-padding-x-sm,
+      var(--t-button-padding-x, var(--t-spacing-2))
+    );
 }
 
 .medium {

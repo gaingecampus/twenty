@@ -13,20 +13,28 @@ export const StyledDropdownButtonContainer = styled.div<StyledDropdownButtonProp
     transparentBackground
       ? 'none'
       : isUnfolded
-        ? themeCssVariables.background.transparent.light
-        : themeCssVariables.background.primary};
-  border-radius: ${themeCssVariables.border.radius.sm};
+        ? `var(--t-toolbar-chip-active-bg, ${themeCssVariables.background.transparent.light})`
+        : `var(--t-toolbar-chip-bg, ${themeCssVariables.background.primary})`};
+  border: ${({ transparentBackground }) =>
+    transparentBackground ? 'none' : 'var(--t-toolbar-chip-border, none)'};
+  border-radius: var(
+    --t-toolbar-chip-radius,
+    ${themeCssVariables.border.radius.sm}
+  );
+  box-sizing: border-box;
   color: ${({ isActive }) =>
     isActive
       ? themeCssVariables.color.blue
       : themeCssVariables.font.color.secondary};
   cursor: pointer;
   display: flex;
-
-  padding: ${themeCssVariables.spacing[1]};
-  padding-left: ${themeCssVariables.spacing[1]};
-
-  padding-right: ${themeCssVariables.spacing[2]};
+  font-size: var(--t-toolbar-chip-font-size, inherit);
+  font-weight: var(--t-toolbar-chip-font-weight, inherit);
+  height: var(--t-toolbar-chip-height, auto);
+  padding: var(--t-toolbar-chip-padding-y, ${themeCssVariables.spacing[1]})
+    var(--t-toolbar-chip-padding-x, ${themeCssVariables.spacing[2]})
+    var(--t-toolbar-chip-padding-y, ${themeCssVariables.spacing[1]})
+    var(--t-toolbar-chip-padding-x, ${themeCssVariables.spacing[1]});
   user-select: none;
 
   &:hover {
@@ -34,7 +42,7 @@ export const StyledDropdownButtonContainer = styled.div<StyledDropdownButtonProp
       transparentBackground
         ? 'transparent'
         : isUnfolded
-          ? themeCssVariables.background.transparent.medium
-          : themeCssVariables.background.transparent.light};
+          ? `var(--t-toolbar-chip-active-bg, ${themeCssVariables.background.transparent.medium})`
+          : `var(--t-toolbar-chip-hover-bg, ${themeCssVariables.background.transparent.light})`};
   }
 `;

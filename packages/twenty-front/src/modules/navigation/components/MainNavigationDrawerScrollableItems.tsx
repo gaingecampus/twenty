@@ -25,7 +25,7 @@ const WorkspaceSectionDispatcher = lazy(() =>
 const StyledScrollableItemsContainer = styled.div`
   display: flex;
   flex-direction: column;
-  gap: ${themeCssVariables.spacing[3]};
+  gap: var(--t-nav-section-gap, ${themeCssVariables.spacing[3]});
 `;
 
 export const MainNavigationDrawerScrollableItems = () => {

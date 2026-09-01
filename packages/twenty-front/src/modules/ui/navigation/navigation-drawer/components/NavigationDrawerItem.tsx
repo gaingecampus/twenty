@@ -1,3 +1,4 @@
+import { currentWorkspaceState } from '@/auth/states/currentWorkspaceState';
 import { useNavigationDrawerExpanded } from '@/navigation/hooks/useNavigationDrawerExpanded';
 import { NAVIGATION_DRAWER_COLLAPSED_WIDTH } from '@/ui/layout/resizable-panel/constants/NavigationDrawerCollapsedWidth';
 import { NavigationDrawerAnimatedCollapseWrapper } from '@/ui/navigation/navigation-drawer/components/NavigationDrawerAnimatedCollapseWrapper';
@@ -6,6 +7,7 @@ import { useNavigationDrawerTooltip } from '@/ui/navigation/navigation-drawer/ho
 import { type NavigationDrawerSubItemState } from '@/ui/navigation/navigation-drawer/types/NavigationDrawerSubItemState';
 import { isNavigationDrawerExpandedState } from '@/ui/navigation/states/isNavigationDrawerExpanded';
 import { useIsMobile } from '@/ui/utilities/responsive/hooks/useIsMobile';
+import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 import { useSetAtomState } from '@/ui/utilities/state/jotai/hooks/useSetAtomState';
 import { styled } from '@linaria/react';
 import { t } from '@lingui/core/macro';
@@ -102,46 +104,79 @@ const StyledItem = styled.button<StyledItemProps>`
       return themeCssVariables.font.color.tertiary;
     }
     if (active === true) {
-      return themeCssVariables.font.color.primary;
+      return `var(--t-nav-item-active-color, ${themeCssVariables.font.color.primary})`;
     }
     if (isSoon) {
       return themeCssVariables.font.color.light;
     }
-    return themeCssVariables.font.color.secondary;
+    return `var(--t-nav-item-color, ${themeCssVariables.font.color.secondary})`;
   }};
   cursor: ${({ isSoon, isDragging }) =>
     isDragging ? 'grabbing' : isSoon ? 'default' : 'pointer'};
   display: flex;
   font-family: ${themeCssVariables.font.family};
   font-size: ${themeCssVariables.font.size.md};
+  font-weight: ${({ active }) =>
+    active === true
+      ? `var(
+          --t-nav-item-active-font-weight,
+          var(
+            --t-nav-item-font-weight,
+            ${themeCssVariables.font.weight.medium}
+          )
+        )`
+      : `var(
+          --t-nav-item-font-weight,
+          ${themeCssVariables.font.weight.medium}
+        )`};
   height: var(--t-nav-item-height, ${themeCssVariables.spacing[7]});
   margin-top: ${({ indentationLevel }) =>
     indentationLevel === 2 ? '2px' : '0'};
   min-width: 0;
-  padding-bottom: ${themeCssVariables.spacing[1]};
-  padding-left: ${themeCssVariables.spacing[1]};
-  padding-right: ${({ hasRightOptions }) =>
-    hasRightOptions
-      ? themeCssVariables.spacing['0.5']
+  padding-bottom: var(--t-nav-item-padding-y, ${themeCssVariables.spacing[1]});
+  padding-left: ${({ isNavigationDrawerExpanded }) =>
+    isNavigationDrawerExpanded
+      ? `var(--t-nav-item-padding-x, ${themeCssVariables.spacing[1]})`
       : themeCssVariables.spacing[1]};
-  padding-top: ${themeCssVariables.spacing[1]};
+  padding-right: ${({ hasRightOptions, isNavigationDrawerExpanded }) => {
+    if (!isNavigationDrawerExpanded) {
+      return hasRightOptions
+        ? themeCssVariables.spacing['0.5']
+        : themeCssVariables.spacing[1];
+    }
+
+    if (hasRightOptions === true) {
+      return `var(
+        --t-nav-item-padding-right-with-options,
+        ${themeCssVariables.spacing['0.5']}
+      )`;
+    }
+
+    return `var(--t-nav-item-padding-x, ${themeCssVariables.spacing[1]})`;
+  }};
+  padding-top: var(--t-nav-item-padding-y, ${themeCssVariables.spacing[1]});
   pointer-events: ${({ isSoon }) => (isSoon ? 'none' : 'auto')};
   text-decoration: none;
   user-select: none;
   width: ${({ isNavigationDrawerExpanded, hasRightOptions }) =>
     !isNavigationDrawerExpanded
       ? `calc(${NAVIGATION_DRAWER_COLLAPSED_WIDTH}px - ${themeCssVariables.spacing[6]} + ${themeCssVariables.spacing[1]} + ${hasRightOptions ? themeCssVariables.spacing['0.5'] : themeCssVariables.spacing[1]})`
-      : `calc(100% - ${themeCssVariables.spacing['1.5']} + ${themeCssVariables.spacing[1]} + ${hasRightOptions ? themeCssVariables.spacing['0.5'] : themeCssVariables.spacing[1]})`};
+      : `var(--t-nav-item-width, calc(100% - ${themeCssVariables.spacing['1.5']} + ${themeCssVariables.spacing[1]} + ${hasRightOptions ? themeCssVariables.spacing['0.5'] : themeCssVariables.spacing[1]}))`};
 
   &:hover {
-    background: var(
-      --t-nav-item-hover-bg,
-      ${themeCssVariables.background.transparent.light}
-    );
-    color: ${({ variant }) =>
-      variant === 'tertiary'
-        ? themeCssVariables.font.color.tertiary
-        : themeCssVariables.font.color.primary};
+    background: ${({ active }) =>
+      active === true
+        ? `var(--t-nav-item-active-hover-bg, var(--t-nav-item-active-bg, ${themeCssVariables.background.transparent.light}))`
+        : `var(--t-nav-item-hover-bg, ${themeCssVariables.background.transparent.light})`};
+    color: ${({ active, variant }) => {
+      if (variant === 'tertiary') {
+        return themeCssVariables.font.color.tertiary;
+      }
+      if (active === true) {
+        return `var(--t-nav-item-active-color, ${themeCssVariables.font.color.primary})`;
+      }
+      return `var(--t-nav-item-hover-color, ${themeCssVariables.font.color.primary})`;
+    }};
   }
 
   &:hover .keyboard-shortcuts {
@@ -174,6 +209,13 @@ const StyledItemLabel = styled.span`
     --t-nav-item-font-weight,
     ${themeCssVariables.font.weight.medium}
   );
+
+  .navigation-drawer-item[aria-selected='true'] & {
+    font-weight: var(
+      --t-nav-item-active-font-weight,
+      var(--t-nav-item-font-weight, ${themeCssVariables.font.weight.medium})
+    );
+  }
 `;
 
 const StyledItemSecondaryLabel = styled.span`
@@ -206,16 +248,16 @@ const StyledSpacer = styled.span`
 `;
 
 const StyledIcon = styled.div`
-  align-items: center;
-  display: flex;
-  flex-grow: 0;
-  flex-shrink: 0;
-  justify-content: center;
-  margin-right: ${themeCssVariables.spacing[2]};
   --tinted-icon-tile-dimension: var(
     --t-nav-icon-tile-size,
     ${themeCssVariables.spacing[4]}
   );
+  align-items: center;
+  display: flex;
+  flex-grow: 0;
+  flex-shrink: 0;
+  justify-content: var(--t-nav-icon-justify, center);
+  margin-right: var(--t-nav-item-icon-gap, ${themeCssVariables.spacing[2]});
 
   &[data-plain-icon='true'] {
     background: var(--t-nav-icon-tile-bg, transparent);
@@ -247,12 +289,42 @@ const StyledIconBackgroundTile = styled.div`
 
 const StyledRightOptionsContainer = styled.div`
   align-items: center;
-  border-radius: ${themeCssVariables.border.radius.sm};
+  border-radius: var(
+    --t-icon-button-radius,
+    ${themeCssVariables.border.radius.sm}
+  );
+  color: var(--t-font-color-tertiary);
   display: flex;
   flex-grow: 0;
   flex-shrink: 0;
-  height: ${themeCssVariables.spacing[6]};
+  height: var(--t-nav-right-option-size, ${themeCssVariables.spacing[6]});
   justify-content: center;
+  min-width: var(--t-nav-right-option-size, ${themeCssVariables.spacing[6]});
+  width: auto;
+
+  svg.tabler-icon {
+    color: var(--t-font-color-tertiary);
+    height: calc(var(--t-icon-size-md, 18) * 1px);
+    stroke: currentColor;
+    stroke-width: var(--t-icon-stroke-sm, 1.5);
+    width: calc(var(--t-icon-size-md, 18) * 1px);
+  }
+
+  &:hover {
+    background: var(
+      --t-nav-right-option-hover-bg,
+      var(--t-icon-button-hover-bg, transparent)
+    );
+  }
+
+  .navigation-drawer-item[aria-selected='true'] & {
+    &:hover {
+      background: var(
+        --t-nav-right-option-active-hover-bg,
+        var(--t-nav-right-option-hover-bg, var(--t-icon-button-hover-bg, transparent))
+      );
+    }
+  }
 `;
 
 const StyledRightOptionsVisbility = styled.div`
@@ -302,6 +374,8 @@ export const NavigationDrawerItem = ({
   variant = 'default',
 }: NavigationDrawerItemProps) => {
   const { theme } = useContext(ThemeContext);
+  const currentWorkspace = useAtomStateValue(currentWorkspaceState);
+  const hideIconTile = currentWorkspace?.uiTheme === 'weshare';
   const isMobile = useIsMobile();
   const isExpanded = useNavigationDrawerExpanded();
   const setIsNavigationDrawerExpanded = useSetAtomState(
@@ -387,11 +461,11 @@ export const NavigationDrawerItem = ({
           )}
 
           {Icon &&
-            (isNonEmptyString(iconColor) ? (
+            (isNonEmptyString(iconColor) && !hideIconTile ? (
               <StyledIcon>
                 <TintedIconTile Icon={Icon} color={iconColor} />
               </StyledIcon>
-            ) : withIconBackground ? (
+            ) : withIconBackground && !hideIconTile ? (
               <StyledIcon>
                 <StyledIconBackgroundTile>
                   <Icon
@@ -471,6 +545,7 @@ export const NavigationDrawerItem = ({
                   - onClickCapture: prevents the native <a> follow since the child's
                     stopPropagation blocks Link's own preventDefault */}
               <StyledRightOptionsContainer
+                data-nav-right-option="true"
                 onMouseDown={(e) => e.stopPropagation()}
                 onClickCapture={(e) => e.preventDefault()}
               >

@@ -29,21 +29,25 @@ type HeaderLayout = 'default' | 'centerTitle' | 'centerContent';
 const StyledHeader = styled.div<{ headerLayout: HeaderLayout }>`
   align-items: center;
   background-color: ${themeCssVariables.background.secondary};
-  border-bottom: 1px solid ${themeCssVariables.border.color.medium};
   box-sizing: border-box;
-  column-gap: ${themeCssVariables.spacing[2]};
+  column-gap: var(--t-page-header-column-gap, ${themeCssVariables.spacing[2]});
   display: grid;
   /* Balanced side columns keep center content truly centered; right 1fr
      also gives pinned command buttons room to measure and render. */
   grid-template-columns: ${({ headerLayout }) => {
     if (headerLayout === 'centerTitle' || headerLayout === 'centerContent') {
-      return 'minmax(0, 1fr) auto minmax(0, 1fr)';
+      return 'var(--t-page-header-grid, minmax(0, 1fr) auto minmax(0, 1fr))';
     }
 
     return 'minmax(0, auto) minmax(0, 1fr)';
   }};
-  min-height: ${SIDE_PANEL_TOP_BAR_HEIGHT}px;
-  padding: 0 ${themeCssVariables.spacing[3]};
+  border-bottom: var(
+    --t-page-header-border,
+    1px solid ${themeCssVariables.border.color.medium}
+  );
+  min-height: var(--t-page-bar-min-height, ${SIDE_PANEL_TOP_BAR_HEIGHT}px);
+  padding: var(--t-page-header-padding-y, 0)
+    var(--t-page-header-padding-x, ${themeCssVariables.spacing[3]});
   width: 100%;
 `;
 
@@ -62,10 +66,19 @@ const StyledTitle = styled.div<{ titleColor?: string }>`
   color: ${({ titleColor }) =>
     titleColor ?? themeCssVariables.font.color.primary};
   display: flex;
-  font-size: ${themeCssVariables.font.size.md};
-  font-weight: ${themeCssVariables.font.weight.semiBold};
+  font-size: var(--t-page-title-font-size, ${themeCssVariables.font.size.md});
+  font-weight: var(
+    --t-page-title-font-weight,
+    ${themeCssVariables.font.weight.semiBold}
+  );
   gap: ${themeCssVariables.spacing[1]};
+  letter-spacing: var(--t-heading-letter-spacing, 0);
   min-width: 0;
+`;
+
+const StyledHeaderIcon = styled.div`
+  align-items: center;
+  display: var(--t-page-header-icon-display, flex);
 `;
 
 const StyledCenteredTitle = styled(StyledTitle)`
@@ -81,7 +94,7 @@ const StyledCenterContent = styled.div`
   display: flex;
   grid-column: 2;
   justify-content: center;
-  justify-self: center;
+  justify-self: var(--t-page-header-center-justify, center);
   max-width: 100%;
   min-width: 0;
 `;
@@ -90,12 +103,11 @@ const StyledRight = styled.div<{ headerLayout: HeaderLayout }>`
   align-items: center;
   display: flex;
   gap: ${themeCssVariables.spacing[2]};
-  grid-column: ${({ headerLayout }) =>
-    headerLayout === 'default' ? 2 : 3};
+  grid-column: ${({ headerLayout }) => (headerLayout === 'default' ? 2 : 3)};
   justify-content: flex-end;
   justify-self: end;
-  min-width: 0;
-  width: 100%;
+  min-width: var(--t-page-header-right-min-width, 0);
+  width: var(--t-page-header-right-width, 100%);
 `;
 
 export const PageCardHeader = ({
@@ -125,7 +137,7 @@ export const PageCardHeader = ({
 
   const titleContent = (
     <>
-      {icon}
+      {isDefined(icon) && <StyledHeaderIcon>{icon}</StyledHeaderIcon>}
       {isDefined(title) && title}
       {tag}
     </>

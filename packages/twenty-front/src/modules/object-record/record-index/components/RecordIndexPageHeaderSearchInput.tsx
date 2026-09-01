@@ -10,8 +10,8 @@ const SEARCH_DEBOUNCE_MS = 500;
 
 const StyledSearchInputWrapper = styled.div`
   flex-shrink: 0;
-  max-width: 280px;
-  width: 280px;
+  max-width: var(--t-page-search-width, 280px);
+  width: var(--t-page-search-width, 280px);
 `;
 
 type RecordIndexPageHeaderSearchInputProps = {

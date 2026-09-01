@@ -142,13 +142,13 @@ const NavigationMenuItemFolderReadOnlyContent = ({
           rightOptions={
             isOpen ? (
               <IconChevronDown
-                size={theme.icon.size.sm}
+                size={theme.icon.size.md}
                 stroke={theme.icon.stroke.sm}
                 color={themeCssVariables.font.color.tertiary}
               />
             ) : (
               <IconChevronRight
-                size={theme.icon.size.sm}
+                size={theme.icon.size.md}
                 stroke={theme.icon.stroke.sm}
                 color={themeCssVariables.font.color.tertiary}
               />

@@ -1,14 +1,9 @@
 import { styled } from '@linaria/react';
-import { t } from '@lingui/core/macro';
-import { IconSearch } from 'twenty-ui/icon';
-import { LightIconButton } from 'twenty-ui/input';
 import { MOBILE_VIEWPORT, themeCssVariables } from 'twenty-ui/theme-constants';
 
-import { useOpenRecordsSearchPageInSidePanel } from '@/side-panel/hooks/useOpenRecordsSearchPageInSidePanel';
 import { PAGE_BAR_MIN_HEIGHT } from '@/ui/layout/page/constants/PageBarMinHeight';
 import { MultiWorkspaceDropdownButton } from '@/ui/navigation/navigation-drawer/components/MultiWorkspaceDropdown/MultiWorkspaceDropdownButton';
 import { isNavigationDrawerExpandedState } from '@/ui/navigation/states/isNavigationDrawerExpanded';
-import { useIsMobile } from '@/ui/utilities/responsive/hooks/useIsMobile';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 import { NavigationDrawerCollapseButton } from './NavigationDrawerCollapseButton';
 
@@ -18,8 +13,11 @@ const StyledContainer = styled.div<{ isExpanded: boolean }>`
   flex-direction: ${({ isExpanded }) => (isExpanded ? 'row' : 'column')};
   flex-shrink: 0;
   gap: ${({ isExpanded }) => (isExpanded ? '0' : themeCssVariables.spacing[4])};
-  min-height: var(--t-page-bar-min-height, ${PAGE_BAR_MIN_HEIGHT}px);
-  padding-right: ${themeCssVariables.spacing[2]};
+  min-height: var(--t-nav-header-min-height, ${PAGE_BAR_MIN_HEIGHT}px);
+  padding-right: var(
+    --t-nav-header-padding-right,
+    ${themeCssVariables.spacing[2]}
+  );
   transition: gap calc(${themeCssVariables.animation.duration.normal} * 1s) ease;
   user-select: none;
 
@@ -42,26 +40,17 @@ const StyledRightActions = styled.div<{ isExpanded: boolean }>`
 `;
 
 const StyledNavigationDrawerCollapseButtonContainer = styled.div`
-  > * {
-    height: var(--t-control-height-sm, ${themeCssVariables.spacing[6]});
-    padding-right: 0;
-    width: var(--t-control-height-sm, ${themeCssVariables.spacing[6]});
-  }
-
-  @media (max-width: ${MOBILE_VIEWPORT}px) {
-    > * {
-      height: ${themeCssVariables.spacing[8]};
-      padding-right: 0;
-      width: ${themeCssVariables.spacing[8]};
-    }
-  }
+  flex-shrink: 0;
 `;
 
 const StyledWorkspaceDropdownContainer = styled.div`
   align-items: center;
   display: flex;
   flex: 1 1 auto;
-  min-height: ${themeCssVariables.spacing[8]};
+  min-height: var(
+    --t-workspace-switcher-height,
+    ${themeCssVariables.spacing[8]}
+  );
   min-width: 0;
 `;
 
@@ -72,8 +61,6 @@ type NavigationDrawerHeaderProps = {
 export const NavigationDrawerHeader = ({
   showCollapseButton,
 }: NavigationDrawerHeaderProps) => {
-  const isMobile = useIsMobile();
-  const { openRecordsSearchPage } = useOpenRecordsSearchPageInSidePanel();
   const isNavigationDrawerExpanded = useAtomStateValue(
     isNavigationDrawerExpandedState,
   );
@@ -84,15 +71,6 @@ export const NavigationDrawerHeader = ({
         <MultiWorkspaceDropdownButton />
       </StyledWorkspaceDropdownContainer>
       <StyledRightActions isExpanded={isNavigationDrawerExpanded}>
-        {!isMobile && (
-          <LightIconButton
-            Icon={IconSearch}
-            accent="secondary"
-            size="small"
-            onClick={openRecordsSearchPage}
-            aria-label={t`Search`}
-          />
-        )}
         {isNavigationDrawerExpanded && showCollapseButton && (
           <StyledNavigationDrawerCollapseButtonContainer>
             <NavigationDrawerCollapseButton direction="left" />
