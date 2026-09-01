@@ -127,6 +127,7 @@ export const NavigationDrawer = ({
       <StyledAnimatedContainer
         className={className}
         data-click-outside-id={NAVIGATION_DRAWER_CLICK_OUTSIDE_ID}
+        data-nav-expanded={isExpanded ? 'true' : 'false'}
         isExpanded={isExpanded}
         isResizing={isResizing}
       >

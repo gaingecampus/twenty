@@ -17,7 +17,10 @@ import { DropdownMenuItemsContainer } from '@/ui/layout/dropdown/components/Drop
 import { DropdownMenuSeparator } from '@/ui/layout/dropdown/components/DropdownMenuSeparator';
 import { useCloseDropdown } from '@/ui/layout/dropdown/hooks/useCloseDropdown';
 import { useOpenSettingsMenu } from '@/navigation/hooks/useOpenSettings';
-import { MULTI_WORKSPACE_DROPDOWN_ID } from '@/ui/navigation/navigation-drawer/constants/MultiWorkspaceDropdownId';
+import {
+  MULTI_WORKSPACE_DROPDOWN_ID,
+  MULTI_WORKSPACE_DROPDOWN_WIDTH,
+} from '@/ui/navigation/navigation-drawer/constants/MultiWorkspaceDropdownId';
 import { multiWorkspaceDropdownState } from '@/ui/navigation/navigation-drawer/states/multiWorkspaceDropdownState';
 import { useColorScheme } from '@/ui/theme/hooks/useColorScheme';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
@@ -110,7 +113,7 @@ export const MultiWorkspaceDropdownDefaultComponents = () => {
   };
 
   return (
-    <DropdownContent>
+    <DropdownContent widthInPixels={MULTI_WORKSPACE_DROPDOWN_WIDTH}>
       <DropdownMenuHeader
         StartComponent={
           <DropdownMenuHeaderLeftComponent

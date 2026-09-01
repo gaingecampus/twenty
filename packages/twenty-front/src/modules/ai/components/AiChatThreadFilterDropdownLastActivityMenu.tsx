@@ -4,6 +4,7 @@ import { MenuItemSelect } from 'twenty-ui/navigation';
 
 import { AGENT_CHAT_THREAD_LAST_ACTIVITY_FILTER } from '@/ai/constants/AgentChatThreadLastActivityFilter';
 import { AGENT_CHAT_THREAD_LAST_ACTIVITY_FILTER_LABELS } from '@/ai/constants/AgentChatThreadLastActivityFilterLabels';
+import { AI_CHAT_THREAD_FILTER_DROPDOWN_WIDTH } from '@/ai/constants/AiChatThreadFilterDropdownWidth';
 import { agentChatThreadLastActivityFilterState } from '@/ai/states/agentChatThreadLastActivityFilterState';
 import { DropdownContent } from '@/ui/layout/dropdown/components/DropdownContent';
 import { DropdownMenuHeader } from '@/ui/layout/dropdown/components/DropdownMenuHeader/DropdownMenuHeader';
@@ -35,7 +36,7 @@ export const AiChatThreadFilterDropdownLastActivityMenu = ({
   ] = useAtomState(agentChatThreadLastActivityFilterState);
 
   return (
-    <DropdownContent>
+    <DropdownContent widthInPixels={AI_CHAT_THREAD_FILTER_DROPDOWN_WIDTH}>
       <DropdownMenuHeader
         StartComponent={
           <DropdownMenuHeaderLeftComponent

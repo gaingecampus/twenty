@@ -11,6 +11,7 @@ import { useContext } from 'react';
 import { ThemeContext } from 'twenty-ui/theme-constants';
 const StyledAnimatedContainerBase = styled.span`
   display: block;
+  overflow: hidden;
 `;
 
 const StyledAnimatedContainer = motion.create(StyledAnimatedContainerBase);

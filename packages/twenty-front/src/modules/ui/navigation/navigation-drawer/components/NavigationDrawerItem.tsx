@@ -1,6 +1,5 @@
 import { currentWorkspaceState } from '@/auth/states/currentWorkspaceState';
 import { useNavigationDrawerExpanded } from '@/navigation/hooks/useNavigationDrawerExpanded';
-import { NAVIGATION_DRAWER_COLLAPSED_WIDTH } from '@/ui/layout/resizable-panel/constants/NavigationDrawerCollapsedWidth';
 import { NavigationDrawerAnimatedCollapseWrapper } from '@/ui/navigation/navigation-drawer/components/NavigationDrawerAnimatedCollapseWrapper';
 import { NavigationDrawerItemBreadcrumb } from '@/ui/navigation/navigation-drawer/components/NavigationDrawerItemBreadcrumb';
 import { useNavigationDrawerTooltip } from '@/ui/navigation/navigation-drawer/hooks/useNavigationDrawerTooltip';
@@ -132,35 +131,26 @@ const StyledItem = styled.button<StyledItemProps>`
   height: var(--t-nav-item-height, ${themeCssVariables.spacing[7]});
   margin-top: ${({ indentationLevel }) =>
     indentationLevel === 2 ? '2px' : '0'};
+  justify-content: ${({ isNavigationDrawerExpanded }) =>
+    isNavigationDrawerExpanded ? 'flex-start' : 'center'};
   min-width: 0;
+  overflow: hidden;
   padding-bottom: var(--t-nav-item-padding-y, ${themeCssVariables.spacing[1]});
-  padding-left: ${({ isNavigationDrawerExpanded }) =>
-    isNavigationDrawerExpanded
-      ? `var(--t-nav-item-padding-x, ${themeCssVariables.spacing[1]})`
-      : themeCssVariables.spacing[1]};
-  padding-right: ${({ hasRightOptions, isNavigationDrawerExpanded }) => {
-    if (!isNavigationDrawerExpanded) {
-      return hasRightOptions
-        ? themeCssVariables.spacing['0.5']
-        : themeCssVariables.spacing[1];
-    }
-
-    if (hasRightOptions === true) {
-      return `var(
+  padding-left: var(--t-nav-item-padding-x, ${themeCssVariables.spacing[1]});
+  padding-right: ${({ hasRightOptions }) =>
+    hasRightOptions === true
+      ? `var(
         --t-nav-item-padding-right-with-options,
         ${themeCssVariables.spacing['0.5']}
-      )`;
-    }
-
-    return `var(--t-nav-item-padding-x, ${themeCssVariables.spacing[1]})`;
-  }};
+      )`
+      : `var(--t-nav-item-padding-x, ${themeCssVariables.spacing[1]})`};
   padding-top: var(--t-nav-item-padding-y, ${themeCssVariables.spacing[1]});
   pointer-events: ${({ isSoon }) => (isSoon ? 'none' : 'auto')};
   text-decoration: none;
   user-select: none;
   width: ${({ isNavigationDrawerExpanded, hasRightOptions }) =>
     !isNavigationDrawerExpanded
-      ? `calc(${NAVIGATION_DRAWER_COLLAPSED_WIDTH}px - ${themeCssVariables.spacing[6]} + ${themeCssVariables.spacing[1]} + ${hasRightOptions ? themeCssVariables.spacing['0.5'] : themeCssVariables.spacing[1]})`
+      ? '100%'
       : `var(--t-nav-item-width, calc(100% - ${themeCssVariables.spacing['1.5']} + ${themeCssVariables.spacing[1]} + ${hasRightOptions ? themeCssVariables.spacing['0.5'] : themeCssVariables.spacing[1]}))`};
 
   &:hover {
@@ -188,20 +178,28 @@ const StyledItem = styled.button<StyledItemProps>`
   }
 `;
 
-const StyledItemElementsContainer = styled.div`
+const StyledItemElementsContainer = styled.div<{
+  isNavigationDrawerExpanded: boolean;
+}>`
   align-items: center;
   display: flex;
-  width: 100%;
+  justify-content: ${({ isNavigationDrawerExpanded }) =>
+    isNavigationDrawerExpanded ? 'flex-start' : 'center'};
+  width: ${({ isNavigationDrawerExpanded }) =>
+    isNavigationDrawerExpanded ? '100%' : 'auto'};
 `;
 
-const StyledLabelParent = styled.div`
+const StyledLabelParent = styled.div<{ isNavigationDrawerExpanded: boolean }>`
   align-items: center;
   display: flex;
-  flex: 1 1 auto;
-  min-width: 0px;
+  flex: ${({ isNavigationDrawerExpanded }) =>
+    isNavigationDrawerExpanded ? '1 1 auto' : '0 0 0'};
+  min-width: 0;
   overflow: hidden;
   text-overflow: clip;
   white-space: nowrap;
+  width: ${({ isNavigationDrawerExpanded }) =>
+    isNavigationDrawerExpanded ? 'auto' : '0'};
 `;
 
 const StyledItemLabel = styled.span`
@@ -453,7 +451,9 @@ export const NavigationDrawerItem = ({
         rel={isExternalLink ? 'noopener noreferrer' : undefined}
         draggable={isInternalLink ? false : undefined}
       >
-        <StyledItemElementsContainer>
+        <StyledItemElementsContainer
+          isNavigationDrawerExpanded={isExpanded}
+        >
           {showBreadcrumb && (
             <NavigationDrawerAnimatedCollapseWrapper>
               <NavigationDrawerItemBreadcrumb state={subItemState} />
@@ -496,7 +496,7 @@ export const NavigationDrawerItem = ({
               </StyledIcon>
             ))}
 
-          <StyledLabelParent>
+          <StyledLabelParent isNavigationDrawerExpanded={isExpanded}>
             <OverflowingTextWithTooltip
               text={
                 <>
@@ -515,7 +515,7 @@ export const NavigationDrawerItem = ({
             />
           </StyledLabelParent>
 
-          {showStyledSpacer && <StyledSpacer />}
+          {showStyledSpacer && isExpanded && <StyledSpacer />}
 
           {isSoon && (
             <NavigationDrawerAnimatedCollapseWrapper>

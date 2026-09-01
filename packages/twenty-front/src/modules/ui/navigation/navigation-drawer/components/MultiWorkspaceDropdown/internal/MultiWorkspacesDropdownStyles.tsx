@@ -25,15 +25,19 @@ export const StyledContainer = styled.div<{
     --t-workspace-switcher-height,
     var(--t-nav-item-height, ${themeCssVariables.spacing[7]})
   );
+  justify-content: ${({ isNavigationDrawerExpanded }) =>
+    isNavigationDrawerExpanded ? 'flex-start' : 'center'};
   max-width: 100%;
   min-width: 0;
   opacity: ${({ disabled }) => (disabled ? 0.5 : 1)};
+  overflow: hidden;
   padding: var(
     --t-workspace-switcher-padding,
     calc(${themeCssVariables.spacing[1]} - 1px)
   );
   pointer-events: ${({ disabled }) => (disabled ? 'none' : 'auto')};
-  width: fit-content;
+  width: ${({ isNavigationDrawerExpanded }) =>
+    isNavigationDrawerExpanded ? 'fit-content' : '100%'};
 
   &:hover {
     background-color: ${({ disabled }) =>
@@ -47,10 +51,15 @@ export const StyledContainer = styled.div<{
   }
 `;
 
-export const StyledLabelWrapper = styled.div`
-  flex: 1 1 auto;
+export const StyledLabelWrapper = styled.div<{
+  isNavigationDrawerExpanded: boolean;
+}>`
+  flex: ${({ isNavigationDrawerExpanded }) =>
+    isNavigationDrawerExpanded ? '1 1 auto' : '0 0 0'};
   min-width: 0;
   overflow: hidden;
+  width: ${({ isNavigationDrawerExpanded }) =>
+    isNavigationDrawerExpanded ? 'auto' : '0'};
 `;
 
 export const StyledLabel = styled.div`

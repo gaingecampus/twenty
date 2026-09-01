@@ -39,7 +39,9 @@ export const MultiWorkspaceDropdownClickableComponent = ({
           currentWorkspace?.logo ?? DEFAULT_WORKSPACE_LOGO,
         )}
       />
-      <StyledLabelWrapper>
+      <StyledLabelWrapper
+        isNavigationDrawerExpanded={isNavigationDrawerExpanded}
+      >
         <NavigationDrawerAnimatedCollapseWrapper>
           <StyledLabel>{currentWorkspace?.displayName ?? ''}</StyledLabel>
         </NavigationDrawerAnimatedCollapseWrapper>

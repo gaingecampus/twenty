@@ -3,6 +3,7 @@ import { DropdownMenuHeader } from '@/ui/layout/dropdown/components/DropdownMenu
 import { DropdownMenuHeaderLeftComponent } from '@/ui/layout/dropdown/components/DropdownMenuHeader/internal/DropdownMenuHeaderLeftComponent';
 import { DropdownMenuSearchInput } from '@/ui/layout/dropdown/components/DropdownMenuSearchInput';
 import { DropdownMenuSeparator } from '@/ui/layout/dropdown/components/DropdownMenuSeparator';
+import { MULTI_WORKSPACE_DROPDOWN_WIDTH } from '@/ui/navigation/navigation-drawer/constants/MultiWorkspaceDropdownId';
 import { multiWorkspaceDropdownState } from '@/ui/navigation/navigation-drawer/states/multiWorkspaceDropdownState';
 import { useLingui } from '@lingui/react/macro';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
@@ -25,7 +26,7 @@ export const MultiWorkspaceDropdownWorkspacesListComponents = () => {
   const [searchValue, setSearchValue] = useState('');
 
   return (
-    <DropdownContent>
+    <DropdownContent widthInPixels={MULTI_WORKSPACE_DROPDOWN_WIDTH}>
       <DropdownMenuHeader
         StartComponent={
           <DropdownMenuHeaderLeftComponent

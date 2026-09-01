@@ -36,10 +36,10 @@ export const NavigationDrawerItemsCollapsableContainer = ({
     border: 'none',
   };
   if (!isExpanded) {
-    animate = { width: 24 };
+    animate = { width: '100%' };
     if (isGroup) {
       animate = {
-        width: 24,
+        width: '100%',
         backgroundColor: theme.background.transparent.lighter,
         border: `1px solid ${theme.background.transparent.lighter}`,
         borderRadius: theme.border.radius.sm,

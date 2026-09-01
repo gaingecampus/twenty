@@ -3,7 +3,9 @@ import { t } from '@lingui/core/macro';
 import {
   type IconComponent,
   IconComment,
+  IconCommentFilled,
   IconHome,
+  IconHomeFilled,
   IconMessageCirclePlus,
 } from 'twenty-ui/icon';
 import { OverflowingTextWithTooltip } from 'twenty-ui/surfaces';
@@ -152,8 +154,8 @@ const StyledNewChatButtonWrapper = styled.div<{
           )
         )`};
   border-radius: var(
-    --t-nav-tabs-radius,
-    ${themeCssVariables.border.radius.pill}
+    --t-nav-new-chat-radius,
+    var(--t-nav-tabs-radius, ${themeCssVariables.border.radius.pill})
   );
   box-sizing: border-box;
   display: flex;
@@ -162,22 +164,34 @@ const StyledNewChatButtonWrapper = styled.div<{
   height: ${({ isExpanded }) =>
     isExpanded
       ? `var(--t-nav-tabs-height, ${themeCssVariables.spacing[7]})`
-      : themeCssVariables.spacing[6]};
+      : `var(
+          --t-nav-new-chat-collapsed-size,
+          ${themeCssVariables.spacing[6]}
+        )`};
   justify-content: center;
   min-width: ${({ isExpanded }) =>
     isExpanded
       ? 'var(--t-nav-new-chat-min-width, 0)'
-      : themeCssVariables.spacing[6]};
+      : `var(
+          --t-nav-new-chat-collapsed-size,
+          ${themeCssVariables.spacing[6]}
+        )`};
   padding: ${({ isExpanded }) =>
     isExpanded
       ? 'var(--t-nav-new-chat-padding, 3px)'
-      : themeCssVariables.spacing[0.5]};
+      : `var(
+          --t-nav-new-chat-collapsed-padding,
+          ${themeCssVariables.spacing[0.5]}
+        )`};
   transition:
     height calc(${themeCssVariables.animation.duration.normal} * 1s) ease,
     padding calc(${themeCssVariables.animation.duration.normal} * 1s) ease;
   width: ${({ isExpanded, isEmphasized }) => {
     if (!isExpanded) {
-      return themeCssVariables.spacing[6];
+      return `var(
+        --t-nav-new-chat-collapsed-size,
+        ${themeCssVariables.spacing[6]}
+      )`;
     }
 
     if (isEmphasized) {
@@ -254,11 +268,13 @@ const StyledNewChatButton = styled.div<{ isEmphasized: boolean }>`
 
 type MainNavigationDrawerTabsRowProps = {
   NavigationMenuTabIcon?: IconComponent;
+  NavigationMenuTabActiveIcon?: IconComponent;
   navigationMenuTabLabel?: string;
 };
 
 export const MainNavigationDrawerTabsRow = ({
   NavigationMenuTabIcon = IconHome,
+  NavigationMenuTabActiveIcon = IconHomeFilled,
   navigationMenuTabLabel = t`Home`,
 }: MainNavigationDrawerTabsRowProps) => {
   const { theme } = useContext(ThemeContext);
@@ -277,6 +293,14 @@ export const MainNavigationDrawerTabsRow = ({
 
   const isExpanded = isNavigationDrawerExpanded || isMobile;
   const chatTabLabel = t`Chat`;
+  const isNavigationMenuTabActive =
+    navigationDrawerActiveTab === NAVIGATION_DRAWER_TABS.NAVIGATION_MENU;
+  const isChatTabActive =
+    navigationDrawerActiveTab === NAVIGATION_DRAWER_TABS.AI_CHAT_HISTORY;
+  const NavigationMenuIcon = isNavigationMenuTabActive
+    ? NavigationMenuTabActiveIcon
+    : NavigationMenuTabIcon;
+  const ChatTabIcon = isChatTabActive ? IconCommentFilled : IconComment;
 
   if (!hasAiPermission) {
     return null;
@@ -321,54 +345,32 @@ export const MainNavigationDrawerTabsRow = ({
       <NavigationDrawerAnimatedCollapseWrapper>
         <StyledTabsPill role="tablist" aria-label={t`Navigation tabs`}>
           <StyledTabWrapper
-            isActive={
-              navigationDrawerActiveTab ===
-              NAVIGATION_DRAWER_TABS.NAVIGATION_MENU
-            }
+            isActive={isNavigationMenuTabActive}
             role="tab"
-            aria-selected={
-              navigationDrawerActiveTab ===
-              NAVIGATION_DRAWER_TABS.NAVIGATION_MENU
-            }
+            aria-selected={isNavigationMenuTabActive}
             aria-label={navigationMenuTabLabel}
-            tabIndex={
-              navigationDrawerActiveTab ===
-              NAVIGATION_DRAWER_TABS.NAVIGATION_MENU
-                ? 0
-                : -1
-            }
+            tabIndex={isNavigationMenuTabActive ? 0 : -1}
             onClick={handleTabClick(NAVIGATION_DRAWER_TABS.NAVIGATION_MENU)}
             onKeyDown={handleTabKeyDown(NAVIGATION_DRAWER_TABS.NAVIGATION_MENU)}
           >
             <StyledTabIcon>
-              <NavigationMenuTabIcon
+              <NavigationMenuIcon
                 size={theme.icon.size.md}
                 color="currentColor"
               />
             </StyledTabIcon>
           </StyledTabWrapper>
           <StyledTabWrapper
-            isActive={
-              navigationDrawerActiveTab ===
-              NAVIGATION_DRAWER_TABS.AI_CHAT_HISTORY
-            }
+            isActive={isChatTabActive}
             role="tab"
-            aria-selected={
-              navigationDrawerActiveTab ===
-              NAVIGATION_DRAWER_TABS.AI_CHAT_HISTORY
-            }
+            aria-selected={isChatTabActive}
             aria-label={chatTabLabel}
-            tabIndex={
-              navigationDrawerActiveTab ===
-              NAVIGATION_DRAWER_TABS.AI_CHAT_HISTORY
-                ? 0
-                : -1
-            }
+            tabIndex={isChatTabActive ? 0 : -1}
             onClick={handleTabClick(NAVIGATION_DRAWER_TABS.AI_CHAT_HISTORY)}
             onKeyDown={handleTabKeyDown(NAVIGATION_DRAWER_TABS.AI_CHAT_HISTORY)}
           >
             <StyledTabIcon>
-              <IconComment
+              <ChatTabIcon
                 size={theme.icon.size.md}
                 color="currentColor"
               />

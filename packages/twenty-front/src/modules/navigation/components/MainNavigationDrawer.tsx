@@ -40,8 +40,8 @@ export const MainNavigationDrawer = ({ className }: { className?: string }) => {
     >
       <NavigationDrawerFixedContent>
         <StyledChromeStack>
-          <MainNavigationDrawerSearchButton />
           <MainNavigationDrawerTabsRow />
+          <MainNavigationDrawerSearchButton />
         </StyledChromeStack>
       </NavigationDrawerFixedContent>
 

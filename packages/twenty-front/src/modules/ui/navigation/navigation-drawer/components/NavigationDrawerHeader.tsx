@@ -8,16 +8,17 @@ import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomState
 import { NavigationDrawerCollapseButton } from './NavigationDrawerCollapseButton';
 
 const StyledContainer = styled.div<{ isExpanded: boolean }>`
-  align-items: ${({ isExpanded }) => (isExpanded ? 'center' : 'flex-start')};
+  align-items: center;
   display: flex;
   flex-direction: ${({ isExpanded }) => (isExpanded ? 'row' : 'column')};
   flex-shrink: 0;
-  gap: ${({ isExpanded }) => (isExpanded ? '0' : themeCssVariables.spacing[4])};
+  gap: var(--t-nav-header-gap, 0);
   min-height: var(--t-nav-header-min-height, ${PAGE_BAR_MIN_HEIGHT}px);
   padding-right: var(
     --t-nav-header-padding-right,
     ${themeCssVariables.spacing[2]}
   );
+  width: 100%;
   transition: gap calc(${themeCssVariables.animation.duration.normal} * 1s) ease;
   user-select: none;
 
@@ -47,11 +48,14 @@ const StyledWorkspaceDropdownContainer = styled.div`
   align-items: center;
   display: flex;
   flex: 1 1 auto;
+  justify-content: center;
   min-height: var(
     --t-workspace-switcher-height,
     ${themeCssVariables.spacing[8]}
   );
   min-width: 0;
+  overflow: hidden;
+  width: 100%;
 `;
 
 type NavigationDrawerHeaderProps = {
@@ -70,13 +74,13 @@ export const NavigationDrawerHeader = ({
       <StyledWorkspaceDropdownContainer>
         <MultiWorkspaceDropdownButton />
       </StyledWorkspaceDropdownContainer>
-      <StyledRightActions isExpanded={isNavigationDrawerExpanded}>
-        {isNavigationDrawerExpanded && showCollapseButton && (
+      {isNavigationDrawerExpanded && showCollapseButton && (
+        <StyledRightActions isExpanded={isNavigationDrawerExpanded}>
           <StyledNavigationDrawerCollapseButtonContainer>
             <NavigationDrawerCollapseButton direction="left" />
           </StyledNavigationDrawerCollapseButtonContainer>
-        )}
-      </StyledRightActions>
+        </StyledRightActions>
+      )}
     </StyledContainer>
   );
 };

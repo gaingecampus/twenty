@@ -13,13 +13,13 @@ import { AGENT_CHAT_THREAD_GROUP_BY_LABELS } from '@/ai/constants/AgentChatThrea
 import { AGENT_CHAT_THREAD_LAST_ACTIVITY_FILTER } from '@/ai/constants/AgentChatThreadLastActivityFilter';
 import { AGENT_CHAT_THREAD_LAST_ACTIVITY_FILTER_LABELS } from '@/ai/constants/AgentChatThreadLastActivityFilterLabels';
 import { AI_CHAT_THREAD_FILTER_DROPDOWN_PAGE } from '@/ai/constants/AiChatThreadFilterDropdownPage';
+import { AI_CHAT_THREAD_FILTER_DROPDOWN_WIDTH } from '@/ai/constants/AiChatThreadFilterDropdownWidth';
 import { type AiChatThreadFilterDropdownPage } from '@/ai/types/AiChatThreadFilterDropdownPage';
 import { agentChatThreadFilterStatusState } from '@/ai/states/agentChatThreadFilterStatusState';
 import { agentChatThreadGroupByState } from '@/ai/states/agentChatThreadGroupByState';
 import { agentChatThreadLastActivityFilterState } from '@/ai/states/agentChatThreadLastActivityFilterState';
 import { DropdownContent } from '@/ui/layout/dropdown/components/DropdownContent';
 import { DropdownMenuItemsContainer } from '@/ui/layout/dropdown/components/DropdownMenuItemsContainer';
-import { DropdownMenuSeparator } from '@/ui/layout/dropdown/components/DropdownMenuSeparator';
 import { useCloseDropdown } from '@/ui/layout/dropdown/hooks/useCloseDropdown';
 import { useAtomState } from '@/ui/utilities/state/jotai/hooks/useAtomState';
 import { MenuItem } from 'twenty-ui/navigation';
@@ -62,7 +62,7 @@ export const AiChatThreadFilterDropdownRootMenu = ({
   };
 
   return (
-    <DropdownContent>
+    <DropdownContent widthInPixels={AI_CHAT_THREAD_FILTER_DROPDOWN_WIDTH}>
       <DropdownMenuItemsContainer>
         <MenuItem
           LeftIcon={IconStatusChange}
@@ -103,15 +103,12 @@ export const AiChatThreadFilterDropdownRootMenu = ({
           }
         />
         {!isAtDefaults && (
-          <>
-            <DropdownMenuSeparator />
-            <MenuItem
-              accent="danger"
-              LeftIcon={IconTrash}
-              text={t`Clear filters`}
-              onClick={handleClearFilters}
-            />
-          </>
+          <MenuItem
+            accent="danger"
+            LeftIcon={IconTrash}
+            text={t`Clear filters`}
+            onClick={handleClearFilters}
+          />
         )}
       </DropdownMenuItemsContainer>
     </DropdownContent>

@@ -31,6 +31,7 @@ export const AiChatThreadFilterDropdown = ({
     <Dropdown
       dropdownId={dropdownId}
       dropdownPlacement="bottom-end"
+      dropdownOffset={{ x: 0, y: 8 }}
       onClose={goToRoot}
       clickableComponent={
         clickableComponent ?? (
