@@ -375,7 +375,7 @@ export const NavigationDrawerItem = ({
 }: NavigationDrawerItemProps) => {
   const { theme } = useContext(ThemeContext);
   const currentWorkspace = useAtomStateValue(currentWorkspaceState);
-  const hideIconTile = currentWorkspace?.uiTheme === 'weshare';
+  const hideIconTile = currentWorkspace?.uiTheme === 'enterprise';
   const isMobile = useIsMobile();
   const isExpanded = useNavigationDrawerExpanded();
   const setIsNavigationDrawerExpanded = useSetAtomState(

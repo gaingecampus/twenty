@@ -9,7 +9,6 @@ import {
 import {
   IconBuildingSkyscraper,
   IconColorSwatch,
-  IconShare,
   type IconComponent,
 } from 'twenty-ui/icon';
 import { Section } from 'twenty-ui/layout';
@@ -34,13 +33,8 @@ export const SettingsWorkspaceUiThemePicker = () => {
     },
     enterprise: {
       title: t`Enterprise`,
-      description: t`Material Design surfaces, Roboto, Google Blue`,
-      Icon: IconBuildingSkyscraper,
-    },
-    weshare: {
-      title: t`WeShare`,
       description: t`Pretendard, royal-blue navigation, rounded toolbar chips`,
-      Icon: IconShare,
+      Icon: IconBuildingSkyscraper,
     },
   };
 

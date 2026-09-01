@@ -120,8 +120,6 @@ export default defineConfig(({ command }) => {
             'theme-dark.css',
             'theme-enterprise-light.css',
             'theme-enterprise-dark.css',
-            'theme-weshare-light.css',
-            'theme-weshare-dark.css',
           ];
           for (const file of themeCssFiles) {
             fs.copyFileSync(

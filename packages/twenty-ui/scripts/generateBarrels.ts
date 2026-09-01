@@ -224,8 +224,6 @@ const generateModulePackageExports = (moduleDirectories: string[]) => {
       './theme-dark.css': './dist/theme-dark.css',
       './theme-enterprise-light.css': './dist/theme-enterprise-light.css',
       './theme-enterprise-dark.css': './dist/theme-enterprise-dark.css',
-      './theme-weshare-light.css': './dist/theme-weshare-light.css',
-      './theme-weshare-dark.css': './dist/theme-weshare-dark.css',
     },
   );
 };
