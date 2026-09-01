@@ -12099,6 +12099,11 @@ msgstr ""
 msgid "No chat"
 msgstr "채팅 없음"
 
+#. js-lingui-id: zMdyPJ
+#: src/modules/ai/components/NavigationDrawerAiChatContent.tsx
+msgid "No matching chats"
+msgstr "일치하는 채팅이 없습니다"
+
 #. js-lingui-id: NjIy4U
 #: src/pages/settings/admin-panel/SettingsAdminWorkspaceDetail.tsx
 msgid "No chat threads found."
@@ -15425,6 +15430,11 @@ msgstr "보기 검색..."
 msgid "Search across indexed fields..."
 msgstr "색인화된 필드 전체에서 검색..."
 
+#. js-lingui-id: a4xYoA
+#: src/modules/navigation/components/MainNavigationDrawerSearchButton.tsx
+msgid "Search chats"
+msgstr "채팅 검색"
+
 #. js-lingui-id: +7s4fw
 #: src/modules/settings/roles/role-assignment/components/SettingsRoleAssignmentEntityPickerDropdown.tsx
 msgid "Search agents"
@@ -18506,6 +18516,11 @@ msgstr "범용 ID"
 #: src/pages/settings/layout/SettingsLayoutViewDetail.tsx
 msgid "Universal identifier"
 msgstr "범용 식별자"
+
+#. js-lingui-id: AlLV23
+#: src/modules/navigation/components/MainNavigationDrawerSearchButton.tsx
+msgid "Universal search"
+msgstr "통합 검색"
 
 #. js-lingui-id: Ef7StM
 #: src/modules/settings/admin-panel/components/SettingsAdminVersionContainer.tsx

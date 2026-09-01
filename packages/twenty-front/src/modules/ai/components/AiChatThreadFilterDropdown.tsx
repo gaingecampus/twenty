@@ -1,5 +1,5 @@
 import { useLingui } from '@lingui/react/macro';
-import { useState } from 'react';
+import { type ReactNode, useState } from 'react';
 import { IconAdjustments } from 'twenty-ui/icon';
 import { LightIconButton } from 'twenty-ui/input';
 
@@ -12,10 +12,12 @@ import { Dropdown } from '@/ui/layout/dropdown/components/Dropdown';
 
 type AiChatThreadFilterDropdownProps = {
   surface: AiChatThreadActionsSurface;
+  clickableComponent?: ReactNode;
 };
 
 export const AiChatThreadFilterDropdown = ({
   surface,
+  clickableComponent,
 }: AiChatThreadFilterDropdownProps) => {
   const { t } = useLingui();
   const dropdownId = getAiChatThreadFilterDropdownId(surface);
@@ -31,12 +33,14 @@ export const AiChatThreadFilterDropdown = ({
       dropdownPlacement="bottom-end"
       onClose={goToRoot}
       clickableComponent={
-        <LightIconButton
-          aria-label={t`Filter chats`}
-          Icon={IconAdjustments}
-          accent="tertiary"
-          size="small"
-        />
+        clickableComponent ?? (
+          <LightIconButton
+            aria-label={t`Filter chats`}
+            Icon={IconAdjustments}
+            accent="tertiary"
+            size="small"
+          />
+        )
       }
       dropdownComponents={
         <AiChatThreadFilterDropdownContent

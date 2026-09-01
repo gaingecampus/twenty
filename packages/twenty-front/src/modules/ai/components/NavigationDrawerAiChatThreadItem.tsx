@@ -1,6 +1,6 @@
 import { styled } from '@linaria/react';
 import { useLingui } from '@lingui/react/macro';
-import { IconArchive, IconComment } from 'twenty-ui/icon';
+import { IconArchive } from 'twenty-ui/icon';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 
 import { AiChatThreadItemMenu } from '@/ai/components/AiChatThreadItemMenu';
@@ -30,7 +30,9 @@ const StyledTimestamp = styled.span<{ $isDropdownOpen: boolean }>`
   font-size: ${themeCssVariables.font.size.xs};
   font-weight: ${themeCssVariables.font.weight.regular};
   opacity: ${({ $isDropdownOpen }) => ($isDropdownOpen ? 0 : 1)};
+  text-align: right;
   transition: opacity 150ms;
+  white-space: nowrap;
 
   .navigation-drawer-item:hover & {
     opacity: 0;
@@ -56,12 +58,14 @@ type NavigationDrawerAiChatThreadItemProps = {
   thread: AgentChatThread;
   isActive: boolean;
   onClick: (thread: AgentChatThread) => void;
+  showTimestamp?: boolean;
 };
 
 export const NavigationDrawerAiChatThreadItem = ({
   thread,
   isActive,
   onClick,
+  showTimestamp = false,
 }: NavigationDrawerAiChatThreadItemProps) => {
   const { t } = useLingui();
   const { localeCatalog } = useAtomStateValue(dateLocaleState);
@@ -75,7 +79,7 @@ export const NavigationDrawerAiChatThreadItem = ({
   } = useAiChatThreadRename(thread);
 
   const isArchived = Boolean(thread.deletedAt);
-  const ThreadIcon = isArchived ? IconArchive : IconComment;
+  const ThreadIcon = isArchived ? IconArchive : undefined;
   const displayLabel = thread.title || t`New chat`;
   const timestamp = beautifyPastDateRelativeToNowShort(
     thread.lastMessageAt ?? thread.updatedAt ?? thread.createdAt,
@@ -104,6 +108,16 @@ export const NavigationDrawerAiChatThreadItem = ({
     );
   }
 
+  const menu = (
+    <AiChatThreadItemMenu
+      threadId={thread.id}
+      threadTitle={displayLabel}
+      isArchived={isArchived}
+      surface={AI_CHAT_THREAD_ACTIONS_SURFACE.NAV_DRAWER}
+      onRenameRequested={startRename}
+    />
+  );
+
   return (
     <NavigationDrawerItem
       label={displayLabel}
@@ -111,20 +125,16 @@ export const NavigationDrawerAiChatThreadItem = ({
       active={isActive}
       onClick={() => onClick(thread)}
       variant={isArchived ? 'tertiary' : 'default'}
-      alwaysShowRightOptions
+      alwaysShowRightOptions={showTimestamp}
       rightOptions={
         <StyledRightOptions>
-          <StyledTimestamp $isDropdownOpen={isDropdownOpen}>
-            {timestamp}
-          </StyledTimestamp>
+          {showTimestamp && (
+            <StyledTimestamp $isDropdownOpen={isDropdownOpen}>
+              {timestamp}
+            </StyledTimestamp>
+          )}
           <StyledMenuTrigger $isDropdownOpen={isDropdownOpen}>
-            <AiChatThreadItemMenu
-              threadId={thread.id}
-              threadTitle={displayLabel}
-              isArchived={isArchived}
-              surface={AI_CHAT_THREAD_ACTIONS_SURFACE.NAV_DRAWER}
-              onRenameRequested={startRename}
-            />
+            {menu}
           </StyledMenuTrigger>
         </StyledRightOptions>
       }

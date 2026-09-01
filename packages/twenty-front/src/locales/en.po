@@ -11898,6 +11898,11 @@ msgstr "No charge will be made. You'll receive an email reminder 7 days before i
 msgid "No chat"
 msgstr "No chat"
 
+#. js-lingui-id: zMdyPJ
+#: src/modules/ai/components/NavigationDrawerAiChatContent.tsx
+msgid "No matching chats"
+msgstr "No matching chats"
+
 #. js-lingui-id: NjIy4U
 #: src/pages/settings/admin-panel/SettingsAdminWorkspaceDetail.tsx
 msgid "No chat threads found."
@@ -15189,6 +15194,11 @@ msgstr "Search a view..."
 msgid "Search across indexed fields..."
 msgstr "Search across indexed fields..."
 
+#. js-lingui-id: a4xYoA
+#: src/modules/navigation/components/MainNavigationDrawerSearchButton.tsx
+msgid "Search chats"
+msgstr "Search chats"
+
 #. js-lingui-id: +7s4fw
 #: src/modules/settings/roles/role-assignment/components/SettingsRoleAssignmentEntityPickerDropdown.tsx
 msgid "Search agents"
@@ -18287,6 +18297,11 @@ msgstr "Universal ID"
 #: src/pages/settings/layout/SettingsLayoutViewDetail.tsx
 msgid "Universal identifier"
 msgstr "Universal identifier"
+
+#. js-lingui-id: AlLV23
+#: src/modules/navigation/components/MainNavigationDrawerSearchButton.tsx
+msgid "Universal search"
+msgstr "Universal search"
 
 #. js-lingui-id: Ef7StM
 #: src/modules/settings/admin-panel/components/SettingsAdminVersionContainer.tsx

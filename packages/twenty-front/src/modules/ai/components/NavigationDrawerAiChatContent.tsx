@@ -3,7 +3,6 @@ import { useLingui } from '@lingui/react/macro';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 
 import { AiChatThreadDeleteConfirmationModal } from '@/ai/components/AiChatThreadDeleteConfirmationModal';
-import { AiChatThreadFilterDropdown } from '@/ai/components/AiChatThreadFilterDropdown';
 import { AiChatSkeletonLoader } from '@/ai/components/internal/AiChatSkeletonLoader';
 import { NavigationDrawerAiChatThreadSection } from '@/ai/components/NavigationDrawerAiChatThreadSection';
 import { AGENT_CHAT_THREAD_GROUP_BY } from '@/ai/constants/AgentChatThreadGroupBy';
@@ -11,8 +10,11 @@ import { AI_CHAT_THREAD_ACTIONS_SURFACE } from '@/ai/constants/AiChatThreadActio
 import { useAiChatThreadClick } from '@/ai/hooks/useAiChatThreadClick';
 import { useChatThreads } from '@/ai/hooks/useChatThreads';
 import { agentChatThreadGroupByState } from '@/ai/states/agentChatThreadGroupByState';
+import { agentChatThreadSearchQueryState } from '@/ai/states/agentChatThreadSearchQueryState';
 import { currentAiChatThreadState } from '@/ai/states/currentAiChatThreadState';
+import { filterChatThreadsBySearchQuery } from '@/ai/utils/filterChatThreadsBySearchQuery';
 import { groupThreadsByDate } from '@/ai/utils/groupThreadsByDate';
+import { isUnusedEmptyChatThread } from '@/ai/utils/isUnusedEmptyChatThread';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 import { dateLocaleState } from '~/localization/states/dateLocaleState';
 
@@ -62,9 +64,17 @@ export const NavigationDrawerAiChatContent = () => {
     resetNavigationStack: true,
   });
   const agentChatThreadGroupBy = useAtomStateValue(agentChatThreadGroupByState);
+  const searchQuery = useAtomStateValue(agentChatThreadSearchQueryState);
   const { locale } = useAtomStateValue(dateLocaleState);
 
   const { threads, hasNextPage, loading, fetchMoreRef } = useChatThreads();
+  const listedThreads = threads.filter(
+    (thread) => !isUnusedEmptyChatThread(thread, currentAiChatThread),
+  );
+  const visibleThreads = filterChatThreadsBySearchQuery(
+    listedThreads,
+    searchQuery,
+  );
 
   if (loading && threads.length === 0) {
     return (
@@ -77,22 +87,17 @@ export const NavigationDrawerAiChatContent = () => {
   const isGroupedByDate =
     agentChatThreadGroupBy === AGENT_CHAT_THREAD_GROUP_BY.DATE;
   const dateGroups = isGroupedByDate
-    ? groupThreadsByDate(threads, new Date(), locale)
+    ? groupThreadsByDate(visibleThreads, new Date(), locale)
     : [];
   const shouldRenderDateGroups = isGroupedByDate && dateGroups.length > 0;
-
-  const filterDropdown = (
-    <AiChatThreadFilterDropdown
-      surface={AI_CHAT_THREAD_ACTIONS_SURFACE.NAV_DRAWER}
-    />
-  );
+  const hasSearchQuery = searchQuery.trim().length > 0;
 
   return (
     <StyledContainer>
       <StyledThreadList>
         {shouldRenderDateGroups ? (
           <StyledSectionsContainer>
-            {dateGroups.map((dateGroup, index) => (
+            {dateGroups.map((dateGroup) => (
               <NavigationDrawerAiChatThreadSection
                 key={dateGroup.id}
                 sectionId={`AiChatDateGroup:${dateGroup.id}`}
@@ -100,22 +105,24 @@ export const NavigationDrawerAiChatContent = () => {
                 threads={dateGroup.threads}
                 currentThreadId={currentAiChatThread}
                 onThreadClick={handleThreadClick}
-                rightIcon={index === 0 ? filterDropdown : undefined}
+                showTimestamp={true}
               />
             ))}
           </StyledSectionsContainer>
-        ) : (
+        ) : visibleThreads.length > 0 ? (
           <NavigationDrawerAiChatThreadSection
             sectionId={AI_CHAT_RECENTS_NAVIGATION_SECTION_ID}
             title={t`Recents`}
-            threads={threads}
+            threads={visibleThreads}
             currentThreadId={currentAiChatThread}
             onThreadClick={handleThreadClick}
-            rightIcon={filterDropdown}
+            showTimestamp={true}
           />
-        )}
-        {threads.length === 0 ? (
-          <StyledEmptyState>{t`No chat`}</StyledEmptyState>
+        ) : null}
+        {visibleThreads.length === 0 ? (
+          <StyledEmptyState>
+            {hasSearchQuery ? t`No matching chats` : t`No chat`}
+          </StyledEmptyState>
         ) : null}
         {hasNextPage ? <StyledFetchMoreTrigger ref={fetchMoreRef} /> : null}
       </StyledThreadList>

@@ -13,6 +13,7 @@ import { useIsMobile } from 'twenty-ui/utilities';
 import { useContext } from 'react';
 
 import { useSwitchToNewAiChat } from '@/ai/hooks/useSwitchToNewAiChat';
+import { agentChatThreadSearchQueryState } from '@/ai/states/agentChatThreadSearchQueryState';
 import { useHasPermissionFlag } from '@/settings/roles/hooks/useHasPermissionFlag';
 import { NavigationDrawerAnimatedCollapseWrapper } from '@/ui/navigation/navigation-drawer/components/NavigationDrawerAnimatedCollapseWrapper';
 import { isNavigationDrawerExpandedState } from '@/ui/navigation/states/isNavigationDrawerExpanded';
@@ -28,48 +29,80 @@ import { PermissionFlagType } from '~/generated-metadata/graphql';
 
 const StyledRow = styled.div<{ isExpanded: boolean }>`
   align-items: center;
+  box-sizing: border-box;
   display: flex;
-  gap: ${({ isExpanded }) => (isExpanded ? themeCssVariables.spacing[2] : 0)};
+  gap: ${({ isExpanded }) =>
+    isExpanded
+      ? `var(--t-nav-chrome-gap, ${themeCssVariables.spacing[2]})`
+      : 0};
   justify-content: ${({ isExpanded }) =>
-    isExpanded ? 'space-between' : 'center'};
+    isExpanded
+      ? 'var(--t-nav-chrome-justify, space-between)'
+      : 'center'};
+  min-height: ${({ isExpanded }) =>
+    isExpanded ? `var(--t-nav-row-min-height, auto)` : 'auto'};
+  padding-left: var(--t-nav-tabs-align-inset, 0);
   transition: gap calc(${themeCssVariables.animation.duration.normal} * 1s) ease;
   width: ${({ isExpanded }) => (isExpanded ? '100%' : 'max-content')};
 `;
 
 const StyledTabsPill = styled.div`
   align-items: center;
-  background: ${themeCssVariables.background.secondary};
-  border: 1px solid ${themeCssVariables.border.color.medium};
-  border-radius: ${themeCssVariables.border.radius.pill};
+  background: var(--t-nav-tabs-bg, ${themeCssVariables.background.secondary});
+  border: var(
+    --t-nav-tabs-border,
+    1px solid ${themeCssVariables.border.color.medium}
+  );
+  border-radius: var(
+    --t-nav-tabs-radius,
+    ${themeCssVariables.border.radius.pill}
+  );
   box-sizing: border-box;
   display: flex;
   flex-shrink: 0;
-  gap: ${themeCssVariables.spacing[0.5]};
-  height: ${themeCssVariables.spacing[7]};
-  padding: 3px;
-  width: ${themeCssVariables.spacing[18]};
+  gap: var(--t-nav-tabs-gap, ${themeCssVariables.spacing[0.5]});
+  height: var(--t-nav-tabs-height, ${themeCssVariables.spacing[7]});
+  padding: var(--t-nav-tabs-padding, 3px);
+  width: var(--t-nav-tabs-width, ${themeCssVariables.spacing[18]});
 `;
 
 const StyledTabWrapper = styled.div<{ isActive: boolean }>`
   align-items: center;
   background: ${({ isActive }) =>
-    isActive ? themeCssVariables.background.transparent.light : 'transparent'};
-  border-radius: ${themeCssVariables.border.radius.pill};
+    isActive
+      ? `var(--t-nav-tabs-active-bg, ${themeCssVariables.background.transparent.light})`
+      : 'transparent'};
+  border-radius: var(
+    --t-nav-tabs-inner-radius,
+    calc(
+      var(--t-nav-tabs-radius, ${themeCssVariables.border.radius.pill}) - 3px
+    )
+  );
   color: ${({ isActive }) =>
     isActive
-      ? themeCssVariables.font.color.primary
+      ? `var(--t-nav-tabs-active-color, ${themeCssVariables.font.color.primary})`
       : themeCssVariables.font.color.tertiary};
+  box-sizing: border-box;
   cursor: pointer;
   display: flex;
-  flex: 1;
-  height: 100%;
+  flex: var(--t-nav-tab-flex, 1);
+  height: var(--t-nav-tab-size, 100%);
   justify-content: center;
+  min-width: var(--t-nav-tab-size, 0);
+  width: var(--t-nav-tab-size, auto);
 
   &:hover {
     background: ${({ isActive }) =>
       isActive
-        ? themeCssVariables.background.transparent.light
+        ? `var(--t-nav-tabs-active-hover-bg, var(--t-nav-tabs-active-bg, ${themeCssVariables.background.transparent.light}))`
         : themeCssVariables.background.transparent.lighter};
+  }
+
+  svg.tabler-icon {
+    stroke-width: var(
+      --t-nav-tabs-active-icon-stroke,
+      var(--t-icon-stroke-md)
+    );
   }
 `;
 
@@ -87,49 +120,135 @@ const StyledNewChatIcon = styled.div`
   flex-grow: 0;
   flex-shrink: 0;
   justify-content: center;
+
+  svg.tabler-icon {
+    stroke-width: var(--t-nav-new-chat-icon-stroke, 2.25);
+  }
 `;
 
-const StyledNewChatButtonWrapper = styled.div<{ isExpanded: boolean }>`
+const StyledNewChatButtonWrapper = styled.div<{
+  isExpanded: boolean;
+  isEmphasized: boolean;
+}>`
   align-items: center;
-  background: ${themeCssVariables.background.secondary};
-  border: 1px solid ${themeCssVariables.border.color.medium};
-  border-radius: ${themeCssVariables.border.radius.pill};
+  background: ${({ isEmphasized }) =>
+    isEmphasized
+      ? `var(--t-nav-new-chat-bg, ${themeCssVariables.background.secondary})`
+      : `var(
+          --t-nav-new-chat-quiet-bg,
+          var(--t-nav-new-chat-bg, ${themeCssVariables.background.secondary})
+        )`};
+  border: ${({ isEmphasized }) =>
+    isEmphasized
+      ? `var(
+          --t-nav-new-chat-border,
+          1px solid ${themeCssVariables.border.color.medium}
+        )`
+      : `var(
+          --t-nav-new-chat-quiet-border,
+          var(
+            --t-nav-new-chat-border,
+            1px solid ${themeCssVariables.border.color.medium}
+          )
+        )`};
+  border-radius: var(
+    --t-nav-tabs-radius,
+    ${themeCssVariables.border.radius.pill}
+  );
   box-sizing: border-box;
   display: flex;
+  flex: ${({ isExpanded }) =>
+    isExpanded ? 'var(--t-nav-new-chat-flex, 0 0 auto)' : '0 0 auto'};
   height: ${({ isExpanded }) =>
-    isExpanded ? themeCssVariables.spacing[7] : themeCssVariables.spacing[6]};
+    isExpanded
+      ? `var(--t-nav-tabs-height, ${themeCssVariables.spacing[7]})`
+      : themeCssVariables.spacing[6]};
   justify-content: center;
+  min-width: ${({ isExpanded }) =>
+    isExpanded
+      ? 'var(--t-nav-new-chat-min-width, 0)'
+      : themeCssVariables.spacing[6]};
   padding: ${({ isExpanded }) =>
-    isExpanded ? '3px' : themeCssVariables.spacing[0.5]};
+    isExpanded
+      ? 'var(--t-nav-new-chat-padding, 3px)'
+      : themeCssVariables.spacing[0.5]};
   transition:
     height calc(${themeCssVariables.animation.duration.normal} * 1s) ease,
     padding calc(${themeCssVariables.animation.duration.normal} * 1s) ease;
-  width: ${({ isExpanded }) =>
-    isExpanded ? '103px' : themeCssVariables.spacing[6]};
+  width: ${({ isExpanded, isEmphasized }) => {
+    if (!isExpanded) {
+      return themeCssVariables.spacing[6];
+    }
+
+    if (isEmphasized) {
+      return 'var(--t-nav-new-chat-width, 103px)';
+    }
+
+    return `var(
+      --t-nav-new-chat-quiet-width,
+      var(--t-nav-tabs-height, ${themeCssVariables.spacing[7]})
+    )`;
+  }};
 `;
 
-const StyledNewChatButton = styled.div`
+const StyledNewChatButton = styled.div<{ isEmphasized: boolean }>`
   align-items: center;
   border-radius: inherit;
-  color: ${themeCssVariables.font.color.secondary};
+  color: ${({ isEmphasized }) =>
+    isEmphasized
+      ? `var(--t-nav-new-chat-color, ${themeCssVariables.font.color.secondary})`
+      : `var(
+          --t-nav-new-chat-quiet-color,
+          var(--t-nav-new-chat-color, ${themeCssVariables.font.color.secondary})
+        )`};
   cursor: pointer;
   display: flex;
   font-size: ${themeCssVariables.font.size.sm};
-  font-weight: ${themeCssVariables.font.weight.medium};
+  font-weight: var(
+    --t-nav-new-chat-font-weight,
+    ${themeCssVariables.font.weight.medium}
+  );
   gap: ${themeCssVariables.spacing[1]};
   height: 100%;
   justify-content: center;
   min-width: 0;
   overflow: hidden;
-  padding-inline: ${themeCssVariables.spacing[2]};
+  padding-inline: ${({ isEmphasized }) =>
+    isEmphasized
+      ? `var(--t-nav-new-chat-padding-x, ${themeCssVariables.spacing[2]})`
+      : '0'};
   transition:
     background calc(${themeCssVariables.animation.duration.fast} * 1s) ease,
     color calc(${themeCssVariables.animation.duration.fast} * 1s) ease;
   width: 100%;
 
   &:hover {
-    background: ${themeCssVariables.background.transparent.light};
-    color: ${themeCssVariables.font.color.primary};
+    background: ${({ isEmphasized }) =>
+      isEmphasized
+        ? `var(
+            --t-nav-new-chat-hover-bg,
+            ${themeCssVariables.background.transparent.light}
+          )`
+        : `var(
+            --t-nav-new-chat-quiet-hover-bg,
+            var(
+              --t-nav-new-chat-hover-bg,
+              ${themeCssVariables.background.transparent.light}
+            )
+          )`};
+    color: ${({ isEmphasized }) =>
+      isEmphasized
+        ? `var(
+            --t-nav-new-chat-hover-color,
+            var(--t-nav-new-chat-color, ${themeCssVariables.font.color.primary})
+          )`
+        : `var(
+            --t-nav-new-chat-quiet-hover-color,
+            var(
+              --t-nav-new-chat-hover-color,
+              var(--t-nav-new-chat-color, ${themeCssVariables.font.color.primary})
+            )
+          )`};
   }
 `;
 
@@ -153,23 +272,33 @@ export const MainNavigationDrawerTabsRow = ({
   const setIsNavigationDrawerExpanded = useSetAtomState(
     isNavigationDrawerExpandedState,
   );
+  const setSearchQuery = useSetAtomState(agentChatThreadSearchQueryState);
   const hasAiPermission = useHasPermissionFlag(PermissionFlagType.AI);
 
   const isExpanded = isNavigationDrawerExpanded || isMobile;
+  const chatTabLabel = t`Chat`;
 
   if (!hasAiPermission) {
     return null;
   }
 
-  const handleTabClick = (tab: NavigationDrawerActiveTab) => () => {
+  const handleTabChange = (tab: NavigationDrawerActiveTab) => {
     setNavigationDrawerActiveTab(tab);
+
+    if (tab !== NAVIGATION_DRAWER_TABS.AI_CHAT_HISTORY) {
+      setSearchQuery('');
+    }
+  };
+
+  const handleTabClick = (tab: NavigationDrawerActiveTab) => () => {
+    handleTabChange(tab);
   };
 
   const handleTabKeyDown =
     (tab: NavigationDrawerActiveTab) => (event: React.KeyboardEvent) => {
       if (event.key === 'Enter' || event.key === ' ') {
         event.preventDefault();
-        setNavigationDrawerActiveTab(tab);
+        handleTabChange(tab);
       }
     };
 
@@ -186,9 +315,6 @@ export const MainNavigationDrawerTabsRow = ({
       handleNewChatClick();
     }
   };
-
-  const getTabIconColor = (isActive: boolean) =>
-    isActive ? theme.font.color.primary : theme.font.color.tertiary;
 
   return (
     <StyledRow isExpanded={isExpanded}>
@@ -217,10 +343,7 @@ export const MainNavigationDrawerTabsRow = ({
             <StyledTabIcon>
               <NavigationMenuTabIcon
                 size={theme.icon.size.md}
-                color={getTabIconColor(
-                  navigationDrawerActiveTab ===
-                    NAVIGATION_DRAWER_TABS.NAVIGATION_MENU,
-                )}
+                color="currentColor"
               />
             </StyledTabIcon>
           </StyledTabWrapper>
@@ -234,7 +357,7 @@ export const MainNavigationDrawerTabsRow = ({
               navigationDrawerActiveTab ===
               NAVIGATION_DRAWER_TABS.AI_CHAT_HISTORY
             }
-            aria-label={t`Chat`}
+            aria-label={chatTabLabel}
             tabIndex={
               navigationDrawerActiveTab ===
               NAVIGATION_DRAWER_TABS.AI_CHAT_HISTORY
@@ -247,25 +370,27 @@ export const MainNavigationDrawerTabsRow = ({
             <StyledTabIcon>
               <IconComment
                 size={theme.icon.size.md}
-                color={getTabIconColor(
-                  navigationDrawerActiveTab ===
-                    NAVIGATION_DRAWER_TABS.AI_CHAT_HISTORY,
-                )}
+                color="currentColor"
               />
             </StyledTabIcon>
           </StyledTabWrapper>
         </StyledTabsPill>
       </NavigationDrawerAnimatedCollapseWrapper>
-      <StyledNewChatButtonWrapper isExpanded={isExpanded}>
+      <StyledNewChatButtonWrapper isExpanded={isExpanded} isEmphasized={true}>
         <StyledNewChatButton
           role="button"
           tabIndex={0}
           aria-label={t`New chat`}
+          isEmphasized={true}
           onClick={handleNewChatClick}
           onKeyDown={handleNewChatKeyDown}
         >
-          <StyledNewChatIcon>
-            <IconMessageCirclePlus size={theme.icon.size.md} />
+          <StyledNewChatIcon data-nav-new-chat-icon="true">
+            <IconMessageCirclePlus
+              size={theme.icon.size.md}
+              stroke={theme.icon.stroke.lg}
+              color="currentColor"
+            />
           </StyledNewChatIcon>
           {isExpanded && <OverflowingTextWithTooltip text={t`New chat`} />}
         </StyledNewChatButton>

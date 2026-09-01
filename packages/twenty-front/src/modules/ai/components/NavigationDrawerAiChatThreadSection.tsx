@@ -24,6 +24,7 @@ export type NavigationDrawerAiChatThreadSectionProps = {
   onThreadClick: (thread: AgentChatThread) => void;
   rightIcon?: ReactNode;
   alwaysShowRightIcon?: boolean;
+  showTimestamp?: boolean;
 };
 
 export const NavigationDrawerAiChatThreadSection = ({
@@ -34,6 +35,7 @@ export const NavigationDrawerAiChatThreadSection = ({
   onThreadClick,
   rightIcon,
   alwaysShowRightIcon = false,
+  showTimestamp = false,
 }: NavigationDrawerAiChatThreadSectionProps) => {
   const { isNavigationSectionOpen, toggleNavigationSection } =
     useNavigationSection(sectionId);
@@ -64,6 +66,7 @@ export const NavigationDrawerAiChatThreadSection = ({
                 thread={thread}
                 isActive={currentThreadId === thread.id}
                 onClick={onThreadClick}
+                showTimestamp={showTimestamp}
               />
             ))}
           </StyledThreadList>

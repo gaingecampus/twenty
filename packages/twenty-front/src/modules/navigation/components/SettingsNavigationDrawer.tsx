@@ -1,3 +1,4 @@
+import { MainNavigationDrawerSearchButton } from '@/navigation/components/MainNavigationDrawerSearchButton';
 import { MainNavigationDrawerTabsRow } from '@/navigation/components/MainNavigationDrawerTabsRow';
 import { NavigationDrawerTabbedContent } from '@/navigation/components/NavigationDrawerTabbedContent';
 import { useHasPermissionFlag } from '@/settings/roles/hooks/useHasPermissionFlag';
@@ -54,14 +55,15 @@ export const SettingsNavigationDrawer = ({
 
   return (
     <NavigationDrawer className={className} title={t`Settings`}>
-      {hasAiPermission && (
-        <NavigationDrawerFixedContent>
+      <NavigationDrawerFixedContent>
+        <MainNavigationDrawerSearchButton />
+        {hasAiPermission && (
           <MainNavigationDrawerTabsRow
             NavigationMenuTabIcon={IconSettings}
             navigationMenuTabLabel={t`Settings`}
           />
-        </NavigationDrawerFixedContent>
-      )}
+        )}
+      </NavigationDrawerFixedContent>
 
       <NavigationDrawerScrollableContent>
         <NavigationDrawerTabbedContent
