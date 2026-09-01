@@ -378,7 +378,11 @@ export const MainNavigationDrawerTabsRow = ({
           </StyledTabWrapper>
         </StyledTabsPill>
       </NavigationDrawerAnimatedCollapseWrapper>
-      <StyledNewChatButtonWrapper isExpanded={isExpanded} isEmphasized={true}>
+      <StyledNewChatButtonWrapper
+        data-nav-new-chat-button="true"
+        isExpanded={isExpanded}
+        isEmphasized={true}
+      >
         <StyledNewChatButton
           role="button"
           tabIndex={0}

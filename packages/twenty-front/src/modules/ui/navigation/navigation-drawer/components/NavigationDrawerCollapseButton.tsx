@@ -24,10 +24,16 @@ const StyledCollapseButton = styled.div`
   cursor: pointer;
   display: flex;
   flex-shrink: 0;
-  height: var(--t-nav-tab-size, ${themeCssVariables.spacing[8]});
+  height: var(
+    --t-nav-collapse-size,
+    var(--t-nav-tabs-height, ${themeCssVariables.spacing[8]})
+  );
   justify-content: center;
   user-select: none;
-  width: var(--t-nav-tab-size, ${themeCssVariables.spacing[8]});
+  width: var(
+    --t-nav-collapse-size,
+    var(--t-nav-tabs-height, ${themeCssVariables.spacing[8]})
+  );
 
   &:hover {
     background: ${themeCssVariables.background.transparent.lighter};

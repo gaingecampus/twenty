@@ -230,8 +230,9 @@ html.dark[data-ui-theme='enterprise'] {
   --t-nav-tabs-width: auto;
   --t-nav-tabs-gap: 4px;
   --t-nav-tabs-radius: 10px;
-  --t-nav-tabs-inner-radius: 6px;
+  --t-nav-tabs-inner-radius: 10px;
   --t-nav-tab-size: 30px;
+  --t-nav-collapse-size: 40px;
   --t-nav-tab-flex: 0 0 30px;
   --t-nav-tabs-active-bg: #1a1f36;
   --t-nav-tabs-active-hover-bg: #000000;
@@ -274,6 +275,11 @@ html.dark[data-ui-theme='enterprise'] svg.tabler-icon {
 html.dark[data-ui-theme='enterprise']
   [data-nav-new-chat-icon] svg.tabler-icon {
   stroke-width: var(--t-nav-new-chat-icon-stroke, 2.25);
+}
+
+html.dark[data-ui-theme='enterprise'] [data-nav-new-chat-button] {
+  --t-nav-new-chat-bg: #000000;
+  --t-nav-new-chat-hover-bg: #1a1f36;
 }
 
 html.dark[data-ui-theme='enterprise']

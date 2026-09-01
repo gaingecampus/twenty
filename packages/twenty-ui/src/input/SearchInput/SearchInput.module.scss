@@ -66,3 +66,10 @@
 .input:disabled {
   color: var(--t-font-color-tertiary);
 }
+
+.wrapper button[data-variant='secondary'] {
+  --icon-button-border-color: var(
+    --t-search-border-color,
+    var(--t-border-color-medium)
+  );
+}

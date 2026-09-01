@@ -51,6 +51,21 @@ const StyledCollapsedSearchButton = styled.button`
   }
 `;
 
+const StyledChatSearch = styled.div`
+  width: 100%;
+
+  button[data-variant='secondary'][data-accent='default'][data-position='standalone'] {
+    --icon-button-border-color: var(
+      --t-search-border-color,
+      ${themeCssVariables.border.color.medium}
+    );
+    border-color: var(
+      --t-search-border-color,
+      ${themeCssVariables.border.color.medium}
+    );
+  }
+`;
+
 const StyledSearchTrigger = styled.div`
   cursor: pointer;
   width: 100%;
@@ -130,19 +145,21 @@ export const MainNavigationDrawerSearchButton = () => {
 
   if (isChatTab) {
     return (
-      <SearchInput
-        placeholder={searchLabel}
-        value={searchQuery}
-        onChange={setSearchQuery}
-        aria-label={searchLabel}
-        filterButtonAriaLabel={t`Filter chats`}
-        filterDropdown={(filterButton) => (
-          <AiChatThreadFilterDropdown
-            surface={AI_CHAT_THREAD_ACTIONS_SURFACE.NAV_DRAWER}
-            clickableComponent={filterButton}
-          />
-        )}
-      />
+      <StyledChatSearch>
+        <SearchInput
+          placeholder={searchLabel}
+          value={searchQuery}
+          onChange={setSearchQuery}
+          aria-label={searchLabel}
+          filterButtonAriaLabel={t`Filter chats`}
+          filterDropdown={(filterButton) => (
+            <AiChatThreadFilterDropdown
+              surface={AI_CHAT_THREAD_ACTIONS_SURFACE.NAV_DRAWER}
+              clickableComponent={filterButton}
+            />
+          )}
+        />
+      </StyledChatSearch>
     );
   }
 
