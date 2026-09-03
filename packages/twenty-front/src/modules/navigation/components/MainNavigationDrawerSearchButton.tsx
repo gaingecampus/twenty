@@ -1,6 +1,7 @@
 import { styled } from '@linaria/react';
 import { t } from '@lingui/core/macro';
 import { type KeyboardEvent, type MouseEvent, useContext } from 'react';
+import { SidePanelPages } from 'twenty-shared/types';
 import { isDefined } from 'twenty-shared/utils';
 import { IconSearch } from 'twenty-ui/icon';
 import { SearchInput } from 'twenty-ui/input';
@@ -11,6 +12,9 @@ import { AiChatThreadFilterDropdown } from '@/ai/components/AiChatThreadFilterDr
 import { AI_CHAT_THREAD_ACTIONS_SURFACE } from '@/ai/constants/AiChatThreadActionsSurface';
 import { agentChatThreadSearchQueryState } from '@/ai/states/agentChatThreadSearchQueryState';
 import { useOpenRecordsSearchPageInSidePanel } from '@/side-panel/hooks/useOpenRecordsSearchPageInSidePanel';
+import { isSidePanelOpenedState } from '@/side-panel/states/isSidePanelOpenedState';
+import { sidePanelPageState } from '@/side-panel/states/sidePanelPageState';
+import { NAVIGATION_DRAWER_SEARCH_CLICK_OUTSIDE_ID } from '@/ui/navigation/navigation-drawer/constants/NavigationDrawerSearchClickOutsideId';
 import { isNavigationDrawerExpandedState } from '@/ui/navigation/states/isNavigationDrawerExpanded';
 import { navigationDrawerActiveTabState } from '@/ui/navigation/states/navigationDrawerActiveTabState';
 import { NAVIGATION_DRAWER_TABS } from '@/ui/navigation/states/navigationDrawerTabs';
@@ -102,11 +106,15 @@ export const MainNavigationDrawerSearchButton = () => {
   const [searchQuery, setSearchQuery] = useAtomState(
     agentChatThreadSearchQueryState,
   );
-  const { openRecordsSearchPage } = useOpenRecordsSearchPageInSidePanel();
+  const { toggleRecordsSearchPage } = useOpenRecordsSearchPageInSidePanel();
+  const isSidePanelOpened = useAtomStateValue(isSidePanelOpenedState);
+  const sidePanelPage = useAtomStateValue(sidePanelPageState);
   const isExpanded = isNavigationDrawerExpanded || isMobile;
   const isChatTab =
     navigationDrawerActiveTab === NAVIGATION_DRAWER_TABS.AI_CHAT_HISTORY;
   const searchLabel = isChatTab ? t`Search chats` : t`Universal search`;
+  const isRecordsSearchOpen =
+    isSidePanelOpened && sidePanelPage === SidePanelPages.SearchRecords;
 
   const handleSearchTriggerRef = (element: HTMLDivElement | null) => {
     const input = element?.querySelector('input');
@@ -121,7 +129,7 @@ export const MainNavigationDrawerSearchButton = () => {
 
   const handleSearchMouseDown = (event: MouseEvent<HTMLDivElement>) => {
     event.preventDefault();
-    openRecordsSearchPage();
+    toggleRecordsSearchPage();
   };
 
   const handleSearchKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
@@ -130,15 +138,17 @@ export const MainNavigationDrawerSearchButton = () => {
     }
 
     event.preventDefault();
-    openRecordsSearchPage();
+    toggleRecordsSearchPage();
   };
 
   if (!isExpanded) {
     return (
       <StyledCollapsedSearchButton
         type="button"
-        onClick={openRecordsSearchPage}
+        onClick={toggleRecordsSearchPage}
         aria-label={t`Universal search`}
+        aria-expanded={isRecordsSearchOpen}
+        data-click-outside-id={NAVIGATION_DRAWER_SEARCH_CLICK_OUTSIDE_ID}
       >
         <IconSearch size={theme.icon.size.md} color="currentColor" />
       </StyledCollapsedSearchButton>
@@ -171,6 +181,8 @@ export const MainNavigationDrawerSearchButton = () => {
       role="button"
       tabIndex={0}
       aria-label={searchLabel}
+      aria-expanded={isRecordsSearchOpen}
+      data-click-outside-id={NAVIGATION_DRAWER_SEARCH_CLICK_OUTSIDE_ID}
       onMouseDown={handleSearchMouseDown}
       onKeyDown={handleSearchKeyDown}
     >

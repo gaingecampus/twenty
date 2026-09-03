@@ -1,5 +1,6 @@
 import { tableWidthResizeIsActiveState } from '@/object-record/record-table/states/tableWidthResizeIsActivedState';
 import { SidePanelRouter } from '@/side-panel/components/SidePanelRouter';
+import { SidePanelSearchClickOutsideEffect } from '@/side-panel/components/SidePanelSearchClickOutsideEffect';
 import { SidePanelWidthEffect } from '@/side-panel/components/SidePanelWidthEffect';
 import { SIDE_PANEL_CLICK_OUTSIDE_ID } from '@/side-panel/constants/SidePanelClickOutsideId';
 import { SIDE_PANEL_CONSTRAINTS } from '@/side-panel/constants/SidePanelConstraints';
@@ -18,7 +19,7 @@ import { useAtomState } from '@/ui/utilities/state/jotai/hooks/useAtomState';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 import { useSetAtomState } from '@/ui/utilities/state/jotai/hooks/useSetAtomState';
 import { styled } from '@linaria/react';
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 
 const StyledSidePanelWrapper = styled.div<{
@@ -65,6 +66,7 @@ export const SidePanelForDesktop = () => {
   const { sidePanelCloseAnimationCompleteCleanup } =
     useSidePanelCloseAnimationCompleteCleanup();
 
+  const sidePanelRef = useRef<HTMLDivElement>(null);
   const [modalContainer, setModalContainer] = useState<HTMLDivElement | null>(
     null,
   );
@@ -132,7 +134,9 @@ export const SidePanelForDesktop = () => {
         onResizeStart={handleResizeStart}
       />
 
+      <SidePanelSearchClickOutsideEffect sidePanelRef={sidePanelRef} />
       <StyledSidePanelWrapper
+        ref={sidePanelRef}
         isOpen={isSidePanelOpened}
         isResizing={isResizing}
         onTransitionEnd={handleTransitionEnd}
