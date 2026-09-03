@@ -1,6 +1,7 @@
 import { type ReactNode } from 'react';
 
 import { ObjectSortDropdownButton } from '@/object-record/object-sort-dropdown/components/ObjectSortDropdownButton';
+import { RecordIndexPageSizeDropdown } from '@/object-record/record-index/components/RecordIndexPageSizeDropdown';
 import { useRecordIndexContextOrThrow } from '@/object-record/record-index/contexts/RecordIndexContext';
 import { TopBar } from '@/ui/layout/top-bar/components/TopBar';
 import { QueryParamsFiltersEffect } from '@/views/components/QueryParamsFiltersEffect';
@@ -65,6 +66,7 @@ export const ViewBar = ({
         leftComponent={<ViewPickerDropdown />}
         rightComponent={
           <>
+            <RecordIndexPageSizeDropdown />
             <ObjectFilterDropdownComponentInstanceContext.Provider
               value={{ instanceId: ViewBarFilterDropdownIds.MAIN }}
             >

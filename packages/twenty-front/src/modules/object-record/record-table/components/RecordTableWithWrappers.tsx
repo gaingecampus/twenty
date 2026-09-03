@@ -2,6 +2,7 @@ import { useContext } from 'react';
 
 import { useDeleteOneRecord } from '@/object-record/hooks/useDeleteOneRecord';
 import { IsRecordIndexPageContext } from '@/object-record/record-index/components/RecordIndexPageProvider';
+import { RecordIndexPaginationBar } from '@/object-record/record-index/components/RecordIndexPaginationBar';
 import { useOpenRecordFromIndexView } from '@/object-record/record-index/hooks/useOpenRecordFromIndexView';
 import { RecordTable } from '@/object-record/record-table/components/RecordTable';
 import { RecordTableComponentInstance } from '@/object-record/record-table/components/RecordTableComponentInstance';
@@ -31,10 +32,30 @@ const StyledRecordTablePrintBoundary = styled.div`
 const StyledRecordIndexTableInset = styled.div`
   background: #f8f8fb;
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
   height: 100%;
   min-height: 0;
-  padding: ${themeCssVariables.spacing[6]};
+  padding-bottom: ${themeCssVariables.spacing[6]};
+  padding-left: ${themeCssVariables.spacing[6]};
+  padding-right: ${themeCssVariables.spacing[6]};
+  padding-top: 0;
   width: 100%;
+`;
+
+const StyledTableAndPagination = styled.div`
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  width: 100%;
+`;
+
+const StyledScrollArea = styled.div`
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
 `;
 
 type RecordTableWithWrappersProps = {
@@ -78,9 +99,7 @@ export const RecordTableWithWrappers = ({
   const isRecordIndexPage = useContext(IsRecordIndexPageContext);
 
   const recordTable = (
-    <ScrollWrapper
-      componentInstanceId={`record-table-scroll-${recordTableId}`}
-    >
+    <ScrollWrapper componentInstanceId={`record-table-scroll-${recordTableId}`}>
       <RecordTableRecordLimitReloadEffect />
       <RecordTable />
     </ScrollWrapper>
@@ -98,7 +117,10 @@ export const RecordTableWithWrappers = ({
           <StyledRecordTablePrintBoundary>
             {isRecordIndexPage ? (
               <StyledRecordIndexTableInset>
-                {recordTable}
+                <StyledTableAndPagination>
+                  <StyledScrollArea>{recordTable}</StyledScrollArea>
+                  <RecordIndexPaginationBar />
+                </StyledTableAndPagination>
               </StyledRecordIndexTableInset>
             ) : (
               recordTable
