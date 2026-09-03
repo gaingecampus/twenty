@@ -27,7 +27,7 @@ const StyledChromeRow = styled.div`
   flex-shrink: 0;
   gap: 0;
   height: var(--t-nav-chrome-row-height, auto);
-  justify-content: var(--t-nav-chrome-justify, space-between);
+  justify-content: var(--t-nav-chrome-pack, space-between);
   min-width: 0;
   padding: var(--t-nav-chrome-row-padding, 0);
   width: 100%;

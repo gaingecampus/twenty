@@ -253,7 +253,7 @@ const StyledIcon = styled.div<{ isNavigationDrawerExpanded: boolean }>`
   display: flex;
   flex-grow: 0;
   flex-shrink: 0;
-  justify-content: var(--t-nav-icon-justify, center);
+  justify-content: var(--t-nav-icon-pack, center);
   margin-right: ${({ isNavigationDrawerExpanded }) =>
     isNavigationDrawerExpanded
       ? `var(--t-nav-item-icon-gap, ${themeCssVariables.spacing[2]})`

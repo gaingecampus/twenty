@@ -147,7 +147,7 @@ html.dark[data-ui-theme='enterprise'] {
   --t-nav-icon-tile-size: 24px;
   --t-nav-icon-tile-bg: transparent;
   --t-nav-icon-tile-radius: 6px;
-  --t-nav-icon-justify: flex-start;
+  --t-nav-icon-pack: flex-start;
   --t-nav-drawer-bg: #1c1f2a;
   --t-nav-drawer-border-right: 1px solid #2a2f3c;
   --t-nav-drawer-padding: 16px;
@@ -308,7 +308,7 @@ html.dark[data-ui-theme='enterprise'] {
   --t-nav-new-chat-min-width: auto;
   --t-nav-new-chat-flex: 0 0 auto;
   --t-nav-new-chat-radius: var(--t-border-radius-sm);
-  --t-nav-chrome-justify: space-between;
+  --t-nav-chrome-pack: space-between;
   --t-nav-tabs-align-inset: 0;
   --t-nav-new-chat-font-size: 14px;
   --t-nav-new-chat-font-weight: 600;
@@ -643,13 +643,13 @@ html.dark[data-ui-theme='enterprise'] [data-nav-expanded='false'] {
   --t-nav-item-height: 40px;
   --t-nav-icon-size: 18;
   --t-nav-icon-tile-size: 24px;
-  --t-nav-icon-justify: center;
+  --t-nav-icon-pack: center;
   --t-avatar-size-md: 24px;
   --t-avatar-font-size-md: var(--t-workspace-switcher-avatar-font-size);
   --t-workspace-switcher-height: 40px;
   --t-workspace-switcher-padding: 0;
   --t-nav-chrome-gap: 8px;
-  --t-nav-chrome-justify: center;
+  --t-nav-chrome-pack: center;
   --t-nav-new-chat-collapsed-size: var(--t-search-height);
   --t-nav-new-chat-collapsed-padding: 0;
   --t-nav-new-chat-padding-x: 0;
