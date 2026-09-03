@@ -327,3 +327,29 @@ $secondary-accents: (
 .button[data-variant='secondary'][data-inverted][data-disabled] {
   --btn-border-color: #{$gray-scale-light-gray1};
 }
+
+.button[data-variant='tertiary'][data-accent='blue']:not([data-inverted]) {
+  --btn-bg: var(--t-button-tonal-bg, transparent);
+  --btn-active-bg: var(--t-button-tonal-hover-bg, var(--t-accent-secondary));
+  --btn-border-color: transparent;
+  --btn-hover-bg: var(--t-button-tonal-hover-bg, var(--t-accent-tertiary));
+  --btn-radius: var(--t-button-tonal-radius, var(--t-border-radius-sm));
+}
+
+.button[data-variant='primary'][data-accent='blue']:not(
+    [data-inverted]
+  )[data-disabled] {
+  --btn-active-bg: var(--t-button-disabled-bg, var(--t-accent-accent4060));
+  --btn-bg: var(--t-button-disabled-bg, var(--t-accent-accent4060));
+  --btn-color: var(--t-button-disabled-color, #{$gray-scale-light-gray1});
+  --btn-hover-bg: var(--t-button-disabled-bg, var(--t-accent-accent4060));
+}
+
+.button[data-variant='tertiary'][data-accent='blue']:not(
+    [data-inverted]
+  )[data-disabled] {
+  --btn-active-bg: var(--t-button-disabled-bg, transparent);
+  --btn-bg: var(--t-button-disabled-bg, transparent);
+  --btn-color: var(--t-button-disabled-color, var(--t-accent-accent4060));
+  --btn-hover-bg: var(--t-button-disabled-bg, transparent);
+}

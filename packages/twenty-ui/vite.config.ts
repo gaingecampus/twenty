@@ -11,6 +11,24 @@ type Checkers = Parameters<typeof checker>[0];
 
 import packageJson from './package.json';
 
+const THEME_CSS_FILES = [
+  'theme-light.css',
+  'theme-dark.css',
+  'theme-enterprise-light.css',
+  'theme-enterprise-dark.css',
+] as const;
+
+const copyThemeCssFiles = () => {
+  const distDir = path.resolve(__dirname, 'dist');
+  const srcDir = path.resolve(__dirname, 'src/theme-constants');
+
+  fs.mkdirSync(distDir, { recursive: true });
+
+  for (const file of THEME_CSS_FILES) {
+    fs.copyFileSync(path.resolve(srcDir, file), path.resolve(distDir, file));
+  }
+};
+
 const entries = Object.keys(packageJson.exports)
   .filter((el) => !el.endsWith('.css'))
   .map((module) => `src/${module}/index.ts`);
@@ -112,20 +130,27 @@ export default defineConfig(({ command }) => {
       checker(checkersConfig),
       {
         name: 'copy-theme-css',
+        buildStart() {
+          copyThemeCssFiles();
+        },
         closeBundle() {
-          const distDir = path.resolve(__dirname, 'dist');
-          fs.mkdirSync(distDir, { recursive: true });
-          const themeCssFiles = [
-            'theme-light.css',
-            'theme-dark.css',
-            'theme-enterprise-light.css',
-            'theme-enterprise-dark.css',
-          ];
-          for (const file of themeCssFiles) {
-            fs.copyFileSync(
+          copyThemeCssFiles();
+        },
+        configureServer(server) {
+          copyThemeCssFiles();
+          for (const file of THEME_CSS_FILES) {
+            server.watcher.add(
               path.resolve(__dirname, `src/theme-constants/${file}`),
-              path.resolve(distDir, file),
             );
+          }
+        },
+        handleHotUpdate({ file }) {
+          if (
+            THEME_CSS_FILES.some((name) =>
+              file.endsWith(`theme-constants/${name}`),
+            )
+          ) {
+            copyThemeCssFiles();
           }
         },
       },

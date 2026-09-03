@@ -79,6 +79,7 @@ upstream 관례보다 이 파일과 `GAINGE_RUNBOOK.md`를 우선 참고하세�
 - 커스텀 디렉토리:
 - upstream과 다른 점:
 - 이 포크에서 우선하는 패턴: **운영 설정은 Admin Panel Config Variables 우선** (`GAINGE_CONTEXT.md` § 운영 설정 참고)
+- 엔터프라이즈 테마 토큰 수정: `.cursor/rules/003-fork-enterprise-theme.mdc` (CSS 두 파일만, 브라우저 검증 생략)
 
 ## 충돌 해석
 

@@ -61,7 +61,10 @@
 }
 
 .button[data-accent='secondary'] {
-  --light-icon-button-color: var(--t-font-color-secondary);
+  --light-icon-button-color: var(
+    --t-nav-icon-button-color,
+    var(--t-font-color-secondary)
+  );
 }
 
 .button[data-accent='tertiary'] {

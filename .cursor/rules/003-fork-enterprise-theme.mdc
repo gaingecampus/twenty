@@ -1,0 +1,31 @@
+---
+description: 엔터프라이즈 테마 CSS 토큰 수정 — 빠른 경로, 브라우저 검증 생략
+globs: packages/twenty-ui/src/theme-constants/theme-enterprise-*.css
+alwaysApply: false
+---
+
+# 엔터프라이즈 테마 CSS
+
+토큰(패딩, 폰트, 색, radius)만 바꾸는 요청은 **CSS 두 파일만** 고친다.
+컴포넌트 탐색, 새 토큰, 새 선택자, 브라우저 검증을 하지 않는다.
+
+## 할 일
+
+1. `theme-enterprise-light.css`와 `theme-enterprise-dark.css`에서 **이미 있는** `--t-*`만 수정
+2. 라이트/다크 값을 같이 맞춘다
+3. 끝. `dist` 복사는 필요 없다 — `twenty-front`가 `src` CSS를 직접 읽는다
+
+## 하지 말 것
+
+- 브라우저 lock / navigate / CDP / screenshot
+- 컴포넌트 TSX·SCSS를 열어 “어디에 먹히는지” 추적
+- 새 `--t-*` 추가, `themeCssVariables.ts` 수정
+- `html[data-ui-theme='enterprise'] …` 컴포넌트 선택자 추가
+- `GAINGE_CONTEXT.md`를 다시 읽기
+
+## 예외 — 토큰만으로 안 될 때만
+
+컴포넌트가 해당 `--t-*`를 아직 안 읽을 때만 TSX에 `var(--t-…, fallback)`을 연결한다.
+그때도 브라우저 검증은 사용자가 하겠다고 하기 전에는 생략한다.
+
+이미 연결된 접두어: `--t-nav-*`, `--t-search-*`, `--t-toolbar-chip-*`, `--t-view-tab-*`, `--t-page-header-*`, `--t-page-header-action-*`, `--t-button-*`, `--t-overlay-*`, `--t-icon-button-*`, `--t-control-*`

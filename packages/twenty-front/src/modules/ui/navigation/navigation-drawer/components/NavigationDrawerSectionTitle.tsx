@@ -11,6 +11,14 @@ import { Label } from 'twenty-ui/typography';
 import { ThemeContext, themeCssVariables } from 'twenty-ui/theme-constants';
 
 const StyledTitle = styled.div`
+  --t-icon-button-hover-bg: var(
+    --t-nav-section-title-button-hover-bg,
+    var(--t-icon-button-hover-bg)
+  );
+  --t-icon-button-size-sm: var(
+    --t-nav-section-title-button-size,
+    var(--t-icon-button-size-sm)
+  );
   align-items: center;
   border: var(--t-nav-section-title-border, 1px solid transparent);
   border-radius: ${themeCssVariables.border.radius.sm};
@@ -43,8 +51,30 @@ const StyledTitle = styled.div`
     cursor: pointer;
 
     .section-title-label {
-      color: ${themeCssVariables.font.color.tertiary};
+      color: var(
+        --t-nav-section-title-color,
+        ${themeCssVariables.font.color.tertiary}
+      );
     }
+  }
+`;
+
+const StyledSectionLabel = styled(Label)`
+  && {
+    color: var(
+      --t-nav-section-title-color,
+      ${themeCssVariables.font.color.light}
+    );
+    font-size: var(
+      --t-nav-section-title-font-size,
+      ${themeCssVariables.font.size.xs}
+    );
+    font-weight: var(
+      --t-nav-section-title-font-weight,
+      ${themeCssVariables.font.weight.semiBold}
+    );
+    letter-spacing: var(--t-nav-section-title-letter-spacing, 0);
+    text-transform: var(--t-nav-section-title-text-transform, none);
   }
 `;
 
@@ -114,7 +144,9 @@ export const NavigationDrawerSectionTitle = ({
   return (
     <StyledTitle className="section-title-container">
       <StyledLabelContainer onClick={handleTitleClick}>
-        <Label className="section-title-label">{label}</Label>
+        <StyledSectionLabel className="section-title-label">
+          {label}
+        </StyledSectionLabel>
         {isOpen !== undefined && (
           <StyledChevron>
             <MotionIconChevronRight

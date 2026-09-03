@@ -15,6 +15,21 @@ import svgr from 'vite-plugin-svgr';
 
 import { createWywProfilingPlugin } from 'twenty-shared/vite';
 
+const TWENTY_UI_THEME_CSS_DIR = path.resolve(
+  __dirname,
+  '../twenty-ui/src/theme-constants',
+);
+
+const twentyUiThemeCssAliases = [
+  'theme-light.css',
+  'theme-dark.css',
+  'theme-enterprise-light.css',
+  'theme-enterprise-dark.css',
+].map((file) => ({
+  find: `twenty-ui/${file}`,
+  replacement: path.join(TWENTY_UI_THEME_CSS_DIR, file),
+}));
+
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, __dirname, '');
 
@@ -263,6 +278,7 @@ export default defineConfig(({ mode }) => {
         { find: /^@\//, replacement: path.resolve(__dirname, 'src/modules') + '/' },
         { find: /^~\//, replacement: path.resolve(__dirname, 'src') + '/' },
         { find: 'path', replacement: 'rollup-plugin-node-polyfills/polyfills/path' },
+        ...twentyUiThemeCssAliases,
       ],
     },
   };

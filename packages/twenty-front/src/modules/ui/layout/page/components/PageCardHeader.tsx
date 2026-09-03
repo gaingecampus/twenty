@@ -100,6 +100,22 @@ const StyledCenterContent = styled.div`
 `;
 
 const StyledRight = styled.div<{ headerLayout: HeaderLayout }>`
+  --t-button-padding-x: var(
+    --t-page-header-action-padding-x,
+    var(--t-button-padding-x)
+  );
+  --t-button-padding-x-sm: var(
+    --t-page-header-action-padding-x,
+    var(--t-button-padding-x-sm)
+  );
+  --t-control-height-md: var(
+    --t-page-header-action-height,
+    var(--t-control-height-md)
+  );
+  --t-control-height-sm: var(
+    --t-page-header-action-height,
+    var(--t-control-height-sm)
+  );
   align-items: center;
   display: flex;
   gap: ${themeCssVariables.spacing[2]};

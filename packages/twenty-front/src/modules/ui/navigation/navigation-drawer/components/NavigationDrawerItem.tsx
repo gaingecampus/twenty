@@ -270,8 +270,14 @@ const StyledIcon = styled.div`
   }
 
   svg {
+    color: inherit;
     height: calc(var(--t-nav-icon-size, var(--t-icon-size-md)) * 1px);
     min-width: calc(var(--t-nav-icon-size, var(--t-icon-size-md)) * 1px);
+    stroke: currentColor;
+    stroke-width: var(
+      --t-nav-item-active-icon-stroke,
+      var(--t-icon-stroke-md)
+    );
     width: calc(var(--t-nav-icon-size, var(--t-icon-size-md)) * 1px);
   }
 `;

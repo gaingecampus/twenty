@@ -1,4 +1,21 @@
+import path from 'path';
+
 import type { StorybookConfig } from '@storybook/react-vite';
+
+const twentyUiThemeCssDir = path.resolve(
+  __dirname,
+  '../../twenty-ui/src/theme-constants',
+);
+
+const twentyUiThemeCssAliases = [
+  'theme-light.css',
+  'theme-dark.css',
+  'theme-enterprise-light.css',
+  'theme-enterprise-dark.css',
+].map((file) => ({
+  find: `twenty-ui/${file}`,
+  replacement: path.join(twentyUiThemeCssDir, file),
+}));
 
 const computeStoriesGlob = () => {
   if (process.env.STORYBOOK_SCOPE === 'pages') {
@@ -57,6 +74,9 @@ const config: StorybookConfig = {
 
     return mergeConfig(viteConfig, {
       logLevel: 'warn',
+      resolve: {
+        alias: twentyUiThemeCssAliases,
+      },
     });
   },
 
