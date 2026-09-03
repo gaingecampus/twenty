@@ -59,7 +59,7 @@ export const NavigationDrawerAiChatThreadSection = ({
           containAnimation
           initial={false}
         >
-          <StyledThreadList>
+          <StyledThreadList data-nav-section="chat">
             {threads.map((thread) => (
               <NavigationDrawerAiChatThreadItem
                 key={thread.id}

@@ -9,6 +9,13 @@ import { NavigationDrawerCollapseButton } from './NavigationDrawerCollapseButton
 
 const StyledContainer = styled.div<{ isExpanded: boolean }>`
   align-items: center;
+  background: ${({ isExpanded }) =>
+    isExpanded ? 'var(--t-nav-header-bg, transparent)' : 'transparent'};
+  border: ${({ isExpanded }) =>
+    isExpanded ? 'var(--t-nav-header-border, none)' : 'none'};
+  border-radius: ${({ isExpanded }) =>
+    isExpanded ? 'var(--t-nav-header-radius, 0)' : '0'};
+  box-sizing: border-box;
   display: flex;
   flex-direction: ${({ isExpanded }) => (isExpanded ? 'row' : 'column')};
   flex-shrink: 0;

@@ -18,8 +18,10 @@ const StyledAnimatedContainer = motion.create(StyledAnimatedContainerBase);
 
 export const NavigationDrawerAnimatedCollapseWrapper = ({
   children,
+  expandToFullWidth = false,
 }: {
   children: React.ReactNode;
+  expandToFullWidth?: boolean;
 }) => {
   const { theme } = useContext(ThemeContext);
   const isSettingsPage = useIsSettingsPage();
@@ -35,7 +37,7 @@ export const NavigationDrawerAnimatedCollapseWrapper = ({
     isNavigationDrawerExpanded
       ? {
           opacity: 1,
-          width: 'auto',
+          width: expandToFullWidth ? '100%' : 'auto',
           height: 'auto',
           pointerEvents: 'auto',
         }

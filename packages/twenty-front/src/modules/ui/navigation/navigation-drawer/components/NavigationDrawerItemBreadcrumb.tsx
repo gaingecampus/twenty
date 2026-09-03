@@ -21,8 +21,14 @@ const StyledNavigationDrawerItemBreadcrumbContainer = styled.div`
 const StyledGapVerticalLine = styled.div<{ darker: boolean }>`
   background: ${({ darker }) =>
     darker
-      ? themeCssVariables.font.color.tertiary
-      : themeCssVariables.border.color.strong};
+      ? `var(
+          --t-nav-breadcrumb-active-color,
+          ${themeCssVariables.font.color.tertiary}
+        )`
+      : `var(
+          --t-nav-breadcrumb-color,
+          ${themeCssVariables.border.color.strong}
+        )`};
 
   height: 2px;
   position: relative;
@@ -34,8 +40,14 @@ const StyledGapVerticalLine = styled.div<{ darker: boolean }>`
 const StyledSecondaryFullVerticalBar = styled.div<{ darker: boolean }>`
   background: ${({ darker }) =>
     darker
-      ? themeCssVariables.font.color.tertiary
-      : themeCssVariables.border.color.strong};
+      ? `var(
+          --t-nav-breadcrumb-active-color,
+          ${themeCssVariables.font.color.tertiary}
+        )`
+      : `var(
+          --t-nav-breadcrumb-color,
+          ${themeCssVariables.border.color.strong}
+        )`};
 
   height: calc(${themeCssVariables.spacing[7]} + 1px);
   position: relative;
@@ -51,8 +63,14 @@ const StyledRoundedProtrusion = styled.div<{ darker: boolean }>`
   border: 1px solid
     ${({ darker }) =>
       darker
-        ? themeCssVariables.font.color.tertiary
-        : themeCssVariables.border.color.strong};
+        ? `var(
+            --t-nav-breadcrumb-active-color,
+            ${themeCssVariables.font.color.tertiary}
+          )`
+        : `var(
+            --t-nav-breadcrumb-color,
+            ${themeCssVariables.border.color.strong}
+          )`};
   border-bottom-left-radius: 4px;
 
   border-right: none;

@@ -134,7 +134,7 @@ export const WorkspaceSectionContainer = ({
       alwaysShowRightIcon={isLayoutCustomizationModeEnabled}
       forceExpanded={isAddToNavigationDropTargetVisible}
       contentWrapper={(children) => (
-        <StyledWorkspaceSectionContentGapOffset>
+        <StyledWorkspaceSectionContentGapOffset data-nav-section="workspace">
           {children}
         </StyledWorkspaceSectionContentGapOffset>
       )}

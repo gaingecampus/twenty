@@ -52,6 +52,7 @@ const StyledCollapsedSearchButton = styled.button`
 `;
 
 const StyledChatSearch = styled.div`
+  min-width: 0;
   width: 100%;
 
   button[data-variant='secondary'][data-accent='default'][data-position='standalone'] {
@@ -68,6 +69,7 @@ const StyledChatSearch = styled.div`
 
 const StyledSearchTrigger = styled.div`
   cursor: pointer;
+  min-width: 0;
   width: 100%;
 
   input {
