@@ -2,7 +2,7 @@ import { Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { TypeOrmQueryService } from '@ptc-org/nestjs-query-typeorm';
-import { type APP_LOCALES, SOURCE_LOCALE } from 'twenty-shared/translations';
+import { APP_LOCALES } from 'twenty-shared/translations';
 import { FileFolder } from 'twenty-shared/types';
 import { assertIsDefinedOrThrow, isDefined } from 'twenty-shared/utils';
 import { IsNull, Not, type QueryRunner, type Repository } from 'typeorm';
@@ -103,12 +103,14 @@ export class UserWorkspaceService extends TypeOrmQueryService<UserWorkspaceEntit
       isExistingUser,
       pictureUrl,
       applicationUniversalIdentifier,
+      locale,
     }: {
       userId: string;
       workspaceId: string;
       isExistingUser: boolean;
       pictureUrl?: string;
       applicationUniversalIdentifier?: string;
+      locale?: keyof typeof APP_LOCALES;
     },
     queryRunner?: QueryRunner,
   ): Promise<UserWorkspaceEntity> {
@@ -125,6 +127,7 @@ export class UserWorkspaceService extends TypeOrmQueryService<UserWorkspaceEntit
       userId,
       workspaceId,
       defaultAvatarUrl,
+      locale: locale ?? APP_LOCALES['ko-KR'],
     });
 
     return queryRunner
@@ -173,7 +176,8 @@ export class UserWorkspaceService extends TypeOrmQueryService<UserWorkspaceEntit
         userId: user.id,
         userEmail: user.email,
         avatarUrl: userWorkspace.defaultAvatarUrl ?? null,
-        locale: (user.locale ?? SOURCE_LOCALE) as keyof typeof APP_LOCALES,
+        locale: (user.locale ??
+          APP_LOCALES['ko-KR']) as keyof typeof APP_LOCALES,
       });
 
       const workspaceMember = await workspaceMemberRepository.find({
@@ -212,6 +216,7 @@ export class UserWorkspaceService extends TypeOrmQueryService<UserWorkspaceEntit
       userId: user.id,
       workspaceId: workspace.id,
       isExistingUser: true,
+      locale: user.locale ?? APP_LOCALES['ko-KR'],
     });
 
     await this.createWorkspaceMember(workspace.id, user);

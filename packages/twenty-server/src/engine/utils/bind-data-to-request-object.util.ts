@@ -23,6 +23,7 @@ export const bindDataToRequestObject = (
   request.tokenType = data.tokenType;
 
   request.locale =
+    data.workspaceMember?.locale ??
     data.userWorkspace?.locale ??
     (request.headers['x-locale'] as keyof typeof APP_LOCALES) ??
     SOURCE_LOCALE;

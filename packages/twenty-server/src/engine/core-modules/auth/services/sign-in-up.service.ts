@@ -3,6 +3,7 @@ import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 
 import { msg } from '@lingui/core/macro';
 import { TWENTY_ICONS_BASE_URL } from 'twenty-shared/constants';
+import { APP_LOCALES } from 'twenty-shared/translations';
 import { isDefined } from 'twenty-shared/utils';
 import { WorkspaceActivationStatus } from 'twenty-shared/workspace';
 import {
@@ -109,7 +110,7 @@ export class SignInUpService {
       firstName: newUserPayload.firstName ?? '',
       lastName: newUserPayload.lastName ?? '',
       picture: newUserPayload.picture ?? '',
-      locale: newUserPayload.locale ?? 'en',
+      locale: newUserPayload.locale ?? APP_LOCALES['ko-KR'],
       isEmailVerified: newUserPayload.isEmailAlreadyVerified,
     };
 
@@ -619,6 +620,7 @@ export class SignInUpService {
                 : userData.newUserWithPicture.picture,
               applicationUniversalIdentifier:
                 customApplication.universalIdentifier,
+              locale: user.locale ?? APP_LOCALES['ko-KR'],
             },
             queryRunner,
           );

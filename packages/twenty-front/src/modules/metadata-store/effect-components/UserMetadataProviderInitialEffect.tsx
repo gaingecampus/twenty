@@ -77,13 +77,15 @@ export const UserMetadataProviderInitialEffect = () => {
   );
 
   useEffect(() => {
-    if (isInitialized) {
+    if (!hasAccessTokenPair) {
+      setIsCurrentUserLoaded(true);
+      if (isInitialized) {
+        setIsInitialized(false);
+      }
       return;
     }
 
-    if (!hasAccessTokenPair) {
-      setIsCurrentUserLoaded(true);
-      setIsInitialized(true);
+    if (isInitialized) {
       return;
     }
 

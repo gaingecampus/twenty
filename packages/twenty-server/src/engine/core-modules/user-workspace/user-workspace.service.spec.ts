@@ -213,6 +213,7 @@ describe('UserWorkspaceService', () => {
         userId,
         workspaceId,
         defaultAvatarUrl: undefined,
+        locale: 'ko-KR',
       });
       expect(userWorkspaceRepository.save).toHaveBeenCalledWith(userWorkspace);
       expect(result).toEqual(userWorkspace);
@@ -241,6 +242,37 @@ describe('UserWorkspaceService', () => {
 
       expect(userWorkspaceRepository.save).toHaveBeenCalledWith(userWorkspace);
       expect(result).toEqual(userWorkspace);
+    });
+
+    it('should copy the provided locale onto the user workspace', async () => {
+      const userId = 'user-id';
+      const workspaceId = 'workspace-id';
+      const userWorkspace = {
+        userId,
+        workspaceId,
+        locale: 'ko-KR',
+      } as unknown as UserWorkspaceEntity;
+
+      jest
+        .spyOn(userWorkspaceRepository, 'create')
+        .mockReturnValue(userWorkspace);
+      jest
+        .spyOn(userWorkspaceRepository, 'save')
+        .mockResolvedValue(userWorkspace);
+
+      await service.create({
+        userId,
+        workspaceId,
+        isExistingUser: true,
+        locale: 'ko-KR',
+      });
+
+      expect(userWorkspaceRepository.create).toHaveBeenCalledWith({
+        userId,
+        workspaceId,
+        defaultAvatarUrl: undefined,
+        locale: 'ko-KR',
+      });
     });
   });
 
@@ -306,6 +338,43 @@ describe('UserWorkspaceService', () => {
         locale: 'en',
         avatarUrl: 'userWorkspace-avatar-url',
       });
+    });
+
+    it('should default workspace member locale to Korean when user locale is missing', async () => {
+      const workspaceId = 'workspace-id';
+      const user = {
+        id: 'user-id',
+        email: 'test@example.com',
+        firstName: 'John',
+        lastName: 'Doe',
+      } as unknown as AuthContextUser;
+      const workspaceMemberRepository = {
+        insert: jest.fn(),
+        find: jest
+          .fn()
+          .mockResolvedValueOnce([])
+          .mockResolvedValue([
+            {
+              id: 'workspace-member-id',
+              userId: 'user-id',
+            },
+          ]),
+      };
+
+      jest
+        .spyOn(globalWorkspaceOrmManager, 'getRepository')
+        .mockResolvedValue(workspaceMemberRepository as any);
+      jest.spyOn(userWorkspaceRepository, 'findOneOrFail').mockResolvedValue({
+        defaultAvatarUrl: null,
+      } as UserWorkspaceEntity);
+
+      await service.createWorkspaceMember(workspaceId, user);
+
+      expect(workspaceMemberRepository.insert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          locale: 'ko-KR',
+        }),
+      );
     });
 
     it('should not create a workspace member when one already exists', async () => {
@@ -374,6 +443,7 @@ describe('UserWorkspaceService', () => {
         workspaceId: workspace.id,
         userId: user.id,
         isExistingUser: true,
+        locale: 'ko-KR',
       });
       expect(service.createWorkspaceMember).toHaveBeenCalledWith(
         workspace.id,
