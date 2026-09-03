@@ -32,6 +32,7 @@ const StyledPreviewWrapper = styled.div`
 type CommandMenuItemRendererProps = {
   item: CommandMenuItemFieldsFragment;
   isPrimaryAction?: boolean;
+  isIconOnly?: boolean;
 };
 
 type CommandMenuItemButtonRendererProps = CommandMenuItemRendererProps;
@@ -39,6 +40,7 @@ type CommandMenuItemButtonRendererProps = CommandMenuItemRendererProps;
 const CommandMenuItemButtonRenderer = ({
   item,
   isPrimaryAction = false,
+  isIconOnly = false,
 }: CommandMenuItemButtonRendererProps) => {
   const { commandMenuContextApi, isInPreviewMode } =
     useContext(CommandMenuContext);
@@ -65,6 +67,7 @@ const CommandMenuItemButtonRenderer = ({
         <CommandMenuButton
           command={command}
           isPrimaryAction={isPrimaryAction}
+          isIconOnly={isIconOnly}
         />
       </StyledPreviewWrapper>
     );
@@ -76,6 +79,7 @@ const CommandMenuItemButtonRenderer = ({
       onClick={disabled ? undefined : handleClick}
       disabled={disabled}
       isPrimaryAction={isPrimaryAction}
+      isIconOnly={isIconOnly}
     />
   );
 };
@@ -175,6 +179,7 @@ const CommandMenuItemSelectableRenderer = ({
 export const CommandMenuItemRenderer = ({
   item,
   isPrimaryAction,
+  isIconOnly,
 }: CommandMenuItemRendererProps) => {
   const { displayType } = useContext(CommandMenuContext);
 
@@ -183,6 +188,7 @@ export const CommandMenuItemRenderer = ({
       <CommandMenuItemButtonRenderer
         item={item}
         isPrimaryAction={isPrimaryAction}
+        isIconOnly={isIconOnly}
       />
     );
   }

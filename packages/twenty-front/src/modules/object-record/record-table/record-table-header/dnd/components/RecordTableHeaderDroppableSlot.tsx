@@ -6,11 +6,18 @@ import { type ReactNode } from 'react';
 
 const StyledSlotWrapper = styled.div`
   align-self: stretch;
-  flex: 0 0 2px;
-  margin-left: -1px;
-  margin-right: -1px;
+  flex: 0 0 0;
   min-height: 0;
   position: relative;
+  width: 0;
+`;
+
+const StyledDroppableHitArea = styled.div`
+  height: 100%;
+  left: -1px;
+  position: absolute;
+  top: 0;
+  width: 2px;
   z-index: 100;
 `;
 
@@ -41,5 +48,9 @@ export const RecordTableHeaderDroppableSlot = ({
     data,
   });
 
-  return <StyledSlotWrapper ref={ref}>{children}</StyledSlotWrapper>;
+  return (
+    <StyledSlotWrapper>
+      <StyledDroppableHitArea ref={ref}>{children}</StyledDroppableHitArea>
+    </StyledSlotWrapper>
+  );
 };

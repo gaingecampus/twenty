@@ -2,6 +2,7 @@ import { useUpdateRecordField } from '@/object-record/record-field/hooks/useUpda
 
 import { RECORD_TABLE_COLUMN_LAST_EMPTY_COLUMN_WIDTH_VARIABLE_NAME } from '@/object-record/record-table/constants/RecordTableColumnLastEmptyColumnWidthVariableName';
 import { RECORD_TABLE_COLUMN_MIN_WIDTH } from '@/object-record/record-table/constants/RecordTableColumnMinWidth';
+import { getRecordTableColumnDisplayWidth } from '@/object-record/record-table/constants/RecordTableColumnWidthExtra';
 import { RECORD_TABLE_COLUMN_WITH_GROUP_LAST_EMPTY_COLUMN_WIDTH_VARIABLE_NAME } from '@/object-record/record-table/constants/RecordTableColumnWithGroupLastEmptyColumnWidthVariableName';
 import { useRecordTableContextOrThrow } from '@/object-record/record-table/contexts/RecordTableContext';
 import { useResetTableRowSelection } from '@/object-record/record-table/hooks/internal/useResetTableRowSelection';
@@ -111,7 +112,7 @@ export const useResizeTableHeader = () => {
       updateRecordTableCSSVariable(
         recordTableId,
         getRecordTableColumnFieldWidthCSSVariableName(recordFieldIndex),
-        `${newWidth}px`,
+        `${getRecordTableColumnDisplayWidth(newWidth)}px`,
       );
 
       const { lastColumnWidth } = computeLastRecordTableColumnWidth({

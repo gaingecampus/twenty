@@ -37,7 +37,16 @@ const StyledContainer = styled.div`
   }
 
   button {
+    --btn-active-bg: rgb(255 255 255 / 0.24) !important;
+    --btn-border-color: transparent !important;
+    --btn-box-shadow: none !important;
+    --btn-hover-bg: rgb(255 255 255 / 0.16) !important;
     --tw-button-color: ${GRAY_SCALE_LIGHT.gray1} !important;
+  }
+
+  button:focus,
+  button:focus-visible {
+    outline: none;
   }
 
   button[type='submit']:not(:disabled):not(:focus) {

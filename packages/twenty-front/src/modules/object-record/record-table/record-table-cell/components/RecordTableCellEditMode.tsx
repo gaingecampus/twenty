@@ -3,6 +3,7 @@ import { RecordFieldComponentInstanceContext } from '@/object-record/record-fiel
 import { recordFieldInputIsFieldInErrorComponentState } from '@/object-record/record-field/ui/states/recordFieldInputIsFieldInErrorComponentState';
 import { recordFieldInputLayoutDirectionComponentState } from '@/object-record/record-field/ui/states/recordFieldInputLayoutDirectionComponentState';
 import { recordFieldInputLayoutDirectionLoadingComponentState } from '@/object-record/record-field/ui/states/recordFieldInputLayoutDirectionLoadingComponentState';
+import { RECORD_TABLE_ROW_HEIGHT_WITH_BORDER } from '@/object-record/record-table/constants/RecordTableRowHeight';
 import { RecordTableCellContext } from '@/object-record/record-table/contexts/RecordTableCellContext';
 import { useFocusRecordTableCell } from '@/object-record/record-table/record-table-cell/hooks/useFocusRecordTableCell';
 import { OverlayContainer } from '@/ui/layout/overlay/components/OverlayContainer';
@@ -18,6 +19,7 @@ import {
   type MiddlewareState,
 } from '@floating-ui/react';
 import { useContext, type ReactElement } from 'react';
+import { themeCssVariables } from 'twenty-ui/theme-constants';
 
 const StyledEditableCellEditModeContainer = styled.div<{
   isFieldInputOnly: boolean;
@@ -34,7 +36,7 @@ const StyledInputModeOnlyContainer = styled.div`
   display: flex;
   height: 100%;
   overflow: hidden;
-  padding-left: 8px;
+  padding-left: ${themeCssVariables.table.horizontalCellPadding};
   width: 100%;
 `;
 
@@ -78,7 +80,7 @@ export const RecordTableCellEditMode = ({
     middleware: [
       flip(),
       offset({
-        mainAxis: -33,
+        mainAxis: -RECORD_TABLE_ROW_HEIGHT_WITH_BORDER,
         crossAxis: -3,
       }),
       setFieldInputLayoutDirectionMiddleware,

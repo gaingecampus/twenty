@@ -13,6 +13,20 @@ const StyledChromeStack = styled.div`
   width: 100%;
 `;
 
+const StyledChromeRow = styled.div`
+  align-items: center;
+  background: var(--t-nav-chrome-row-bg, transparent);
+  border: var(--t-nav-chrome-row-border, none);
+  border-radius: var(--t-nav-chrome-row-radius, 0);
+  box-sizing: border-box;
+  display: flex;
+  flex-shrink: 0;
+  height: var(--t-nav-chrome-row-height, auto);
+  justify-content: space-between;
+  padding: var(--t-nav-chrome-row-padding, 0);
+  width: 100%;
+`;
+
 type MainNavigationDrawerChromeProps = {
   NavigationMenuTabIcon?: IconComponent;
   NavigationMenuTabActiveIcon?: IconComponent;
@@ -26,13 +40,15 @@ export const MainNavigationDrawerChrome = ({
 }: MainNavigationDrawerChromeProps) => {
   return (
     <StyledChromeStack>
-      <MainNavigationDrawerTabsRow
-        NavigationMenuTabIcon={NavigationMenuTabIcon}
-        NavigationMenuTabActiveIcon={NavigationMenuTabActiveIcon}
-        navigationMenuTabLabel={navigationMenuTabLabel}
-      />
+      <StyledChromeRow>
+        <MainNavigationDrawerTabsRow
+          NavigationMenuTabIcon={NavigationMenuTabIcon}
+          NavigationMenuTabActiveIcon={NavigationMenuTabActiveIcon}
+          navigationMenuTabLabel={navigationMenuTabLabel}
+        />
+        <MainNavigationDrawerNewChatButton />
+      </StyledChromeRow>
       <MainNavigationDrawerSearchButton />
-      <MainNavigationDrawerNewChatButton />
     </StyledChromeStack>
   );
 };

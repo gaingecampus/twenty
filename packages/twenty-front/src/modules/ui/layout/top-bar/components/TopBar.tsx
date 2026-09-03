@@ -28,6 +28,7 @@ const StyledTopBar = styled.div`
   display: flex;
   flex-direction: row;
   font-weight: ${themeCssVariables.font.weight.medium};
+  gap: var(--t-view-bar-section-gap, ${themeCssVariables.spacing[4]});
   height: var(--t-view-bar-min-height, 39px);
   justify-content: space-between;
   padding-right: var(--t-view-bar-padding-x, ${themeCssVariables.spacing[2]});
@@ -37,10 +38,14 @@ const StyledTopBar = styled.div`
 
 const StyledLeftSection = styled.div`
   display: flex;
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow-x: auto;
 `;
 
 const StyledRightSection = styled.div`
   display: flex;
+  flex-shrink: 0;
   font-weight: ${themeCssVariables.font.weight.regular};
   gap: var(--t-toolbar-chip-gap, ${themeCssVariables.betweenSiblingsGap});
 `;

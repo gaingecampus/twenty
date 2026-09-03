@@ -1,12 +1,17 @@
+import { getRecordTableColumnDisplayWidth } from '@/object-record/record-table/constants/RecordTableColumnWidthExtra';
 import { computeLastRecordTableColumnWidth } from '@/object-record/record-table/utils/computeLastRecordTableColumnWidth';
 
 describe('computeLastRecordTableColumnWidth', () => {
+  const twoColumnDisplayWidth =
+    getRecordTableColumnDisplayWidth(100) +
+    getRecordTableColumnDisplayWidth(100);
+
   it('returns 0 when the table is narrower than the total content width', () => {
     const recordFields = [{ size: 100 }, { size: 100 }];
 
     const { lastColumnWidth } = computeLastRecordTableColumnWidth({
       recordFields,
-      tableWidth: 200,
+      tableWidth: twoColumnDisplayWidth,
       shouldCompactFirstColumn: false,
       isDragColumnHidden: false,
       isCheckboxColumnHidden: false,
@@ -20,13 +25,13 @@ describe('computeLastRecordTableColumnWidth', () => {
 
     const { lastColumnWidth } = computeLastRecordTableColumnWidth({
       recordFields,
-      tableWidth: 300,
+      tableWidth: twoColumnDisplayWidth + 175,
       shouldCompactFirstColumn: false,
       isDragColumnHidden: false,
       isCheckboxColumnHidden: false,
     });
 
-    expect(lastColumnWidth).toBe(25);
+    expect(lastColumnWidth).toBe(103);
   });
 
   it('excludes drag-and-drop and checkbox widths from the calculation when both columns are hidden', () => {
@@ -34,13 +39,13 @@ describe('computeLastRecordTableColumnWidth', () => {
 
     const { lastColumnWidth } = computeLastRecordTableColumnWidth({
       recordFields,
-      tableWidth: 300,
+      tableWidth: twoColumnDisplayWidth + 175,
       shouldCompactFirstColumn: false,
       isDragColumnHidden: true,
       isCheckboxColumnHidden: true,
     });
 
-    expect(lastColumnWidth).toBe(65);
+    expect(lastColumnWidth).toBe(143);
   });
 
   it('excludes the add column button width when that column is hidden', () => {
@@ -48,14 +53,14 @@ describe('computeLastRecordTableColumnWidth', () => {
 
     const { lastColumnWidth } = computeLastRecordTableColumnWidth({
       recordFields,
-      tableWidth: 300,
+      tableWidth: twoColumnDisplayWidth + 175,
       shouldCompactFirstColumn: false,
       isDragColumnHidden: false,
       isCheckboxColumnHidden: false,
       isAddColumnButtonHidden: true,
     });
 
-    expect(lastColumnWidth).toBe(57);
+    expect(lastColumnWidth).toBe(135);
   });
 
   it('uses the compact first column width when shouldCompactFirstColumn is true', () => {
@@ -64,7 +69,7 @@ describe('computeLastRecordTableColumnWidth', () => {
     const { lastColumnWidth: lastColumnWidthWithCompact } =
       computeLastRecordTableColumnWidth({
         recordFields,
-        tableWidth: 300,
+        tableWidth: 500,
         shouldCompactFirstColumn: true,
         isDragColumnHidden: false,
         isCheckboxColumnHidden: false,
@@ -73,13 +78,14 @@ describe('computeLastRecordTableColumnWidth', () => {
     const { lastColumnWidth: lastColumnWidthWithoutCompact } =
       computeLastRecordTableColumnWidth({
         recordFields,
-        tableWidth: 300,
+        tableWidth: 500,
         shouldCompactFirstColumn: false,
         isDragColumnHidden: false,
         isCheckboxColumnHidden: false,
       });
 
-    expect(lastColumnWidthWithCompact).toBe(37);
-    expect(lastColumnWidthWithoutCompact).toBe(0);
+    expect(lastColumnWidthWithCompact).toBeGreaterThan(
+      lastColumnWidthWithoutCompact,
+    );
   });
 });

@@ -30,9 +30,11 @@ const StyledPlusIconHeaderCell = styled.div<{
       ? `1px solid ${themeCssVariables.border.color.light}`
       : 'none'};
 
+  align-items: stretch;
   color: ${themeCssVariables.font.color.tertiary};
 
   cursor: pointer;
+  display: flex;
 
   height: ${RECORD_TABLE_ROW_HEIGHT}px;
 
@@ -49,14 +51,22 @@ const StyledPlusIconHeaderCell = styled.div<{
 const StyledPlusIconContainer = styled.div`
   align-items: center;
   display: flex;
-  height: ${RECORD_TABLE_ROW_HEIGHT}px;
+  height: 100%;
   justify-content: center;
   width: 100%;
 `;
 
 const StyledDropdownContainer = styled.div`
   cursor: pointer;
+  display: flex;
+  flex: 1;
+  height: 100%;
   width: 100%;
+
+  & > div {
+    height: 100%;
+    width: 100%;
+  }
 `;
 
 export const RecordTableHeaderAddColumnButton = () => {

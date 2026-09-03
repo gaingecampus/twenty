@@ -7,17 +7,27 @@ export const OverlayContainer = styled.div<{
   hasDangerBorder?: boolean;
 }>`
   align-items: center;
-  backdrop-filter: ${themeCssVariables.blur.medium};
+  backdrop-filter: var(
+    --t-overlay-backdrop-filter,
+    ${themeCssVariables.blur.medium}
+  );
 
-  background: ${themeCssVariables.background.transparent.primary};
+  background: var(
+    --t-overlay-bg,
+    ${themeCssVariables.background.transparent.primary}
+  );
 
-  border: 1px solid
-    ${({ hasDangerBorder }) =>
-      themeCssVariables.border.color[hasDangerBorder ? 'danger' : 'medium']};
+  border: ${({ hasDangerBorder }) =>
+    hasDangerBorder
+      ? `1px solid ${themeCssVariables.border.color.danger}`
+      : `var(--t-overlay-border, 1px solid ${themeCssVariables.border.color.medium})`};
 
   border-radius: ${({ borderRadius }) =>
-    themeCssVariables.border.radius[borderRadius ?? 'md']};
-  box-shadow: ${themeCssVariables.boxShadow.strong};
+    `var(--t-overlay-radius, ${themeCssVariables.border.radius[borderRadius ?? 'md']})`};
+  box-shadow: var(
+    --t-overlay-shadow,
+    ${themeCssVariables.boxShadow.strong}
+  );
   display: flex;
 
   overflow: hidden;

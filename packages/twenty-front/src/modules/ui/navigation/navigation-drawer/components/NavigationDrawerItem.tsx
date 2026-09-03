@@ -185,8 +185,7 @@ const StyledItemElementsContainer = styled.div<{
   display: flex;
   justify-content: ${({ isNavigationDrawerExpanded }) =>
     isNavigationDrawerExpanded ? 'flex-start' : 'center'};
-  width: ${({ isNavigationDrawerExpanded }) =>
-    isNavigationDrawerExpanded ? '100%' : 'auto'};
+  width: 100%;
 `;
 
 const StyledLabelParent = styled.div<{ isNavigationDrawerExpanded: boolean }>`
@@ -245,7 +244,7 @@ const StyledSpacer = styled.span`
   flex-grow: 1;
 `;
 
-const StyledIcon = styled.div`
+const StyledIcon = styled.div<{ isNavigationDrawerExpanded: boolean }>`
   --tinted-icon-tile-dimension: var(
     --t-nav-icon-tile-size,
     ${themeCssVariables.spacing[4]}
@@ -255,7 +254,10 @@ const StyledIcon = styled.div`
   flex-grow: 0;
   flex-shrink: 0;
   justify-content: var(--t-nav-icon-justify, center);
-  margin-right: var(--t-nav-item-icon-gap, ${themeCssVariables.spacing[2]});
+  margin-right: ${({ isNavigationDrawerExpanded }) =>
+    isNavigationDrawerExpanded
+      ? `var(--t-nav-item-icon-gap, ${themeCssVariables.spacing[2]})`
+      : '0'};
 
   &[data-plain-icon='true'] {
     background: var(--t-nav-icon-tile-bg, transparent);
@@ -462,19 +464,17 @@ export const NavigationDrawerItem = ({
         <StyledItemElementsContainer
           isNavigationDrawerExpanded={isExpanded}
         >
-          {showBreadcrumb && (
-            <NavigationDrawerAnimatedCollapseWrapper>
-              <NavigationDrawerItemBreadcrumb state={subItemState} />
-            </NavigationDrawerAnimatedCollapseWrapper>
+          {showBreadcrumb && isExpanded && (
+            <NavigationDrawerItemBreadcrumb state={subItemState} />
           )}
 
           {Icon &&
             (isNonEmptyString(iconColor) && !hideIconTile ? (
-              <StyledIcon>
+              <StyledIcon isNavigationDrawerExpanded={isExpanded}>
                 <TintedIconTile Icon={Icon} color={iconColor} />
               </StyledIcon>
             ) : withIconBackground && !hideIconTile ? (
-              <StyledIcon>
+              <StyledIcon isNavigationDrawerExpanded={isExpanded}>
                 <StyledIconBackgroundTile>
                   <Icon
                     size={theme.icon.size.md}
@@ -488,7 +488,10 @@ export const NavigationDrawerItem = ({
                 </StyledIconBackgroundTile>
               </StyledIcon>
             ) : (
-              <StyledIcon data-plain-icon="true">
+              <StyledIcon
+                data-plain-icon="true"
+                isNavigationDrawerExpanded={isExpanded}
+              >
                 <Icon
                   style={{
                     minWidth: theme.icon.size.md,
@@ -504,48 +507,40 @@ export const NavigationDrawerItem = ({
               </StyledIcon>
             ))}
 
-          <StyledLabelParent isNavigationDrawerExpanded={isExpanded}>
-            <OverflowingTextWithTooltip
-              text={
-                <>
-                  <StyledItemLabel>{label}</StyledItemLabel>
-                  {secondaryLabel && (
-                    <StyledItemSecondaryLabel>
-                      {' · '}
-                      {secondaryLabel}
-                    </StyledItemSecondaryLabel>
-                  )}
-                </>
-              }
-              tooltipContent={
-                secondaryLabel ? `${label} · ${secondaryLabel}` : label
-              }
-            />
-          </StyledLabelParent>
+          {isExpanded && (
+            <StyledLabelParent isNavigationDrawerExpanded={isExpanded}>
+              <OverflowingTextWithTooltip
+                text={
+                  <>
+                    <StyledItemLabel>{label}</StyledItemLabel>
+                    {secondaryLabel && (
+                      <StyledItemSecondaryLabel>
+                        {' · '}
+                        {secondaryLabel}
+                      </StyledItemSecondaryLabel>
+                    )}
+                  </>
+                }
+                tooltipContent={
+                  secondaryLabel ? `${label} · ${secondaryLabel}` : label
+                }
+              />
+            </StyledLabelParent>
+          )}
 
           {showStyledSpacer && isExpanded && <StyledSpacer />}
 
-          {isSoon && (
-            <NavigationDrawerAnimatedCollapseWrapper>
-              <Pill label={t`Soon`} />
-            </NavigationDrawerAnimatedCollapseWrapper>
+          {isSoon && isExpanded && <Pill label={t`Soon`} />}
+
+          {isNew && isExpanded && <Pill label={t`New`} />}
+
+          {isDefined(keyboardKeys) && isExpanded && (
+            <StyledKeyBoardShortcut className="keyboard-shortcuts">
+              <Label>{keyboardKeys}</Label>
+            </StyledKeyBoardShortcut>
           )}
 
-          {isNew && (
-            <NavigationDrawerAnimatedCollapseWrapper>
-              <Pill label={t`New`} />
-            </NavigationDrawerAnimatedCollapseWrapper>
-          )}
-
-          {isDefined(keyboardKeys) && (
-            <NavigationDrawerAnimatedCollapseWrapper>
-              <StyledKeyBoardShortcut className="keyboard-shortcuts">
-                <Label>{keyboardKeys}</Label>
-              </StyledKeyBoardShortcut>
-            </NavigationDrawerAnimatedCollapseWrapper>
-          )}
-
-          {isDefined(rightOptions) && (
+          {isDefined(rightOptions) && isExpanded && (
             <NavigationDrawerAnimatedCollapseWrapper>
               {/* When StyledItem renders as a Link, we need both handlers to
                   prevent navigation when interacting with rightOptions:
@@ -559,9 +554,10 @@ export const NavigationDrawerItem = ({
               >
                 <StyledRightOptionsVisbility
                   data-visible={
-                    isMobile ||
-                    isRightOptionsDropdownOpen ||
-                    alwaysShowRightOptions
+                    isExpanded &&
+                    (isMobile ||
+                      isRightOptionsDropdownOpen ||
+                      alwaysShowRightOptions)
                       ? 'true'
                       : undefined
                   }

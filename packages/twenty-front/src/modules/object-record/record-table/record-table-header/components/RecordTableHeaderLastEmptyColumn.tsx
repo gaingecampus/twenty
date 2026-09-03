@@ -26,6 +26,7 @@ const StyledLastColumnHeader = styled.div<{
 
   cursor: pointer;
 
+  box-sizing: border-box;
   height: ${RECORD_TABLE_ROW_HEIGHT}px;
   max-height: ${RECORD_TABLE_ROW_HEIGHT}px;
 `;

@@ -22,9 +22,10 @@ const StyledTitle = styled.div<{ hideTitle?: boolean }>`
   flex-direction: row;
   font-weight: ${themeCssVariables.font.weight.medium};
   gap: ${themeCssVariables.spacing[1]};
-  height: ${themeCssVariables.spacing[8]};
-  padding-left: ${themeCssVariables.spacing[2]};
-  padding-right: ${themeCssVariables.spacing[2]};
+  height: 100%;
+  padding-left: ${themeCssVariables.table.horizontalCellPadding};
+  padding-right: ${themeCssVariables.table.horizontalCellPadding};
+  width: 100%;
 
   @media (max-width: ${MOBILE_VIEWPORT}px) {
     display: ${({ hideTitle }) => (hideTitle ? 'none' : 'flex')};

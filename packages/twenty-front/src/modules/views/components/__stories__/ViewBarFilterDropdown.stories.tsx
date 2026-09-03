@@ -154,7 +154,9 @@ export const Default: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement.ownerDocument.body);
 
-    const filterButton = await canvas.findByText('Filter');
+    const filterButton = await canvas.findByRole('button', {
+      name: 'Filter',
+    });
 
     await userEvent.click(filterButton);
 
@@ -176,7 +178,9 @@ export const Date: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement.ownerDocument.body);
 
-    const filterButton = await canvas.findByText('Filter');
+    const filterButton = await canvas.findByRole('button', {
+      name: 'Filter',
+    });
 
     await userEvent.click(filterButton);
 
@@ -190,7 +194,9 @@ export const Number: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement.ownerDocument.body);
 
-    const filterButton = await canvas.findByText('Filter');
+    const filterButton = await canvas.findByRole('button', {
+      name: 'Filter',
+    });
 
     await userEvent.click(filterButton);
 
@@ -279,7 +285,9 @@ export const AdvancedFilterCountBadge: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement.ownerDocument.body);
 
-    const filterButton = await canvas.findByText('Filter');
+    const filterButton = await canvas.findByRole('button', {
+      name: 'Filter',
+    });
 
     await userEvent.click(filterButton);
 

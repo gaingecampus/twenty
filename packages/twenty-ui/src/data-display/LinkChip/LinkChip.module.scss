@@ -1,9 +1,11 @@
 .linkContainer {
   display: inline-flex;
+  max-width: 100%;
   min-width: 0;
   vertical-align: middle;
 
   & > a {
+    display: inline-flex;
     max-width: 100%;
     min-width: 0;
     text-decoration: none;

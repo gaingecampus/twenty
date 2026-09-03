@@ -4,18 +4,15 @@ import { useRecordIndexContextOrThrow } from '@/object-record/record-index/conte
 import { RECORD_TABLE_COLUMN_CHECKBOX_WIDTH } from '@/object-record/record-table/constants/RecordTableColumnCheckboxWidth';
 import { RECORD_TABLE_COLUMN_DRAG_AND_DROP_WIDTH } from '@/object-record/record-table/constants/RecordTableColumnDragAndDropWidth';
 import { RECORD_TABLE_COLUMN_MIN_WIDTH } from '@/object-record/record-table/constants/RecordTableColumnMinWidth';
+import { getRecordTableColumnDisplayWidth } from '@/object-record/record-table/constants/RecordTableColumnWidthExtra';
 import { RECORD_TABLE_LABEL_IDENTIFIER_COLUMN_WIDTH_ON_MOBILE } from '@/object-record/record-table/constants/RecordTableLabelIdentifierColumnWidthOnMobile';
 import { RECORD_TABLE_ROW_HEIGHT } from '@/object-record/record-table/constants/RecordTableRowHeight';
 import { useRecordTableContextOrThrow } from '@/object-record/record-table/contexts/RecordTableContext';
 import { RecordTableDragAndDropPlaceholderCell } from '@/object-record/record-table/record-table-cell/components/RecordTableDragAndDropPlaceholderCell';
 import { RecordTableAddButtonPlaceholderCell } from '@/object-record/record-table/record-table-row/components/RecordTableAddButtonPlaceholderCell';
-import { RecordTableGroupSectionLastDynamicFillingCell } from '@/object-record/record-table/record-table-row/components/RecordTableGroupSectionLastDynamicFillingCell';
+import { RecordTableLastDynamicFillingCell } from '@/object-record/record-table/record-table-row/components/RecordTableLastDynamicFillingCell';
 import { useContext } from 'react';
-import {
-  filterOutByProperty,
-  findByProperty,
-  sumByProperty,
-} from 'twenty-shared/utils';
+import { filterOutByProperty, findByProperty } from 'twenty-shared/utils';
 import { type IconComponent } from 'twenty-ui/icon';
 import { ThemeContext, themeCssVariables } from 'twenty-ui/theme-constants';
 import { useIsMobile } from 'twenty-ui/utilities';
@@ -27,7 +24,7 @@ const StyledFieldPlaceholderCell = styled.div<{ widthOfFields: number }>`
 `;
 
 const StyledRecordTableDraggableTr = styled.div`
-  align-items: center;
+  align-items: stretch;
 
   background: ${themeCssVariables.background.primary};
   border: none;
@@ -35,6 +32,12 @@ const StyledRecordTableDraggableTr = styled.div`
   cursor: pointer;
   display: flex;
   flex-direction: row;
+  height: ${RECORD_TABLE_ROW_HEIGHT}px;
+
+  & > * {
+    box-sizing: border-box;
+    height: 100%;
+  }
 
   &:hover {
     div:not(:first-of-type) {
@@ -117,15 +120,18 @@ export const RecordTableActionRow = ({
     findByProperty('fieldMetadataItemId', labelIdentifierFieldMetadataItem?.id),
   );
 
-  const firstColumnWidth = isMobile
-    ? RECORD_TABLE_LABEL_IDENTIFIER_COLUMN_WIDTH_ON_MOBILE
-    : (labelIdentifierRecordField?.size ?? RECORD_TABLE_COLUMN_MIN_WIDTH);
+  const firstColumnWidth = getRecordTableColumnDisplayWidth(
+    isMobile
+      ? RECORD_TABLE_LABEL_IDENTIFIER_COLUMN_WIDTH_ON_MOBILE
+      : (labelIdentifierRecordField?.size ?? RECORD_TABLE_COLUMN_MIN_WIDTH),
+  );
 
   const sumOfWidthOfVisibleRecordFieldsAfterLabelIdentifierField =
-    visibleRecordFieldsWithoutLabelIdentifier.reduce(sumByProperty('size'), 0);
-
-  const sumOfBorderWidthForFields =
-    visibleRecordFieldsWithoutLabelIdentifier.length;
+    visibleRecordFieldsWithoutLabelIdentifier.reduce(
+      (sum, recordField) =>
+        sum + getRecordTableColumnDisplayWidth(recordField.size),
+      0,
+    );
 
   return (
     <StyledRecordTableDraggableTr onClick={onClick}>
@@ -141,13 +147,10 @@ export const RecordTableActionRow = ({
         <StyledText>{text}</StyledText>
       </StyledActionTextContainer>
       <StyledFieldPlaceholderCell
-        widthOfFields={
-          sumOfWidthOfVisibleRecordFieldsAfterLabelIdentifierField +
-          sumOfBorderWidthForFields
-        }
+        widthOfFields={sumOfWidthOfVisibleRecordFieldsAfterLabelIdentifierField}
       />
       <RecordTableAddButtonPlaceholderCell />
-      <RecordTableGroupSectionLastDynamicFillingCell />
+      <RecordTableLastDynamicFillingCell />
     </StyledRecordTableDraggableTr>
   );
 };

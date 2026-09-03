@@ -8,13 +8,18 @@ import { t } from '@lingui/core/macro';
 import { IconLock, IconPencil } from 'twenty-ui/icon';
 import { Button } from 'twenty-ui/input';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
+import { useIsMobile } from 'twenty-ui/utilities';
 
 const StyledRecordIndexInlineEditModeButton = styled(Button)`
+  --btn-border-color: transparent !important;
+  --btn-box-shadow: none !important;
   --btn-color: ${themeCssVariables.font.color.inverted} !important;
   --tw-button-color: ${themeCssVariables.font.color.inverted} !important;
   background: ${themeCssVariables.background.primaryInverted} !important;
   border-color: transparent !important;
+  box-shadow: none !important;
   color: ${themeCssVariables.font.color.inverted} !important;
+  flex-shrink: 0;
   height: 40px;
 
   &:active {
@@ -23,6 +28,16 @@ const StyledRecordIndexInlineEditModeButton = styled(Button)`
 
   &:hover {
     background: ${themeCssVariables.background.primaryInvertedHover} !important;
+  }
+
+  &:focus,
+  &:focus-visible,
+  &[data-focus] {
+    --btn-border-color: transparent !important;
+    --btn-box-shadow: none !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+    outline: none;
   }
 
   svg {
@@ -50,6 +65,7 @@ export const RecordIndexInlineEditModeButton = () => {
 
   const closeCurrentTableCellInEditMode =
     useCloseCurrentTableCellInEditMode(recordIndexId);
+  const isMobile = useIsMobile();
 
   if (objectPermissions.canUpdateObjectRecords !== true) {
     return null;
@@ -69,7 +85,13 @@ export const RecordIndexInlineEditModeButton = () => {
   return (
     <StyledRecordIndexInlineEditModeButton
       Icon={isRecordIndexInlineEditModeEnabled ? IconPencil : IconLock}
-      title={isRecordIndexInlineEditModeEnabled ? t`Editing` : t`Edit`}
+      title={
+        isMobile
+          ? undefined
+          : isRecordIndexInlineEditModeEnabled
+            ? t`Editing`
+            : t`Edit`
+      }
       variant="primary"
       accent="default"
       size="medium"

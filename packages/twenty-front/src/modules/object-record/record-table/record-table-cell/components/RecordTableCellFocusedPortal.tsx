@@ -28,7 +28,10 @@ export const RecordTableCellFocusedPortal = () => {
 
   return (
     <RecordTableCellPortalWrapper position={recordTableFocusPosition}>
-      <RecordTableCellPortalRootContainer zIndex={TABLE_Z_INDEX.hoverPortal}>
+      <RecordTableCellPortalRootContainer
+        zIndex={TABLE_Z_INDEX.hoverPortal}
+        style={{ pointerEvents: 'none' }}
+      >
         <RecordTableCellFocusedPortalContent />
       </RecordTableCellPortalRootContainer>
     </RecordTableCellPortalWrapper>

@@ -4,6 +4,7 @@ import { styled } from '@linaria/react';
 import { cx } from '@linaria/core';
 
 const StyledPlaceholderLastDynamicFillingCell = styled.div`
+  box-sizing: border-box;
   height: ${RECORD_TABLE_ROW_HEIGHT}px;
 `;
 

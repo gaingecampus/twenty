@@ -13,6 +13,13 @@ import { RecordTableVirtualizedSSESubscribeEffect } from '@/object-record/record
 import { RecordTableVirtualizedRowTreadmillEffect } from '@/object-record/record-table/virtualization/components/RecordTableVirtualizedRowTreadmillEffect';
 import { useAtomComponentSelectorValue } from '@/ui/utilities/state/jotai/hooks/useAtomComponentSelectorValue';
 import { useAtomComponentStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomComponentStateValue';
+import { styled } from '@linaria/react';
+
+const StyledBodyAndFooter = styled.div`
+  display: flex;
+  flex: 1 0 auto;
+  flex-direction: column;
+`;
 
 export const RecordTableNoRecordGroupBody = () => {
   const recordTableHasRecords = useAtomComponentSelectorValue(
@@ -30,13 +37,15 @@ export const RecordTableNoRecordGroupBody = () => {
   return (
     <RecordTableNoRecordGroupBodyContextProvider>
       <RecordTableBodyNoRecordGroupDragDropContextProvider>
-        <RecordTableBodyNoRecordGroupDroppable>
-          <RecordTableNoRecordGroupRows />
-          <RecordTableCellPortals />
-        </RecordTableBodyNoRecordGroupDroppable>
-        {!isRecordTableInitialLoading && recordTableHasRecords && (
-          <RecordTableAggregateFooter />
-        )}
+        <StyledBodyAndFooter>
+          <RecordTableBodyNoRecordGroupDroppable>
+            <RecordTableNoRecordGroupRows />
+            <RecordTableCellPortals />
+          </RecordTableBodyNoRecordGroupDroppable>
+          {!isRecordTableInitialLoading && recordTableHasRecords && (
+            <RecordTableAggregateFooter />
+          )}
+        </StyledBodyAndFooter>
         <RecordTableVirtualizedRowTreadmillEffect />
         <RecordTableVirtualizedDataChangedEffect />
         <RecordTableVirtualizedSSESubscribeEffect />

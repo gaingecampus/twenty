@@ -6,6 +6,7 @@ import {
 } from '@/object-record/record-table/components/RecordTableStyleWrapper';
 import { RECORD_TABLE_COLUMN_ADD_COLUMN_BUTTON_WIDTH } from '@/object-record/record-table/constants/RecordTableColumnAddColumnButtonWidth';
 import { RECORD_TABLE_COLUMN_LAST_EMPTY_COLUMN_WIDTH_CLASS_NAME } from '@/object-record/record-table/constants/RecordTableColumnLastEmptyColumnWidthClassName';
+import { RECORD_TABLE_ROW_HEIGHT } from '@/object-record/record-table/constants/RecordTableRowHeight';
 import { TABLE_Z_INDEX } from '@/object-record/record-table/constants/TableZIndex';
 import { useRecordTableContextOrThrow } from '@/object-record/record-table/contexts/RecordTableContext';
 import { useIsRecordTableAddColumnButtonHidden } from '@/object-record/record-table/hooks/useIsRecordTableAddColumnButtonHidden';
@@ -16,6 +17,7 @@ import { themeCssVariables } from 'twenty-ui/theme-constants';
 const StyledPlaceholderDragAndDropFooterCell = styled.div`
   background-color: ${themeCssVariables.background.primary};
   bottom: 0;
+  height: 100%;
   left: 0px;
   position: sticky;
   width: calc(
@@ -29,6 +31,7 @@ const StyledPlaceholderDragAndDropFooterCell = styled.div`
 const StyledPlaceholderAddButtonPlaceholderFooterCell = styled.div`
   background-color: ${themeCssVariables.background.primary};
   bottom: 0;
+  height: 100%;
   position: sticky;
   width: ${RECORD_TABLE_COLUMN_ADD_COLUMN_BUTTON_WIDTH}px;
   z-index: ${TABLE_Z_INDEX.footer.default};
@@ -37,13 +40,23 @@ const StyledPlaceholderAddButtonPlaceholderFooterCell = styled.div`
 const StyledPlaceholderLastColumnEmptyFooterCell = styled.div`
   background-color: ${themeCssVariables.background.primary};
   bottom: 0;
+  height: 100%;
   position: sticky;
   z-index: ${TABLE_Z_INDEX.footer.default};
 `;
 
-const StyledAggregateFooterContainer = styled.div`
+const StyledAggregateFooterContainer = styled.div<{
+  isPinnedToTableBottom: boolean;
+}>`
+  background-color: ${themeCssVariables.background.primary};
+  border-top: 1px solid ${themeCssVariables.border.color.light};
   bottom: 0;
   display: flex;
+  flex-shrink: 0;
+  height: ${RECORD_TABLE_ROW_HEIGHT}px;
+  isolation: isolate;
+  margin-top: ${({ isPinnedToTableBottom }) =>
+    isPinnedToTableBottom ? 'auto' : '0'};
   position: sticky;
   z-index: ${TABLE_Z_INDEX.footer.default};
 `;
@@ -58,7 +71,9 @@ export const RecordTableAggregateFooter = ({
     useIsRecordTableAddColumnButtonHidden();
 
   return (
-    <StyledAggregateFooterContainer>
+    <StyledAggregateFooterContainer
+      isPinnedToTableBottom={currentRecordGroupId === undefined}
+    >
       <StyledPlaceholderDragAndDropFooterCell />
       {visibleRecordFields.map((recordField, index) => {
         return (

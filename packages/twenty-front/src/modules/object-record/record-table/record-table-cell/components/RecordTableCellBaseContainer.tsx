@@ -4,6 +4,7 @@ import { useContext, type ReactNode } from 'react';
 import { FieldContext } from '@/object-record/record-field/ui/contexts/FieldContext';
 import { isFieldIdentifierDisplay } from '@/object-record/record-field/ui/meta-types/display/utils/isFieldIdentifierDisplay';
 import { RECORD_CHIP_CLICK_OUTSIDE_ID } from '@/object-record/record-table/constants/RecordChipClickOutsideId';
+import { RECORD_TABLE_ROW_HEIGHT } from '@/object-record/record-table/constants/RecordTableRowHeight';
 import { RecordTableCellContext } from '@/object-record/record-table/contexts/RecordTableCellContext';
 import { useRecordTableContextOrThrow } from '@/object-record/record-table/contexts/RecordTableContext';
 import { useOpenRecordTableCellFromCell } from '@/object-record/record-table/record-table-cell/hooks/useOpenRecordTableCellFromCell';
@@ -11,8 +12,6 @@ import { getRecordTableCellId } from '@/object-record/record-table/utils/getReco
 import { ThemeContext } from 'twenty-ui/theme-constants';
 
 const StyledBaseContainer = styled.div<{
-  fontColorMedium: string;
-  backgroundColorSecondary: string;
   fontColorSecondary: string;
   isReadOnly: boolean;
 }>`
@@ -20,19 +19,16 @@ const StyledBaseContainer = styled.div<{
   box-sizing: border-box;
   cursor: ${({ isReadOnly }) => (isReadOnly ? 'default' : 'pointer')};
   display: flex;
-  height: 32px;
+  height: ${RECORD_TABLE_ROW_HEIGHT}px;
+  overflow: visible;
   position: relative;
 
   user-select: none;
 
   &:hover {
-    background-color: ${({ isReadOnly, backgroundColorSecondary }) =>
-      isReadOnly ? backgroundColorSecondary : 'unset'};
-    border-radius: ${({ isReadOnly }) => (isReadOnly ? '0px' : 'unset')};
     color: ${({ isReadOnly, fontColorSecondary }) =>
       isReadOnly ? fontColorSecondary : 'unset'};
-    outline: ${({ isReadOnly, fontColorMedium }) =>
-      isReadOnly ? `1px solid ${fontColorMedium}` : 'unset'};
+    outline: none;
 
     svg {
       color: ${({ isReadOnly, fontColorSecondary }) =>
@@ -73,9 +69,7 @@ export const RecordTableCellBaseContainer = ({
   return (
     <StyledBaseContainer
       onClick={handleContainerClick}
-      backgroundColorSecondary={theme.background.secondary}
       fontColorSecondary={theme.font.color.secondary}
-      fontColorMedium={theme.border.color.medium}
       isReadOnly={isReadOnly ?? false}
       id={getRecordTableCellId(
         recordTableId,

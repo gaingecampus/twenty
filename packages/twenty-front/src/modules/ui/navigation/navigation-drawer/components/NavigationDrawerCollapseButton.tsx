@@ -5,46 +5,32 @@ import { useAtomState } from '@/ui/utilities/state/jotai/hooks/useAtomState';
 import { useSetAtomState } from '@/ui/utilities/state/jotai/hooks/useSetAtomState';
 import { styled } from '@linaria/react';
 import { t } from '@lingui/core/macro';
-import { type KeyboardEvent, useContext } from 'react';
 import {
   IconLayoutSidebarLeftCollapse,
   IconLayoutSidebarRightCollapse,
 } from 'twenty-ui/icon';
-import { ThemeContext, themeCssVariables } from 'twenty-ui/theme-constants';
+import { IconButton } from 'twenty-ui/input';
+import { themeCssVariables } from 'twenty-ui/theme-constants';
 
-const StyledCollapseButton = styled.div`
-  align-items: center;
-  background: transparent;
-  border-radius: var(
-    --t-nav-tabs-inner-radius,
-    ${themeCssVariables.border.radius.sm}
+const StyledCollapseIconButton = styled(IconButton)`
+  --icon-button-border-color: transparent;
+  --icon-button-border-width: 0;
+  --t-control-height-sm: var(
+    --t-nav-collapse-size,
+    var(--t-nav-tabs-height, ${themeCssVariables.spacing[8]})
   );
-  box-sizing: border-box;
-  color: ${themeCssVariables.font.color.tertiary};
-  cursor: pointer;
-  display: flex;
-  flex-shrink: 0;
   height: var(
     --t-nav-collapse-size,
     var(--t-nav-tabs-height, ${themeCssVariables.spacing[8]})
   );
-  justify-content: center;
-  user-select: none;
+  min-width: var(
+    --t-nav-collapse-size,
+    var(--t-nav-tabs-height, ${themeCssVariables.spacing[8]})
+  );
   width: var(
     --t-nav-collapse-size,
     var(--t-nav-tabs-height, ${themeCssVariables.spacing[8]})
   );
-
-  &:hover {
-    background: ${themeCssVariables.background.transparent.lighter};
-  }
-
-  svg.tabler-icon {
-    stroke-width: var(
-      --t-nav-tabs-active-icon-stroke,
-      var(--t-icon-stroke-md)
-    );
-  }
 `;
 
 type NavigationDrawerCollapseButtonProps = {
@@ -56,7 +42,6 @@ export const NavigationDrawerCollapseButton = ({
   className,
   direction = 'left',
 }: NavigationDrawerCollapseButtonProps) => {
-  const { theme } = useContext(ThemeContext);
   const [isNavigationDrawerExpanded, setIsNavigationDrawerExpanded] =
     useAtomState(isNavigationDrawerExpandedState);
   const setNavigationDrawerActiveTab = useSetAtomState(
@@ -75,26 +60,15 @@ export const NavigationDrawerCollapseButton = ({
     setIsNavigationDrawerExpanded((previousIsExpanded) => !previousIsExpanded);
   };
 
-  const handleKeyDown = (event: KeyboardEvent) => {
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault();
-      handleClick();
-    }
-  };
-
   return (
-    <StyledCollapseButton
+    <StyledCollapseIconButton
       className={className}
-      role="button"
-      tabIndex={0}
-      aria-label={
-        isNavigationDrawerExpanded ? t`Collapse` : t`Expand`
-      }
-      data-nav-tab-icon="true"
+      Icon={CollapseIcon}
+      size="small"
+      variant="secondary"
+      accent="default"
+      ariaLabel={isNavigationDrawerExpanded ? t`Collapse` : t`Expand`}
       onClick={handleClick}
-      onKeyDown={handleKeyDown}
-    >
-      <CollapseIcon size={theme.icon.size.md} color="currentColor" />
-    </StyledCollapseButton>
+    />
   );
 };

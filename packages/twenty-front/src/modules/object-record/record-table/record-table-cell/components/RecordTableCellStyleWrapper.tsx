@@ -2,7 +2,7 @@ import { type DraggableProvidedDragHandleProps } from '@hello-pangea/dnd';
 import { cx } from '@linaria/core';
 import { styled } from '@linaria/react';
 import { type ReactNode, useContext } from 'react';
-import { ThemeContext } from 'twenty-ui/theme-constants';
+import { ThemeContext, themeCssVariables } from 'twenty-ui/theme-constants';
 
 export const StyledCell = styled.div<{
   backgroundColor: string;
@@ -22,6 +22,7 @@ export const StyledCell = styled.div<{
     hasRightBorder ? `1px solid ${borderColor}` : 'none'};
 
   color: ${({ fontColor }) => fontColor};
+  font-size: ${themeCssVariables.font.size.md};
 
   padding: 0;
 

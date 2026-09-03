@@ -25,6 +25,7 @@ export type CommandMenuButtonProps = {
   to?: string;
   disabled?: boolean;
   isPrimaryAction?: boolean;
+  isIconOnly?: boolean;
 };
 
 export const CommandMenuButton = ({
@@ -33,6 +34,7 @@ export const CommandMenuButton = ({
   to,
   disabled = false,
   isPrimaryAction = false,
+  isIconOnly = false,
 }: CommandMenuButtonProps) => {
   const resolvedLabel = getCommandMenuItemLabel(command.label);
 
@@ -41,22 +43,12 @@ export const CommandMenuButton = ({
     : undefined;
 
   const buttonAccent = command.isPrimaryCTA ? 'blue' : 'default';
+  const shouldRenderIconOnly =
+    isIconOnly === true || resolvedShortLabel === undefined;
 
   return (
     <>
-      {resolvedShortLabel !== undefined ? (
-        <Button
-          Icon={command.Icon}
-          size="small"
-          variant={isPrimaryAction ? 'primary' : 'secondary'}
-          accent={isPrimaryAction ? 'blue' : buttonAccent}
-          to={to}
-          onClick={onClick}
-          disabled={disabled}
-          title={resolvedShortLabel}
-          ariaLabel={resolvedLabel}
-        />
-      ) : (
+      {shouldRenderIconOnly ? (
         <div id={`command-menu-item-entry-${command.key}`} key={command.key}>
           <IconButton
             Icon={command.Icon}
@@ -79,6 +71,18 @@ export const CommandMenuButton = ({
             />
           </StyledWrapper>
         </div>
+      ) : (
+        <Button
+          Icon={command.Icon}
+          size="small"
+          variant={isPrimaryAction ? 'primary' : 'secondary'}
+          accent={isPrimaryAction ? 'blue' : buttonAccent}
+          to={to}
+          onClick={onClick}
+          disabled={disabled}
+          title={resolvedShortLabel}
+          ariaLabel={resolvedLabel}
+        />
       )}
     </>
   );

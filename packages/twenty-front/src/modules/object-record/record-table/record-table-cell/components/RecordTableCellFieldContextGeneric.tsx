@@ -11,6 +11,7 @@ import { getJunctionConfig } from '@/object-record/record-field/ui/utils/junctio
 import { getTargetObjectMetadataIdsFromField } from '@/object-record/record-field/ui/utils/junction/getTargetObjectMetadataIdsFromField';
 import { hasJunctionConfig } from '@/object-record/record-field/ui/utils/junction/hasJunctionConfig';
 import { useRecordIndexContextOrThrow } from '@/object-record/record-index/contexts/RecordIndexContext';
+import { getRecordTableChipMaxWidth } from '@/object-record/record-table/constants/RecordTableColumnWidthExtra';
 import { useRecordTableContextOrThrow } from '@/object-record/record-table/contexts/RecordTableContext';
 import { useRecordTableRowContextOrThrow } from '@/object-record/record-table/contexts/RecordTableRowContext';
 import { RecordTableUpdateContext } from '@/object-record/record-table/contexts/RecordTableUpdateContext';
@@ -18,6 +19,7 @@ import { isRecordTableCellsNonEditableComponentState } from '@/object-record/rec
 import { useAtomComponentStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomComponentStateValue';
 import { useContext, type ReactNode } from 'react';
 import { isDefined } from 'twenty-shared/utils';
+
 type RecordTableCellFieldContextGenericProps = {
   recordField: RecordField;
   children: ReactNode;
@@ -117,6 +119,7 @@ export const RecordTableCellFieldContextGeneric = ({
           objectMetadataItem,
         }),
         displayedMaxRows: 1,
+        maxWidth: getRecordTableChipMaxWidth(recordField.size),
         isRecordFieldReadOnly:
           isRecordTableCellsNonEditable ||
           isRecordFieldReadOnly({

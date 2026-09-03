@@ -8,7 +8,7 @@ const StyledOuterContainer = styled.div`
   display: flex;
   height: 100%;
   overflow: hidden;
-  padding-left: 8px;
+  padding-left: ${themeCssVariables.table.horizontalCellPadding};
   width: 100%;
 `;
 
@@ -19,6 +19,19 @@ const StyledInnerContainer = styled.div`
   overflow: hidden;
   white-space: nowrap;
   width: 100%;
+
+  a:has([data-testid='chip']) {
+    display: inline-flex;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  [data-testid='chip'] {
+    box-sizing: border-box;
+    height: calc(var(--t-avatar-size-sm) + 2 * var(--t-spacing-1));
+    max-width: 100%;
+    overflow: visible;
+  }
 `;
 
 const StyledEmptyPlaceholderField = styled.div`

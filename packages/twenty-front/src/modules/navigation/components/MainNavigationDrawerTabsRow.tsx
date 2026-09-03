@@ -1,15 +1,17 @@
 import { styled } from '@linaria/react';
 import { t } from '@lingui/core/macro';
+import { useContext } from 'react';
 import {
   type IconComponent,
   IconComment,
-  IconCommentFilled,
   IconHome,
-  IconHomeFilled,
 } from 'twenty-ui/icon';
-import { ThemeContext, themeCssVariables } from 'twenty-ui/theme-constants';
-
-import { useContext } from 'react';
+import {
+  MOBILE_VIEWPORT,
+  ThemeContext,
+  themeCssVariables,
+} from 'twenty-ui/theme-constants';
+import { useIsMobile } from 'twenty-ui/utilities';
 
 import { agentChatThreadSearchQueryState } from '@/ai/states/agentChatThreadSearchQueryState';
 import { useHasPermissionFlag } from '@/settings/roles/hooks/useHasPermissionFlag';
@@ -22,6 +24,11 @@ import {
 import { useAtomState } from '@/ui/utilities/state/jotai/hooks/useAtomState';
 import { useSetAtomState } from '@/ui/utilities/state/jotai/hooks/useSetAtomState';
 import { PermissionFlagType } from '~/generated-metadata/graphql';
+
+const StyledTabsCollapseHost = styled.div`
+  flex: 0 0 auto;
+  width: fit-content;
+`;
 
 const StyledTabsList = styled.div`
   align-items: stretch;
@@ -40,7 +47,7 @@ const StyledTabsList = styled.div`
   flex-shrink: 0;
   gap: var(--t-nav-tabs-gap, ${themeCssVariables.spacing[0.5]});
   height: var(--t-nav-tabs-height, ${themeCssVariables.spacing[7]});
-  padding: var(--t-nav-tabs-padding, 3px);
+  padding: var(--t-nav-tabs-padding, 6px);
   width: var(--t-nav-tabs-width, ${themeCssVariables.spacing[18]});
 `;
 
@@ -53,9 +60,13 @@ const StyledTabWrapper = styled.div<{ isActive: boolean }>`
   border-radius: var(
     --t-nav-tabs-inner-radius,
     calc(
-      var(--t-nav-tabs-radius, ${themeCssVariables.border.radius.pill}) - 3px
+      var(--t-nav-tabs-radius, ${themeCssVariables.border.radius.pill}) - 6px
     )
   );
+  box-shadow: ${({ isActive }) =>
+    isActive
+      ? `var(--t-nav-tabs-active-shadow, ${themeCssVariables.boxShadow.light})`
+      : 'none'};
   box-sizing: border-box;
   color: ${({ isActive }) =>
     isActive
@@ -64,7 +75,7 @@ const StyledTabWrapper = styled.div<{ isActive: boolean }>`
   cursor: pointer;
   display: flex;
   flex: var(--t-nav-tab-flex, 1);
-  font-size: ${themeCssVariables.font.size.sm};
+  font-size: var(--t-nav-tabs-font-size, ${themeCssVariables.font.size.md});
   font-weight: ${({ isActive }) =>
     isActive
       ? `var(--t-tab-active-font-weight, ${themeCssVariables.font.weight.semiBold})`
@@ -73,7 +84,9 @@ const StyledTabWrapper = styled.div<{ isActive: boolean }>`
   height: var(--t-nav-tab-size, 100%);
   justify-content: center;
   min-width: 0;
+  padding-inline: var(--t-nav-tab-padding-x, ${themeCssVariables.spacing[2]});
   position: relative;
+  white-space: nowrap;
   width: auto;
 
   &::after {
@@ -121,6 +134,10 @@ const StyledTabLabel = styled.span`
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+
+  @media (max-width: ${MOBILE_VIEWPORT}px) {
+    display: none;
+  }
 `;
 
 type MainNavigationDrawerTabsRowProps = {
@@ -131,10 +148,10 @@ type MainNavigationDrawerTabsRowProps = {
 
 export const MainNavigationDrawerTabsRow = ({
   NavigationMenuTabIcon = IconHome,
-  NavigationMenuTabActiveIcon = IconHomeFilled,
   navigationMenuTabLabel = t`Home`,
 }: MainNavigationDrawerTabsRowProps) => {
   const { theme } = useContext(ThemeContext);
+  const isMobile = useIsMobile();
   const [navigationDrawerActiveTab, setNavigationDrawerActiveTab] =
     useAtomState(navigationDrawerActiveTabState);
   const setSearchQuery = useSetAtomState(agentChatThreadSearchQueryState);
@@ -144,10 +161,8 @@ export const MainNavigationDrawerTabsRow = ({
     navigationDrawerActiveTab === NAVIGATION_DRAWER_TABS.NAVIGATION_MENU;
   const isChatTabActive =
     navigationDrawerActiveTab === NAVIGATION_DRAWER_TABS.AI_CHAT_HISTORY;
-  const NavigationMenuIcon = isNavigationMenuTabActive
-    ? NavigationMenuTabActiveIcon
-    : NavigationMenuTabIcon;
-  const ChatTabIcon = isChatTabActive ? IconCommentFilled : IconComment;
+  const NavigationMenuIcon = NavigationMenuTabIcon;
+  const ChatTabIcon = IconComment;
 
   if (!hasAiPermission) {
     return null;
@@ -174,40 +189,44 @@ export const MainNavigationDrawerTabsRow = ({
     };
 
   return (
-    <NavigationDrawerAnimatedCollapseWrapper expandToFullWidth>
-      <StyledTabsList role="tablist" aria-label={t`Navigation tabs`}>
-        <StyledTabWrapper
-          isActive={isNavigationMenuTabActive}
-          role="tab"
-          aria-selected={isNavigationMenuTabActive}
-          aria-label={navigationMenuTabLabel}
-          tabIndex={isNavigationMenuTabActive ? 0 : -1}
-          onClick={handleTabClick(NAVIGATION_DRAWER_TABS.NAVIGATION_MENU)}
-          onKeyDown={handleTabKeyDown(NAVIGATION_DRAWER_TABS.NAVIGATION_MENU)}
-        >
-          <StyledTabIcon>
-            <NavigationMenuIcon
-              size={theme.icon.size.md}
-              color="currentColor"
-            />
-          </StyledTabIcon>
-          <StyledTabLabel>{navigationMenuTabLabel}</StyledTabLabel>
-        </StyledTabWrapper>
-        <StyledTabWrapper
-          isActive={isChatTabActive}
-          role="tab"
-          aria-selected={isChatTabActive}
-          aria-label={chatTabLabel}
-          tabIndex={isChatTabActive ? 0 : -1}
-          onClick={handleTabClick(NAVIGATION_DRAWER_TABS.AI_CHAT_HISTORY)}
-          onKeyDown={handleTabKeyDown(NAVIGATION_DRAWER_TABS.AI_CHAT_HISTORY)}
-        >
-          <StyledTabIcon>
-            <ChatTabIcon size={theme.icon.size.md} color="currentColor" />
-          </StyledTabIcon>
-          <StyledTabLabel>{chatTabLabel}</StyledTabLabel>
-        </StyledTabWrapper>
-      </StyledTabsList>
-    </NavigationDrawerAnimatedCollapseWrapper>
+    <StyledTabsCollapseHost>
+      <NavigationDrawerAnimatedCollapseWrapper>
+        <StyledTabsList role="tablist" aria-label={t`Navigation tabs`}>
+          <StyledTabWrapper
+            isActive={isNavigationMenuTabActive}
+            role="tab"
+            aria-selected={isNavigationMenuTabActive}
+            aria-label={navigationMenuTabLabel}
+            tabIndex={isNavigationMenuTabActive ? 0 : -1}
+            onClick={handleTabClick(NAVIGATION_DRAWER_TABS.NAVIGATION_MENU)}
+            onKeyDown={handleTabKeyDown(NAVIGATION_DRAWER_TABS.NAVIGATION_MENU)}
+          >
+            <StyledTabIcon>
+              <NavigationMenuIcon
+                size={theme.icon.size.md}
+                color="currentColor"
+              />
+            </StyledTabIcon>
+            {!isMobile && (
+              <StyledTabLabel>{navigationMenuTabLabel}</StyledTabLabel>
+            )}
+          </StyledTabWrapper>
+          <StyledTabWrapper
+            isActive={isChatTabActive}
+            role="tab"
+            aria-selected={isChatTabActive}
+            aria-label={chatTabLabel}
+            tabIndex={isChatTabActive ? 0 : -1}
+            onClick={handleTabClick(NAVIGATION_DRAWER_TABS.AI_CHAT_HISTORY)}
+            onKeyDown={handleTabKeyDown(NAVIGATION_DRAWER_TABS.AI_CHAT_HISTORY)}
+          >
+            <StyledTabIcon>
+              <ChatTabIcon size={theme.icon.size.md} color="currentColor" />
+            </StyledTabIcon>
+            {!isMobile && <StyledTabLabel>{chatTabLabel}</StyledTabLabel>}
+          </StyledTabWrapper>
+        </StyledTabsList>
+      </NavigationDrawerAnimatedCollapseWrapper>
+    </StyledTabsCollapseHost>
   );
 };

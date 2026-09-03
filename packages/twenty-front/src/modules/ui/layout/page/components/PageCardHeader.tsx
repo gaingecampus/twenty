@@ -74,6 +74,7 @@ const StyledTitle = styled.div<{ titleColor?: string }>`
   gap: ${themeCssVariables.spacing[1]};
   letter-spacing: var(--t-heading-letter-spacing, 0);
   min-width: 0;
+  overflow: hidden;
 `;
 
 const StyledHeaderIcon = styled.div`
@@ -97,6 +98,7 @@ const StyledCenterContent = styled.div`
   justify-self: var(--t-page-header-center-justify, center);
   max-width: 100%;
   min-width: 0;
+  width: 100%;
 `;
 
 const StyledRight = styled.div<{ headerLayout: HeaderLayout }>`

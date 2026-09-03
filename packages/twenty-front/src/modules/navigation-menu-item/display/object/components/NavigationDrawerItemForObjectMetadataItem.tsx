@@ -178,6 +178,7 @@ export const NavigationDrawerItemForObjectMetadataItem = ({
 
   return (
     <NavigationDrawerItem
+      className={isRecord ? 'navigation-drawer-item-avatar' : undefined}
       label={label}
       secondaryLabel={secondaryLabel}
       to={

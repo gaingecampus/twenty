@@ -1,10 +1,11 @@
 .modal {
   display: flex;
   flex-direction: column;
-  box-shadow: var(--t-box-shadow-strong);
-  background: var(--t-background-primary);
+  box-shadow: var(--t-overlay-shadow, var(--t-box-shadow-strong));
+  background: var(--t-overlay-bg, var(--t-background-primary));
+  border: var(--t-overlay-border, none);
   color: var(--t-font-color-primary);
-  border-radius: var(--t-border-radius-md);
+  border-radius: var(--t-overlay-radius, var(--t-border-radius-md));
   overflow-x: hidden;
   overflow-y: auto;
   z-index: var(--modal-z-index, 40);

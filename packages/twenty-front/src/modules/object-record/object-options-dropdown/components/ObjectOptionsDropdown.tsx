@@ -12,7 +12,10 @@ import { DROPDOWN_OFFSET_Y } from '@/ui/layout/dropdown/constants/DropdownOffset
 import { isDropdownOpenComponentState } from '@/ui/layout/dropdown/states/isDropdownOpenComponentState';
 import { useAtomComponentStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomComponentStateValue';
 import { type ViewType } from '@/views/types/ViewType';
-import { Trans } from '@lingui/react/macro';
+import { t } from '@lingui/core/macro';
+import { useContext } from 'react';
+import { IconSettings } from 'twenty-ui/icon';
+import { ThemeContext } from 'twenty-ui/theme-constants';
 
 type ObjectOptionsDropdownProps = {
   viewType: ViewType;
@@ -32,6 +35,8 @@ export const ObjectOptionsDropdown = ({
     isDropdownOpenComponentState,
     OBJECT_OPTIONS_DROPDOWN_ID,
   );
+  const { theme } = useContext(ThemeContext);
+  const optionsLabel = t`Options`;
 
   const {
     handleRecordGroupOrderChangeWithModal,
@@ -46,8 +51,13 @@ export const ObjectOptionsDropdown = ({
         dropdownId={OBJECT_OPTIONS_DROPDOWN_ID}
         dropdownOffset={{ y: DROPDOWN_OFFSET_Y }}
         clickableComponent={
-          <StyledHeaderDropdownButton isUnfolded={isDropdownOpen}>
-            <Trans>Options</Trans>
+          <StyledHeaderDropdownButton
+            isUnfolded={isDropdownOpen}
+            aria-label={optionsLabel}
+            title={optionsLabel}
+            data-toolbar-chip="icon"
+          >
+            <IconSettings size={theme.icon.size.md} />
           </StyledHeaderDropdownButton>
         }
         onClose={handleResetContent}

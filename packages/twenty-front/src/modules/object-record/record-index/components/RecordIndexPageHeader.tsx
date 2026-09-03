@@ -17,7 +17,6 @@ import { isNonEmptyString } from '@sniptt/guards';
 import { styled } from '@linaria/react';
 import { t } from '@lingui/core/macro';
 import { isDefined } from 'twenty-shared/utils';
-import { IconInfoCircle } from 'twenty-ui/icon';
 import { AppTooltip, TooltipDelay } from 'twenty-ui/surfaces';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 
@@ -38,18 +37,8 @@ const StyledSelectedRecordsCount = styled.div`
 `;
 
 const StyledTitleWithDescription = styled.div`
-  align-items: center;
-  display: flex;
-  gap: ${themeCssVariables.spacing[1]};
+  cursor: help;
   min-width: 0;
-`;
-
-const StyledInfoIcon = styled(IconInfoCircle)`
-  color: ${themeCssVariables.font.color.tertiary};
-  cursor: default;
-  flex-shrink: 0;
-  height: calc(var(--t-icon-size-md) * 1px);
-  width: calc(var(--t-icon-size-md) * 1px);
 `;
 
 export const RecordIndexPageHeader = () => {
@@ -89,9 +78,8 @@ export const RecordIndexPageHeader = () => {
 
   const titleWithDescription =
     hasDescription && isDefined(tooltipId) ? (
-      <StyledTitleWithDescription>
+      <StyledTitleWithDescription id={tooltipId}>
         {pageHeaderTitle}
-        <StyledInfoIcon id={tooltipId} />
         <AppTooltip
           anchorSelect={`#${tooltipId}`}
           content={description}
@@ -126,8 +114,8 @@ export const RecordIndexPageHeader = () => {
       actionButton={
         isDefined(contextStoreCurrentViewId) ? (
           <>
-            <RecordIndexInlineEditModeButton />
             <RecordIndexCommandMenu />
+            <RecordIndexInlineEditModeButton />
             {!isLayoutCustomizationModeEnabled && <SidePanelToggleButton />}
           </>
         ) : undefined

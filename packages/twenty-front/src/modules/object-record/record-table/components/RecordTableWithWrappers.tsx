@@ -52,10 +52,13 @@ const StyledTableAndPagination = styled.div`
 `;
 
 const StyledScrollArea = styled.div`
+  background: ${themeCssVariables.background.primary};
+  border-radius: var(--t-table-radius, 0);
   display: flex;
   flex: 1;
   flex-direction: column;
   min-height: 0;
+  overflow: hidden;
 `;
 
 type RecordTableWithWrappersProps = {

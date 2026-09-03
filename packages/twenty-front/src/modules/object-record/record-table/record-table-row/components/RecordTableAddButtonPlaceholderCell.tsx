@@ -5,6 +5,7 @@ import { styled } from '@linaria/react';
 import { cx } from '@linaria/core';
 
 const StyledPlaceholderAddButtonCell = styled.div`
+  box-sizing: border-box;
   height: ${RECORD_TABLE_ROW_HEIGHT}px;
   width: ${RECORD_TABLE_COLUMN_ADD_COLUMN_BUTTON_WIDTH}px;
 `;

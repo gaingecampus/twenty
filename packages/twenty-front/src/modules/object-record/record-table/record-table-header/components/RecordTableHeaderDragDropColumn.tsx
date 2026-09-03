@@ -24,6 +24,7 @@ const StyledDragDropHeaderCell = styled.div<{
       ? `1px solid ${themeCssVariables.background.primary}`
       : 'none'};
   cursor: pointer;
+  height: ${RECORD_TABLE_ROW_HEIGHT}px;
   max-height: ${RECORD_TABLE_ROW_HEIGHT}px;
   max-width: ${RECORD_TABLE_COLUMN_DRAG_AND_DROP_WIDTH}px;
   min-height: ${RECORD_TABLE_ROW_HEIGHT}px;

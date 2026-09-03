@@ -52,9 +52,11 @@ const StyledNewChatButtonWrapper = styled.div<{
           ${themeCssVariables.spacing[6]}
         )`};
   justify-content: center;
+  flex: var(--t-nav-new-chat-flex, 0 0 auto);
+  margin-left: ${({ isExpanded }) => (isExpanded ? 'auto' : '0')};
   min-width: ${({ isExpanded }) =>
     isExpanded
-      ? 'var(--t-nav-new-chat-min-width, 0)'
+      ? 'var(--t-nav-new-chat-min-width, auto)'
       : `var(
           --t-nav-new-chat-collapsed-size,
           ${themeCssVariables.spacing[6]}
@@ -68,7 +70,7 @@ const StyledNewChatButtonWrapper = styled.div<{
         )`};
   width: ${({ isExpanded }) =>
     isExpanded
-      ? '100%'
+      ? 'var(--t-nav-new-chat-width, auto)'
       : `var(
           --t-nav-new-chat-collapsed-size,
           ${themeCssVariables.spacing[6]}
@@ -81,12 +83,12 @@ const StyledNewChatButton = styled.div`
   color: var(--t-nav-new-chat-color, ${themeCssVariables.font.color.secondary});
   cursor: pointer;
   display: flex;
-  font-size: ${themeCssVariables.font.size.sm};
+  font-size: var(--t-nav-new-chat-font-size, ${themeCssVariables.font.size.md});
   font-weight: var(
     --t-nav-new-chat-font-weight,
     ${themeCssVariables.font.weight.medium}
   );
-  gap: ${themeCssVariables.spacing[1]};
+  gap: var(--t-button-gap, ${themeCssVariables.spacing[1]});
   height: 100%;
   justify-content: center;
   min-width: 0;
@@ -98,6 +100,7 @@ const StyledNewChatButton = styled.div`
   transition:
     background calc(${themeCssVariables.animation.duration.fast} * 1s) ease,
     color calc(${themeCssVariables.animation.duration.fast} * 1s) ease;
+  white-space: nowrap;
   width: 100%;
 
   &:hover {
@@ -162,7 +165,9 @@ export const MainNavigationDrawerNewChatButton = () => {
             color="currentColor"
           />
         </StyledNewChatIcon>
-        {isExpanded && <OverflowingTextWithTooltip text={t`New chat`} />}
+        {isExpanded && !isMobile && (
+          <OverflowingTextWithTooltip text={t`New chat`} />
+        )}
       </StyledNewChatButton>
     </StyledNewChatButtonWrapper>
   );

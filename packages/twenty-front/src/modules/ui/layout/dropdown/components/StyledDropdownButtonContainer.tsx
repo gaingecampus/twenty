@@ -40,7 +40,7 @@ export const StyledDropdownButtonContainer = styled.div<StyledDropdownButtonProp
   &:hover {
     background: ${({ isUnfolded, transparentBackground }) =>
       transparentBackground
-        ? 'transparent'
+        ? `var(--t-control-hover-bg, ${themeCssVariables.background.transparent.light})`
         : isUnfolded
           ? `var(--t-toolbar-chip-active-bg, ${themeCssVariables.background.transparent.medium})`
           : `var(--t-toolbar-chip-hover-bg, ${themeCssVariables.background.transparent.light})`};

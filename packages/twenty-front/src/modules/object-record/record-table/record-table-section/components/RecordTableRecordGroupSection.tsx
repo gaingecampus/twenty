@@ -19,6 +19,7 @@ import { RecordTableGroupSectionLastDynamicFillingCell } from '@/object-record/r
 
 import { RECORD_TABLE_COLUMN_CHECKBOX_WIDTH } from '@/object-record/record-table/constants/RecordTableColumnCheckboxWidth';
 import { RECORD_TABLE_COLUMN_MIN_WIDTH } from '@/object-record/record-table/constants/RecordTableColumnMinWidth';
+import { getRecordTableColumnDisplayWidth } from '@/object-record/record-table/constants/RecordTableColumnWidthExtra';
 import { RECORD_TABLE_LABEL_IDENTIFIER_COLUMN_WIDTH_ON_MOBILE } from '@/object-record/record-table/constants/RecordTableLabelIdentifierColumnWidthOnMobile';
 
 import { recordIndexAggregateDisplayLabelComponentState } from '@/object-record/record-index/states/recordIndexAggregateDisplayLabelComponentState';
@@ -33,7 +34,6 @@ import {
   filterOutByProperty,
   findByProperty,
   isDefined,
-  sumByProperty,
 } from 'twenty-shared/utils';
 import { IconChevronDown } from 'twenty-ui/icon';
 import { AnimatedLightIconButton } from 'twenty-ui/input';
@@ -147,14 +147,16 @@ export const RecordTableRecordGroupSection = () => {
 
   const isMobile = useIsMobile();
 
-  const widthOfLabelIdentifierRecordField = isMobile
-    ? RECORD_TABLE_LABEL_IDENTIFIER_COLUMN_WIDTH_ON_MOBILE
-    : (visibleRecordFields.find(
-        findByProperty(
-          'fieldMetadataItemId',
-          labelIdentifierFieldMetadataItem?.id ?? '',
-        ),
-      )?.size ?? RECORD_TABLE_COLUMN_MIN_WIDTH);
+  const widthOfLabelIdentifierRecordField = getRecordTableColumnDisplayWidth(
+    isMobile
+      ? RECORD_TABLE_LABEL_IDENTIFIER_COLUMN_WIDTH_ON_MOBILE
+      : (visibleRecordFields.find(
+          findByProperty(
+            'fieldMetadataItemId',
+            labelIdentifierFieldMetadataItem?.id ?? '',
+          ),
+        )?.size ?? RECORD_TABLE_COLUMN_MIN_WIDTH),
+  );
 
   const [
     isRecordGroupTableSectionToggled,
@@ -176,13 +178,14 @@ export const RecordTableRecordGroupSection = () => {
   );
 
   const sumOfWidthOfVisibleRecordFieldsAfterLabelIdentifierField =
-    visibleRecordFieldsWithoutLabelIdentifier.reduce(sumByProperty('size'), 0);
-
-  const sumOfBorderWidthForFields = visibleRecordFields.length;
+    visibleRecordFieldsWithoutLabelIdentifier.reduce(
+      (sum, recordField) =>
+        sum + getRecordTableColumnDisplayWidth(recordField.size),
+      0,
+    );
 
   const fieldsPlaceholderWidth =
-    sumOfWidthOfVisibleRecordFieldsAfterLabelIdentifierField +
-    sumOfBorderWidthForFields;
+    sumOfWidthOfVisibleRecordFieldsAfterLabelIdentifierField;
 
   if (shouldHide) {
     return null;

@@ -70,6 +70,7 @@ export const RecordTableColumnHeadWithDropdown = ({
       onClose={handleDropdownClose}
       dropdownId={dropdownId}
       clickableComponent={<RecordTableColumnHead recordField={recordField} />}
+      clickableComponentWidth="100%"
       dropdownComponents={
         currentView === 'editAggregateColumn' ? (
           <DropdownContent>

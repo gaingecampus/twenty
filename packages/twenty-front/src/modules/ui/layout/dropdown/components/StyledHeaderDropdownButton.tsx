@@ -38,4 +38,13 @@ export const StyledHeaderDropdownButton = styled.button<StyledDropdownButtonProp
         ? `var(--t-toolbar-chip-active-bg, ${themeCssVariables.background.transparent.medium})`
         : `var(--t-toolbar-chip-hover-bg, ${themeCssVariables.background.transparent.light})`};
   }
+
+  &[data-toolbar-chip='icon'] {
+    justify-content: center;
+    padding-inline: var(
+      --t-toolbar-chip-icon-padding-x,
+      ${themeCssVariables.spacing[1]}
+    );
+    width: var(--t-toolbar-chip-icon-size, var(--t-toolbar-chip-height, auto));
+  }
 `;

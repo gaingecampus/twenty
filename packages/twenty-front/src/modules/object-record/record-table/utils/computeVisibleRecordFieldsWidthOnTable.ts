@@ -1,6 +1,6 @@
 import { type RecordField } from '@/object-record/record-field/types/RecordField';
+import { getRecordTableColumnDisplayWidth } from '@/object-record/record-table/constants/RecordTableColumnWidthExtra';
 import { RECORD_TABLE_LABEL_IDENTIFIER_COLUMN_WIDTH_ON_MOBILE } from '@/object-record/record-table/constants/RecordTableLabelIdentifierColumnWidthOnMobile';
-import { sumByProperty } from 'twenty-shared/utils';
 
 export const computeVisibleRecordFieldsWidthOnTable = ({
   shouldCompactFirstColumn,
@@ -12,14 +12,21 @@ export const computeVisibleRecordFieldsWidthOnTable = ({
   const visibleRecordFieldsWithoutFirst = visibleRecordFields.slice(1);
 
   const sumWithoutFirstField = visibleRecordFieldsWithoutFirst.reduce(
-    sumByProperty('size'),
+    (sum, recordField) =>
+      sum + getRecordTableColumnDisplayWidth(recordField.size),
     0,
   );
 
-  const sumWithAllFields = visibleRecordFields.reduce(sumByProperty('size'), 0);
+  const sumWithAllFields = visibleRecordFields.reduce(
+    (sum, recordField) =>
+      sum + getRecordTableColumnDisplayWidth(recordField.size),
+    0,
+  );
 
   const sumForCompactedFirstColumn =
-    RECORD_TABLE_LABEL_IDENTIFIER_COLUMN_WIDTH_ON_MOBILE + sumWithoutFirstField;
+    getRecordTableColumnDisplayWidth(
+      RECORD_TABLE_LABEL_IDENTIFIER_COLUMN_WIDTH_ON_MOBILE,
+    ) + sumWithoutFirstField;
 
   const sumForNoCompactColumn = sumWithAllFields;
 

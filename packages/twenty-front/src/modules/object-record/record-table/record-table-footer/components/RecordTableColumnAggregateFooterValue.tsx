@@ -11,7 +11,7 @@ const StyledText = styled.span`
   display: flex;
   flex-grow: 1;
   gap: 4px;
-  height: 20px;
+  height: 100%;
   overflow: hidden;
   padding-left: ${themeCssVariables.spacing[2]};
   text-overflow: ellipsis;

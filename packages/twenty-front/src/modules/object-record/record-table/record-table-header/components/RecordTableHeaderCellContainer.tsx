@@ -16,9 +16,13 @@ const StyledHeaderCell = styled.div<{
   border-right: 1px solid ${themeCssVariables.border.color.light};
 
   color: ${themeCssVariables.font.color.tertiary};
+  font-size: ${themeCssVariables.font.size.md};
+  font-weight: ${themeCssVariables.font.weight.medium};
 
+  align-items: center;
   cursor: ${({ isResizing, isReadOnly }) =>
     isReadOnly ? 'default' : isResizing ? 'col-resize' : 'pointer'};
+  display: flex;
   height: ${RECORD_TABLE_ROW_HEIGHT}px;
 
   max-height: ${RECORD_TABLE_ROW_HEIGHT}px;

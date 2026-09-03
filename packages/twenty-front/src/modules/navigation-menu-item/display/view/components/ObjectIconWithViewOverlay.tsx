@@ -14,6 +14,11 @@ const StyledCompositeContainer = styled.div`
   justify-content: center;
   position: relative;
   width: 16px;
+
+  [data-nav-expanded='false'] & {
+    height: var(--t-nav-icon-tile-size, 24px);
+    width: var(--t-nav-icon-tile-size, 24px);
+  }
 `;
 
 const StyledObjectIconWrapper = styled.div<{
@@ -21,9 +26,12 @@ const StyledObjectIconWrapper = styled.div<{
   $borderColor?: string;
 }>`
   align-items: center;
-  background-color: ${({ $backgroundColor }) => $backgroundColor};
+  background-color: ${({ $backgroundColor }) =>
+    `var(--t-nav-composite-object-bg, ${$backgroundColor})`};
   border: ${({ $borderColor }) =>
-    $borderColor ? `1px solid ${$borderColor}` : 'none'};
+    $borderColor
+      ? `var(--t-nav-composite-object-border, 1px solid ${$borderColor})`
+      : 'var(--t-nav-composite-object-border, none)'};
   border-radius: 4px;
   box-sizing: border-box;
   display: flex;
@@ -34,7 +42,8 @@ const StyledObjectIconWrapper = styled.div<{
 
 const StyledViewOverlay = styled.div<{ $backgroundColor: string }>`
   align-items: center;
-  background-color: ${({ $backgroundColor }) => $backgroundColor};
+  background-color: ${({ $backgroundColor }) =>
+    `var(--t-nav-composite-view-bg, ${$backgroundColor})`};
   border-radius: 4px;
   bottom: -5px;
   display: flex;
@@ -43,6 +52,11 @@ const StyledViewOverlay = styled.div<{ $backgroundColor: string }>`
   position: absolute;
   right: -6px;
   width: 12px;
+
+  [data-nav-expanded='false'] & {
+    bottom: 0;
+    right: 0;
+  }
 `;
 
 export type ObjectIconWithViewOverlayProps = {

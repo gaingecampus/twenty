@@ -5,7 +5,7 @@ import { themeCssVariables } from 'twenty-ui/theme-constants';
 const StyledExternalContainer = styled.div<{
   maxHeight?: number;
 }>`
-  --padding: ${themeCssVariables.spacing[1]};
+  --padding: var(--t-overlay-padding, ${themeCssVariables.spacing[1]});
 
   align-items: flex-start;
   box-sizing: border-box;

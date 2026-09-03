@@ -19,21 +19,23 @@ import { Checkbox } from 'twenty-ui/input';
 const StyledContainer = styled.div`
   align-items: center;
   background-color: ${themeCssVariables.background.primary};
-  border-bottom: 1px solid ${themeCssVariables.border.color.light};
+  box-sizing: border-box;
   display: flex;
   height: ${RECORD_TABLE_ROW_HEIGHT}px;
   justify-content: center;
   min-width: 24px;
   padding-right: ${themeCssVariables.spacing[1]};
+  width: 100%;
 `;
 
 const StyledColumnHeaderCell = styled.div`
   background-color: ${themeCssVariables.background.primary};
-
+  border-bottom: 1px solid ${themeCssVariables.border.color.light};
+  box-sizing: border-box;
   cursor: pointer;
-
+  display: flex;
+  height: ${RECORD_TABLE_ROW_HEIGHT}px;
   max-height: ${RECORD_TABLE_ROW_HEIGHT}px;
-
   min-width: ${RECORD_TABLE_COLUMN_CHECKBOX_WIDTH}px;
 `;
 

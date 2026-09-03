@@ -301,8 +301,14 @@ $secondary-accents: (
     [data-variant='tertiary']
   )[data-inverted] {
   --btn-color: var(--t-font-color-inverted);
-  --btn-hover-bg: var(--t-background-transparent-light);
-  --btn-active-bg: var(--t-background-transparent-medium);
+  --btn-hover-bg: var(
+    --t-button-inverted-hover-bg,
+    var(--t-background-transparent-light)
+  );
+  --btn-active-bg: var(
+    --t-button-inverted-active-bg,
+    var(--t-background-transparent-medium)
+  );
 }
 
 .button[data-variant='secondary'][data-inverted] {

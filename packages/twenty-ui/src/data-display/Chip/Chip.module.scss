@@ -2,7 +2,7 @@
   --chip-horizontal-padding: var(--t-spacing-1);
   --chip-vertical-padding: var(--t-spacing-1);
 
-  // Height and max-width are sized against the content box.
+  // Large chips still size height against the content box.
   box-sizing: content-box;
   text-decoration: none;
   align-items: center;
@@ -29,7 +29,16 @@
 }
 
 .sizeSmall {
-  height: var(--t-spacing-3);
+  // Border-box so 24px avatars fit inside padding instead of overflowing a 20px pill.
+  box-sizing: border-box;
+  height: calc(
+    var(--t-avatar-size-sm) + 2 * var(--chip-vertical-padding)
+  );
+  overflow: visible;
+
+  &.hasMaxWidth {
+    max-width: var(--chip-max-width);
+  }
 }
 
 .accentTextPrimary {

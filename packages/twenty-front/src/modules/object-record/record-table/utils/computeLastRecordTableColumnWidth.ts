@@ -24,8 +24,6 @@ export const computeLastRecordTableColumnWidth = ({
     visibleRecordFields: recordFields,
   });
 
-  const widthOfBorders = recordFields.length + 1;
-
   const dragColumnWidth = isDragColumnHidden
     ? 0
     : RECORD_TABLE_COLUMN_DRAG_AND_DROP_WIDTH;
@@ -40,12 +38,12 @@ export const computeLastRecordTableColumnWidth = ({
     ? 0
     : RECORD_TABLE_COLUMN_ADD_COLUMN_BUTTON_WIDTH;
 
-  const fixedColumnsWidth =
-    leftColumnsWidth + addColumnButtonWidth + widthOfBorders;
-
   const remainingWidthToFill = Math.max(
     0,
-    tableWidth - fixedColumnsWidth - visibleRecordFieldsWidth,
+    tableWidth -
+      leftColumnsWidth -
+      addColumnButtonWidth -
+      visibleRecordFieldsWidth,
   );
 
   const lastColumnWidth = remainingWidthToFill;

@@ -46,7 +46,15 @@ const StyledAnimatedContainer = styled.div<{
   width: ${({ isExpanded }) =>
     isExpanded
       ? `var(${NAVIGATION_DRAWER_WIDTH_VAR})`
-      : `${NAVIGATION_DRAWER_COLLAPSED_WIDTH}px`};
+      : `var(--t-nav-collapsed-width, ${NAVIGATION_DRAWER_COLLAPSED_WIDTH}px)`};
+
+  &[data-nav-expanded='false'] [id^='scroll-wrapper-'] {
+    scrollbar-width: none;
+  }
+
+  &[data-nav-expanded='false'] [id^='scroll-wrapper-']::-webkit-scrollbar {
+    display: none;
+  }
 
   @media (max-width: ${MOBILE_VIEWPORT}px) {
     width: ${({ isExpanded }) => (isExpanded ? '100vw' : '0')};

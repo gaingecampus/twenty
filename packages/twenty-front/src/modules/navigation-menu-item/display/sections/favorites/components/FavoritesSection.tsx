@@ -143,7 +143,7 @@ export const FavoritesSection = () => {
         />
       }
     >
-      <StyledList>
+      <StyledList data-nav-section="favorites">
         {topLevelItems.map((item, index) => (
           <StyledListItemRow key={item.id}>
             {index === 0 ? (

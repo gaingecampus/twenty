@@ -12,6 +12,7 @@ export const RelationToOneFieldDisplay = () => {
     fieldDefinition,
     generateRecordChipData,
     foreignKeyFieldValue,
+    maxWidth,
   } = useRelationToOneFieldDisplay();
 
   const { disableChipClick, triggerEvent } = useContext(FieldContext);
@@ -37,6 +38,7 @@ export const RelationToOneFieldDisplay = () => {
       key={recordChipData.recordId}
       objectNameSingular={recordChipData.objectNameSingular}
       record={fieldValue}
+      maxWidth={maxWidth}
       forceDisableClick={
         isWorkspaceMemberFieldMetadataRelation || disableChipClick
       }

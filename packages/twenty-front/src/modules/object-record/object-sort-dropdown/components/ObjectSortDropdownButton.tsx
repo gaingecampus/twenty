@@ -30,10 +30,12 @@ import { useAtomComponentState } from '@/ui/utilities/state/jotai/hooks/useAtomC
 import { useAtomComponentStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomComponentStateValue';
 import { useSetAtomComponentState } from '@/ui/utilities/state/jotai/hooks/useSetAtomComponentState';
 import { useAtomFamilySelectorValue } from '@/ui/utilities/state/jotai/hooks/useAtomFamilySelectorValue';
-import { Trans, useLingui } from '@lingui/react/macro';
+import { useLingui } from '@lingui/react/macro';
+import { useContext } from 'react';
 import { findByProperty } from 'twenty-shared/utils';
-import { IconX, useIcons } from 'twenty-ui/icon';
+import { IconArrowsSort, IconX, useIcons } from 'twenty-ui/icon';
 import { MenuItem } from 'twenty-ui/navigation';
+import { ThemeContext } from 'twenty-ui/theme-constants';
 import { v4 } from 'uuid';
 import { ViewSortDirection } from '~/generated-metadata/graphql';
 
@@ -146,6 +148,8 @@ export const ObjectSortDropdownButton = () => {
   );
 
   const { t } = useLingui();
+  const { theme } = useContext(ThemeContext);
+  const sortLabel = t`Sort`;
 
   const selectableItemIdArray = [
     ...visibleFieldMetadataItems.map((item) => item.id),
@@ -171,8 +175,13 @@ export const ObjectSortDropdownButton = () => {
       dropdownOffset={{ y: 8 }}
       onOpen={handleDropdownOpen}
       clickableComponent={
-        <StyledHeaderDropdownButton isUnfolded={isDropdownOpen}>
-          <Trans>Sort</Trans>
+        <StyledHeaderDropdownButton
+          isUnfolded={isDropdownOpen}
+          aria-label={sortLabel}
+          title={sortLabel}
+          data-toolbar-chip="icon"
+        >
+          <IconArrowsSort size={theme.icon.size.md} />
         </StyledHeaderDropdownButton>
       }
       dropdownComponents={
