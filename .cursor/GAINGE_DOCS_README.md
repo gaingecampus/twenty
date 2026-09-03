@@ -17,7 +17,7 @@ GAINGE 포크 전용 문서입니다. upstream 파일은 **수정하지 않습�
 | [`.cursor/rules/000-fork-priority.mdc`](rules/000-fork-priority.mdc) | ❌ | Cursor에 단일 원본 위치 안내 |
 | [`.cursor/rules/001-fork-workflows.mdc`](rules/001-fork-workflows.mdc) | ❌ | `GAINGE_WORKFLOWS.md` 참조 |
 | [`.cursor/rules/002-fork-jira.mdc`](rules/002-fork-jira.mdc) | ❌ | CRM Jira 이슈·커밋 연결 규칙 요약 |
-| [`.cursor/hooks/inject-fork-context.sh`](../hooks/inject-fork-context.sh) | ❌ | 세션 시작 시 3개 파일 주입 |
+| [`.cursor/hooks/inject-fork-context.sh`](../hooks/inject-fork-context.sh) | ❌ | 세션 시작 시 포인터만 주입 |
 | [`CLAUDE.local.md`](../CLAUDE.local.md) | ❌ | Claude `@import` 연결 |
 
 ## 자동 로드 방식
@@ -34,10 +34,11 @@ GAINGE 포크 전용 문서입니다. upstream 파일은 **수정하지 않습�
 
 ```
 Cursor User Rules (전역)
-  → sessionStart hook (GAINGE_*.md 3종 전체 주입)
+  → sessionStart hook (포인터만)
     → 000-fork-priority.mdc (원본 위치 안내)
-      → upstream alwaysApply 규칙
-        → glob 기반 규칙
+      → 003-fork-enterprise-theme.mdc (테마 토큰 빠른 경로)
+        → upstream alwaysApply 규칙
+          → glob 기반 규칙
 ```
 
 Claude Code:

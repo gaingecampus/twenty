@@ -4,7 +4,7 @@
 upstream 관례보다 이 파일과 `GAINGE_RUNBOOK.md`를 우선 참고하세요.
 
 > **Claude Code**: `CLAUDE.local.md`가 세션 시작 시 GAINGE 문서 3종을 자동으로 불러옵니다.
-> **Cursor**: `sessionStart` hook이 아래 단일 원본 파일 전체를 주입합니다.
+> **Cursor**: `sessionStart` hook은 포인터만 주입한다. 전문은 해당 작업일 때만 읽는다.
 
 ## 최초 참고 문서
 

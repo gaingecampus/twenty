@@ -1,25 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-cd "$ROOT"
+python3 -c 'import json; print(json.dumps({"additional_context": """이 저장소는 GAINGE Twenty 포크다 (upstream 아님).
+이미 주입된 문서·규칙을 Read로 다시 열지 마라.
 
-read_file() {
-  local file_path="$1"
-  local section_title="$2"
-
-  if [[ ! -f "$file_path" ]]; then
-    return
-  fi
-
-  printf '## %s\n\n' "$section_title"
-  cat "$file_path"
-  printf '\n\n---\n\n'
-}
-
-context=""
-context+=$(read_file GAINGE_CONTEXT.md GAINGE_CONTEXT.md)
-context+=$(read_file GAINGE_RUNBOOK.md GAINGE_RUNBOOK.md)
-context+=$(read_file GAINGE_WORKFLOWS.md GAINGE_WORKFLOWS.md)
-
-python3 -c 'import json, sys; print(json.dumps({"additional_context": sys.stdin.read()}))' <<<"$context"
+- 실행/배포/환경 → 필요할 때만 GAINGE_RUNBOOK.md
+- 커밋/PR/Jira → 필요할 때만 GAINGE_WORKFLOWS.md
+- 포크 정책 → 필요할 때만 GAINGE_CONTEXT.md
+- 테마 패딩/폰트/색/radius/`--t-*` → 003-fork-enterprise-theme.mdc (규칙으로 이미 적용). CSS 두 파일만. 브라우저·Grep 금지.
+"""}))'

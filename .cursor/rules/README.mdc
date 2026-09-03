@@ -1,7 +1,7 @@
 ---
 description: Twenty CRM development rules and best practices
 globs: []
-alwaysApply: true
+alwaysApply: false
 ---
 # Twenty Development Rules
 

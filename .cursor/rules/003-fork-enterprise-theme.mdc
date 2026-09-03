@@ -1,31 +1,22 @@
 ---
-description: 엔터프라이즈 테마 CSS 토큰 수정 — 빠른 경로, 브라우저 검증 생략
-globs: packages/twenty-ui/src/theme-constants/theme-enterprise-*.css
-alwaysApply: false
+description: 엔터프라이즈 테마 패딩·폰트·색·radius, 네비 탭, 헤더 버튼, --t-* 토큰
+alwaysApply: true
 ---
 
-# 엔터프라이즈 테마 CSS
+# 엔터프라이즈 테마 — 빠른 경로
 
-토큰(패딩, 폰트, 색, radius)만 바꾸는 요청은 **CSS 두 파일만** 고친다.
-컴포넌트 탐색, 새 토큰, 새 선택자, 브라우저 검증을 하지 않는다.
+전역 User Rule(UI면 브라우저 검증)보다 **이 규칙이 우선**한다.
 
-## 할 일
+패딩/폰트/색/radius/`--t-*`만 바꾸라는 요청이면:
 
-1. `theme-enterprise-light.css`와 `theme-enterprise-dark.css`에서 **이미 있는** `--t-*`만 수정
-2. 라이트/다크 값을 같이 맞춘다
-3. 끝. `dist` 복사는 필요 없다 — `twenty-front`가 `src` CSS를 직접 읽는다
+1. `theme-enterprise-light.css`와 `theme-enterprise-dark.css`의 기존 변수만 수정
+2. 라이트/다크를 같이 맞춘다
+3. 끝. 확인은 사용자가 한다
 
-## 하지 말 것
+하지 말 것: 브라우저 lock/navigate/screenshot/CDP, Grep로 컴포넌트 추적,
+새 토큰, 새 선택자, `GAINGE_*.md` / 이 규칙 / React 가이드 재읽기.
 
-- 브라우저 lock / navigate / CDP / screenshot
-- 컴포넌트 TSX·SCSS를 열어 “어디에 먹히는지” 추적
-- 새 `--t-*` 추가, `themeCssVariables.ts` 수정
-- `html[data-ui-theme='enterprise'] …` 컴포넌트 선택자 추가
-- `GAINGE_CONTEXT.md`를 다시 읽기
+사용자가 DOM을 찍어 줘도 같다.
 
-## 예외 — 토큰만으로 안 될 때만
-
-컴포넌트가 해당 `--t-*`를 아직 안 읽을 때만 TSX에 `var(--t-…, fallback)`을 연결한다.
-그때도 브라우저 검증은 사용자가 하겠다고 하기 전에는 생략한다.
-
-이미 연결된 접두어: `--t-nav-*`, `--t-search-*`, `--t-toolbar-chip-*`, `--t-view-tab-*`, `--t-page-header-*`, `--t-page-header-action-*`, `--t-button-*`, `--t-overlay-*`, `--t-icon-button-*`, `--t-control-*`
+예외: 값이 화면에 안 먹을 때만 해당 TSX에 `var(--t-…, fallback)` 연결.
+버튼 누락·스크롤·레이아웃·동작 버그는 이 경로가 아님.

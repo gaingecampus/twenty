@@ -1,12 +1,11 @@
 ---
-description: 포크 커밋/PR/리뷰 워크플로
-globs: []
-alwaysApply: true
+description: 포크 커밋, PR, 리뷰, Jira 워크플로 — 커밋/PR 요청일 때만
+alwaysApply: false
 ---
 
 # 포크 워크플로
 
 커밋·PR·리뷰·**Jira 이슈** 절차의 단일 원본은 `GAINGE_WORKFLOWS.md`입니다.
-내용이 컨텍스트에 없으면 Read 도구로 읽으세요.
+커밋/PR/Jira 요청일 때만 읽고, CSS/`--t-*` 작업 전에는 읽지 마라.
 
 CRM Jira 요약 규칙은 `002-fork-jira.mdc`에도 있습니다.

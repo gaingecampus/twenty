@@ -10,12 +10,13 @@ alwaysApply: true
 
 ## 단일 원본 (내용은 아래 파일만 수정)
 
-| 파일 | 내용 |
-|------|------|
-| `GAINGE_CONTEXT.md` | 포크 정체성·우선순위·개인 선호·충돌 해석 |
-| `GAINGE_RUNBOOK.md` | 로컬 실행·배포·운영 |
-| `GAINGE_WORKFLOWS.md` | 커밋/PR 워크플로 |
+| 파일 | 내용 | 언제 읽나 |
+|------|------|-----------|
+| `GAINGE_CONTEXT.md` | 포크 정체성·우선순위 | 포크 정책이 필요할 때만 |
+| `GAINGE_RUNBOOK.md` | 로컬 실행·배포·운영 | 실행·배포·환경 질문일 때만 |
+| `GAINGE_WORKFLOWS.md` | 커밋/PR 워크플로 | 커밋·PR·Jira 요청일 때만 |
 
-위 내용이 컨텍스트에 없으면 **다른 작업 전에** Read 도구로 읽으세요.
-환경·실행·배포 작업은 `GAINGE_RUNBOOK.md`를 **최우선**으로 따릅니다.
-`sessionStart` hook이 세 파일 전체를 주입합니다.
+이미 hook/규칙에 있는 문서를 Read로 다시 열지 마라.
+CSS/`--t-*` 토큰 요청에서는 위 파일을 읽지 마라.
+환경·실행·배포 작업은 `GAINGE_RUNBOOK.md`를 **최우선**으로 따른다.
+`sessionStart` hook은 포인터만 주입한다. 전문을 넣지 않는다.
