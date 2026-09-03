@@ -7,8 +7,9 @@ import { useRecordTableContextOrThrow } from '@/object-record/record-table/conte
 import { useResetTableRowSelection } from '@/object-record/record-table/hooks/internal/useResetTableRowSelection';
 import { recordTableWidthComponentState } from '@/object-record/record-table/states/recordTableWidthComponentState';
 
-import { isRecordTableCheckboxColumnHiddenComponentState } from '@/object-record/record-table/states/isRecordTableCheckboxColumnHiddenComponentState';
-import { isRecordTableDragColumnHiddenComponentState } from '@/object-record/record-table/states/isRecordTableDragColumnHiddenComponentState';
+import { useIsRecordTableAddColumnButtonHidden } from '@/object-record/record-table/hooks/useIsRecordTableAddColumnButtonHidden';
+import { useIsRecordTableCheckboxColumnHidden } from '@/object-record/record-table/hooks/useIsRecordTableCheckboxColumnHidden';
+import { useIsRecordTableDragColumnHidden } from '@/object-record/record-table/hooks/useIsRecordTableDragColumnHidden';
 import { resizedFieldMetadataIdComponentState } from '@/object-record/record-table/states/resizedFieldMetadataIdComponentState';
 import { resizeFieldOffsetComponentState } from '@/object-record/record-table/states/resizeFieldOffsetComponentState';
 import { shouldCompactRecordTableFirstColumnComponentState } from '@/object-record/record-table/states/shouldCompactRecordTableFirstColumnComponentState';
@@ -70,15 +71,14 @@ export const useResizeTableHeader = () => {
     recordTableId,
   );
 
-  const isRecordTableDragColumnHidden = useAtomComponentStateValue(
-    isRecordTableDragColumnHiddenComponentState,
-    recordTableId,
-  );
+  const isRecordTableDragColumnHidden =
+    useIsRecordTableDragColumnHidden(recordTableId);
 
-  const isRecordTableCheckboxColumnHidden = useAtomComponentStateValue(
-    isRecordTableCheckboxColumnHiddenComponentState,
-    recordTableId,
-  );
+  const isRecordTableCheckboxColumnHidden =
+    useIsRecordTableCheckboxColumnHidden(recordTableId);
+
+  const isRecordTableAddColumnButtonHidden =
+    useIsRecordTableAddColumnButtonHidden();
 
   const handleResizeHandlerStart = useCallback<PointerEventListener>(
     ({ x }) => {
@@ -120,6 +120,7 @@ export const useResizeTableHeader = () => {
         tableWidth: recordTableWidth,
         isDragColumnHidden: isRecordTableDragColumnHidden,
         isCheckboxColumnHidden: isRecordTableCheckboxColumnHidden,
+        isAddColumnButtonHidden: isRecordTableAddColumnButtonHidden,
       });
 
       const newLastColumnWidth = lastColumnWidth - newResizeOffset;
@@ -152,6 +153,7 @@ export const useResizeTableHeader = () => {
       recordTableWidth,
       isRecordTableDragColumnHidden,
       isRecordTableCheckboxColumnHidden,
+      isRecordTableAddColumnButtonHidden,
       setResizeFieldOffset,
     ],
   );

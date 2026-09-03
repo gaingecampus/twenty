@@ -2,6 +2,7 @@ import { useObjectPermissionsForObject } from '@/object-record/hooks/useObjectPe
 import { isFieldMetadataReadOnlyByPermissions } from '@/object-record/read-only/utils/internal/isFieldMetadataReadOnlyByPermissions';
 import { useRecordCalendarContextOrThrow } from '@/object-record/record-calendar/contexts/RecordCalendarContext';
 import { hasAnySoftDeleteFilterOnViewComponentSelector } from '@/object-record/record-filter/states/hasAnySoftDeleteFilterOnView';
+import { useGuardRecordIndexInlineEdit } from '@/object-record/record-index/hooks/useGuardRecordIndexInlineEdit';
 import { recordIndexCalendarFieldMetadataIdState } from '@/object-record/record-index/states/recordIndexCalendarFieldMetadataIdState';
 import { useCreateNewIndexRecord } from '@/object-record/record-table/hooks/useCreateNewIndexRecord';
 import { canCreateRecordsForObjectMetadataItem } from '@/object-record/utils/canCreateRecordsForObjectMetadataItem';
@@ -31,6 +32,7 @@ export const RecordCalendarAddNew = ({
   const { theme } = useContext(ThemeContext);
   const { userTimezone } = useUserTimezone();
   const { objectMetadataItem } = useRecordCalendarContextOrThrow();
+  const { isInlineEditEnabled } = useGuardRecordIndexInlineEdit();
   const { createNewIndexRecord } = useCreateNewIndexRecord({
     objectMetadataItem,
   });
@@ -59,6 +61,7 @@ export const RecordCalendarAddNew = ({
     : false;
 
   if (
+    !isInlineEditEnabled ||
     hasAnySoftDeleteFilterOnView === true ||
     !canCreateRecordsForObjectMetadataItem({
       objectPermissions,

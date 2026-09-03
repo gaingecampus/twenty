@@ -1,4 +1,5 @@
 import { isLayoutCustomizationModeEnabledState } from '@/layout-customization/states/isLayoutCustomizationModeEnabledState';
+import { useGuardRecordIndexInlineEdit } from '@/object-record/record-index/hooks/useGuardRecordIndexInlineEdit';
 import { hasAnySoftDeleteFilterOnViewComponentSelector } from '@/object-record/record-filter/states/hasAnySoftDeleteFilterOnView';
 import { useRecordTableContextOrThrow } from '@/object-record/record-table/contexts/RecordTableContext';
 import { useCreateNewIndexRecord } from '@/object-record/record-table/hooks/useCreateNewIndexRecord';
@@ -19,6 +20,7 @@ const StyledHeaderIcon = styled.div`
 export const RecordTableHeaderLabelIdentifierCellPlusButton = () => {
   const { objectMetadataItem, objectPermissions } =
     useRecordTableContextOrThrow();
+  const { isInlineEditEnabled } = useGuardRecordIndexInlineEdit();
 
   const isMobile = useIsMobile();
   const isLayoutCustomizationModeEnabled = useAtomStateValue(
@@ -40,6 +42,7 @@ export const RecordTableHeaderLabelIdentifierCellPlusButton = () => {
   );
 
   return (
+    isInlineEditEnabled &&
     !isMobile &&
     !isLayoutCustomizationModeEnabled &&
     !hasAnySoftDeleteFilterOnView &&

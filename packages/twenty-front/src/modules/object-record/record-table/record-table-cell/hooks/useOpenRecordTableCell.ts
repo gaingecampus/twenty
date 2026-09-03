@@ -18,6 +18,7 @@ import { getRecordFieldInputInstanceId } from '@/object-record/utils/getRecordFi
 import { useSetActiveDropdownFocusIdAndMemorizePrevious } from '@/ui/layout/dropdown/hooks/useSetFocusedDropdownIdAndMemorizePrevious';
 
 import { useRecordFieldsScopeContextOrThrow } from '@/object-record/record-field-list/contexts/RecordFieldsScopeContext';
+import { useGuardRecordIndexInlineEdit } from '@/object-record/record-index/hooks/useGuardRecordIndexInlineEdit';
 import { useOpenRecordFromIndexView } from '@/object-record/record-index/hooks/useOpenRecordFromIndexView';
 import { useActiveRecordTableRow } from '@/object-record/record-table/hooks/useActiveRecordTableRow';
 import { useFocusedRecordTableRow } from '@/object-record/record-table/hooks/useFocusedRecordTableRow';
@@ -83,6 +84,7 @@ export const useOpenRecordTableCell = (recordTableId: string) => {
   const { focusRecordTableCell } = useFocusRecordTableCell();
 
   const { openRecordFromIndexView } = useOpenRecordFromIndexView();
+  const { assertInlineEditAllowed } = useGuardRecordIndexInlineEdit();
 
   const openTableCell = useCallback(
     ({
@@ -131,6 +133,10 @@ export const useOpenRecordTableCell = (recordTableId: string) => {
 
       // Block editing for read-only records, but allow navigation (handled above)
       if (isReadOnly) {
+        return;
+      }
+
+      if (!assertInlineEditAllowed()) {
         return;
       }
 
@@ -197,6 +203,7 @@ export const useOpenRecordTableCell = (recordTableId: string) => {
       activateRecordTableRow,
       unfocusRecordTableRow,
       store,
+      assertInlineEditAllowed,
     ],
   );
 

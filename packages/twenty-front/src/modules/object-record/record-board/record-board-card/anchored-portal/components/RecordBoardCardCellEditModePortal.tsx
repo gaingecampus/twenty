@@ -7,6 +7,7 @@ import { RecordBoardCardContext } from '@/object-record/record-board/record-boar
 import { useRecordBoardCardMetadataFromPosition } from '@/object-record/record-board/record-board-card/hooks/useRecordBoardCardMetadataFromPosition';
 import { recordBoardCardEditModePositionComponentState } from '@/object-record/record-board/record-board-card/states/recordBoardCardEditModePositionComponentState';
 import { FieldInput } from '@/object-record/record-field/ui/components/FieldInput';
+import { useGuardRecordIndexInlineEdit } from '@/object-record/record-index/hooks/useGuardRecordIndexInlineEdit';
 import { RecordInlineCellAnchoredPortal } from '@/object-record/record-inline-cell/components/RecordInlineCellAnchoredPortal';
 import { RecordInlineCellEditMode } from '@/object-record/record-inline-cell/components/RecordInlineCellEditMode';
 import { useContext } from 'react';
@@ -21,8 +22,10 @@ export const RecordBoardCardCellEditModePortal = () => {
   );
 
   const { editedFieldMetadataItem } = useRecordBoardCardMetadataFromPosition();
+  const { isInlineEditEnabled } = useGuardRecordIndexInlineEdit();
 
   if (
+    !isInlineEditEnabled ||
     !isDefined(recordBoardCardEditModePosition) ||
     !isDefined(editedFieldMetadataItem)
   ) {

@@ -4,9 +4,8 @@ import { RecordTableHeaderDnd } from '@/object-record/record-table/record-table-
 import { RecordTableHeaderDragDropColumn } from '@/object-record/record-table/record-table-header/components/RecordTableHeaderDragDropColumn';
 import { RecordTableHeaderFirstCell } from '@/object-record/record-table/record-table-header/components/RecordTableHeaderFirstCell';
 import { useResizeTableHeader } from '@/object-record/record-table/record-table-header/hooks/useResizeTableHeader';
-import { isRecordTableCheckboxColumnHiddenComponentState } from '@/object-record/record-table/states/isRecordTableCheckboxColumnHiddenComponentState';
-import { isRecordTableDragColumnHiddenComponentState } from '@/object-record/record-table/states/isRecordTableDragColumnHiddenComponentState';
-import { useAtomComponentStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomComponentStateValue';
+import { useIsRecordTableCheckboxColumnHidden } from '@/object-record/record-table/hooks/useIsRecordTableCheckboxColumnHidden';
+import { useIsRecordTableDragColumnHidden } from '@/object-record/record-table/hooks/useIsRecordTableDragColumnHidden';
 import { styled } from '@linaria/react';
 
 const StyledHeaderContainer = styled.div`
@@ -18,13 +17,10 @@ const StyledHeaderContainer = styled.div`
 `;
 
 export const RecordTableHeader = () => {
-  const isRecordTableDragColumnHidden = useAtomComponentStateValue(
-    isRecordTableDragColumnHiddenComponentState,
-  );
+  const isRecordTableDragColumnHidden = useIsRecordTableDragColumnHidden();
 
-  const isRecordTableCheckboxColumnHidden = useAtomComponentStateValue(
-    isRecordTableCheckboxColumnHiddenComponentState,
-  );
+  const isRecordTableCheckboxColumnHidden =
+    useIsRecordTableCheckboxColumnHidden();
 
   useResizeTableHeader();
 

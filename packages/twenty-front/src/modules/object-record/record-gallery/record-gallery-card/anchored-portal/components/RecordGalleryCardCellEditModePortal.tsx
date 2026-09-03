@@ -6,6 +6,7 @@ import { RECORD_GALLERY_CARD_INPUT_ID_PREFIX } from '@/object-record/record-gall
 import { useRecordGalleryCardMetadataFromPosition } from '@/object-record/record-gallery/record-gallery-card/hooks/useRecordGalleryCardMetadataFromPosition';
 import { recordGalleryCardEditModePositionComponentState } from '@/object-record/record-gallery/record-gallery-card/states/recordGalleryCardEditModePositionComponentState';
 import { FieldInput } from '@/object-record/record-field/ui/components/FieldInput';
+import { useGuardRecordIndexInlineEdit } from '@/object-record/record-index/hooks/useGuardRecordIndexInlineEdit';
 import { RecordInlineCellAnchoredPortal } from '@/object-record/record-inline-cell/components/RecordInlineCellAnchoredPortal';
 import { RecordInlineCellEditMode } from '@/object-record/record-inline-cell/components/RecordInlineCellEditMode';
 import { isDefined } from 'twenty-shared/utils';
@@ -23,9 +24,12 @@ export const RecordGalleryCardCellEditModePortal = ({
     recordGalleryCardEditModePositionComponentState,
   );
 
-  const { editedFieldMetadataItem } = useRecordGalleryCardMetadataFromPosition();
+  const { editedFieldMetadataItem } =
+    useRecordGalleryCardMetadataFromPosition();
+  const { isInlineEditEnabled } = useGuardRecordIndexInlineEdit();
 
   if (
+    !isInlineEditEnabled ||
     !isDefined(recordGalleryCardEditModePosition) ||
     !isDefined(editedFieldMetadataItem)
   ) {

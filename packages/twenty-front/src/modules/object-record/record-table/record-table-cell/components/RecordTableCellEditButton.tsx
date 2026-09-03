@@ -1,5 +1,6 @@
 import { useGetButtonIcon } from '@/object-record/record-field/ui/hooks/useGetButtonIcon';
 import { useIsFieldInputOnly } from '@/object-record/record-field/ui/hooks/useIsFieldInputOnly';
+import { useGuardRecordIndexInlineEdit } from '@/object-record/record-index/hooks/useGuardRecordIndexInlineEdit';
 
 import { RecordTableCellContext } from '@/object-record/record-table/contexts/RecordTableCellContext';
 import { RecordTableCellButtons } from '@/object-record/record-table/record-table-cell/components/RecordTableCellButtons';
@@ -12,6 +13,7 @@ import { IconArrowUpRight, IconPencil } from 'twenty-ui/icon';
 export const RecordTableCellEditButton = () => {
   const { cellPosition } = useContext(RecordTableCellContext);
   const { openTableCell } = useOpenRecordTableCellFromCell();
+  const { isInlineEditEnabled } = useGuardRecordIndexInlineEdit();
   const isFieldInputOnly = useIsFieldInputOnly();
   const isFirstColumn = cellPosition.column === 0;
   const customButtonIcon = useGetButtonIcon();
@@ -32,15 +34,23 @@ export const RecordTableCellEditButton = () => {
     }
   };
 
-  return (
-    <RecordTableCellButtons
-      buttons={[
-        ...secondaryButton,
-        {
-          onClick: handleMainButtonClick,
-          Icon: mainButtonIcon,
-        },
-      ]}
-    />
-  );
+  const shouldShowMainButton = isFirstColumn || isInlineEditEnabled;
+
+  const buttons = [
+    ...secondaryButton,
+    ...(shouldShowMainButton
+      ? [
+          {
+            onClick: handleMainButtonClick,
+            Icon: mainButtonIcon,
+          },
+        ]
+      : []),
+  ];
+
+  if (buttons.length === 0) {
+    return null;
+  }
+
+  return <RecordTableCellButtons buttons={buttons} />;
 };

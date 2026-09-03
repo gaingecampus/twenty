@@ -43,6 +43,21 @@ describe('computeLastRecordTableColumnWidth', () => {
     expect(lastColumnWidth).toBe(65);
   });
 
+  it('excludes the add column button width when that column is hidden', () => {
+    const recordFields = [{ size: 100 }, { size: 100 }];
+
+    const { lastColumnWidth } = computeLastRecordTableColumnWidth({
+      recordFields,
+      tableWidth: 300,
+      shouldCompactFirstColumn: false,
+      isDragColumnHidden: false,
+      isCheckboxColumnHidden: false,
+      isAddColumnButtonHidden: true,
+    });
+
+    expect(lastColumnWidth).toBe(57);
+  });
+
   it('uses the compact first column width when shouldCompactFirstColumn is true', () => {
     const recordFields = [{ size: 100 }, { size: 150 }];
 

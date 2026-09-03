@@ -5,6 +5,7 @@ import { contextStoreNumberOfSelectedRecordsComponentState } from '@/context-sto
 import { isLayoutCustomizationModeEnabledState } from '@/layout-customization/states/isLayoutCustomizationModeEnabledState';
 import { useNumberFormat } from '@/localization/hooks/useNumberFormat';
 import { useFilteredObjectMetadataItems } from '@/object-metadata/hooks/useFilteredObjectMetadataItems';
+import { RecordIndexInlineEditModeButton } from '@/object-record/record-index/components/RecordIndexInlineEditModeButton';
 import { RecordIndexPageHeaderIcon } from '@/object-record/record-index/components/RecordIndexPageHeaderIcon';
 import { RecordIndexPageHeaderSearchInput } from '@/object-record/record-index/components/RecordIndexPageHeaderSearchInput';
 import { useRecordIndexContextOrThrow } from '@/object-record/record-index/contexts/RecordIndexContext';
@@ -125,6 +126,7 @@ export const RecordIndexPageHeader = () => {
       actionButton={
         isDefined(contextStoreCurrentViewId) ? (
           <>
+            <RecordIndexInlineEditModeButton />
             <RecordIndexCommandMenu />
             {!isLayoutCustomizationModeEnabled && <SidePanelToggleButton />}
           </>

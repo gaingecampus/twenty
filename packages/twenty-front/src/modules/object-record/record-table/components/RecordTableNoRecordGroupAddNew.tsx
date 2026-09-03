@@ -1,3 +1,4 @@
+import { useGuardRecordIndexInlineEdit } from '@/object-record/record-index/hooks/useGuardRecordIndexInlineEdit';
 import { useObjectPermissionsForObject } from '@/object-record/hooks/useObjectPermissionsForObject';
 import { hasAnySoftDeleteFilterOnViewComponentSelector } from '@/object-record/record-filter/states/hasAnySoftDeleteFilterOnView';
 import { useUpsertRecordsInStore } from '@/object-record/record-store/hooks/useUpsertRecordsInStore';
@@ -17,6 +18,7 @@ import { IconPlus } from 'twenty-ui/icon';
 
 export const RecordTableNoRecordGroupAddNew = () => {
   const { objectMetadataItem } = useRecordTableContextOrThrow();
+  const { isInlineEditEnabled } = useGuardRecordIndexInlineEdit();
 
   const isRecordTableCellsNonEditable = useAtomComponentStateValue(
     isRecordTableCellsNonEditableComponentState,
@@ -61,7 +63,7 @@ export const RecordTableNoRecordGroupAddNew = () => {
     totalNumberOfRecordsToVirtualize,
   ]);
 
-  if (isRecordTableCellsNonEditable) {
+  if (!isInlineEditEnabled || isRecordTableCellsNonEditable) {
     return null;
   }
 

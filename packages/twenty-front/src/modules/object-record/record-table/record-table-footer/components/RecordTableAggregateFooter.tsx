@@ -8,6 +8,7 @@ import { RECORD_TABLE_COLUMN_ADD_COLUMN_BUTTON_WIDTH } from '@/object-record/rec
 import { RECORD_TABLE_COLUMN_LAST_EMPTY_COLUMN_WIDTH_CLASS_NAME } from '@/object-record/record-table/constants/RecordTableColumnLastEmptyColumnWidthClassName';
 import { TABLE_Z_INDEX } from '@/object-record/record-table/constants/TableZIndex';
 import { useRecordTableContextOrThrow } from '@/object-record/record-table/contexts/RecordTableContext';
+import { useIsRecordTableAddColumnButtonHidden } from '@/object-record/record-table/hooks/useIsRecordTableAddColumnButtonHidden';
 import { RecordTableAggregateFooterCell } from '@/object-record/record-table/record-table-footer/components/RecordTableAggregateFooterCell';
 import { RecordTableColumnAggregateFooterCellContext } from '@/object-record/record-table/record-table-footer/components/RecordTableColumnAggregateFooterCellContext';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
@@ -53,6 +54,8 @@ export const RecordTableAggregateFooter = ({
   currentRecordGroupId?: string;
 }) => {
   const { visibleRecordFields } = useRecordTableContextOrThrow();
+  const isRecordTableAddColumnButtonHidden =
+    useIsRecordTableAddColumnButtonHidden();
 
   return (
     <StyledAggregateFooterContainer>
@@ -73,7 +76,9 @@ export const RecordTableAggregateFooter = ({
           </RecordTableColumnAggregateFooterCellContext.Provider>
         );
       })}
-      <StyledPlaceholderAddButtonPlaceholderFooterCell />
+      {!isRecordTableAddColumnButtonHidden && (
+        <StyledPlaceholderAddButtonPlaceholderFooterCell />
+      )}
       <StyledPlaceholderLastColumnEmptyFooterCell
         className={RECORD_TABLE_COLUMN_LAST_EMPTY_COLUMN_WIDTH_CLASS_NAME}
       />

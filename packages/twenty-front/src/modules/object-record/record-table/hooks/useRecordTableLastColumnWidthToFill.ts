@@ -1,6 +1,7 @@
 import { useRecordTableContextOrThrow } from '@/object-record/record-table/contexts/RecordTableContext';
-import { isRecordTableCheckboxColumnHiddenComponentState } from '@/object-record/record-table/states/isRecordTableCheckboxColumnHiddenComponentState';
-import { isRecordTableDragColumnHiddenComponentState } from '@/object-record/record-table/states/isRecordTableDragColumnHiddenComponentState';
+import { useIsRecordTableAddColumnButtonHidden } from '@/object-record/record-table/hooks/useIsRecordTableAddColumnButtonHidden';
+import { useIsRecordTableCheckboxColumnHidden } from '@/object-record/record-table/hooks/useIsRecordTableCheckboxColumnHidden';
+import { useIsRecordTableDragColumnHidden } from '@/object-record/record-table/hooks/useIsRecordTableDragColumnHidden';
 import { recordTableWidthComponentState } from '@/object-record/record-table/states/recordTableWidthComponentState';
 import { shouldCompactRecordTableFirstColumnComponentState } from '@/object-record/record-table/states/shouldCompactRecordTableFirstColumnComponentState';
 import { computeLastRecordTableColumnWidth } from '@/object-record/record-table/utils/computeLastRecordTableColumnWidth';
@@ -17,13 +18,13 @@ export const useRecordTableLastColumnWidthToFill = () => {
     shouldCompactRecordTableFirstColumnComponentState,
   );
 
-  const isRecordTableDragColumnHidden = useAtomComponentStateValue(
-    isRecordTableDragColumnHiddenComponentState,
-  );
+  const isRecordTableDragColumnHidden = useIsRecordTableDragColumnHidden();
 
-  const isRecordTableCheckboxColumnHidden = useAtomComponentStateValue(
-    isRecordTableCheckboxColumnHiddenComponentState,
-  );
+  const isRecordTableCheckboxColumnHidden =
+    useIsRecordTableCheckboxColumnHidden();
+
+  const isRecordTableAddColumnButtonHidden =
+    useIsRecordTableAddColumnButtonHidden();
 
   const { lastColumnWidth } = computeLastRecordTableColumnWidth({
     recordFields: visibleRecordFields,
@@ -31,6 +32,7 @@ export const useRecordTableLastColumnWidthToFill = () => {
     shouldCompactFirstColumn: shouldCompactRecordTableFirstColumn,
     isDragColumnHidden: isRecordTableDragColumnHidden,
     isCheckboxColumnHidden: isRecordTableCheckboxColumnHidden,
+    isAddColumnButtonHidden: isRecordTableAddColumnButtonHidden,
   });
 
   return {

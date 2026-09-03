@@ -6,6 +6,7 @@ import { useClearField } from '@/object-record/record-field/ui/hooks/useClearFie
 import { useIsFieldClearable } from '@/object-record/record-field/ui/hooks/useIsFieldClearable';
 import { useIsFieldInputOnly } from '@/object-record/record-field/ui/hooks/useIsFieldInputOnly';
 import { useToggleEditOnlyInput } from '@/object-record/record-field/ui/hooks/useToggleEditOnlyInput';
+import { useGuardRecordIndexInlineEdit } from '@/object-record/record-index/hooks/useGuardRecordIndexInlineEdit';
 import { useRecordTableBodyContextOrThrow } from '@/object-record/record-table/contexts/RecordTableBodyContext';
 import { useSelectAllRows } from '@/object-record/record-table/hooks/internal/useSelectAllRows';
 import { useFocusedRecordTableRow } from '@/object-record/record-table/hooks/useFocusedRecordTableRow';
@@ -22,6 +23,7 @@ export const RecordTableCellHotkeysEffect = ({
   const { openTableCell } = useOpenRecordTableCellFromCell();
   const { isRecordFieldReadOnly: isReadOnly } = useContext(FieldContext);
   const { onCloseTableCell } = useRecordTableBodyContextOrThrow();
+  const { assertInlineEditAllowed } = useGuardRecordIndexInlineEdit();
 
   const isFieldInputOnly = useIsFieldInputOnly();
   const isFieldClearable = useIsFieldClearable();
@@ -29,6 +31,10 @@ export const RecordTableCellHotkeysEffect = ({
   const clearField = useClearField();
 
   const handleBackspaceOrDelete = () => {
+    if (!assertInlineEditAllowed()) {
+      return;
+    }
+
     if (!isFieldInputOnly && isFieldClearable) {
       clearField();
     }
@@ -42,6 +48,10 @@ export const RecordTableCellHotkeysEffect = ({
     if (!isFieldInputOnly) {
       openTableCell();
     } else {
+      if (!assertInlineEditAllowed()) {
+        return;
+      }
+
       toggleEditOnlyInput();
     }
   };

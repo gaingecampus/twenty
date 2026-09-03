@@ -4,8 +4,8 @@ import {
   getRecordTableColumnWidthInlineStyles,
   RecordTableStyleWrapper,
 } from '@/object-record/record-table/components/RecordTableStyleWrapper';
-import { isRecordTableCheckboxColumnHiddenComponentState } from '@/object-record/record-table/states/isRecordTableCheckboxColumnHiddenComponentState';
-import { isRecordTableDragColumnHiddenComponentState } from '@/object-record/record-table/states/isRecordTableDragColumnHiddenComponentState';
+import { useIsRecordTableCheckboxColumnHidden } from '@/object-record/record-table/hooks/useIsRecordTableCheckboxColumnHidden';
+import { useIsRecordTableDragColumnHidden } from '@/object-record/record-table/hooks/useIsRecordTableDragColumnHidden';
 import { RecordTableWidthEffect } from '@/object-record/record-table/components/RecordTableWidthEffect';
 import { getRecordTableHtmlId } from '@/object-record/record-table/utils/getRecordTableHtmlId';
 import { useRecordTableContextOrThrow } from '@/object-record/record-table/contexts/RecordTableContext';
@@ -15,12 +15,12 @@ import { RecordTableHeader } from '@/object-record/record-table/record-table-hea
 import { isRowSelectedComponentFamilyState } from '@/object-record/record-table/record-table-row/states/isRowSelectedComponentFamilyState';
 import { recordTableHoverPositionComponentState } from '@/object-record/record-table/states/recordTableHoverPositionComponentState';
 import { isSomeCellInEditModeComponentSelector } from '@/object-record/record-table/states/selectors/isSomeCellInEditModeComponentSelector';
+import { useGuardRecordIndexInlineEdit } from '@/object-record/record-index/hooks/useGuardRecordIndexInlineEdit';
 import { DragSelect } from '@/ui/utilities/drag-select/components/DragSelect';
 import { RECORD_INDEX_DRAG_SELECT_BOUNDARY_CLASS } from '@/ui/utilities/drag-select/constants/RecordIndecDragSelectBoundaryClass';
 import { useAtomComponentFamilyStateCallbackState } from '@/ui/utilities/state/jotai/hooks/useAtomComponentFamilyStateCallbackState';
 import { useAtomComponentSelectorCallbackState } from '@/ui/utilities/state/jotai/hooks/useAtomComponentSelectorCallbackState';
 import { useAtomComponentStateCallbackState } from '@/ui/utilities/state/jotai/hooks/useAtomComponentStateCallbackState';
-import { useAtomComponentStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomComponentStateValue';
 import { styled } from '@linaria/react';
 import { useStore } from 'jotai';
 import { useCallback, useMemo, useRef, useState } from 'react';
@@ -132,13 +132,12 @@ export const RecordTableContent = ({
     [store, isSomeCellInEditMode, recordTableHoverPositionCallbackState],
   );
 
-  const isRecordTableDragColumnHidden = useAtomComponentStateValue(
-    isRecordTableDragColumnHiddenComponentState,
-  );
+  const { isInlineEditEnabled } = useGuardRecordIndexInlineEdit();
 
-  const isRecordTableCheckboxColumnHidden = useAtomComponentStateValue(
-    isRecordTableCheckboxColumnHiddenComponentState,
-  );
+  const isRecordTableDragColumnHidden = useIsRecordTableDragColumnHidden();
+
+  const isRecordTableCheckboxColumnHidden =
+    useIsRecordTableCheckboxColumnHidden();
 
   const columnWidthStyles = useMemo(
     () =>
@@ -174,14 +173,16 @@ export const RecordTableContent = ({
         <RecordTableColumnWidthEffect />
         <RecordTableWidthEffect />
       </RecordTableStyleWrapper>
-      <DragSelect
-        selectableItemsContainerRef={containerRef}
-        onDragSelectionStart={handleDragStart}
-        onDragSelectionChange={handleDragSelectionChange}
-        onDragSelectionEnd={handleDragEnd}
-        scrollWrapperComponentInstanceId={recordTableScrollWrapperId}
-        selectionBoundaryClass={RECORD_INDEX_DRAG_SELECT_BOUNDARY_CLASS}
-      />
+      {isInlineEditEnabled && (
+        <DragSelect
+          selectableItemsContainerRef={containerRef}
+          onDragSelectionStart={handleDragStart}
+          onDragSelectionChange={handleDragSelectionChange}
+          onDragSelectionEnd={handleDragEnd}
+          scrollWrapperComponentInstanceId={recordTableScrollWrapperId}
+          selectionBoundaryClass={RECORD_INDEX_DRAG_SELECT_BOUNDARY_CLASS}
+        />
+      )}
     </StyledTableContainer>
   );
 };

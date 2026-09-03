@@ -1,3 +1,4 @@
+import { useGuardRecordIndexInlineEdit } from '@/object-record/record-index/hooks/useGuardRecordIndexInlineEdit';
 import { useObjectPermissionsForObject } from '@/object-record/hooks/useObjectPermissionsForObject';
 import { RecordBoardContext } from '@/object-record/record-board/contexts/RecordBoardContext';
 import { RecordBoardColumnContext } from '@/object-record/record-board/record-board-column/contexts/RecordBoardColumnContext';
@@ -33,6 +34,7 @@ export const RecordBoardColumnNewRecordButton = () => {
   const { theme } = useContext(ThemeContext);
   const { objectMetadataItem, selectFieldMetadataItem } =
     useContext(RecordBoardContext);
+  const { isInlineEditEnabled } = useGuardRecordIndexInlineEdit();
 
   const { columnDefinition } = useContext(RecordBoardColumnContext);
 
@@ -47,6 +49,10 @@ export const RecordBoardColumnNewRecordButton = () => {
   const { createNewIndexRecord } = useCreateNewIndexRecord({
     objectMetadataItem: objectMetadataItem,
   });
+
+  if (!isInlineEditEnabled) {
+    return null;
+  }
 
   if (
     !canCreateRecordsForObjectMetadataItem({

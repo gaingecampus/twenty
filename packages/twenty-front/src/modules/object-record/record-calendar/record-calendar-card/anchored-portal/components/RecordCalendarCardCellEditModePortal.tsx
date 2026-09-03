@@ -6,6 +6,7 @@ import { RECORD_CALENDAR_CARD_INPUT_ID_PREFIX } from '@/object-record/record-cal
 import { useRecordCalendarCardMetadataFromPosition } from '@/object-record/record-calendar/record-calendar-card/hooks/useRecordCalendarCardMetadataFromPosition';
 import { recordCalendarCardEditModePositionComponentState } from '@/object-record/record-calendar/record-calendar-card/states/recordCalendarCardEditModePositionComponentState';
 import { FieldInput } from '@/object-record/record-field/ui/components/FieldInput';
+import { useGuardRecordIndexInlineEdit } from '@/object-record/record-index/hooks/useGuardRecordIndexInlineEdit';
 import { RecordInlineCellAnchoredPortal } from '@/object-record/record-inline-cell/components/RecordInlineCellAnchoredPortal';
 import { RecordInlineCellEditMode } from '@/object-record/record-inline-cell/components/RecordInlineCellEditMode';
 import { isDefined } from 'twenty-shared/utils';
@@ -25,8 +26,10 @@ export const RecordCalendarCardCellEditModePortal = ({
 
   const { editedFieldMetadataItem } =
     useRecordCalendarCardMetadataFromPosition();
+  const { isInlineEditEnabled } = useGuardRecordIndexInlineEdit();
 
   if (
+    !isInlineEditEnabled ||
     !isDefined(recordCalendarCardEditModePosition) ||
     !isDefined(editedFieldMetadataItem)
   ) {

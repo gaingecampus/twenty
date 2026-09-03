@@ -4,6 +4,7 @@ import { useRecordGalleryContextOrThrow } from '@/object-record/record-gallery/c
 import { isRecordGalleryCardSelectedComponentFamilyState } from '@/object-record/record-gallery/record-gallery-card/states/isRecordGalleryCardSelectedComponentFamilyState';
 import { RecordCardHeaderContainer } from '@/object-record/record-card/components/RecordCardHeaderContainer';
 import { isDraggingRecordComponentState } from '@/object-record/record-drag/states/isDraggingRecordComponentState';
+import { useGuardRecordIndexInlineEdit } from '@/object-record/record-index/hooks/useGuardRecordIndexInlineEdit';
 import { useOpenRecordFromIndexView } from '@/object-record/record-index/hooks/useOpenRecordFromIndexView';
 import { recordStoreFamilyState } from '@/object-record/record-store/states/recordStoreFamilyState';
 import { useAtomComponentFamilyState } from '@/ui/utilities/state/jotai/hooks/useAtomComponentFamilyState';
@@ -37,6 +38,7 @@ export const RecordGalleryCardHeader = ({
   const { objectMetadataItem } = useRecordGalleryContextOrThrow();
   const recordStore = useAtomFamilyStateValue(recordStoreFamilyState, recordId);
   const { openRecordFromIndexView } = useOpenRecordFromIndexView();
+  const { isInlineEditEnabled } = useGuardRecordIndexInlineEdit();
 
   const { currentView } = useGetCurrentViewOnly();
 
@@ -79,18 +81,20 @@ export const RecordGalleryCardHeader = ({
           />
         </StopPropagationContainer>
       </StyledRecordChipContainer>
-      <StyledCheckboxContainer className="checkbox-container">
-        <StopPropagationContainer>
-          <Checkbox
-            hoverable
-            checked={isRecordGalleryCardSelected}
-            onChange={(value) => {
-              setIsRecordGalleryCardSelected(value.target.checked);
-            }}
-            variant={CheckboxVariant.Secondary}
-          />
-        </StopPropagationContainer>
-      </StyledCheckboxContainer>
+      {isInlineEditEnabled && (
+        <StyledCheckboxContainer className="checkbox-container">
+          <StopPropagationContainer>
+            <Checkbox
+              hoverable
+              checked={isRecordGalleryCardSelected}
+              onChange={(value) => {
+                setIsRecordGalleryCardSelected(value.target.checked);
+              }}
+              variant={CheckboxVariant.Secondary}
+            />
+          </StopPropagationContainer>
+        </StyledCheckboxContainer>
+      )}
     </RecordCardHeaderContainer>
   );
 };

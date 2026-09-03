@@ -2,12 +2,16 @@ import { FieldDisplay } from '@/object-record/record-field/ui/components/FieldDi
 import { FieldContext } from '@/object-record/record-field/ui/contexts/FieldContext';
 import { FieldFocusStaticFocusedProvider } from '@/object-record/record-field/ui/contexts/FieldFocusContextProvider';
 import { useIsFieldInputOnly } from '@/object-record/record-field/ui/hooks/useIsFieldInputOnly';
+import { useGuardRecordIndexInlineEdit } from '@/object-record/record-index/hooks/useGuardRecordIndexInlineEdit';
 import { RECORD_TABLE_ROW_HEIGHT } from '@/object-record/record-table/constants/RecordTableRowHeight';
+import { TABLE_Z_INDEX } from '@/object-record/record-table/constants/TableZIndex';
 import { useRecordTableRowContextOrThrow } from '@/object-record/record-table/contexts/RecordTableRowContext';
 import { RecordTableCellDisplayMode } from '@/object-record/record-table/record-table-cell/components/RecordTableCellDisplayMode';
 import { RecordTableCellEditButton } from '@/object-record/record-table/record-table-cell/components/RecordTableCellEditButton';
 import { RecordTableCellEditMode } from '@/object-record/record-table/record-table-cell/components/RecordTableCellEditMode';
 import { RecordTableCellFieldInput } from '@/object-record/record-table/record-table-cell/components/RecordTableCellFieldInput';
+import { RecordTableCellPortalRootContainer } from '@/object-record/record-table/record-table-cell/components/RecordTableCellPortalRootContainer';
+import { useGetSecondaryRecordTableCellButton } from '@/object-record/record-table/record-table-cell/hooks/useGetSecondaryRecordTableCellButton';
 
 import { isRecordTableRowActiveComponentFamilyState } from '@/object-record/record-table/states/isRecordTableRowActiveComponentFamilyState';
 import { recordTableHoverPositionComponentState } from '@/object-record/record-table/states/recordTableHoverPositionComponentState';
@@ -58,15 +62,25 @@ export const RecordTableCellHoveredPortalContent = () => {
   const isFirstColumn = recordTableHoverPosition?.column === 0;
 
   const { isRecordFieldReadOnly: isReadOnly } = useContext(FieldContext);
+  const { isInlineEditEnabled } = useGuardRecordIndexInlineEdit();
 
-  const isFieldInputOnly = useIsFieldInputOnly() && !isReadOnly;
+  const isFieldInputOnly =
+    useIsFieldInputOnly() && !isReadOnly && isInlineEditEnabled;
+
+  const secondaryButton = useGetSecondaryRecordTableCellButton();
+  const hasSecondaryButton = secondaryButton.length > 0;
+
+  const showMainButton = isFirstColumn || (isInlineEditEnabled && !isReadOnly);
 
   const showButton =
     !isFieldInputOnly &&
-    (!isReadOnly || isFirstColumn) &&
+    (showMainButton || hasSecondaryButton) &&
     !(isMobile && isFirstColumn);
 
-  const showInteractiveStyle = !isReadOnly || (isFirstColumn && showButton);
+  const showInteractiveStyle =
+    (isInlineEditEnabled && !isReadOnly) ||
+    (isFirstColumn && showButton) ||
+    hasSecondaryButton;
 
   const { rowIndex } = useRecordTableRowContextOrThrow();
 
@@ -75,23 +89,29 @@ export const RecordTableCellHoveredPortalContent = () => {
     rowIndex,
   );
 
+  if (!showButton && !isFieldInputOnly) {
+    return null;
+  }
+
   return (
-    <StyledRecordTableCellHoveredPortalContent
-      showInteractiveStyle={showInteractiveStyle}
-      isRecordTableRowActive={isRecordTableRowActive}
-    >
-      <FieldFocusStaticFocusedProvider>
-        {isFieldInputOnly ? (
-          <RecordTableCellEditMode>
-            <RecordTableCellFieldInput />
-          </RecordTableCellEditMode>
-        ) : (
-          <RecordTableCellDisplayMode>
-            <FieldDisplay />
-          </RecordTableCellDisplayMode>
-        )}
-      </FieldFocusStaticFocusedProvider>
-      {showButton && <RecordTableCellEditButton />}
-    </StyledRecordTableCellHoveredPortalContent>
+    <RecordTableCellPortalRootContainer zIndex={TABLE_Z_INDEX.hoverPortal}>
+      <StyledRecordTableCellHoveredPortalContent
+        showInteractiveStyle={showInteractiveStyle}
+        isRecordTableRowActive={isRecordTableRowActive}
+      >
+        <FieldFocusStaticFocusedProvider>
+          {isFieldInputOnly ? (
+            <RecordTableCellEditMode>
+              <RecordTableCellFieldInput />
+            </RecordTableCellEditMode>
+          ) : (
+            <RecordTableCellDisplayMode>
+              <FieldDisplay />
+            </RecordTableCellDisplayMode>
+          )}
+        </FieldFocusStaticFocusedProvider>
+        {showButton && <RecordTableCellEditButton />}
+      </StyledRecordTableCellHoveredPortalContent>
+    </RecordTableCellPortalRootContainer>
   );
 };

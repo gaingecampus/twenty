@@ -3,6 +3,7 @@ import { styled } from '@linaria/react';
 import { FieldContext } from '@/object-record/record-field/ui/contexts/FieldContext';
 import { useIsFieldEmpty } from '@/object-record/record-field/ui/hooks/useIsFieldEmpty';
 import { useIsFieldInputOnly } from '@/object-record/record-field/ui/hooks/useIsFieldInputOnly';
+import { useGuardRecordIndexInlineEdit } from '@/object-record/record-index/hooks/useGuardRecordIndexInlineEdit';
 import {
   useRecordInlineCellContext,
   type RecordInlineCellContextProps,
@@ -75,6 +76,7 @@ export const RecordInlineCellDisplayMode = ({
     useRecordInlineCellContext();
 
   const { isForbidden } = useContext(FieldContext);
+  const { isInlineEditEnabled } = useGuardRecordIndexInlineEdit();
 
   const isFieldEmpty = useIsFieldEmpty();
   const showEditButton =
@@ -82,7 +84,8 @@ export const RecordInlineCellDisplayMode = ({
     isHovered &&
     !readonly &&
     !isFieldEmpty &&
-    !editModeContentOnly;
+    !editModeContentOnly &&
+    isInlineEditEnabled;
 
   const isFieldInputOnly = useIsFieldInputOnly();
 

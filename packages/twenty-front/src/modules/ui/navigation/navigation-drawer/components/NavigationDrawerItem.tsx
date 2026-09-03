@@ -263,8 +263,10 @@ const StyledIcon = styled.div`
       --t-nav-icon-tile-radius,
       ${themeCssVariables.border.radius.sm}
     );
-    height: var(--t-nav-icon-tile-size, auto);
-    width: var(--t-nav-icon-tile-size, auto);
+    height: auto;
+    min-height: var(--t-nav-icon-tile-size, auto);
+    min-width: var(--t-nav-icon-tile-size, auto);
+    width: auto;
   }
 
   svg {

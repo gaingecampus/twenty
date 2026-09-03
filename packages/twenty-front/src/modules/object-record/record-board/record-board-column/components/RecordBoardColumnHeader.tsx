@@ -2,6 +2,7 @@ import { styled } from '@linaria/react';
 import { useContext, useState } from 'react';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 
+import { useGuardRecordIndexInlineEdit } from '@/object-record/record-index/hooks/useGuardRecordIndexInlineEdit';
 import { useObjectPermissionsForObject } from '@/object-record/hooks/useObjectPermissionsForObject';
 import { RecordBoardContext } from '@/object-record/record-board/contexts/RecordBoardContext';
 import { RecordBoardColumnDropdownMenu } from '@/object-record/record-board/record-board-column/components/RecordBoardColumnDropdownMenu';
@@ -100,6 +101,7 @@ export const RecordBoardColumnHeader = () => {
     objectMetadataItem.id,
   );
 
+  const { isInlineEditEnabled } = useGuardRecordIndexInlineEdit();
   const canCreateRecords = canCreateRecordsForObjectMetadataItem({
     objectPermissions,
     objectMetadataItem,
@@ -182,13 +184,15 @@ export const RecordBoardColumnHeader = () => {
                     });
                   }}
                 />
-                {canCreateRecords && !hasAnySoftDeleteFilterOnView && (
-                  <LightIconButton
-                    accent="tertiary"
-                    Icon={IconPlus}
-                    onClick={handleCreateNewRecordClick}
-                  />
-                )}
+                {isInlineEditEnabled &&
+                  canCreateRecords &&
+                  !hasAnySoftDeleteFilterOnView && (
+                    <LightIconButton
+                      accent="tertiary"
+                      Icon={IconPlus}
+                      onClick={handleCreateNewRecordClick}
+                    />
+                  )}
               </StyledHeaderActions>
             )}
           </StyledRightContainer>

@@ -1,3 +1,4 @@
+import { RecordIndexPageProvider } from '@/object-record/record-index/components/RecordIndexPageProvider';
 import { RecordIndexContextProvider } from '@/object-record/record-index/contexts/RecordIndexContext';
 
 import { getCommandMenuIdFromRecordIndexId } from '@/command-menu-item/utils/getCommandMenuIdFromRecordIndexId';
@@ -85,43 +86,45 @@ export const RecordIndexContainerGater = () => {
           fieldDefinitionByViewFieldId,
         }}
       >
-        <ViewComponentInstanceContext.Provider
-          value={{ instanceId: recordIndexId }}
-        >
-          <RecordComponentInstanceContextsWrapper
-            componentInstanceId={recordIndexId}
+        <RecordIndexPageProvider>
+          <ViewComponentInstanceContext.Provider
+            value={{ instanceId: recordIndexId }}
           >
-            <CommandMenuComponentInstanceContext.Provider
-              value={{
-                instanceId: getCommandMenuIdFromRecordIndexId(recordIndexId),
-              }}
+            <RecordComponentInstanceContextsWrapper
+              componentInstanceId={recordIndexId}
             >
-              <PageTitle title={objectMetadataItem.labelPlural} />
-              <PageCardLayout
-                header={<RecordIndexPageHeader />}
-                secondaryBar={
-                  hasObjectReadPermissions && <RecordIndexViewBar />
-                }
+              <CommandMenuComponentInstanceContext.Provider
+                value={{
+                  instanceId: getCommandMenuIdFromRecordIndexId(recordIndexId),
+                }}
               >
-                <StyledIndexContainer
-                  className={RECORD_INDEX_DRAG_SELECT_BOUNDARY_CLASS}
+                <PageTitle title={objectMetadataItem.labelPlural} />
+                <PageCardLayout
+                  header={<RecordIndexPageHeader />}
+                  secondaryBar={
+                    hasObjectReadPermissions && <RecordIndexViewBar />
+                  }
                 >
-                  {hasObjectReadPermissions ? (
-                    <>
-                      <RecordIndexContainerContextStoreNumberOfSelectedRecordsEffect />
-                      <RecordIndexContainer />
-                    </>
-                  ) : (
-                    <RecordIndexEmptyStateNotShared />
-                  )}
-                </StyledIndexContainer>
-              </PageCardLayout>
-            </CommandMenuComponentInstanceContext.Provider>
-          </RecordComponentInstanceContextsWrapper>
-          <RecordIndexLoadBaseOnContextStoreEffect />
-          <RecordIndexViewFieldsSSESyncEffect />
-          <RecordIndexRelationRollupFetchEffect />
-        </ViewComponentInstanceContext.Provider>
+                  <StyledIndexContainer
+                    className={RECORD_INDEX_DRAG_SELECT_BOUNDARY_CLASS}
+                  >
+                    {hasObjectReadPermissions ? (
+                      <>
+                        <RecordIndexContainerContextStoreNumberOfSelectedRecordsEffect />
+                        <RecordIndexContainer />
+                      </>
+                    ) : (
+                      <RecordIndexEmptyStateNotShared />
+                    )}
+                  </StyledIndexContainer>
+                </PageCardLayout>
+              </CommandMenuComponentInstanceContext.Provider>
+            </RecordComponentInstanceContextsWrapper>
+            <RecordIndexLoadBaseOnContextStoreEffect />
+            <RecordIndexViewFieldsSSESyncEffect />
+            <RecordIndexRelationRollupFetchEffect />
+          </ViewComponentInstanceContext.Provider>
+        </RecordIndexPageProvider>
       </RecordIndexContextProvider>
     </>
   );

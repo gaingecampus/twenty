@@ -9,6 +9,7 @@ import { useFocusedRecordBoardCard } from '@/object-record/record-board/hooks/us
 import { StopPropagationContainer } from '@/object-record/record-board/record-board-card/components/StopPropagationContainer';
 import { recordBoardCardIsExpandedComponentState } from '@/object-record/record-board/record-board-card/states/recordBoardCardIsExpandedComponentState';
 import { RecordCardHeaderContainer } from '@/object-record/record-card/components/RecordCardHeaderContainer';
+import { useGuardRecordIndexInlineEdit } from '@/object-record/record-index/hooks/useGuardRecordIndexInlineEdit';
 import { useOpenRecordFromIndexView } from '@/object-record/record-index/hooks/useOpenRecordFromIndexView';
 import { recordIndexOpenRecordInState } from '@/object-record/record-index/states/recordIndexOpenRecordInState';
 import { recordStoreFamilyState } from '@/object-record/record-store/states/recordStoreFamilyState';
@@ -74,6 +75,7 @@ export const RecordBoardCardHeader = () => {
   );
 
   const recordStore = useAtomFamilyStateValue(recordStoreFamilyState, recordId);
+  const { isInlineEditEnabled } = useGuardRecordIndexInlineEdit();
 
   const triggerEvent =
     recordIndexOpenRecordIn === ViewOpenRecordIn.SIDE_PANEL
@@ -113,19 +115,21 @@ export const RecordBoardCardHeader = () => {
           </StopPropagationContainer>
         </StyledCompactIconContainer>
       )}
-      <StyledCheckboxContainer className="checkbox-container">
-        <StopPropagationContainer>
-          <Checkbox
-            hoverable
-            checked={isRecordBoardCardSelected}
-            onChange={(value) => {
-              setIsRecordBoardCardSelected(value.target.checked);
-              checkIfLastUnselectAndCloseDropdown();
-            }}
-            variant={CheckboxVariant.Secondary}
-          />
-        </StopPropagationContainer>
-      </StyledCheckboxContainer>
+      {isInlineEditEnabled && (
+        <StyledCheckboxContainer className="checkbox-container">
+          <StopPropagationContainer>
+            <Checkbox
+              hoverable
+              checked={isRecordBoardCardSelected}
+              onChange={(value) => {
+                setIsRecordBoardCardSelected(value.target.checked);
+                checkIfLastUnselectAndCloseDropdown();
+              }}
+              variant={CheckboxVariant.Secondary}
+            />
+          </StopPropagationContainer>
+        </StyledCheckboxContainer>
+      )}
     </RecordCardHeaderContainer>
   );
 };

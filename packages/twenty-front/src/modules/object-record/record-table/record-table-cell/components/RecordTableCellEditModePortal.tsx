@@ -1,6 +1,7 @@
 import { RecordTableCellPortalWrapper } from '@/object-record/record-table/record-table-cell/components/RecordTableCellPortalWrapper';
 import { useAtomComponentStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomComponentStateValue';
 
+import { useGuardRecordIndexInlineEdit } from '@/object-record/record-index/hooks/useGuardRecordIndexInlineEdit';
 import { TABLE_Z_INDEX } from '@/object-record/record-table/constants/TableZIndex';
 import { RecordTableCellEditMode } from '@/object-record/record-table/record-table-cell/components/RecordTableCellEditMode';
 import { RecordTableCellFieldInput } from '@/object-record/record-table/record-table-cell/components/RecordTableCellFieldInput';
@@ -21,6 +22,7 @@ export const RecordTableCellEditModePortal = () => {
   );
 
   const cellFocusId = useCurrentlyFocusedRecordTableCellFocusId();
+  const { isInlineEditEnabled } = useGuardRecordIndexInlineEdit();
 
   if (!isDefined(recordTableFocusPosition) || !isDefined(cellFocusId)) {
     return null;
@@ -28,7 +30,7 @@ export const RecordTableCellEditModePortal = () => {
 
   return (
     <RecordTableCellPortalWrapper position={recordTableFocusPosition}>
-      {recordTableCellEditModePosition && (
+      {recordTableCellEditModePosition && isInlineEditEnabled && (
         <RecordTableCellPortalRootContainer
           zIndex={TABLE_Z_INDEX.cell.editMode}
         >

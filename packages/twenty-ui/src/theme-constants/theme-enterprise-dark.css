@@ -122,7 +122,7 @@ html.dark[data-ui-theme='enterprise'] {
   --t-nav-item-font-weight: 600;
   --t-nav-item-active-font-weight: 600;
   --t-nav-item-radius: 10px;
-  --t-nav-item-padding-x: 8px;
+  --t-nav-item-padding-x: 4px;
   --t-nav-item-padding-right-with-options: 8px;
   --t-nav-item-padding-y: 0px;
   --t-nav-item-icon-gap: 8px;

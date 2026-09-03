@@ -1,3 +1,4 @@
+import { useGuardRecordIndexInlineEdit } from '@/object-record/record-index/hooks/useGuardRecordIndexInlineEdit';
 import { useObjectPermissionsForObject } from '@/object-record/hooks/useObjectPermissionsForObject';
 import { useCurrentRecordGroupId } from '@/object-record/record-group/hooks/useCurrentRecordGroupId';
 import { recordGroupDefinitionFamilyState } from '@/object-record/record-group/states/recordGroupDefinitionFamilyState';
@@ -14,6 +15,7 @@ import { IconPlus } from 'twenty-ui/icon';
 
 export const RecordTableRecordGroupSectionAddNew = () => {
   const { objectMetadataItem } = useRecordTableContextOrThrow();
+  const { isInlineEditEnabled } = useGuardRecordIndexInlineEdit();
 
   const currentRecordGroupId = useCurrentRecordGroupId();
 
@@ -37,6 +39,10 @@ export const RecordTableRecordGroupSectionAddNew = () => {
   const objectPermissions = useObjectPermissionsForObject(
     objectMetadataItem.id,
   );
+
+  if (!isInlineEditEnabled) {
+    return null;
+  }
 
   if (
     !canCreateRecordsForObjectMetadataItem({

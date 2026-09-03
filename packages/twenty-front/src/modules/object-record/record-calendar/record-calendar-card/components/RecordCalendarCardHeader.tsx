@@ -3,6 +3,7 @@ import { StopPropagationContainer } from '@/object-record/record-board/record-bo
 import { useRecordCalendarContextOrThrow } from '@/object-record/record-calendar/contexts/RecordCalendarContext';
 import { RecordCardHeaderContainer } from '@/object-record/record-card/components/RecordCardHeaderContainer';
 import { isDraggingRecordComponentState } from '@/object-record/record-drag/states/isDraggingRecordComponentState';
+import { useGuardRecordIndexInlineEdit } from '@/object-record/record-index/hooks/useGuardRecordIndexInlineEdit';
 import { useOpenRecordFromIndexView } from '@/object-record/record-index/hooks/useOpenRecordFromIndexView';
 import { recordStoreFamilyState } from '@/object-record/record-store/states/recordStoreFamilyState';
 import { useAtomComponentFamilyState } from '@/ui/utilities/state/jotai/hooks/useAtomComponentFamilyState';
@@ -37,6 +38,7 @@ export const RecordCalendarCardHeader = ({
   const { objectMetadataItem } = useRecordCalendarContextOrThrow();
   const recordStore = useAtomFamilyStateValue(recordStoreFamilyState, recordId);
   const { openRecordFromIndexView } = useOpenRecordFromIndexView();
+  const { isInlineEditEnabled } = useGuardRecordIndexInlineEdit();
 
   const { currentView } = useGetCurrentViewOnly();
 
@@ -80,18 +82,20 @@ export const RecordCalendarCardHeader = ({
           />
         </StopPropagationContainer>
       </StyledRecordChipContainer>
-      <StyledCheckboxContainer className="checkbox-container">
-        <StopPropagationContainer>
-          <Checkbox
-            hoverable
-            checked={isRecordCalendarCardSelected}
-            onChange={(value) => {
-              setIsRecordCalendarCardSelected(value.target.checked);
-            }}
-            variant={CheckboxVariant.Secondary}
-          />
-        </StopPropagationContainer>
-      </StyledCheckboxContainer>
+      {isInlineEditEnabled && (
+        <StyledCheckboxContainer className="checkbox-container">
+          <StopPropagationContainer>
+            <Checkbox
+              hoverable
+              checked={isRecordCalendarCardSelected}
+              onChange={(value) => {
+                setIsRecordCalendarCardSelected(value.target.checked);
+              }}
+              variant={CheckboxVariant.Secondary}
+            />
+          </StopPropagationContainer>
+        </StyledCheckboxContainer>
+      )}
     </RecordCardHeaderContainer>
   );
 };

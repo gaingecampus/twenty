@@ -1,4 +1,7 @@
+import { useContext } from 'react';
+
 import { useDeleteOneRecord } from '@/object-record/hooks/useDeleteOneRecord';
+import { IsRecordIndexPageContext } from '@/object-record/record-index/components/RecordIndexPageProvider';
 import { useOpenRecordFromIndexView } from '@/object-record/record-index/hooks/useOpenRecordFromIndexView';
 import { RecordTable } from '@/object-record/record-table/components/RecordTable';
 import { RecordTableComponentInstance } from '@/object-record/record-table/components/RecordTableComponentInstance';
@@ -12,6 +15,7 @@ import { PageFocusId } from '@/types/PageFocusId';
 import { useHotkeysOnFocusedElement } from '@/ui/utilities/hotkey/hooks/useHotkeysOnFocusedElement';
 import { ScrollWrapper } from '@/ui/utilities/scroll/components/ScrollWrapper';
 import { styled } from '@linaria/react';
+import { themeCssVariables } from 'twenty-ui/theme-constants';
 
 const StyledRecordTablePrintBoundary = styled.div`
   display: contents;
@@ -21,6 +25,16 @@ const StyledRecordTablePrintBoundary = styled.div`
     max-height: 100vh;
     overflow: hidden;
   }
+`;
+
+// oxlint-disable-next-line twenty/no-hardcoded-colors
+const StyledRecordIndexTableInset = styled.div`
+  background: #f8f8fb;
+  box-sizing: border-box;
+  height: 100%;
+  min-height: 0;
+  padding: ${themeCssVariables.spacing[6]};
+  width: 100%;
 `;
 
 type RecordTableWithWrappersProps = {
@@ -61,6 +75,16 @@ export const RecordTableWithWrappers = ({
   };
 
   const { deleteOneRecord } = useDeleteOneRecord({ objectNameSingular });
+  const isRecordIndexPage = useContext(IsRecordIndexPageContext);
+
+  const recordTable = (
+    <ScrollWrapper
+      componentInstanceId={`record-table-scroll-${recordTableId}`}
+    >
+      <RecordTableRecordLimitReloadEffect />
+      <RecordTable />
+    </ScrollWrapper>
+  );
 
   return (
     <RecordTableComponentInstance recordTableId={recordTableId}>
@@ -72,12 +96,13 @@ export const RecordTableWithWrappers = ({
       >
         <EntityDeleteContext.Provider value={deleteOneRecord}>
           <StyledRecordTablePrintBoundary>
-            <ScrollWrapper
-              componentInstanceId={`record-table-scroll-${recordTableId}`}
-            >
-              <RecordTableRecordLimitReloadEffect />
-              <RecordTable />
-            </ScrollWrapper>
+            {isRecordIndexPage ? (
+              <StyledRecordIndexTableInset>
+                {recordTable}
+              </StyledRecordIndexTableInset>
+            ) : (
+              recordTable
+            )}
           </StyledRecordTablePrintBoundary>
         </EntityDeleteContext.Provider>
       </RecordTableContextProvider>

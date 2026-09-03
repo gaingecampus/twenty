@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { useRecordTableContextOrThrow } from '@/object-record/record-table/contexts/RecordTableContext';
+import { useIsRecordTableAddColumnButtonHidden } from '@/object-record/record-table/hooks/useIsRecordTableAddColumnButtonHidden';
 import { RecordTableHeaderAddColumnButton } from '@/object-record/record-table/record-table-header/components/RecordTableHeaderAddColumnButton';
 import { RecordTableHeaderCell } from '@/object-record/record-table/record-table-header/components/RecordTableHeaderCell';
 import { RecordTableHeaderEmptyLastColumn } from '@/object-record/record-table/record-table-header/components/RecordTableHeaderEmptyLastColumn';
@@ -21,6 +22,8 @@ export const RecordTableHeaderDnd = () => {
   const isRecordTableColumnHeadersReadOnly = useAtomComponentStateValue(
     isRecordTableColumnHeadersReadOnlyComponentState,
   );
+  const isRecordTableAddColumnButtonHidden =
+    useIsRecordTableAddColumnButtonHidden();
 
   const firstScrollableRecordField = visibleRecordFields[1];
 
@@ -84,7 +87,7 @@ export const RecordTableHeaderDnd = () => {
       </RecordTableHeaderDroppableSlot>
       {isRecordTableColumnHeadersReadOnly ? (
         <RecordTableHeaderEmptyLastColumn />
-      ) : (
+      ) : isRecordTableAddColumnButtonHidden ? null : (
         <RecordTableHeaderAddColumnButton />
       )}
       <RecordTableHeaderLastEmptyColumn />

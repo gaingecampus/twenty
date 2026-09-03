@@ -14,6 +14,8 @@ import { TABLE_Z_INDEX } from '@/object-record/record-table/constants/TableZInde
 import { useRecordTableContextOrThrow } from '@/object-record/record-table/contexts/RecordTableContext';
 import { RecordTableRowDraggableContextProvider } from '@/object-record/record-table/contexts/RecordTableRowDraggableContext';
 import { useRecordTableLastColumnWidthToFill } from '@/object-record/record-table/hooks/useRecordTableLastColumnWidthToFill';
+import { useIsRecordTableCheckboxColumnHidden } from '@/object-record/record-table/hooks/useIsRecordTableCheckboxColumnHidden';
+import { useIsRecordTableDragColumnHidden } from '@/object-record/record-table/hooks/useIsRecordTableDragColumnHidden';
 import { RecordTableCellCheckbox } from '@/object-record/record-table/record-table-cell/components/RecordTableCellCheckbox';
 import { RecordTableCellDragAndDrop } from '@/object-record/record-table/record-table-cell/components/RecordTableCellDragAndDrop';
 import { RecordTableLastEmptyCell } from '@/object-record/record-table/record-table-cell/components/RecordTableLastEmptyCell';
@@ -143,6 +145,11 @@ export const RecordTableBodyVirtualizedDraggableClone = ({
 
   const { visibleRecordFields } = useRecordTableContextOrThrow();
 
+  const isRecordTableDragColumnHidden = useIsRecordTableDragColumnHidden();
+
+  const isRecordTableCheckboxColumnHidden =
+    useIsRecordTableCheckboxColumnHidden();
+
   const { isSecondaryDragged } = useIsTableRowSecondaryDragged(recordId);
 
   const columnWidthStyles = useMemo(() => {
@@ -189,8 +196,8 @@ export const RecordTableBodyVirtualizedDraggableClone = ({
             dragHandleProps: draggableProvided.dragHandleProps,
           }}
         >
-          <RecordTableCellDragAndDrop />
-          <RecordTableCellCheckbox />
+          {!isRecordTableDragColumnHidden && <RecordTableCellDragAndDrop />}
+          {!isRecordTableCheckboxColumnHidden && <RecordTableCellCheckbox />}
           <RecordTableFieldsCells />
           <RecordTablePlusButtonCellPlaceholder />
           <RecordTableLastEmptyCell />

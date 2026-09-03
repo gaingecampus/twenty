@@ -5,6 +5,7 @@ import { FieldDisplay } from '@/object-record/record-field/ui/components/FieldDi
 import { FieldInput } from '@/object-record/record-field/ui/components/FieldInput';
 import { FieldContext } from '@/object-record/record-field/ui/contexts/FieldContext';
 import { useOpenFieldInputEditMode } from '@/object-record/record-field/ui/hooks/useOpenFieldInputEditMode';
+import { useGuardRecordIndexInlineEdit } from '@/object-record/record-index/hooks/useGuardRecordIndexInlineEdit';
 import { useRecordInlineCellContext } from '@/object-record/record-inline-cell/components/RecordInlineCellContext';
 import { RecordInlineCellDisplayMode } from '@/object-record/record-inline-cell/components/RecordInlineCellDisplayMode';
 import { RecordInlineCellHoveredPortalContent } from '@/object-record/record-inline-cell/components/RecordInlineCellHoveredPortalContent';
@@ -19,6 +20,8 @@ export const RecordGalleryCardCellHoveredPortalContent = () => {
 
   const { isRecordFieldReadOnly, recordId, fieldDefinition } =
     useContext(FieldContext);
+  const { isInlineEditEnabled, assertInlineEditAllowed } =
+    useGuardRecordIndexInlineEdit();
 
   const { openInlineCell } = useInlineCell(
     getRecordFieldInputInstanceId({
@@ -28,9 +31,6 @@ export const RecordGalleryCardCellHoveredPortalContent = () => {
     }),
   );
 
-  const shouldContainerBeClickable =
-    !isRecordFieldReadOnly && !editModeContentOnly;
-
   const [recordGalleryCardHoverPosition, setRecordGalleryCardHoverPosition] =
     useAtomComponentState(recordGalleryCardHoverPositionComponentState);
 
@@ -39,18 +39,30 @@ export const RecordGalleryCardCellHoveredPortalContent = () => {
   );
   const { openFieldInput } = useOpenFieldInputEditMode();
 
-  const handleClick = () => {
-    if (shouldContainerBeClickable) {
-      openInlineCell();
-      setRecordGalleryCardEditModePosition(recordGalleryCardHoverPosition);
+  const shouldShowFieldInput = editModeContentOnly && isInlineEditEnabled;
 
-      openFieldInput({
-        fieldDefinition,
-        recordId,
-        prefix: RECORD_GALLERY_CARD_INPUT_ID_PREFIX,
-        onFileUploadClose: () => setRecordGalleryCardEditModePosition(null),
-      });
+  const handleClick = () => {
+    if (isRecordFieldReadOnly) {
+      return;
     }
+
+    if (!assertInlineEditAllowed()) {
+      return;
+    }
+
+    if (editModeContentOnly) {
+      return;
+    }
+
+    openInlineCell();
+    setRecordGalleryCardEditModePosition(recordGalleryCardHoverPosition);
+
+    openFieldInput({
+      fieldDefinition,
+      recordId,
+      prefix: RECORD_GALLERY_CARD_INPUT_ID_PREFIX,
+      onFileUploadClose: () => setRecordGalleryCardEditModePosition(null),
+    });
   };
 
   const handleMouseLeave = () => {
@@ -64,7 +76,7 @@ export const RecordGalleryCardCellHoveredPortalContent = () => {
       onMouseLeave={handleMouseLeave}
     >
       <RecordInlineCellDisplayMode isHovered={true} onClick={handleClick}>
-        {editModeContentOnly ? <FieldInput /> : <FieldDisplay />}
+        {shouldShowFieldInput ? <FieldInput /> : <FieldDisplay />}
       </RecordInlineCellDisplayMode>
     </RecordInlineCellHoveredPortalContent>
   );

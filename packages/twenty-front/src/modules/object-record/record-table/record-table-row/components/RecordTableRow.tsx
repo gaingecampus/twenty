@@ -1,8 +1,7 @@
 import { RecordTableDraggableTr } from '@/object-record/record-table/record-table-row/components/RecordTableDraggableTr';
 import { RecordTableRowCells } from '@/object-record/record-table/record-table-row/components/RecordTableRowCells';
 import { RecordTableStaticTr } from '@/object-record/record-table/record-table-row/components/RecordTableStaticTr';
-import { isRecordTableDragColumnHiddenComponentState } from '@/object-record/record-table/states/isRecordTableDragColumnHiddenComponentState';
-import { useAtomComponentStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomComponentStateValue';
+import { useIsRecordTableDragColumnHidden } from '@/object-record/record-table/hooks/useIsRecordTableDragColumnHidden';
 
 type RecordTableRowProps = {
   recordId: string;
@@ -15,9 +14,7 @@ export const RecordTableRow = ({
   rowIndexForFocus,
   rowIndexForDrag,
 }: RecordTableRowProps) => {
-  const isRecordTableDragColumnHidden = useAtomComponentStateValue(
-    isRecordTableDragColumnHiddenComponentState,
-  );
+  const isRecordTableDragColumnHidden = useIsRecordTableDragColumnHidden();
 
   if (isRecordTableDragColumnHidden) {
     return (

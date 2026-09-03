@@ -7,6 +7,12 @@ import { SpreadsheetImportProvider } from '@/spreadsheet-import/provider/compone
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 import { ViewBar } from '@/views/components/ViewBar';
 import { ViewType } from '@/views/types/ViewType';
+import { styled } from '@linaria/react';
+
+// oxlint-disable-next-line twenty/no-hardcoded-colors
+const StyledViewBar = styled(ViewBar)`
+  background: #f8f8fb;
+`;
 
 export const RecordIndexViewBar = () => {
   const recordIndexViewType = useAtomStateValue(recordIndexViewTypeState);
@@ -19,7 +25,7 @@ export const RecordIndexViewBar = () => {
 
   return (
     <SpreadsheetImportProvider>
-      <ViewBar
+      <StyledViewBar
         isReadOnly={hasCurrentViewNonReadableFields}
         viewBarId={recordIndexId}
         optionsDropdownButton={
