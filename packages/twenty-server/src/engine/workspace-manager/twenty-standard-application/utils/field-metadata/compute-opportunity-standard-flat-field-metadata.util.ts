@@ -142,6 +142,10 @@ export const buildOpportunityStandardFlatFieldMetadatas = ({
       description: i18nLabel(msg`Opportunity amount`),
       icon: 'IconCurrencyDollar',
       isNullable: true,
+      settings: {
+        format: 'full',
+        decimals: 0,
+      },
     },
     standardObjectMetadataRelatedEntityIds,
     dependencyFlatEntityMaps,

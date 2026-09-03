@@ -196,6 +196,10 @@ export const buildCompanyStandardFlatFieldMetadatas = ({
       description: i18nLabel(msg`The company's total annual revenue`),
       icon: 'IconMoneybag',
       isNullable: true,
+      settings: {
+        format: 'full',
+        decimals: 0,
+      },
     },
     standardObjectMetadataRelatedEntityIds,
     dependencyFlatEntityMaps,
