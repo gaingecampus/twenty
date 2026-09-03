@@ -1,4 +1,5 @@
 import { styled } from '@linaria/react';
+import { isNonEmptyString } from '@sniptt/guards';
 import { useContext, type ReactNode } from 'react';
 
 import { FieldContext } from '@/object-record/record-field/ui/contexts/FieldContext';
@@ -23,7 +24,7 @@ const StyledBaseContainer = styled.div<{
   overflow: visible;
   position: relative;
 
-  user-select: none;
+  user-select: text;
 
   &:hover {
     color: ${({ isReadOnly, fontColorSecondary }) =>
@@ -63,6 +64,10 @@ export const RecordTableCellBaseContainer = ({
   );
 
   const handleContainerClick = () => {
+    if (isNonEmptyString(window.getSelection()?.toString())) {
+      return;
+    }
+
     openTableCell();
   };
 

@@ -1,7 +1,9 @@
+import { isNonEmptyString } from '@sniptt/guards';
+import { useContext, type ReactNode } from 'react';
+
 import { FieldContext } from '@/object-record/record-field/ui/contexts/FieldContext';
 import { useRecordTableBodyContextOrThrow } from '@/object-record/record-table/contexts/RecordTableBodyContext';
 import { useOpenRecordTableCellFromCell } from '@/object-record/record-table/record-table-cell/hooks/useOpenRecordTableCellFromCell';
-import { useContext, type ReactNode } from 'react';
 import { RecordTableCellDisplayContainer } from './RecordTableCellDisplayContainer';
 
 export const RecordTableCellDisplayMode = ({
@@ -22,6 +24,11 @@ export const RecordTableCellDisplayMode = ({
 
   const handleClick = (event: React.MouseEvent) => {
     event.stopPropagation();
+
+    if (isNonEmptyString(window.getSelection()?.toString())) {
+      return;
+    }
+
     if (!isReadOnly) {
       openTableCell();
     }

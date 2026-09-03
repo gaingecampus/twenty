@@ -8,8 +8,11 @@ import {
 import { isFieldEmails } from '@/object-record/record-field/ui/types/guards/isFieldEmails';
 import { isFieldLinks } from '@/object-record/record-field/ui/types/guards/isFieldLinks';
 import { isFieldPhones } from '@/object-record/record-field/ui/types/guards/isFieldPhones';
+import { isFieldText } from '@/object-record/record-field/ui/types/guards/isFieldText';
+import { isFieldTextValue } from '@/object-record/record-field/ui/types/guards/isFieldTextValue';
 import { useRecordFieldValue } from '@/object-record/record-store/hooks/useRecordFieldValue';
 import { t } from '@lingui/core/macro';
+import { isNonEmptyString } from '@sniptt/guards';
 import { useContext } from 'react';
 import { FieldMetadataSettingsOnClickAction } from 'twenty-shared/types';
 import { ensureAbsoluteUrl, isDefined } from 'twenty-shared/utils';
@@ -25,8 +28,23 @@ export const useGetSecondaryRecordTableCellButton = () => {
   const { openEmail } = useOpenEmailInAppOrFallback({ skip: !isEmailField });
 
   const fieldValue = useRecordFieldValue<
-    FieldPhonesValue | FieldEmailsValue | FieldLinksValue | undefined
+    FieldPhonesValue | FieldEmailsValue | FieldLinksValue | string | undefined
   >(recordId, fieldDefinition.metadata.fieldName, fieldDefinition);
+
+  if (
+    isFieldText(fieldDefinition) &&
+    isFieldTextValue(fieldValue) &&
+    isNonEmptyString(fieldValue)
+  ) {
+    return [
+      {
+        onClick: () => {
+          copyToClipboard(fieldValue, t`Text copied to clipboard`);
+        },
+        Icon: IconCopy,
+      },
+    ];
+  }
 
   if (
     (!isFieldPhones(fieldDefinition) &&
