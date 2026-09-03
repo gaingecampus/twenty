@@ -52,13 +52,15 @@ export const RecordIndexPageSizeDropdown = () => {
     closeDropdown(RECORD_INDEX_PAGE_SIZE_DROPDOWN_ID);
   };
 
+  const getPageSizeLabel = (pageSize: number) => t`${pageSize} per page`;
+
   return (
     <Dropdown
       dropdownId={RECORD_INDEX_PAGE_SIZE_DROPDOWN_ID}
       dropdownOffset={{ y: DROPDOWN_OFFSET_Y }}
       clickableComponent={
         <StyledHeaderDropdownButton isUnfolded={isDropdownOpen}>
-          {t`${recordIndexPageSize} per page`}
+          {getPageSizeLabel(recordIndexPageSize)}
         </StyledHeaderDropdownButton>
       }
       dropdownComponents={
@@ -68,7 +70,7 @@ export const RecordIndexPageSizeDropdown = () => {
               <MenuItemSelect
                 key={recordIndexPageSizeOption}
                 selected={recordIndexPageSizeOption === recordIndexPageSize}
-                text={t`${recordIndexPageSizeOption} per page`}
+                text={getPageSizeLabel(recordIndexPageSizeOption)}
                 onClick={() => handlePageSizeChange(recordIndexPageSizeOption)}
               />
             ))}

@@ -20,13 +20,18 @@ const StyledPaginationBar = styled.div`
   display: flex;
   flex-shrink: 0;
   gap: ${themeCssVariables.spacing[2]};
-  justify-content: center;
-  padding-top: ${themeCssVariables.spacing[2]};
+  justify-content: space-between;
+  padding-top: ${themeCssVariables.spacing[3]};
 `;
 
 const StyledRange = styled.span`
-  color: ${themeCssVariables.font.color.tertiary};
-  font-size: ${themeCssVariables.font.size.sm};
+  color: ${themeCssVariables.font.color.secondary};
+  font-size: var(--t-toolbar-chip-font-size, ${themeCssVariables.font.size.sm});
+  font-weight: var(
+    --t-toolbar-chip-font-weight,
+    ${themeCssVariables.font.weight.medium}
+  );
+  white-space: nowrap;
 `;
 
 const StyledPageControls = styled.div`
@@ -62,6 +67,12 @@ const StyledPaginationButton = styled(StyledHeaderDropdownButton)`
         ? themeCssVariables.font.color.inverted
         : themeCssVariables.font.color.secondary};
   }
+`;
+
+const StyledNavButton = styled(StyledPaginationButton)`
+  gap: var(--t-button-gap, ${themeCssVariables.spacing[2]});
+  min-width: unset;
+  white-space: nowrap;
 `;
 
 const StyledEllipsis = styled.span`
@@ -104,16 +115,17 @@ export const RecordIndexPaginationBar = () => {
   return (
     <StyledPaginationBar>
       <StyledRange>
-        {t`${formatNumber(from)}–${formatNumber(to)} / ${formatNumber(recordIndexTotalCount)}`}
+        {t`${formatNumber(from)}–${formatNumber(to)} of ${formatNumber(recordIndexTotalCount)} records`}
       </StyledRange>
       <StyledPageControls>
-        <StyledPaginationButton
-          aria-label={t`Previous page`}
+        <StyledNavButton
           disabled={recordIndexCurrentPage <= 1}
           onClick={() => setRecordIndexCurrentPage(recordIndexCurrentPage - 1)}
+          type="button"
         >
           <IconChevronLeft size={16} />
-        </StyledPaginationButton>
+          {t`Previous`}
+        </StyledNavButton>
         {visiblePageNumbers.map((visiblePageNumber, index) =>
           visiblePageNumber === 'ellipsis' ? (
             <StyledEllipsis key={`ellipsis-${index}`}>…</StyledEllipsis>
@@ -122,18 +134,20 @@ export const RecordIndexPaginationBar = () => {
               key={visiblePageNumber}
               isActive={visiblePageNumber === recordIndexCurrentPage}
               onClick={() => setRecordIndexCurrentPage(visiblePageNumber)}
+              type="button"
             >
               {visiblePageNumber}
             </StyledPaginationButton>
           ),
         )}
-        <StyledPaginationButton
-          aria-label={t`Next page`}
+        <StyledNavButton
           disabled={recordIndexCurrentPage >= pageCount}
           onClick={() => setRecordIndexCurrentPage(recordIndexCurrentPage + 1)}
+          type="button"
         >
+          {t`Next`}
           <IconChevronRight size={16} />
-        </StyledPaginationButton>
+        </StyledNavButton>
       </StyledPageControls>
     </StyledPaginationBar>
   );

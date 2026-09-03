@@ -234,11 +234,24 @@ msgstr ""
 msgid "{0} of {1}"
 msgstr ""
 
+#. js-lingui-id: k7H4MD
+#. placeholder {0}: formatNumber(from)
+#. placeholder {1}: formatNumber(to)
+#. placeholder {2}: formatNumber(recordIndexTotalCount)
+#: src/modules/object-record/record-index/components/RecordIndexPaginationBar.tsx
+msgid "{0}–{1} of {2} records"
+msgstr "총 {2}건 중 {0}–{1}건"
+
 #. js-lingui-id: BzvoVr
 #. placeholder {0}: preview.topicUnsubscribed
 #: src/modules/activities/emails/components/CampaignComposerFields.tsx
 msgid "{0} opted out of this topic"
 msgstr ""
+
+#. placeholder {pageSize}: pageSize
+#: src/modules/object-record/record-index/components/RecordIndexPageSizeDropdown.tsx
+msgid "{pageSize} per page"
+msgstr "{pageSize}개씩 보기"
 
 #. js-lingui-id: fvImQM
 #. placeholder {0}: formatNumber(contextStoreNumberOfSelectedRecords)
