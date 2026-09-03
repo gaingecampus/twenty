@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import { useStore } from 'jotai';
 
 import { useLazyFindManyRecordsWithOffset } from '@/object-record/hooks/useLazyFindManyRecordsWithOffset';
+import { useIsRecordIndexPaginationEnabled } from '@/object-record/record-index/hooks/useIsRecordIndexPaginationEnabled';
 import { useUpsertRecordsInStore } from '@/object-record/record-store/hooks/useUpsertRecordsInStore';
 import { useRecordTableContextOrThrow } from '@/object-record/record-table/contexts/RecordTableContext';
 import { TABLE_VIRTUALIZATION_NUMBER_OF_RECORDS_PER_PAGE } from '@/object-record/record-table/virtualization/constants/TableVirtualizationNumberOfRecordsPerPage';
@@ -24,6 +25,7 @@ const TIME_BETWEEN_TWO_REQUETS = 25;
 export const useTriggerFetchPages = () => {
   const { objectNameSingular } = useRecordTableContextOrThrow();
   const { scrollWrapperHTMLElement } = useScrollWrapperHTMLElement();
+  const isRecordIndexPaginationEnabled = useIsRecordIndexPaginationEnabled();
 
   const { upsertRecordsInStore } = useUpsertRecordsInStore();
 
@@ -53,6 +55,10 @@ export const useTriggerFetchPages = () => {
   const store = useStore();
 
   const triggerFetchPagesWithoutDebounce = useCallback(async () => {
+    if (isRecordIndexPaginationEnabled) {
+      return;
+    }
+
     const lowDetailsActivated = store.get(lowDetailsActivatedCallbackState);
 
     if (lowDetailsActivated) {
@@ -178,6 +184,7 @@ export const useTriggerFetchPages = () => {
     scrollWrapperHTMLElement,
     lowDetailsActivatedCallbackState,
     store,
+    isRecordIndexPaginationEnabled,
   ]);
 
   const triggerFetchPages = useDebouncedCallback(

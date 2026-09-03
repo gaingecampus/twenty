@@ -1,13 +1,21 @@
 import { useStore } from 'jotai';
 import { useCallback } from 'react';
 
+import { useLazyFindManyRecordsWithOffset } from '@/object-record/hooks/useLazyFindManyRecordsWithOffset';
 import { useRecordIndexContextOrThrow } from '@/object-record/record-index/contexts/RecordIndexContext';
+import { useIsRecordIndexPaginationEnabled } from '@/object-record/record-index/hooks/useIsRecordIndexPaginationEnabled';
 import { useRecordIndexTableLazyQuery } from '@/object-record/record-index/hooks/useRecordIndexTableLazyQuery';
+import { recordIndexCurrentPageComponentState } from '@/object-record/record-index/states/recordIndexCurrentPageComponentState';
+import { recordIndexPageSizeState } from '@/object-record/record-index/states/recordIndexPageSizeState';
 import { recordIndexRecordIdsByGroupComponentFamilyState } from '@/object-record/record-index/states/recordIndexRecordIdsByGroupComponentFamilyState';
+import { recordIndexTotalCountComponentState } from '@/object-record/record-index/states/recordIndexTotalCountComponentState';
 import {
   NO_RECORD_GROUP_FAMILY_KEY,
   recordIndexAllRecordIdsComponentSelector,
 } from '@/object-record/record-index/states/selectors/recordIndexAllRecordIdsComponentSelector';
+import { clampRecordIndexPage } from '@/object-record/record-index/utils/clampRecordIndexPage';
+import { getRecordIndexPageCount } from '@/object-record/record-index/utils/getRecordIndexPageCount';
+import { getRecordIndexPageOffset } from '@/object-record/record-index/utils/getRecordIndexPageOffset';
 import { useUpsertRecordsInStore } from '@/object-record/record-store/hooks/useUpsertRecordsInStore';
 import { RECORD_TABLE_HORIZONTAL_SCROLL_SHADOW_VISIBILITY_CSS_VARIABLE_NAME } from '@/object-record/record-table/constants/RecordTableHorizontalScrollShadowVisibilityCssVariableName';
 import { RECORD_TABLE_VERTICAL_SCROLL_SHADOW_VISIBILITY_CSS_VARIABLE_NAME } from '@/object-record/record-table/constants/RecordTableVerticalScrollShadowVisibilityCssVariableName';
@@ -42,8 +50,14 @@ export const useTriggerInitialRecordTableDataLoad = () => {
 
   const { recordLimit } = useRecordIndexContextOrThrow();
 
+  const isRecordIndexPaginationEnabled = useIsRecordIndexPaginationEnabled();
+
   const { findManyRecordsLazy } =
     useRecordIndexTableLazyQuery(objectNameSingular);
+
+  const { findManyRecordsLazyWithOffset } = useLazyFindManyRecordsWithOffset({
+    objectNameSingular,
+  });
 
   const isInitializingVirtualTableDataLoadingCallbackState =
     useAtomComponentStateCallbackState(
@@ -116,6 +130,13 @@ export const useTriggerInitialRecordTableDataLoad = () => {
       totalNumberOfRecordsToVirtualizeComponentState,
     );
 
+  const recordIndexCurrentPageCallbackState =
+    useAtomComponentStateCallbackState(recordIndexCurrentPageComponentState);
+
+  const recordIndexTotalCountCallbackState = useAtomComponentStateCallbackState(
+    recordIndexTotalCountComponentState,
+  );
+
   const triggerInitialRecordTableDataLoad = useCallback(
     async ({
       shouldScrollToStart = true,
@@ -177,18 +198,55 @@ export const useTriggerInitialRecordTableDataLoad = () => {
           [],
         );
 
-        const { records: findManyRecords, totalCount: findManyTotalCount } =
-          await findManyRecordsLazy();
+        if (isRecordIndexPaginationEnabled) {
+          const pageSize = store.get(recordIndexPageSizeState.atom);
+          const requestedPage = store.get(recordIndexCurrentPageCallbackState);
+          const offset = getRecordIndexPageOffset(requestedPage, pageSize);
 
-        records = findManyRecords;
-        totalCount = findManyTotalCount;
+          const paginatedResult = await findManyRecordsLazyWithOffset(
+            pageSize,
+            offset,
+          );
 
-        store.set(
-          totalNumberOfRecordsToVirtualizeCallbackState,
-          isDefined(recordLimit)
-            ? Math.min(totalCount, recordLimit)
-            : totalCount,
-        );
+          records = paginatedResult.records;
+          totalCount = paginatedResult.totalCount;
+
+          store.set(recordIndexTotalCountCallbackState, totalCount);
+
+          const pageCount = getRecordIndexPageCount(totalCount, pageSize);
+          const clampedPage = clampRecordIndexPage(requestedPage, pageCount);
+
+          if (clampedPage !== requestedPage) {
+            store.set(recordIndexCurrentPageCallbackState, clampedPage);
+
+            const clampedResult = await findManyRecordsLazyWithOffset(
+              pageSize,
+              getRecordIndexPageOffset(clampedPage, pageSize),
+            );
+
+            records = clampedResult.records;
+          }
+
+          store.set(
+            totalNumberOfRecordsToVirtualizeCallbackState,
+            records?.length ?? 0,
+          );
+        } else {
+          const { records: findManyRecords, totalCount: findManyTotalCount } =
+            await findManyRecordsLazy();
+
+          records = findManyRecords;
+          totalCount = findManyTotalCount;
+
+          store.set(recordIndexTotalCountCallbackState, totalCount);
+
+          store.set(
+            totalNumberOfRecordsToVirtualizeCallbackState,
+            isDefined(recordLimit)
+              ? Math.min(totalCount, recordLimit)
+              : totalCount,
+          );
+        }
 
         if (isDefined(records)) {
           upsertRecordsInStore({ partialRecords: records });
@@ -238,14 +296,18 @@ export const useTriggerInitialRecordTableDataLoad = () => {
       setIsRecordTableScrolledVertically,
       scrollTableToPosition,
       findManyRecordsLazy,
+      findManyRecordsLazyWithOffset,
       dataLoadingStatusByRealIndexCallbackState,
       recordIdByRealIndexCallbackState,
       totalNumberOfRecordsToVirtualizeCallbackState,
+      recordIndexCurrentPageCallbackState,
+      recordIndexTotalCountCallbackState,
       upsertRecordsInStore,
       loadRecordsToVirtualRows,
       reapplyRowSelection,
       recordTableId,
       recordLimit,
+      isRecordIndexPaginationEnabled,
     ],
   );
 

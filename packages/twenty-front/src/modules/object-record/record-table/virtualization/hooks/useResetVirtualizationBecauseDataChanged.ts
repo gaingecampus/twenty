@@ -6,7 +6,9 @@ import { useLazyFindManyRecords } from '@/object-record/hooks/useLazyFindManyRec
 import { useRelevantRecordsGqlFields } from '@/object-record/record-field/hooks/useRelevantRecordsGqlFields';
 
 import { useFindManyRecordIndexTableParams } from '@/object-record/record-index/hooks/useFindManyRecordIndexTableParams';
+import { useIsRecordIndexPaginationEnabled } from '@/object-record/record-index/hooks/useIsRecordIndexPaginationEnabled';
 import { useTriggerFetchPages } from '@/object-record/record-table/virtualization/hooks/useTriggerFetchPages';
+import { useTriggerInitialRecordTableDataLoad } from '@/object-record/record-table/virtualization/hooks/useTriggerInitialRecordTableDataLoad';
 import { dataLoadingStatusByRealIndexComponentState } from '@/object-record/record-table/virtualization/states/dataLoadingStatusByRealIndexComponentState';
 import { dataPagesLoadedComponentState } from '@/object-record/record-table/virtualization/states/dataPagesLoadedComponentState';
 import { lastScrollPositionComponentState } from '@/object-record/record-table/virtualization/states/lastScrollPositionComponentState';
@@ -51,6 +53,11 @@ export const useResetVirtualizationBecauseDataChanged = (
   );
 
   const { triggerFetchPagesWithoutDebounce } = useTriggerFetchPages();
+
+  const { triggerInitialRecordTableDataLoad } =
+    useTriggerInitialRecordTableDataLoad();
+
+  const isRecordIndexPaginationEnabled = useIsRecordIndexPaginationEnabled();
 
   const lastScrollPositionCallbackState = useAtomComponentStateCallbackState(
     lastScrollPositionComponentState,
@@ -140,12 +147,25 @@ export const useResetVirtualizationBecauseDataChanged = (
   ]);
 
   const resetVirtualizationBecauseDataChanged = useCallback(async () => {
+    if (isRecordIndexPaginationEnabled) {
+      await triggerInitialRecordTableDataLoad({
+        shouldScrollToStart: false,
+      });
+
+      return;
+    }
+
     await resetVirtualization();
 
     await sleep(50);
 
     await triggerFetchPagesWithoutDebounce();
-  }, [resetVirtualization, triggerFetchPagesWithoutDebounce]);
+  }, [
+    isRecordIndexPaginationEnabled,
+    resetVirtualization,
+    triggerFetchPagesWithoutDebounce,
+    triggerInitialRecordTableDataLoad,
+  ]);
 
   return {
     resetVirtualizationBecauseDataChanged,

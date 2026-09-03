@@ -1,4 +1,8 @@
+import { useIsRecordIndexPaginationEnabled } from '@/object-record/record-index/hooks/useIsRecordIndexPaginationEnabled';
 import { useRecordIndexTableLazyQuery } from '@/object-record/record-index/hooks/useRecordIndexTableLazyQuery';
+import { lastLoadedRecordIndexPaginationComponentState } from '@/object-record/record-index/states/lastLoadedRecordIndexPaginationComponentState';
+import { recordIndexCurrentPageComponentState } from '@/object-record/record-index/states/recordIndexCurrentPageComponentState';
+import { recordIndexPageSizeState } from '@/object-record/record-index/states/recordIndexPageSizeState';
 import { useRecordTableContextOrThrow } from '@/object-record/record-table/contexts/RecordTableContext';
 
 import { visibleRecordFieldsComponentSelector } from '@/object-record/record-field/states/visibleRecordFieldsComponentSelector';
@@ -12,6 +16,7 @@ import { isFetchingMoreRecordsFamilyState } from '@/object-record/states/isFetch
 import { useAtomComponentSelectorValue } from '@/ui/utilities/state/jotai/hooks/useAtomComponentSelectorValue';
 import { useAtomComponentState } from '@/ui/utilities/state/jotai/hooks/useAtomComponentState';
 import { useAtomFamilyStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomFamilyStateValue';
+import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 import { useGetCurrentViewOnly } from '@/views/hooks/useGetCurrentViewOnly';
 import isEmpty from 'lodash.isempty';
 import { useEffect, useState } from 'react';
@@ -61,6 +66,16 @@ export const RecordTableVirtualizedInitialDataLoadEffect = () => {
 
   const { currentView } = useGetCurrentViewOnly();
 
+  const isRecordIndexPaginationEnabled = useIsRecordIndexPaginationEnabled();
+
+  const [recordIndexCurrentPage, setRecordIndexCurrentPage] =
+    useAtomComponentState(recordIndexCurrentPageComponentState);
+
+  const recordIndexPageSize = useAtomStateValue(recordIndexPageSizeState);
+
+  const [lastLoadedRecordIndexPagination, setLastLoadedRecordIndexPagination] =
+    useAtomComponentState(lastLoadedRecordIndexPaginationComponentState);
+
   useEffect(() => {
     if (isInitializingVirtualTableDataLoading) {
       return;
@@ -80,6 +95,11 @@ export const RecordTableVirtualizedInitialDataLoadEffect = () => {
         setLastContextStoreVirtualizedViewId(currentView?.id ?? null);
         setLastRecordTableQueryIdentifier(queryIdentifier);
         setLastContextStoreVirtualizedVisibleRecordFields(visibleRecordFields);
+        setRecordIndexCurrentPage(1);
+        setLastLoadedRecordIndexPagination({
+          page: 1,
+          pageSize: recordIndexPageSize,
+        });
 
         await triggerInitialRecordTableDataLoad();
       } else if (
@@ -87,6 +107,22 @@ export const RecordTableVirtualizedInitialDataLoadEffect = () => {
         !isFetchingMoreRecords
       ) {
         setLastRecordTableQueryIdentifier(queryIdentifier);
+        setRecordIndexCurrentPage(1);
+        setLastLoadedRecordIndexPagination({
+          page: 1,
+          pageSize: recordIndexPageSize,
+        });
+
+        await triggerInitialRecordTableDataLoad();
+      } else if (
+        isRecordIndexPaginationEnabled &&
+        (recordIndexCurrentPage !== lastLoadedRecordIndexPagination.page ||
+          recordIndexPageSize !== lastLoadedRecordIndexPagination.pageSize)
+      ) {
+        setLastLoadedRecordIndexPagination({
+          page: recordIndexCurrentPage,
+          pageSize: recordIndexPageSize,
+        });
 
         await triggerInitialRecordTableDataLoad();
       } else if (recordTableWentFromEmptyToNotEmpty) {
@@ -131,6 +167,12 @@ export const RecordTableVirtualizedInitialDataLoadEffect = () => {
     visibleRecordFields,
     isInitializedOnMount,
     setIsInitializedOnMount,
+    isRecordIndexPaginationEnabled,
+    recordIndexCurrentPage,
+    recordIndexPageSize,
+    setRecordIndexCurrentPage,
+    lastLoadedRecordIndexPagination,
+    setLastLoadedRecordIndexPagination,
   ]);
 
   return <></>;

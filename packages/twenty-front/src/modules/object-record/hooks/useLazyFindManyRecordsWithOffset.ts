@@ -85,9 +85,13 @@ export const useLazyFindManyRecordsWithOffset = ({
         },
       });
 
+      const totalCount =
+        result?.data?.[objectMetadataItem.namePlural]?.totalCount ?? 0;
+
       return {
         data: result?.data,
         records,
+        totalCount,
         error: result?.error,
       };
     },
