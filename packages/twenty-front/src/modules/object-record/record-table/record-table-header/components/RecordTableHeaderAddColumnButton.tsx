@@ -24,22 +24,18 @@ import { ThemeContext, themeCssVariables } from 'twenty-ui/theme-constants';
 const StyledPlusIconHeaderCell = styled.div<{
   shouldDisplayBorderBottom: boolean;
 }>`
+  align-items: stretch;
   background-color: ${themeCssVariables.background.primary};
   border-bottom: ${({ shouldDisplayBorderBottom }) =>
     shouldDisplayBorderBottom
       ? `1px solid ${themeCssVariables.border.color.light}`
       : 'none'};
-
-  align-items: stretch;
+  box-sizing: border-box;
   color: ${themeCssVariables.font.color.tertiary};
-
   cursor: pointer;
   display: flex;
-
   height: ${RECORD_TABLE_ROW_HEIGHT}px;
-
   max-height: ${RECORD_TABLE_ROW_HEIGHT}px;
-
   width: ${RECORD_TABLE_COLUMN_ADD_COLUMN_BUTTON_WIDTH}px;
   z-index: 1;
 

@@ -13,8 +13,9 @@ import { LightIconButton } from 'twenty-ui/input';
 import { useIsMobile } from 'twenty-ui/utilities';
 
 const StyledHeaderIcon = styled.div`
-  margin: ${themeCssVariables.spacing[1]} ${themeCssVariables.spacing[1]}
-    ${themeCssVariables.spacing[1]} ${themeCssVariables.spacing['1.5']};
+  align-items: center;
+  display: flex;
+  padding-right: ${themeCssVariables.spacing[1]};
 `;
 
 export const RecordTableHeaderLabelIdentifierCellPlusButton = () => {

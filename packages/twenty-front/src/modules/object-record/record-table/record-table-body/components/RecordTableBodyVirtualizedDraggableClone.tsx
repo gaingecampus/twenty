@@ -74,6 +74,9 @@ const StyledRowDraggableCloneCSSBridge = styled.div`
   }
 
   div.table-cell.${RECORD_TABLE_COLUMN_CHECKBOX_WIDTH_CLASS_NAME} {
+    align-items: center;
+    display: flex;
+    justify-content: center;
     left: ${RECORD_TABLE_COLUMN_DRAG_AND_DROP_WIDTH}px;
     position: sticky;
     z-index: ${TABLE_Z_INDEX.cell.sticky};

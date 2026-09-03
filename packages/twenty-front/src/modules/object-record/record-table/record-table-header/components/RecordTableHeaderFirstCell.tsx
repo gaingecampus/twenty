@@ -27,10 +27,21 @@ import { useState } from 'react';
 import { isDefined } from 'twenty-shared/utils';
 
 const StyledPlusButtonWrapper = styled.div`
+  align-items: center;
+  display: flex;
+  height: 100%;
   position: absolute;
   right: 0;
   top: 0;
   z-index: ${TABLE_Z_INDEX.headerColumns.headerColumnsSticky};
+`;
+
+const StyledColumnHeadFill = styled.div`
+  align-items: center;
+  display: flex;
+  height: 100%;
+  min-width: 0;
+  width: 100%;
 `;
 
 export const RecordTableHeaderFirstCell = () => {
@@ -101,12 +112,16 @@ export const RecordTableHeaderFirstCell = () => {
       isReadOnly={isRecordTableColumnHeadersReadOnly}
     >
       {isRecordTableColumnHeadersReadOnly ? (
-        <RecordTableColumnHead recordField={recordField} />
+        <StyledColumnHeadFill>
+          <RecordTableColumnHead recordField={recordField} />
+        </StyledColumnHeadFill>
       ) : (
-        <RecordTableColumnHeadWithDropdown
-          recordField={recordField}
-          objectMetadataId={objectMetadataItem.id}
-        />
+        <StyledColumnHeadFill>
+          <RecordTableColumnHeadWithDropdown
+            recordField={recordField}
+            objectMetadataId={objectMetadataItem.id}
+          />
+        </StyledColumnHeadFill>
       )}
       {iconIsVisible && !isRecordTableColumnHeadersReadOnly && (
         <StyledPlusButtonWrapper>

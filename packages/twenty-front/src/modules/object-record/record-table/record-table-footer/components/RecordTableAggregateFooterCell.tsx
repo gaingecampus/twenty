@@ -31,9 +31,11 @@ const StyledColumnFooterCell = styled.div<{
 
   bottom: 0;
 
+  box-sizing: border-box;
   color: ${themeCssVariables.font.color.tertiary};
 
   cursor: ${({ isReadOnly }) => (isReadOnly ? 'default' : 'pointer')};
+  display: flex;
   height: ${RECORD_TABLE_ROW_HEIGHT}px;
 
   left: ${({ isFirstCell }) =>
@@ -81,6 +83,7 @@ const StyledColumnFooterCell = styled.div<{
 `;
 
 const StyledColumnFootContainer = styled.div`
+  height: 100%;
   position: relative;
   width: 100%;
   z-index: 1;

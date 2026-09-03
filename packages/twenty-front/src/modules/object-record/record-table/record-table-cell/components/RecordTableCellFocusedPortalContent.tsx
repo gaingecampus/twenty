@@ -15,10 +15,9 @@ const StyledRecordTableCellFocusPortalContent = styled.div`
   user-select: none;
 
   &::after {
-    border-radius: ${themeCssVariables.border.radius.sm};
     box-shadow: 0 0 0 1px ${themeCssVariables.color.blue8};
     content: '';
-    inset: ${themeCssVariables.spacing[1]};
+    inset: 0;
     pointer-events: none;
     position: absolute;
   }

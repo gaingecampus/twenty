@@ -248,19 +248,19 @@ html.dark[data-ui-theme='enterprise'] {
   --t-view-tab-add-color: #8b92a0;
   --t-view-tab-add-size: 36px;
 
-  --t-overlay-bg: #1c1f2a;
-  --t-overlay-border: var(--t-nav-drawer-border-right);
-  --t-overlay-radius: var(--t-border-radius-sm);
-  --t-overlay-shadow: var(--t-box-shadow-strong);
+  --t-overlay-bg: var(--t-search-bg);
+  --t-overlay-border: 1px solid var(--t-search-border-color);
+  --t-overlay-radius: var(--t-search-radius);
+  --t-overlay-shadow: var(--t-box-shadow-light);
   --t-overlay-backdrop-filter: none;
   --t-overlay-padding: 8px;
   --t-overlay-section-bg: transparent;
   --t-overlay-section-color: var(--t-font-color-secondary);
-  --t-overlay-section-font-size: 12px;
-  --t-overlay-section-font-weight: 600;
+  --t-overlay-section-font-size: 13px;
+  --t-overlay-section-font-weight: 700;
   --t-overlay-section-min-height: 28px;
-  --t-overlay-section-padding-x: 8px;
-  --t-overlay-section-padding-y: 4px;
+  --t-overlay-section-padding-x: 16px;
+  --t-overlay-section-padding-y: 8px;
 
   --t-icon-button-radius: var(--t-border-radius-sm);
   --t-icon-button-bg: transparent;
@@ -330,6 +330,10 @@ html.dark[data-ui-theme='enterprise'] {
   html.dark[data-ui-theme='enterprise'] {
     --t-page-search-width: 240px;
     --t-page-header-column-gap: 12px;
+    --t-nav-new-chat-padding-x: 0;
+    --t-nav-new-chat-width: 40px;
+    --t-nav-new-chat-min-width: 40px;
+    --t-nav-tab-padding-x: 8px;
   }
 }
 
@@ -417,6 +421,7 @@ html.dark[data-ui-theme='enterprise'] [data-variant='tertiary'][data-accent='def
 }
 
 html.dark[data-ui-theme='enterprise']
+  [data-nav-expanded='true']
   :is(
     [data-nav-section='workspace'],
     [data-nav-section='chat'],
@@ -426,6 +431,7 @@ html.dark[data-ui-theme='enterprise']
 }
 
 html.dark[data-ui-theme='enterprise']
+  [data-nav-expanded='true']
   [data-nav-section='favorites']
   .navigation-drawer-item-avatar {
   --t-nav-item-padding-x: 4px;
@@ -549,6 +555,8 @@ html.dark[data-ui-theme='enterprise']
 }
 
 html.dark[data-ui-theme='enterprise'] [id$='-options'] {
+  --t-avatar-font-size-md: var(--t-workspace-switcher-avatar-font-size);
+  --t-avatar-size-md: 24px;
   --t-background-transparent-light: var(--t-nav-item-hover-bg);
   --t-control-height-md: var(--t-nav-item-height);
 }
@@ -649,5 +657,8 @@ html.dark[data-ui-theme='enterprise']
   .navigation-drawer-item {
   aspect-ratio: 1;
   height: auto;
+  justify-content: center;
+  padding-left: 0;
+  padding-right: 0;
 }
 

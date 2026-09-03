@@ -22,26 +22,61 @@ import { useDebouncedCallback } from 'use-debounce';
 
 const StyledDropdownMenuIconAndNameContainer = styled.div`
   align-items: center;
+  box-sizing: border-box;
   display: flex;
-  gap: ${themeCssVariables.spacing[1]};
-  margin-left: 0;
-  margin-right: 0;
+  flex: 1;
+  gap: ${themeCssVariables.spacing[2]};
+  min-height: var(--t-control-height-md, 40px);
+  min-width: 0;
+  width: 100%;
+
+  & > div:last-child {
+    flex: 1;
+    min-width: 0;
+  }
+
+  input {
+    background-color: var(
+      --t-search-bg,
+      ${themeCssVariables.background.transparent.lighter}
+    );
+    border: 1px solid
+      var(--t-search-border-color, ${themeCssVariables.border.color.medium});
+    border-radius: var(
+      --t-search-radius,
+      ${themeCssVariables.border.radius.sm}
+    );
+    font-size: var(--t-font-size-md, ${themeCssVariables.font.size.md});
+    font-weight: var(
+      --t-font-weight-regular,
+      ${themeCssVariables.font.weight.regular}
+    );
+    height: var(--t-control-height-md, 40px);
+    padding: 0 ${themeCssVariables.spacing[3]};
+  }
+
+  input:focus {
+    background-color: var(--t-search-focus-bg, var(--t-search-bg));
+    box-shadow: var(--t-search-focus-ring, none);
+  }
 `;
 
 const StyledMenuTitleContainer = styled.div`
   align-items: center;
+  box-sizing: border-box;
   display: flex;
-  gap: ${themeCssVariables.spacing[1]};
-  padding: ${themeCssVariables.spacing[1]};
+  gap: ${themeCssVariables.spacing[2]};
+  min-height: var(--t-control-height-md, 40px);
+  padding: 0 ${themeCssVariables.spacing[2]};
 `;
 
 const StyledMenuIconContainer = styled.div`
   align-items: center;
   color: ${themeCssVariables.font.color.primary};
   display: flex;
-  height: ${themeCssVariables.spacing[6]};
+  height: var(--t-control-height-md, 40px);
   justify-content: center;
-  width: ${themeCssVariables.spacing[6]};
+  width: var(--t-control-height-md, 40px);
 `;
 
 const StyledMainText = styled.div`
@@ -130,7 +165,6 @@ export const ObjectOptionsDropdownMenuViewName = ({
         <DropdownMenuItemsContainer>
           <StyledDropdownMenuIconAndNameContainer>
             <IconPicker
-              size="small"
               onChange={handleIconChange}
               selectedIconKey={viewPickerSelectedIcon}
             />
@@ -141,7 +175,7 @@ export const ObjectOptionsDropdownMenuViewName = ({
                 handleViewNameChange(value);
               }}
               autoGrow={false}
-              sizeVariant="sm"
+              sizeVariant="lg"
               fullWidth
             />
           </StyledDropdownMenuIconAndNameContainer>

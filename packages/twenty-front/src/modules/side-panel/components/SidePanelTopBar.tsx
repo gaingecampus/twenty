@@ -4,7 +4,6 @@ import { SidePanelTopBarInputFocusEffect } from '@/side-panel/components/SidePan
 import { SidePanelTopBarRightCornerIcon } from '@/side-panel/components/SidePanelTopBarRightCornerIcon';
 import { COMMAND_MENU_SIDE_PANEL_PAGES } from '@/side-panel/constants/CommandMenuSidePanelPages';
 import { SIDE_PANEL_TOP_BAR_HEIGHT } from '@/side-panel/constants/SidePanelTopBarHeight';
-import { SIDE_PANEL_TOP_BAR_HEIGHT_MOBILE } from '@/side-panel/constants/SidePanelTopBarHeightMobile';
 import { SIDE_PANEL_FOCUS_ID } from '@/side-panel/constants/SidePanelFocusId';
 import { useSidePanelMenu } from '@/side-panel/hooks/useSidePanelMenu';
 import { useSidePanelContextChips } from '@/side-panel/hooks/useSidePanelContextChips';
@@ -25,7 +24,7 @@ import { IconButton } from 'twenty-ui/input';
 import { useIsMobile } from 'twenty-ui/utilities';
 import { ThemeContext, themeCssVariables } from 'twenty-ui/theme-constants';
 
-const StyledInputContainer = styled.div<{ isMobile: boolean }>`
+const StyledInputContainer = styled.div`
   align-items: center;
   background-color: ${themeCssVariables.background.secondary};
   border: none;
@@ -37,14 +36,14 @@ const StyledInputContainer = styled.div<{ isMobile: boolean }>`
   flex-shrink: 0;
   font-size: ${themeCssVariables.font.size.lg};
   gap: ${themeCssVariables.spacing[4]};
-  height: ${({ isMobile }) =>
-    isMobile ? SIDE_PANEL_TOP_BAR_HEIGHT_MOBILE : SIDE_PANEL_TOP_BAR_HEIGHT}px;
+  height: var(--t-page-bar-min-height, ${SIDE_PANEL_TOP_BAR_HEIGHT}px);
   justify-content: space-between;
   margin: 0;
 
   outline: none;
   overflow: hidden;
-  padding: 0 ${themeCssVariables.spacing[2]};
+  padding: var(--t-page-header-padding-y, 0)
+    var(--t-page-header-padding-x, ${themeCssVariables.spacing[3]});
   position: relative;
 `;
 
@@ -147,7 +146,7 @@ export const SidePanelTopBar = () => {
   const lastChip = contextChips.at(-1);
 
   return (
-    <StyledInputContainer isMobile={isMobile}>
+    <StyledInputContainer>
       <StyledContentContainer>
         <AnimatePresence>
           {shouldShowBackButton && (
@@ -185,7 +184,7 @@ export const SidePanelTopBar = () => {
         {!shouldHideCloseButton && (
           <IconButton
             Icon={IconX}
-            size="small"
+            size="medium"
             variant="secondary"
             onClick={closeSidePanelMenu}
             ariaLabel={t`Close side panel`}

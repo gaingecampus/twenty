@@ -119,6 +119,9 @@ const StyledTable = styled.div<{
   }
 
   div.table-cell.${RECORD_TABLE_COLUMN_CHECKBOX_WIDTH_CLASS_NAME} {
+    align-items: center;
+    display: flex;
+    justify-content: center;
     left: var(${RECORD_TABLE_DRAG_DROP_WIDTH_CSS_VAR});
     position: sticky;
     z-index: ${TABLE_Z_INDEX.cell.sticky};

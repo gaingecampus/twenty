@@ -5,6 +5,8 @@ import { themeCssVariables } from 'twenty-ui/theme-constants';
 import { MainNavigationDrawerNewChatButton } from '@/navigation/components/MainNavigationDrawerNewChatButton';
 import { MainNavigationDrawerSearchButton } from '@/navigation/components/MainNavigationDrawerSearchButton';
 import { MainNavigationDrawerTabsRow } from '@/navigation/components/MainNavigationDrawerTabsRow';
+import { isNavigationDrawerExpandedState } from '@/ui/navigation/states/isNavigationDrawerExpanded';
+import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 
 const StyledChromeStack = styled.div`
   display: flex;
@@ -19,10 +21,14 @@ const StyledChromeRow = styled.div`
   border: var(--t-nav-chrome-row-border, none);
   border-radius: var(--t-nav-chrome-row-radius, 0);
   box-sizing: border-box;
+  container-name: nav-chrome;
+  container-type: inline-size;
   display: flex;
   flex-shrink: 0;
+  gap: 0;
   height: var(--t-nav-chrome-row-height, auto);
-  justify-content: space-between;
+  justify-content: var(--t-nav-chrome-justify, space-between);
+  min-width: 0;
   padding: var(--t-nav-chrome-row-padding, 0);
   width: 100%;
 `;
@@ -38,14 +44,20 @@ export const MainNavigationDrawerChrome = ({
   NavigationMenuTabActiveIcon,
   navigationMenuTabLabel,
 }: MainNavigationDrawerChromeProps) => {
+  const isNavigationDrawerExpanded = useAtomStateValue(
+    isNavigationDrawerExpandedState,
+  );
+
   return (
     <StyledChromeStack>
       <StyledChromeRow>
-        <MainNavigationDrawerTabsRow
-          NavigationMenuTabIcon={NavigationMenuTabIcon}
-          NavigationMenuTabActiveIcon={NavigationMenuTabActiveIcon}
-          navigationMenuTabLabel={navigationMenuTabLabel}
-        />
+        {isNavigationDrawerExpanded && (
+          <MainNavigationDrawerTabsRow
+            NavigationMenuTabIcon={NavigationMenuTabIcon}
+            NavigationMenuTabActiveIcon={NavigationMenuTabActiveIcon}
+            navigationMenuTabLabel={navigationMenuTabLabel}
+          />
+        )}
         <MainNavigationDrawerNewChatButton />
       </StyledChromeRow>
       <MainNavigationDrawerSearchButton />

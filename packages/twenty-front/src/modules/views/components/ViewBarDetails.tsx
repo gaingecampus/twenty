@@ -48,12 +48,16 @@ export type ViewBarDetailsProps = {
 const StyledBar = styled.div`
   align-items: center;
   border-top: 1px solid ${themeCssVariables.border.color.light};
+  box-sizing: border-box;
   display: flex;
   flex-direction: row;
+  flex-wrap: wrap;
+  gap: var(--t-toolbar-chip-gap, ${themeCssVariables.spacing[2]});
   justify-content: space-between;
-  min-height: 32px;
-  padding-bottom: ${themeCssVariables.spacing[1]};
-  padding-top: ${themeCssVariables.spacing[1]};
+  min-height: var(--t-view-bar-min-height, 52px);
+  padding: ${themeCssVariables.spacing[2]}
+    var(--t-view-bar-padding-x, ${themeCssVariables.spacing[3]})
+    ${themeCssVariables.spacing[2]} 0;
   z-index: 4;
 `;
 
@@ -61,21 +65,25 @@ const StyledChipContainer = styled.div`
   align-items: center;
   display: flex;
   flex-direction: row;
-  gap: ${themeCssVariables.spacing[2]};
+  flex-wrap: wrap;
+  gap: var(--t-toolbar-chip-gap, ${themeCssVariables.spacing[2]});
   z-index: 1;
 `;
 
 const StyledActionButtonContainer = styled.div`
+  align-items: center;
   display: flex;
   flex-direction: row;
-  gap: ${themeCssVariables.spacing[2]};
+  flex-shrink: 0;
+  gap: var(--t-toolbar-chip-gap, ${themeCssVariables.spacing[2]});
 `;
 
 const StyledFilterContainer = styled.div`
   align-items: center;
   display: flex;
-  gap: ${themeCssVariables.spacing[1]};
-
+  flex: 1 1 auto;
+  gap: var(--t-toolbar-chip-gap, ${themeCssVariables.spacing[2]});
+  min-width: 0;
   overflow-x: hidden;
 `;
 

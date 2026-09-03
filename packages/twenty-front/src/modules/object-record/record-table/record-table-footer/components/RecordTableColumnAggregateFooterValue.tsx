@@ -1,4 +1,3 @@
-import { RECORD_TABLE_ROW_HEIGHT } from '@/object-record/record-table/constants/RecordTableRowHeight';
 import { useAggregateRecordsForRecordTableColumnFooter } from '@/object-record/record-table/record-table-footer/hooks/useAggregateRecordsForRecordTableColumnFooter';
 import { styled } from '@linaria/react';
 import { Trans } from '@lingui/react/macro';
@@ -12,10 +11,9 @@ const StyledText = styled.span`
   flex-grow: 1;
   gap: 4px;
   height: 100%;
+  min-width: 0;
   overflow: hidden;
-  padding-left: ${themeCssVariables.spacing[2]};
   text-overflow: ellipsis;
-
   white-space: nowrap;
   z-index: 1;
 `;
@@ -24,18 +22,19 @@ const StyledValueContainer = styled.div`
   -ms-overflow-style: none;
   align-items: center;
   display: flex;
+  flex-grow: 1;
   gap: 4px;
+  height: 100%;
+  justify-content: flex-start;
+  min-width: 0;
+  overflow-x: auto;
+  padding: 0;
+  scrollbar-width: none;
+  white-space: nowrap;
 
   &::-webkit-scrollbar {
     display: none;
   }
-
-  height: ${RECORD_TABLE_ROW_HEIGHT}px;
-  justify-content: flex-end;
-  overflow-x: auto;
-  padding: 0 8px;
-  scrollbar-width: none;
-  white-space: nowrap;
 `;
 
 const StyledValue = styled.div`

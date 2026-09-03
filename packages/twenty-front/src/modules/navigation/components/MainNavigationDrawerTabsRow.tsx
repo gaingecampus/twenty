@@ -1,16 +1,8 @@
 import { styled } from '@linaria/react';
 import { t } from '@lingui/core/macro';
 import { useContext } from 'react';
-import {
-  type IconComponent,
-  IconComment,
-  IconHome,
-} from 'twenty-ui/icon';
-import {
-  MOBILE_VIEWPORT,
-  ThemeContext,
-  themeCssVariables,
-} from 'twenty-ui/theme-constants';
+import { type IconComponent, IconComment, IconHome } from 'twenty-ui/icon';
+import { ThemeContext, themeCssVariables } from 'twenty-ui/theme-constants';
 import { useIsMobile } from 'twenty-ui/utilities';
 
 import { agentChatThreadSearchQueryState } from '@/ai/states/agentChatThreadSearchQueryState';
@@ -29,6 +21,9 @@ const StyledTabsCollapseHost = styled.div`
   flex: 0 0 auto;
   width: fit-content;
 `;
+
+const COMPACT_NAV_CHROME_QUERY = 'max-width: 400px';
+const COMPACT_NAV_VIEWPORT_QUERY = 'max-width: 1024px';
 
 const StyledTabsList = styled.div`
   align-items: stretch;
@@ -49,6 +44,14 @@ const StyledTabsList = styled.div`
   height: var(--t-nav-tabs-height, ${themeCssVariables.spacing[7]});
   padding: var(--t-nav-tabs-padding, 6px);
   width: var(--t-nav-tabs-width, ${themeCssVariables.spacing[18]});
+
+  @media (${COMPACT_NAV_VIEWPORT_QUERY}) {
+    width: auto;
+  }
+
+  @container nav-chrome (${COMPACT_NAV_CHROME_QUERY}) {
+    width: auto;
+  }
 `;
 
 const StyledTabWrapper = styled.div<{ isActive: boolean }>`
@@ -114,10 +117,19 @@ const StyledTabWrapper = styled.div<{ isActive: boolean }>`
   }
 
   svg.tabler-icon {
-    stroke-width: var(
-      --t-nav-tabs-active-icon-stroke,
-      var(--t-icon-stroke-md)
-    );
+    stroke-width: var(--t-nav-tabs-active-icon-stroke, var(--t-icon-stroke-md));
+  }
+
+  @media (${COMPACT_NAV_VIEWPORT_QUERY}) {
+    flex: 0 0 auto;
+    padding-inline: 0;
+    width: 40px;
+  }
+
+  @container nav-chrome (${COMPACT_NAV_CHROME_QUERY}) {
+    flex: 0 0 auto;
+    padding-inline: 0;
+    width: 40px;
   }
 `;
 
@@ -135,7 +147,11 @@ const StyledTabLabel = styled.span`
   text-overflow: ellipsis;
   white-space: nowrap;
 
-  @media (max-width: ${MOBILE_VIEWPORT}px) {
+  @media (${COMPACT_NAV_VIEWPORT_QUERY}) {
+    display: none;
+  }
+
+  @container nav-chrome (${COMPACT_NAV_CHROME_QUERY}) {
     display: none;
   }
 `;
@@ -154,7 +170,9 @@ export const MainNavigationDrawerTabsRow = ({
   const isMobile = useIsMobile();
   const [navigationDrawerActiveTab, setNavigationDrawerActiveTab] =
     useAtomState(navigationDrawerActiveTabState);
-  const setSearchQuery = useSetAtomState(agentChatThreadSearchQueryState);
+  const setAgentChatThreadSearchQuery = useSetAtomState(
+    agentChatThreadSearchQueryState,
+  );
   const hasAiPermission = useHasPermissionFlag(PermissionFlagType.AI);
   const chatTabLabel = t`Chat`;
   const isNavigationMenuTabActive =
@@ -172,7 +190,7 @@ export const MainNavigationDrawerTabsRow = ({
     setNavigationDrawerActiveTab(tab);
 
     if (tab !== NAVIGATION_DRAWER_TABS.AI_CHAT_HISTORY) {
-      setSearchQuery('');
+      setAgentChatThreadSearchQuery('');
     }
   };
 

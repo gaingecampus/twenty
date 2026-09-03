@@ -1,5 +1,4 @@
 import { hasRecordGroupsComponentSelector } from '@/object-record/record-group/states/selectors/hasRecordGroupsComponentSelector';
-import { RECORD_TABLE_COLUMN_CHECKBOX_WIDTH } from '@/object-record/record-table/constants/RecordTableColumnCheckboxWidth';
 import { RECORD_TABLE_ROW_HEIGHT } from '@/object-record/record-table/constants/RecordTableRowHeight';
 
 import { RecordTableColumnAggregateFooterCellContext } from '@/object-record/record-table/record-table-footer/components/RecordTableColumnAggregateFooterCellContext';
@@ -14,29 +13,30 @@ import { useContext, useState } from 'react';
 import { IconChevronDown } from 'twenty-ui/icon';
 import { ThemeContext, themeCssVariables } from 'twenty-ui/theme-constants';
 
-const StyledCell = styled.div<{ isUnfolded: boolean; isFirstCell: boolean }>`
+const StyledHoverWrapper = styled.div`
+  height: 100%;
+  width: 100%;
+`;
+
+const StyledCell = styled.div<{ isUnfolded: boolean }>`
   align-items: center;
   background: ${({ isUnfolded }) =>
     isUnfolded ? themeCssVariables.background.tertiary : 'none'};
+  box-sizing: border-box;
   cursor: pointer;
   display: flex;
   flex-direction: row;
-
   flex-grow: 1;
   flex-shrink: 0;
   font-weight: ${themeCssVariables.font.weight.medium};
   gap: ${themeCssVariables.spacing[1]};
   height: ${RECORD_TABLE_ROW_HEIGHT}px;
   justify-content: space-between;
-
   max-width: 100%;
-
-  min-width: ${themeCssVariables.spacing[7]};
-
-  padding-left: ${({ isFirstCell }) =>
-    isFirstCell
-      ? `calc(${RECORD_TABLE_COLUMN_CHECKBOX_WIDTH} + ${themeCssVariables.spacing[1]})`
-      : '0'};
+  min-width: 0;
+  padding-left: ${themeCssVariables.table.horizontalCellPadding};
+  padding-right: ${themeCssVariables.table.horizontalCellPadding};
+  width: 100%;
 `;
 
 const StyledIconContainer = styled.div`
@@ -44,9 +44,8 @@ const StyledIconContainer = styled.div`
   display: flex;
   flex-grow: 0;
   flex-shrink: 0;
-  height: 20px;
+  height: 100%;
   justify-content: center;
-  padding-right: ${themeCssVariables.spacing[2]};
 `;
 
 export const RecordTableColumnAggregateFooterValueCell = ({
@@ -78,13 +77,13 @@ export const RecordTableColumnAggregateFooterValueCell = ({
   );
 
   return (
-    <div
+    <StyledHoverWrapper
       onMouseEnter={() => {
         setIsHovered(true);
       }}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <StyledCell isUnfolded={isDropdownOpen} isFirstCell={isFirstCell}>
+      <StyledCell isUnfolded={isDropdownOpen}>
         {isHovered ||
         isDropdownOpen ||
         hasAggregateOperationForViewField ||
@@ -104,6 +103,6 @@ export const RecordTableColumnAggregateFooterValueCell = ({
           <></>
         )}
       </StyledCell>
-    </div>
+    </StyledHoverWrapper>
   );
 };

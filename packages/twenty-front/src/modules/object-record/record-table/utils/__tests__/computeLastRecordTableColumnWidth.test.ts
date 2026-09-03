@@ -6,7 +6,7 @@ describe('computeLastRecordTableColumnWidth', () => {
     getRecordTableColumnDisplayWidth(100) +
     getRecordTableColumnDisplayWidth(100);
 
-  it('returns 0 when the table is narrower than the total content width', () => {
+  it('returns the last empty column min width when remaining width is not positive', () => {
     const recordFields = [{ size: 100 }, { size: 100 }];
 
     const { lastColumnWidth } = computeLastRecordTableColumnWidth({
@@ -17,7 +17,7 @@ describe('computeLastRecordTableColumnWidth', () => {
       isCheckboxColumnHidden: false,
     });
 
-    expect(lastColumnWidth).toBe(0);
+    expect(lastColumnWidth).toBe(24);
   });
 
   it('returns the remaining positive width when the table is wider than the total content width', () => {

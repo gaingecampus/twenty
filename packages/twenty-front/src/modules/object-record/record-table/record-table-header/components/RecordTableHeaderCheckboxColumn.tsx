@@ -21,10 +21,8 @@ const StyledContainer = styled.div`
   background-color: ${themeCssVariables.background.primary};
   box-sizing: border-box;
   display: flex;
-  height: ${RECORD_TABLE_ROW_HEIGHT}px;
+  height: 100%;
   justify-content: center;
-  min-width: 24px;
-  padding-right: ${themeCssVariables.spacing[1]};
   width: 100%;
 `;
 

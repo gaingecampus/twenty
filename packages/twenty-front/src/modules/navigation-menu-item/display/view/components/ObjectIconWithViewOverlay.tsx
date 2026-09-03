@@ -17,6 +17,7 @@ const StyledCompositeContainer = styled.div`
 
   [data-nav-expanded='false'] & {
     height: var(--t-nav-icon-tile-size, 24px);
+    overflow: hidden;
     width: var(--t-nav-icon-tile-size, 24px);
   }
 `;
@@ -38,6 +39,11 @@ const StyledObjectIconWrapper = styled.div<{
   inset: 0;
   justify-content: center;
   position: absolute;
+
+  [data-nav-expanded='false'] & svg {
+    height: calc(var(--t-nav-icon-size, 18) * 1px);
+    width: calc(var(--t-nav-icon-size, 18) * 1px);
+  }
 `;
 
 const StyledViewOverlay = styled.div<{ $backgroundColor: string }>`
@@ -54,8 +60,7 @@ const StyledViewOverlay = styled.div<{ $backgroundColor: string }>`
   width: 12px;
 
   [data-nav-expanded='false'] & {
-    bottom: 0;
-    right: 0;
+    display: none;
   }
 `;
 

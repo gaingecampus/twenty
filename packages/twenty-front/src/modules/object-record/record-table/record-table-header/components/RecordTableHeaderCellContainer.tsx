@@ -8,29 +8,27 @@ const StyledHeaderCell = styled.div<{
   isResizing: boolean;
   isReadOnly: boolean;
 }>`
+  align-items: center;
   background-color: ${themeCssVariables.background.primary};
   border-bottom: ${({ shouldDisplayBorderBottom }) =>
     shouldDisplayBorderBottom
       ? `1px solid ${themeCssVariables.border.color.light}`
       : 'none'};
   border-right: 1px solid ${themeCssVariables.border.color.light};
-
+  box-sizing: border-box;
   color: ${themeCssVariables.font.color.tertiary};
-  font-size: ${themeCssVariables.font.size.md};
-  font-weight: ${themeCssVariables.font.weight.medium};
-
-  align-items: center;
   cursor: ${({ isResizing, isReadOnly }) =>
     isReadOnly ? 'default' : isResizing ? 'col-resize' : 'pointer'};
   display: flex;
+  font-size: ${themeCssVariables.font.size.md};
+  font-weight: ${themeCssVariables.font.weight.medium};
   height: ${RECORD_TABLE_ROW_HEIGHT}px;
-
   max-height: ${RECORD_TABLE_ROW_HEIGHT}px;
   padding: 0;
-
   position: relative;
-
   text-align: left;
+  user-select: none;
+  z-index: ${({ zIndex }) => zIndex ?? 'auto'};
 
   &:hover {
     background: ${({ isResizing, isReadOnly }) =>
@@ -45,10 +43,6 @@ const StyledHeaderCell = styled.div<{
         ? themeCssVariables.background.primary
         : themeCssVariables.background.tertiary};
   }
-
-  user-select: none;
-
-  z-index: ${({ zIndex }) => zIndex ?? 'auto'};
 `;
 
 export const RecordTableHeaderCellContainer = StyledHeaderCell;

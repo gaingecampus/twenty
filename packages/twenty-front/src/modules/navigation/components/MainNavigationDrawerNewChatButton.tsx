@@ -44,6 +44,7 @@ const StyledNewChatButtonWrapper = styled.div<{
   );
   box-sizing: border-box;
   display: flex;
+  flex: var(--t-nav-new-chat-flex, 0 0 auto);
   height: ${({ isExpanded }) =>
     isExpanded
       ? `var(--t-search-height, ${themeCssVariables.spacing[8]})`
@@ -52,7 +53,6 @@ const StyledNewChatButtonWrapper = styled.div<{
           ${themeCssVariables.spacing[6]}
         )`};
   justify-content: center;
-  flex: var(--t-nav-new-chat-flex, 0 0 auto);
   margin-left: ${({ isExpanded }) => (isExpanded ? 'auto' : '0')};
   min-width: ${({ isExpanded }) =>
     isExpanded
@@ -75,6 +75,18 @@ const StyledNewChatButtonWrapper = styled.div<{
           --t-nav-new-chat-collapsed-size,
           ${themeCssVariables.spacing[6]}
         )`};
+
+  @media (max-width: 1024px) {
+    min-width: 40px;
+    padding: 0;
+    width: 40px;
+  }
+
+  @container nav-chrome (max-width: 400px) {
+    min-width: 40px;
+    padding: 0;
+    width: 40px;
+  }
 `;
 
 const StyledNewChatButton = styled.div`
@@ -103,6 +115,14 @@ const StyledNewChatButton = styled.div`
   white-space: nowrap;
   width: 100%;
 
+  @media (max-width: 1024px) {
+    padding-inline: 0;
+  }
+
+  @container nav-chrome (max-width: 400px) {
+    padding-inline: 0;
+  }
+
   &:hover {
     background: var(
       --t-nav-new-chat-hover-bg,
@@ -112,6 +132,19 @@ const StyledNewChatButton = styled.div`
       --t-nav-new-chat-hover-color,
       var(--t-nav-new-chat-color, ${themeCssVariables.font.color.primary})
     );
+  }
+`;
+
+const StyledNewChatLabel = styled.span`
+  min-width: 0;
+  overflow: hidden;
+
+  @media (max-width: 1024px) {
+    display: none;
+  }
+
+  @container nav-chrome (max-width: 400px) {
+    display: none;
   }
 `;
 
@@ -165,8 +198,10 @@ export const MainNavigationDrawerNewChatButton = () => {
             color="currentColor"
           />
         </StyledNewChatIcon>
-        {isExpanded && !isMobile && (
-          <OverflowingTextWithTooltip text={t`New chat`} />
+        {isExpanded && (
+          <StyledNewChatLabel>
+            <OverflowingTextWithTooltip text={t`New chat`} />
+          </StyledNewChatLabel>
         )}
       </StyledNewChatButton>
     </StyledNewChatButtonWrapper>

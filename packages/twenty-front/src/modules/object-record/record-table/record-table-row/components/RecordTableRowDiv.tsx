@@ -16,22 +16,16 @@ const StyledTr = styled.div<{
     div.table-cell-0-0 {
       &:not(:first-of-type) {
         background-color: ${themeCssVariables.accent.quaternary};
-        border-bottom: 1px solid ${themeCssVariables.border.color.medium};
+        border-bottom-color: ${themeCssVariables.border.color.medium};
         border-color: ${themeCssVariables.border.color.medium};
       }
       &:nth-of-type(2) {
-        border-left: 1px solid ${themeCssVariables.border.color.medium};
-
-        margin-left: -1px;
-
-        div {
-          margin-left: -1px;
-        }
+        box-shadow: -1px 0 0 ${themeCssVariables.border.color.medium};
       }
       &:last-of-type {
         border-radius: 0 ${themeCssVariables.border.radius.sm}
           ${themeCssVariables.border.radius.sm} 0;
-        border-right: 1px solid ${themeCssVariables.border.color.medium};
+        border-right-color: ${themeCssVariables.border.color.medium};
       }
     }
   }
