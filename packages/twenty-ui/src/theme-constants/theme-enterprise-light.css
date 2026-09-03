@@ -516,6 +516,10 @@ html.light[data-ui-theme='enterprise']
   --t-nav-item-padding-x: 8px;
 }
 
+html.light[data-ui-theme='enterprise'] [id*='settings-navigation-drawer'] {
+  --t-nav-item-padding-x: 8px;
+}
+
 html.light[data-ui-theme='enterprise']
   [data-nav-expanded='true']
   [data-nav-section='favorites']

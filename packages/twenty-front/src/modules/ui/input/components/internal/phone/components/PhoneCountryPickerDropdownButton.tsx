@@ -22,15 +22,15 @@ type StyledDropdownButtonProps = {
 const StyledDropdownButtonContainer = styled.div<StyledDropdownButtonProps>`
   align-items: center;
   background: none;
-  border-radius: ${themeCssVariables.border.radius.xs} 0 0
-    ${themeCssVariables.border.radius.xs};
+  border-radius: ${themeCssVariables.border.radius.sm} 0 0
+    ${themeCssVariables.border.radius.sm};
   border-right: 1px solid ${themeCssVariables.border.color.medium};
   color: ${({ color }) => color ?? 'none'};
   cursor: pointer;
 
   display: flex;
 
-  height: 32px;
+  height: var(--t-control-height-md, 40px);
   padding-left: ${themeCssVariables.spacing[2]};
   padding-right: ${themeCssVariables.spacing[1]};
 

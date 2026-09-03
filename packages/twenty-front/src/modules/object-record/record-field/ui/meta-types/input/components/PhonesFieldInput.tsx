@@ -27,20 +27,16 @@ import { themeCssVariables } from 'twenty-ui/theme-constants';
 import { FieldMetadataType } from '~/generated-metadata/graphql';
 import { stripSimpleQuotesFromString } from '~/utils/string/stripSimpleQuotesFromString';
 
-const StyledCustomPhoneInputContainer = styled.div<{
-  hasItem: boolean;
-  hasError?: boolean;
-}>`
-  background-color: ${({ hasItem }) =>
-    hasItem ? themeCssVariables.background.transparent.lighter : 'transparent'};
-  border: ${({ hasItem, hasError }) =>
-    hasItem
-      ? hasError
-        ? `1px solid ${themeCssVariables.border.color.danger}`
-        : `1px solid ${themeCssVariables.border.color.medium}`
-      : 'none'};
-  border-radius: ${({ hasItem }) => (hasItem ? '4px' : '0')};
-  height: ${({ hasItem }) => (hasItem ? '30px' : 'auto')};
+const StyledCustomPhoneInputContainer = styled.div`
+  background-color: transparent;
+  border: none;
+  border-radius: var(
+    --t-border-radius-sm,
+    ${themeCssVariables.border.radius.sm}
+  );
+  display: flex;
+  height: var(--t-control-height-md, 40px);
+  overflow: hidden;
 `;
 
 const StyledCustomPhoneInputWrapper = styled.div`
@@ -53,10 +49,17 @@ const StyledCustomPhoneInputWrapper = styled.div`
   height: 100%;
   width: calc(100% - ${themeCssVariables.spacing[8]});
 
+  .PhoneInput {
+    align-items: center;
+    display: flex;
+    height: 100%;
+  }
+
   .PhoneInputInput {
     background: none;
     border: none;
     color: ${themeCssVariables.font.color.primary};
+    height: 100%;
     margin-left: ${themeCssVariables.spacing[2]};
 
     &::placeholder,
@@ -204,12 +207,9 @@ export const PhonesFieldInput = () => {
           onDelete={handleDelete}
         />
       )}
-      renderInput={({ value, onChange, autoFocus, placeholder, hasError }) => {
+      renderInput={({ value, onChange, autoFocus, placeholder }) => {
         return (
-          <StyledCustomPhoneInputContainer
-            hasItem={!!phones.length}
-            hasError={hasError}
-          >
+          <StyledCustomPhoneInputContainer>
             <StyledCustomPhoneInputWrapper>
               <ReactPhoneNumberInput
                 autoFocus={autoFocus}

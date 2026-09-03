@@ -12,20 +12,13 @@ import { useCombinedRefs } from '~/hooks/useCombinedRefs';
 
 const StyledInput = styled.input<{
   withRightComponent?: boolean;
-  hasError?: boolean;
-  hasItem: boolean;
 }>`
-  background-color: ${({ hasItem }) =>
-    hasItem ? themeCssVariables.background.transparent.lighter : 'transparent'};
   background-color: transparent;
-  border: ${({ hasItem, hasError }) =>
-    hasItem
-      ? hasError
-        ? `1px solid ${themeCssVariables.border.color.danger}`
-        : `1px solid ${themeCssVariables.border.color.medium}`
-      : 'none'};
   border: none;
-  border-radius: ${({ hasItem }) => (hasItem ? '4px' : '0')};
+  border-radius: var(
+    --t-border-radius-sm,
+    ${themeCssVariables.border.radius.sm}
+  );
   box-sizing: border-box;
   color: ${themeCssVariables.font.color.primary};
   font-family: ${themeCssVariables.font.family};
@@ -38,9 +31,8 @@ const StyledInput = styled.input<{
   }
 
   font-size: inherit;
-  font-weight: ${themeCssVariables.font.weight.medium};
   font-weight: inherit;
-  height: 32px;
+  height: var(--t-control-height-md, 40px);
   outline: none;
   padding: ${themeCssVariables.spacing[0]} ${themeCssVariables.spacing[2]};
   padding-right: ${({ withRightComponent }) =>
@@ -121,7 +113,6 @@ export const MultiItemBaseInput = forwardRef<
       renderInput,
       error = '',
       hasError = false,
-      hasItem,
       instanceId,
     },
     ref,
@@ -153,14 +144,12 @@ export const MultiItemBaseInput = forwardRef<
             })
           ) : (
             <StyledInput
-              hasError={hasError}
               autoFocus={autoFocus}
               value={value}
               placeholder={placeholder}
               onChange={(event) => onChange(event.target.value)}
               ref={combinedRef}
               withRightComponent={isDefined(rightComponent)}
-              hasItem={hasItem}
               onFocus={onFocus}
               onBlur={onBlur}
             />
