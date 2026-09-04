@@ -34,6 +34,7 @@ export const StyledInput = styled.input`
   border-top: none;
   border-top-left-radius: ${themeCssVariables.border.radius.md};
   border-top-right-radius: ${themeCssVariables.border.radius.md};
+  box-sizing: border-box;
   color: ${themeCssVariables.font.color.primary};
   font-family: inherit;
   font-size: ${themeCssVariables.font.size.sm};
@@ -44,8 +45,18 @@ export const StyledInput = styled.input`
 
   outline: none;
   overflow: hidden;
-  padding: ${themeCssVariables.spacing[2]};
+  padding-bottom: ${themeCssVariables.spacing[2]};
+  padding-left: var(
+    --t-overlay-section-padding-x,
+    ${themeCssVariables.spacing[2]}
+  );
+  padding-right: var(
+    --t-overlay-section-padding-x,
+    ${themeCssVariables.spacing[2]}
+  );
+  padding-top: ${themeCssVariables.spacing[2]};
   text-decoration: none;
+  width: 100%;
 
   &::placeholder {
     color: ${themeCssVariables.font.color.light};
