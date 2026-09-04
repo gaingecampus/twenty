@@ -34,8 +34,6 @@ const StyledCell = styled.div<{ isUnfolded: boolean }>`
   justify-content: space-between;
   max-width: 100%;
   min-width: 0;
-  padding-left: ${themeCssVariables.table.horizontalCellPadding};
-  padding-right: ${themeCssVariables.table.horizontalCellPadding};
   width: 100%;
 `;
 

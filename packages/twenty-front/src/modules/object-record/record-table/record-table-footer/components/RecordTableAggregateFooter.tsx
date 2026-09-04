@@ -6,7 +6,7 @@ import {
 } from '@/object-record/record-table/components/RecordTableStyleWrapper';
 import { RECORD_TABLE_COLUMN_ADD_COLUMN_BUTTON_WIDTH } from '@/object-record/record-table/constants/RecordTableColumnAddColumnButtonWidth';
 import { RECORD_TABLE_COLUMN_LAST_EMPTY_COLUMN_WIDTH_CLASS_NAME } from '@/object-record/record-table/constants/RecordTableColumnLastEmptyColumnWidthClassName';
-import { RECORD_TABLE_ROW_HEIGHT } from '@/object-record/record-table/constants/RecordTableRowHeight';
+import { RECORD_TABLE_FOOTER_HEIGHT } from '@/object-record/record-table/constants/RecordTableFooterHeight';
 import { TABLE_Z_INDEX } from '@/object-record/record-table/constants/TableZIndex';
 import { useRecordTableContextOrThrow } from '@/object-record/record-table/contexts/RecordTableContext';
 import { useIsRecordTableAddColumnButtonHidden } from '@/object-record/record-table/hooks/useIsRecordTableAddColumnButtonHidden';
@@ -53,7 +53,7 @@ const StyledAggregateFooterContainer = styled.div<{
   bottom: 0;
   display: flex;
   flex-shrink: 0;
-  height: ${RECORD_TABLE_ROW_HEIGHT}px;
+  height: ${RECORD_TABLE_FOOTER_HEIGHT}px;
   isolation: isolate;
   margin-top: ${({ isPinnedToTableBottom }) =>
     isPinnedToTableBottom ? 'auto' : '0'};

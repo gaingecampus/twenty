@@ -6,8 +6,9 @@ import {
   RECORD_TABLE_CHECKBOX_WIDTH_CSS_VAR,
   RECORD_TABLE_DRAG_DROP_WIDTH_CSS_VAR,
 } from '@/object-record/record-table/components/RecordTableStyleWrapper';
+import { RECORD_TABLE_FOOTER_HEIGHT } from '@/object-record/record-table/constants/RecordTableFooterHeight';
+import { RECORD_TABLE_HORIZONTAL_SCROLLBAR_HEIGHT } from '@/object-record/record-table/constants/RecordTableHorizontalScrollbarHeight';
 import { RECORD_TABLE_LABEL_IDENTIFIER_COLUMN_WIDTH_ON_MOBILE } from '@/object-record/record-table/constants/RecordTableLabelIdentifierColumnWidthOnMobile';
-import { RECORD_TABLE_ROW_HEIGHT } from '@/object-record/record-table/constants/RecordTableRowHeight';
 import { TABLE_Z_INDEX } from '@/object-record/record-table/constants/TableZIndex';
 import { useRecordTableContextOrThrow } from '@/object-record/record-table/contexts/RecordTableContext';
 import { RecordTableColumnAggregateFooterCellContext } from '@/object-record/record-table/record-table-footer/components/RecordTableColumnAggregateFooterCellContext';
@@ -36,7 +37,7 @@ const StyledColumnFooterCell = styled.div<{
 
   cursor: ${({ isReadOnly }) => (isReadOnly ? 'default' : 'pointer')};
   display: flex;
-  height: ${RECORD_TABLE_ROW_HEIGHT}px;
+  height: ${RECORD_TABLE_FOOTER_HEIGHT}px;
 
   left: ${({ isFirstCell }) =>
     isFirstCell
@@ -83,7 +84,11 @@ const StyledColumnFooterCell = styled.div<{
 `;
 
 const StyledColumnFootContainer = styled.div`
+  box-sizing: border-box;
   height: 100%;
+  padding-bottom: ${RECORD_TABLE_HORIZONTAL_SCROLLBAR_HEIGHT}px;
+  padding-left: ${themeCssVariables.table.horizontalCellPadding};
+  padding-right: ${themeCssVariables.table.horizontalCellPadding};
   position: relative;
   width: 100%;
   z-index: 1;
