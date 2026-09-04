@@ -1,4 +1,5 @@
 import { type ObjectsPermissions } from 'twenty-shared/types';
+import { isDefined } from 'twenty-shared/utils';
 import {
   type EntityTarget,
   type InsertQueryBuilder,
@@ -28,6 +29,7 @@ import { computeEventSelectQueryBuilder } from 'src/engine/twenty-orm/utils/comp
 import { formatResult } from 'src/engine/twenty-orm/utils/format-result.util';
 import { formatTwentyOrmEventToDatabaseBatchEvent } from 'src/engine/twenty-orm/utils/format-twenty-orm-event-to-database-batch-event.util';
 import { getObjectMetadataFromEntityTarget } from 'src/engine/twenty-orm/utils/get-object-metadata-from-entity-target.util';
+import { stampUpdatedByOnSoftDelete } from 'src/engine/twenty-orm/utils/stamp-updated-by-on-soft-delete.util';
 import { computeObjectTargetTable } from 'src/engine/utils/compute-object-target-table.util';
 
 export class WorkspaceSoftDeleteQueryBuilder<
@@ -109,6 +111,18 @@ export class WorkspaceSoftDeleteQueryBuilder<
         tableName,
         aliasName: objectMetadata.nameSingular,
       }) as WhereClause[];
+
+      if (this.expressionMap.queryType !== 'restore') {
+        await stampUpdatedByOnSoftDelete({
+          executeQuery: (sql, parameters) =>
+            this.executeStampQuery(sql, parameters),
+          workspaceId: this.internalContext.workspaceId,
+          objectMetadata,
+          flatFieldMetadataMaps: this.internalContext.flatFieldMetadataMaps,
+          authContext: this.authContext,
+          records: before,
+        });
+      }
 
       const typeORMSoftRemoveResultWithOnlyIdColumn = await super.execute();
 
@@ -194,6 +208,25 @@ export class WorkspaceSoftDeleteQueryBuilder<
     }
 
     return mainAliasTarget;
+  }
+
+  // Datasource.query() is blocked unless permissions are bypassed.
+  // Use the current query runner so the stamp stays in the same transaction.
+  private async executeStampQuery(
+    sql: string,
+    parameters?: unknown[],
+  ): Promise<unknown> {
+    if (isDefined(this.queryRunner)) {
+      return this.queryRunner.query(sql, parameters);
+    }
+
+    const queryRunner = this.connection.createQueryRunner();
+
+    try {
+      return await queryRunner.query(sql, parameters);
+    } finally {
+      await queryRunner.release();
+    }
   }
 
   private applyRowLevelPermissionPredicates(): void {
