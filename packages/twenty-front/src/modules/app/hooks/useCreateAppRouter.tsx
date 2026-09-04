@@ -12,6 +12,7 @@ import { DefaultLayout } from '@/ui/layout/page/components/DefaultLayout';
 import { MainAppLayoutWithSidePanel } from '@/ui/layout/page/components/MainAppLayoutWithSidePanel';
 import { AppPath, SettingsPath } from 'twenty-shared/types';
 import { getSettingsPath } from 'twenty-shared/utils';
+import { TRASH_APP_PATH } from '@/trash/constants/TrashAppPath';
 
 import { lazy } from 'react';
 import {
@@ -30,6 +31,12 @@ const RecordIndexPage = lazy(() =>
 const RecordShowPage = lazy(() =>
   import('~/pages/object-record/RecordShowPage').then((module) => ({
     default: module.RecordShowPage,
+  })),
+);
+
+const TrashPage = lazy(() =>
+  import('~/pages/trash/TrashPage').then((module) => ({
+    default: module.TrashPage,
   })),
 );
 
@@ -273,6 +280,14 @@ export const useCreateAppRouter = (
               element={
                 <LazyRoute>
                   <StandalonePageLayoutPage />
+                </LazyRoute>
+              }
+            />
+            <Route
+              path={TRASH_APP_PATH}
+              element={
+                <LazyRoute>
+                  <TrashPage />
                 </LazyRoute>
               }
             />

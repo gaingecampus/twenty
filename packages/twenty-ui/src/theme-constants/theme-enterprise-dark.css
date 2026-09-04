@@ -225,7 +225,7 @@ html.dark[data-ui-theme='enterprise'] {
   --t-toolbar-chip-font-weight: 500;
   --t-toolbar-chip-gap: 8px;
   --t-view-bar-border-bottom: none;
-  --t-view-bar-min-height: 52px;
+  --t-view-bar-min-height: 68px;
   --t-view-bar-padding-x: 24px;
   --t-view-bar-section-gap: 24px;
   --t-view-tab-height: 36px;
@@ -425,7 +425,8 @@ html.dark[data-ui-theme='enterprise']
   :is(
     [data-nav-section='workspace'],
     [data-nav-section='chat'],
-    [data-nav-section='favorites']
+    [data-nav-section='favorites'],
+    [data-nav-section='trash']
   ) {
   --t-nav-item-padding-x: 8px;
 }

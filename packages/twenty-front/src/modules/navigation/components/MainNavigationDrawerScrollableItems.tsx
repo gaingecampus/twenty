@@ -1,5 +1,6 @@
 import { NavigationDrawerOpenedSection } from '@/navigation-menu-item/display/sections/components/NavigationDrawerOpenedSection';
 import { NavigationDrawerWorkspaceSectionSkeletonLoader } from '@/object-metadata/components/NavigationDrawerWorkspaceSectionSkeletonLoader';
+import { TrashNavigationDrawerItem } from '@/trash/components/TrashNavigationDrawerItem';
 
 import { styled } from '@linaria/react';
 import { lazy, Suspense } from 'react';
@@ -35,6 +36,7 @@ export const MainNavigationDrawerScrollableItems = () => {
       <Suspense fallback={<NavigationDrawerWorkspaceSectionSkeletonLoader />}>
         <FavoritesSectionDispatcher />
         <WorkspaceSectionDispatcher />
+        <TrashNavigationDrawerItem />
       </Suspense>
     </StyledScrollableItemsContainer>
   );
