@@ -15,6 +15,8 @@ const StyledChromeStack = styled.div`
   width: 100%;
 `;
 
+// space-between must not be a var() fallback — stylis breaks var() when
+// rewriting it for -webkit-box-pack, which fails lightningcss minify.
 const StyledChromeRow = styled.div`
   align-items: center;
   background: var(--t-nav-chrome-row-bg, transparent);
@@ -27,7 +29,8 @@ const StyledChromeRow = styled.div`
   flex-shrink: 0;
   gap: 0;
   height: var(--t-nav-chrome-row-height, auto);
-  justify-content: var(--t-nav-chrome-pack, space-between);
+  justify-content: space-between;
+  justify-content: var(--t-nav-chrome-pack);
   min-width: 0;
   padding: var(--t-nav-chrome-row-padding, 0);
   width: 100%;
