@@ -8,7 +8,7 @@ import { type Manifest } from 'twenty-shared/application';
 import { SettingsPath } from 'twenty-shared/types';
 import { getSettingsPath, isDefined } from 'twenty-shared/utils';
 import { H2Title } from 'twenty-ui/typography';
-import { SearchInput } from 'twenty-ui/input';
+import { SearchInput } from '@/ui/input/components/SearchInput';
 import { Section } from 'twenty-ui/layout';
 import { type ApplicationDisplayData } from '@/applications/types/applicationDisplayData.type';
 import { type Application } from '~/generated-metadata/graphql';

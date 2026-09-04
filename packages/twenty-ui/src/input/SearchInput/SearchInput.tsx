@@ -1,6 +1,11 @@
 import { Input } from '@base-ui/react/input';
 import { clsx } from 'clsx';
-import { type ReactNode, useId, useState } from 'react';
+import {
+  type FocusEventHandler,
+  type ReactNode,
+  useId,
+  useState,
+} from 'react';
 
 import { IconFilter, IconSearch } from '@ui/icon';
 import { IconButton } from '@ui/input/IconButton/IconButton';
@@ -18,6 +23,8 @@ export type SearchInputProps = {
   className?: string;
   id?: string;
   filterButtonAriaLabel?: string;
+  onFocus?: FocusEventHandler<HTMLInputElement>;
+  onBlur?: FocusEventHandler<HTMLInputElement>;
   'aria-label'?: string;
   'aria-labelledby'?: string;
 };
@@ -32,6 +39,8 @@ export const SearchInput = ({
   className,
   id,
   filterButtonAriaLabel = 'Filter',
+  onFocus,
+  onBlur,
   'aria-label': ariaLabel,
   'aria-labelledby': ariaLabelledby,
 }: SearchInputProps) => {
@@ -48,9 +57,40 @@ export const SearchInput = ({
     />
   );
 
+  const handleFocus: FocusEventHandler<HTMLInputElement> = (event) => {
+    setIsFocused(true);
+    onFocus?.(event);
+  };
+
+  const handleBlur: FocusEventHandler<HTMLInputElement> = (event) => {
+    setIsFocused(false);
+    onBlur?.(event);
+  };
+
+  const handleContainerFocusCapture: FocusEventHandler<HTMLDivElement> = () => {
+    setIsFocused(true);
+  };
+
+  const handleContainerBlurCapture: FocusEventHandler<HTMLDivElement> = (
+    event,
+  ) => {
+    if (
+      event.relatedTarget instanceof Node &&
+      event.currentTarget.contains(event.relatedTarget)
+    ) {
+      return;
+    }
+
+    setIsFocused(false);
+  };
+
   return (
     <div className={clsx(styles.wrapper, className)}>
-      <div className={styles.inputContainer}>
+      <div
+        className={styles.inputContainer}
+        onFocusCapture={handleContainerFocusCapture}
+        onBlurCapture={handleContainerBlurCapture}
+      >
         <div
           className={styles.iconContainer}
           data-focused={isFocused || undefined}
@@ -63,8 +103,8 @@ export const SearchInput = ({
           className={styles.input}
           value={value}
           onValueChange={(newValue) => onChange(newValue)}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
           placeholder={placeholder}
           autoFocus={autoFocus}
           disabled={disabled}

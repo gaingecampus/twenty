@@ -8,7 +8,7 @@ import { DropdownMenuItemsContainer } from '@/ui/layout/dropdown/components/Drop
 import { isDefined } from 'twenty-shared/utils';
 import { IconLock, IconPuzzle, IconTool } from 'twenty-ui/icon';
 import { H2Title } from 'twenty-ui/typography';
-import { SearchInput } from 'twenty-ui/input';
+import { SearchInput } from '@/ui/input/components/SearchInput';
 import { Section } from 'twenty-ui/layout';
 import { MenuItemToggle } from 'twenty-ui/navigation';
 import { themeCssVariables } from 'twenty-ui/theme-constants';

@@ -31,15 +31,16 @@ import {
   IconHierarchy2,
   IconListDetails,
 } from 'twenty-ui/icon';
-import { AppTooltip, TooltipDelay } from 'twenty-ui/surfaces';
-import { H2Title } from 'twenty-ui/typography';
-import { Button, SearchInput } from 'twenty-ui/input';
+import { Button } from 'twenty-ui/input';
 import { Section } from 'twenty-ui/layout';
 import { MenuItem } from 'twenty-ui/navigation';
+import { AppTooltip, TooltipDelay } from 'twenty-ui/surfaces';
+import { ThemeContext, themeCssVariables } from 'twenty-ui/theme-constants';
+import { H2Title } from 'twenty-ui/typography';
 
+import { SearchInput } from '@/ui/input/components/SearchInput';
 import { TableCell } from '@/ui/layout/table/components/TableCell';
 import { TableRow } from '@/ui/layout/table/components/TableRow';
-import { ThemeContext, themeCssVariables } from 'twenty-ui/theme-constants';
 import { useNavigateApp } from '~/hooks/useNavigateApp';
 import { useNavigateSettings } from '~/hooks/useNavigateSettings';
 import { getAbsoluteImageUrl } from '~/utils/image/getAbsoluteImageUrl';

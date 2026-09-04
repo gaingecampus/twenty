@@ -12,7 +12,7 @@ import { useContext, useState } from 'react';
 import { Avatar } from 'twenty-ui/data-display';
 import { IconChevronRight } from 'twenty-ui/icon';
 import { H2Title } from 'twenty-ui/typography';
-import { SearchInput } from 'twenty-ui/input';
+import { SearchInput } from '@/ui/input/components/SearchInput';
 import { Section } from 'twenty-ui/layout';
 import { ThemeContext, themeCssVariables } from 'twenty-ui/theme-constants';
 import { type UsageOperationType } from '~/generated-metadata/graphql';

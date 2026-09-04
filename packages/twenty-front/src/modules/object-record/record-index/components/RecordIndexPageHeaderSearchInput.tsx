@@ -1,9 +1,9 @@
 import { anyFieldFilterValueComponentState } from '@/object-record/record-filter/states/anyFieldFilterValueComponentState';
+import { SearchInput } from '@/ui/input/components/SearchInput';
 import { useAtomComponentState } from '@/ui/utilities/state/jotai/hooks/useAtomComponentState';
 import { styled } from '@linaria/react';
 import { t } from '@lingui/core/macro';
 import { useEffect, useState } from 'react';
-import { SearchInput } from 'twenty-ui/input';
 import { useDebouncedCallback } from 'use-debounce';
 
 const SEARCH_DEBOUNCE_MS = 500;

@@ -25,7 +25,7 @@ export const useGoToHotkeys = ({
     },
     {
       enableOnContentEditable: true,
-      enableOnFormTags: true,
+      enableOnFormTags: false,
       preventDefault: true,
     },
     [navigate],

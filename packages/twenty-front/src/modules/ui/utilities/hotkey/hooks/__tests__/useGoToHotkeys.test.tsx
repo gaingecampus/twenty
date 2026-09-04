@@ -39,4 +39,32 @@ describe('useGoToHotkeys', () => {
 
     expect(result.current.pathname).toBe('/three');
   });
+
+  it('should not navigate when an input is focused', () => {
+    const { result } = renderHook(() => {
+      useGoToHotkeys({ key: 'a', location: '/three' });
+
+      const location = useLocation();
+
+      return {
+        pathname: location.pathname,
+      };
+    }, renderHookConfig);
+
+    const input = document.createElement('input');
+    document.body.appendChild(input);
+    input.focus();
+
+    act(() => {
+      fireEvent.keyDown(input, { key: 'g', code: 'KeyG' });
+    });
+
+    act(() => {
+      fireEvent.keyDown(input, { key: 'a', code: 'KeyA' });
+    });
+
+    expect(result.current.pathname).toBe('/two');
+
+    document.body.removeChild(input);
+  });
 });

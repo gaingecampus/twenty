@@ -14,16 +14,20 @@ import { useQuery } from '@apollo/client/react';
 import { styled } from '@linaria/react';
 import { useLingui } from '@lingui/react/macro';
 import { useContext, useMemo, useState } from 'react';
-import { ThemeContext, themeCssVariables } from 'twenty-ui/theme-constants';
 import { FeatureFlagKey, SettingsPath } from 'twenty-shared/types';
 import { getSettingsPath } from 'twenty-shared/utils';
 import { CommandBlock } from 'twenty-ui/data-display';
 import { InlineBanner } from 'twenty-ui/feedback';
 import { IconArrowUpRight, IconChevronRight, IconCopy } from 'twenty-ui/icon';
-import { OverflowingTextWithTooltip } from 'twenty-ui/surfaces';
-import { H2Title } from 'twenty-ui/typography';
-import { Button, SearchInput } from 'twenty-ui/input';
+import { Button } from 'twenty-ui/input';
 import { Section } from 'twenty-ui/layout';
+import { OverflowingTextWithTooltip } from 'twenty-ui/surfaces';
+import { ThemeContext, themeCssVariables } from 'twenty-ui/theme-constants';
+import { H2Title } from 'twenty-ui/typography';
+
+import { ApplicationDisplay } from '@/applications/components/ApplicationDisplay';
+import { SearchInput } from '@/ui/input/components/SearchInput';
+import { useIsFeatureEnabled } from '@/workspace/hooks/useIsFeatureEnabled';
 import {
   type ApplicationRegistrationFragmentFragment,
   FindManyApplicationRegistrationsDocument,
@@ -35,8 +39,6 @@ import {
   SettingsApplicationTableRow,
 } from '~/pages/settings/applications/components/SettingsApplicationTableRow';
 import { getApplicationDescriptionSummary } from '~/pages/settings/applications/utils/getApplicationDescriptionSummary';
-import { ApplicationDisplay } from '@/applications/components/ApplicationDisplay';
-import { useIsFeatureEnabled } from '@/workspace/hooks/useIsFeatureEnabled';
 
 const StyledButtonContainer = styled.div`
   display: flex;

@@ -12,7 +12,7 @@ import { useSortedArray } from '@/ui/layout/table/hooks/useSortedArray';
 import { SettingsPath } from 'twenty-shared/types';
 import { getSettingsPath } from 'twenty-shared/utils';
 import { IconChevronRight, IconSettingsAutomation } from 'twenty-ui/icon';
-import { SearchInput } from 'twenty-ui/input';
+import { SearchInput } from '@/ui/input/components/SearchInput';
 import { MenuItemToggle } from 'twenty-ui/navigation';
 import { ThemeContext, themeCssVariables } from 'twenty-ui/theme-constants';
 import { SETTINGS_AI_AGENT_TABLE_METADATA } from '~/pages/settings/ai/constants/SettingsAiAgentTableMetadata';

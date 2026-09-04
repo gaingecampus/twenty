@@ -19,14 +19,15 @@ import {
   IconTrash,
   IconWorld,
 } from 'twenty-ui/icon';
-import { H2Title } from 'twenty-ui/typography';
-import { Button, SearchInput } from 'twenty-ui/input';
+import { Button } from 'twenty-ui/input';
 import { Section } from 'twenty-ui/layout';
 import { RoundedLink, UndecoratedLink } from 'twenty-ui/navigation';
+import { H2Title } from 'twenty-ui/typography';
 
 import { useClientConfig } from '@/client-config/hooks/useClientConfig';
 import { useApolloAdminClient } from '@/settings/admin-panel/apollo/hooks/useApolloAdminClient';
 import { SettingsSkeletonLoader } from '@/settings/components/SettingsSkeletonLoader';
+import { SearchInput } from '@/ui/input/components/SearchInput';
 import { SettingsAiModelsTable } from '@/settings/ai/components/SettingsAiModelsTable';
 import { REMOVE_AI_PROVIDER } from '@/settings/admin-panel/ai/graphql/mutations/removeAiProvider';
 import { SET_ADMIN_AI_MODELS_ENABLED } from '@/settings/admin-panel/ai/graphql/mutations/setAdminAiModelsEnabled';

@@ -16,13 +16,15 @@ import { t } from '@lingui/core/macro';
 import { type ReactNode, useContext, useState } from 'react';
 import { assertUnreachable, getSettingsPath } from 'twenty-shared/utils';
 import { SettingsPath } from 'twenty-shared/types';
+import { Tag } from 'twenty-ui/data-display';
 import { IconChevronRight, IconPinned, IconRefresh } from 'twenty-ui/icon';
-import { H2Title } from 'twenty-ui/typography';
-import { Button, SearchInput } from 'twenty-ui/input';
+import { Button } from 'twenty-ui/input';
 import { Section } from 'twenty-ui/layout';
 import { MenuItemToggle } from 'twenty-ui/navigation';
 import { ThemeContext, themeCssVariables } from 'twenty-ui/theme-constants';
-import { Tag } from 'twenty-ui/data-display';
+import { H2Title } from 'twenty-ui/typography';
+
+import { SearchInput } from '@/ui/input/components/SearchInput';
 import {
   type ApplicationRegistrationFragmentFragment,
   ApplicationRegistrationSourceType,

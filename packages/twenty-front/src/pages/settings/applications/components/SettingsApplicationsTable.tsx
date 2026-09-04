@@ -15,7 +15,7 @@ import { useContext, useState } from 'react';
 import { type ApplicationWithoutRelation } from '~/pages/settings/applications/types/applicationWithoutRelation';
 import { isNewerSemver } from '~/pages/settings/applications/utils/isNewerSemver';
 import { Section } from 'twenty-ui/layout';
-import { SearchInput } from 'twenty-ui/input';
+import { SearchInput } from '@/ui/input/components/SearchInput';
 import { ThemeContext, themeCssVariables } from 'twenty-ui/theme-constants';
 import { ApplicationRegistrationSourceType } from '~/generated-metadata/graphql';
 

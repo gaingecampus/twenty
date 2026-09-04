@@ -4,7 +4,6 @@ import { type KeyboardEvent, type MouseEvent, useContext } from 'react';
 import { SidePanelPages } from 'twenty-shared/types';
 import { isDefined } from 'twenty-shared/utils';
 import { IconSearch } from 'twenty-ui/icon';
-import { SearchInput } from 'twenty-ui/input';
 import { ThemeContext, themeCssVariables } from 'twenty-ui/theme-constants';
 import { useIsMobile } from 'twenty-ui/utilities';
 
@@ -14,6 +13,7 @@ import { agentChatThreadSearchQueryState } from '@/ai/states/agentChatThreadSear
 import { useOpenRecordsSearchPageInSidePanel } from '@/side-panel/hooks/useOpenRecordsSearchPageInSidePanel';
 import { isSidePanelOpenedState } from '@/side-panel/states/isSidePanelOpenedState';
 import { sidePanelPageState } from '@/side-panel/states/sidePanelPageState';
+import { SearchInput } from '@/ui/input/components/SearchInput';
 import { NAVIGATION_DRAWER_SEARCH_CLICK_OUTSIDE_ID } from '@/ui/navigation/navigation-drawer/constants/NavigationDrawerSearchClickOutsideId';
 import { isNavigationDrawerExpandedState } from '@/ui/navigation/states/isNavigationDrawerExpanded';
 import { navigationDrawerActiveTabState } from '@/ui/navigation/states/navigationDrawerActiveTabState';
@@ -103,9 +103,8 @@ export const MainNavigationDrawerSearchButton = () => {
   const navigationDrawerActiveTab = useAtomStateValue(
     navigationDrawerActiveTabState,
   );
-  const [searchQuery, setSearchQuery] = useAtomState(
-    agentChatThreadSearchQueryState,
-  );
+  const [agentChatThreadSearchQuery, setAgentChatThreadSearchQuery] =
+    useAtomState(agentChatThreadSearchQueryState);
   const { toggleRecordsSearchPage } = useOpenRecordsSearchPageInSidePanel();
   const isSidePanelOpened = useAtomStateValue(isSidePanelOpenedState);
   const sidePanelPage = useAtomStateValue(sidePanelPageState);
@@ -160,8 +159,8 @@ export const MainNavigationDrawerSearchButton = () => {
       <StyledChatSearch>
         <SearchInput
           placeholder={searchLabel}
-          value={searchQuery}
-          onChange={setSearchQuery}
+          value={agentChatThreadSearchQuery}
+          onChange={setAgentChatThreadSearchQuery}
           aria-label={searchLabel}
           filterButtonAriaLabel={t`Filter chats`}
           filterDropdown={(filterButton) => (
