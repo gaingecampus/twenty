@@ -225,9 +225,23 @@ html.dark[data-ui-theme='enterprise'] {
   --t-toolbar-chip-font-weight: 500;
   --t-toolbar-chip-gap: 8px;
   --t-view-bar-border-bottom: none;
-  --t-view-bar-min-height: 68px;
+  --t-view-bar-min-height: auto;
+  --t-view-bar-details-min-height: auto;
+  --t-view-bar-details-padding-y: 0;
+  --t-view-bar-details-border-top: none;
   --t-view-bar-padding-x: 24px;
   --t-view-bar-section-gap: 24px;
+  --t-view-bar-stack-gap: 12px;
+
+  /* Active filter/sort chips — solid surface + clear blue edge */
+  --t-filter-chip-bg: #1c1f2a;
+  --t-filter-chip-border: 1px solid rgb(77 115 255 / 0.55);
+  --t-filter-chip-color: #9db0ff;
+  --t-filter-chip-delete-hover-bg: rgb(46 91 255 / 0.28);
+  --t-filter-chip-danger-bg: #1c1f2a;
+  --t-filter-chip-danger-border: 1px solid rgb(229 72 77 / 0.55);
+  --t-filter-chip-danger-color: #ff8d8d;
+  --t-filter-chip-danger-delete-hover-bg: rgb(229 72 77 / 0.28);
   --t-view-tab-height: 36px;
   --t-view-tab-bg: transparent;
   --t-view-tab-border: none;
@@ -237,7 +251,9 @@ html.dark[data-ui-theme='enterprise'] {
   --t-view-tab-gap: 4px;
   --t-view-tab-color: #8b92a0;
   --t-view-tab-weight: 500;
-  --t-view-tab-active-bg: transparent;
+  --t-view-tab-active-bg: #1c1f2a;
+  --t-view-tab-active-border: 1px solid #2a2f3c;
+  --t-view-tab-active-hover-bg: #1c1f2a;
   --t-view-tab-active-color: #f4f5f8;
   --t-view-tab-active-weight: 600;
   --t-view-tab-hover-bg: var(--t-control-hover-bg);
@@ -527,9 +543,6 @@ html.dark[data-ui-theme='enterprise']
   background: var(--t-icon-button-bg);
   border-radius: var(--t-icon-button-radius);
   box-sizing: border-box;
-  height: var(--t-icon-button-size-sm, 24px);
-  min-width: var(--t-icon-button-size-sm, 24px);
-  width: var(--t-icon-button-size-sm, 24px);
 }
 
 html.dark[data-ui-theme='enterprise']
@@ -557,6 +570,49 @@ html.dark[data-ui-theme='enterprise']
   .section-title-container
   button[data-accent='tertiary']:not([data-variant]):hover {
   background: var(--t-nav-section-title-button-hover-bg, #353b4a);
+}
+
+/* View bar details — match TopBar toolbar chips */
+html.dark[data-ui-theme='enterprise'] [data-view-bar-details] {
+  --t-control-height-sm: var(--t-toolbar-chip-height);
+}
+
+html.dark[data-ui-theme='enterprise']
+  [data-view-bar-details]
+  button[data-accent]:not([data-variant]) {
+  --light-button-color: var(--t-view-tab-color, #8b92a0);
+  background: var(--t-toolbar-chip-bg);
+  border: var(--t-toolbar-chip-border);
+  border-radius: var(--t-toolbar-chip-radius);
+  box-sizing: border-box;
+  color: var(--light-button-color);
+  font-size: var(--t-toolbar-chip-font-size);
+  font-weight: var(--t-toolbar-chip-font-weight);
+  height: var(--t-toolbar-chip-height);
+  padding: 0 var(--t-toolbar-chip-padding-x);
+}
+
+html.dark[data-ui-theme='enterprise']
+  [data-view-bar-details]
+  button[data-accent]:not([data-variant]):hover {
+  --light-button-hover-bg: var(--t-toolbar-chip-hover-bg);
+  background: var(--t-toolbar-chip-hover-bg);
+}
+
+html.dark[data-ui-theme='enterprise']
+  [data-view-bar-details]
+  button[data-variant] {
+  font-size: var(--t-toolbar-chip-font-size);
+  height: var(--t-toolbar-chip-height);
+}
+
+html.dark[data-ui-theme='enterprise']
+  [data-view-bar-details]
+  button[data-variant='secondary'][data-accent='blue'] {
+  --btn-bg: #1c1f2a;
+  --btn-border-color: rgb(77 115 255 / 0.55);
+  --btn-hover-bg: rgb(46 91 255 / 0.2);
+  --btn-active-bg: rgb(46 91 255 / 0.2);
 }
 
 html.dark[data-ui-theme='enterprise'] [id$='-options'] {

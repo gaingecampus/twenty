@@ -9,31 +9,33 @@ const StyledChip = styled.div<{ variant: SortOrFilterChipVariant }>`
   background-color: ${({ variant }) => {
     switch (variant) {
       case 'danger':
-        return themeCssVariables.background.danger;
+        return `var(--t-filter-chip-danger-bg, ${themeCssVariables.background.danger})`;
       case 'default':
       default:
-        return themeCssVariables.accent.quaternary;
+        return `var(--t-filter-chip-bg, ${themeCssVariables.accent.quaternary})`;
     }
   }};
-  border: 1px solid
-    ${({ variant }) => {
-      switch (variant) {
-        case 'danger':
-          return themeCssVariables.border.color.danger;
-        case 'default':
-        default:
-          return themeCssVariables.accent.tertiary;
-      }
-    }};
-  border-radius: 4px;
+  border: ${({ variant }) => {
+    switch (variant) {
+      case 'danger':
+        return `var(--t-filter-chip-danger-border, 1px solid ${themeCssVariables.border.color.danger})`;
+      case 'default':
+      default:
+        return `var(--t-filter-chip-border, 1px solid ${themeCssVariables.accent.tertiary})`;
+    }
+  }};
+  border-radius: var(
+    --t-toolbar-chip-radius,
+    ${themeCssVariables.border.radius.sm}
+  );
   box-sizing: border-box;
   color: ${({ variant }) => {
     switch (variant) {
       case 'danger':
-        return themeCssVariables.color.red;
+        return `var(--t-filter-chip-danger-color, ${themeCssVariables.color.red})`;
       case 'default':
       default:
-        return themeCssVariables.color.blue;
+        return `var(--t-filter-chip-color, ${themeCssVariables.color.blue})`;
     }
   }};
   column-gap: ${themeCssVariables.spacing[1]};
@@ -41,11 +43,19 @@ const StyledChip = styled.div<{ variant: SortOrFilterChipVariant }>`
   display: flex;
   flex-direction: row;
   flex-shrink: 0;
-  font-size: ${themeCssVariables.font.size.sm};
-  font-weight: ${themeCssVariables.font.weight.medium};
-  height: 24px;
-  padding: ${themeCssVariables.spacing[0.5]};
-  padding-left: ${themeCssVariables.spacing[1]};
+  font-size: var(
+    --t-toolbar-chip-font-size,
+    ${themeCssVariables.font.size.sm}
+  );
+  font-weight: var(
+    --t-toolbar-chip-font-weight,
+    ${themeCssVariables.font.weight.medium}
+  );
+  height: var(--t-toolbar-chip-height, 24px);
+  padding: var(--t-toolbar-chip-padding-y, ${themeCssVariables.spacing[0.5]})
+    var(--t-toolbar-chip-padding-x, ${themeCssVariables.spacing[2]})
+    var(--t-toolbar-chip-padding-y, ${themeCssVariables.spacing[0.5]})
+    var(--t-toolbar-chip-padding-x, ${themeCssVariables.spacing[2]});
   user-select: none;
   white-space: nowrap;
 `;
@@ -53,40 +63,52 @@ const StyledChip = styled.div<{ variant: SortOrFilterChipVariant }>`
 const StyledIcon = styled.div`
   align-items: center;
   display: flex;
+  flex-shrink: 0;
 `;
 
 const StyledDelete = styled.button<{ variant: SortOrFilterChipVariant }>`
   align-items: center;
   background: none;
   border: none;
+  border-radius: var(
+    --t-toolbar-chip-radius,
+    ${themeCssVariables.border.radius.sm}
+  );
   box-sizing: border-box;
   color: inherit;
   cursor: pointer;
   display: flex;
-  font-size: ${themeCssVariables.font.size.sm};
-  height: 20px;
+  flex-shrink: 0;
+  font-size: var(
+    --t-toolbar-chip-font-size,
+    ${themeCssVariables.font.size.sm}
+  );
+  height: 24px;
   justify-content: center;
   margin: 0;
+  margin-right: calc(-1 * var(--t-spacing-1, 4px));
   padding: 0;
   user-select: none;
-  width: 20px;
+  width: 24px;
 
   &:hover {
     background-color: ${({ variant }) => {
       switch (variant) {
         case 'danger':
-          return themeCssVariables.color.red5;
+          return `var(--t-filter-chip-danger-delete-hover-bg, ${themeCssVariables.color.red5})`;
         case 'default':
         default:
-          return themeCssVariables.accent.secondary;
+          return `var(--t-filter-chip-delete-hover-bg, ${themeCssVariables.accent.secondary})`;
       }
     }};
-    border-radius: ${themeCssVariables.border.radius.sm};
   }
 `;
 
 const StyledLabelKey = styled.div`
-  font-weight: ${themeCssVariables.font.weight.medium};
+  font-weight: var(
+    --t-toolbar-chip-font-weight,
+    ${themeCssVariables.font.weight.medium}
+  );
 `;
 
 const StyledFilterValue = styled.span`
@@ -94,7 +116,10 @@ const StyledFilterValue = styled.span`
 `;
 
 const StyledSortValue = styled.span`
-  font-weight: ${themeCssVariables.font.weight.medium};
+  font-weight: var(
+    --t-toolbar-chip-font-weight,
+    ${themeCssVariables.font.weight.medium}
+  );
 `;
 
 const StyledSubFieldSeparator = styled.span`
@@ -108,7 +133,9 @@ const StyledSubFieldValue = styled.span`
 `;
 
 const StyledKeyLabelContainer = styled.div`
+  align-items: center;
   display: flex;
+  min-width: 0;
 `;
 
 export type SortOrFilterChipVariant = 'default' | 'danger';

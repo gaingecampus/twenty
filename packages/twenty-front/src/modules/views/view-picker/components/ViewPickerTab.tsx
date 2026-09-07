@@ -23,7 +23,10 @@ const StyledTabChip = styled(StyledDropdownButtonContainer)`
     isUnfolded
       ? `var(--t-view-tab-active-bg, transparent)`
       : `var(--t-view-tab-bg, transparent)`};
-  border: var(--t-view-tab-border, none);
+  border: ${({ isUnfolded }) =>
+    isUnfolded
+      ? `var(--t-view-tab-active-border, var(--t-view-tab-border, none))`
+      : `var(--t-view-tab-border, none)`};
   border-radius: var(
     --t-view-tab-radius,
     ${themeCssVariables.border.radius.sm}
@@ -43,10 +46,16 @@ const StyledTabChip = styled(StyledDropdownButtonContainer)`
   padding: 0 var(--t-view-tab-padding-x, ${themeCssVariables.spacing[2]});
 
   &:hover {
-    background: var(
-      --t-view-tab-hover-bg,
-      ${themeCssVariables.background.transparent.light}
-    );
+    background: ${({ isUnfolded }) =>
+      isUnfolded
+        ? `var(
+          --t-view-tab-active-hover-bg,
+          var(--t-view-tab-active-bg, transparent)
+        )`
+        : `var(
+          --t-view-tab-hover-bg,
+          ${themeCssVariables.background.transparent.light}
+        )`};
     color: ${({ isUnfolded }) =>
       isUnfolded
         ? `var(--t-view-tab-active-color, ${themeCssVariables.font.color.primary})`
@@ -55,7 +64,7 @@ const StyledTabChip = styled(StyledDropdownButtonContainer)`
 
   &:hover [data-view-picker-tab-options],
   &:focus-within [data-view-picker-tab-options] {
-    opacity: 1;
+    display: flex;
   }
 `;
 
@@ -83,10 +92,10 @@ const StyledCount = styled.span`
 `;
 
 const StyledOptionsButton = styled.div<{ isVisible: boolean }>`
-  display: flex;
+  align-items: center;
+  display: ${({ isVisible }) => (isVisible ? 'flex' : 'none')};
   flex-shrink: 0;
   margin-left: ${themeCssVariables.spacing[1]};
-  opacity: ${({ isVisible }) => (isVisible ? 1 : 0)};
 `;
 
 type ViewPickerTabProps = {

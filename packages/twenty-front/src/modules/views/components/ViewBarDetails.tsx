@@ -47,17 +47,22 @@ export type ViewBarDetailsProps = {
 
 const StyledBar = styled.div`
   align-items: center;
-  border-top: 1px solid ${themeCssVariables.border.color.light};
+  border-top: var(
+    --t-view-bar-details-border-top,
+    1px solid ${themeCssVariables.border.color.light}
+  );
   box-sizing: border-box;
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
   gap: var(--t-toolbar-chip-gap, ${themeCssVariables.spacing[2]});
+  height: auto;
   justify-content: space-between;
-  min-height: var(--t-view-bar-min-height, 52px);
-  padding: ${themeCssVariables.spacing[2]}
-    var(--t-view-bar-padding-x, ${themeCssVariables.spacing[3]})
-    ${themeCssVariables.spacing[2]} 0;
+  min-height: var(--t-view-bar-details-min-height, auto);
+  padding-bottom: var(--t-view-bar-details-padding-y, 0);
+  padding-left: 0;
+  padding-right: 0;
+  padding-top: var(--t-view-bar-details-padding-y, 0);
   z-index: 4;
 `;
 
@@ -67,6 +72,7 @@ const StyledChipContainer = styled.div`
   flex-direction: row;
   flex-wrap: wrap;
   gap: var(--t-toolbar-chip-gap, ${themeCssVariables.spacing[2]});
+  width: max-content;
   z-index: 1;
 `;
 
@@ -87,14 +93,20 @@ const StyledFilterContainer = styled.div`
   overflow-x: hidden;
 `;
 
+const StyledScrollableChipArea = styled.div`
+  flex: 0 1 auto;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: hidden;
+  width: max-content;
+`;
+
 const StyledSeparatorContainer = styled.div`
-  align-items: flex-start;
+  align-items: center;
   align-self: stretch;
   display: flex;
-  padding-bottom: ${themeCssVariables.spacing[2]};
   padding-left: ${themeCssVariables.spacing[1]};
   padding-right: ${themeCssVariables.spacing[1]};
-  padding-top: ${themeCssVariables.spacing[2]};
 `;
 
 const StyledSeparator = styled.div`
@@ -104,6 +116,7 @@ const StyledSeparator = styled.div`
 `;
 
 const StyledAddFilterContainer = styled.div`
+  flex-shrink: 0;
   z-index: 5;
 `;
 
@@ -227,56 +240,59 @@ export const ViewBarDetails = ({
   }
 
   return (
-    <StyledBar>
+    <StyledBar data-view-bar-details>
       <StyledFilterContainer>
-        <ScrollWrapper
-          componentInstanceId={viewBarId}
-          defaultEnableYScroll={false}
-        >
-          <StyledChipContainer>
-            {isDefined(allSoftDeletedRecordsFilter) && (
-              <SoftDeleteFilterChip
-                key={allSoftDeletedRecordsFilter.fieldMetadataId}
-                recordFilter={allSoftDeletedRecordsFilter}
-                viewBarId={viewBarId}
-              />
-            )}
-            {isDefined(allSoftDeletedRecordsFilter) && (
-              <StyledSeparatorContainer>
-                <StyledSeparator />
-              </StyledSeparatorContainer>
-            )}
-            {currentRecordSorts.map((recordSort) => (
-              <EditableSortChip
-                key={recordSort.fieldMetadataId}
-                recordSort={recordSort}
-              />
-            ))}
-            {isNonEmptyArray(recordFilters) &&
-              isNonEmptyArray(currentRecordSorts) && (
+        <StyledScrollableChipArea>
+          <ScrollWrapper
+            componentInstanceId={viewBarId}
+            defaultEnableYScroll={false}
+            autoHeight
+          >
+            <StyledChipContainer>
+              {isDefined(allSoftDeletedRecordsFilter) && (
+                <SoftDeleteFilterChip
+                  key={allSoftDeletedRecordsFilter.fieldMetadataId}
+                  recordFilter={allSoftDeletedRecordsFilter}
+                  viewBarId={viewBarId}
+                />
+              )}
+              {isDefined(allSoftDeletedRecordsFilter) && (
                 <StyledSeparatorContainer>
                   <StyledSeparator />
                 </StyledSeparatorContainer>
               )}
-            {shouldShowAnyFieldSearchChip && <AnyFieldSearchDropdownButton />}
-            {shouldShowAdvancedFilterDropdownButton && (
-              <AdvancedFilterDropdownButton />
-            )}
-            {recordFilters.map((recordFilter) => (
-              <ObjectFilterDropdownComponentInstanceContext.Provider
-                key={recordFilter.id}
-                value={{
-                  instanceId:
-                    getEditableChipObjectFilterDropdownComponentInstanceId({
-                      recordFilterId: recordFilter.id,
-                    }),
-                }}
-              >
-                <EditableFilterDropdownButton recordFilter={recordFilter} />
-              </ObjectFilterDropdownComponentInstanceContext.Provider>
-            ))}
-          </StyledChipContainer>
-        </ScrollWrapper>
+              {currentRecordSorts.map((recordSort) => (
+                <EditableSortChip
+                  key={recordSort.fieldMetadataId}
+                  recordSort={recordSort}
+                />
+              ))}
+              {isNonEmptyArray(recordFilters) &&
+                isNonEmptyArray(currentRecordSorts) && (
+                  <StyledSeparatorContainer>
+                    <StyledSeparator />
+                  </StyledSeparatorContainer>
+                )}
+              {shouldShowAnyFieldSearchChip && <AnyFieldSearchDropdownButton />}
+              {shouldShowAdvancedFilterDropdownButton && (
+                <AdvancedFilterDropdownButton />
+              )}
+              {recordFilters.map((recordFilter) => (
+                <ObjectFilterDropdownComponentInstanceContext.Provider
+                  key={recordFilter.id}
+                  value={{
+                    instanceId:
+                      getEditableChipObjectFilterDropdownComponentInstanceId({
+                        recordFilterId: recordFilter.id,
+                      }),
+                  }}
+                >
+                  <EditableFilterDropdownButton recordFilter={recordFilter} />
+                </ObjectFilterDropdownComponentInstanceContext.Provider>
+              ))}
+            </StyledChipContainer>
+          </ScrollWrapper>
+        </StyledScrollableChipArea>
         {hasFilterButton && (
           <StyledAddFilterContainer>
             <ViewBarDetailsAddFilterButton />

@@ -29,7 +29,6 @@ import { themeCssVariables } from 'twenty-ui/theme-constants';
 const StyledContainer = styled.div`
   border-radius: ${themeCssVariables.border.radius.md};
   display: inline-flex;
-  margin-right: ${themeCssVariables.spacing[2]};
   position: relative;
 `;
 

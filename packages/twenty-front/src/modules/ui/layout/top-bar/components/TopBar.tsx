@@ -15,9 +15,11 @@ const StyledContainer = styled.div`
     --t-view-bar-border-bottom,
     1px solid ${themeCssVariables.border.color.light}
   );
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  padding-left: var(--t-view-bar-padding-x, ${themeCssVariables.spacing[3]});
+  gap: var(--t-view-bar-stack-gap, ${themeCssVariables.spacing[2]});
+  padding: var(--t-view-bar-padding-x, ${themeCssVariables.spacing[3]});
 `;
 
 const StyledTopBar = styled.div`
@@ -31,7 +33,6 @@ const StyledTopBar = styled.div`
   gap: var(--t-view-bar-section-gap, ${themeCssVariables.spacing[4]});
   height: var(--t-view-bar-min-height, 39px);
   justify-content: space-between;
-  padding-right: var(--t-view-bar-padding-x, ${themeCssVariables.spacing[2]});
 
   z-index: 7;
 `;
