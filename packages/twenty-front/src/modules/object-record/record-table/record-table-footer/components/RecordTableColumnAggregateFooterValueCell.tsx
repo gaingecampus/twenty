@@ -1,5 +1,5 @@
 import { hasRecordGroupsComponentSelector } from '@/object-record/record-group/states/selectors/hasRecordGroupsComponentSelector';
-import { RECORD_TABLE_ROW_HEIGHT } from '@/object-record/record-table/constants/RecordTableRowHeight';
+import { RECORD_TABLE_FOOTER_HEIGHT } from '@/object-record/record-table/constants/RecordTableFooterHeight';
 
 import { RecordTableColumnAggregateFooterCellContext } from '@/object-record/record-table/record-table-footer/components/RecordTableColumnAggregateFooterCellContext';
 import { RecordTableColumnAggregateFooterValue } from '@/object-record/record-table/record-table-footer/components/RecordTableColumnAggregateFooterValue';
@@ -30,10 +30,12 @@ const StyledCell = styled.div<{ isUnfolded: boolean }>`
   flex-shrink: 0;
   font-weight: ${themeCssVariables.font.weight.medium};
   gap: ${themeCssVariables.spacing[1]};
-  height: ${RECORD_TABLE_ROW_HEIGHT}px;
+  height: ${RECORD_TABLE_FOOTER_HEIGHT}px;
   justify-content: space-between;
   max-width: 100%;
   min-width: 0;
+  padding-left: ${themeCssVariables.table.horizontalCellPadding};
+  padding-right: ${themeCssVariables.table.horizontalCellPadding};
   width: 100%;
 `;
 

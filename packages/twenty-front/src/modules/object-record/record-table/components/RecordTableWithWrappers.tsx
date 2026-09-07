@@ -7,6 +7,7 @@ import { useOpenRecordFromIndexView } from '@/object-record/record-index/hooks/u
 import { RecordTable } from '@/object-record/record-table/components/RecordTable';
 import { RecordTableComponentInstance } from '@/object-record/record-table/components/RecordTableComponentInstance';
 import { RecordTableContextProvider } from '@/object-record/record-table/components/RecordTableContextProvider';
+import { RecordTableScrollbars } from '@/object-record/record-table/components/RecordTableScrollbars';
 import { EntityDeleteContext } from '@/object-record/record-table/contexts/EntityDeleteHookContext';
 import { useSelectAllRows } from '@/object-record/record-table/hooks/internal/useSelectAllRows';
 import { useActiveRecordTableRow } from '@/object-record/record-table/hooks/useActiveRecordTableRow';
@@ -49,16 +50,6 @@ const StyledTableAndPagination = styled.div`
   height: 100%;
   min-height: 0;
   width: 100%;
-`;
-
-const StyledScrollArea = styled.div`
-  background: ${themeCssVariables.background.primary};
-  border-radius: var(--t-table-radius, 0);
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  min-height: 0;
-  overflow: hidden;
 `;
 
 type RecordTableWithWrappersProps = {
@@ -121,7 +112,9 @@ export const RecordTableWithWrappers = ({
             {isRecordIndexPage ? (
               <StyledRecordIndexTableInset>
                 <StyledTableAndPagination>
-                  <StyledScrollArea>{recordTable}</StyledScrollArea>
+                  <RecordTableScrollbars recordTableId={recordTableId}>
+                    {recordTable}
+                  </RecordTableScrollbars>
                   <RecordIndexPaginationBar />
                 </StyledTableAndPagination>
               </StyledRecordIndexTableInset>
