@@ -88,6 +88,49 @@ describe('getVisibleRecordIndexPageNumbers', () => {
     expect(getVisibleRecordIndexPageNumbers(1, 5)).toEqual([1, 2, 3, 4, 5]);
   });
 
+  it('should keep the first five pages selectable near the start', () => {
+    expect(getVisibleRecordIndexPageNumbers(1, 20)).toEqual([
+      1,
+      2,
+      3,
+      4,
+      5,
+      'ellipsis',
+      20,
+    ]);
+    expect(getVisibleRecordIndexPageNumbers(2, 20)).toEqual([
+      1,
+      2,
+      3,
+      4,
+      5,
+      'ellipsis',
+      20,
+    ]);
+    expect(getVisibleRecordIndexPageNumbers(5, 20)).toEqual([
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      'ellipsis',
+      20,
+    ]);
+  });
+
+  it('should keep the last five pages selectable near the end', () => {
+    expect(getVisibleRecordIndexPageNumbers(20, 20)).toEqual([
+      1,
+      'ellipsis',
+      16,
+      17,
+      18,
+      19,
+      20,
+    ]);
+  });
+
   it('should insert ellipsis around the current page for a long list', () => {
     expect(getVisibleRecordIndexPageNumbers(10, 20)).toEqual([
       1,
@@ -95,16 +138,6 @@ describe('getVisibleRecordIndexPageNumbers', () => {
       9,
       10,
       11,
-      'ellipsis',
-      20,
-    ]);
-  });
-
-  it('should not insert a leading ellipsis near the start', () => {
-    expect(getVisibleRecordIndexPageNumbers(2, 20)).toEqual([
-      1,
-      2,
-      3,
       'ellipsis',
       20,
     ]);
