@@ -7,9 +7,12 @@ import { OnboardingInviteSuggestionsModule } from 'src/modules/onboarding-invite
 import { WorkflowModule } from 'src/modules/workflow/workflow.module';
 import { WorkspaceMemberModule } from 'src/modules/workspace-member/workspace-member.module';
 
+import { GaingeAutomationModule } from 'src/modules/gainge-automation/gainge-automation.module';
+
 @Module({
   imports: [
     MessagingModule,
+    GaingeAutomationModule,
     CalendarModule,
     ConnectedAccountModule,
     OnboardingInviteSuggestionsModule,

@@ -1571,6 +1571,63 @@ export class ConfigVariables {
   GOOGLE_API_KEY?: string;
 
   @ConfigVariablesMetadata({
+    group: ConfigVariablesGroup.ADVANCED_SETTINGS,
+    description:
+      'Verified Google Workspace add-on deployment system service account email',
+    type: ConfigVariableType.STRING,
+  })
+  @IsOptional()
+  GAINGE_CHAT_SYSTEM_EMAIL?: string;
+
+  @ConfigVariablesMetadata({
+    group: ConfigVariablesGroup.ADVANCED_SETTINGS,
+    isSensitive: false,
+    description: 'Workspace authorized for GAINGE automation',
+    type: ConfigVariableType.STRING,
+  })
+  @IsOptional()
+  GAINGE_AUTOMATION_WORKSPACE_ID: string =
+    '5cd16cee-0d32-4404-93b9-e707e01ada9d';
+
+  @ConfigVariablesMetadata({
+    group: ConfigVariablesGroup.ADVANCED_SETTINGS,
+    isSensitive: false,
+    description: 'Fill empty new-company information from its official website',
+    type: ConfigVariableType.BOOLEAN,
+  })
+  @IsOptional()
+  GAINGE_ENRICHMENT_ENABLED: boolean = true;
+
+  @ConfigVariablesMetadata({
+    group: ConfigVariablesGroup.ADVANCED_SETTINGS,
+    isSensitive: false,
+    description:
+      'Send CRM creation and change notifications through Google Chat',
+    type: ConfigVariableType.BOOLEAN,
+  })
+  @IsOptional()
+  GAINGE_CHAT_ENABLED: boolean = false;
+
+  @ConfigVariablesMetadata({
+    group: ConfigVariablesGroup.ADVANCED_SETTINGS,
+    isSensitive: true,
+    description:
+      'Google Chat service account or workload identity JSON credentials',
+    type: ConfigVariableType.STRING,
+  })
+  @IsOptional()
+  GAINGE_CHAT_CREDENTIALS?: string;
+
+  @ConfigVariablesMetadata({
+    group: ConfigVariablesGroup.ADVANCED_SETTINGS,
+    isSensitive: false,
+    description: 'Organization Google Chat space for CRM notifications',
+    type: ConfigVariableType.STRING,
+  })
+  @IsOptional()
+  GAINGE_CHAT_SPACE: string = 'spaces/AAQAEZqZkIA';
+
+  @ConfigVariablesMetadata({
     group: ConfigVariablesGroup.LLM,
     isSensitive: true,
     description: 'API key for xAI models (Grok)',
