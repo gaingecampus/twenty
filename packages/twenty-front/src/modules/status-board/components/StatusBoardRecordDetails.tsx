@@ -14,6 +14,7 @@ import {
 } from '@/status-board/utils/formatStatusBoardAmount';
 import { getStatusBoardContractProgress } from '@/status-board/utils/getStatusBoardContractProgress';
 import { differenceInCalendarDays, parseISO } from 'date-fns';
+import { OPPORTUNITY_STAGE_TIMINGS } from 'twenty-shared/constants';
 
 const StatusBoardStageLabel = ({
   objectNameSingular,
@@ -86,10 +87,22 @@ export const StatusBoardRecordDetails = ({
   }
   if (typeof record.customStage === 'string') {
     return (
-      <StatusBoardStageLabel
-        objectNameSingular={objectNameSingular}
-        value={record.customStage}
-      />
+      <StyledStatusBoardRowAside>
+        <StatusBoardStageLabel
+          objectNameSingular={objectNameSingular}
+          value={record.customStage}
+        />
+        {OPPORTUNITY_STAGE_TIMINGS.map((stage) => {
+          const days = record[stage.daysField];
+          return typeof days === 'number' &&
+            Number.isFinite(days) &&
+            days >= 0 ? (
+            <StyledStatusBoardRowCaption key={stage.value}>
+              {stage.label} 도달 {days}일
+            </StyledStatusBoardRowCaption>
+          ) : null;
+        })}
+      </StyledStatusBoardRowAside>
     );
   }
   const progress = getStatusBoardContractProgress(

@@ -1,4 +1,5 @@
 import { StatusBoardEmptyState } from '@/status-board/components/StatusBoardEmptyState';
+import { StatusBoardStageTimingSection } from '@/status-board/components/StatusBoardStageTimingSection';
 import { hasStatusBoardField } from '@/status-board/utils/hasStatusBoardField';
 import { StatusBoardCumulativeSection } from '@/status-board/components/StatusBoardCumulativeSection';
 import { StatusBoardDummyDataProvider } from '@/status-board/components/StatusBoardDummyDataProvider';
@@ -171,6 +172,11 @@ const StatusBoardContentBody = ({
                     Math.min(0, currentOffset + delta),
                   )
                 }
+                onOpenSheet={setSheet}
+              />
+              <StatusBoardStageTimingSection
+                opportunityObjectMetadataItem={metadata.opportunity}
+                memberIds={memberIds}
                 onOpenSheet={setSheet}
               />
               <StatusBoardWeekSection

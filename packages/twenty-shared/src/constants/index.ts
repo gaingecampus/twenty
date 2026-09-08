@@ -64,3 +64,4 @@ export { TWENTY_ICONS_BASE_URL } from './TwentyIconsBaseUrl';
 export type { UiThemeId } from './UiThemeIds';
 export { UI_THEME_IDS } from './UiThemeIds';
 export { VIEW_GROUP_VISIBLE_OPTIONS_MAX } from './ViewGroupVisibleOptionsMax';
+export { OPPORTUNITY_STAGE_TIMINGS } from './OpportunityStageTiming';
