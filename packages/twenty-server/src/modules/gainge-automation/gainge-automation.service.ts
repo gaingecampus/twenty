@@ -205,7 +205,7 @@ export class GaingeAutomationService {
     const model = this.models.getDefaultSpeedModel();
     const generated = await generateText({
       model: model.model,
-      maxOutputTokens: 900,
+      maxOutputTokens: 4096,
       abortSignal: AbortSignal.timeout(35000),
       maxRetries: 0,
       system:

@@ -1,3 +1,5 @@
+import { convert } from 'html-to-text';
+
 export const COMPANY_ENRICHMENT_FIELDS = [
   { name: 'aiCompanyProfile', label: 'AI 기업 소개', type: 'TEXT' },
   { name: 'aiEnrichmentStatus', label: 'AI 정보 보완 상태', type: 'TEXT' },
@@ -18,11 +20,12 @@ export function getCompanyWebsite(value: unknown): string | null {
   }
 }
 export function websiteText(html: string): string {
-  return html
-    .replace(/<(script|style|noscript)[\s\S]*?<\/\1>/gi, ' ')
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/&nbsp;|&#160;/g, ' ')
-    .replace(/&amp;/g, '&')
+  return convert(
+    html
+      .replace(/<(script|style|noscript)[\s\S]*?<\/\1>/gi, ' ')
+      .replace(/<[^>]+>/g, ' '),
+    { wordwrap: false },
+  )
     .replace(/\s+/g, ' ')
     .trim()
     .slice(0, 18000);
