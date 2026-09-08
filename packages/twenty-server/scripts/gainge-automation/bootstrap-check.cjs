@@ -10,6 +10,13 @@ const { GaingeAutomationTableService } = require('../../dist/modules/gainge-auto
   const app = await NestFactory.create(AppModule, { logger: ['error'], abortOnError: false });
   assert.ok(app.get(GaingeAutomationService));
   assert.ok(app.get(GaingeAutomationTableService));
+  const {GlobalWorkspaceOrmManager}=require('../../dist/engine/twenty-orm/global-workspace-datasource/global-workspace-orm.manager');
+  const {queryAutomationDatabase}=require('../../dist/modules/gainge-automation/automation-query');
+  const {GlobalWorkspaceDataSourceService}=require('../../dist/engine/twenty-orm/global-workspace-datasource/global-workspace-datasource.service');
+  await app.get(GlobalWorkspaceDataSourceService).onModuleInit();
+  const ds=await app.get(GlobalWorkspaceOrmManager).getGlobalWorkspaceDataSource();
+  assert.deepEqual(await queryAutomationDatabase(ds,'SELECT 1 AS value'),[{value:1}]);
+  assert.deepEqual(await queryAutomationDatabase(ds,'UPDATE core.workspace SET id=id WHERE false RETURNING id'),[]);
   await app.close();
   console.log('Full application dependency resolution passed; no HTTP listener started.');
   process.exit(0);

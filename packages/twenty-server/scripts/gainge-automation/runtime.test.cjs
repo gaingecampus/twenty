@@ -41,5 +41,9 @@ test('automation uses the explicit internal SQL permission path',async()=>{
   const ds=Object.create(GlobalWorkspaceDataSource.prototype);
   assert.throws(()=>ds.query('SELECT $1',[42]),/permissions are not implemented/);
   assert.deepEqual(await queryAutomationDatabase(ds,'SELECT $1',[42]),[{value:42}]);
+  DataSource.prototype.query=async()=>[[{id:'claimed-event'}],1];
+  assert.deepEqual(await queryAutomationDatabase(ds,'UPDATE event RETURNING *'),[{id:'claimed-event'}]);
+  DataSource.prototype.query=async()=>[[],0];
+  assert.deepEqual(await queryAutomationDatabase(ds,'UPDATE event RETURNING *'),[]);
  }finally{DataSource.prototype.query=original;}
 });
