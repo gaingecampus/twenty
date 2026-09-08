@@ -1,0 +1,30 @@
+name: CRM automation diagnostics
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+  id-token: write
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    environment: prod
+    timeout-minutes: 5
+    env:
+      AWS_REGION: ${{ vars.AWS_REGION }}
+      AWS_ROLE_ARN: ${{ vars.AWS_ROLE_ARN }}
+      EC2_INSTANCE_ID: ${{ vars.EC2_INSTANCE_ID }}
+    steps:
+      - name: Authenticate existing deployment role
+        shell: bash
+        run: |
+          set -euo pipefail
+          token_response="$(curl -sSf -H "Authorization: bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=sts.amazonaws.com")"
+          token_file="${RUNNER_TEMP}/aws-web-identity-token"
+          jq -r '.value' <<<"${token_response}" >"${token_file}"
+          echo "AWS_WEB_IDENTITY_TOKEN_FILE=${token_file}" >>"${GITHUB_ENV}"
+      - name: Inspect instance identity and IMDS settings
+        shell: bash
+        run: |
+          set -euo pipefail
+          aws ec2 describe-instances --instance-ids "${EC2_INSTANCE_ID}" \
+            --query 'Reservations[].Instances[].{InstanceId:InstanceId,Profile:IamInstanceProfile.Arn,Metadata:MetadataOptions}' --output json
