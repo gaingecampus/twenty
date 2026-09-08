@@ -4,7 +4,7 @@ import { styled } from '@linaria/react';
 
 const StyledContainer = styled.div`
   display: flex;
-  height: 24px;
+  height: var(--t-calendar-weekday-height, 24px);
   width: 100%;
 `;
 

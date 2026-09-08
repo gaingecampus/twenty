@@ -16,6 +16,7 @@ const StyledContainer = styled.div`
     1px solid ${themeCssVariables.border.color.light}
   );
   box-sizing: border-box;
+  container-type: inline-size;
   display: flex;
   flex-direction: column;
   gap: var(--t-view-bar-stack-gap, ${themeCssVariables.spacing[2]});
@@ -35,13 +36,19 @@ const StyledTopBar = styled.div`
   justify-content: space-between;
 
   z-index: 7;
+
+  @container (max-width: 700px) {
+    align-items: stretch;
+    flex-direction: column;
+    height: auto;
+  }
 `;
 
 const StyledLeftSection = styled.div`
   display: flex;
-  flex: 0 1 auto;
+  flex: 1;
   min-width: 0;
-  overflow-x: auto;
+  overflow: hidden;
 `;
 
 const StyledRightSection = styled.div`

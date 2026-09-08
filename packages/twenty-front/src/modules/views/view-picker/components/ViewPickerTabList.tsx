@@ -1,10 +1,10 @@
-import {
-  DragDropContext,
-  type DropResult,
-  Droppable,
-} from '@hello-pangea/dnd';
+import { Dropdown } from '@/ui/layout/dropdown/components/Dropdown';
+import { ViewPickerViewOptionsMenuContent } from '@/views/view-picker/components/ViewPickerViewOptionsMenuContent';
+import { IconDotsVertical } from 'twenty-ui/icon';
+import { LightIconButton } from 'twenty-ui/input';
+import { DragDropContext, type DropResult, Droppable } from '@hello-pangea/dnd';
 import { styled } from '@linaria/react';
-import { type MouseEvent, useCallback } from 'react';
+import { type KeyboardEvent, type MouseEvent, useCallback } from 'react';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 
 import { useContextStoreObjectMetadataItemOrThrow } from '@/context-store/hooks/useContextStoreObjectMetadataItemOrThrow';
@@ -25,12 +25,47 @@ import { viewPickerReferenceViewIdComponentState } from '@/views/view-picker/sta
 import { ViewVisibility } from '~/generated-metadata/graphql';
 import { moveArrayItem } from '~/utils/array/moveArrayItem';
 
+const StyledTabsAndOptions = styled.div`
+  align-items: center;
+  display: flex;
+  flex: 0 1 auto;
+  gap: 4px;
+  min-width: 0;
+`;
+
 const StyledTabList = styled.div`
   align-items: center;
   display: flex;
-  flex-shrink: 0;
+  flex: 1;
   gap: var(--t-view-tab-gap, ${themeCssVariables.spacing[1]});
+  min-width: 0;
+  overflow-x: auto;
+  padding: 3px;
+  scrollbar-width: thin;
 `;
+
+const handleTabKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+  if (
+    !(event.target instanceof HTMLElement) ||
+    event.target.getAttribute('role') !== 'tab'
+  )
+    return;
+  const tabs = Array.from(
+    event.currentTarget.querySelectorAll<HTMLElement>('[role="tab"]'),
+  );
+  const index = tabs.indexOf(event.target);
+  let nextIndex = index;
+  if (event.key === 'ArrowRight') nextIndex = (index + 1) % tabs.length;
+  else if (event.key === 'ArrowLeft')
+    nextIndex = (index - 1 + tabs.length) % tabs.length;
+  else if (event.key === 'Home') nextIndex = 0;
+  else if (event.key === 'End') nextIndex = tabs.length - 1;
+  else if (event.key !== 'Enter' && event.key !== ' ') return;
+  event.preventDefault();
+  event.stopPropagation();
+  tabs[nextIndex]?.focus();
+  tabs[nextIndex]?.click();
+};
 
 type ViewPickerTabListProps = {
   isReadOnly?: boolean;
@@ -111,12 +146,8 @@ export const ViewPickerTabList = ({
         key={view.id}
         view={view}
         isCurrentView={currentView?.id === view.id}
-        isIndexView={view.key === 'INDEX'}
-        isLastView={isLastView}
-        isReadOnly={isReadOnly}
         totalCount={currentView?.id === view.id ? totalCount : undefined}
         onSelect={handleViewSelect}
-        onEdit={handleEditViewButtonClick}
       />
     );
 
@@ -135,11 +166,15 @@ export const ViewPickerTabList = ({
     );
   });
 
-  if (!canReorder) {
-    return <StyledTabList role="tablist">{tabItems}</StyledTabList>;
-  }
-
-  return (
+  const tabList = !canReorder ? (
+    <StyledTabList
+      role="tablist"
+      aria-label="목록 뷰 선택"
+      onKeyDown={handleTabKeyDown}
+    >
+      {tabItems}
+    </StyledTabList>
+  ) : (
     <DragDropContext onDragEnd={handleDragEnd}>
       <Droppable
         droppableId={VIEW_PICKER_TAB_LIST_DROPPABLE_ID}
@@ -148,6 +183,8 @@ export const ViewPickerTabList = ({
         {(provided) => (
           <StyledTabList
             role="tablist"
+            aria-label="목록 뷰 선택"
+            onKeyDown={handleTabKeyDown}
             ref={provided.innerRef}
             // oxlint-disable-next-line react/jsx-props-no-spreading
             {...provided.droppableProps}
@@ -158,5 +195,38 @@ export const ViewPickerTabList = ({
         )}
       </Droppable>
     </DragDropContext>
+  );
+
+  const optionsDropdownId = `view-picker-current-view-options-${currentView?.id}`;
+
+  return (
+    <StyledTabsAndOptions>
+      {tabList}
+      {!isReadOnly && currentView && (
+        <Dropdown
+          key={currentView.id}
+          dropdownId={optionsDropdownId}
+          dropdownPlacement="bottom-start"
+          clickableComponent={
+            <LightIconButton
+              Icon={IconDotsVertical}
+              size="medium"
+              accent="tertiary"
+              aria-label={`${currentView.name} 뷰 옵션`}
+              title={`${currentView.name} 뷰 옵션`}
+            />
+          }
+          dropdownComponents={
+            <ViewPickerViewOptionsMenuContent
+              view={currentView}
+              isIndexView={currentView.key === 'INDEX'}
+              isLastView={isLastView}
+              dropdownId={optionsDropdownId}
+              onEdit={handleEditViewButtonClick}
+            />
+          }
+        />
+      )}
+    </StyledTabsAndOptions>
   );
 };

@@ -4,6 +4,21 @@ import { buildStatusBoardIdInFilter } from '@/status-board/utils/buildStatusBoar
 import { FieldMetadataType } from 'twenty-shared/types';
 
 describe('buildStatusBoardIdInFilter', () => {
+  it('uses UUID fields instead of legacy text owner names', () => {
+    const metadata = {
+      readableFields: [
+        { name: 'leadConsultant', type: FieldMetadataType.TEXT },
+        { name: 'leadConsultantId', type: FieldMetadataType.UUID },
+      ],
+    } as EnrichedObjectMetadataItem;
+    expect(
+      buildStatusBoardIdInFilter({
+        objectMetadataItem: metadata,
+        fieldNames: ['leadConsultant', 'leadConsultantId'],
+        ids: ['member-1'],
+      }),
+    ).toEqual({ leadConsultantId: { in: ['member-1'] } });
+  });
   const objectMetadataItem = {
     readableFields: [
       {

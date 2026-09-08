@@ -1,4 +1,5 @@
-import { StatusBoardCountKpi } from '@/status-board/components/StatusBoardCountKpi';
+import { type StatusBoardSheetState } from '@/status-board/components/StatusBoardSheet';
+import { StatusBoardLinkedCountKpi } from '@/status-board/components/StatusBoardLinkedCountKpi';
 import {
   StyledStatusBoardKpiGrid,
   StyledStatusBoardMuted,
@@ -6,10 +7,7 @@ import {
   StyledStatusBoardSectionHeader,
   StyledStatusBoardSectionTitle,
 } from '@/status-board/components/statusBoardStyled';
-import { type StatusBoardSheetState } from '@/status-board/components/StatusBoardSheet';
 import { STATUS_BOARD_FIELD } from '@/status-board/constants/StatusBoardFieldNames';
-import { STATUS_BOARD_OBJECT_NAME_SINGULAR } from '@/status-board/constants/StatusBoardObjectNames';
-import { buildStatusBoardRecordGqlFields } from '@/status-board/utils/buildStatusBoardRecordGqlFields';
 import {
   buildStatusBoardActiveOnboardingFilter,
   buildStatusBoardEndingOnboardingFilter,
@@ -99,8 +97,9 @@ export const StatusBoardNowSection = ({
             depositObjectMetadataItem,
             STATUS_BOARD_FIELD.expectedPaymentDate,
           ) && (
-            <StatusBoardCountKpi
-              objectNameSingular={STATUS_BOARD_OBJECT_NAME_SINGULAR.deposit}
+            <StatusBoardLinkedCountKpi
+              onOpenSheet={onOpenSheet}
+              objectMetadataItem={depositObjectMetadataItem}
               filter={overdueFilter}
               label="미수금"
               tone="red"
@@ -108,95 +107,34 @@ export const StatusBoardNowSection = ({
                 depositObjectMetadataItem,
                 STATUS_BOARD_FIELD.amount,
               )}
-              onClick={() =>
-                onOpenSheet({
-                  title: '미수금',
-                  objectNameSingular: STATUS_BOARD_OBJECT_NAME_SINGULAR.deposit,
-                  filter: overdueFilter,
-                  recordGqlFields: buildStatusBoardRecordGqlFields({
-                    objectMetadataItem: depositObjectMetadataItem,
-                    fieldNames: [
-                      STATUS_BOARD_FIELD.name,
-                      STATUS_BOARD_FIELD.company,
-                      STATUS_BOARD_FIELD.amount,
-                      STATUS_BOARD_FIELD.expectedPaymentDate,
-                    ],
-                  }),
-                })
-              }
             />
           )}
         {opportunityObjectMetadataItem !== undefined && (
-          <StatusBoardCountKpi
-            objectNameSingular={STATUS_BOARD_OBJECT_NAME_SINGULAR.opportunity}
+          <StatusBoardLinkedCountKpi
+            onOpenSheet={onOpenSheet}
+            objectMetadataItem={opportunityObjectMetadataItem}
             filter={openFilter}
             label="진행 중 문의"
             tone="blue"
-            onClick={() =>
-              onOpenSheet({
-                title: '진행 중 문의',
-                objectNameSingular:
-                  STATUS_BOARD_OBJECT_NAME_SINGULAR.opportunity,
-                filter: openFilter,
-                recordGqlFields: buildStatusBoardRecordGqlFields({
-                  objectMetadataItem: opportunityObjectMetadataItem,
-                  fieldNames: [
-                    STATUS_BOARD_FIELD.name,
-                    STATUS_BOARD_FIELD.company,
-                    STATUS_BOARD_FIELD.customStage,
-                  ],
-                }),
-              })
-            }
           />
         )}
         {onboardingObjectMetadataItem !== undefined && (
-          <StatusBoardCountKpi
-            objectNameSingular={STATUS_BOARD_OBJECT_NAME_SINGULAR.onboarding}
+          <StatusBoardLinkedCountKpi
+            onOpenSheet={onOpenSheet}
+            objectMetadataItem={onboardingObjectMetadataItem}
             filter={activeFilter}
             label="온보딩 중"
             tone="green"
-            onClick={() =>
-              onOpenSheet({
-                title: '온보딩 중',
-                objectNameSingular:
-                  STATUS_BOARD_OBJECT_NAME_SINGULAR.onboarding,
-                filter: activeFilter,
-                recordGqlFields: buildStatusBoardRecordGqlFields({
-                  objectMetadataItem: onboardingObjectMetadataItem,
-                  fieldNames: [
-                    STATUS_BOARD_FIELD.name,
-                    STATUS_BOARD_FIELD.company,
-                    STATUS_BOARD_FIELD.onboardingStatus,
-                  ],
-                }),
-              })
-            }
           />
         )}
         {onboardingObjectMetadataItem !== undefined &&
           endingFilter !== undefined && (
-            <StatusBoardCountKpi
-              objectNameSingular={STATUS_BOARD_OBJECT_NAME_SINGULAR.onboarding}
+            <StatusBoardLinkedCountKpi
+              onOpenSheet={onOpenSheet}
+              objectMetadataItem={onboardingObjectMetadataItem}
               filter={endingFilter}
               label="이번 달 종료"
               tone="orange"
-              onClick={() =>
-                onOpenSheet({
-                  title: '이번 달 종료',
-                  objectNameSingular:
-                    STATUS_BOARD_OBJECT_NAME_SINGULAR.onboarding,
-                  filter: endingFilter,
-                  recordGqlFields: buildStatusBoardRecordGqlFields({
-                    objectMetadataItem: onboardingObjectMetadataItem,
-                    fieldNames: [
-                      STATUS_BOARD_FIELD.name,
-                      STATUS_BOARD_FIELD.company,
-                      STATUS_BOARD_FIELD.contractEndDate,
-                    ],
-                  }),
-                })
-              }
             />
           )}
       </StyledStatusBoardKpiGrid>

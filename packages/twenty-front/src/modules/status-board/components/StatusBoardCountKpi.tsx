@@ -13,6 +13,7 @@ type StatusBoardCountKpiProps = {
   showAmountAsValue?: boolean;
   tone?: StatusBoardTone;
   variant?: 'tile' | 'stat';
+  to?: string;
   onClick?: () => void;
 };
 
@@ -25,6 +26,7 @@ export const StatusBoardCountKpi = ({
   tone = 'default',
   variant = 'tile',
   onClick,
+  to,
 }: StatusBoardCountKpiProps) => {
   const {
     count,
@@ -62,18 +64,18 @@ export const StatusBoardCountKpi = ({
       subtitle={
         hasError
           ? '불러오지 못했어요'
-          : count === 0
-            ? '해당 항목 없음'
-            : showAmountAsValue
-              ? countLabel
-              : withSum
-                ? formatStatusBoardAmount(sum)
-                : '눌러서 목록 보기'
+          : showAmountAsValue
+            ? countLabel
+            : withSum
+              ? formatStatusBoardAmount(count === 0 ? 0 : sum)
+              : undefined
       }
       loading={countLoading || ((withSum || showAmountAsValue) && sumLoading)}
       tone={count === 0 || hasError ? 'default' : tone}
+      isEmpty={!countLoading && !hasError && count === 0}
       variant={variant}
       onClick={onClick}
+      to={to}
     />
   );
 };

@@ -9,11 +9,12 @@ export const useStatusBoardMetadata = () => {
   const { objectPermissionsByObjectMetadataId } = useObjectPermissions();
 
   return useMemo(() => {
-    const resolve = (nameSingular: string) =>
+    const resolve = (nameSingular: string, fallbackNames: string[] = []) =>
       getStatusBoardObject({
         objectMetadataItems,
         objectPermissionsByObjectMetadataId,
         nameSingular,
+        fallbackNames,
       });
 
     return {
@@ -23,7 +24,9 @@ export const useStatusBoardMetadata = () => {
       onboarding: resolve(STATUS_BOARD_OBJECT_NAME_SINGULAR.onboarding),
       deposit: resolve(STATUS_BOARD_OBJECT_NAME_SINGULAR.deposit),
       group: resolve(STATUS_BOARD_OBJECT_NAME_SINGULAR.group),
-      member: resolve(STATUS_BOARD_OBJECT_NAME_SINGULAR.member),
+      member: resolve(STATUS_BOARD_OBJECT_NAME_SINGULAR.teamMember, [
+        STATUS_BOARD_OBJECT_NAME_SINGULAR.member,
+      ]),
     };
   }, [objectMetadataItems, objectPermissionsByObjectMetadataId]);
 };

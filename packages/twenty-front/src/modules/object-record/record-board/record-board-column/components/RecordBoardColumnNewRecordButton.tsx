@@ -17,17 +17,26 @@ const StyledNewButton = styled.button`
   align-items: center;
   align-self: baseline;
   background-color: ${themeCssVariables.background.primary};
-  border: none;
+  border: var(--t-board-add-border, none);
   border-radius: ${themeCssVariables.border.radius.sm};
+  box-sizing: border-box;
   color: ${themeCssVariables.font.color.tertiary};
+
+  &:hover {
+    background: ${themeCssVariables.background.tertiary};
+    color: ${themeCssVariables.font.color.primary};
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${themeCssVariables.color.blue7};
+    outline-offset: 2px;
+  }
   cursor: pointer;
   display: flex;
   gap: ${themeCssVariables.spacing[1]};
+  min-height: var(--t-board-add-height, auto);
   padding: ${themeCssVariables.spacing[1]};
-
-  &:hover {
-    background-color: ${themeCssVariables.background.tertiary};
-  }
+  width: 100%;
 `;
 
 export const RecordBoardColumnNewRecordButton = () => {

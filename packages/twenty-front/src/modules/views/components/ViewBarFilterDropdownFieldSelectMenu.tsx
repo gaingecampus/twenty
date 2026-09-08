@@ -1,4 +1,4 @@
-import { styled } from '@linaria/react';
+import { DropdownMenuSearchInput } from '@/ui/layout/dropdown/components/DropdownMenuSearchInput';
 import React from 'react';
 
 import { objectFilterDropdownSearchInputComponentState } from '@/object-record/object-filter-dropdown/states/objectFilterDropdownSearchInputComponentState';
@@ -24,44 +24,6 @@ import { VIEW_BAR_FILTER_BOTTOM_MENU_ITEM_IDS } from '@/views/constants/ViewBarF
 import { ViewBarFilterDropdownIds } from '@/views/constants/ViewBarFilterDropdownIds';
 import { useLingui } from '@lingui/react/macro';
 import { IconX } from 'twenty-ui/icon';
-import { themeCssVariables } from 'twenty-ui/theme-constants';
-
-export const StyledInput = styled.input`
-  background: transparent;
-  border: none;
-  border-bottom: 1px solid ${themeCssVariables.border.color.light};
-  border-radius: 0;
-  border-top: none;
-  border-top-left-radius: ${themeCssVariables.border.radius.md};
-  border-top-right-radius: ${themeCssVariables.border.radius.md};
-  box-sizing: border-box;
-  color: ${themeCssVariables.font.color.primary};
-  font-family: inherit;
-  font-size: ${themeCssVariables.font.size.sm};
-  font-weight: inherit;
-  margin: 0;
-  max-width: 100%;
-  min-height: 19px;
-
-  outline: none;
-  overflow: hidden;
-  padding-bottom: ${themeCssVariables.spacing[2]};
-  padding-left: var(
-    --t-overlay-section-padding-x,
-    ${themeCssVariables.spacing[2]}
-  );
-  padding-right: var(
-    --t-overlay-section-padding-x,
-    ${themeCssVariables.spacing[2]}
-  );
-  padding-top: ${themeCssVariables.spacing[2]};
-  text-decoration: none;
-  width: 100%;
-
-  &::placeholder {
-    color: ${themeCssVariables.font.color.light};
-  }
-`;
 
 export const ViewBarFilterDropdownFieldSelectMenu = () => {
   const [objectFilterDropdownSearchInput, setObjectFilterDropdownSearchInput] =
@@ -112,7 +74,7 @@ export const ViewBarFilterDropdownFieldSelectMenu = () => {
         {t`Filter`}
       </DropdownMenuHeader>
       <ScrollWrapper componentInstanceId="view-bar-dropdown-filter-field-select-menu">
-        <StyledInput
+        <DropdownMenuSearchInput
           value={objectFilterDropdownSearchInput}
           autoFocus
           placeholder={t`Search fields`}

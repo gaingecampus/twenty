@@ -5,9 +5,8 @@ import { t } from '@lingui/core/macro';
 import { IconTrash } from 'twenty-ui/icon';
 import { themeCssVariables, useTheme } from 'twenty-ui/theme-constants';
 
-// oxlint-disable-next-line twenty/no-hardcoded-colors
 const StyledViewBar = styled(TopBar)`
-  background: #f8f8fb;
+  background: var(--t-app-bg, ${themeCssVariables.background.tertiary});
 `;
 
 const StyledViewTab = styled.div`

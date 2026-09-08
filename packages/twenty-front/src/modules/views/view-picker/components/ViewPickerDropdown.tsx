@@ -22,33 +22,21 @@ import { ThemeContext, themeCssVariables } from 'twenty-ui/theme-constants';
 const StyledContainer = styled.div`
   align-items: center;
   display: flex;
-  flex: 0 1 auto;
+  flex: 1;
   gap: var(--t-view-tab-gap, ${themeCssVariables.spacing[1]});
   min-width: 0;
-
-  &:hover [data-view-picker-add],
-  &:focus-within [data-view-picker-add] {
-    opacity: 1;
-    pointer-events: auto;
-  }
 `;
 
-const StyledAddViewButton = styled(StyledDropdownButtonContainer)<{
-  isVisible: boolean;
-}>`
+const StyledAddViewButton = styled(StyledDropdownButtonContainer)`
   background: var(--t-view-tab-add-bg, transparent);
   border: var(--t-view-tab-add-border, none);
-  color: var(
-    --t-view-tab-add-color,
-    ${themeCssVariables.font.color.tertiary}
-  );
+  color: var(--t-view-tab-add-color, ${themeCssVariables.font.color.tertiary});
   flex-shrink: 0;
+  gap: 6px;
   height: var(--t-view-tab-add-size, var(--t-view-tab-height, 32px));
   justify-content: center;
-  opacity: ${({ isVisible }) => (isVisible ? 1 : 0)};
-  padding: 0;
-  pointer-events: ${({ isVisible }) => (isVisible ? 'auto' : 'none')};
-  width: var(--t-view-tab-add-size, var(--t-view-tab-height, 32px));
+  padding: 0 10px;
+  white-space: nowrap;
 
   &:hover {
     background: var(
@@ -115,11 +103,11 @@ export const ViewPickerDropdown = ({
             <StyledAddViewButton
               data-view-picker-add
               isUnfolded={isDropdownOpen}
-              isVisible={isDropdownOpen}
               transparentBackground
               aria-label={t`Add view`}
             >
               <IconPlus size={theme.icon.size.sm} color="currentColor" />
+              {t`Add view`}
             </StyledAddViewButton>
           }
           dropdownComponents={(() => {

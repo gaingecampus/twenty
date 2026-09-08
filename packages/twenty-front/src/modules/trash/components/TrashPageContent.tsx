@@ -16,9 +16,8 @@ import { Navigate } from 'react-router-dom';
 import { AppPath } from 'twenty-shared/types';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 
-// oxlint-disable-next-line twenty/no-hardcoded-colors
 const StyledTableInset = styled.div`
-  background: #f8f8fb;
+  background: var(--t-app-bg, ${themeCssVariables.background.tertiary});
   box-sizing: border-box;
   display: flex;
   flex: 1;

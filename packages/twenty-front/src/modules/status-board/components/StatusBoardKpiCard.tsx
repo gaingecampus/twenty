@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import {
   IconCalendar,
   IconCoins,
@@ -23,8 +24,10 @@ type StatusBoardKpiCardProps = {
   value: string;
   subtitle?: string;
   loading: boolean;
+  isEmpty?: boolean;
   tone?: StatusBoardTone;
   variant?: 'tile' | 'stat';
+  to?: string;
   onClick?: () => void;
 };
 
@@ -33,9 +36,11 @@ export const StatusBoardKpiCard = ({
   value,
   subtitle,
   loading,
+  isEmpty = false,
   tone = 'default',
   variant = 'tile',
   onClick,
+  to,
 }: StatusBoardKpiCardProps) => {
   const Icon =
     label.includes('미수') || label.includes('완료')
@@ -58,22 +63,26 @@ export const StatusBoardKpiCard = ({
         aria-busy={loading}
         onClick={onClick}
       >
-        <StyledStatusBoardCumulativeValue>
+        <StyledStatusBoardCumulativeValue isEmpty={isEmpty}>
           {loading ? '…' : value}
         </StyledStatusBoardCumulativeValue>
         <StyledStatusBoardCumulativeLabel>
           {label}
         </StyledStatusBoardCumulativeLabel>
-        <StyledStatusBoardKpiSubtitle>
-          {loading ? '불러오는 중…' : (subtitle ?? '\u00a0')}
-        </StyledStatusBoardKpiSubtitle>
+        {!loading && subtitle && (
+          <StyledStatusBoardKpiSubtitle>
+            {subtitle}
+          </StyledStatusBoardKpiSubtitle>
+        )}
       </StyledStatusBoardCumulativeButton>
     );
   }
 
   return (
     <StyledStatusBoardKpiButton
-      type="button"
+      as={to ? Link : 'button'}
+      to={to}
+      type={to ? undefined : 'button'}
       aria-label={`${label} ${loading ? '불러오는 중' : value} · 상세 목록 보기`}
       aria-busy={loading}
       tone={tone}
@@ -83,12 +92,12 @@ export const StatusBoardKpiCard = ({
         <Icon size={20} />
       </StyledStatusBoardKpiIcon>
       <StyledStatusBoardKpiLabel>{label}</StyledStatusBoardKpiLabel>
-      <StyledStatusBoardKpiValue tone={tone}>
+      <StyledStatusBoardKpiValue tone={tone} isEmpty={isEmpty}>
         {loading ? '…' : value}
       </StyledStatusBoardKpiValue>
-      <StyledStatusBoardKpiSubtitle>
-        {loading ? '불러오는 중…' : (subtitle ?? '\u00a0')}
-      </StyledStatusBoardKpiSubtitle>
+      {!loading && subtitle && (
+        <StyledStatusBoardKpiSubtitle>{subtitle}</StyledStatusBoardKpiSubtitle>
+      )}
     </StyledStatusBoardKpiButton>
   );
 };

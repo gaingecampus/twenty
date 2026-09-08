@@ -80,11 +80,11 @@ const StatusBoardContentBody = ({
 }) => {
   const theme = useTheme();
   const dummy = useStatusBoardDummyData();
-  const filters = useStatusBoardFilters();
+  const filters = useStatusBoardFilters(dummy.members);
   const { visibleMembers, memberIds } = useStatusBoardMemberIds({
     members: dummy.members,
     selectedGroupIds: filters.selectedGroupIds,
-    selectedMemberId: filters.selectedMemberId,
+    selectedMemberIds: filters.selectedMemberIds,
   });
   const [onboardingTab, setOnboardingTab] = useState<'ACTIVE' | 'PRE' | 'DONE'>(
     'ACTIVE',
@@ -129,11 +129,11 @@ const StatusBoardContentBody = ({
             memberObjectMetadataItem={metadata.member}
             members={visibleMembers}
             selectedGroupIds={filters.selectedGroupIds}
-            selectedMemberId={filters.selectedMemberId}
+            selectedMemberIds={filters.selectedMemberIds}
             onToggleGroupId={filters.toggleGroupId}
-            onSelectMemberId={filters.selectMemberId}
+            onToggleMemberId={filters.toggleMemberId}
             onClearSelectedGroupIds={filters.clearSelectedGroupIds}
-            onClearSelectedMemberId={filters.clearSelectedMemberId}
+            onClearSelectedMemberIds={filters.clearSelectedMemberIds}
           />
           {isGroupUnavailable ? (
             <StatusBoardEmptyState
@@ -146,17 +146,7 @@ const StatusBoardContentBody = ({
           ) : (
             <>
               <StatusBoardNowSection
-                depositObjectMetadataItem={metadata.deposit}
-                opportunityObjectMetadataItem={metadata.opportunity}
-                onboardingObjectMetadataItem={metadata.onboarding}
-                memberIds={memberIds}
-                selectedGroupIds={filters.selectedGroupIds}
-                todayIsoDate={todayIsoDate}
-                monthStartDate={monthRange.startDate}
-                monthEndDate={monthRange.endDate}
                 onOpenSheet={setSheet}
-              />
-              <StatusBoardListsSection
                 depositObjectMetadataItem={metadata.deposit}
                 opportunityObjectMetadataItem={metadata.opportunity}
                 onboardingObjectMetadataItem={metadata.onboarding}
@@ -165,13 +155,6 @@ const StatusBoardContentBody = ({
                 todayIsoDate={todayIsoDate}
                 monthStartDate={monthRange.startDate}
                 monthEndDate={monthRange.endDate}
-                onboardingTab={onboardingTab}
-                onOnboardingTabChange={setOnboardingTab}
-              />
-              <StatusBoardWeekSection
-                onboardingObjectMetadataItem={metadata.onboarding}
-                members={visibleMembers}
-                memberIds={memberIds}
               />
               <StatusBoardPeriodSection
                 depositObjectMetadataItem={metadata.deposit}
@@ -189,6 +172,17 @@ const StatusBoardContentBody = ({
                   )
                 }
                 onOpenSheet={setSheet}
+              />
+              <StatusBoardWeekSection
+                onboardingObjectMetadataItem={metadata.onboarding}
+                members={visibleMembers}
+                memberIds={memberIds}
+              />
+              <StatusBoardListsSection
+                onboardingObjectMetadataItem={metadata.onboarding}
+                memberIds={memberIds}
+                onboardingTab={onboardingTab}
+                onOnboardingTabChange={setOnboardingTab}
               />
               <StatusBoardCumulativeSection
                 companyObjectMetadataItem={metadata.company}

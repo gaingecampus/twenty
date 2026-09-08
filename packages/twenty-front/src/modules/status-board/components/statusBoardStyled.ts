@@ -87,6 +87,7 @@ export const StyledStatusBoardKpiGrid = styled.div`
 
 export const StyledStatusBoardKpiButton = styled.button<{
   tone?: StatusBoardTone;
+  to?: string;
 }>`
   background: ${themeCssVariables.background.secondary};
   border: none;
@@ -98,6 +99,7 @@ export const StyledStatusBoardKpiButton = styled.button<{
   gap: 4px;
   padding: 18px 18px 16px;
   text-align: left;
+  text-decoration: none;
   transition:
     background 0.12s,
     transform 0.12s;
@@ -119,22 +121,24 @@ export const StyledStatusBoardKpiLabel = styled.div`
 
 export const StyledStatusBoardKpiValue = styled.div<{
   tone?: StatusBoardTone;
+  isEmpty?: boolean;
 }>`
-  color: ${({ tone }) => {
+  color: ${({ tone, isEmpty }) => {
+    if (isEmpty) return themeCssVariables.font.color.tertiary;
     if (tone === 'red') {
-      return themeCssVariables.tag.text.red;
+      return themeCssVariables.color.red;
     }
 
     if (tone === 'blue') {
-      return themeCssVariables.tag.text.blue;
+      return themeCssVariables.color.blue;
     }
 
     if (tone === 'green') {
-      return themeCssVariables.tag.text.green;
+      return themeCssVariables.color.green;
     }
 
     if (tone === 'orange') {
-      return themeCssVariables.tag.text.orange;
+      return themeCssVariables.color.orange;
     }
 
     return themeCssVariables.font.color.primary;
@@ -177,7 +181,7 @@ export const StyledStatusBoardChip = styled.button<{
     }
 
     if (variant === 'soft') {
-      return themeCssVariables.tag.background.blue;
+      return themeCssVariables.background.transparent.blue;
     }
 
     return themeCssVariables.font.color.primary;
@@ -197,7 +201,7 @@ export const StyledStatusBoardChip = styled.button<{
     }
 
     if (variant === 'soft') {
-      return themeCssVariables.tag.text.blue;
+      return themeCssVariables.color.blue;
     }
 
     return themeCssVariables.font.color.inverted;
@@ -222,13 +226,13 @@ export const StyledStatusBoardChip = styled.button<{
 export const StyledStatusBoardSoftTab = styled.button<{ isActive: boolean }>`
   background: ${({ isActive }) =>
     isActive
-      ? themeCssVariables.tag.background.blue
+      ? themeCssVariables.background.transparent.blue
       : themeCssVariables.background.secondary};
   border: none;
   border-radius: ${themeCssVariables.border.radius.pill};
   color: ${({ isActive }) =>
     isActive
-      ? themeCssVariables.tag.text.blue
+      ? themeCssVariables.color.blue
       : themeCssVariables.font.color.secondary};
   cursor: pointer;
   font-size: 13.5px;
@@ -313,11 +317,11 @@ export const StyledStatusBoardRowList = styled.div`
 
 const statusBoardRowBase = `
   align-items: center;
-  border-radius: 14px;
+  border-radius: 0;
   color: inherit;
   display: flex;
   gap: 14px;
-  padding: 14px 4px;
+  padding: 12px 8px;
   text-decoration: none;
   transition: background 0.12s;
 
@@ -332,9 +336,11 @@ export const StyledStatusBoardRowLink = styled(Link)`
 
   &:hover {
     background: ${themeCssVariables.background.secondary};
-    margin: 0 -10px;
-    padding-left: 14px;
-    padding-right: 14px;
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${themeCssVariables.border.color.blue};
+    outline-offset: -2px;
   }
 `;
 
@@ -348,19 +354,19 @@ export const StyledStatusBoardRowAvatar = styled.div<{
   align-items: center;
   background: ${({ tone }) => {
     if (tone === 'red') {
-      return themeCssVariables.tag.background.red;
+      return themeCssVariables.background.transparent.danger;
     }
 
     if (tone === 'blue') {
-      return themeCssVariables.tag.background.blue;
+      return themeCssVariables.background.transparent.blue;
     }
 
     if (tone === 'green') {
-      return themeCssVariables.tag.background.green;
+      return themeCssVariables.background.transparent.success;
     }
 
     if (tone === 'orange') {
-      return themeCssVariables.tag.background.orange;
+      return themeCssVariables.background.transparent.orange;
     }
 
     return themeCssVariables.background.secondary;
@@ -368,22 +374,22 @@ export const StyledStatusBoardRowAvatar = styled.div<{
   border-radius: 14px;
   color: ${({ tone }) => {
     if (tone === 'red') {
-      return themeCssVariables.tag.text.red;
+      return themeCssVariables.color.red;
     }
 
     if (tone === 'blue') {
-      return themeCssVariables.tag.text.blue;
+      return themeCssVariables.color.blue;
     }
 
     if (tone === 'green') {
-      return themeCssVariables.tag.text.green;
+      return themeCssVariables.color.green;
     }
 
     if (tone === 'orange') {
-      return themeCssVariables.tag.text.orange;
+      return themeCssVariables.color.orange;
     }
 
-    return themeCssVariables.font.color.secondary;
+    return themeCssVariables.font.color.tertiary;
   }};
   display: grid;
   flex: none;
@@ -451,8 +457,13 @@ export const StyledStatusBoardCumulativeButton = styled.button`
   }
 `;
 
-export const StyledStatusBoardCumulativeValue = styled.div`
-  color: ${themeCssVariables.font.color.primary};
+export const StyledStatusBoardCumulativeValue = styled.div<{
+  isEmpty?: boolean;
+}>`
+  color: ${({ isEmpty }) =>
+    isEmpty
+      ? themeCssVariables.font.color.tertiary
+      : themeCssVariables.font.color.primary};
   font-size: 26px;
   font-variant-numeric: tabular-nums;
   font-weight: ${themeCssVariables.font.weight.semiBold};
@@ -478,24 +489,15 @@ export const StyledStatusBoardGroupTitle = styled.div`
   }
 `;
 
-export const StyledStatusBoardTwoColumn = styled.div`
-  align-items: stretch;
-  display: grid;
-  gap: 16px 20px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+export const StyledStatusBoardContractSection = styled(
+  StyledStatusBoardSection,
+)`
+  height: 380px;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
 
-  > section {
-    height: 380px;
-    overflow-y: auto;
-    scrollbar-gutter: stable;
-
-    > * {
-      flex-shrink: 0;
-    }
-  }
-
-  @container (max-width: 900px) {
-    grid-template-columns: 1fr;
+  > * {
+    flex-shrink: 0;
   }
 `;
 
@@ -560,6 +562,17 @@ export const StyledStatusBoardSheet = styled.div`
   }
 `;
 
+export const StyledStatusBoardSheetHeader = styled.div`
+  align-items: center;
+  display: flex;
+  gap: 8px;
+`;
+
+export const StyledStatusBoardSheetCount = styled(StyledStatusBoardMuted)`
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+`;
+
 export const StyledStatusBoardSheetCloseButton = styled.button`
   background: ${themeCssVariables.background.secondary};
   border: none;
@@ -569,6 +582,7 @@ export const StyledStatusBoardSheetCloseButton = styled.button`
   flex: none;
   font-size: 16px;
   height: 32px;
+  margin-left: auto;
   width: 32px;
 `;
 
@@ -602,7 +616,7 @@ export const StyledStatusBoardWeekHeaderCell = styled.div<{
 }>`
   color: ${({ isToday }) =>
     isToday === true
-      ? themeCssVariables.tag.text.blue
+      ? themeCssVariables.color.blue
       : themeCssVariables.font.color.tertiary};
   font-size: 12px;
   font-weight: ${({ isToday }) =>
@@ -689,10 +703,10 @@ export const StyledStatusBoardWeekCellTitle = styled.b<{
 }>`
   color: ${({ cadence }) => {
     if (cadence === 'BIWEEKLY') {
-      return themeCssVariables.tag.text.orange;
+      return themeCssVariables.color.orange;
     }
 
-    return themeCssVariables.tag.text.blue;
+    return themeCssVariables.color.blue;
   }};
   display: block;
   font-size: 12.5px;
@@ -735,12 +749,12 @@ export const StyledStatusBoardRowAside = styled.div`
 export const StyledStatusBoardTag = styled.span<{ tone?: StatusBoardTone }>`
   background: ${({ tone }) =>
     tone === 'orange'
-      ? themeCssVariables.tag.background.orange
+      ? themeCssVariables.background.transparent.orange
       : themeCssVariables.background.secondary};
   border-radius: 6px;
   color: ${({ tone }) =>
     tone === 'orange'
-      ? themeCssVariables.tag.text.orange
+      ? themeCssVariables.color.orange
       : themeCssVariables.font.color.secondary};
   display: inline-block;
   font-size: 12px;
@@ -781,11 +795,11 @@ export const StyledStatusBoardProgress = styled.progress`
     background: ${themeCssVariables.background.tertiary};
   }
   &::-webkit-progress-value {
-    background: ${themeCssVariables.tag.text.blue};
+    background: ${themeCssVariables.color.blue};
     border-radius: 3px;
   }
   &::-moz-progress-bar {
-    background: ${themeCssVariables.tag.text.blue};
+    background: ${themeCssVariables.color.blue};
   }
 `;
 
@@ -890,4 +904,39 @@ export const StyledStatusBoardSearchClear = styled.button`
     outline: 2px solid ${themeCssVariables.border.color.blue};
     outline-offset: 2px;
   }
+`;
+
+export const StyledStatusBoardSheetFooter = styled.div`
+  border-top: 1px solid ${themeCssVariables.border.color.light};
+  display: flex;
+  flex-shrink: 0;
+  justify-content: flex-end;
+  padding-top: 16px;
+`;
+
+export const StyledStatusBoardSheetListLink = styled(Link)`
+  align-items: center;
+  background: ${themeCssVariables.background.transparent.blue};
+  border: 1px solid ${themeCssVariables.border.color.blue};
+  border-radius: ${themeCssVariables.border.radius.sm};
+  color: ${themeCssVariables.color.blue};
+  display: inline-flex;
+  font-size: 14px;
+  font-weight: ${themeCssVariables.font.weight.medium};
+  gap: 8px;
+  min-height: 36px;
+  padding: 0 12px;
+  text-decoration: none;
+
+  &:hover {
+    background: ${themeCssVariables.accent.secondary};
+  }
+`;
+
+export const StyledStatusBoardTabCount = styled.span`
+  display: inline-block;
+  font-variant-numeric: tabular-nums;
+  margin-left: 6px;
+  min-width: 3ch;
+  text-align: right;
 `;

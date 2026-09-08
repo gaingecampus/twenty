@@ -7,6 +7,7 @@ import { useAtomComponentStateValue } from '@/ui/utilities/state/jotai/hooks/use
 import { styled } from '@linaria/react';
 import { Droppable } from '@hello-pangea/dnd';
 import { useState } from 'react';
+import { t } from '@lingui/core/macro';
 import { Temporal } from 'temporal-polyfill';
 import {
   isDefined,
@@ -25,13 +26,14 @@ const StyledContainer = styled.div<{
     isOtherMonth || isDayOfWeekend
       ? themeCssVariables.background.secondary
       : themeCssVariables.background.primary};
+  box-sizing: border-box;
   color: ${({ isOtherMonth }) =>
     isOtherMonth
       ? themeCssVariables.font.color.light
       : themeCssVariables.font.color.primary};
   display: flex;
   flex-direction: column;
-  min-height: 122px;
+  min-height: var(--t-calendar-day-min-height, 122px);
   min-width: 0;
   padding: ${themeCssVariables.spacing[1]};
   width: calc(100% / 7);
@@ -47,7 +49,7 @@ const StyledDayHeader = styled.div`
   flex-direction: row;
   height: 24px;
   justify-content: space-between;
-  margin-left: none;
+  margin-bottom: ${themeCssVariables.spacing[1]};
   width: 100%;
 `;
 
@@ -64,13 +66,12 @@ const StyledDayHeaderDay = styled.span<{ isToday: boolean }>`
     isToday ? themeCssVariables.color.blue : 'transparent'};
   border-radius: ${({ isToday }) => (isToday ? '4px' : '0')};
   color: ${({ isToday }) =>
-    isToday
-      ? themeCssVariables.font.color.inverted
-      : themeCssVariables.font.color.primary};
+    isToday ? themeCssVariables.font.color.inverted : 'inherit'};
   display: flex;
   font-size: ${themeCssVariables.font.size.sm};
   font-weight: ${({ isToday }) =>
     isToday ? themeCssVariables.font.weight.medium : 'normal'};
+  height: 24px;
   justify-content: center;
   line-height: 140%;
   width: 20px;
@@ -84,7 +85,7 @@ const StyledCardsContainer = styled.div<{ isDraggedOver?: boolean }>`
   border: ${({ isDraggedOver }) =>
     isDraggedOver
       ? `1px dashed ${themeCssVariables.border.color.medium}`
-      : 'none'};
+      : '1px solid transparent'};
   border-radius: ${themeCssVariables.border.radius.sm};
   display: flex;
   flex: 1;
@@ -92,6 +93,26 @@ const StyledCardsContainer = styled.div<{ isDraggedOver?: boolean }>`
   gap: ${themeCssVariables.spacing['0.5']};
   min-height: 60px;
   transition: background-color 0.1s ease;
+`;
+
+const StyledShowMoreButton = styled.button`
+  background: ${themeCssVariables.background.primary};
+  border: 1px solid ${themeCssVariables.border.color.medium};
+  border-radius: ${themeCssVariables.border.radius.sm};
+  color: ${themeCssVariables.color.blue};
+  cursor: pointer;
+  font: inherit;
+  min-height: 28px;
+  width: 100%;
+
+  &:hover {
+    background: ${themeCssVariables.background.tertiary};
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${themeCssVariables.color.blue7};
+    outline-offset: 2px;
+  }
 `;
 
 type RecordCalendarMonthBodyDayProps = {
@@ -121,6 +142,8 @@ export const RecordCalendarMonthBodyDay = ({
     Temporal.Now.zonedDateTimeISO(userTimezone).toPlainDate();
 
   const [hovered, setHovered] = useState(false);
+  const [showAllRecords, setShowAllRecords] = useState(false);
+  const remainingCount = Math.max(0, recordIds.length - 5);
 
   const isToday = isSamePlainDate(day, todayInUserTimeZone);
 
@@ -151,14 +174,25 @@ export const RecordCalendarMonthBodyDay = ({
             ref={droppableProvided.innerRef}
             isDraggedOver={droppableSnapshot.isDraggingOver}
           >
-            {recordIds.slice(0, 5).map((recordId, index) => (
-              <RecordCalendarCardDraggableContainer
-                key={recordId}
-                recordId={recordId}
-                index={index}
-              />
-            ))}
+            {recordIds
+              .slice(0, showAllRecords ? undefined : 5)
+              .map((recordId, index) => (
+                <RecordCalendarCardDraggableContainer
+                  key={recordId}
+                  recordId={recordId}
+                  index={index}
+                />
+              ))}
             {droppableProvided.placeholder}
+            {remainingCount > 0 && (
+              <StyledShowMoreButton
+                type="button"
+                aria-expanded={showAllRecords}
+                onClick={() => setShowAllRecords(!showAllRecords)}
+              >
+                {showAllRecords ? t`접기` : t`${remainingCount}개 더 보기`}
+              </StyledShowMoreButton>
+            )}
           </StyledCardsContainer>
         )}
       </Droppable>

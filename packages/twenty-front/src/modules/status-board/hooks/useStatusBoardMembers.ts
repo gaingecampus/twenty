@@ -26,7 +26,9 @@ export const useStatusBoardMembers = ({
     : undefined;
 
   const { records, loading } = useFindManyRecords({
-    objectNameSingular: STATUS_BOARD_OBJECT_NAME_SINGULAR.member,
+    objectNameSingular:
+      memberObjectMetadataItem?.nameSingular ??
+      STATUS_BOARD_OBJECT_NAME_SINGULAR.member,
     skip: memberObjectMetadataItem === undefined,
     filter: andStatusBoardFilters([employmentStatusFilter]),
     limit: STATUS_BOARD_LIMITS.picker,

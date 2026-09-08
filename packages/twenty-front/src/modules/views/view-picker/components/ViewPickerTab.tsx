@@ -1,16 +1,10 @@
 import { useNumberFormat } from '@/localization/hooks/useNumberFormat';
-import { Dropdown } from '@/ui/layout/dropdown/components/Dropdown';
 import { StyledDropdownButtonContainer } from '@/ui/layout/dropdown/components/StyledDropdownButtonContainer';
-import { isDropdownOpenComponentState } from '@/ui/layout/dropdown/states/isDropdownOpenComponentState';
-import { useAtomComponentStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomComponentStateValue';
 import { type View } from '@/views/types/View';
-import { ViewPickerViewOptionsMenuContent } from '@/views/view-picker/components/ViewPickerViewOptionsMenuContent';
 import { styled } from '@linaria/react';
-import { useLingui } from '@lingui/react/macro';
-import { type MouseEvent, useContext } from 'react';
+import { useContext } from 'react';
 import { isDefined } from 'twenty-shared/utils';
-import { IconDotsVertical, IconList, useIcons } from 'twenty-ui/icon';
-import { LightIconButton } from 'twenty-ui/input';
+import { IconList, useIcons } from 'twenty-ui/icon';
 import { OverflowingTextWithTooltip } from 'twenty-ui/surfaces';
 import {
   MOBILE_VIEWPORT,
@@ -43,6 +37,7 @@ const StyledTabChip = styled(StyledDropdownButtonContainer)`
       : `var(--t-view-tab-weight, ${themeCssVariables.font.weight.medium})`};
   gap: ${themeCssVariables.spacing[1]};
   height: var(--t-view-tab-height, var(--t-toolbar-chip-height, auto));
+  outline-offset: -2px;
   padding: 0 var(--t-view-tab-padding-x, ${themeCssVariables.spacing[2]});
 
   &:hover {
@@ -62,9 +57,8 @@ const StyledTabChip = styled(StyledDropdownButtonContainer)`
         : `var(--t-view-tab-hover-color, ${themeCssVariables.font.color.secondary})`};
   }
 
-  &:hover [data-view-picker-tab-options],
-  &:focus-within [data-view-picker-tab-options] {
-    display: flex;
+  &:focus-visible {
+    outline: 2px solid ${themeCssVariables.color.blue};
   }
 `;
 
@@ -86,59 +80,46 @@ const StyledViewName = styled.span`
 `;
 
 const StyledCount = styled.span`
-  color: var(--t-view-tab-count-color, ${themeCssVariables.font.color.light});
+  background: var(
+    --t-view-tab-count-bg,
+    ${themeCssVariables.background.tertiary}
+  );
+  border-radius: ${themeCssVariables.border.radius.pill};
+  color: var(
+    --t-view-tab-count-color,
+    ${themeCssVariables.font.color.secondary}
+  );
   flex-shrink: 0;
+  font-size: 12px;
   font-weight: ${themeCssVariables.font.weight.medium};
-`;
-
-const StyledOptionsButton = styled.div<{ isVisible: boolean }>`
-  align-items: center;
-  display: ${({ isVisible }) => (isVisible ? 'flex' : 'none')};
-  flex-shrink: 0;
-  margin-left: ${themeCssVariables.spacing[1]};
+  line-height: 20px;
+  min-width: 20px;
+  padding: 0 5px;
+  text-align: center;
 `;
 
 type ViewPickerTabProps = {
   isCurrentView: boolean;
-  isIndexView: boolean;
-  isLastView: boolean;
-  isReadOnly?: boolean;
   totalCount?: number;
   view: Pick<
     View,
     'id' | 'name' | 'icon' | 'visibility' | 'createdByUserWorkspaceId'
   >;
-  onEdit: (event: MouseEvent<HTMLElement>, viewId: string) => void;
   onSelect: (viewId: string) => void;
 };
 
 export const ViewPickerTab = ({
   isCurrentView,
-  isIndexView,
-  isLastView,
-  isReadOnly = false,
   totalCount,
   view,
-  onEdit,
   onSelect,
 }: ViewPickerTabProps) => {
-  const { t } = useLingui();
   const { theme } = useContext(ThemeContext);
   const { formatNumber } = useNumberFormat();
   const { getIcon } = useIcons();
   const ViewIcon = getIcon(view.icon);
-  const optionsDropdownId = `view-picker-tab-options-${view.id}`;
-  const isDropdownOpen = useAtomComponentStateValue(
-    isDropdownOpenComponentState,
-    optionsDropdownId,
-  );
-
   const handleTabClick = () => {
     onSelect(view.id);
-  };
-
-  const handleOptionsClick = (event: MouseEvent<HTMLElement>) => {
-    event.stopPropagation();
   };
 
   return (
@@ -148,6 +129,7 @@ export const ViewPickerTab = ({
       onClick={handleTabClick}
       role="tab"
       aria-selected={isCurrentView}
+      tabIndex={isCurrentView ? 0 : -1}
     >
       <StyledIconContainer>
         {isDefined(ViewIcon) ? (
@@ -160,36 +142,7 @@ export const ViewPickerTab = ({
         <OverflowingTextWithTooltip text={view.name} />
       </StyledViewName>
       {isCurrentView && isDefined(totalCount) && (
-        <StyledCount>· {formatNumber(totalCount)}</StyledCount>
-      )}
-      {!isReadOnly && (
-        <StyledOptionsButton
-          data-view-picker-tab-options
-          isVisible={isDropdownOpen}
-          onClick={handleOptionsClick}
-        >
-          <Dropdown
-            dropdownId={optionsDropdownId}
-            dropdownPlacement="bottom-start"
-            clickableComponent={
-              <LightIconButton
-                Icon={IconDotsVertical}
-                size="small"
-                accent="tertiary"
-                aria-label={t`View options`}
-              />
-            }
-            dropdownComponents={
-              <ViewPickerViewOptionsMenuContent
-                view={view}
-                isIndexView={isIndexView}
-                isLastView={isLastView}
-                dropdownId={optionsDropdownId}
-                onEdit={onEdit}
-              />
-            }
-          />
-        </StyledOptionsButton>
+        <StyledCount>{formatNumber(totalCount)}</StyledCount>
       )}
     </StyledTabChip>
   );

@@ -21,7 +21,7 @@ export const RelationRollupFieldDisplay = () => {
     ? fieldDefinition.metadata.viewFieldId
     : '';
 
-  const rollupValue = useAtomFamilyStateValue(
+  const relationRollupValue = useAtomFamilyStateValue(
     relationRollupValueFamilyState,
     isDefined(recordId) && viewFieldId !== ''
       ? { recordId, viewFieldId }
@@ -32,7 +32,7 @@ export const RelationRollupFieldDisplay = () => {
     return null;
   }
 
-  if (!isDefined(rollupValue)) {
+  if (!isDefined(relationRollupValue)) {
     return <span>-</span>;
   }
 
@@ -45,7 +45,7 @@ export const RelationRollupFieldDisplay = () => {
   const displayValue = transformAggregateRawValueIntoAggregateDisplayValue({
     aggregateFieldMetadataItem: aggregateFieldMetadataItem ?? null,
     aggregateOperation,
-    aggregateRawValue: rollupValue,
+    aggregateRawValue: relationRollupValue,
     dateFormat,
     timeFormat,
     timeZone,

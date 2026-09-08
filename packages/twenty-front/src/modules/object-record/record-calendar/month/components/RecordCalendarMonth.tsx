@@ -19,7 +19,7 @@ const StyledContainer = styled.div`
   display: flex;
   flex-direction: column;
   min-height: 100%;
-  min-width: 1000px;
+  min-width: var(--t-calendar-min-width, 1000px);
 `;
 
 export const RecordCalendarMonth = () => {

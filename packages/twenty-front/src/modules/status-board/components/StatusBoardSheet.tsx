@@ -1,10 +1,15 @@
-import { IconSearch, IconX } from 'twenty-ui/icon';
+import { type EnrichedObjectMetadataItem } from '@/object-metadata/types/EnrichedObjectMetadataItem';
+import { buildStatusBoardListUrl } from '@/status-board/utils/buildStatusBoardListUrl';
+import { IconSearch, IconX, IconArrowRight } from 'twenty-ui/icon';
 import { useEffect, useId, useRef, useState } from 'react';
 import { useDebounce } from 'use-debounce';
 import { andStatusBoardFilters } from '@/status-board/utils/andStatusBoardFilters';
 import { useStatusBoardCount } from '@/status-board/hooks/useStatusBoardCount';
 import {
-  StyledStatusBoardSectionHeader,
+  StyledStatusBoardSheetHeader,
+  StyledStatusBoardSheetFooter,
+  StyledStatusBoardSheetListLink,
+  StyledStatusBoardSheetCount,
   StyledStatusBoardSectionTitle,
   StyledStatusBoardSheet,
   StyledStatusBoardSheetBackdrop,
@@ -13,13 +18,16 @@ import {
   StyledStatusBoardModalSearch,
   StyledStatusBoardModalSearchInput,
   StyledStatusBoardSearchClear,
-  StyledStatusBoardMuted,
 } from '@/status-board/components/statusBoardStyled';
 import { StatusBoardRecordList } from '@/status-board/components/StatusBoardRecordList';
 import { type RecordGqlFields } from '@/object-record/graphql/record-gql-fields/types/RecordGqlFields';
 import { type RecordGqlOperationFilter } from 'twenty-shared/types';
 
 export type StatusBoardSheetState = {
+  listTarget?: {
+    objectMetadataItem: EnrichedObjectMetadataItem;
+    viewId?: string;
+  };
   title: string;
   objectNameSingular: string;
   filter?: RecordGqlOperationFilter;
@@ -93,13 +101,13 @@ export const StatusBoardSheet = ({ sheet, onClose }: StatusBoardSheetProps) => {
           event.stopPropagation();
         }}
       >
-        <StyledStatusBoardSectionHeader>
+        <StyledStatusBoardSheetHeader>
           <StyledStatusBoardSectionTitle id={titleId}>
             {sheet.title}
           </StyledStatusBoardSectionTitle>
-          <StyledStatusBoardMuted>
+          <StyledStatusBoardSheetCount>
             {loading ? '…' : error ? '조회 실패' : `${count}건`}
-          </StyledStatusBoardMuted>
+          </StyledStatusBoardSheetCount>
           <StyledStatusBoardSheetCloseButton
             type="button"
             aria-label="닫기"
@@ -107,7 +115,7 @@ export const StatusBoardSheet = ({ sheet, onClose }: StatusBoardSheetProps) => {
           >
             ✕
           </StyledStatusBoardSheetCloseButton>
-        </StyledStatusBoardSectionHeader>
+        </StyledStatusBoardSheetHeader>
         <StyledStatusBoardModalSearch
           role="search"
           aria-label={`${sheet.title} 검색`}
@@ -151,6 +159,21 @@ export const StatusBoardSheet = ({ sheet, onClose }: StatusBoardSheetProps) => {
             }
           />
         </StyledStatusBoardSheetBody>
+        {sheet.listTarget && (
+          <StyledStatusBoardSheetFooter>
+            <StyledStatusBoardSheetListLink
+              to={buildStatusBoardListUrl({
+                objectMetadataItem: sheet.listTarget.objectMetadataItem,
+                viewId: sheet.listTarget.viewId,
+                filter,
+              })}
+              onClick={onClose}
+            >
+              필터 적용된 목록 보기
+              <IconArrowRight size={16} aria-hidden />
+            </StyledStatusBoardSheetListLink>
+          </StyledStatusBoardSheetFooter>
+        )}
       </StyledStatusBoardSheet>
     </StyledStatusBoardSheetBackdrop>
   );

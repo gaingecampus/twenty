@@ -1,6 +1,9 @@
 import { type EnrichedObjectMetadataItem } from '@/object-metadata/types/EnrichedObjectMetadataItem';
 import { getRelationJoinColumnName } from '@/object-record/record-field/ui/utils/junction/getRelationJoinColumnName';
-import { type RecordGqlOperationFilter } from 'twenty-shared/types';
+import {
+  FieldMetadataType,
+  type RecordGqlOperationFilter,
+} from 'twenty-shared/types';
 
 export const buildStatusBoardIdInFilter = ({
   objectMetadataItem,
@@ -22,6 +25,11 @@ export const buildStatusBoardIdInFilter = ({
           (item) => item.name === fieldName,
         );
         if (field === undefined) return [];
+        if (
+          field.type !== FieldMetadataType.RELATION &&
+          field.type !== FieldMetadataType.UUID
+        )
+          return [];
         return [getRelationJoinColumnName(field) ?? fieldName];
       }),
     ),

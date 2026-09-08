@@ -69,7 +69,7 @@ export const StatusBoardEmptyState = ({
         height="68"
         rx="10"
         transform="rotate(-9 32 17)"
-        fill={themeCssVariables.tag.background.blue}
+        fill={themeCssVariables.background.transparent.blue}
       />
       <rect
         x="35"
@@ -85,7 +85,7 @@ export const StatusBoardEmptyState = ({
         <>
           <path
             d="M36 34H94M49 8V20M81 8V20"
-            stroke={themeCssVariables.tag.text.blue}
+            stroke={themeCssVariables.color.blue}
             strokeWidth="4"
             strokeLinecap="round"
           />
@@ -104,7 +104,7 @@ export const StatusBoardEmptyState = ({
             width="22"
             height="7"
             rx="3.5"
-            fill={themeCssVariables.tag.background.blue}
+            fill={themeCssVariables.background.transparent.blue}
           />
           <path
             d="M48 45H80M48 55H75M48 65H64"
@@ -118,7 +118,7 @@ export const StatusBoardEmptyState = ({
         cx="94"
         cy="71"
         r="18"
-        fill={themeCssVariables.tag.background.blue}
+        fill={themeCssVariables.background.transparent.blue}
       />
       {variant === 'search' ? (
         <>
@@ -126,12 +126,12 @@ export const StatusBoardEmptyState = ({
             cx="91"
             cy="68"
             r="6"
-            stroke={themeCssVariables.tag.text.blue}
+            stroke={themeCssVariables.color.blue}
             strokeWidth="3"
           />
           <path
             d="M96 73L102 79"
-            stroke={themeCssVariables.tag.text.blue}
+            stroke={themeCssVariables.color.blue}
             strokeWidth="3"
             strokeLinecap="round"
           />
@@ -139,14 +139,14 @@ export const StatusBoardEmptyState = ({
       ) : variant === 'connection' ? (
         <path
           d="M94 62V73M94 79V80"
-          stroke={themeCssVariables.tag.text.blue}
+          stroke={themeCssVariables.color.blue}
           strokeWidth="3"
           strokeLinecap="round"
         />
       ) : (
         <path
           d="M86 71L92 77L103 65"
-          stroke={themeCssVariables.tag.text.blue}
+          stroke={themeCssVariables.color.blue}
           strokeWidth="3"
           strokeLinecap="round"
           strokeLinejoin="round"

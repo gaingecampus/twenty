@@ -1,3 +1,5 @@
+import { useObjectMetadataItem } from '@/object-metadata/hooks/useObjectMetadataItem';
+import { SelectDisplay } from '@/ui/field/display/components/SelectDisplay';
 import { type ObjectRecord } from '@/object-record/types/ObjectRecord';
 import {
   StyledStatusBoardContractMeta,
@@ -13,15 +15,25 @@ import {
 import { getStatusBoardContractProgress } from '@/status-board/utils/getStatusBoardContractProgress';
 import { differenceInCalendarDays, parseISO } from 'date-fns';
 
-const STAGES: Record<string, string> = {
-  INQUIRY: '문의',
-  TECHNICAL_CONSULT: '기술상담',
-  PROPOSAL: '제안',
-  FOLLOW_UP: '팔로업',
-  ON_HOLD: '보류',
-  MATCHING_HOLD_COMPLETED: '종료',
-  MATCHING_SUCCESS: '매칭 성공',
+const StatusBoardStageLabel = ({
+  objectNameSingular,
+  value,
+}: {
+  objectNameSingular: string;
+  value: string;
+}) => {
+  const { objectMetadataItem } = useObjectMetadataItem({ objectNameSingular });
+  const selectedOption = objectMetadataItem.fields
+    .find((field) => field.name === 'customStage')
+    ?.options?.find((option) => option.value === value);
+
+  if (!selectedOption) return null;
+
+  return (
+    <SelectDisplay color={selectedOption.color} label={selectedOption.label} />
+  );
 };
+
 const CADENCES: Record<string, string> = {
   WEEKLY: '매주',
   BIWEEKLY: '격주',
@@ -43,8 +55,10 @@ const DAYS: Record<string, string> = {
 
 export const StatusBoardRecordDetails = ({
   record,
+  objectNameSingular,
 }: {
   record: ObjectRecord;
+  objectNameSingular: string;
 }) => {
   if (
     record.expectedPaymentDate !== undefined ||
@@ -72,9 +86,10 @@ export const StatusBoardRecordDetails = ({
   }
   if (typeof record.customStage === 'string') {
     return (
-      <StyledStatusBoardTag>
-        {STAGES[record.customStage] ?? record.customStage}
-      </StyledStatusBoardTag>
+      <StatusBoardStageLabel
+        objectNameSingular={objectNameSingular}
+        value={record.customStage}
+      />
     );
   }
   const progress = getStatusBoardContractProgress(

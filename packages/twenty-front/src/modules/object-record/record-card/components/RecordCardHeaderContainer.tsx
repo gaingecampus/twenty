@@ -6,9 +6,11 @@ export const StyledBoardCardHeaderContainer = styled.div<{
   padding?: string;
 }>`
   align-items: center;
+  border-bottom: var(--t-record-card-header-border, none);
   display: flex;
   flex-direction: row;
   font-weight: ${themeCssVariables.font.weight.medium};
+  gap: ${themeCssVariables.spacing[2]};
   height: var(--t-record-card-header-height, 32px);
   justify-content: space-between;
   padding: ${({ padding, isCompact }) =>

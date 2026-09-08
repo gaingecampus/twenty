@@ -7,6 +7,7 @@ export const getStatusBoardObject = ({
   objectMetadataItems,
   objectPermissionsByObjectMetadataId,
   nameSingular,
+  fallbackNames = [],
 }: {
   objectMetadataItems: EnrichedObjectMetadataItem[];
   objectPermissionsByObjectMetadataId: Record<
@@ -14,10 +15,15 @@ export const getStatusBoardObject = ({
     ObjectPermissions & { objectMetadataId: string }
   >;
   nameSingular: string;
+  fallbackNames?: string[];
 }): EnrichedObjectMetadataItem | undefined => {
-  const objectMetadataItem = objectMetadataItems.find(
-    (item) => item.nameSingular === nameSingular && item.isActive === true,
-  );
+  const objectMetadataItem = [nameSingular, ...fallbackNames]
+    .map((candidateName) =>
+      objectMetadataItems.find(
+        (item) => item.nameSingular === candidateName && item.isActive === true,
+      ),
+    )
+    .find(isDefined);
 
   if (!isDefined(objectMetadataItem)) {
     return undefined;

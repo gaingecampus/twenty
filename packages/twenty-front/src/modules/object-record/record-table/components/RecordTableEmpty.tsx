@@ -26,9 +26,15 @@ import { useMemo } from 'react';
 import { isDefined } from 'twenty-shared/utils';
 
 const StyledEmptyStateContainer = styled.div<{ width: number }>`
+  display: flex;
+  flex-direction: column;
   height: 100%;
-  overflow: hidden;
+  min-height: 360px;
   width: ${({ width }) => width}px;
+`;
+
+const StyledHeaderOnly = styled(RecordTableStyleWrapper)`
+  min-height: 0;
 `;
 
 export interface RecordTableEmptyProps {
@@ -104,19 +110,28 @@ export const RecordTableEmpty = ({ tableBodyRef }: RecordTableEmptyProps) => {
   );
 
   const columnWidthStyles = useMemo(
-    () => getRecordTableColumnWidthInlineStyles({ visibleRecordFields }),
-    [visibleRecordFields],
+    () =>
+      getRecordTableColumnWidthInlineStyles({
+        visibleRecordFields,
+        isDragColumnHidden: isRecordTableDragColumnHidden,
+        isCheckboxColumnHidden: isRecordTableCheckboxColumnHidden,
+      }),
+    [
+      visibleRecordFields,
+      isRecordTableDragColumnHidden,
+      isRecordTableCheckboxColumnHidden,
+    ],
   );
 
   return (
     <StyledEmptyStateContainer width={tableContainerWidth}>
-      <RecordTableStyleWrapper
+      <StyledHeaderOnly
         ref={tableBodyRef}
         style={columnWidthStyles}
         id={getRecordTableHtmlId(recordTableId)}
       >
         <RecordTableHeader />
-      </RecordTableStyleWrapper>
+      </StyledHeaderOnly>
       <RecordTableEmptyState />
       <RecordTableColumnWidthEffect />
       <RecordTableWidthEffect />

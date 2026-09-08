@@ -6,10 +6,14 @@ type RecordCalendarMonthHeaderDayProps = {
 };
 
 const StyledLabel = styled.div`
-  color: ${themeCssVariables.font.color.light};
+  align-items: center;
+  background: var(--t-view-canvas-bg, transparent);
+  box-sizing: border-box;
+  color: ${themeCssVariables.font.color.secondary};
   display: flex;
   font-size: ${themeCssVariables.font.size.sm};
-  height: 24px;
+  font-weight: ${themeCssVariables.font.weight.medium};
+  height: var(--t-calendar-weekday-height, 24px);
   justify-content: flex-end;
   padding: ${themeCssVariables.spacing[0]} ${themeCssVariables.spacing[1]};
   width: calc(100% / 7);

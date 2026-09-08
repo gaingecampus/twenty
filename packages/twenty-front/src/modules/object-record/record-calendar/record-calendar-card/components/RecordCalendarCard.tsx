@@ -18,7 +18,8 @@ import { useAtomComponentFamilyState } from '@/ui/utilities/state/jotai/hooks/us
 import { useSetAtomComponentState } from '@/ui/utilities/state/jotai/hooks/useSetAtomComponentState';
 import { useGetCurrentViewOnly } from '@/views/hooks/useGetCurrentViewOnly';
 import { styled } from '@linaria/react';
-import { AnimatedEaseInOut } from 'twenty-ui/layout';
+import { t } from '@lingui/core/macro';
+import { themeCssVariables } from 'twenty-ui/theme-constants';
 
 const StyledContainer = styled.div`
   display: flex;
@@ -26,6 +27,26 @@ const StyledContainer = styled.div`
 
 const StyledRecordCardContainer = styled.div`
   width: calc(100% - 2px);
+`;
+
+const StyledDetails = styled.details`
+  summary {
+    border-radius: ${themeCssVariables.border.radius.sm};
+    color: ${themeCssVariables.font.color.secondary};
+    cursor: pointer;
+    font-size: ${themeCssVariables.font.size.sm};
+    padding: ${themeCssVariables.spacing[2]};
+
+    &:hover {
+      background: ${themeCssVariables.background.tertiary};
+      color: ${themeCssVariables.font.color.primary};
+    }
+
+    &:focus-visible {
+      outline: 2px solid ${themeCssVariables.color.blue7};
+      outline-offset: -2px;
+    }
+  }
 `;
 
 type RecordCalendarCardProps = {
@@ -90,12 +111,15 @@ export const RecordCalendarCard = ({ recordId }: RecordCalendarCardProps) => {
               data-click-outside-id={RECORD_CALENDAR_CARD_CLICK_OUTSIDE_ID}
             >
               <RecordCalendarCardHeader recordId={recordId} />
-              <AnimatedEaseInOut isOpen={!isCompactModeActive} initial={false}>
-                <RecordCalendarCardBody
-                  recordId={recordId}
-                  isRecordReadOnly={false}
-                />
-              </AnimatedEaseInOut>
+              {!isCompactModeActive && (
+                <StyledDetails>
+                  <summary>{t`세부정보`}</summary>
+                  <RecordCalendarCardBody
+                    recordId={recordId}
+                    isRecordReadOnly={false}
+                  />
+                </StyledDetails>
+              )}
             </RecordCard>
           </StyledRecordCardContainer>
           <RecordCalendarCardCellHoveredPortal recordId={recordId} />

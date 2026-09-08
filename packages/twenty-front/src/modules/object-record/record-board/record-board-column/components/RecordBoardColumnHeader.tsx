@@ -43,7 +43,7 @@ const StyledHeaderActions = styled.div`
 `;
 
 const StyledHeaderContainer = styled.div`
-  background: ${themeCssVariables.background.primary};
+  background: var(--t-view-canvas-bg, ${themeCssVariables.background.primary});
   display: flex;
   justify-content: space-between;
   width: 100%;
@@ -61,7 +61,10 @@ const StyledRightContainer = styled.div`
 `;
 
 const StyledColumn = styled.div`
-  background-color: ${themeCssVariables.background.primary};
+  background-color: var(
+    --t-view-canvas-bg,
+    ${themeCssVariables.background.primary}
+  );
   display: flex;
   flex-direction: column;
   max-width: var(

@@ -6,15 +6,29 @@ const StyledBoardCard = styled.div<{
   isSecondaryDragged?: boolean;
   isPrimaryMultiDrag?: boolean;
 }>`
-  background-color: ${themeCssVariables.background.secondary};
+  background-color: var(
+    --t-record-card-bg,
+    ${themeCssVariables.background.secondary}
+  );
   border: 1px solid ${themeCssVariables.border.color.medium};
-  border-radius: ${themeCssVariables.border.radius.sm};
+  border-radius: var(
+    --t-record-card-radius,
+    ${themeCssVariables.border.radius.sm}
+  );
   box-shadow: var(--t-record-card-shadow, none);
   color: ${themeCssVariables.font.color.primary};
   cursor: pointer;
   opacity: ${({ isSecondaryDragged }) => (isSecondaryDragged ? '0.3' : '1')};
 
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease;
   width: 100%;
+
+  &:focus-within {
+    outline: 2px solid ${themeCssVariables.color.blue7};
+    outline-offset: 2px;
+  }
 
   &[data-selected='true'] {
     background-color: ${themeCssVariables.accent.quaternary};
@@ -39,13 +53,14 @@ const StyledBoardCard = styled.div<{
 
   .checkbox-container {
     flex-shrink: 0;
-    max-width: 0;
+    max-width: var(--t-record-card-control-width, 0);
     opacity: 0;
     overflow: hidden;
     pointer-events: none;
-    transition: all ease-in-out 160ms;
+    transition: opacity ease-in-out 160ms;
   }
 
+  &:focus-within .checkbox-container,
   &[data-selected='true'] .checkbox-container,
   &:hover .checkbox-container {
     max-width: ${themeCssVariables.spacing[6]};
@@ -55,8 +70,9 @@ const StyledBoardCard = styled.div<{
 
   .compact-icon-container {
     opacity: 0;
-    transition: all ease-in-out 160ms;
+    transition: opacity ease-in-out 160ms;
   }
+  &:focus-within .compact-icon-container,
   &:hover .compact-icon-container {
     opacity: 1;
   }

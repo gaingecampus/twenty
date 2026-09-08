@@ -1,3 +1,4 @@
+import { themeCssVariables } from 'twenty-ui/theme-constants';
 import { ObjectOptionsDropdown } from '@/object-record/object-options-dropdown/components/ObjectOptionsDropdown';
 import { RecordIndexViewBarEffect } from '@/object-record/record-index/components/RecordIndexViewBarEffect';
 import { useRecordIndexContextOrThrow } from '@/object-record/record-index/contexts/RecordIndexContext';
@@ -9,9 +10,8 @@ import { ViewBar } from '@/views/components/ViewBar';
 import { ViewType } from '@/views/types/ViewType';
 import { styled } from '@linaria/react';
 
-// oxlint-disable-next-line twenty/no-hardcoded-colors
 const StyledViewBar = styled(ViewBar)`
-  background: #f8f8fb;
+  background: var(--t-app-bg, ${themeCssVariables.background.tertiary});
 `;
 
 export const RecordIndexViewBar = () => {

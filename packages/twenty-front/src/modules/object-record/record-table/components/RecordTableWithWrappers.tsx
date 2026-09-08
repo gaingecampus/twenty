@@ -29,9 +29,8 @@ const StyledRecordTablePrintBoundary = styled.div`
   }
 `;
 
-// oxlint-disable-next-line twenty/no-hardcoded-colors
 const StyledRecordIndexTableInset = styled.div`
-  background: #f8f8fb;
+  background: var(--t-app-bg, ${themeCssVariables.background.tertiary});
   box-sizing: border-box;
   display: flex;
   flex-direction: column;

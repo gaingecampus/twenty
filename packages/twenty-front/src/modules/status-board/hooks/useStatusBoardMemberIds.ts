@@ -5,11 +5,11 @@ import { useMemo } from 'react';
 export const useStatusBoardMemberIds = ({
   members,
   selectedGroupIds,
-  selectedMemberId,
+  selectedMemberIds,
 }: {
   members: ObjectRecord[];
   selectedGroupIds: string[];
-  selectedMemberId: string | undefined;
+  selectedMemberIds: string[];
 }): {
   visibleMembers: ObjectRecord[];
   memberIds: string[] | undefined;
@@ -24,13 +24,12 @@ export const useStatusBoardMemberIds = ({
             return groupId !== undefined && selectedGroupIds.includes(groupId);
           });
 
-    if (
-      selectedMemberId !== undefined &&
-      visibleMembers.some((member) => member.id === selectedMemberId)
-    ) {
+    if (selectedMemberIds.length > 0) {
       return {
         visibleMembers,
-        memberIds: [selectedMemberId],
+        memberIds: visibleMembers
+          .filter((member) => selectedMemberIds.includes(member.id))
+          .map((member) => member.id),
       };
     }
 
@@ -45,5 +44,5 @@ export const useStatusBoardMemberIds = ({
       visibleMembers,
       memberIds: undefined,
     };
-  }, [members, selectedGroupIds, selectedMemberId]);
+  }, [members, selectedGroupIds, selectedMemberIds]);
 };

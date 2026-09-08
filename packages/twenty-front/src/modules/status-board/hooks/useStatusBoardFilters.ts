@@ -1,38 +1,59 @@
+import { type ObjectRecord } from '@/object-record/types/ObjectRecord';
+import { getStatusBoardMemberGroupId } from '@/status-board/utils/getStatusBoardMemberGroupId';
 import { type StatusBoardPeriodType } from '@/status-board/utils/getStatusBoardPeriodRange';
 import { useCallback, useState } from 'react';
 
-export const useStatusBoardFilters = () => {
-  const [selectedGroupIds, setSelectedGroupIds] = useState<string[]>([]);
-  const [selectedMemberId, setSelectedMemberId] = useState<string | undefined>(
-    undefined,
-  );
+export const useStatusBoardFilters = (members: ObjectRecord[]) => {
+  const [{ selectedGroupIds, selectedMemberIds }, setSelection] = useState<{
+    selectedGroupIds: string[];
+    selectedMemberIds: string[];
+  }>({ selectedGroupIds: [], selectedMemberIds: [] });
   const [periodType, setPeriodType] = useState<StatusBoardPeriodType>('month');
   const [periodOffset, setPeriodOffset] = useState(0);
 
-  const toggleGroupId = useCallback((groupId: string) => {
-    setSelectedMemberId(undefined);
-    setSelectedGroupIds((currentGroupIds) => {
-      if (currentGroupIds.includes(groupId)) {
-        return currentGroupIds.filter((id) => id !== groupId);
-      }
+  const toggleGroupId = useCallback(
+    (groupId: string) => {
+      setSelection((current) => {
+        const nextGroupIds = current.selectedGroupIds.includes(groupId)
+          ? current.selectedGroupIds.filter((id) => id !== groupId)
+          : [...current.selectedGroupIds, groupId];
+        const availableIds = new Set(
+          members
+            .filter(
+              (member) =>
+                nextGroupIds.length === 0 ||
+                nextGroupIds.includes(
+                  getStatusBoardMemberGroupId(member) ?? '',
+                ),
+            )
+            .map((member) => member.id),
+        );
+        return {
+          selectedGroupIds: nextGroupIds,
+          selectedMemberIds: current.selectedMemberIds.filter((id) =>
+            availableIds.has(id),
+          ),
+        };
+      });
+    },
+    [members],
+  );
 
-      return [...currentGroupIds, groupId];
-    });
-  }, []);
-
-  const selectMemberId = useCallback((memberId: string | undefined) => {
-    setSelectedMemberId((currentMemberId) =>
-      currentMemberId === memberId ? undefined : memberId,
-    );
+  const toggleMemberId = useCallback((memberId: string) => {
+    setSelection((current) => ({
+      ...current,
+      selectedMemberIds: current.selectedMemberIds.includes(memberId)
+        ? current.selectedMemberIds.filter((id) => id !== memberId)
+        : [...current.selectedMemberIds, memberId],
+    }));
   }, []);
 
   const clearSelectedGroupIds = useCallback(() => {
-    setSelectedMemberId(undefined);
-    setSelectedGroupIds([]);
+    setSelection({ selectedGroupIds: [], selectedMemberIds: [] });
   }, []);
 
-  const clearSelectedMemberId = useCallback(() => {
-    setSelectedMemberId(undefined);
+  const clearSelectedMemberIds = useCallback(() => {
+    setSelection((current) => ({ ...current, selectedMemberIds: [] }));
   }, []);
 
   const selectPeriodType = useCallback(
@@ -45,13 +66,13 @@ export const useStatusBoardFilters = () => {
 
   return {
     selectedGroupIds,
-    selectedMemberId,
+    selectedMemberIds,
     periodType,
     periodOffset,
     toggleGroupId,
-    selectMemberId,
+    toggleMemberId,
     clearSelectedGroupIds,
-    clearSelectedMemberId,
+    clearSelectedMemberIds,
     selectPeriodType,
     setPeriodOffset,
   };

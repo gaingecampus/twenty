@@ -22,6 +22,7 @@ import { themeCssVariables } from 'twenty-ui/theme-constants';
 import { useEffect } from 'react';
 
 const StyledContainer = styled.div`
+  background: var(--t-view-canvas-bg, transparent);
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -32,9 +33,10 @@ const StyledContainer = styled.div`
 `;
 
 const StyledGrid = styled.div`
+  align-items: start;
   display: grid;
-  gap: ${themeCssVariables.spacing[2]};
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--t-gallery-gap, ${themeCssVariables.spacing[2]});
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
   padding: ${themeCssVariables.spacing[1]};
 `;
 
@@ -57,9 +59,8 @@ export const RecordGallery = () => {
     recordGalleryId,
   );
 
-  const { hasNextPage, fetchMoreRecords } = useRecordIndexTableQuery(
-    objectNameSingular,
-  );
+  const { hasNextPage, fetchMoreRecords } =
+    useRecordIndexTableQuery(objectNameSingular);
 
   const { ref: fetchMoreRef, inView } = useInView();
 

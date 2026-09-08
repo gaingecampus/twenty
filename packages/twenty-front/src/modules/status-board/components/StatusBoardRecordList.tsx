@@ -85,7 +85,10 @@ const StatusBoardRecordRowContent = ({
             <StyledStatusBoardRowCaption>{caption}</StyledStatusBoardRowCaption>
           )}
         </StyledStatusBoardRowBody>
-        <StatusBoardRecordDetails record={record} />
+        <StatusBoardRecordDetails
+          record={record}
+          objectNameSingular={objectNameSingular}
+        />
       </StyledStatusBoardContractTop>
       {isContract && <StatusBoardContractDetails record={record} />}
     </StyledStatusBoardContract>

@@ -92,7 +92,20 @@ html.dark[data-ui-theme='enterprise'] {
   --t-box-shadow-light: 0 2px 8px rgb(0 0 0 / 0.4);
   --t-box-shadow-strong: 0 12px 32px rgb(0 0 0 / 0.5);
   --t-record-card-shadow: 0 2px 10px rgb(0 0 0 / 0.28);
-  --t-record-card-header-height: 48px;
+  --t-record-card-header-height: 40px;
+  --t-record-card-bg: var(--t-background-primary);
+  --t-record-card-radius: 10px;
+  --t-record-card-header-border: 1px solid var(--t-border-color-light);
+  --t-record-card-field-gap: 4px;
+  --t-record-card-body-top: 8px;
+  --t-record-card-control-width: 24px;
+  --t-view-canvas-bg: var(--t-app-bg);
+  --t-gallery-gap: 16px;
+  --t-board-add-border: 1px dashed var(--t-border-color-medium);
+  --t-board-add-height: 36px;
+  --t-calendar-day-min-height: 144px;
+  --t-calendar-weekday-height: 36px;
+  --t-calendar-min-width: 840px;
   --t-tag-radius: 6px;
   --t-tag-font-size: 12px;
   --t-table-horizontal-cell-margin: 12px;
@@ -244,23 +257,23 @@ html.dark[data-ui-theme='enterprise'] {
   --t-filter-chip-danger-delete-hover-bg: rgb(229 72 77 / 0.28);
   --t-view-tab-height: 36px;
   --t-view-tab-bg: transparent;
-  --t-view-tab-border: none;
+  --t-view-tab-border: 1px solid transparent;
   --t-view-tab-radius: 6px;
   --t-view-tab-padding-x: 10px;
   --t-view-tab-font-size: 14px;
   --t-view-tab-gap: 4px;
-  --t-view-tab-color: #8b92a0;
+  --t-view-tab-color: var(--t-font-color-secondary);
   --t-view-tab-weight: 500;
-  --t-view-tab-active-bg: #1c1f2a;
-  --t-view-tab-active-border: 1px solid #2a2f3c;
-  --t-view-tab-active-hover-bg: #1c1f2a;
-  --t-view-tab-active-color: #f4f5f8;
+  --t-view-tab-active-bg: var(--t-background-transparent-blue);
+  --t-view-tab-active-border: 1px solid var(--t-border-color-blue);
+  --t-view-tab-active-hover-bg: var(--t-background-transparent-blue);
+  --t-view-tab-active-color: var(--t-color-blue);
   --t-view-tab-active-weight: 600;
   --t-view-tab-hover-bg: var(--t-control-hover-bg);
   --t-view-tab-hover-color: #c4c8d2;
-  --t-view-tab-count-color: #6b7280;
-  --t-view-tab-add-bg: transparent;
-  --t-view-tab-add-border: none;
+  --t-view-tab-count-color: var(--t-color-blue);
+  --t-view-tab-add-bg: var(--t-search-bg);
+  --t-view-tab-add-border: 1px solid var(--t-search-border-color);
   --t-view-tab-add-color: #8b92a0;
   --t-view-tab-add-size: 36px;
 
@@ -368,15 +381,12 @@ html.dark[data-ui-theme='enterprise'] svg.tabler-icon {
   stroke-width: var(--t-icon-stroke-md);
 }
 
-html.dark[data-ui-theme='enterprise']
-  [data-nav-new-chat-icon] svg.tabler-icon {
+html.dark[data-ui-theme='enterprise'] [data-nav-new-chat-icon] svg.tabler-icon {
   stroke-width: var(--t-nav-new-chat-icon-stroke, 2.25);
 }
 
-html.dark[data-ui-theme='enterprise']
-  [role='tab'] svg.tabler-icon,
-html.dark[data-ui-theme='enterprise']
-  [data-nav-tab-icon] svg.tabler-icon {
+html.dark[data-ui-theme='enterprise'] [role='tab'] svg.tabler-icon,
+html.dark[data-ui-theme='enterprise'] [data-nav-tab-icon] svg.tabler-icon {
   stroke-width: var(--t-nav-tabs-active-icon-stroke, 2.25);
 }
 
@@ -421,16 +431,21 @@ html.dark[data-ui-theme='enterprise']
 }
 
 html.dark[data-ui-theme='enterprise']
-  [data-variant='primary'][data-accent='blue']:not([data-inverted])[data-disabled],
+  [data-variant='primary'][data-accent='blue']:not(
+    [data-inverted]
+  )[data-disabled],
 html.dark[data-ui-theme='enterprise']
-  [data-variant='tertiary'][data-accent='blue']:not([data-inverted])[data-disabled] {
+  [data-variant='tertiary'][data-accent='blue']:not(
+    [data-inverted]
+  )[data-disabled] {
   --btn-bg: var(--t-button-disabled-bg);
   --btn-color: var(--t-button-disabled-color);
   --btn-hover-bg: var(--t-button-disabled-bg);
   --btn-active-bg: var(--t-button-disabled-bg);
 }
 
-html.dark[data-ui-theme='enterprise'] [data-variant='tertiary'][data-accent='default'] {
+html.dark[data-ui-theme='enterprise']
+  [data-variant='tertiary'][data-accent='default'] {
   --icon-button-bg: #2a2f3c;
   --icon-button-hover-bg: #353b4a;
   --icon-button-color: #c4c8d2;
@@ -722,4 +737,3 @@ html.dark[data-ui-theme='enterprise']
   padding-left: 0;
   padding-right: 0;
 }
-

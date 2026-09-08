@@ -8,4 +8,5 @@ export const STATUS_BOARD_OBJECT_NAME_SINGULAR = {
   deposit: 'deposit',
   group: 'group',
   member: 'member',
+  teamMember: 'teamMember',
 } as const;

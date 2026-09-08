@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { getStatusBoardMemberGroupId } from '@/status-board/utils/getStatusBoardMemberGroupId';
+import { themeCssVariables } from 'twenty-ui/theme-constants';
 import { styled } from '@linaria/react';
 import {
-  StyledStatusBoardSearch,
   StyledStatusBoardToolbar,
   StyledStatusBoardMuted,
   StyledStatusBoardChip,
@@ -24,11 +24,11 @@ type StatusBoardFilterBarProps = {
   memberObjectMetadataItem: EnrichedObjectMetadataItem | undefined;
   members: ObjectRecord[];
   selectedGroupIds: string[];
-  selectedMemberId: string | undefined;
+  selectedMemberIds: string[];
   onToggleGroupId: (groupId: string) => void;
-  onSelectMemberId: (memberId: string | undefined) => void;
+  onToggleMemberId: (memberId: string) => void;
   onClearSelectedGroupIds: () => void;
-  onClearSelectedMemberId: () => void;
+  onClearSelectedMemberIds: () => void;
 };
 
 export const StatusBoardFilterBar = ({
@@ -36,11 +36,11 @@ export const StatusBoardFilterBar = ({
   memberObjectMetadataItem,
   members,
   selectedGroupIds,
-  selectedMemberId,
+  selectedMemberIds,
   onToggleGroupId,
-  onSelectMemberId,
+  onToggleMemberId,
   onClearSelectedGroupIds,
-  onClearSelectedMemberId,
+  onClearSelectedMemberIds,
 }: StatusBoardFilterBarProps) => {
   const dummy = useStatusBoardDummyData();
   const shouldShowGroupChips =
@@ -60,9 +60,9 @@ export const StatusBoardFilterBar = ({
       {shouldShowMemberChips && (
         <StatusBoardMemberChips
           members={members}
-          selectedMemberId={selectedMemberId}
-          onSelectMemberId={onSelectMemberId}
-          onClearSelectedMemberId={onClearSelectedMemberId}
+          selectedMemberIds={selectedMemberIds}
+          onToggleMemberId={onToggleMemberId}
+          onClearSelectedMemberIds={onClearSelectedMemberIds}
         />
       )}
       <StyledStatusBoardMuted>
@@ -71,7 +71,7 @@ export const StatusBoardFilterBar = ({
           day: 'numeric',
           weekday: 'long',
         }).format(new Date())}{' '}
-        · 그룹을 여러 개 선택할 수 있어요
+        · 여러 그룹의 구성원을 함께 선택할 수 있어요
       </StyledStatusBoardMuted>
     </StyledStatusBoardToolbar>
   );
@@ -113,98 +113,84 @@ const StatusBoardGroupChips = ({
   );
 };
 
+const StyledMemberGroup = styled.div`
+  align-items: baseline;
+  display: flex;
+  gap: 12px;
+  padding: 4px 0;
+`;
+
+const StyledMemberGroupName = styled.span`
+  color: ${themeCssVariables.font.color.secondary};
+  flex: 0 0 100px;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+`;
+
 const StatusBoardMemberChips = ({
   members,
-  selectedMemberId,
-  onSelectMemberId,
-  onClearSelectedMemberId,
+  selectedMemberIds,
+  onToggleMemberId,
+  onClearSelectedMemberIds,
 }: {
   members: ObjectRecord[];
-  selectedMemberId: string | undefined;
-  onSelectMemberId: (memberId: string | undefined) => void;
-  onClearSelectedMemberId: () => void;
+  selectedMemberIds: string[];
+  onToggleMemberId: (memberId: string) => void;
+  onClearSelectedMemberIds: () => void;
 }) => {
-  const [search, setSearch] = useState('');
-  const [expanded, setExpanded] = useState(false);
-  const matchingMembers = members.filter((member) =>
-    getStatusBoardRecordLabel(member)
-      .toLocaleLowerCase()
-      .includes(search.trim().toLocaleLowerCase()),
-  );
-  const selectedMember = members.find(
-    (member) => member.id === selectedMemberId,
-  );
-
+  const { groups } = useStatusBoardDummyData();
+  const memberGroups = [
+    ...new Set(members.map((member) => getStatusBoardMemberGroupId(member))),
+  ].map((groupId) => ({
+    id: groupId ?? 'ungrouped',
+    label: groups.find((group) => group.id === groupId)?.name ?? '소속 미지정',
+    members: members.filter(
+      (member) => getStatusBoardMemberGroupId(member) === groupId,
+    ),
+  }));
   return (
-    <>
+    <div role="group" aria-label="구성원 선택">
       <StyledStatusBoardChipRow>
         <StyledStatusBoardChip
           type="button"
-          isActive={selectedMemberId === undefined}
-          aria-pressed={selectedMemberId === undefined}
-          onClick={onClearSelectedMemberId}
+          isActive={selectedMemberIds.length === 0}
+          aria-pressed={selectedMemberIds.length === 0}
+          onClick={onClearSelectedMemberIds}
         >
           {`전체 구성원 ${members.length}명`}
         </StyledStatusBoardChip>
-        {selectedMember && (
-          <StyledStatusBoardChip
-            type="button"
-            isActive
-            aria-pressed
-            onClick={onClearSelectedMemberId}
-            aria-label={`${getStatusBoardRecordLabel(selectedMember)} 선택 해제`}
-          >
-            {getStatusBoardRecordLabel(selectedMember)} ×
-          </StyledStatusBoardChip>
+        {selectedMemberIds.length > 0 && (
+          <StyledStatusBoardMuted>{`${selectedMemberIds.length}명 선택`}</StyledStatusBoardMuted>
         )}
-        <StyledStatusBoardChip
-          isActive={expanded}
-          variant="soft"
-          type="button"
-          aria-expanded={expanded}
-          onClick={() => {
-            setExpanded(!expanded);
-            setSearch('');
-          }}
-        >
-          {expanded ? '구성원 선택 닫기' : '구성원 찾기'}
-        </StyledStatusBoardChip>
       </StyledStatusBoardChipRow>
-      {expanded && (
-        <>
-          <StyledStatusBoardSearch
-            type="search"
-            aria-label="구성원 이름 검색"
-            placeholder="구성원 이름으로 검색"
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-          />
+      {memberGroups.map((group) => (
+        <StyledMemberGroup
+          key={group.id}
+          role="group"
+          aria-label={String(group.label)}
+        >
+          <StyledMemberGroupName>{String(group.label)}</StyledMemberGroupName>
           <StyledMemberOptions>
-            {matchingMembers.slice(0, 12).map((member) => (
+            {group.members.map((member) => (
               <StyledStatusBoardChip
                 key={member.id}
                 type="button"
-                isActive={selectedMemberId === member.id}
-                aria-pressed={selectedMemberId === member.id}
-                onClick={() => {
-                  onSelectMemberId(member.id);
-                  setExpanded(false);
-                  setSearch('');
-                }}
+                variant="soft"
+                isActive={selectedMemberIds.includes(member.id)}
+                aria-pressed={selectedMemberIds.includes(member.id)}
+                onClick={() => onToggleMemberId(member.id)}
               >
                 {getStatusBoardRecordLabel(member)}
               </StyledStatusBoardChip>
             ))}
           </StyledMemberOptions>
-          <StyledStatusBoardMuted role="status">
-            {matchingMembers.length === 0
-              ? '일치하는 구성원이 없어요. 이름이나 그룹을 확인해 주세요.'
-              : matchingMembers.length > 12
-                ? `${matchingMembers.length}명 중 12명 표시 · 이름을 입력해 범위를 좁혀 보세요`
-                : `${matchingMembers.length}명`}
-          </StyledStatusBoardMuted>
-        </>
+        </StyledMemberGroup>
+      ))}
+      {members.length === 0 && (
+        <StyledStatusBoardMuted>
+          선택한 그룹에 구성원이 없어요.
+        </StyledStatusBoardMuted>
       )}
-    </>
+    </div>
   );
 };
