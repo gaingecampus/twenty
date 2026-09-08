@@ -78,7 +78,7 @@ const StatusBoardRecordRowContent = ({
           }
         />
         <StyledStatusBoardRowBody>
-          <StyledStatusBoardRowName>
+          <StyledStatusBoardRowName title={getStatusBoardRecordLabel(record)}>
             {getStatusBoardRecordLabel(record)}
           </StyledStatusBoardRowName>
           {caption.length > 0 && (

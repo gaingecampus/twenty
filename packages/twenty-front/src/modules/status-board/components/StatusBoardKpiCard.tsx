@@ -21,6 +21,7 @@ import {
 
 type StatusBoardKpiCardProps = {
   label: string;
+  exactValue?: string;
   value: string;
   subtitle?: string;
   loading: boolean;
@@ -33,6 +34,7 @@ type StatusBoardKpiCardProps = {
 
 export const StatusBoardKpiCard = ({
   label,
+  exactValue,
   value,
   subtitle,
   loading,
@@ -42,6 +44,17 @@ export const StatusBoardKpiCard = ({
   onClick,
   to,
 }: StatusBoardKpiCardProps) => {
+  const valueParts = /^(.*?)(건|만|억)$/.exec(value);
+  const displayValue = loading ? (
+    '…'
+  ) : valueParts ? (
+    <>
+      {valueParts[1]}
+      <small>{valueParts[2]}</small>
+    </>
+  ) : (
+    value
+  );
   const Icon =
     label.includes('미수') || label.includes('완료')
       ? IconCoins
@@ -59,16 +72,17 @@ export const StatusBoardKpiCard = ({
     return (
       <StyledStatusBoardCumulativeButton
         type="button"
-        aria-label={`${label} ${loading ? '불러오는 중' : value} · 상세 목록 보기`}
+        aria-label={`${label} ${loading ? '불러오는 중' : (exactValue ?? value)} · 상세 목록 보기`}
+        title={loading ? undefined : exactValue}
         aria-busy={loading}
         onClick={onClick}
       >
-        <StyledStatusBoardCumulativeValue isEmpty={isEmpty}>
-          {loading ? '…' : value}
-        </StyledStatusBoardCumulativeValue>
         <StyledStatusBoardCumulativeLabel>
           {label}
         </StyledStatusBoardCumulativeLabel>
+        <StyledStatusBoardCumulativeValue isEmpty={isEmpty}>
+          {displayValue}
+        </StyledStatusBoardCumulativeValue>
         {!loading && subtitle && (
           <StyledStatusBoardKpiSubtitle>
             {subtitle}
@@ -83,7 +97,8 @@ export const StatusBoardKpiCard = ({
       as={to ? Link : 'button'}
       to={to}
       type={to ? undefined : 'button'}
-      aria-label={`${label} ${loading ? '불러오는 중' : value} · 상세 목록 보기`}
+      aria-label={`${label} ${loading ? '불러오는 중' : (exactValue ?? value)} · 상세 목록 보기`}
+      title={loading ? undefined : exactValue}
       aria-busy={loading}
       tone={tone}
       onClick={onClick}
@@ -93,7 +108,7 @@ export const StatusBoardKpiCard = ({
       </StyledStatusBoardKpiIcon>
       <StyledStatusBoardKpiLabel>{label}</StyledStatusBoardKpiLabel>
       <StyledStatusBoardKpiValue tone={tone} isEmpty={isEmpty}>
-        {loading ? '…' : value}
+        {displayValue}
       </StyledStatusBoardKpiValue>
       {!loading && subtitle && (
         <StyledStatusBoardKpiSubtitle>{subtitle}</StyledStatusBoardKpiSubtitle>

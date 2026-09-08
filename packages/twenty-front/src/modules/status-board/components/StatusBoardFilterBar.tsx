@@ -12,6 +12,13 @@ import { getStatusBoardRecordLabel } from '@/status-board/utils/getStatusBoardRe
 import { type EnrichedObjectMetadataItem } from '@/object-metadata/types/EnrichedObjectMetadataItem';
 import { type ObjectRecord } from '@/object-record/types/ObjectRecord';
 
+const StyledMemberList = styled.div`
+  max-height: 180px;
+  overflow-y: auto;
+  padding-top: 6px;
+  scrollbar-gutter: stable;
+`;
+
 const StyledMemberOptions = styled.div`
   display: flex;
   flex-wrap: wrap;
@@ -65,14 +72,6 @@ export const StatusBoardFilterBar = ({
           onClearSelectedMemberIds={onClearSelectedMemberIds}
         />
       )}
-      <StyledStatusBoardMuted>
-        {new Intl.DateTimeFormat('ko-KR', {
-          month: 'long',
-          day: 'numeric',
-          weekday: 'long',
-        }).format(new Date())}{' '}
-        · 여러 그룹의 구성원을 함께 선택할 수 있어요
-      </StyledStatusBoardMuted>
     </StyledStatusBoardToolbar>
   );
 };
@@ -89,7 +88,7 @@ const StatusBoardGroupChips = ({
   const { groups } = useStatusBoardDummyData();
 
   return (
-    <StyledStatusBoardChipRow>
+    <StyledStatusBoardChipRow role="group" aria-label="그룹 선택">
       <StyledStatusBoardChip
         type="button"
         isActive={selectedGroupIds.length === 0}
@@ -114,16 +113,16 @@ const StatusBoardGroupChips = ({
 };
 
 const StyledMemberGroup = styled.div`
-  align-items: baseline;
+  align-items: center;
   display: flex;
   gap: 12px;
-  padding: 4px 0;
+  padding: 2px 0;
 `;
 
 const StyledMemberGroupName = styled.span`
   color: ${themeCssVariables.font.color.secondary};
-  flex: 0 0 100px;
-  font-size: 13px;
+  flex: 0 0 88px;
+  font-size: 12px;
   overflow-wrap: anywhere;
 `;
 
@@ -163,29 +162,34 @@ const StatusBoardMemberChips = ({
           <StyledStatusBoardMuted>{`${selectedMemberIds.length}명 선택`}</StyledStatusBoardMuted>
         )}
       </StyledStatusBoardChipRow>
-      {memberGroups.map((group) => (
-        <StyledMemberGroup
-          key={group.id}
-          role="group"
-          aria-label={String(group.label)}
-        >
-          <StyledMemberGroupName>{String(group.label)}</StyledMemberGroupName>
-          <StyledMemberOptions>
-            {group.members.map((member) => (
-              <StyledStatusBoardChip
-                key={member.id}
-                type="button"
-                variant="soft"
-                isActive={selectedMemberIds.includes(member.id)}
-                aria-pressed={selectedMemberIds.includes(member.id)}
-                onClick={() => onToggleMemberId(member.id)}
-              >
-                {getStatusBoardRecordLabel(member)}
-              </StyledStatusBoardChip>
-            ))}
-          </StyledMemberOptions>
-        </StyledMemberGroup>
-      ))}
+      <StyledMemberList>
+        {memberGroups.map((group) => (
+          <StyledMemberGroup
+            key={group.id}
+            role="group"
+            aria-label={String(group.label)}
+          >
+            <StyledMemberGroupName>{String(group.label)}</StyledMemberGroupName>
+            <StyledMemberOptions>
+              {group.members.map((member) => (
+                <StyledStatusBoardChip
+                  key={member.id}
+                  type="button"
+                  variant="soft"
+                  isActive={selectedMemberIds.includes(member.id)}
+                  aria-pressed={selectedMemberIds.includes(member.id)}
+                  onClick={() => onToggleMemberId(member.id)}
+                >
+                  {selectedMemberIds.includes(member.id) && (
+                    <span aria-hidden="true">✓ </span>
+                  )}
+                  {getStatusBoardRecordLabel(member)}
+                </StyledStatusBoardChip>
+              ))}
+            </StyledMemberOptions>
+          </StyledMemberGroup>
+        ))}
+      </StyledMemberList>
       {members.length === 0 && (
         <StyledStatusBoardMuted>
           선택한 그룹에 구성원이 없어요.

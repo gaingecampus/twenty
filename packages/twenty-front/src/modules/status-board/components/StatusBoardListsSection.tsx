@@ -5,7 +5,8 @@ import {
   StyledStatusBoardSectionTitle,
   StyledStatusBoardSoftTab,
   StyledStatusBoardTabCount,
-  StyledStatusBoardChipRow,
+  StyledStatusBoardContractTabs,
+  StyledStatusBoardContractBody,
 } from '@/status-board/components/statusBoardStyled';
 import { StatusBoardRecordList } from '@/status-board/components/StatusBoardRecordList';
 import { STATUS_BOARD_FIELD } from '@/status-board/constants/StatusBoardFieldNames';
@@ -97,7 +98,7 @@ export const StatusBoardListsSection = ({
         onboardingObjectMetadataItem,
         STATUS_BOARD_FIELD.onboardingStatus,
       ) && (
-        <StyledStatusBoardChipRow>
+        <StyledStatusBoardContractTabs>
           {(['PRE', 'ACTIVE', 'DONE'] as const).map((tab) => (
             <StatusBoardContractTab
               key={tab}
@@ -113,34 +114,36 @@ export const StatusBoardListsSection = ({
               }
             />
           ))}
-        </StyledStatusBoardChipRow>
+        </StyledStatusBoardContractTabs>
       )}
-      <StatusBoardRecordList
-        objectNameSingular={STATUS_BOARD_OBJECT_NAME_SINGULAR.onboarding}
-        filter={getContractFilter(onboardingTab)}
-        tone="green"
-        recordGqlFields={buildStatusBoardRecordGqlFields({
-          objectMetadataItem: onboardingObjectMetadataItem,
-          fieldNames: [
-            STATUS_BOARD_FIELD.name,
-            STATUS_BOARD_FIELD.company,
-            STATUS_BOARD_FIELD.customStage,
-            STATUS_BOARD_FIELD.contractStartDate,
-            STATUS_BOARD_FIELD.contractEndDate,
-            STATUS_BOARD_FIELD.onboardingStatus,
-            STATUS_BOARD_FIELD.visitDays,
-            STATUS_BOARD_FIELD.visitCadence,
-            'totalFee',
-          ],
-        })}
-        emptyLabel={
-          onboardingTab === 'PRE'
-            ? '시작 전인 계약이 없어요'
-            : onboardingTab === 'ACTIVE'
-              ? '온보딩 중인 계약이 없어요'
-              : '완료된 계약이 없어요'
-        }
-      />
+      <StyledStatusBoardContractBody>
+        <StatusBoardRecordList
+          objectNameSingular={STATUS_BOARD_OBJECT_NAME_SINGULAR.onboarding}
+          filter={getContractFilter(onboardingTab)}
+          tone="green"
+          recordGqlFields={buildStatusBoardRecordGqlFields({
+            objectMetadataItem: onboardingObjectMetadataItem,
+            fieldNames: [
+              STATUS_BOARD_FIELD.name,
+              STATUS_BOARD_FIELD.company,
+              STATUS_BOARD_FIELD.customStage,
+              STATUS_BOARD_FIELD.contractStartDate,
+              STATUS_BOARD_FIELD.contractEndDate,
+              STATUS_BOARD_FIELD.onboardingStatus,
+              STATUS_BOARD_FIELD.visitDays,
+              STATUS_BOARD_FIELD.visitCadence,
+              'totalFee',
+            ],
+          })}
+          emptyLabel={
+            onboardingTab === 'PRE'
+              ? '시작 전인 계약이 없어요'
+              : onboardingTab === 'ACTIVE'
+                ? '온보딩 중인 계약이 없어요'
+                : '완료된 계약이 없어요'
+          }
+        />
+      </StyledStatusBoardContractBody>
     </StyledStatusBoardContractSection>
   );
 };

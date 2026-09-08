@@ -145,14 +145,14 @@ export const StatusBoardContractDetails = ({
         )}
         {amount !== null && (
           <StyledStatusBoardTag>
-            {formatStatusBoardAmount(amount)}
+            계약 금액 {formatStatusBoardAmount(amount)}원
           </StyledStatusBoardTag>
         )}
         {typeof record.contractStartDate === 'string' && (
           <StyledStatusBoardTag>
-            {record.contractStartDate.slice(0, 10)} ~{' '}
+            {record.contractStartDate.slice(0, 10).replaceAll('-', '.')} –{' '}
             {typeof record.contractEndDate === 'string'
-              ? record.contractEndDate.slice(0, 10)
+              ? record.contractEndDate.slice(0, 10).replaceAll('-', '.')
               : '종료일 미정'}
           </StyledStatusBoardTag>
         )}

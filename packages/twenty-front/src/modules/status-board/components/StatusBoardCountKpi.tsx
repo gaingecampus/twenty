@@ -1,3 +1,4 @@
+import { formatStatusBoardCount } from '@/status-board/utils/formatStatusBoardCount';
 import { StatusBoardKpiCard } from '@/status-board/components/StatusBoardKpiCard';
 import { type StatusBoardTone } from '@/status-board/components/statusBoardStyled';
 import { useStatusBoardCount } from '@/status-board/hooks/useStatusBoardCount';
@@ -54,12 +55,13 @@ export const StatusBoardCountKpi = ({
   return (
     <StatusBoardKpiCard
       label={label}
+      exactValue={!hasError && !showAmountAsValue ? countLabel : undefined}
       value={
         hasError
           ? '—'
           : showAmountAsValue
             ? formatStatusBoardAmount(count === 0 ? 0 : sum)
-            : countLabel
+            : formatStatusBoardCount(count)
       }
       subtitle={
         hasError

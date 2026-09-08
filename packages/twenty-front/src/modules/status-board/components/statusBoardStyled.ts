@@ -77,10 +77,9 @@ export const StyledStatusBoardMuted = styled.span`
 
 export const StyledStatusBoardKpiGrid = styled.div`
   display: grid;
-  gap: 10px;
+  gap: 8px;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-
-  @container (max-width: 560px) {
+  @container (max-width: 720px) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 `;
@@ -89,27 +88,23 @@ export const StyledStatusBoardKpiButton = styled.button<{
   tone?: StatusBoardTone;
   to?: string;
 }>`
+  align-content: start;
   background: ${themeCssVariables.background.secondary};
   border: none;
-  border-radius: 20px;
+  border-radius: 12px;
   color: inherit;
   cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 18px 18px 16px;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  min-height: 108px;
+  min-width: 0;
+  padding: 16px;
   text-align: left;
   text-decoration: none;
-  transition:
-    background 0.12s,
-    transform 0.12s;
-
+  transition: background 0.12s;
   &:hover {
     background: ${themeCssVariables.background.tertiary};
-  }
-
-  &:active {
-    transform: scale(0.98);
   }
 `;
 
@@ -143,24 +138,32 @@ export const StyledStatusBoardKpiValue = styled.div<{
 
     return themeCssVariables.font.color.primary;
   }};
-  font-size: 28px;
+  font-size: clamp(22px, 3.5cqw, 28px);
   font-variant-numeric: tabular-nums;
   font-weight: ${themeCssVariables.font.weight.semiBold};
+  small {
+    font-size: 14px;
+    font-weight: 500;
+    margin-left: 3px;
+  }
+  grid-column: 1 / -1;
   letter-spacing: -0.02em;
   line-height: 1.15;
   margin-top: 4px;
+  white-space: nowrap;
 `;
 
 export const StyledStatusBoardKpiSubtitle = styled.div`
   color: ${themeCssVariables.font.color.tertiary};
   font-size: 13px;
+  grid-column: 1 / -1;
+  line-height: 1.4;
   margin-top: 6px;
-  min-height: 22px;
 `;
 
 export const StyledStatusBoardChipRow = styled.div`
   display: flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   gap: 6px;
   min-width: 0;
   overflow-x: auto;
@@ -210,7 +213,8 @@ export const StyledStatusBoardChip = styled.button<{
   flex: none;
   font-size: 14px;
   font-weight: ${themeCssVariables.font.weight.semiBold};
-  padding: 8px 14px;
+  min-height: 32px;
+  padding: 6px 10px;
   white-space: nowrap;
 
   &:active {
@@ -224,23 +228,30 @@ export const StyledStatusBoardChip = styled.button<{
 `;
 
 export const StyledStatusBoardSoftTab = styled.button<{ isActive: boolean }>`
+  align-items: center;
   background: ${({ isActive }) =>
-    isActive
-      ? themeCssVariables.background.transparent.blue
-      : themeCssVariables.background.secondary};
+    isActive ? themeCssVariables.background.primary : 'transparent'};
   border: none;
-  border-radius: ${themeCssVariables.border.radius.pill};
+  border-radius: 8px;
+  box-shadow: ${({ isActive }) =>
+    isActive ? themeCssVariables.boxShadow.light : 'none'};
   color: ${({ isActive }) =>
     isActive
-      ? themeCssVariables.color.blue
+      ? themeCssVariables.font.color.primary
       : themeCssVariables.font.color.secondary};
   cursor: pointer;
-  font-size: 13.5px;
+  display: flex;
+  flex: 1;
+  font-size: 13px;
   font-weight: ${themeCssVariables.font.weight.semiBold};
-  padding: 7px 12px;
-
-  &:active {
-    transform: scale(0.97);
+  gap: 6px;
+  justify-content: center;
+  min-height: 40px;
+  min-width: 0;
+  padding: 8px;
+  white-space: nowrap;
+  &:hover {
+    color: ${themeCssVariables.color.blue};
   }
 `;
 
@@ -423,37 +434,32 @@ export const StyledStatusBoardRowCaption = styled.div`
 `;
 
 export const StyledStatusBoardCumulativeGrid = styled.div`
-  align-content: center;
-  background: ${themeCssVariables.background.secondary};
-  border-radius: 20px;
   display: grid;
-  gap: 0;
+  gap: 8px;
   grid-template-columns: repeat(5, minmax(0, 1fr));
-  min-height: 112px;
-  padding: 18px 8px;
-
-  @media (max-width: 560px) {
+  @container (max-width: 900px) {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    row-gap: 14px;
+  }
+  @container (max-width: 480px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 `;
 
 export const StyledStatusBoardCumulativeButton = styled.button`
-  background: transparent;
+  background: ${themeCssVariables.background.secondary};
   border: none;
-  border-radius: 14px;
+  border-radius: 10px;
   color: inherit;
   cursor: pointer;
-  padding: 8px 4px;
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  padding: 16px;
+  text-align: left;
   transition: background 0.12s;
-
   &:hover {
     background: ${themeCssVariables.background.tertiary};
-  }
-
-  &:active {
-    transform: scale(0.98);
   }
 `;
 
@@ -464,11 +470,17 @@ export const StyledStatusBoardCumulativeValue = styled.div<{
     isEmpty
       ? themeCssVariables.font.color.tertiary
       : themeCssVariables.font.color.primary};
-  font-size: 26px;
+  font-size: 24px;
   font-variant-numeric: tabular-nums;
+  small {
+    font-size: 13px;
+    font-weight: 500;
+    margin-left: 3px;
+  }
   font-weight: ${themeCssVariables.font.weight.semiBold};
   letter-spacing: -0.02em;
   line-height: 1.1;
+  white-space: nowrap;
 `;
 
 export const StyledStatusBoardCumulativeLabel = styled.div`
@@ -492,12 +504,13 @@ export const StyledStatusBoardGroupTitle = styled.div`
 export const StyledStatusBoardContractSection = styled(
   StyledStatusBoardSection,
 )`
-  height: 380px;
-  overflow-y: auto;
-  scrollbar-gutter: stable;
-
+  height: 400px;
+  overflow: hidden;
   > * {
     flex-shrink: 0;
+  }
+  > div:last-child {
+    flex-shrink: 1;
   }
 `;
 
@@ -732,10 +745,11 @@ export const StyledStatusBoardWeekNote = styled.div`
 `;
 
 export const StyledStatusBoardKpiIcon = styled(StyledStatusBoardRowAvatar)`
-  border-radius: 12px;
-  height: 34px;
-  margin-bottom: 8px;
-  width: 34px;
+  border-radius: 8px;
+  grid-column: 2;
+  grid-row: 1;
+  height: 28px;
+  width: 28px;
 `;
 
 export const StyledStatusBoardRowAside = styled.div`
@@ -774,10 +788,17 @@ export const StyledStatusBoardContractTop = styled.div`
 `;
 
 export const StyledStatusBoardContractMeta = styled.div`
+  align-items: center;
+  color: ${themeCssVariables.font.color.secondary};
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 10px;
+  font-size: 12px;
+  gap: 6px 12px;
+  margin: 8px 0 0 36px;
+  > span {
+    background: transparent;
+    padding: 0;
+  }
 `;
 
 export const StyledStatusBoardProgress = styled.progress`
@@ -786,10 +807,11 @@ export const StyledStatusBoardProgress = styled.progress`
   border: none;
   border-radius: 3px;
   display: block;
-  height: 6px;
+  height: 3px;
+  margin-left: 36px;
   margin-top: 10px;
   overflow: hidden;
-  width: 100%;
+  width: calc(100% - 36px);
 
   &::-webkit-progress-bar {
     background: ${themeCssVariables.background.tertiary};
@@ -804,9 +826,12 @@ export const StyledStatusBoardProgress = styled.progress`
 `;
 
 export const StyledStatusBoardToolbar = styled.div`
+  background: ${themeCssVariables.background.primary};
+  border-radius: 16px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
+  padding: 16px 20px;
 `;
 
 export const StyledStatusBoardSheetBody = styled.div`
@@ -934,9 +959,22 @@ export const StyledStatusBoardSheetListLink = styled(Link)`
 `;
 
 export const StyledStatusBoardTabCount = styled.span`
+  color: ${themeCssVariables.font.color.tertiary};
   display: inline-block;
   font-variant-numeric: tabular-nums;
-  margin-left: 6px;
-  min-width: 3ch;
+  min-width: 2ch;
   text-align: right;
+`;
+
+export const StyledStatusBoardContractTabs = styled.div`
+  background: ${themeCssVariables.background.tertiary};
+  border-radius: 10px;
+  display: flex;
+  padding: 4px;
+`;
+export const StyledStatusBoardContractBody = styled.div`
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
 `;
