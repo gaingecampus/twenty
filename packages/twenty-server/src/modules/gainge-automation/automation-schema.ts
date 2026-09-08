@@ -102,8 +102,8 @@ BEGIN
     SELECT array_agg(id) INTO member_ids FROM ${ns}.${table('teamMember')} WHERE "workspaceMemberAccountId"=actor_id AND "deletedAt" IS NULL;
     IF cardinality(member_ids)=1 AND NEW."${t.dri}" IS DISTINCT FROM member_ids[1] THEN
       PERFORM pg_advisory_xact_lock(hashtextextended('${t.table}:' || NEW.id::text,0));
-      INSERT INTO ${ns}.${table(t.link)} ("${t.parent}","guseongweonId","createdBySource","createdByName")
-        SELECT NEW.id,member_ids[1],'SYSTEM','CRM 담당자 자동 배정'
+      INSERT INTO ${ns}.${table(t.link)} ("${t.parent}","guseongweonId","createdBySource","createdByName","updatedBySource","updatedByName")
+        SELECT NEW.id,member_ids[1],'SYSTEM','CRM 담당자 자동 배정','SYSTEM','CRM 담당자 자동 배정'
         WHERE NOT EXISTS(SELECT 1 FROM ${ns}.${table(t.link)} WHERE "${t.parent}"=NEW.id AND "guseongweonId"=member_ids[1] AND "deletedAt" IS NULL);
     END IF;
   END IF;
