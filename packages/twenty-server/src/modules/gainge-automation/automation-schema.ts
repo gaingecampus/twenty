@@ -33,11 +33,14 @@ export function quoteAutomationSchema(schema: string) {
 
 // Resume newly created companies when a person supplies their website later.
 // Historical companies have no AI status and are deliberately excluded.
-export function buildEnrichmentResumeSql(schema: string) {
+export function buildEnrichmentResumeSql(
+  schema: string,
+  companyTable = 'company',
+) {
   const ns = quoteAutomationSchema(schema);
   return `INSERT INTO ${ns}."_gaingeAutomationEvent"(id,"recordId","objectName",kind,payload,"enrichmentStatus","chatStatus")
     SELECT md5('gainge-enrichment:' || c.id::text || ':' || c."updatedAt"::text)::uuid,c.id,'company','ENRICHMENT_REQUESTED',jsonb_build_object('name',c.name),'PENDING','NOT_APPLICABLE'
-    FROM ${ns}.company c WHERE c."deletedAt" IS NULL
+    FROM ${ns}.${quoteAutomationSchema(companyTable)} c WHERE c."deletedAt" IS NULL
       AND c."aiEnrichmentStatus" IN ('NEEDS_WEBSITE','IDENTITY_UNCONFIRMED','NEEDS_REVIEW')
       AND COALESCE(trim(c."aiCompanyProfile"),'')=''
       AND COALESCE(trim(c."domainNamePrimaryLinkUrl"),'')<>''
@@ -50,8 +53,11 @@ export function buildEnrichmentResumeSql(schema: string) {
 export function buildAutomationSql(
   schema: string,
   targets: readonly (typeof AUTOMATION_TARGETS)[number][],
+  tableNames: Readonly<Record<string, string>> = {},
 ) {
   const ns = quoteAutomationSchema(schema);
+  const table = (name: string) =>
+    quoteAutomationSchema(tableNames[name] ?? name);
   return `
 CREATE TABLE IF NOT EXISTS ${ns}."_gaingeAutomationBudget" (day date PRIMARY KEY,calls int NOT NULL);
 CREATE TABLE IF NOT EXISTS ${ns}."_gaingeAutomationEvent" (
@@ -77,12 +83,12 @@ BEGIN
   actor_source := CASE WHEN TG_OP='INSERT' THEN row_json->>'createdBySource' ELSE row_json->>'updatedBySource' END;
   IF actor_source IS DISTINCT FROM 'MANUAL' THEN RETURN NEW; END IF;
   actor_id := (CASE WHEN TG_OP='INSERT' THEN row_json->>'createdByWorkspaceMemberId' ELSE row_json->>'updatedByWorkspaceMemberId' END)::uuid;
-  SELECT array_agg(id) INTO member_ids FROM ${ns}."teamMember" WHERE "workspaceMemberAccountId"=actor_id AND "deletedAt" IS NULL;
+  SELECT array_agg(id) INTO member_ids FROM ${ns}.${table('teamMember')} WHERE "workspaceMemberAccountId"=actor_id AND "deletedAt" IS NULL;
   IF cardinality(member_ids)=1 AND NEW."${t.dri}" IS NULL THEN NEW."${t.dri}" := member_ids[1]; END IF;
   RETURN NEW;
 END;$assign$;
-DROP TRIGGER IF EXISTS gainge_assign_owner ON ${ns}."${t.table}";
-CREATE TRIGGER gainge_assign_owner BEFORE INSERT OR UPDATE ON ${ns}."${t.table}" FOR EACH ROW EXECUTE FUNCTION ${ns}.gainge_assign_${t.table}();
+DROP TRIGGER IF EXISTS gainge_assign_owner ON ${ns}.${table(t.table)};
+CREATE TRIGGER gainge_assign_owner BEFORE INSERT OR UPDATE ON ${ns}.${table(t.table)} FOR EACH ROW EXECUTE FUNCTION ${ns}.gainge_assign_${t.table}();
 CREATE OR REPLACE FUNCTION ${ns}.gainge_record_${t.table}() RETURNS trigger LANGUAGE plpgsql AS $record$
 DECLARE actor_id uuid; member_ids uuid[]; j jsonb; old_j jsonb; actor_source text; changed_fields text[]; stage_key text; event_kind text; actor_name text;
 BEGIN
@@ -93,12 +99,12 @@ BEGIN
   actor_id := (CASE WHEN TG_OP='INSERT' THEN j->>'createdByWorkspaceMemberId' ELSE j->>'updatedByWorkspaceMemberId' END)::uuid;
   actor_name := CASE WHEN TG_OP='INSERT' THEN j->>'createdByName' ELSE j->>'updatedByName' END;
   IF actor_source='MANUAL' THEN
-    SELECT array_agg(id) INTO member_ids FROM ${ns}."teamMember" WHERE "workspaceMemberAccountId"=actor_id AND "deletedAt" IS NULL;
+    SELECT array_agg(id) INTO member_ids FROM ${ns}.${table('teamMember')} WHERE "workspaceMemberAccountId"=actor_id AND "deletedAt" IS NULL;
     IF cardinality(member_ids)=1 AND NEW."${t.dri}" IS DISTINCT FROM member_ids[1] THEN
       PERFORM pg_advisory_xact_lock(hashtextextended('${t.table}:' || NEW.id::text,0));
-      INSERT INTO ${ns}."${t.link}" ("${t.parent}","guseongweonId","createdBySource","createdByName")
+      INSERT INTO ${ns}.${table(t.link)} ("${t.parent}","guseongweonId","createdBySource","createdByName")
         SELECT NEW.id,member_ids[1],'SYSTEM','CRM 담당자 자동 배정'
-        WHERE NOT EXISTS(SELECT 1 FROM ${ns}."${t.link}" WHERE "${t.parent}"=NEW.id AND "guseongweonId"=member_ids[1] AND "deletedAt" IS NULL);
+        WHERE NOT EXISTS(SELECT 1 FROM ${ns}.${table(t.link)} WHERE "${t.parent}"=NEW.id AND "guseongweonId"=member_ids[1] AND "deletedAt" IS NULL);
     END IF;
   END IF;
   IF TG_OP='UPDATE' THEN
@@ -108,15 +114,15 @@ BEGIN
       AND key NOT IN ('updatedAt','searchVector','position') AND key NOT LIKE 'updatedBy%' AND key NOT LIKE 'stage%';
     IF changed_fields IS NULL THEN RETURN NEW; END IF;
   END IF;
-  stage_key := CASE WHEN TG_TABLE_NAME='opportunity' THEN 'customStage' WHEN TG_TABLE_NAME='onboarding' THEN 'onboardingStatus' ELSE '' END;
+  stage_key := CASE WHEN '${t.table}'='opportunity' THEN 'customStage' WHEN '${t.table}'='onboarding' THEN 'onboardingStatus' ELSE '' END;
   event_kind := CASE WHEN TG_OP='INSERT' THEN 'CREATED' WHEN stage_key=ANY(changed_fields) THEN 'STATUS_CHANGED' ELSE 'UPDATED' END;
   INSERT INTO ${ns}."_gaingeAutomationEvent"("recordId","objectName",kind,payload,"enrichmentStatus") VALUES
-    (NEW.id,TG_TABLE_NAME,event_kind,jsonb_build_object('name',COALESCE(j->>'name',trim(COALESCE(j->>'nameFirstName','') || ' ' || COALESCE(j->>'nameLastName',''))),'driId',NEW."${t.dri}",'actorId',actor_id,'actorName',actor_name,'actorSource',actor_source,'changedFields',changed_fields,'beforeStage',old_j->>stage_key,'afterStage',j->>stage_key,'driResult',CASE WHEN actor_source IS DISTINCT FROM 'MANUAL' THEN 'NON_MANUAL' WHEN cardinality(member_ids)=1 THEN 'ASSIGNED_OR_COLLABORATOR' ELSE 'ACCOUNT_MAPPING_MISSING_OR_AMBIGUOUS' END),
-    CASE WHEN TG_TABLE_NAME='company' AND TG_OP='INSERT' THEN 'PENDING' ELSE 'NOT_APPLICABLE' END);
+    (NEW.id,'${t.table}',event_kind,jsonb_build_object('name',COALESCE(j->>'name',trim(COALESCE(j->>'nameFirstName','') || ' ' || COALESCE(j->>'nameLastName',''))),'driId',NEW."${t.dri}",'actorId',actor_id,'actorName',actor_name,'actorSource',actor_source,'changedFields',changed_fields,'beforeStage',old_j->>stage_key,'afterStage',j->>stage_key,'driResult',CASE WHEN actor_source IS DISTINCT FROM 'MANUAL' THEN 'NON_MANUAL' WHEN cardinality(member_ids)=1 THEN 'ASSIGNED_OR_COLLABORATOR' ELSE 'ACCOUNT_MAPPING_MISSING_OR_AMBIGUOUS' END),
+    CASE WHEN '${t.table}'='company' AND TG_OP='INSERT' THEN 'PENDING' ELSE 'NOT_APPLICABLE' END);
   RETURN NEW;
 END;$record$;
-DROP TRIGGER IF EXISTS gainge_record_automation ON ${ns}."${t.table}";
-CREATE TRIGGER gainge_record_automation AFTER INSERT OR UPDATE ON ${ns}."${t.table}" FOR EACH ROW EXECUTE FUNCTION ${ns}.gainge_record_${t.table}();
+DROP TRIGGER IF EXISTS gainge_record_automation ON ${ns}.${table(t.table)};
+CREATE TRIGGER gainge_record_automation AFTER INSERT OR UPDATE ON ${ns}.${table(t.table)} FOR EACH ROW EXECUTE FUNCTION ${ns}.gainge_record_${t.table}();
 `,
   )
   .join('\n')}`;

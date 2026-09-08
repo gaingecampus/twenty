@@ -1,3 +1,4 @@
+import { GaingeAutomationTableService } from './automation-table.service';
 import {
   Body,
   Controller,
@@ -26,6 +27,7 @@ export class GaingeGoogleChatController {
   constructor(
     private readonly config: TwentyConfigService,
     private readonly orm: GlobalWorkspaceOrmManager,
+    private readonly tables: GaingeAutomationTableService,
   ) {}
   // External Google OIDC is verified by GaingeChatAuthGuard; no CRM session cookie applies.
   // oxlint-disable-next-line twenty/rest-api-methods-should-be-guarded
@@ -52,8 +54,9 @@ export class GaingeGoogleChatController {
       throw new ServiceUnavailableException();
     const ns = quoteAutomationSchema(getWorkspaceSchemaName(workspaceId));
     const ds = await this.orm.getGlobalWorkspaceDataSource();
+    const memberTable = await this.tables.quoted(workspaceId, 'teamMember');
     const members = await ds.query(
-      `SELECT id FROM ${ns}."teamMember" WHERE lower(trim("emailPrimaryEmail"))=$1 AND "deletedAt" IS NULL`,
+      `SELECT id FROM ${ns}.${memberTable} WHERE lower(trim("emailPrimaryEmail"))=$1 AND "deletedAt" IS NULL`,
       [user.email.toLowerCase()],
     );
     if (members.length !== 1)
@@ -64,7 +67,7 @@ export class GaingeGoogleChatController {
     const enabled =
       text === '알림 끄기' ? false : text === '알림 켜기' ? true : null;
     await ds.query(
-      `UPDATE ${ns}."teamMember" SET "googleChatUserId"=$2,"googleChatNotificationsEnabled"=COALESCE($3,"googleChatNotificationsEnabled",true) WHERE id=$1`,
+      `UPDATE ${ns}.${memberTable} SET "googleChatUserId"=$2,"googleChatNotificationsEnabled"=COALESCE($3,"googleChatNotificationsEnabled",true) WHERE id=$1`,
       [members[0].id, user.name!.slice(6), enabled],
     );
     return response(

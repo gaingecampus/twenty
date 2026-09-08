@@ -1,3 +1,4 @@
+import { GaingeAutomationTableService } from './automation-table.service';
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { createHash, randomUUID } from 'node:crypto';
@@ -50,6 +51,7 @@ export class GaingeAutomationService {
     private readonly http: SecureHttpClientService,
     private readonly models: AiModelRegistryService,
     private readonly chat: GaingeGoogleChatService,
+    private readonly tables: GaingeAutomationTableService,
   ) {}
   @Cron('*/30 * * * * *')
   async tick(): Promise<void> {
@@ -66,7 +68,10 @@ export class GaingeAutomationService {
       if (!table[0]?.name) return;
       if (this.config.get('GAINGE_ENRICHMENT_ENABLED')) {
         await ds.query(
-          buildEnrichmentResumeSql(getWorkspaceSchemaName(workspaceId)),
+          buildEnrichmentResumeSql(
+            getWorkspaceSchemaName(workspaceId),
+            await this.tables.name(workspaceId, 'company'),
+          ),
         );
       }
       for (let i = 0; i < 5; i++) {
@@ -132,10 +137,16 @@ export class GaingeAutomationService {
       this.running = false;
     }
   }
+  private table(objectName: string) {
+    return this.tables.quoted(
+      this.config.get('GAINGE_AUTOMATION_WORKSPACE_ID'),
+      objectName,
+    );
+  }
   private async setCompanyStatus(ns: string, id: string, status: string) {
     const ds = await this.orm.getGlobalWorkspaceDataSource();
     await ds.query(
-      `UPDATE ${ns}.company SET "aiEnrichmentStatus"=$2,"aiEnrichmentCheckedAt"=now(),"updatedBySource"='SYSTEM',"updatedByName"='CRM 기업 정보 자동 보완' WHERE id=$1 AND "deletedAt" IS NULL`,
+      `UPDATE ${ns}.${await this.table('company')} SET "aiEnrichmentStatus"=$2,"aiEnrichmentCheckedAt"=now(),"updatedBySource"='SYSTEM',"updatedByName"='CRM 기업 정보 자동 보완' WHERE id=$1 AND "deletedAt" IS NULL`,
       [id, status],
     );
   }
@@ -143,7 +154,7 @@ export class GaingeAutomationService {
     if (!this.config.get('GAINGE_ENRICHMENT_ENABLED')) return 'DISABLED';
     const ds = await this.orm.getGlobalWorkspaceDataSource();
     const rows = await ds.query(
-      `SELECT id,name,"domainNamePrimaryLinkUrl" AS website,"aiCompanyProfile" AS profile FROM ${ns}.company WHERE id=$1 AND "deletedAt" IS NULL`,
+      `SELECT id,name,"domainNamePrimaryLinkUrl" AS website,"aiCompanyProfile" AS profile FROM ${ns}.${await this.table('company')} WHERE id=$1 AND "deletedAt" IS NULL`,
       [e.recordId],
     );
     const company = rows[0];
@@ -203,7 +214,7 @@ export class GaingeAutomationService {
     }
     // Recheck identity and empty values after the network call; preserve human edits.
     const updated = await ds.query(
-      `UPDATE ${ns}.company SET "aiCompanyProfile"=$2,"employees"=COALESCE("employees",$3),"aiEnrichmentStatus"='FILLED',"aiEnrichmentSource"=$4,"aiEnrichmentCheckedAt"=now(),"aiEnrichmentModel"=$5,"updatedBySource"='SYSTEM',"updatedByName"='CRM 기업 정보 자동 보완',"updatedAt"=now() WHERE id=$1 AND "deletedAt" IS NULL AND COALESCE(trim("aiCompanyProfile"),'')='' AND name=$6 AND "domainNamePrimaryLinkUrl"=$7 RETURNING id`,
+      `UPDATE ${ns}.${await this.table('company')} SET "aiCompanyProfile"=$2,"employees"=COALESCE("employees",$3),"aiEnrichmentStatus"='FILLED',"aiEnrichmentSource"=$4,"aiEnrichmentCheckedAt"=now(),"aiEnrichmentModel"=$5,"updatedBySource"='SYSTEM',"updatedByName"='CRM 기업 정보 자동 보완',"updatedAt"=now() WHERE id=$1 AND "deletedAt" IS NULL AND COALESCE(trim("aiCompanyProfile"),'')='' AND name=$6 AND "domainNamePrimaryLinkUrl"=$7 RETURNING id`,
       [
         e.recordId,
         profile.profile,
@@ -222,7 +233,7 @@ export class GaingeAutomationService {
     if (!AUTOMATION_TARGETS.some((target) => target.table === e.objectName))
       return 'UNSUPPORTED_OBJECT';
     const records = await ds.query(
-      `SELECT id FROM ${ns}."${e.objectName}" WHERE id=$1 AND "deletedAt" IS NULL`,
+      `SELECT id FROM ${ns}.${await this.table(e.objectName)} WHERE id=$1 AND "deletedAt" IS NULL`,
       [e.recordId],
     );
     if (!records.length) return 'DELETED';
@@ -232,7 +243,7 @@ export class GaingeAutomationService {
     let dmMissing = false;
     if (e.payload.driId) {
       const members = await ds.query(
-        `SELECT "googleChatUserId","googleChatNotificationsEnabled" FROM ${ns}."teamMember" WHERE id=$1 AND "deletedAt" IS NULL`,
+        `SELECT "googleChatUserId","googleChatNotificationsEnabled" FROM ${ns}.${await this.table('teamMember')} WHERE id=$1 AND "deletedAt" IS NULL`,
         [e.payload.driId],
       );
       const userId = members[0]?.googleChatUserId;

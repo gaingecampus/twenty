@@ -1,3 +1,4 @@
+import { GaingeAutomationTableService } from './automation-table.service';
 import { Module } from '@nestjs/common';
 import { SecureHttpClientModule } from 'src/engine/core-modules/secure-http-client/secure-http-client.module';
 import { AiModelsModule } from 'src/engine/metadata-modules/ai/ai-models/ai-models.module';
@@ -10,6 +11,7 @@ import { GaingeChatAuthGuard } from './google-chat-auth.guard';
   imports: [SecureHttpClientModule, AiModelsModule],
   providers: [
     GaingeAutomationService,
+    GaingeAutomationTableService,
     GaingeGoogleChatService,
     GaingeChatAuthGuard,
   ],

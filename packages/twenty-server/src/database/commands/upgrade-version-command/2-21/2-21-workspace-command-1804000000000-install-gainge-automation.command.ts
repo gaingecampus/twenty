@@ -1,3 +1,5 @@
+import { TWENTY_STANDARD_APPLICATION_UNIVERSAL_IDENTIFIER } from 'twenty-shared/application';
+import { computeTableName } from 'src/engine/utils/compute-table-name.util';
 import { Command } from 'nest-commander';
 import { FieldMetadataType } from 'twenty-shared/types';
 import { ActiveOrSuspendedWorkspaceCommandRunner } from 'src/database/commands/command-runners/active-or-suspended-workspace.command-runner';
@@ -32,11 +34,20 @@ export class InstallGaingeAutomationCommand extends ActiveOrSuspendedWorkspaceCo
     options,
   }: RunOnWorkspaceArgs): Promise<void> {
     if (!dataSource) throw new Error('Missing data source');
-    const { flatObjectMetadataMaps, flatFieldMetadataMaps } =
-      await this.cache.getOrRecompute(workspaceId, [
-        'flatObjectMetadataMaps',
-        'flatFieldMetadataMaps',
-      ]);
+    const {
+      flatObjectMetadataMaps,
+      flatFieldMetadataMaps,
+      flatApplicationMaps,
+    } = await this.cache.getOrRecompute(workspaceId, [
+      'flatObjectMetadataMaps',
+      'flatFieldMetadataMaps',
+      'flatApplicationMaps',
+    ]);
+    const standard =
+      flatApplicationMaps.idByUniversalIdentifier[
+        TWENTY_STANDARD_APPLICATION_UNIVERSAL_IDENTIFIER
+      ];
+    if (!standard) throw new Error('Missing Twenty standard application');
     const objects = Object.values(flatObjectMetadataMaps.byUniversalIdentifier);
     const fields = Object.values(flatFieldMetadataMaps.byUniversalIdentifier);
     const member = objects.find((o) => o?.nameSingular === 'teamMember');
@@ -131,7 +142,21 @@ export class InstallGaingeAutomationCommand extends ActiveOrSuspendedWorkspaceCo
       await runner.query("SET LOCAL lock_timeout='5s'");
       await runner.query("SET LOCAL statement_timeout='30s'");
       await runner.query(
-        buildAutomationSql(getWorkspaceSchemaName(workspaceId), targets),
+        buildAutomationSql(
+          getWorkspaceSchemaName(workspaceId),
+          targets,
+          Object.fromEntries(
+            objects
+              .filter((o) => !!o)
+              .map((o) => [
+                o.nameSingular,
+                computeTableName(
+                  o.nameSingular,
+                  o.applicationId !== standard,
+                ),
+              ]),
+          ),
+        ),
       );
       await runner.commitTransaction();
     } catch (error) {
