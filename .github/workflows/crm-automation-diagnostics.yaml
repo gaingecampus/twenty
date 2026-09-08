@@ -14,6 +14,7 @@ jobs:
       AWS_ROLE_ARN: ${{ vars.AWS_ROLE_ARN }}
       EC2_INSTANCE_ID: ${{ vars.EC2_INSTANCE_ID }}
     steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
       - name: Authenticate existing deployment role
         shell: bash
         run: |
@@ -28,3 +29,13 @@ jobs:
           set -euo pipefail
           aws ec2 describe-instances --instance-ids "${EC2_INSTANCE_ID}" \
             --query 'Reservations[].Instances[].{InstanceId:InstanceId,Profile:IamInstanceProfile.Arn,Metadata:MetadataOptions}' --output json
+      - name: Verify Google Chat access from the running server (read only)
+        shell: bash
+        run: |
+          set -euo pipefail
+          script_b64="$(base64 -w 0 packages/twenty-server/scripts/gainge-automation/check-chat-access.cjs)"
+          config_b64="$(base64 -w 0 packages/twenty-server/scripts/gainge-automation/google-chat-wif.public.json)"
+          parameters="$(jq -n --arg script "$script_b64" --arg config "$config_b64" '{commands:["set -eu", "container=$(docker ps -q --filter label=com.docker.compose.project=twenty-ec2 --filter label=com.docker.compose.service=server)", "test -n \"$container\"", "printf %s " + ($script | @sh) + " | base64 -d | docker exec -i -e CRM_PUBLIC_WIF_CONFIG=" + ($config | @sh) + " \"$container\" node"]}')"
+          command_id="$(aws ssm send-command --instance-ids "$EC2_INSTANCE_ID" --document-name AWS-RunShellScript --comment 'Read-only Google Chat authentication verification' --parameters "$parameters" --query Command.CommandId --output text)"
+          aws ssm wait command-executed --command-id "$command_id" --instance-id "$EC2_INSTANCE_ID" || true
+          aws ssm get-command-invocation --command-id "$command_id" --instance-id "$EC2_INSTANCE_ID" --query '{Status:Status,Output:StandardOutputContent,Error:StandardErrorContent}' --output json
