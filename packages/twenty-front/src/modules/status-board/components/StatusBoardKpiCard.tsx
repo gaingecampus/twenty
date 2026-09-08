@@ -52,24 +52,33 @@ export const StatusBoardKpiCard = ({
 
   if (variant === 'stat') {
     return (
-      <StyledStatusBoardCumulativeButton type="button" onClick={onClick}>
+      <StyledStatusBoardCumulativeButton
+        type="button"
+        aria-label={`${label} ${loading ? '불러오는 중' : value} · 상세 목록 보기`}
+        aria-busy={loading}
+        onClick={onClick}
+      >
         <StyledStatusBoardCumulativeValue>
           {loading ? '…' : value}
         </StyledStatusBoardCumulativeValue>
         <StyledStatusBoardCumulativeLabel>
           {label}
         </StyledStatusBoardCumulativeLabel>
-        {subtitle !== undefined && (
-          <StyledStatusBoardKpiSubtitle>
-            {subtitle}
-          </StyledStatusBoardKpiSubtitle>
-        )}
+        <StyledStatusBoardKpiSubtitle>
+          {loading ? '불러오는 중…' : (subtitle ?? '\u00a0')}
+        </StyledStatusBoardKpiSubtitle>
       </StyledStatusBoardCumulativeButton>
     );
   }
 
   return (
-    <StyledStatusBoardKpiButton type="button" tone={tone} onClick={onClick}>
+    <StyledStatusBoardKpiButton
+      type="button"
+      aria-label={`${label} ${loading ? '불러오는 중' : value} · 상세 목록 보기`}
+      aria-busy={loading}
+      tone={tone}
+      onClick={onClick}
+    >
       <StyledStatusBoardKpiIcon tone={tone}>
         <Icon size={20} />
       </StyledStatusBoardKpiIcon>
@@ -77,9 +86,9 @@ export const StatusBoardKpiCard = ({
       <StyledStatusBoardKpiValue tone={tone}>
         {loading ? '…' : value}
       </StyledStatusBoardKpiValue>
-      {subtitle !== undefined && (
-        <StyledStatusBoardKpiSubtitle>{subtitle}</StyledStatusBoardKpiSubtitle>
-      )}
+      <StyledStatusBoardKpiSubtitle>
+        {loading ? '불러오는 중…' : (subtitle ?? '\u00a0')}
+      </StyledStatusBoardKpiSubtitle>
     </StyledStatusBoardKpiButton>
   );
 };

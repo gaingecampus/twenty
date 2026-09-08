@@ -12,7 +12,13 @@ export const buildStatusBoardRecordGqlFields = ({
 }): RecordGqlFields => {
   const recordGqlFields: RecordGqlFields = { id: true };
 
+  const imageIdentifierField = objectMetadataItem.readableFields.find(
+    (field) => field.id === objectMetadataItem.imageIdentifierFieldMetadataId,
+  );
   const detailFields = [
+    ...(imageIdentifierField ? [imageIdentifierField.name] : []),
+    'domainName',
+    'avatarFile',
     'amount',
     'depositStatus',
     'expectedPaymentDate',

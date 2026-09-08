@@ -1,3 +1,4 @@
+import { IconSearch, IconX } from 'twenty-ui/icon';
 import { useEffect, useId, useRef, useState } from 'react';
 import { useDebounce } from 'use-debounce';
 import { andStatusBoardFilters } from '@/status-board/utils/andStatusBoardFilters';
@@ -9,7 +10,9 @@ import {
   StyledStatusBoardSheetBackdrop,
   StyledStatusBoardSheetCloseButton,
   StyledStatusBoardSheetBody,
-  StyledStatusBoardSearch,
+  StyledStatusBoardModalSearch,
+  StyledStatusBoardModalSearchInput,
+  StyledStatusBoardSearchClear,
   StyledStatusBoardMuted,
 } from '@/status-board/components/statusBoardStyled';
 import { StatusBoardRecordList } from '@/status-board/components/StatusBoardRecordList';
@@ -32,6 +35,7 @@ export const StatusBoardSheet = ({ sheet, onClose }: StatusBoardSheetProps) => {
   const [search, setSearch] = useState('');
   const [debouncedSearch] = useDebounce(search.trim(), 200);
   const titleId = useId();
+  const searchRef = useRef<HTMLInputElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
   const filter = andStatusBoardFilters([
     sheet.filter,
@@ -46,7 +50,7 @@ export const StatusBoardSheet = ({ sheet, onClose }: StatusBoardSheetProps) => {
           }
         : { name: { ilike: `%${debouncedSearch}%` } },
   ]);
-  const { count, loading } = useStatusBoardCount({
+  const { count, loading, error } = useStatusBoardCount({
     objectNameSingular: sheet.objectNameSingular,
     filter,
   });
@@ -94,7 +98,7 @@ export const StatusBoardSheet = ({ sheet, onClose }: StatusBoardSheetProps) => {
             {sheet.title}
           </StyledStatusBoardSectionTitle>
           <StyledStatusBoardMuted>
-            {loading ? '…' : `${count}건`}
+            {loading ? '…' : error ? '조회 실패' : `${count}건`}
           </StyledStatusBoardMuted>
           <StyledStatusBoardSheetCloseButton
             type="button"
@@ -104,18 +108,47 @@ export const StatusBoardSheet = ({ sheet, onClose }: StatusBoardSheetProps) => {
             ✕
           </StyledStatusBoardSheetCloseButton>
         </StyledStatusBoardSectionHeader>
-        <StyledStatusBoardSearch
-          aria-label="목록 검색"
-          placeholder="검색"
-          value={search}
-          onChange={(event) => setSearch(event.target.value)}
-        />
+        <StyledStatusBoardModalSearch
+          role="search"
+          aria-label={`${sheet.title} 검색`}
+        >
+          <IconSearch size={20} aria-hidden />
+          <StyledStatusBoardModalSearchInput
+            ref={searchRef}
+            type="search"
+            aria-label="목록 검색"
+            placeholder={`${sheet.title}에서 이름으로 검색`}
+            autoComplete="off"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+          />
+          {search.length > 0 && (
+            <StyledStatusBoardSearchClear
+              type="button"
+              aria-label="검색어 지우기"
+              onClick={() => {
+                setSearch('');
+                searchRef.current?.focus();
+              }}
+            >
+              <IconX size={16} aria-hidden />
+            </StyledStatusBoardSearchClear>
+          )}
+        </StyledStatusBoardModalSearch>
         <StyledStatusBoardSheetBody>
           <StatusBoardRecordList
             objectNameSingular={sheet.objectNameSingular}
             filter={filter}
             recordGqlFields={sheet.recordGqlFields}
-            emptyLabel="해당 항목 없음"
+            emptyLabel={
+              search.trim() ? '검색 결과가 없어요' : '해당하는 항목이 없어요'
+            }
+            emptyVariant={search.trim() ? 'search' : 'document'}
+            emptyDescription={
+              search.trim()
+                ? '이름을 확인하거나 다른 검색어로 찾아보세요.'
+                : undefined
+            }
           />
         </StyledStatusBoardSheetBody>
       </StyledStatusBoardSheet>

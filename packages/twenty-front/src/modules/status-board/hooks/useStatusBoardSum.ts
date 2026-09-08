@@ -16,7 +16,7 @@ export const useStatusBoardSum = ({
 }) => {
   const dummy = useStatusBoardDummyData();
   const shouldUseDummy = dummy.enabled && skip !== true;
-  const { data, loading } = useAggregateRecords({
+  const { data, loading, error } = useAggregateRecords({
     objectNameSingular,
     filter,
     skip: skip === true || shouldUseDummy,
@@ -33,6 +33,7 @@ export const useStatusBoardSum = ({
         filter,
       }),
       loading: false,
+      error: undefined,
     };
   }
 
@@ -41,5 +42,6 @@ export const useStatusBoardSum = ({
   return {
     sum: typeof sum === 'number' ? sum : undefined,
     loading,
+    error,
   };
 };

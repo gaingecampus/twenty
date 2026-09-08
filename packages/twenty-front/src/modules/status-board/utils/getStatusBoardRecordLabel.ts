@@ -2,7 +2,7 @@ import { type ObjectRecord } from '@/object-record/types/ObjectRecord';
 import { isDefined } from 'twenty-shared/utils';
 
 export const getStatusBoardRecordLabel = (record: ObjectRecord): string => {
-  if (typeof record.name === 'string' && record.name.length > 0) {
+  if (typeof record.name === 'string' && record.name.trim().length > 0) {
     return record.name;
   }
 
@@ -16,17 +16,19 @@ export const getStatusBoardRecordLabel = (record: ObjectRecord): string => {
     const lastName =
       typeof record.name.lastName === 'string' ? record.name.lastName : '';
 
-    return `${firstName} ${lastName}`.trim();
+    const fullName = `${firstName} ${lastName}`.trim();
+    if (fullName) return fullName;
   }
 
   if (
     typeof record.company === 'object' &&
     isDefined(record.company) &&
     'name' in record.company &&
-    typeof record.company.name === 'string'
+    typeof record.company.name === 'string' &&
+    record.company.name.trim().length > 0
   ) {
     return record.company.name;
   }
 
-  return record.id;
+  return `이름 미입력 · ${record.id.slice(0, 8)}`;
 };

@@ -1,3 +1,5 @@
+import { useStatusBoardMetadata } from '@/status-board/hooks/useStatusBoardMetadata';
+import { buildStatusBoardRecordGqlFields } from '@/status-board/utils/buildStatusBoardRecordGqlFields';
 import { useState } from 'react';
 import { useStatusBoardDummyData } from '@/status-board/contexts/StatusBoardDummyDataContext';
 import {
@@ -22,17 +24,31 @@ export const useStatusBoardFindManyRecords = ({
   skip?: boolean;
 }) => {
   const dummy = useStatusBoardDummyData();
+  const { company } = useStatusBoardMetadata();
+  const fieldsWithCompanyAvatar =
+    company && typeof recordGqlFields.company === 'object'
+      ? {
+          ...recordGqlFields,
+          company: {
+            ...recordGqlFields.company,
+            ...buildStatusBoardRecordGqlFields({
+              objectMetadataItem: company,
+              fieldNames: ['name', 'domainName'],
+            }),
+          },
+        }
+      : recordGqlFields;
   const queryKey = JSON.stringify({ objectNameSingular, filter, limit });
   const [pagination, setPagination] = useState({ queryKey, limit });
   const visibleLimit =
     pagination.queryKey === queryKey ? pagination.limit : limit;
   const shouldUseDummy = dummy.enabled && skip !== true;
-  const { records, loading, hasNextPage, fetchMoreRecords } =
+  const { records, loading, error, refetch, hasNextPage, fetchMoreRecords } =
     useFindManyRecords({
       objectNameSingular,
       filter,
       limit,
-      recordGqlFields,
+      recordGqlFields: fieldsWithCompanyAvatar,
       skip: skip === true || shouldUseDummy,
     });
 
@@ -52,6 +68,8 @@ export const useStatusBoardFindManyRecords = ({
     return {
       records: dummyRecords,
       loading: false,
+      error: undefined,
+      refetch,
       hasNextPage: dummyCount > dummyRecords.length,
       fetchMoreRecords: async () => {
         setPagination({ queryKey, limit: visibleLimit + limit });
@@ -61,6 +79,8 @@ export const useStatusBoardFindManyRecords = ({
 
   return {
     records,
+    error,
+    refetch,
     loading,
     hasNextPage,
     fetchMoreRecords,

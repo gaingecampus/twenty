@@ -1,3 +1,4 @@
+import { StatusBoardEmptyState } from '@/status-board/components/StatusBoardEmptyState';
 import { hasStatusBoardField } from '@/status-board/utils/hasStatusBoardField';
 import { StatusBoardCumulativeSection } from '@/status-board/components/StatusBoardCumulativeSection';
 import { StatusBoardDummyDataProvider } from '@/status-board/components/StatusBoardDummyDataProvider';
@@ -92,6 +93,12 @@ const StatusBoardContentBody = ({
     undefined,
   );
 
+  const isGroupUnavailable =
+    !dummy.enabled &&
+    filters.selectedGroupIds.length > 0 &&
+    !hasStatusBoardField(metadata.member, 'currentGroup') &&
+    !hasStatusBoardField(metadata.member, 'currentGroupId');
+
   const periodRange = getStatusBoardPeriodRange({
     periodType: filters.periodType,
     offset: filters.periodOffset,
@@ -128,68 +135,72 @@ const StatusBoardContentBody = ({
             onClearSelectedGroupIds={filters.clearSelectedGroupIds}
             onClearSelectedMemberId={filters.clearSelectedMemberId}
           />
-          {filters.selectedGroupIds.length > 0 &&
-            !hasStatusBoardField(metadata.member, 'currentGroup') &&
-            !hasStatusBoardField(metadata.member, 'currentGroupId') && (
-              <StyledStatusBoardMuted role="status">
-                구성원의 소속 그룹 필드가 연결되지 않아 그룹별 현황을 표시할 수
-                없어요.
-              </StyledStatusBoardMuted>
-            )}
-          <StatusBoardNowSection
-            depositObjectMetadataItem={metadata.deposit}
-            opportunityObjectMetadataItem={metadata.opportunity}
-            onboardingObjectMetadataItem={metadata.onboarding}
-            memberIds={memberIds}
-            selectedGroupIds={filters.selectedGroupIds}
-            todayIsoDate={todayIsoDate}
-            monthStartDate={monthRange.startDate}
-            monthEndDate={monthRange.endDate}
-            onOpenSheet={setSheet}
-          />
-          <StatusBoardListsSection
-            depositObjectMetadataItem={metadata.deposit}
-            opportunityObjectMetadataItem={metadata.opportunity}
-            onboardingObjectMetadataItem={metadata.onboarding}
-            memberIds={memberIds}
-            selectedGroupIds={filters.selectedGroupIds}
-            todayIsoDate={todayIsoDate}
-            monthStartDate={monthRange.startDate}
-            monthEndDate={monthRange.endDate}
-            onboardingTab={onboardingTab}
-            onOnboardingTabChange={setOnboardingTab}
-          />
-          <StatusBoardWeekSection
-            onboardingObjectMetadataItem={metadata.onboarding}
-            members={visibleMembers}
-            memberIds={memberIds}
-          />
-          <StatusBoardPeriodSection
-            depositObjectMetadataItem={metadata.deposit}
-            opportunityObjectMetadataItem={metadata.opportunity}
-            onboardingObjectMetadataItem={metadata.onboarding}
-            memberIds={memberIds}
-            selectedGroupIds={filters.selectedGroupIds}
-            periodRange={periodRange}
-            periodType={filters.periodType}
-            periodOffset={filters.periodOffset}
-            onSelectPeriodType={filters.selectPeriodType}
-            onShiftPeriodOffset={(delta) =>
-              filters.setPeriodOffset((currentOffset) =>
-                Math.min(0, currentOffset + delta),
-              )
-            }
-            onOpenSheet={setSheet}
-          />
-          <StatusBoardCumulativeSection
-            companyObjectMetadataItem={metadata.company}
-            personObjectMetadataItem={metadata.person}
-            opportunityObjectMetadataItem={metadata.opportunity}
-            onboardingObjectMetadataItem={metadata.onboarding}
-            depositObjectMetadataItem={metadata.deposit}
-            memberIds={memberIds}
-            onOpenSheet={setSheet}
-          />
+          {isGroupUnavailable ? (
+            <StatusBoardEmptyState
+              title="그룹별 현황을 아직 확인할 수 없어요"
+              description="구성원의 소속 그룹 정보가 연결되어 있지 않아요. 전체 그룹으로 조회하거나 관리자에게 소속 정보 연결을 요청해 주세요."
+              variant="connection"
+              actionLabel="전체 그룹 현황 보기"
+              onAction={filters.clearSelectedGroupIds}
+            />
+          ) : (
+            <>
+              <StatusBoardNowSection
+                depositObjectMetadataItem={metadata.deposit}
+                opportunityObjectMetadataItem={metadata.opportunity}
+                onboardingObjectMetadataItem={metadata.onboarding}
+                memberIds={memberIds}
+                selectedGroupIds={filters.selectedGroupIds}
+                todayIsoDate={todayIsoDate}
+                monthStartDate={monthRange.startDate}
+                monthEndDate={monthRange.endDate}
+                onOpenSheet={setSheet}
+              />
+              <StatusBoardListsSection
+                depositObjectMetadataItem={metadata.deposit}
+                opportunityObjectMetadataItem={metadata.opportunity}
+                onboardingObjectMetadataItem={metadata.onboarding}
+                memberIds={memberIds}
+                selectedGroupIds={filters.selectedGroupIds}
+                todayIsoDate={todayIsoDate}
+                monthStartDate={monthRange.startDate}
+                monthEndDate={monthRange.endDate}
+                onboardingTab={onboardingTab}
+                onOnboardingTabChange={setOnboardingTab}
+              />
+              <StatusBoardWeekSection
+                onboardingObjectMetadataItem={metadata.onboarding}
+                members={visibleMembers}
+                memberIds={memberIds}
+              />
+              <StatusBoardPeriodSection
+                depositObjectMetadataItem={metadata.deposit}
+                opportunityObjectMetadataItem={metadata.opportunity}
+                onboardingObjectMetadataItem={metadata.onboarding}
+                memberIds={memberIds}
+                selectedGroupIds={filters.selectedGroupIds}
+                periodRange={periodRange}
+                periodType={filters.periodType}
+                periodOffset={filters.periodOffset}
+                onSelectPeriodType={filters.selectPeriodType}
+                onShiftPeriodOffset={(delta) =>
+                  filters.setPeriodOffset((currentOffset) =>
+                    Math.min(0, currentOffset + delta),
+                  )
+                }
+                onOpenSheet={setSheet}
+              />
+              <StatusBoardCumulativeSection
+                companyObjectMetadataItem={metadata.company}
+                personObjectMetadataItem={metadata.person}
+                opportunityObjectMetadataItem={metadata.opportunity}
+                onboardingObjectMetadataItem={metadata.onboarding}
+                depositObjectMetadataItem={metadata.deposit}
+                memberIds={memberIds}
+                onOpenSheet={setSheet}
+              />
+            </>
+          )}
         </StyledStatusBoardScroll>
       </PageCardLayout>
       {sheet !== undefined && (

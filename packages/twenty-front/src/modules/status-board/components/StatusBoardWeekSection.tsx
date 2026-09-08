@@ -1,6 +1,7 @@
+import { StatusBoardEmptyState } from '@/status-board/components/StatusBoardEmptyState';
 import {
   StyledStatusBoardMuted,
-  StyledStatusBoardSection,
+  StyledStatusBoardWeekSection,
   StyledStatusBoardSectionHeader,
   StyledStatusBoardSectionTitle,
   StyledStatusBoardWeekCell,
@@ -80,7 +81,7 @@ const StatusBoardWeekSectionLoaded = ({
   members: ObjectRecord[];
   memberIds: string[] | undefined;
 }) => {
-  const { records, loading } = useStatusBoardFindManyRecords({
+  const { records, loading, error, refetch } = useStatusBoardFindManyRecords({
     objectNameSingular: STATUS_BOARD_OBJECT_NAME_SINGULAR.onboarding,
     filter: buildStatusBoardActiveOnboardingFilter({
       onboardingObjectMetadataItem,
@@ -146,7 +147,7 @@ const StatusBoardWeekSectionLoaded = ({
   );
 
   return (
-    <StyledStatusBoardSection>
+    <StyledStatusBoardWeekSection>
       <StyledStatusBoardSectionHeader>
         <StyledStatusBoardSectionTitle>
           이번 주 현장
@@ -158,11 +159,26 @@ const StatusBoardWeekSectionLoaded = ({
         )}
       </StyledStatusBoardSectionHeader>
       {loading && records.length === 0 ? (
-        <StyledStatusBoardMuted>불러오는 중</StyledStatusBoardMuted>
+        <StatusBoardEmptyState
+          title="방문 일정을 불러오는 중이에요"
+          description="선택한 조건의 일정을 확인하고 있어요."
+          variant="calendar"
+        />
+      ) : error ? (
+        <StatusBoardEmptyState
+          title="방문 일정을 불러오지 못했어요"
+          variant="connection"
+          actionLabel="다시 불러오기"
+          onAction={() => {
+            void refetch();
+          }}
+        />
       ) : memberRows.length === 0 ? (
-        <StyledStatusBoardMuted>
-          이번 주 방문 일정이 없어요
-        </StyledStatusBoardMuted>
+        <StatusBoardEmptyState
+          title="표시할 방문 일정이 없어요"
+          description="선택한 구성원의 방문 일정을 찾지 못했어요. 진행 중 계약의 담당자와 방문 요일을 확인해 주세요."
+          variant="calendar"
+        />
       ) : (
         <>
           <StyledStatusBoardWeekWrap>
@@ -299,6 +315,6 @@ const StatusBoardWeekSectionLoaded = ({
           )}
         </>
       )}
-    </StyledStatusBoardSection>
+    </StyledStatusBoardWeekSection>
   );
 };

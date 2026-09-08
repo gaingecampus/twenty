@@ -16,7 +16,7 @@ export const useStatusBoardCount = ({
 }) => {
   const dummy = useStatusBoardDummyData();
   const shouldUseDummy = dummy.enabled && skip !== true;
-  const { data, loading } = useAggregateRecords({
+  const { data, loading, error } = useAggregateRecords({
     objectNameSingular,
     filter,
     skip: skip === true || shouldUseDummy,
@@ -33,6 +33,7 @@ export const useStatusBoardCount = ({
         filter,
       }),
       loading: false,
+      error: undefined,
     };
   }
 
@@ -41,5 +42,6 @@ export const useStatusBoardCount = ({
   return {
     count: typeof count === 'number' ? count : 0,
     loading,
+    error,
   };
 };

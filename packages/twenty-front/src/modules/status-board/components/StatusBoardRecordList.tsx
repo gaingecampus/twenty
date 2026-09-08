@@ -1,15 +1,15 @@
+import { StatusBoardRecordAvatar } from '@/status-board/components/StatusBoardRecordAvatar';
+import { StatusBoardEmptyState } from '@/status-board/components/StatusBoardEmptyState';
 import {
   StatusBoardRecordDetails,
   StatusBoardContractDetails,
 } from '@/status-board/components/StatusBoardRecordDetails';
 import {
-  StyledStatusBoardEmpty,
   StyledStatusBoardContract,
   StyledStatusBoardContractTop,
   StyledStatusBoardGroupTitle,
   StyledStatusBoardMoreButton,
   StyledStatusBoardRow,
-  StyledStatusBoardRowAvatar,
   StyledStatusBoardRowBody,
   StyledStatusBoardRowCaption,
   StyledStatusBoardRowLink,
@@ -20,10 +20,7 @@ import {
 import { STATUS_BOARD_LIMITS } from '@/status-board/constants/StatusBoardLimits';
 import { useStatusBoardFindManyRecords } from '@/status-board/hooks/useStatusBoardFindManyRecords';
 import { isStatusBoardDummyRecordId } from '@/status-board/utils/buildStatusBoardDummyDataset';
-import {
-  getStatusBoardRecordCaption,
-  getStatusBoardRecordInitial,
-} from '@/status-board/utils/getStatusBoardRecordInitial';
+import { getStatusBoardRecordCaption } from '@/status-board/utils/getStatusBoardRecordInitial';
 import { getStatusBoardRecordLabel } from '@/status-board/utils/getStatusBoardRecordLabel';
 import { type RecordGqlFields } from '@/object-record/graphql/record-gql-fields/types/RecordGqlFields';
 import { type ObjectRecord } from '@/object-record/types/ObjectRecord';
@@ -36,16 +33,18 @@ type StatusBoardRecordListProps = {
   filter?: RecordGqlOperationFilter;
   recordGqlFields: RecordGqlFields;
   emptyLabel: string;
+  emptyDescription?: string;
+  emptyVariant?: 'document' | 'search';
   heading?: string;
   tone?: StatusBoardTone;
 };
 
 const StatusBoardRecordRowContent = ({
   record,
-  tone,
+  objectNameSingular,
 }: {
   record: ObjectRecord;
-  tone: StatusBoardTone;
+  objectNameSingular: string;
 }) => {
   const companyCaption = getStatusBoardRecordCaption(record);
   const owners = ['assignee', 'leadConsultant', 'executionConsultant'].flatMap(
@@ -72,9 +71,12 @@ const StatusBoardRecordRowContent = ({
   return (
     <StyledStatusBoardContract>
       <StyledStatusBoardContractTop>
-        <StyledStatusBoardRowAvatar tone={tone}>
-          {getStatusBoardRecordInitial(record)}
-        </StyledStatusBoardRowAvatar>
+        <StatusBoardRecordAvatar
+          record={record.company?.id ? record.company : record}
+          objectNameSingular={
+            record.company?.id ? 'company' : objectNameSingular
+          }
+        />
         <StyledStatusBoardRowBody>
           <StyledStatusBoardRowName>
             {getStatusBoardRecordLabel(record)}
@@ -95,10 +97,11 @@ export const StatusBoardRecordList = ({
   filter,
   recordGqlFields,
   emptyLabel,
+  emptyDescription,
+  emptyVariant,
   heading,
-  tone = 'default',
 }: StatusBoardRecordListProps) => {
-  const { records, loading, hasNextPage, fetchMoreRecords } =
+  const { records, loading, error, refetch, hasNextPage, fetchMoreRecords } =
     useStatusBoardFindManyRecords({
       objectNameSingular,
       filter,
@@ -108,23 +111,42 @@ export const StatusBoardRecordList = ({
 
   if (loading && records.length === 0) {
     return (
-      <>
-        {heading !== undefined && (
-          <StyledStatusBoardGroupTitle>{heading}</StyledStatusBoardGroupTitle>
-        )}
-        <StyledStatusBoardEmpty>{t`Loading`}</StyledStatusBoardEmpty>
-      </>
+      <StatusBoardEmptyState
+        title={heading ?? '목록을 불러오는 중이에요'}
+        description="선택한 조건의 항목을 확인하고 있어요."
+        compact={heading !== undefined}
+      />
+    );
+  }
+
+  if (error) {
+    return (
+      <StatusBoardEmptyState
+        title="목록을 불러오지 못했어요"
+        description="잠시 후 다시 시도해 주세요."
+        variant="connection"
+        compact={heading !== undefined}
+        actionLabel="다시 불러오기"
+        onAction={() => {
+          void refetch();
+        }}
+      />
     );
   }
 
   if (records.length === 0) {
     return (
-      <>
-        {heading !== undefined && (
-          <StyledStatusBoardGroupTitle>{heading}</StyledStatusBoardGroupTitle>
-        )}
-        <StyledStatusBoardEmpty>{emptyLabel}</StyledStatusBoardEmpty>
-      </>
+      <StatusBoardEmptyState
+        title={heading ?? emptyLabel}
+        description={
+          heading
+            ? emptyLabel
+            : (emptyDescription ??
+              '선택한 조건에 해당하는 데이터가 없어요. 조회 범위나 상태를 바꿔 확인해 보세요.')
+        }
+        variant={emptyVariant}
+        compact={heading !== undefined}
+      />
     );
   }
 
@@ -137,7 +159,10 @@ export const StatusBoardRecordList = ({
         {records.map((record) =>
           isStatusBoardDummyRecordId(record.id) ? (
             <StyledStatusBoardRow key={record.id}>
-              <StatusBoardRecordRowContent record={record} tone={tone} />
+              <StatusBoardRecordRowContent
+                record={record}
+                objectNameSingular={objectNameSingular}
+              />
             </StyledStatusBoardRow>
           ) : (
             <StyledStatusBoardRowLink
@@ -147,7 +172,10 @@ export const StatusBoardRecordList = ({
                 objectRecordId: record.id,
               })}
             >
-              <StatusBoardRecordRowContent record={record} tone={tone} />
+              <StatusBoardRecordRowContent
+                record={record}
+                objectNameSingular={objectNameSingular}
+              />
             </StyledStatusBoardRowLink>
           ),
         )}

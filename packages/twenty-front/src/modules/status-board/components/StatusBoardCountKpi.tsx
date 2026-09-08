@@ -26,31 +26,52 @@ export const StatusBoardCountKpi = ({
   variant = 'tile',
   onClick,
 }: StatusBoardCountKpiProps) => {
-  const { count, loading: countLoading } = useStatusBoardCount({
+  const {
+    count,
+    loading: countLoading,
+    error: countError,
+  } = useStatusBoardCount({
     objectNameSingular,
     filter,
   });
-  const { sum, loading: sumLoading } = useStatusBoardSum({
+  const {
+    sum,
+    loading: sumLoading,
+    error: sumError,
+  } = useStatusBoardSum({
     objectNameSingular,
     filter,
     skip: withSum !== true && showAmountAsValue !== true,
   });
 
-  const countLabel = `${count}건`;
+  const countLabel = `${count.toLocaleString('ko-KR')}건`;
+  const hasError = Boolean(
+    countError || ((withSum || showAmountAsValue) && sumError),
+  );
 
   return (
     <StatusBoardKpiCard
       label={label}
-      value={showAmountAsValue ? formatStatusBoardAmount(sum) : countLabel}
+      value={
+        hasError
+          ? '—'
+          : showAmountAsValue
+            ? formatStatusBoardAmount(count === 0 ? 0 : sum)
+            : countLabel
+      }
       subtitle={
-        showAmountAsValue
-          ? countLabel
-          : withSum
-            ? formatStatusBoardAmount(sum)
-            : undefined
+        hasError
+          ? '불러오지 못했어요'
+          : count === 0
+            ? '해당 항목 없음'
+            : showAmountAsValue
+              ? countLabel
+              : withSum
+                ? formatStatusBoardAmount(sum)
+                : '눌러서 목록 보기'
       }
       loading={countLoading || ((withSum || showAmountAsValue) && sumLoading)}
-      tone={tone}
+      tone={count === 0 || hasError ? 'default' : tone}
       variant={variant}
       onClick={onClick}
     />

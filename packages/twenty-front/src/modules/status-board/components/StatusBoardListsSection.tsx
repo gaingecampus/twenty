@@ -225,7 +225,13 @@ export const StatusBoardListsSection = ({
                 'totalFee',
               ],
             })}
-            emptyLabel="계약 없음"
+            emptyLabel={
+              onboardingTab === 'PRE'
+                ? '시작 전인 계약이 없어요'
+                : onboardingTab === 'ACTIVE'
+                  ? '온보딩 중인 계약이 없어요'
+                  : '완료된 계약이 없어요'
+            }
           />
         </StyledStatusBoardSection>
       )}

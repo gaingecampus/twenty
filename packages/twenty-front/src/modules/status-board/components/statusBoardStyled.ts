@@ -29,7 +29,9 @@ export const StyledStatusBoardScroll = styled.div`
     outline-offset: 2px;
   }
   overflow: auto;
+  overflow-anchor: none;
   padding: 20px 24px 48px;
+  scrollbar-gutter: stable;
 
   @media (max-width: 640px) {
     padding: 16px 12px 40px;
@@ -477,10 +479,20 @@ export const StyledStatusBoardGroupTitle = styled.div`
 `;
 
 export const StyledStatusBoardTwoColumn = styled.div`
-  align-items: start;
+  align-items: stretch;
   display: grid;
   gap: 16px 20px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  > section {
+    height: 380px;
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+
+    > * {
+      flex-shrink: 0;
+    }
+  }
 
   @container (max-width: 900px) {
     grid-template-columns: 1fr;
@@ -798,5 +810,84 @@ export const StyledStatusBoardSearch = styled.input`
   padding: 10px 14px;
   &:focus-visible {
     outline: 2px solid ${themeCssVariables.border.color.blue};
+  }
+`;
+
+export const StyledStatusBoardWeekSection = styled(StyledStatusBoardSection)`
+  height: 340px;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+
+  > * {
+    flex-shrink: 0;
+  }
+`;
+
+export const StyledStatusBoardModalSearch = styled.div`
+  align-items: center;
+  background: ${themeCssVariables.background.secondary};
+  border: 1px solid ${themeCssVariables.border.color.medium};
+  border-radius: 12px;
+  color: ${themeCssVariables.font.color.secondary};
+  display: flex;
+  flex-shrink: 0;
+  gap: 10px;
+  margin: 16px 0 12px;
+  min-height: 46px;
+  padding: 0 12px;
+
+  &:focus-within {
+    border-color: ${themeCssVariables.border.color.blue};
+    outline: 2px solid ${themeCssVariables.border.color.blue};
+    outline-offset: 2px;
+  }
+
+  > svg {
+    flex-shrink: 0;
+  }
+`;
+
+export const StyledStatusBoardModalSearchInput = styled.input`
+  background: transparent;
+  border: none;
+  color: ${themeCssVariables.font.color.primary};
+  flex: 1;
+  font: inherit;
+  font-size: 14px;
+  min-width: 0;
+  outline: none;
+  padding: 12px 0;
+
+  &::placeholder {
+    color: ${themeCssVariables.font.color.secondary};
+    opacity: 1;
+  }
+
+  &::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+  }
+`;
+
+export const StyledStatusBoardSearchClear = styled.button`
+  align-items: center;
+  background: ${themeCssVariables.background.tertiary};
+  border: none;
+  border-radius: ${themeCssVariables.border.radius.pill};
+  color: ${themeCssVariables.font.color.secondary};
+  cursor: pointer;
+  display: flex;
+  flex-shrink: 0;
+  height: 28px;
+  justify-content: center;
+  padding: 0;
+  width: 28px;
+
+  &:hover {
+    color: ${themeCssVariables.font.color.primary};
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${themeCssVariables.border.color.blue};
+    outline-offset: 2px;
   }
 `;
