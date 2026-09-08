@@ -64,7 +64,9 @@ export const NavigationDrawerAiChatContent = () => {
     resetNavigationStack: true,
   });
   const agentChatThreadGroupBy = useAtomStateValue(agentChatThreadGroupByState);
-  const searchQuery = useAtomStateValue(agentChatThreadSearchQueryState);
+  const agentChatThreadSearchQuery = useAtomStateValue(
+    agentChatThreadSearchQueryState,
+  );
   const { locale } = useAtomStateValue(dateLocaleState);
 
   const { threads, hasNextPage, loading, fetchMoreRef } = useChatThreads();
@@ -73,7 +75,7 @@ export const NavigationDrawerAiChatContent = () => {
   );
   const visibleThreads = filterChatThreadsBySearchQuery(
     listedThreads,
-    searchQuery,
+    agentChatThreadSearchQuery,
   );
 
   if (loading && threads.length === 0) {
@@ -90,7 +92,7 @@ export const NavigationDrawerAiChatContent = () => {
     ? groupThreadsByDate(visibleThreads, new Date(), locale)
     : [];
   const shouldRenderDateGroups = isGroupedByDate && dateGroups.length > 0;
-  const hasSearchQuery = searchQuery.trim().length > 0;
+  const hasSearchQuery = agentChatThreadSearchQuery.trim().length > 0;
 
   return (
     <StyledContainer>

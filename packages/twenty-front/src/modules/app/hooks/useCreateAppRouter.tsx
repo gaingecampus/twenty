@@ -40,6 +40,12 @@ const TrashPage = lazy(() =>
   })),
 );
 
+const StatusBoardPage = lazy(() =>
+  import('~/pages/status-board/StatusBoardPage').then((module) => ({
+    default: module.StatusBoardPage,
+  })),
+);
+
 const SignInUp = lazy(() =>
   import('~/pages/auth/SignInUp').then((module) => ({
     default: module.SignInUp,
@@ -288,6 +294,14 @@ export const useCreateAppRouter = (
               element={
                 <LazyRoute>
                   <TrashPage />
+                </LazyRoute>
+              }
+            />
+            <Route
+              path={AppPath.StatusBoard}
+              element={
+                <LazyRoute>
+                  <StatusBoardPage />
                 </LazyRoute>
               }
             />

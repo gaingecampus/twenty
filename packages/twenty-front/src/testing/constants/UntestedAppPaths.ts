@@ -12,4 +12,5 @@ export const UNTESTED_APP_PATHS = [
   // Public, unauthenticated redirect route handled in useCreateAppRouter — not
   // part of the onboarding/auth page-change navigation matrix.
   AppPath.Dpa,
+  AppPath.StatusBoard,
 ];

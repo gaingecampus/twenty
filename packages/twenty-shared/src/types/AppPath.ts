@@ -31,6 +31,7 @@ export enum AppPath {
   RecordIndexPage = '/objects/:objectNamePlural',
   RecordShowPage = '/object/:objectNameSingular/:objectRecordId',
   PageLayoutPage = '/page/:pageLayoutId',
+  StatusBoard = '/status-board',
 
   Settings = `settings`,
   SettingsCatchAll = `/${Settings}/*`,
