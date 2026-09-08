@@ -6,6 +6,8 @@
 
 신규 기업은 입력된 공식 HTTPS 홈페이지의 기업명을 확인한 뒤 기존 FAST 모델로 AI 기업 소개와 명시된 직원 수의 빈 값만 채운다. 출처·시각·모델·상태를 기록한다. 홈페이지·기업 식별·증거 부족은 검토 상태로 남긴다. 하루 최대 50회, 실패 최대 3회다. 내부 메모와 고객 개인정보는 모델에 보내지 않는다. 모든 칼럼을 추측해서 채우는 기능은 아니다.
 
+생성 후 홈페이지를 입력하거나 검토 상태에서 기업 정보를 수정하면 보완을 다시 시도한다. 동일 수정 버전은 한 번만 등록하며, AI 상태가 없는 과거 기업은 자동 소급 처리하지 않는다. 발송 대기 중 소프트 삭제된 기록은 알림을 보내지 않는다.
+
 Google Chat은 조직방 및 이벤트 DRI의 개인 DM에 생성·수정·상태 변경을 알린다. 목적지별 고정 requestId로 재시도 중복을 방지한다. 인증 미설정 시 NOT_CONFIGURED로 기록하고 과거 알림을 자동 소급 발송하지 않는다. 양방향 요청은 Google OIDC audience·시스템 계정 이메일을 검증한다. 구성원 이메일을 매칭해 Google 사용자 ID를 연결하고 '알림 켜기/끄기'에 응답한다.
 
 ## 운영 설정 — Admin Panel → Config Variables
@@ -19,6 +21,10 @@ Google Chat은 조직방 및 이벤트 DRI의 개인 DM에 생성·수정·상�
 
 엔드포인트: https://crm.gainge.com/gainge-automation/chat
 프로젝트 gainge-crm-automation, 앱 ID 482131628884.
+
+2026-09-08 Google Cloud 연결: WIF 풀 `gainge-crm-prod`, AWS 제공자 `aws-crm-prod`. 서비스 계정은 `crm-chat-notifier@gainge-crm-automation.iam.gserviceaccount.com`이다. 공급자 조건과 서비스 계정 연결은 운영 인스턴스의 정확한 assumed-role ARN으로 제한했다. `google-chat-wif.public.json`은 콘솔에서 생성한 공개 설정에 IMDSv2를 추가한 파일이며 비밀 키·토큰은 포함하지 않는다. 실제 EC2 역할 및 컨테이너의 IMDSv2 접근 확인은 별도 필요하다.
+
+양방향 수신 시스템 계정은 Chat API 구성 화면에서 확인한 `service-482131628884@gcp-sa-gsuiteaddons.iam.gserviceaccount.com`이다. 앱은 루나 계정용으로 구성되어 있고, 사용자 승인 후 조직방 `CRM 알리미`에 설치했다. 운영 Admin Panel 권한 확인 및 인증값 저장, 개인·조직 실발송은 아직 미검증이다.
 
 ## 검증과 제한
 

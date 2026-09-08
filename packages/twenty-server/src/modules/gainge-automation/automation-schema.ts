@@ -31,6 +31,22 @@ export function quoteAutomationSchema(schema: string) {
   return `"${schema}"`;
 }
 
+// Resume newly created companies when a person supplies their website later.
+// Historical companies have no AI status and are deliberately excluded.
+export function buildEnrichmentResumeSql(schema: string) {
+  const ns = quoteAutomationSchema(schema);
+  return `INSERT INTO ${ns}."_gaingeAutomationEvent"(id,"recordId","objectName",kind,payload,"enrichmentStatus","chatStatus")
+    SELECT md5('gainge-enrichment:' || c.id::text || ':' || c."updatedAt"::text)::uuid,c.id,'company','ENRICHMENT_REQUESTED',jsonb_build_object('name',c.name),'PENDING','NOT_APPLICABLE'
+    FROM ${ns}.company c WHERE c."deletedAt" IS NULL
+      AND c."aiEnrichmentStatus" IN ('NEEDS_WEBSITE','IDENTITY_UNCONFIRMED','NEEDS_REVIEW')
+      AND COALESCE(trim(c."aiCompanyProfile"),'')=''
+      AND COALESCE(trim(c."domainNamePrimaryLinkUrl"),'')<>''
+      AND c."updatedAt">c."aiEnrichmentCheckedAt"
+      AND NOT EXISTS(SELECT 1 FROM ${ns}."_gaingeAutomationEvent" e WHERE e."recordId"=c.id AND e."enrichmentStatus"='PENDING' AND e."completedAt" IS NULL)
+      AND NOT EXISTS(SELECT 1 FROM ${ns}."_gaingeAutomationEvent" e WHERE e.id=md5('gainge-enrichment:' || c.id::text || ':' || c."updatedAt"::text)::uuid)
+    ORDER BY c."updatedAt" LIMIT 5 ON CONFLICT(id) DO NOTHING`;
+}
+
 export function buildAutomationSql(
   schema: string,
   targets: readonly (typeof AUTOMATION_TARGETS)[number][],

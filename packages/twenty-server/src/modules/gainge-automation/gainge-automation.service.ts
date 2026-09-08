@@ -8,7 +8,11 @@ import { SecureHttpClientService } from 'src/engine/core-modules/secure-http-cli
 import { AiModelRegistryService } from 'src/engine/metadata-modules/ai/ai-models/services/ai-model-registry.service';
 import { GlobalWorkspaceOrmManager } from 'src/engine/twenty-orm/global-workspace-datasource/global-workspace-orm.manager';
 import { getWorkspaceSchemaName } from 'src/engine/workspace-datasource/utils/get-workspace-schema-name.util';
-import { quoteAutomationSchema } from './automation-schema';
+import {
+  AUTOMATION_TARGETS,
+  buildEnrichmentResumeSql,
+  quoteAutomationSchema,
+} from './automation-schema';
 import {
   getCompanyWebsite,
   parseCompanyProfile,
@@ -60,6 +64,11 @@ export class GaingeAutomationService {
         `${ns}."_gaingeAutomationEvent"`,
       ]);
       if (!table[0]?.name) return;
+      if (this.config.get('GAINGE_ENRICHMENT_ENABLED')) {
+        await ds.query(
+          buildEnrichmentResumeSql(getWorkspaceSchemaName(workspaceId)),
+        );
+      }
       for (let i = 0; i < 5; i++) {
         const lease = randomUUID();
         const rows: AutomationEvent[] = await ds.query(
@@ -210,6 +219,13 @@ export class GaingeAutomationService {
   private async notify(ns: string, e: AutomationEvent): Promise<string> {
     if (!this.chat.isEnabled()) return 'NOT_CONFIGURED';
     const ds = await this.orm.getGlobalWorkspaceDataSource();
+    if (!AUTOMATION_TARGETS.some((target) => target.table === e.objectName))
+      return 'UNSUPPORTED_OBJECT';
+    const records = await ds.query(
+      `SELECT id FROM ${ns}."${e.objectName}" WHERE id=$1 AND "deletedAt" IS NULL`,
+      [e.recordId],
+    );
+    if (!records.length) return 'DELETED';
     const destinations: string[] = [];
     const organization = this.config.get('GAINGE_CHAT_SPACE');
     if (organization) destinations.push(organization);

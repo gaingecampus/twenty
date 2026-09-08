@@ -16,11 +16,16 @@ test('Google Chat rejects unsigned and wrong-project identities',async()=>{
 });
 test('notification retries preserve per-destination idempotency and respect personal opt-out',async()=>{
  const sent=[];const queries=[];const config={get:k=>k==='GAINGE_CHAT_SPACE'?'spaces/test':undefined};
- const orm={getGlobalWorkspaceDataSource:async()=>({query:async(sql,args)=>{queries.push({sql,args});return sql.includes('SELECT "googleChatUserId"')?[{googleChatUserId:'123',googleChatNotificationsEnabled:false}]:[]}})};
+ const orm={getGlobalWorkspaceDataSource:async()=>({query:async(sql,args)=>{queries.push({sql,args});return sql.startsWith('SELECT id FROM')?[{id:'active'}]:sql.includes('SELECT "googleChatUserId"')?[{googleChatUserId:'123',googleChatNotificationsEnabled:false}]:[]}})};
  const chat={isEnabled:()=>true,findDirectMessage:async()=>{throw Error('Opt-out must not look up DM')},send:async(...args)=>sent.push(args)};
  const service=new GaingeAutomationService(config,orm,{}, {},chat);
  const e={id:'11111111-1111-4111-8111-111111111111',recordId:'22222222-2222-4222-8222-222222222222',objectName:'company',kind:'CREATED',payload:{name:'<users/all> test',driId:'33333333-3333-4333-8333-333333333333'},sentDestinations:[],leaseId:'lease'};
  assert.equal(await service.notify('"test"',e),'SENT');assert.equal(sent.length,1);assert.ok(!sent[0][2].includes('<users/all>'));assert.match(sent[0][1],/^[0-9a-f-]{36}$/);
  await service.notify('"test"',e);assert.equal(sent.length,1);
  const retry={...e,sentDestinations:[]};await service.notify('"test"',retry);assert.equal(sent[1][1],sent[0][1]);
+});
+
+test('soft-deleted records do not send queued notifications',async()=>{
+ const service=new GaingeAutomationService({}, {getGlobalWorkspaceDataSource:async()=>({query:async()=>[]})},{},{},{isEnabled:()=>true,send:async()=>{throw Error('Deleted record must not notify')}});
+ assert.equal(await service.notify('"test"',{objectName:'company',recordId:'deleted'}),'DELETED');
 });
