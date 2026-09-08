@@ -36,6 +36,8 @@ export const StatusBoardLinkedCountKpi = ({
       onClick={() =>
         onOpenSheet({
           title: label,
+          kpiLabel: label,
+          tone,
           objectNameSingular: objectMetadataItem.nameSingular,
           filter,
           recordGqlFields: buildStatusBoardRecordGqlFields({

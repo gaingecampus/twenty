@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { StatusBoardRecordAvatar } from '@/status-board/components/StatusBoardRecordAvatar';
 import { StatusBoardEmptyState } from '@/status-board/components/StatusBoardEmptyState';
 import {
@@ -6,6 +7,8 @@ import {
 } from '@/status-board/components/StatusBoardRecordDetails';
 import {
   StyledStatusBoardContract,
+  StyledStatusBoardPagination,
+  StyledStatusBoardPeriodNavButton,
   StyledStatusBoardContractTop,
   StyledStatusBoardGroupTitle,
   StyledStatusBoardMoreButton,
@@ -25,7 +28,11 @@ import { getStatusBoardRecordLabel } from '@/status-board/utils/getStatusBoardRe
 import { type RecordGqlFields } from '@/object-record/graphql/record-gql-fields/types/RecordGqlFields';
 import { type ObjectRecord } from '@/object-record/types/ObjectRecord';
 import { t } from '@lingui/core/macro';
-import { AppPath, type RecordGqlOperationFilter } from 'twenty-shared/types';
+import {
+  AppPath,
+  type RecordGqlOperationVariables,
+  type RecordGqlOperationFilter,
+} from 'twenty-shared/types';
 import { getAppPath } from 'twenty-shared/utils';
 
 type StatusBoardRecordListProps = {
@@ -37,6 +44,10 @@ type StatusBoardRecordListProps = {
   emptyVariant?: 'document' | 'search';
   heading?: string;
   tone?: StatusBoardTone;
+  paginated?: boolean;
+  onPageChange?: () => void;
+  totalCount?: number;
+  orderBy?: RecordGqlOperationVariables['orderBy'];
 };
 
 const StatusBoardRecordRowContent = ({
@@ -81,7 +92,7 @@ const StatusBoardRecordRowContent = ({
           <StyledStatusBoardRowName title={getStatusBoardRecordLabel(record)}>
             {getStatusBoardRecordLabel(record)}
           </StyledStatusBoardRowName>
-          {caption.length > 0 && (
+          {!isContract && caption.length > 0 && (
             <StyledStatusBoardRowCaption>{caption}</StyledStatusBoardRowCaption>
           )}
         </StyledStatusBoardRowBody>
@@ -103,12 +114,20 @@ export const StatusBoardRecordList = ({
   emptyDescription,
   emptyVariant,
   heading,
+  paginated = false,
+  onPageChange,
+  totalCount = 0,
+  orderBy,
 }: StatusBoardRecordListProps) => {
+  const [page, setPage] = useState(0);
+  const [fetchingPage, setFetchingPage] = useState(false);
+  const pageSize = 10;
   const { records, loading, error, refetch, hasNextPage, fetchMoreRecords } =
     useStatusBoardFindManyRecords({
       objectNameSingular,
       filter,
-      limit: STATUS_BOARD_LIMITS.list,
+      limit: paginated ? pageSize : STATUS_BOARD_LIMITS.list,
+      orderBy,
       recordGqlFields,
     });
 
@@ -161,7 +180,10 @@ export const StatusBoardRecordList = ({
       <StyledStatusBoardRowList
         hideSeparators={objectNameSingular === 'onboarding'}
       >
-        {records.map((record) =>
+        {(paginated
+          ? records.slice(page * pageSize, (page + 1) * pageSize)
+          : records
+        ).map((record) =>
           isStatusBoardDummyRecordId(record.id) ? (
             <StyledStatusBoardRow key={record.id}>
               <StatusBoardRecordRowContent
@@ -184,7 +206,7 @@ export const StatusBoardRecordList = ({
             </StyledStatusBoardRowLink>
           ),
         )}
-        {hasNextPage === true && (
+        {!paginated && hasNextPage === true && (
           <StyledStatusBoardMoreButton
             type="button"
             onClick={() => {
@@ -195,6 +217,54 @@ export const StatusBoardRecordList = ({
           </StyledStatusBoardMoreButton>
         )}
       </StyledStatusBoardRowList>
+      {paginated && (
+        <StyledStatusBoardPagination aria-label="목록 페이지 이동">
+          <span>
+            {page * pageSize + 1}–
+            {Math.min((page + 1) * pageSize, records.length)} /{' '}
+            {totalCount.toLocaleString('ko-KR')}건
+          </span>
+          <StyledStatusBoardPeriodNavButton
+            type="button"
+            aria-label="이전 페이지"
+            disabled={page === 0 || fetchingPage || loading}
+            onClick={() => {
+              setPage(page - 1);
+              onPageChange?.();
+            }}
+          >
+            ‹
+          </StyledStatusBoardPeriodNavButton>
+          <span>
+            {page + 1} / {Math.max(1, Math.ceil(totalCount / pageSize))}
+          </span>
+          <StyledStatusBoardPeriodNavButton
+            type="button"
+            aria-label="다음 페이지"
+            disabled={
+              fetchingPage ||
+              loading ||
+              ((page + 1) * pageSize >= records.length && !hasNextPage)
+            }
+            onClick={async () => {
+              if ((page + 1) * pageSize >= records.length) {
+                setFetchingPage(true);
+                try {
+                  await fetchMoreRecords();
+                } catch {
+                  return;
+                } finally {
+                  setFetchingPage(false);
+                }
+              }
+              setPage(page + 1);
+              onPageChange?.();
+            }}
+          >
+            ›
+          </StyledStatusBoardPeriodNavButton>
+        </StyledStatusBoardPagination>
+      )}
     </>
   );
 };

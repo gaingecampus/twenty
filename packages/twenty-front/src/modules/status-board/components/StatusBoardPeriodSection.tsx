@@ -1,3 +1,4 @@
+import { StatusBoardDepositShare } from '@/status-board/components/StatusBoardDepositShare';
 import { IconChevronLeft, IconChevronRight } from 'twenty-ui/icon';
 import { StatusBoardCountKpi } from '@/status-board/components/StatusBoardCountKpi';
 import {
@@ -184,6 +185,8 @@ export const StatusBoardPeriodSection = ({
             onClick={() =>
               onOpenSheet({
                 title: `${periodRange.label} 입금 완료`,
+                kpiLabel: '입금 완료',
+                tone: 'green',
                 objectNameSingular: STATUS_BOARD_OBJECT_NAME_SINGULAR.deposit,
                 filter: paidFilter,
                 recordGqlFields: buildStatusBoardRecordGqlFields({
@@ -211,6 +214,8 @@ export const StatusBoardPeriodSection = ({
             onClick={() =>
               onOpenSheet({
                 title: `${periodRange.label} 입금 예정`,
+                kpiLabel: '입금 예정',
+                tone: 'orange',
                 objectNameSingular: STATUS_BOARD_OBJECT_NAME_SINGULAR.deposit,
                 filter: dueFilter,
                 recordGqlFields: buildStatusBoardRecordGqlFields({
@@ -234,6 +239,8 @@ export const StatusBoardPeriodSection = ({
             onClick={() =>
               onOpenSheet({
                 title: `${periodRange.label} 신규 문의`,
+                kpiLabel: '신규 문의',
+                tone: 'blue',
                 objectNameSingular:
                   STATUS_BOARD_OBJECT_NAME_SINGULAR.opportunity,
                 filter: opportunityFilter,
@@ -257,6 +264,8 @@ export const StatusBoardPeriodSection = ({
             onClick={() =>
               onOpenSheet({
                 title: `${periodRange.label} 계약 시작`,
+                kpiLabel: '계약 시작',
+                tone: 'green',
                 objectNameSingular:
                   STATUS_BOARD_OBJECT_NAME_SINGULAR.onboarding,
                 filter: onboardingFilter,
@@ -272,6 +281,28 @@ export const StatusBoardPeriodSection = ({
           />
         )}
       </StyledStatusBoardKpiGrid>
+      {depositObjectMetadataItem &&
+        hasStatusBoardField(
+          depositObjectMetadataItem,
+          STATUS_BOARD_FIELD.amount,
+        ) &&
+        hasStatusBoardField(
+          depositObjectMetadataItem,
+          STATUS_BOARD_FIELD.depositStatus,
+        ) && (
+          <StatusBoardDepositShare
+            paidFilter={paidFilter}
+            dueFilter={dueFilter}
+            dateBasis={
+              hasStatusBoardField(
+                depositObjectMetadataItem,
+                STATUS_BOARD_FIELD.expectedPaymentDate,
+              )
+                ? '입금 예정일'
+                : '등록일'
+            }
+          />
+        )}
     </StyledStatusBoardSection>
   );
 };

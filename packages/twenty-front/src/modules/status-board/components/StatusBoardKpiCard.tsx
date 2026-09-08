@@ -1,18 +1,10 @@
 import { Link } from 'react-router-dom';
-import {
-  IconCalendar,
-  IconCoins,
-  IconFlag,
-  IconMessageCirclePlus,
-  IconClock,
-  IconFileText,
-} from 'twenty-ui/icon';
+import { StatusBoardKpiIcon } from '@/status-board/components/StatusBoardKpiIcon';
 import {
   StyledStatusBoardCumulativeButton,
   StyledStatusBoardCumulativeLabel,
   StyledStatusBoardCumulativeValue,
   StyledStatusBoardKpiButton,
-  StyledStatusBoardKpiIcon,
   StyledStatusBoardKpiLabel,
   StyledStatusBoardKpiSubtitle,
   StyledStatusBoardKpiValue,
@@ -55,18 +47,6 @@ export const StatusBoardKpiCard = ({
   ) : (
     value
   );
-  const Icon =
-    label.includes('미지급') || label.includes('완료')
-      ? IconCoins
-      : label.includes('문의')
-        ? IconMessageCirclePlus
-        : label.includes('종료')
-          ? IconCalendar
-          : label.includes('예정')
-            ? IconClock
-            : label.includes('시작')
-              ? IconFileText
-              : IconFlag;
 
   if (variant === 'stat') {
     return (
@@ -103,9 +83,7 @@ export const StatusBoardKpiCard = ({
       tone={tone}
       onClick={onClick}
     >
-      <StyledStatusBoardKpiIcon tone={tone}>
-        <Icon size={16} />
-      </StyledStatusBoardKpiIcon>
+      <StatusBoardKpiIcon label={label} tone={tone} />
       <StyledStatusBoardKpiLabel>{label}</StyledStatusBoardKpiLabel>
       <StyledStatusBoardKpiValue tone={tone} isEmpty={isEmpty}>
         {displayValue}

@@ -340,7 +340,9 @@ export const StyledStatusBoardRowList = styled.div<{
   && > a + a,
   && > div + div {
     border-top: ${({ hideSeparators }) =>
-      hideSeparators ? 'none' : undefined};
+      hideSeparators
+        ? 'none'
+        : `1px solid ${themeCssVariables.border.color.light}`};
   }
 `;
 
@@ -854,6 +856,7 @@ export const StyledStatusBoardToolbar = styled.div`
 export const StyledStatusBoardSheetBody = styled.div`
   min-height: 0;
   overflow-y: auto;
+  padding-right: 12px;
 `;
 
 export const StyledStatusBoardSearch = styled.input`
@@ -950,20 +953,15 @@ export const StyledStatusBoardSheetFooter = styled.div`
 
 export const StyledStatusBoardSheetListLink = styled(Link)`
   align-items: center;
-  background: ${themeCssVariables.background.transparent.blue};
-  border: 1px solid ${themeCssVariables.border.color.blue};
-  border-radius: ${themeCssVariables.border.radius.sm};
-  color: ${themeCssVariables.color.blue};
+  border-radius: 8px;
+  color: ${themeCssVariables.font.color.secondary};
   display: inline-flex;
-  font-size: 14px;
-  font-weight: ${themeCssVariables.font.weight.medium};
-  gap: 8px;
-  min-height: 36px;
-  padding: 0 12px;
+  height: 32px;
+  justify-content: center;
   text-decoration: none;
-
+  width: 32px;
   &:hover {
-    background: ${themeCssVariables.accent.secondary};
+    background: ${themeCssVariables.background.tertiary};
   }
 `;
 
@@ -1028,4 +1026,68 @@ export const StyledStatusBoardCadenceBadge = styled.span<{ cadence?: string }>`
   line-height: 1.5;
   padding: 2px 6px;
   white-space: nowrap;
+`;
+
+export const StyledStatusBoardSheetActions = styled.div`
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+`;
+export const StyledStatusBoardSheetToolbar = styled.div`
+  align-items: stretch;
+  display: grid;
+  flex-shrink: 0;
+  gap: 12px;
+  grid-template-columns: minmax(0, 3fr) minmax(128px, 1fr);
+  margin: 16px 0 12px;
+
+  > div {
+    box-sizing: border-box;
+    height: 48px;
+    margin: 0;
+    min-height: 0;
+    min-width: 0;
+  }
+`;
+
+export const StyledStatusBoardSort = styled.label`
+  color: ${themeCssVariables.font.color.secondary};
+  display: flex;
+  font-size: 14px;
+  min-width: 0;
+
+  select {
+    background: ${themeCssVariables.background.secondary};
+    border: 1px solid ${themeCssVariables.border.color.medium};
+    border-radius: 12px;
+    box-sizing: border-box;
+    color: ${themeCssVariables.font.color.primary};
+    font: inherit;
+    height: 48px;
+    min-width: 0;
+    padding: 0 12px;
+    width: 100%;
+  }
+`;
+export const StyledStatusBoardPagination = styled.nav`
+  align-items: center;
+  background: ${themeCssVariables.background.primary};
+  bottom: 0;
+  color: ${themeCssVariables.font.color.secondary};
+  display: flex;
+  font-size: 13px;
+  gap: 8px;
+  padding: 12px 0 0;
+  position: sticky;
+  > span:first-child {
+    margin-right: auto;
+  }
+`;
+
+export const StyledStatusBoardContractLabels = styled.div`
+  align-items: center;
+  display: flex;
+  flex-shrink: 0;
+  gap: 6px;
 `;

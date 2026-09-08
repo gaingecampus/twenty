@@ -5,6 +5,7 @@ import {
   StyledStatusBoardContractMeta,
   StyledStatusBoardProgress,
   StyledStatusBoardRowAside,
+  StyledStatusBoardContractLabels,
   StyledStatusBoardRowCaption,
   StyledStatusBoardTag,
 } from '@/status-board/components/statusBoardStyled';
@@ -93,7 +94,7 @@ export const StatusBoardRecordDetails = ({
       record.contractEndDate,
     );
     return (
-      <StyledStatusBoardRowAside>
+      <StyledStatusBoardContractLabels>
         <StatusBoardStageLabel
           objectNameSingular={objectNameSingular}
           fieldName="onboardingStatus"
@@ -117,7 +118,7 @@ export const StatusBoardRecordDetails = ({
             />
           </StyledStatusBoardRowCaption>
         )}
-      </StyledStatusBoardRowAside>
+      </StyledStatusBoardContractLabels>
     );
   }
   if (typeof record.customStage !== 'string') return null;

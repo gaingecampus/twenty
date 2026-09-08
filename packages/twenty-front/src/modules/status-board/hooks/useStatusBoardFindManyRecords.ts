@@ -8,7 +8,10 @@ import {
 } from '@/status-board/utils/queryStatusBoardDummyDataset';
 import { useFindManyRecords } from '@/object-record/hooks/useFindManyRecords';
 import { type RecordGqlFields } from '@/object-record/graphql/record-gql-fields/types/RecordGqlFields';
-import { type RecordGqlOperationFilter } from 'twenty-shared/types';
+import {
+  type RecordGqlOperationVariables,
+  type RecordGqlOperationFilter,
+} from 'twenty-shared/types';
 
 export const useStatusBoardFindManyRecords = ({
   objectNameSingular,
@@ -16,12 +19,14 @@ export const useStatusBoardFindManyRecords = ({
   limit,
   recordGqlFields,
   skip,
+  orderBy,
 }: {
   objectNameSingular: string;
   filter?: RecordGqlOperationFilter;
   limit: number;
   recordGqlFields: RecordGqlFields;
   skip?: boolean;
+  orderBy?: RecordGqlOperationVariables['orderBy'];
 }) => {
   const dummy = useStatusBoardDummyData();
   const { company } = useStatusBoardMetadata();
@@ -38,7 +43,12 @@ export const useStatusBoardFindManyRecords = ({
           },
         }
       : recordGqlFields;
-  const queryKey = JSON.stringify({ objectNameSingular, filter, limit });
+  const queryKey = JSON.stringify({
+    objectNameSingular,
+    filter,
+    limit,
+    orderBy,
+  });
   const [pagination, setPagination] = useState({ queryKey, limit });
   const visibleLimit =
     pagination.queryKey === queryKey ? pagination.limit : limit;
@@ -47,6 +57,7 @@ export const useStatusBoardFindManyRecords = ({
     useFindManyRecords({
       objectNameSingular,
       filter,
+      orderBy,
       limit,
       recordGqlFields: fieldsWithCompanyAvatar,
       skip: skip === true || shouldUseDummy,
@@ -58,6 +69,7 @@ export const useStatusBoardFindManyRecords = ({
       objectNameSingular,
       filter,
       limit: visibleLimit,
+      orderBy,
     });
     const dummyCount = countStatusBoardDummyRecords({
       dataset: dummy.dataset,

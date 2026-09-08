@@ -130,6 +130,7 @@ const StageTimingCard = ({
       onClick={() =>
         onOpenSheet({
           title: `${label} 도달 소요일 · 측정 문의`,
+          kpiLabel: label,
           objectNameSingular: 'opportunity',
           filter: measuredFilter,
           listTarget: { objectMetadataItem },

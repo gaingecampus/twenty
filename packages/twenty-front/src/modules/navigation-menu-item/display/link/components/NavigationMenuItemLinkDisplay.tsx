@@ -1,4 +1,5 @@
 import { useContext } from 'react';
+import { useLocation } from 'react-router-dom';
 import { IconArrowUpRight } from 'twenty-ui/icon';
 import { ThemeContext, themeCssVariables } from 'twenty-ui/theme-constants';
 
@@ -23,16 +24,22 @@ export const NavigationMenuItemLinkDisplay = ({
   );
   const { theme } = useContext(ThemeContext);
 
+  const { pathname } = useLocation();
   const label = getLinkNavigationMenuItemLabel(item);
-  const computedLink = getLinkNavigationMenuItemComputedLink(item);
-
-  const defaultRightOptions = !isLayoutCustomizationModeEnabled && (
-    <IconArrowUpRight
-      size={theme.icon.size.sm}
-      stroke={theme.icon.stroke.md}
-      color={themeCssVariables.font.color.light}
-    />
+  const computedLink = getLinkNavigationMenuItemComputedLink(
+    item,
+    window.location.origin,
   );
+  const isInternalLink = computedLink.startsWith('/');
+
+  const defaultRightOptions = !isLayoutCustomizationModeEnabled &&
+    !isInternalLink && (
+      <IconArrowUpRight
+        size={theme.icon.size.sm}
+        stroke={theme.icon.stroke.md}
+        color={themeCssVariables.font.color.light}
+      />
+    );
 
   return (
     <NavigationDrawerItem
@@ -48,7 +55,7 @@ export const NavigationMenuItemLinkDisplay = ({
           : undefined
       }
       Icon={() => <NavigationMenuItemIcon navigationMenuItem={item} />}
-      active={false}
+      active={isInternalLink && pathname === computedLink.split(/[?#]/)[0]}
       isSelectedInEditMode={editModeProps?.isSelectedInEditMode}
       isDragging={isDragging}
       triggerEvent="CLICK"

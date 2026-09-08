@@ -1,13 +1,18 @@
+import { StatusBoardKpiIcon } from '@/status-board/components/StatusBoardKpiIcon';
+import { useObjectMetadataItem } from '@/object-metadata/hooks/useObjectMetadataItem';
 import { type EnrichedObjectMetadataItem } from '@/object-metadata/types/EnrichedObjectMetadataItem';
 import { buildStatusBoardListUrl } from '@/status-board/utils/buildStatusBoardListUrl';
-import { IconSearch, IconX, IconArrowRight } from 'twenty-ui/icon';
+import { IconSearch, IconX, IconList, useIcons } from 'twenty-ui/icon';
 import { useEffect, useId, useRef, useState } from 'react';
 import { useDebounce } from 'use-debounce';
 import { andStatusBoardFilters } from '@/status-board/utils/andStatusBoardFilters';
 import { useStatusBoardCount } from '@/status-board/hooks/useStatusBoardCount';
 import {
+  type StatusBoardTone,
   StyledStatusBoardSheetHeader,
-  StyledStatusBoardSheetFooter,
+  StyledStatusBoardSheetActions,
+  StyledStatusBoardSort,
+  StyledStatusBoardSheetToolbar,
   StyledStatusBoardSheetListLink,
   StyledStatusBoardSheetCount,
   StyledStatusBoardSectionTitle,
@@ -24,6 +29,8 @@ import { type RecordGqlFields } from '@/object-record/graphql/record-gql-fields/
 import { type RecordGqlOperationFilter } from 'twenty-shared/types';
 
 export type StatusBoardSheetState = {
+  kpiLabel?: string;
+  tone?: StatusBoardTone;
   listTarget?: {
     objectMetadataItem: EnrichedObjectMetadataItem;
     viewId?: string;
@@ -41,6 +48,14 @@ type StatusBoardSheetProps = {
 
 export const StatusBoardSheet = ({ sheet, onClose }: StatusBoardSheetProps) => {
   const [search, setSearch] = useState('');
+  const [sort, setSort] = useState('newest');
+  const { objectMetadataItem } = useObjectMetadataItem({
+    objectNameSingular: sheet.objectNameSingular,
+  });
+  const { getIcon } = useIcons();
+  const HeaderIcon = getIcon(objectMetadataItem.icon);
+  const bodyRef = useRef<HTMLDivElement>(null);
+
   const [debouncedSearch] = useDebounce(search.trim(), 200);
   const titleId = useId();
   const searchRef = useRef<HTMLInputElement>(null);
@@ -84,7 +99,7 @@ export const StatusBoardSheet = ({ sheet, onClose }: StatusBoardSheetProps) => {
           }
           if (event.key !== 'Tab') return;
           const focusable = dialogRef.current?.querySelectorAll<HTMLElement>(
-            'button:not(:disabled), input, a[href]',
+            'button:not(:disabled), input, select, a[href]',
           );
           const first = focusable?.[0];
           const last = focusable?.[focusable.length - 1];
@@ -102,49 +117,92 @@ export const StatusBoardSheet = ({ sheet, onClose }: StatusBoardSheetProps) => {
         }}
       >
         <StyledStatusBoardSheetHeader>
+          {sheet.kpiLabel ? (
+            <StatusBoardKpiIcon label={sheet.kpiLabel} tone={sheet.tone} />
+          ) : (
+            <HeaderIcon size={20} aria-hidden />
+          )}
           <StyledStatusBoardSectionTitle id={titleId}>
             {sheet.title}
           </StyledStatusBoardSectionTitle>
           <StyledStatusBoardSheetCount>
             {loading ? '…' : error ? '조회 실패' : `${count}건`}
           </StyledStatusBoardSheetCount>
-          <StyledStatusBoardSheetCloseButton
-            type="button"
-            aria-label="닫기"
-            onClick={onClose}
-          >
-            ✕
-          </StyledStatusBoardSheetCloseButton>
-        </StyledStatusBoardSheetHeader>
-        <StyledStatusBoardModalSearch
-          role="search"
-          aria-label={`${sheet.title} 검색`}
-        >
-          <IconSearch size={20} aria-hidden />
-          <StyledStatusBoardModalSearchInput
-            ref={searchRef}
-            type="search"
-            aria-label="목록 검색"
-            placeholder={`${sheet.title}에서 이름으로 검색`}
-            autoComplete="off"
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-          />
-          {search.length > 0 && (
-            <StyledStatusBoardSearchClear
+          <StyledStatusBoardSheetActions>
+            {sheet.listTarget && (
+              <StyledStatusBoardSheetListLink
+                aria-label="필터 적용된 전체 목록 보기"
+                title="필터 적용된 전체 목록 보기"
+                to={buildStatusBoardListUrl({
+                  objectMetadataItem: sheet.listTarget.objectMetadataItem,
+                  viewId: sheet.listTarget.viewId,
+                  filter,
+                })}
+                onClick={onClose}
+              >
+                <IconList size={18} aria-hidden />
+              </StyledStatusBoardSheetListLink>
+            )}
+            <StyledStatusBoardSheetCloseButton
               type="button"
-              aria-label="검색어 지우기"
-              onClick={() => {
-                setSearch('');
-                searchRef.current?.focus();
-              }}
+              aria-label="닫기"
+              onClick={onClose}
             >
-              <IconX size={16} aria-hidden />
-            </StyledStatusBoardSearchClear>
-          )}
-        </StyledStatusBoardModalSearch>
-        <StyledStatusBoardSheetBody>
+              ✕
+            </StyledStatusBoardSheetCloseButton>
+          </StyledStatusBoardSheetActions>
+        </StyledStatusBoardSheetHeader>
+        <StyledStatusBoardSheetToolbar>
+          <StyledStatusBoardModalSearch
+            role="search"
+            aria-label={`${sheet.title} 검색`}
+          >
+            <IconSearch size={20} aria-hidden />
+            <StyledStatusBoardModalSearchInput
+              ref={searchRef}
+              type="search"
+              aria-label="목록 검색"
+              placeholder={`${sheet.title}에서 이름으로 검색`}
+              autoComplete="off"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+            />
+            {search.length > 0 && (
+              <StyledStatusBoardSearchClear
+                type="button"
+                aria-label="검색어 지우기"
+                onClick={() => {
+                  setSearch('');
+                  searchRef.current?.focus();
+                }}
+              >
+                <IconX size={16} aria-hidden />
+              </StyledStatusBoardSearchClear>
+            )}
+          </StyledStatusBoardModalSearch>
+          <StyledStatusBoardSort>
+            <select
+              aria-label="목록 정렬"
+              value={sort}
+              onChange={(event) => setSort(event.target.value)}
+            >
+              <option value="newest">최신 등록순</option>
+              <option value="oldest">오래된 등록순</option>
+            </select>
+          </StyledStatusBoardSort>
+        </StyledStatusBoardSheetToolbar>
+        <StyledStatusBoardSheetBody ref={bodyRef}>
           <StatusBoardRecordList
+            key={JSON.stringify({ filter, sort })}
+            paginated
+            totalCount={count}
+            onPageChange={() => bodyRef.current?.scrollTo({ top: 0 })}
+            orderBy={[
+              {
+                createdAt: sort === 'newest' ? 'DescNullsLast' : 'AscNullsLast',
+              },
+              { id: 'AscNullsLast' },
+            ]}
             objectNameSingular={sheet.objectNameSingular}
             filter={filter}
             recordGqlFields={sheet.recordGqlFields}
@@ -159,21 +217,6 @@ export const StatusBoardSheet = ({ sheet, onClose }: StatusBoardSheetProps) => {
             }
           />
         </StyledStatusBoardSheetBody>
-        {sheet.listTarget && (
-          <StyledStatusBoardSheetFooter>
-            <StyledStatusBoardSheetListLink
-              to={buildStatusBoardListUrl({
-                objectMetadataItem: sheet.listTarget.objectMetadataItem,
-                viewId: sheet.listTarget.viewId,
-                filter,
-              })}
-              onClick={onClose}
-            >
-              필터 적용된 목록 보기
-              <IconArrowRight size={16} aria-hidden />
-            </StyledStatusBoardSheetListLink>
-          </StyledStatusBoardSheetFooter>
-        )}
       </StyledStatusBoardSheet>
     </StyledStatusBoardSheetBackdrop>
   );
