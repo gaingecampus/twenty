@@ -1,3 +1,4 @@
+import { IconChevronLeft, IconChevronRight } from 'twenty-ui/icon';
 import { StatusBoardCountKpi } from '@/status-board/components/StatusBoardCountKpi';
 import {
   StyledStatusBoardKpiGrid,
@@ -140,7 +141,7 @@ export const StatusBoardPeriodSection = ({
               aria-label="이전"
               onClick={() => onShiftPeriodOffset(-1)}
             >
-              ‹
+              <IconChevronLeft size={16} />
             </StyledStatusBoardPeriodNavButton>
             <StyledStatusBoardPeriodLabel>
               {periodRange.label}
@@ -151,7 +152,7 @@ export const StatusBoardPeriodSection = ({
               disabled={periodOffset >= 0}
               onClick={() => onShiftPeriodOffset(1)}
             >
-              ›
+              <IconChevronRight size={16} />
             </StyledStatusBoardPeriodNavButton>
           </StyledStatusBoardPeriodNav>
           <StyledStatusBoardSegment>

@@ -1,3 +1,5 @@
+import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { getStatusBoardMemberGroupId } from '@/status-board/utils/getStatusBoardMemberGroupId';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 import { styled } from '@linaria/react';
@@ -13,8 +15,9 @@ import { type EnrichedObjectMetadataItem } from '@/object-metadata/types/Enriche
 import { type ObjectRecord } from '@/object-record/types/ObjectRecord';
 
 const StyledMemberList = styled.div`
-  max-height: 180px;
+  max-height: 45vh;
   overflow-y: auto;
+  padding-left: 8px;
   padding-top: 6px;
   scrollbar-gutter: stable;
 `;
@@ -49,6 +52,7 @@ export const StatusBoardFilterBar = ({
   onClearSelectedGroupIds,
   onClearSelectedMemberIds,
 }: StatusBoardFilterBarProps) => {
+  const [isMemberModalOpen, setIsMemberModalOpen] = useState(false);
   const dummy = useStatusBoardDummyData();
   const shouldShowGroupChips =
     groupObjectMetadataItem !== undefined || dummy.enabled;
@@ -65,12 +69,53 @@ export const StatusBoardFilterBar = ({
         />
       )}
       {shouldShowMemberChips && (
-        <StatusBoardMemberChips
-          members={members}
-          selectedMemberIds={selectedMemberIds}
-          onToggleMemberId={onToggleMemberId}
-          onClearSelectedMemberIds={onClearSelectedMemberIds}
-        />
+        <>
+          <StyledStatusBoardChipRow>
+            <StyledStatusBoardChip
+              type="button"
+              isActive={false}
+              aria-haspopup="dialog"
+              onClick={() => setIsMemberModalOpen(true)}
+            >
+              구성원 선택 ·{' '}
+              {selectedMemberIds.length > 0
+                ? `${selectedMemberIds.length}명`
+                : `전체 ${members.length}명`}
+            </StyledStatusBoardChip>
+            {members
+              .filter((member) => selectedMemberIds.includes(member.id))
+              .map((member) => (
+                <StyledStatusBoardChip
+                  key={member.id}
+                  type="button"
+                  isActive
+                  variant="soft"
+                  aria-label={`${getStatusBoardRecordLabel(member)} 선택 해제`}
+                  onClick={() => onToggleMemberId(member.id)}
+                >
+                  {getStatusBoardRecordLabel(member)}{' '}
+                  <span aria-hidden="true">×</span>
+                </StyledStatusBoardChip>
+              ))}
+          </StyledStatusBoardChipRow>
+          {isMemberModalOpen && (
+            <StatusBoardMemberModal onClose={() => setIsMemberModalOpen(false)}>
+              {shouldShowGroupChips && (
+                <StatusBoardGroupChips
+                  selectedGroupIds={selectedGroupIds}
+                  onToggleGroupId={onToggleGroupId}
+                  onClearSelectedGroupIds={onClearSelectedGroupIds}
+                />
+              )}
+              <StatusBoardMemberChips
+                members={members}
+                selectedMemberIds={selectedMemberIds}
+                onToggleMemberId={onToggleMemberId}
+                onClearSelectedMemberIds={onClearSelectedMemberIds}
+              />
+            </StatusBoardMemberModal>
+          )}
+        </>
       )}
     </StyledStatusBoardToolbar>
   );
@@ -196,5 +241,70 @@ const StatusBoardMemberChips = ({
         </StyledStatusBoardMuted>
       )}
     </div>
+  );
+};
+
+const StyledMemberDialog = styled.dialog`
+  background: ${themeCssVariables.background.primary};
+  border: 1px solid ${themeCssVariables.border.color.light};
+  border-radius: 20px;
+  box-shadow: ${themeCssVariables.boxShadow.strong};
+  box-sizing: border-box;
+  color: ${themeCssVariables.font.color.primary};
+  max-height: 85vh;
+  padding: 24px;
+  width: min(640px, calc(100vw - 32px));
+  &::backdrop {
+    background: ${themeCssVariables.background.transparent.primary};
+  }
+`;
+const StyledMemberDialogBody = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+`;
+const StyledMemberDialogHeader = styled.div`
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  h2 {
+    font-size: 18px;
+    margin: 0;
+  }
+`;
+const StatusBoardMemberModal = ({
+  children,
+  onClose,
+}: {
+  children: React.ReactNode;
+  onClose: () => void;
+}) => {
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (dialog && !dialog.open) dialog.showModal();
+  }, []);
+  return createPortal(
+    <StyledMemberDialog
+      ref={dialogRef}
+      aria-labelledby="status-board-member-title"
+      onCancel={onClose}
+      onClose={onClose}
+    >
+      <StyledMemberDialogBody>
+        <StyledMemberDialogHeader>
+          <h2 id="status-board-member-title">구성원 선택</h2>
+          <StyledStatusBoardChip
+            type="button"
+            isActive={false}
+            onClick={onClose}
+          >
+            완료
+          </StyledStatusBoardChip>
+        </StyledMemberDialogHeader>
+        {children}
+      </StyledMemberDialogBody>
+    </StyledMemberDialog>,
+    document.body,
   );
 };

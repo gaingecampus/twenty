@@ -19,13 +19,15 @@ import { OPPORTUNITY_STAGE_TIMINGS } from 'twenty-shared/constants';
 const StatusBoardStageLabel = ({
   objectNameSingular,
   value,
+  fieldName = 'customStage',
 }: {
   objectNameSingular: string;
   value: string;
+  fieldName?: string;
 }) => {
   const { objectMetadataItem } = useObjectMetadataItem({ objectNameSingular });
   const selectedOption = objectMetadataItem.fields
-    .find((field) => field.name === 'customStage')
+    .find((field) => field.name === fieldName)
     ?.options?.find((option) => option.value === value);
 
   if (!selectedOption) return null;
@@ -85,46 +87,56 @@ export const StatusBoardRecordDetails = ({
       </StyledStatusBoardRowAside>
     );
   }
-  if (typeof record.customStage === 'string') {
+  if (typeof record.onboardingStatus === 'string') {
+    const progress = getStatusBoardContractProgress(
+      record.contractStartDate,
+      record.contractEndDate,
+    );
     return (
       <StyledStatusBoardRowAside>
         <StatusBoardStageLabel
           objectNameSingular={objectNameSingular}
-          value={record.customStage}
+          fieldName="onboardingStatus"
+          value={record.onboardingStatus}
         />
-        {OPPORTUNITY_STAGE_TIMINGS.map((stage) => {
-          const days = record[stage.daysField];
-          return typeof days === 'number' &&
-            Number.isFinite(days) &&
-            days >= 0 ? (
-            <StyledStatusBoardRowCaption key={stage.value}>
-              {stage.label} 도달 {days}일
-            </StyledStatusBoardRowCaption>
-          ) : null;
-        })}
+        {record.onboardingStatus !== 'DONE' && progress !== undefined && (
+          <StyledStatusBoardRowCaption>
+            <SelectDisplay
+              color={
+                progress.remaining < 0
+                  ? 'red'
+                  : progress.remaining <= 30
+                    ? 'orange'
+                    : 'gray'
+              }
+              label={
+                progress.remaining < 0
+                  ? `${-progress.remaining}일 초과`
+                  : `D-${progress.remaining}`
+              }
+            />
+          </StyledStatusBoardRowCaption>
+        )}
       </StyledStatusBoardRowAside>
     );
   }
-  const progress = getStatusBoardContractProgress(
-    record.contractStartDate,
-    record.contractEndDate,
-  );
-  if (progress === undefined) return null;
+  if (typeof record.customStage !== 'string') return null;
   return (
     <StyledStatusBoardRowAside>
-      <StyledStatusBoardTag
-        tone={
-          record.onboardingStatus === 'ACTIVE' && progress.remaining <= 30
-            ? 'orange'
-            : 'default'
-        }
-      >
-        {record.onboardingStatus === 'DONE'
-          ? '완료'
-          : progress.remaining < 0
-            ? `${-progress.remaining}일 초과`
-            : `D-${progress.remaining}`}
-      </StyledStatusBoardTag>
+      <StatusBoardStageLabel
+        objectNameSingular={objectNameSingular}
+        value={record.customStage}
+      />
+      {OPPORTUNITY_STAGE_TIMINGS.map((stage) => {
+        const days = record[stage.daysField];
+        return typeof days === 'number' &&
+          Number.isFinite(days) &&
+          days >= 0 ? (
+          <StyledStatusBoardRowCaption key={stage.value}>
+            {stage.label} 도달 {days}일
+          </StyledStatusBoardRowCaption>
+        ) : null;
+      })}
     </StyledStatusBoardRowAside>
   );
 };

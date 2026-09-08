@@ -179,11 +179,6 @@ const StatusBoardContentBody = ({
                 memberIds={memberIds}
                 onOpenSheet={setSheet}
               />
-              <StatusBoardWeekSection
-                onboardingObjectMetadataItem={metadata.onboarding}
-                members={visibleMembers}
-                memberIds={memberIds}
-              />
               <StatusBoardListsSection
                 onboardingObjectMetadataItem={metadata.onboarding}
                 memberIds={memberIds}
@@ -198,6 +193,12 @@ const StatusBoardContentBody = ({
                 depositObjectMetadataItem={metadata.deposit}
                 memberIds={memberIds}
                 onOpenSheet={setSheet}
+              />
+              <StatusBoardWeekSection
+                memberObjectMetadataItem={metadata.member}
+                onboardingObjectMetadataItem={metadata.onboarding}
+                members={visibleMembers}
+                memberIds={memberIds}
               />
             </>
           )}

@@ -88,7 +88,7 @@ export const StatusBoardNowSection = ({
   return (
     <StyledStatusBoardSection>
       <StyledStatusBoardSectionHeader>
-        <StyledStatusBoardSectionTitle>지금</StyledStatusBoardSectionTitle>
+        <StyledStatusBoardSectionTitle>주요 현황</StyledStatusBoardSectionTitle>
         <StyledStatusBoardMuted>오늘 기준</StyledStatusBoardMuted>
       </StyledStatusBoardSectionHeader>
       <StyledStatusBoardKpiGrid>

@@ -1,3 +1,4 @@
+import { StatusBoardRecordAvatar } from '@/status-board/components/StatusBoardRecordAvatar';
 import { StatusBoardEmptyState } from '@/status-board/components/StatusBoardEmptyState';
 import {
   StyledStatusBoardMuted,
@@ -11,9 +12,11 @@ import {
   StyledStatusBoardWeekCellTitle,
   StyledStatusBoardWeekGrid,
   StyledStatusBoardWeekHeaderCell,
-  StyledStatusBoardWeekNote,
+  StyledStatusBoardCadenceBadge,
+  StyledStatusBoardCadenceRow,
   StyledStatusBoardWeekRow,
   StyledStatusBoardWeekWho,
+  StyledStatusBoardWeekIdentity,
   StyledStatusBoardWeekWhoMeta,
   StyledStatusBoardWeekWhoName,
   StyledStatusBoardWeekWrap,
@@ -30,7 +33,6 @@ import { getStatusBoardRecordLabel } from '@/status-board/utils/getStatusBoardRe
 import {
   getStatusBoardCompanyName,
   getStatusBoardMemberRoleOnOnboarding,
-  getStatusBoardShortMemberName,
   getStatusBoardVisitCadence,
   getStatusBoardVisitDays,
   isStatusBoardOnboardingOwnedByMember,
@@ -44,12 +46,14 @@ import { getAppPath } from 'twenty-shared/utils';
 
 type StatusBoardWeekSectionProps = {
   onboardingObjectMetadataItem: EnrichedObjectMetadataItem | undefined;
+  memberObjectMetadataItem: EnrichedObjectMetadataItem | undefined;
   members: ObjectRecord[];
   memberIds: string[] | undefined;
 };
 
 export const StatusBoardWeekSection = ({
   onboardingObjectMetadataItem,
+  memberObjectMetadataItem,
   members,
   memberIds,
 }: StatusBoardWeekSectionProps) => {
@@ -66,6 +70,7 @@ export const StatusBoardWeekSection = ({
   return (
     <StatusBoardWeekSectionLoaded
       onboardingObjectMetadataItem={onboardingObjectMetadataItem}
+      memberObjectMetadataItem={memberObjectMetadataItem}
       members={members}
       memberIds={memberIds}
     />
@@ -74,10 +79,12 @@ export const StatusBoardWeekSection = ({
 
 const StatusBoardWeekSectionLoaded = ({
   onboardingObjectMetadataItem,
+  memberObjectMetadataItem,
   members,
   memberIds,
 }: {
   onboardingObjectMetadataItem: EnrichedObjectMetadataItem;
+  memberObjectMetadataItem: EnrichedObjectMetadataItem | undefined;
   members: ObjectRecord[];
   memberIds: string[] | undefined;
 }) => {
@@ -126,38 +133,32 @@ const StatusBoardWeekSectionLoaded = ({
         right.memberOnboardings.length - left.memberOnboardings.length,
     );
 
-  const undatedNotes = memberRows.flatMap(({ member, memberOnboardings }) =>
-    memberOnboardings
-      .filter((onboarding) => {
-        const visitDays = getStatusBoardVisitDays(onboarding);
-
-        return !visitDays.some((visitDay) =>
-          weekdayKeys.some((key) => key === visitDay),
-        );
-      })
-      .map((onboarding) => {
-        const cadence = getStatusBoardVisitCadence(onboarding);
-        const cadenceLabel =
-          cadence !== undefined
-            ? STATUS_BOARD_VISIT_CADENCE_LABEL[cadence]
-            : '요일 미정';
-
-        return `${getStatusBoardShortMemberName(getStatusBoardRecordLabel(member))} · ${getStatusBoardCompanyName(onboarding)} (${cadenceLabel})`;
-      }),
-  );
+  const undatedCount = records.filter(
+    (onboarding) =>
+      !getStatusBoardVisitDays(onboarding).some((day) =>
+        weekdayKeys.some((key) => key === day),
+      ),
+  ).length;
 
   return (
     <StyledStatusBoardWeekSection>
       <StyledStatusBoardSectionHeader>
         <StyledStatusBoardSectionTitle>
-          이번 주 현장
+          온보딩 현황
         </StyledStatusBoardSectionTitle>
-        {undatedNotes.length > 0 && (
+        {undatedCount > 0 && (
           <StyledStatusBoardMuted>
-            {`요일 미정 ${undatedNotes.length}건`}
+            {`요일 미정 ${undatedCount}건`}
           </StyledStatusBoardMuted>
         )}
       </StyledStatusBoardSectionHeader>
+      <StyledStatusBoardCadenceRow aria-label="방문 주기 구분">
+        {(['WEEKLY', 'BIWEEKLY', 'MONTHLY'] as const).map((cadence) => (
+          <StyledStatusBoardCadenceBadge key={cadence} cadence={cadence}>
+            {STATUS_BOARD_VISIT_CADENCE_LABEL[cadence]}
+          </StyledStatusBoardCadenceBadge>
+        ))}
+      </StyledStatusBoardCadenceRow>
       {loading && records.length === 0 ? (
         <StatusBoardEmptyState
           title="방문 일정을 불러오는 중이에요"
@@ -195,9 +196,7 @@ const StatusBoardWeekSectionLoaded = ({
                 ))}
               </StyledStatusBoardWeekRow>
               {memberRows.map(({ member, memberOnboardings }) => {
-                const memberName = getStatusBoardShortMemberName(
-                  getStatusBoardRecordLabel(member),
-                );
+                const memberName = getStatusBoardRecordLabel(member);
                 const groupName =
                   typeof member.currentGroup === 'object' &&
                   member.currentGroup !== null &&
@@ -208,16 +207,50 @@ const StatusBoardWeekSectionLoaded = ({
 
                 return (
                   <StyledStatusBoardWeekRow key={member.id}>
-                    <StyledStatusBoardWeekWho>
-                      <StyledStatusBoardWeekWhoName>
-                        {memberName}
-                      </StyledStatusBoardWeekWhoName>
-                      <StyledStatusBoardWeekWhoMeta>
-                        {[groupName, `진행 ${memberOnboardings.length}건`]
-                          .filter((item) => item !== undefined && item !== '')
-                          .join(' · ')}
-                      </StyledStatusBoardWeekWhoMeta>
-                    </StyledStatusBoardWeekWho>
+                    <StyledStatusBoardWeekIdentity>
+                      {memberObjectMetadataItem && (
+                        <StatusBoardRecordAvatar
+                          record={member}
+                          objectNameSingular={
+                            memberObjectMetadataItem.nameSingular
+                          }
+                        />
+                      )}
+                      <StyledStatusBoardWeekWho>
+                        <StyledStatusBoardWeekWhoName title={memberName}>
+                          {memberName}
+                        </StyledStatusBoardWeekWhoName>
+                        <StyledStatusBoardWeekWhoMeta>
+                          {[groupName, `진행 ${memberOnboardings.length}건`]
+                            .filter((item) => item !== undefined && item !== '')
+                            .join(' · ')}
+                        </StyledStatusBoardWeekWhoMeta>
+                        <StyledStatusBoardCadenceRow>
+                          {[
+                            ...new Set(
+                              memberOnboardings.map(getStatusBoardVisitCadence),
+                            ),
+                          ].map((cadence) => (
+                            <StyledStatusBoardCadenceBadge
+                              key={cadence ?? 'unknown'}
+                              cadence={cadence}
+                            >
+                              {cadence
+                                ? STATUS_BOARD_VISIT_CADENCE_LABEL[cadence]
+                                : '주기 미정'}{' '}
+                              {
+                                memberOnboardings.filter(
+                                  (record) =>
+                                    getStatusBoardVisitCadence(record) ===
+                                    cadence,
+                                ).length
+                              }
+                              건
+                            </StyledStatusBoardCadenceBadge>
+                          ))}
+                        </StyledStatusBoardCadenceRow>
+                      </StyledStatusBoardWeekWho>
+                    </StyledStatusBoardWeekIdentity>
                     {STATUS_BOARD_WEEK_DAYS.map(([key]) => {
                       const visits = memberOnboardings.filter((onboarding) =>
                         getStatusBoardVisitDays(onboarding).includes(key),
@@ -266,14 +299,18 @@ const StatusBoardWeekSectionLoaded = ({
                                 >
                                   {getStatusBoardCompanyName(onboarding)}
                                 </StyledStatusBoardWeekCellTitle>
-                                <StyledStatusBoardWeekCellMeta>
-                                  {[cadenceLabel, role]
-                                    .filter(
-                                      (item) =>
-                                        item !== undefined && item.length > 0,
-                                    )
-                                    .join(' · ')}
-                                </StyledStatusBoardWeekCellMeta>
+                                <StyledStatusBoardCadenceRow>
+                                  <StyledStatusBoardCadenceBadge
+                                    cadence={cadence}
+                                  >
+                                    {cadenceLabel || '주기 미정'}
+                                  </StyledStatusBoardCadenceBadge>
+                                </StyledStatusBoardCadenceRow>
+                                {role && (
+                                  <StyledStatusBoardWeekCellMeta>
+                                    {role}
+                                  </StyledStatusBoardWeekCellMeta>
+                                )}
                               </>
                             );
 
@@ -308,11 +345,6 @@ const StatusBoardWeekSectionLoaded = ({
               })}
             </StyledStatusBoardWeekGrid>
           </StyledStatusBoardWeekWrap>
-          {undatedNotes.length > 0 && (
-            <StyledStatusBoardWeekNote>
-              {`요일 미정 ${undatedNotes.length}건 · ${undatedNotes.join(', ')}`}
-            </StyledStatusBoardWeekNote>
-          )}
         </>
       )}
     </StyledStatusBoardWeekSection>

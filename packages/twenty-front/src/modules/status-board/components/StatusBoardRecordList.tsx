@@ -158,7 +158,9 @@ export const StatusBoardRecordList = ({
       {heading !== undefined && (
         <StyledStatusBoardGroupTitle>{heading}</StyledStatusBoardGroupTitle>
       )}
-      <StyledStatusBoardRowList>
+      <StyledStatusBoardRowList
+        hideSeparators={objectNameSingular === 'onboarding'}
+      >
         {records.map((record) =>
           isStatusBoardDummyRecordId(record.id) ? (
             <StyledStatusBoardRow key={record.id}>

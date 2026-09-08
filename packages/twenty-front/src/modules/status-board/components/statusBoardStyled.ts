@@ -96,7 +96,7 @@ export const StyledStatusBoardKpiButton = styled.button<{
   cursor: pointer;
   display: grid;
   gap: 8px;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: 24px minmax(0, 1fr);
   min-height: 108px;
   min-width: 0;
   padding: 16px;
@@ -109,6 +109,7 @@ export const StyledStatusBoardKpiButton = styled.button<{
 `;
 
 export const StyledStatusBoardKpiLabel = styled.div`
+  align-self: center;
   color: ${themeCssVariables.font.color.secondary};
   font-size: 14px;
   font-weight: ${themeCssVariables.font.weight.medium};
@@ -264,22 +265,30 @@ export const StyledStatusBoardPeriodControls = styled.div`
 
 export const StyledStatusBoardPeriodNav = styled.div`
   align-items: center;
+  background: ${themeCssVariables.background.tertiary};
+  border-radius: 10px;
   display: inline-flex;
   gap: 2px;
+  padding: 4px;
 `;
 
 export const StyledStatusBoardPeriodNavButton = styled.button`
   align-items: center;
-  background: ${themeCssVariables.background.secondary};
+  background: transparent;
   border: none;
   border-radius: 8px;
   color: ${themeCssVariables.font.color.secondary};
   cursor: pointer;
   display: inline-flex;
   font-size: 15px;
-  height: 28px;
+  height: 32px;
   justify-content: center;
-  width: 28px;
+  width: 32px;
+
+  &:hover:not(:disabled) {
+    background: ${themeCssVariables.background.primary};
+    color: ${themeCssVariables.font.color.primary};
+  }
 
   &:disabled {
     cursor: default;
@@ -296,10 +305,10 @@ export const StyledStatusBoardPeriodLabel = styled.span`
 `;
 
 export const StyledStatusBoardSegment = styled.div`
-  background: ${themeCssVariables.background.secondary};
+  background: ${themeCssVariables.background.tertiary};
   border-radius: 10px;
   display: inline-flex;
-  padding: 3px;
+  padding: 4px;
 `;
 
 export const StyledStatusBoardSegmentButton = styled.button<{
@@ -314,16 +323,25 @@ export const StyledStatusBoardSegmentButton = styled.button<{
   color: ${({ isActive }) =>
     isActive
       ? themeCssVariables.font.color.primary
-      : themeCssVariables.font.color.tertiary};
+      : themeCssVariables.font.color.secondary};
   cursor: pointer;
   font-size: 13px;
   font-weight: ${themeCssVariables.font.weight.semiBold};
-  padding: 5px 10px;
+  min-height: 32px;
+  min-width: 42px;
+  padding: 6px 12px;
 `;
 
-export const StyledStatusBoardRowList = styled.div`
+export const StyledStatusBoardRowList = styled.div<{
+  hideSeparators?: boolean;
+}>`
   display: flex;
   flex-direction: column;
+  && > a + a,
+  && > div + div {
+    border-top: ${({ hideSeparators }) =>
+      hideSeparators ? 'none' : undefined};
+  }
 `;
 
 const statusBoardRowBase = `
@@ -616,11 +634,11 @@ export const StyledStatusBoardWeekRow = styled.div`
   align-items: stretch;
   display: grid;
   gap: 8px;
-  grid-template-columns: 140px repeat(5, 1fr);
+  grid-template-columns: 180px repeat(5, 1fr);
 
   @media (max-width: 640px) {
     gap: 6px;
-    grid-template-columns: 90px repeat(5, 1fr);
+    grid-template-columns: 160px repeat(5, 1fr);
   }
 `;
 
@@ -654,9 +672,8 @@ export const StyledStatusBoardWeekWho = styled.div`
 `;
 
 export const StyledStatusBoardWeekWhoName = styled.div`
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
 `;
 
 export const StyledStatusBoardWeekWhoMeta = styled.small`
@@ -745,11 +762,11 @@ export const StyledStatusBoardWeekNote = styled.div`
 `;
 
 export const StyledStatusBoardKpiIcon = styled(StyledStatusBoardRowAvatar)`
-  border-radius: 8px;
-  grid-column: 2;
+  border-radius: 6px;
+  grid-column: 1;
   grid-row: 1;
-  height: 28px;
-  width: 28px;
+  height: 24px;
+  width: 24px;
 `;
 
 export const StyledStatusBoardRowAside = styled.div`
@@ -852,15 +869,7 @@ export const StyledStatusBoardSearch = styled.input`
   }
 `;
 
-export const StyledStatusBoardWeekSection = styled(StyledStatusBoardSection)`
-  height: 340px;
-  overflow-y: auto;
-  scrollbar-gutter: stable;
-
-  > * {
-    flex-shrink: 0;
-  }
-`;
+export const StyledStatusBoardWeekSection = StyledStatusBoardSection;
 
 export const StyledStatusBoardModalSearch = styled.div`
   align-items: center;
@@ -977,4 +986,46 @@ export const StyledStatusBoardContractBody = styled.div`
   min-height: 0;
   overflow-y: auto;
   scrollbar-gutter: stable;
+`;
+
+export const StyledStatusBoardWeekIdentity = styled.div`
+  align-items: flex-start;
+  display: flex;
+  gap: 8px;
+  min-width: 0;
+  > :first-child {
+    flex-shrink: 0;
+  }
+`;
+
+export const StyledStatusBoardCadenceRow = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+`;
+export const StyledStatusBoardCadenceBadge = styled.span<{ cadence?: string }>`
+  background: ${({ cadence }) =>
+    cadence === 'WEEKLY'
+      ? themeCssVariables.background.transparent.blue
+      : cadence === 'BIWEEKLY'
+        ? themeCssVariables.background.transparent.orange
+        : cadence === 'MONTHLY'
+          ? themeCssVariables.background.transparent.success
+          : themeCssVariables.background.tertiary};
+  border-radius: 4px;
+  color: ${({ cadence }) =>
+    cadence === 'WEEKLY'
+      ? themeCssVariables.color.blue
+      : cadence === 'BIWEEKLY'
+        ? themeCssVariables.color.orange
+        : cadence === 'MONTHLY'
+          ? themeCssVariables.color.green
+          : themeCssVariables.font.color.secondary};
+  display: inline-block;
+  font-size: 11px;
+  font-weight: ${themeCssVariables.font.weight.medium};
+  line-height: 1.5;
+  padding: 2px 6px;
+  white-space: nowrap;
 `;

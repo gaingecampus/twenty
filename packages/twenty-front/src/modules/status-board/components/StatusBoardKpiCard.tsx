@@ -104,7 +104,7 @@ export const StatusBoardKpiCard = ({
       onClick={onClick}
     >
       <StyledStatusBoardKpiIcon tone={tone}>
-        <Icon size={20} />
+        <Icon size={16} />
       </StyledStatusBoardKpiIcon>
       <StyledStatusBoardKpiLabel>{label}</StyledStatusBoardKpiLabel>
       <StyledStatusBoardKpiValue tone={tone} isEmpty={isEmpty}>
