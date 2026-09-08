@@ -1,5 +1,6 @@
 import { GaingeAutomationTableService } from './automation-table.service';
 import { Module } from '@nestjs/common';
+import { WorkspaceCacheModule } from 'src/engine/workspace-cache/workspace-cache.module';
 import { SecureHttpClientModule } from 'src/engine/core-modules/secure-http-client/secure-http-client.module';
 import { AiModelsModule } from 'src/engine/metadata-modules/ai/ai-models/ai-models.module';
 import { GaingeAutomationService } from './gainge-automation.service';
@@ -8,7 +9,7 @@ import { GaingeGoogleChatController } from './google-chat.controller';
 import { GaingeChatAuthGuard } from './google-chat-auth.guard';
 @Module({
   controllers: [GaingeGoogleChatController],
-  imports: [SecureHttpClientModule, AiModelsModule],
+  imports: [SecureHttpClientModule, AiModelsModule, WorkspaceCacheModule],
   providers: [
     GaingeAutomationService,
     GaingeAutomationTableService,
