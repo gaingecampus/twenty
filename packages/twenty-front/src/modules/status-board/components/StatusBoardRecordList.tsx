@@ -1,3 +1,4 @@
+import { StatusBoardCompanyActivity } from '@/status-board/components/StatusBoardCompanyActivity';
 import { useState } from 'react';
 import { StatusBoardRecordAvatar } from '@/status-board/components/StatusBoardRecordAvatar';
 import { StatusBoardEmptyState } from '@/status-board/components/StatusBoardEmptyState';
@@ -96,10 +97,14 @@ const StatusBoardRecordRowContent = ({
             <StyledStatusBoardRowCaption>{caption}</StyledStatusBoardRowCaption>
           )}
         </StyledStatusBoardRowBody>
-        <StatusBoardRecordDetails
-          record={record}
-          objectNameSingular={objectNameSingular}
-        />
+        {objectNameSingular === 'company' ? (
+          <StatusBoardCompanyActivity companyId={record.id} />
+        ) : (
+          <StatusBoardRecordDetails
+            record={record}
+            objectNameSingular={objectNameSingular}
+          />
+        )}
       </StyledStatusBoardContractTop>
       {isContract && <StatusBoardContractDetails record={record} />}
     </StyledStatusBoardContract>
