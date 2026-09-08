@@ -16,10 +16,7 @@ describe('queryStatusBoardDummyRecords sorting', () => {
       dataset,
       objectNameSingular: 'deposit',
       limit: 2,
-      orderBy: [
-        { createdAt: 'DescNullsLast' },
-        { __typename: 'Deposit', id: 'AscNullsLast' },
-      ],
+      orderBy: [{ createdAt: 'DescNullsLast' }, { id: 'AscNullsLast' }],
     });
     expect(records.map(({ id }) => id)).toEqual(['a', 'b']);
     expect(dataset.deposit[0].id).toBe('c');
@@ -30,10 +27,7 @@ describe('queryStatusBoardDummyRecords sorting', () => {
       dataset,
       objectNameSingular: 'deposit',
       limit: 10,
-      orderBy: [
-        { createdAt: 'AscNullsLast' },
-        { __typename: 'Deposit', id: 'AscNullsLast' },
-      ],
+      orderBy: [{ createdAt: 'AscNullsLast' }, { id: 'AscNullsLast' }],
     });
     expect(records.map(({ id }) => id)).toEqual(['d', 'a', 'b', 'c']);
   });
