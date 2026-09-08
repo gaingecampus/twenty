@@ -105,6 +105,11 @@ export const NavigationMenuItemIcon = ({
     return (
       <LinkIconWithLinkOverlay
         link={computedLink}
+        monochrome={
+          computedLink?.split(/[?#]/)[0]?.replace(/\/$/, '') ===
+            `${window.location.origin}/status-board` ||
+          computedLink?.split(/[?#]/)[0]?.replace(/\/$/, '') === '/status-board'
+        }
         LinkIcon={IconLink}
         DefaultIcon={IconWorld}
         color={getNavigationMenuItemColor(navigationMenuItem)}

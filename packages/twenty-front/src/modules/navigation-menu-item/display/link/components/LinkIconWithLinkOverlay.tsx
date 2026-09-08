@@ -67,6 +67,7 @@ export type LinkIconWithLinkOverlayProps = {
   LinkIcon: IconComponent;
   DefaultIcon: IconComponent;
   color?: string | null;
+  monochrome?: boolean;
 };
 
 export const LinkIconWithLinkOverlay = ({
@@ -74,6 +75,7 @@ export const LinkIconWithLinkOverlay = ({
   LinkIcon,
   DefaultIcon,
   color: navItemColor,
+  monochrome = false,
 }: LinkIconWithLinkOverlayProps) => {
   const { theme } = useContext(ThemeContext);
   const [localFailedLink, setLocalFailedLink] = useState<string | null>(null);
@@ -81,7 +83,10 @@ export const LinkIconWithLinkOverlay = ({
   const linkKey = link ?? '';
   const isKnownFailed = failedFaviconUrls.has(linkKey);
   const showFavicon =
-    isDefined(faviconUrl) && !isKnownFailed && localFailedLink !== linkKey;
+    !monochrome &&
+    isDefined(faviconUrl) &&
+    !isKnownFailed &&
+    localFailedLink !== linkKey;
 
   const linkStyle = getIconTileColorShades(
     navItemColor ?? DEFAULT_NAVIGATION_MENU_ITEM_COLOR_LINK,
@@ -92,7 +97,7 @@ export const LinkIconWithLinkOverlay = ({
       <StyledMainIconWrapper
         $backgroundColor={linkStyle.backgroundColor}
         $borderColor={linkStyle.borderColor}
-        $noBackgroundOrBorder={showFavicon}
+        $noBackgroundOrBorder={showFavicon || monochrome}
       >
         {showFavicon ? (
           <StyledFaviconImage
@@ -107,15 +112,27 @@ export const LinkIconWithLinkOverlay = ({
           <DefaultIcon
             size="14px"
             stroke={theme.icon.stroke.md}
-            color={linkStyle.iconColor}
+            color={
+              monochrome
+                ? themeCssVariables.font.color.secondary
+                : linkStyle.iconColor
+            }
           />
         )}
       </StyledMainIconWrapper>
-      <StyledLinkOverlay $backgroundColor={themeCssVariables.grayScale.gray4}>
+      <StyledLinkOverlay
+        $backgroundColor={
+          monochrome ? 'transparent' : themeCssVariables.grayScale.gray4
+        }
+      >
         <LinkIcon
           size="14px"
           stroke={theme.icon.stroke.md}
-          color={themeCssVariables.grayScale.gray10}
+          color={
+            monochrome
+              ? themeCssVariables.font.color.secondary
+              : themeCssVariables.grayScale.gray10
+          }
         />
       </StyledLinkOverlay>
     </StyledCompositeContainer>

@@ -56,7 +56,7 @@ export const StatusBoardKpiCard = ({
     value
   );
   const Icon =
-    label.includes('미수') || label.includes('완료')
+    label.includes('미지급') || label.includes('완료')
       ? IconCoins
       : label.includes('문의')
         ? IconMessageCirclePlus

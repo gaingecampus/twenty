@@ -101,7 +101,7 @@ export const StatusBoardNowSection = ({
               onOpenSheet={onOpenSheet}
               objectMetadataItem={depositObjectMetadataItem}
               filter={overdueFilter}
-              label="미수금"
+              label="미지급금"
               tone="red"
               withSum={hasStatusBoardField(
                 depositObjectMetadataItem,
