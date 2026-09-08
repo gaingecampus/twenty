@@ -1,3 +1,5 @@
+import { useStatusBoardDummyData } from '@/status-board/contexts/StatusBoardDummyDataContext';
+import { countStatusBoardDummyRecords } from '@/status-board/utils/queryStatusBoardDummyDataset';
 import { AggregateOperations } from '@/object-record/record-table/constants/AggregateOperations';
 import { FIELD_FOR_TOTAL_COUNT_AGGREGATE_OPERATION } from 'twenty-shared/constants';
 import { useAggregateRecords } from '@/object-record/hooks/useAggregateRecords';
@@ -12,14 +14,27 @@ export const useStatusBoardCount = ({
   filter?: RecordGqlOperationFilter;
   skip?: boolean;
 }) => {
+  const dummy = useStatusBoardDummyData();
+  const shouldUseDummy = dummy.enabled && skip !== true;
   const { data, loading } = useAggregateRecords({
     objectNameSingular,
     filter,
-    skip,
+    skip: skip === true || shouldUseDummy,
     recordGqlFieldsAggregate: {
       [FIELD_FOR_TOTAL_COUNT_AGGREGATE_OPERATION]: [AggregateOperations.COUNT],
     },
   });
+
+  if (shouldUseDummy) {
+    return {
+      count: countStatusBoardDummyRecords({
+        dataset: dummy.dataset,
+        objectNameSingular,
+        filter,
+      }),
+      loading: false,
+    };
+  }
 
   const count = data?.[FIELD_FOR_TOTAL_COUNT_AGGREGATE_OPERATION]?.COUNT;
 

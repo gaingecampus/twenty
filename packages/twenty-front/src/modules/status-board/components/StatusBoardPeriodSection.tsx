@@ -1,12 +1,15 @@
 import { StatusBoardCountKpi } from '@/status-board/components/StatusBoardCountKpi';
 import {
-  StyledStatusBoardChip,
-  StyledStatusBoardChipRow,
   StyledStatusBoardKpiGrid,
-  StyledStatusBoardMuted,
+  StyledStatusBoardPeriodControls,
+  StyledStatusBoardPeriodLabel,
+  StyledStatusBoardPeriodNav,
+  StyledStatusBoardPeriodNavButton,
   StyledStatusBoardSection,
   StyledStatusBoardSectionHeader,
   StyledStatusBoardSectionTitle,
+  StyledStatusBoardSegment,
+  StyledStatusBoardSegmentButton,
 } from '@/status-board/components/statusBoardStyled';
 import { type StatusBoardSheetState } from '@/status-board/components/StatusBoardSheet';
 import { STATUS_BOARD_FIELD } from '@/status-board/constants/StatusBoardFieldNames';
@@ -130,34 +133,41 @@ export const StatusBoardPeriodSection = ({
         <StyledStatusBoardSectionTitle>
           {periodRange.title}
         </StyledStatusBoardSectionTitle>
-        <StyledStatusBoardChipRow>
-          <StyledStatusBoardChip
-            type="button"
-            isActive={false}
-            onClick={() => onShiftPeriodOffset(-1)}
-          >
-            ‹
-          </StyledStatusBoardChip>
-          <StyledStatusBoardMuted>{periodRange.label}</StyledStatusBoardMuted>
-          <StyledStatusBoardChip
-            type="button"
-            isActive={false}
-            disabled={periodOffset >= 0}
-            onClick={() => onShiftPeriodOffset(1)}
-          >
-            ›
-          </StyledStatusBoardChip>
-          {(['month', 'quarter', 'year'] as const).map((item) => (
-            <StyledStatusBoardChip
-              key={item}
+        <StyledStatusBoardPeriodControls>
+          <StyledStatusBoardPeriodNav>
+            <StyledStatusBoardPeriodNavButton
               type="button"
-              isActive={periodType === item}
-              onClick={() => onSelectPeriodType(item)}
+              aria-label="이전"
+              onClick={() => onShiftPeriodOffset(-1)}
             >
-              {item === 'month' ? '월' : item === 'quarter' ? '분기' : '연도'}
-            </StyledStatusBoardChip>
-          ))}
-        </StyledStatusBoardChipRow>
+              ‹
+            </StyledStatusBoardPeriodNavButton>
+            <StyledStatusBoardPeriodLabel>
+              {periodRange.label}
+            </StyledStatusBoardPeriodLabel>
+            <StyledStatusBoardPeriodNavButton
+              type="button"
+              aria-label="다음"
+              disabled={periodOffset >= 0}
+              onClick={() => onShiftPeriodOffset(1)}
+            >
+              ›
+            </StyledStatusBoardPeriodNavButton>
+          </StyledStatusBoardPeriodNav>
+          <StyledStatusBoardSegment>
+            {(['month', 'quarter', 'year'] as const).map((item) => (
+              <StyledStatusBoardSegmentButton
+                key={item}
+                type="button"
+                isActive={periodType === item}
+                aria-pressed={periodType === item}
+                onClick={() => onSelectPeriodType(item)}
+              >
+                {item === 'month' ? '월' : item === 'quarter' ? '분기' : '연도'}
+              </StyledStatusBoardSegmentButton>
+            ))}
+          </StyledStatusBoardSegment>
+        </StyledStatusBoardPeriodControls>
       </StyledStatusBoardSectionHeader>
       <StyledStatusBoardKpiGrid>
         {depositObjectMetadataItem !== undefined && (
@@ -165,6 +175,7 @@ export const StatusBoardPeriodSection = ({
             objectNameSingular={STATUS_BOARD_OBJECT_NAME_SINGULAR.deposit}
             filter={paidFilter}
             label="입금 완료"
+            tone="green"
             showAmountAsValue={hasStatusBoardField(
               depositObjectMetadataItem,
               STATUS_BOARD_FIELD.amount,
@@ -191,6 +202,7 @@ export const StatusBoardPeriodSection = ({
             objectNameSingular={STATUS_BOARD_OBJECT_NAME_SINGULAR.deposit}
             filter={dueFilter}
             label="입금 예정"
+            tone="orange"
             showAmountAsValue={hasStatusBoardField(
               depositObjectMetadataItem,
               STATUS_BOARD_FIELD.amount,
@@ -217,6 +229,7 @@ export const StatusBoardPeriodSection = ({
             objectNameSingular={STATUS_BOARD_OBJECT_NAME_SINGULAR.opportunity}
             filter={opportunityFilter}
             label="신규 문의"
+            tone="blue"
             onClick={() =>
               onOpenSheet({
                 title: `${periodRange.label} 신규 문의`,
@@ -239,6 +252,7 @@ export const StatusBoardPeriodSection = ({
             objectNameSingular={STATUS_BOARD_OBJECT_NAME_SINGULAR.onboarding}
             filter={onboardingFilter}
             label="계약 시작"
+            tone="green"
             onClick={() =>
               onOpenSheet({
                 title: `${periodRange.label} 계약 시작`,

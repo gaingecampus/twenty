@@ -10,6 +10,7 @@ export const useStatusBoardFilters = () => {
   const [periodOffset, setPeriodOffset] = useState(0);
 
   const toggleGroupId = useCallback((groupId: string) => {
+    setSelectedMemberId(undefined);
     setSelectedGroupIds((currentGroupIds) => {
       if (currentGroupIds.includes(groupId)) {
         return currentGroupIds.filter((id) => id !== groupId);
@@ -26,6 +27,7 @@ export const useStatusBoardFilters = () => {
   }, []);
 
   const clearSelectedGroupIds = useCallback(() => {
+    setSelectedMemberId(undefined);
     setSelectedGroupIds([]);
   }, []);
 

@@ -1,5 +1,5 @@
 import { type EnrichedObjectMetadataItem } from '@/object-metadata/types/EnrichedObjectMetadataItem';
-import { hasStatusBoardField } from '@/status-board/utils/hasStatusBoardField';
+import { getRelationJoinColumnName } from '@/object-record/record-field/ui/utils/junction/getRelationJoinColumnName';
 import { type RecordGqlOperationFilter } from 'twenty-shared/types';
 
 export const buildStatusBoardIdInFilter = ({
@@ -15,9 +15,17 @@ export const buildStatusBoardIdInFilter = ({
     return undefined;
   }
 
-  const existingFieldNames = fieldNames.filter((fieldName) =>
-    hasStatusBoardField(objectMetadataItem, fieldName),
-  );
+  const existingFieldNames = [
+    ...new Set(
+      fieldNames.flatMap((fieldName) => {
+        const field = objectMetadataItem.readableFields.find(
+          (item) => item.name === fieldName,
+        );
+        if (field === undefined) return [];
+        return [getRelationJoinColumnName(field) ?? fieldName];
+      }),
+    ),
+  ];
 
   if (existingFieldNames.length === 0) {
     return undefined;

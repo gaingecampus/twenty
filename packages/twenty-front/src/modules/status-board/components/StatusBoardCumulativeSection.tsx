@@ -61,6 +61,7 @@ export const StatusBoardCumulativeSection = ({
               memberIds,
             })}
             label="기업"
+            variant="stat"
             onClick={() =>
               onOpenSheet({
                 title: '누적 기업',
@@ -93,6 +94,7 @@ export const StatusBoardCumulativeSection = ({
               memberIds,
             })}
             label="고객"
+            variant="stat"
             onClick={() =>
               onOpenSheet({
                 title: '누적 고객',
@@ -125,6 +127,7 @@ export const StatusBoardCumulativeSection = ({
               memberIds,
             })}
             label="문의"
+            variant="stat"
             onClick={() =>
               onOpenSheet({
                 title: '누적 문의',
@@ -160,6 +163,7 @@ export const StatusBoardCumulativeSection = ({
               memberIds,
             })}
             label="계약"
+            variant="stat"
             onClick={() =>
               onOpenSheet({
                 title: '누적 계약',
@@ -195,6 +199,7 @@ export const StatusBoardCumulativeSection = ({
               memberIds,
             })}
             label="입금"
+            variant="stat"
             onClick={() =>
               onOpenSheet({
                 title: '누적 입금',

@@ -12,7 +12,23 @@ export const buildStatusBoardRecordGqlFields = ({
 }): RecordGqlFields => {
   const recordGqlFields: RecordGqlFields = { id: true };
 
-  fieldNames.forEach((fieldName) => {
+  const detailFields = [
+    'amount',
+    'depositStatus',
+    'expectedPaymentDate',
+    'customStage',
+    'onboardingStatus',
+    'contractStartDate',
+    'contractEndDate',
+    'visitDays',
+    'visitCadence',
+    'totalFee',
+    'assignee',
+    'leadConsultant',
+    'executionConsultant',
+  ];
+
+  [...new Set([...fieldNames, ...detailFields])].forEach((fieldName) => {
     if (!hasStatusBoardField(objectMetadataItem, fieldName)) {
       return;
     }

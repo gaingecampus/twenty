@@ -1,4 +1,7 @@
+import { hasStatusBoardField } from '@/status-board/utils/hasStatusBoardField';
 import { StatusBoardCumulativeSection } from '@/status-board/components/StatusBoardCumulativeSection';
+import { StatusBoardDummyDataProvider } from '@/status-board/components/StatusBoardDummyDataProvider';
+import { useStatusBoardDummyData } from '@/status-board/contexts/StatusBoardDummyDataContext';
 import { StatusBoardFilterBar } from '@/status-board/components/StatusBoardFilterBar';
 import { StatusBoardListsSection } from '@/status-board/components/StatusBoardListsSection';
 import { StatusBoardNowSection } from '@/status-board/components/StatusBoardNowSection';
@@ -8,7 +11,10 @@ import {
   type StatusBoardSheetState,
 } from '@/status-board/components/StatusBoardSheet';
 import { StatusBoardWeekSection } from '@/status-board/components/StatusBoardWeekSection';
-import { StyledStatusBoardScroll } from '@/status-board/components/statusBoardStyled';
+import {
+  StyledStatusBoardScroll,
+  StyledStatusBoardMuted,
+} from '@/status-board/components/statusBoardStyled';
 import { useStatusBoardFilters } from '@/status-board/hooks/useStatusBoardFilters';
 import { useStatusBoardMemberIds } from '@/status-board/hooks/useStatusBoardMemberIds';
 import { useStatusBoardMembers } from '@/status-board/hooks/useStatusBoardMembers';
@@ -56,10 +62,26 @@ const StatusBoardContentLoaded = ({
   members: ObjectRecord[];
   metadata: ReturnType<typeof useStatusBoardMetadata>;
 }) => {
+  return (
+    <StatusBoardDummyDataProvider
+      members={members}
+      skipGroups={metadata.group === undefined}
+    >
+      <StatusBoardContentBody metadata={metadata} />
+    </StatusBoardDummyDataProvider>
+  );
+};
+
+const StatusBoardContentBody = ({
+  metadata,
+}: {
+  metadata: ReturnType<typeof useStatusBoardMetadata>;
+}) => {
   const theme = useTheme();
+  const dummy = useStatusBoardDummyData();
   const filters = useStatusBoardFilters();
   const { visibleMembers, memberIds } = useStatusBoardMemberIds({
-    members,
+    members: dummy.members,
     selectedGroupIds: filters.selectedGroupIds,
     selectedMemberId: filters.selectedMemberId,
   });
@@ -90,6 +112,11 @@ const StatusBoardContentLoaded = ({
         }
       >
         <StyledStatusBoardScroll>
+          {dummy.enabled && (
+            <StyledStatusBoardMuted>
+              미리보기 · 예시 데이터
+            </StyledStatusBoardMuted>
+          )}
           <StatusBoardFilterBar
             groupObjectMetadataItem={metadata.group}
             memberObjectMetadataItem={metadata.member}
@@ -101,6 +128,14 @@ const StatusBoardContentLoaded = ({
             onClearSelectedGroupIds={filters.clearSelectedGroupIds}
             onClearSelectedMemberId={filters.clearSelectedMemberId}
           />
+          {filters.selectedGroupIds.length > 0 &&
+            !hasStatusBoardField(metadata.member, 'currentGroup') &&
+            !hasStatusBoardField(metadata.member, 'currentGroupId') && (
+              <StyledStatusBoardMuted role="status">
+                구성원의 소속 그룹 필드가 연결되지 않아 그룹별 현황을 표시할 수
+                없어요.
+              </StyledStatusBoardMuted>
+            )}
           <StatusBoardNowSection
             depositObjectMetadataItem={metadata.deposit}
             opportunityObjectMetadataItem={metadata.opportunity}
@@ -126,6 +161,7 @@ const StatusBoardContentLoaded = ({
           />
           <StatusBoardWeekSection
             onboardingObjectMetadataItem={metadata.onboarding}
+            members={visibleMembers}
             memberIds={memberIds}
           />
           <StatusBoardPeriodSection

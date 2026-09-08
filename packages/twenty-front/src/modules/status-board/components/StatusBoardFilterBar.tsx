@@ -1,8 +1,10 @@
 import {
+  StyledStatusBoardToolbar,
+  StyledStatusBoardMuted,
   StyledStatusBoardChip,
   StyledStatusBoardChipRow,
 } from '@/status-board/components/statusBoardStyled';
-import { useStatusBoardGroups } from '@/status-board/hooks/useStatusBoardGroups';
+import { useStatusBoardDummyData } from '@/status-board/contexts/StatusBoardDummyDataContext';
 import { getStatusBoardRecordLabel } from '@/status-board/utils/getStatusBoardRecordLabel';
 import { type EnrichedObjectMetadataItem } from '@/object-metadata/types/EnrichedObjectMetadataItem';
 import { type ObjectRecord } from '@/object-record/types/ObjectRecord';
@@ -30,16 +32,22 @@ export const StatusBoardFilterBar = ({
   onClearSelectedGroupIds,
   onClearSelectedMemberId,
 }: StatusBoardFilterBarProps) => {
+  const dummy = useStatusBoardDummyData();
+  const shouldShowGroupChips =
+    groupObjectMetadataItem !== undefined || dummy.enabled;
+  const shouldShowMemberChips =
+    memberObjectMetadataItem !== undefined || dummy.enabled;
+
   return (
-    <>
-      {groupObjectMetadataItem !== undefined && (
+    <StyledStatusBoardToolbar>
+      {shouldShowGroupChips && (
         <StatusBoardGroupChips
           selectedGroupIds={selectedGroupIds}
           onToggleGroupId={onToggleGroupId}
           onClearSelectedGroupIds={onClearSelectedGroupIds}
         />
       )}
-      {memberObjectMetadataItem !== undefined && (
+      {shouldShowMemberChips && (
         <StatusBoardMemberChips
           members={members}
           selectedMemberId={selectedMemberId}
@@ -47,7 +55,15 @@ export const StatusBoardFilterBar = ({
           onClearSelectedMemberId={onClearSelectedMemberId}
         />
       )}
-    </>
+      <StyledStatusBoardMuted>
+        {new Intl.DateTimeFormat('ko-KR', {
+          month: 'long',
+          day: 'numeric',
+          weekday: 'long',
+        }).format(new Date())}{' '}
+        · 그룹을 여러 개 선택할 수 있어요
+      </StyledStatusBoardMuted>
+    </StyledStatusBoardToolbar>
   );
 };
 
@@ -60,13 +76,14 @@ const StatusBoardGroupChips = ({
   onToggleGroupId: (groupId: string) => void;
   onClearSelectedGroupIds: () => void;
 }) => {
-  const { groups } = useStatusBoardGroups({ skip: false });
+  const { groups } = useStatusBoardDummyData();
 
   return (
     <StyledStatusBoardChipRow>
       <StyledStatusBoardChip
         type="button"
         isActive={selectedGroupIds.length === 0}
+        aria-pressed={selectedGroupIds.length === 0}
         onClick={onClearSelectedGroupIds}
       >
         전체
@@ -76,6 +93,7 @@ const StatusBoardGroupChips = ({
           key={group.id}
           type="button"
           isActive={selectedGroupIds.includes(group.id)}
+          aria-pressed={selectedGroupIds.includes(group.id)}
           onClick={() => onToggleGroupId(group.id)}
         >
           {getStatusBoardRecordLabel(group)}
@@ -101,6 +119,7 @@ const StatusBoardMemberChips = ({
       <StyledStatusBoardChip
         type="button"
         isActive={selectedMemberId === undefined}
+        aria-pressed={selectedMemberId === undefined}
         onClick={onClearSelectedMemberId}
       >
         {`전체 ${members.length}명`}
@@ -110,6 +129,7 @@ const StatusBoardMemberChips = ({
           key={member.id}
           type="button"
           isActive={selectedMemberId === member.id}
+          aria-pressed={selectedMemberId === member.id}
           onClick={() => onSelectMemberId(member.id)}
         >
           {getStatusBoardRecordLabel(member)}

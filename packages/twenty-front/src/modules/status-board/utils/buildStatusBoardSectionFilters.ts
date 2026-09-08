@@ -21,14 +21,16 @@ export const buildStatusBoardMemberFilter = ({
   }
 
   if (memberIds.length === 0) {
-    return { id: { in: ['00000000-0000-0000-0000-000000000000'] } };
+    return { id: { is: 'NULL' } };
   }
 
-  return buildStatusBoardIdInFilter({
-    objectMetadataItem,
-    fieldNames,
-    ids: memberIds,
-  });
+  return (
+    buildStatusBoardIdInFilter({
+      objectMetadataItem,
+      fieldNames,
+      ids: memberIds,
+    }) ?? { id: { is: 'NULL' } }
+  );
 };
 
 export const buildStatusBoardOverdueDepositFilter = ({

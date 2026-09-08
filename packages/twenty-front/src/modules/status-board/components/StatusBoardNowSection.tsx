@@ -103,6 +103,7 @@ export const StatusBoardNowSection = ({
               objectNameSingular={STATUS_BOARD_OBJECT_NAME_SINGULAR.deposit}
               filter={overdueFilter}
               label="미수금"
+              tone="red"
               withSum={hasStatusBoardField(
                 depositObjectMetadataItem,
                 STATUS_BOARD_FIELD.amount,
@@ -130,6 +131,7 @@ export const StatusBoardNowSection = ({
             objectNameSingular={STATUS_BOARD_OBJECT_NAME_SINGULAR.opportunity}
             filter={openFilter}
             label="진행 중 문의"
+            tone="blue"
             onClick={() =>
               onOpenSheet({
                 title: '진행 중 문의',
@@ -153,6 +155,7 @@ export const StatusBoardNowSection = ({
             objectNameSingular={STATUS_BOARD_OBJECT_NAME_SINGULAR.onboarding}
             filter={activeFilter}
             label="온보딩 중"
+            tone="green"
             onClick={() =>
               onOpenSheet({
                 title: '온보딩 중',
@@ -177,6 +180,7 @@ export const StatusBoardNowSection = ({
               objectNameSingular={STATUS_BOARD_OBJECT_NAME_SINGULAR.onboarding}
               filter={endingFilter}
               label="이번 달 종료"
+              tone="orange"
               onClick={() =>
                 onOpenSheet({
                   title: '이번 달 종료',
