@@ -1,3 +1,4 @@
+import { queryAutomationDatabase } from './automation-query';
 import { GaingeAutomationTableService } from './automation-table.service';
 import {
   Body,
@@ -55,7 +56,8 @@ export class GaingeGoogleChatController {
     const ns = quoteAutomationSchema(getWorkspaceSchemaName(workspaceId));
     const ds = await this.orm.getGlobalWorkspaceDataSource();
     const memberTable = await this.tables.quoted(workspaceId, 'teamMember');
-    const members = await ds.query(
+    const members = await queryAutomationDatabase(
+      ds,
       `SELECT id FROM ${ns}.${memberTable} WHERE lower(trim("emailPrimaryEmail"))=$1 AND "deletedAt" IS NULL`,
       [user.email.toLowerCase()],
     );
@@ -66,7 +68,8 @@ export class GaingeGoogleChatController {
     const text = body.chat?.messagePayload?.message?.text?.trim() ?? '';
     const enabled =
       text === '알림 끄기' ? false : text === '알림 켜기' ? true : null;
-    await ds.query(
+    await queryAutomationDatabase(
+      ds,
       `UPDATE ${ns}.${memberTable} SET "googleChatUserId"=$2,"googleChatNotificationsEnabled"=COALESCE($3,"googleChatNotificationsEnabled",true) WHERE id=$1`,
       [members[0].id, user.name!.slice(6), enabled],
     );

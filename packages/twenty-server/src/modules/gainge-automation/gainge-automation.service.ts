@@ -1,3 +1,4 @@
+import { queryAutomationDatabase } from './automation-query';
 import { GaingeAutomationTableService } from './automation-table.service';
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
@@ -62,12 +63,15 @@ export class GaingeAutomationService {
       if (!/^[0-9a-f-]{36}$/i.test(workspaceId)) return;
       const ds = await this.orm.getGlobalWorkspaceDataSource();
       const ns = quoteAutomationSchema(getWorkspaceSchemaName(workspaceId));
-      const table = await ds.query('SELECT to_regclass($1) AS name', [
-        `${ns}."_gaingeAutomationEvent"`,
-      ]);
+      const table = await queryAutomationDatabase(
+        ds,
+        'SELECT to_regclass($1) AS name',
+        [`${ns}."_gaingeAutomationEvent"`],
+      );
       if (!table[0]?.name) return;
       if (this.config.get('GAINGE_ENRICHMENT_ENABLED')) {
-        await ds.query(
+        await queryAutomationDatabase(
+          ds,
           buildEnrichmentResumeSql(
             getWorkspaceSchemaName(workspaceId),
             await this.tables.name(workspaceId, 'company'),
@@ -76,7 +80,8 @@ export class GaingeAutomationService {
       }
       for (let i = 0; i < 5; i++) {
         const lease = randomUUID();
-        const rows: AutomationEvent[] = await ds.query(
+        const rows: AutomationEvent[] = await queryAutomationDatabase(
+          ds,
           `UPDATE ${ns}."_gaingeAutomationEvent" SET "leaseId"=$1,"leaseUntil"=now()+interval '5 minutes' WHERE id=(SELECT id FROM ${ns}."_gaingeAutomationEvent" WHERE "completedAt" IS NULL AND "nextAttemptAt"<=now() AND ("leaseUntil" IS NULL OR "leaseUntil"<now()) ORDER BY "createdAt" LIMIT 1 FOR UPDATE SKIP LOCKED) RETURNING *`,
           [lease],
         );
@@ -107,7 +112,8 @@ export class GaingeAutomationService {
           }
           const done =
             e.enrichmentStatus !== 'PENDING' && e.chatStatus !== 'PENDING';
-          await ds.query(
+          await queryAutomationDatabase(
+            ds,
             `UPDATE ${ns}."_gaingeAutomationEvent" SET "enrichmentStatus"=$2,"chatStatus"=$3,"enrichmentAttempts"=$4,"chatAttempts"=$5,"sentDestinations"=$6::jsonb,"completedAt"=CASE WHEN $7 THEN now() ELSE NULL END,"nextAttemptAt"=now()+interval '5 minutes',"leaseUntil"=NULL,"leaseId"=NULL,"lastError"=$9 WHERE id=$1 AND "leaseId"=$8`,
             [
               e.id,
@@ -145,7 +151,8 @@ export class GaingeAutomationService {
   }
   private async setCompanyStatus(ns: string, id: string, status: string) {
     const ds = await this.orm.getGlobalWorkspaceDataSource();
-    await ds.query(
+    await queryAutomationDatabase(
+      ds,
       `UPDATE ${ns}.${await this.table('company')} SET "aiEnrichmentStatus"=$2,"aiEnrichmentCheckedAt"=now(),"updatedBySource"='SYSTEM',"updatedByName"='CRM 기업 정보 자동 보완' WHERE id=$1 AND "deletedAt" IS NULL`,
       [id, status],
     );
@@ -153,7 +160,8 @@ export class GaingeAutomationService {
   private async enrich(ns: string, e: AutomationEvent): Promise<string> {
     if (!this.config.get('GAINGE_ENRICHMENT_ENABLED')) return 'DISABLED';
     const ds = await this.orm.getGlobalWorkspaceDataSource();
-    const rows = await ds.query(
+    const rows = await queryAutomationDatabase(
+      ds,
       `SELECT id,name,"domainNamePrimaryLinkUrl" AS website,"aiCompanyProfile" AS profile FROM ${ns}.${await this.table('company')} WHERE id=$1 AND "deletedAt" IS NULL`,
       [e.recordId],
     );
@@ -166,7 +174,8 @@ export class GaingeAutomationService {
       return 'NEEDS_WEBSITE';
     }
     // Reserve a daily call budget atomically, across server and worker processes.
-    const budget = await ds.query(
+    const budget = await queryAutomationDatabase(
+      ds,
       `INSERT INTO ${ns}."_gaingeAutomationBudget"(day,calls) VALUES((now() AT TIME ZONE 'Asia/Seoul')::date,1) ON CONFLICT(day) DO UPDATE SET calls=${ns}."_gaingeAutomationBudget".calls+1 WHERE ${ns}."_gaingeAutomationBudget".calls<50 RETURNING calls`,
     );
     if (!budget.length) return 'PENDING';
@@ -213,7 +222,8 @@ export class GaingeAutomationService {
       return 'NEEDS_REVIEW';
     }
     // Recheck identity and empty values after the network call; preserve human edits.
-    const updated = await ds.query(
+    const updated = await queryAutomationDatabase(
+      ds,
       `UPDATE ${ns}.${await this.table('company')} SET "aiCompanyProfile"=$2,"employees"=COALESCE("employees",$3),"aiEnrichmentStatus"='FILLED',"aiEnrichmentSource"=$4,"aiEnrichmentCheckedAt"=now(),"aiEnrichmentModel"=$5,"updatedBySource"='SYSTEM',"updatedByName"='CRM 기업 정보 자동 보완',"updatedAt"=now() WHERE id=$1 AND "deletedAt" IS NULL AND COALESCE(trim("aiCompanyProfile"),'')='' AND name=$6 AND "domainNamePrimaryLinkUrl"=$7 RETURNING id`,
       [
         e.recordId,
@@ -232,7 +242,8 @@ export class GaingeAutomationService {
     const ds = await this.orm.getGlobalWorkspaceDataSource();
     if (!AUTOMATION_TARGETS.some((target) => target.table === e.objectName))
       return 'UNSUPPORTED_OBJECT';
-    const records = await ds.query(
+    const records = await queryAutomationDatabase(
+      ds,
       `SELECT id FROM ${ns}.${await this.table(e.objectName)} WHERE id=$1 AND "deletedAt" IS NULL`,
       [e.recordId],
     );
@@ -242,7 +253,8 @@ export class GaingeAutomationService {
     if (organization) destinations.push(organization);
     let dmMissing = false;
     if (e.payload.driId) {
-      const members = await ds.query(
+      const members = await queryAutomationDatabase(
+        ds,
         `SELECT "googleChatUserId","googleChatNotificationsEnabled" FROM ${ns}.${await this.table('teamMember')} WHERE id=$1 AND "deletedAt" IS NULL`,
         [e.payload.driId],
       );
@@ -274,7 +286,8 @@ export class GaingeAutomationService {
       const requestId = `${hash.slice(0, 8)}-${hash.slice(8, 12)}-${hash.slice(12, 16)}-${hash.slice(16, 20)}-${hash.slice(20)}`;
       await this.chat.send(destination, requestId, text);
       e.sentDestinations.push(destination);
-      await ds.query(
+      await queryAutomationDatabase(
+        ds,
         `UPDATE ${ns}."_gaingeAutomationEvent" SET "sentDestinations"=$2::jsonb WHERE id=$1 AND "leaseId"=$3`,
         [e.id, JSON.stringify(e.sentDestinations), e.leaseId],
       );

@@ -16,7 +16,7 @@ test('Google Chat rejects unsigned and wrong-project identities',async()=>{
 });
 test('notification retries preserve per-destination idempotency and respect personal opt-out',async()=>{
  const sent=[];const queries=[];const config={get:k=>k==='GAINGE_CHAT_SPACE'?'spaces/test':undefined};
- const orm={getGlobalWorkspaceDataSource:async()=>({query:async(sql,args)=>{queries.push({sql,args});return sql.startsWith('SELECT id FROM')?[{id:'active'}]:sql.includes('SELECT "googleChatUserId"')?[{googleChatUserId:'123',googleChatNotificationsEnabled:false}]:[]}})};
+ const orm={getGlobalWorkspaceDataSource:async()=>({query:async(sql,args,runner,options)=>{assert.equal(options?.shouldBypassPermissionChecks,true);queries.push({sql,args});return sql.startsWith('SELECT id FROM')?[{id:'active'}]:sql.includes('SELECT "googleChatUserId"')?[{googleChatUserId:'123',googleChatNotificationsEnabled:false}]:[]}})};
  const chat={isEnabled:()=>true,findDirectMessage:async()=>{throw Error('Opt-out must not look up DM')},send:async(...args)=>sent.push(args)};
  const service=new GaingeAutomationService(config,orm,{}, {},chat,{quoted:async(_w,n)=>`"${n}"`});
  const e={id:'11111111-1111-4111-8111-111111111111',recordId:'22222222-2222-4222-8222-222222222222',objectName:'company',kind:'CREATED',payload:{name:'<users/all> test',driId:'33333333-3333-4333-8333-333333333333'},sentDestinations:[],leaseId:'lease'};
@@ -28,4 +28,18 @@ test('notification retries preserve per-destination idempotency and respect pers
 test('soft-deleted records do not send queued notifications',async()=>{
  const service=new GaingeAutomationService({get:()=>"workspace"}, {getGlobalWorkspaceDataSource:async()=>({query:async()=>[]})},{},{},{isEnabled:()=>true,send:async()=>{throw Error('Deleted record must not notify')}},{quoted:async(_w,n)=>`"${n}"`});
  assert.equal(await service.notify('"test"',{objectName:'company',recordId:'deleted'}),'DELETED');
+});
+
+// Exercise the actual datasource implementation: its default query path rejects system SQL.
+test('automation uses the explicit internal SQL permission path',async()=>{
+ const {DataSource}=require('typeorm');
+ const {GlobalWorkspaceDataSource}=require('../../dist/engine/twenty-orm/global-workspace-datasource/global-workspace-datasource');
+ const {queryAutomationDatabase}=require('../../dist/modules/gainge-automation/automation-query');
+ const original=DataSource.prototype.query;
+ try{
+  DataSource.prototype.query=async(sql,args)=>{assert.equal(sql,'SELECT $1');assert.deepEqual(args,[42]);return [{value:42}]};
+  const ds=Object.create(GlobalWorkspaceDataSource.prototype);
+  assert.throws(()=>ds.query('SELECT $1',[42]),/permissions are not implemented/);
+  assert.deepEqual(await queryAutomationDatabase(ds,'SELECT $1',[42]),[{value:42}]);
+ }finally{DataSource.prototype.query=original;}
 });
