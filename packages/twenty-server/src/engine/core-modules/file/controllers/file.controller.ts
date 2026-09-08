@@ -26,6 +26,7 @@ import {
   SupportedFileFolder,
 } from 'src/engine/core-modules/file/guards/file-by-id.guard';
 import { FileService } from 'src/engine/core-modules/file/services/file.service';
+import { isClientClosedStreamError } from 'src/engine/core-modules/file/utils/is-client-closed-stream-error.util';
 import { setFileResponseHeaders } from 'src/engine/core-modules/file/utils/set-file-response-headers.utils';
 import { NoPermissionGuard } from 'src/engine/guards/no-permission.guard';
 import { PublicEndpointGuard } from 'src/engine/guards/public-endpoint.guard';
@@ -97,16 +98,11 @@ export class FileController {
     try {
       await pipeline(fileResponse.stream, res);
     } catch (error) {
-      this.logger.error('Public asset stream failed mid-transfer', { error });
-
-      if (!res.headersSent) {
-        throw new FileException(
-          'Error streaming file from storage',
-          FileExceptionCode.INTERNAL_SERVER_ERROR,
-        );
-      }
-
-      res.destroy();
+      this.handleStreamPipelineError({
+        error,
+        res,
+        logMessage: 'Public asset stream failed mid-transfer',
+      });
     }
   }
 
@@ -157,16 +153,36 @@ export class FileController {
     try {
       await pipeline(fileResponse.stream, res);
     } catch (error) {
-      this.logger.error('File-by-id stream failed mid-transfer', { error });
-
-      if (!res.headersSent) {
-        throw new FileException(
-          'Error streaming file from storage',
-          FileExceptionCode.INTERNAL_SERVER_ERROR,
-        );
-      }
-
-      res.destroy();
+      this.handleStreamPipelineError({
+        error,
+        res,
+        logMessage: 'File-by-id stream failed mid-transfer',
+      });
     }
+  }
+
+  private handleStreamPipelineError({
+    error,
+    res,
+    logMessage,
+  }: {
+    error: unknown;
+    res: Response;
+    logMessage: string;
+  }) {
+    if (isClientClosedStreamError(error)) {
+      return;
+    }
+
+    this.logger.error(logMessage, { error });
+
+    if (!res.headersSent) {
+      throw new FileException(
+        'Error streaming file from storage',
+        FileExceptionCode.INTERNAL_SERVER_ERROR,
+      );
+    }
+
+    res.destroy();
   }
 }

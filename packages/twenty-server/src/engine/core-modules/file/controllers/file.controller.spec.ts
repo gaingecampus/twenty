@@ -241,6 +241,42 @@ describe('FileController', () => {
       );
     });
 
+    it('should ignore client disconnects instead of throwing INTERNAL_SERVER_ERROR', async () => {
+      const mockStream = createMockStream();
+      const loggerSpy = jest
+        .spyOn(Logger.prototype, 'error')
+        .mockImplementation(() => undefined);
+
+      jest
+        .spyOn(fileService, 'getFilePresignedUrlOrStreamById')
+        .mockResolvedValue({
+          type: 'stream',
+          stream: mockStream,
+          mimeType: 'image/png',
+        });
+
+      mockPipeline.mockRejectedValue(
+        Object.assign(new Error('Cannot pipe to a closed or destroyed stream'), {
+          code: 'ERR_STREAM_UNABLE_TO_PIPE',
+        }),
+      );
+
+      const mockRequest = { workspaceId: 'workspace-id' } as any;
+      const mockResponse = createMockResponse({ headersSent: false }) as any;
+
+      await expect(
+        controller.getFileById(
+          mockResponse,
+          mockRequest,
+          FileFolder.CorePicture,
+          'file-123',
+        ),
+      ).resolves.toBeUndefined();
+
+      expect(loggerSpy).not.toHaveBeenCalled();
+      expect(mockResponse.destroy).not.toHaveBeenCalled();
+    });
+
     it('should throw INTERNAL_SERVER_ERROR when the stream errors before headers are sent', async () => {
       const mockStream = createMockStream();
 
