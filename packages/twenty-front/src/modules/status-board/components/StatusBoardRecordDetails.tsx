@@ -15,7 +15,7 @@ import {
 } from '@/status-board/utils/formatStatusBoardAmount';
 import { getStatusBoardContractProgress } from '@/status-board/utils/getStatusBoardContractProgress';
 import { differenceInCalendarDays, parseISO } from 'date-fns';
-import { OPPORTUNITY_STAGE_TIMINGS } from 'twenty-shared/constants';
+import { getStatusBoardStageTimings } from '@/status-board/utils/getStatusBoardStageTimings';
 
 const StatusBoardStageLabel = ({
   objectNameSingular,
@@ -64,6 +64,7 @@ export const StatusBoardRecordDetails = ({
   record: ObjectRecord;
   objectNameSingular: string;
 }) => {
+  const { objectMetadataItem } = useObjectMetadataItem({ objectNameSingular });
   if (
     record.expectedPaymentDate !== undefined ||
     record.depositStatus !== undefined
@@ -128,7 +129,7 @@ export const StatusBoardRecordDetails = ({
         objectNameSingular={objectNameSingular}
         value={record.customStage}
       />
-      {OPPORTUNITY_STAGE_TIMINGS.map((stage) => {
+      {getStatusBoardStageTimings(objectMetadataItem).map((stage) => {
         const days = record[stage.daysField];
         return typeof days === 'number' &&
           Number.isFinite(days) &&

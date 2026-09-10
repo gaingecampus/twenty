@@ -183,15 +183,23 @@ const StatusBoardMemberChips = ({
   onClearSelectedMemberIds: () => void;
 }) => {
   const { groups } = useStatusBoardDummyData();
+  const groupOrder = new Map(groups.map((group, index) => [group.id, index]));
   const memberGroups = [
     ...new Set(members.map((member) => getStatusBoardMemberGroupId(member))),
-  ].map((groupId) => ({
-    id: groupId ?? 'ungrouped',
-    label: groups.find((group) => group.id === groupId)?.name ?? '소속 미지정',
-    members: members.filter(
-      (member) => getStatusBoardMemberGroupId(member) === groupId,
-    ),
-  }));
+  ]
+    .sort(
+      (left, right) =>
+        (groupOrder.get(left ?? '') ?? groups.length) -
+        (groupOrder.get(right ?? '') ?? groups.length),
+    )
+    .map((groupId) => ({
+      id: groupId ?? 'ungrouped',
+      label:
+        groups.find((group) => group.id === groupId)?.name ?? '소속 미지정',
+      members: members.filter(
+        (member) => getStatusBoardMemberGroupId(member) === groupId,
+      ),
+    }));
   return (
     <div role="group" aria-label="구성원 선택">
       <StyledStatusBoardChipRow>

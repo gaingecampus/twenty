@@ -29,11 +29,15 @@ type HeaderLayout = 'default' | 'centerTitle' | 'centerContent';
 const StyledHeader = styled.div<{ headerLayout: HeaderLayout }>`
   align-items: center;
   background-color: ${themeCssVariables.background.secondary};
+  border-bottom: var(
+    --t-page-header-border,
+    1px solid ${themeCssVariables.border.color.medium}
+  );
   box-sizing: border-box;
   column-gap: var(--t-page-header-column-gap, ${themeCssVariables.spacing[2]});
-  display: grid;
   /* Balanced side columns keep center content truly centered; right 1fr
      also gives pinned command buttons room to measure and render. */
+  display: grid;
   grid-template-columns: ${({ headerLayout }) => {
     if (headerLayout === 'centerTitle' || headerLayout === 'centerContent') {
       return 'var(--t-page-header-grid, minmax(0, 1fr) auto minmax(0, 1fr))';
@@ -41,10 +45,6 @@ const StyledHeader = styled.div<{ headerLayout: HeaderLayout }>`
 
     return 'minmax(0, auto) minmax(0, 1fr)';
   }};
-  border-bottom: var(
-    --t-page-header-border,
-    1px solid ${themeCssVariables.border.color.medium}
-  );
   min-height: var(--t-page-bar-min-height, ${SIDE_PANEL_TOP_BAR_HEIGHT}px);
   padding: var(--t-page-header-padding-y, 0)
     var(--t-page-header-padding-x, ${themeCssVariables.spacing[3]});

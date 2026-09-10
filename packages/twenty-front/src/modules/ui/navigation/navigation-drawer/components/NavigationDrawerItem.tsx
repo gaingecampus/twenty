@@ -129,10 +129,10 @@ const StyledItem = styled.button<StyledItemProps>`
           ${themeCssVariables.font.weight.medium}
         )`};
   height: var(--t-nav-item-height, ${themeCssVariables.spacing[7]});
-  margin-top: ${({ indentationLevel }) =>
-    indentationLevel === 2 ? '2px' : '0'};
   justify-content: ${({ isNavigationDrawerExpanded }) =>
     isNavigationDrawerExpanded ? 'flex-start' : 'center'};
+  margin-top: ${({ indentationLevel }) =>
+    indentationLevel === 2 ? '2px' : '0'};
   min-width: 0;
   overflow: hidden;
   padding-bottom: var(--t-nav-item-padding-y, ${themeCssVariables.spacing[1]});
@@ -276,10 +276,7 @@ const StyledIcon = styled.div<{ isNavigationDrawerExpanded: boolean }>`
     height: calc(var(--t-nav-icon-size, var(--t-icon-size-md)) * 1px);
     min-width: calc(var(--t-nav-icon-size, var(--t-icon-size-md)) * 1px);
     stroke: currentColor;
-    stroke-width: var(
-      --t-nav-item-active-icon-stroke,
-      var(--t-icon-stroke-md)
-    );
+    stroke-width: var(--t-nav-item-active-icon-stroke, var(--t-icon-stroke-md));
     width: calc(var(--t-nav-icon-size, var(--t-icon-size-md)) * 1px);
   }
 `;
@@ -329,7 +326,10 @@ const StyledRightOptionsContainer = styled.div`
     &:hover {
       background: var(
         --t-nav-right-option-active-hover-bg,
-        var(--t-nav-right-option-hover-bg, var(--t-icon-button-hover-bg, transparent))
+        var(
+          --t-nav-right-option-hover-bg,
+          var(--t-icon-button-hover-bg, transparent)
+        )
       );
     }
   }
@@ -461,9 +461,7 @@ export const NavigationDrawerItem = ({
         rel={isExternalLink ? 'noopener noreferrer' : undefined}
         draggable={isInternalLink ? false : undefined}
       >
-        <StyledItemElementsContainer
-          isNavigationDrawerExpanded={isExpanded}
-        >
+        <StyledItemElementsContainer isNavigationDrawerExpanded={isExpanded}>
           {showBreadcrumb && isExpanded && (
             <NavigationDrawerItemBreadcrumb state={subItemState} />
           )}

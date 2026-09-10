@@ -1,3 +1,4 @@
+import { StatusBoardLinkedCountKpi } from '@/status-board/components/StatusBoardLinkedCountKpi';
 import { StatusBoardDepositShare } from '@/status-board/components/StatusBoardDepositShare';
 import { IconChevronLeft, IconChevronRight } from 'twenty-ui/icon';
 import { StatusBoardCountKpi } from '@/status-board/components/StatusBoardCountKpi';
@@ -21,6 +22,7 @@ import { buildStatusBoardDateRangeFilter } from '@/status-board/utils/buildStatu
 import { buildStatusBoardRecordGqlFields } from '@/status-board/utils/buildStatusBoardRecordGqlFields';
 import {
   buildStatusBoardMemberFilter,
+  buildStatusBoardOverdueDepositFilter,
   buildStatusBoardPaidDepositFilter,
   buildStatusBoardUnpaidPeriodDepositFilter,
 } from '@/status-board/utils/buildStatusBoardSectionFilters';
@@ -37,6 +39,7 @@ type StatusBoardPeriodSectionProps = {
   onboardingObjectMetadataItem: EnrichedObjectMetadataItem | undefined;
   memberIds: string[] | undefined;
   selectedGroupIds: string[];
+  todayIsoDate: string;
   periodRange: StatusBoardPeriodRange;
   periodType: StatusBoardPeriodType;
   periodOffset: number;
@@ -51,6 +54,7 @@ export const StatusBoardPeriodSection = ({
   onboardingObjectMetadataItem,
   memberIds,
   selectedGroupIds,
+  todayIsoDate,
   periodRange,
   periodType,
   periodOffset,
@@ -58,6 +62,15 @@ export const StatusBoardPeriodSection = ({
   onShiftPeriodOffset,
   onOpenSheet,
 }: StatusBoardPeriodSectionProps) => {
+  const overdueFilter =
+    depositObjectMetadataItem === undefined
+      ? undefined
+      : buildStatusBoardOverdueDepositFilter({
+          depositObjectMetadataItem,
+          todayIsoDate,
+          memberIds,
+          selectedGroupIds,
+        });
   const paidFilter =
     depositObjectMetadataItem === undefined
       ? undefined
@@ -171,36 +184,24 @@ export const StatusBoardPeriodSection = ({
           </StyledStatusBoardSegment>
         </StyledStatusBoardPeriodControls>
       </StyledStatusBoardSectionHeader>
-      <StyledStatusBoardKpiGrid>
-        {depositObjectMetadataItem !== undefined && (
-          <StatusBoardCountKpi
-            objectNameSingular={STATUS_BOARD_OBJECT_NAME_SINGULAR.deposit}
-            filter={paidFilter}
-            label="입금 완료"
-            tone="green"
-            showAmountAsValue={hasStatusBoardField(
-              depositObjectMetadataItem,
-              STATUS_BOARD_FIELD.amount,
-            )}
-            onClick={() =>
-              onOpenSheet({
-                title: `${periodRange.label} 입금 완료`,
-                kpiLabel: '입금 완료',
-                tone: 'green',
-                objectNameSingular: STATUS_BOARD_OBJECT_NAME_SINGULAR.deposit,
-                filter: paidFilter,
-                recordGqlFields: buildStatusBoardRecordGqlFields({
-                  objectMetadataItem: depositObjectMetadataItem,
-                  fieldNames: [
-                    STATUS_BOARD_FIELD.name,
-                    STATUS_BOARD_FIELD.company,
-                    STATUS_BOARD_FIELD.amount,
-                  ],
-                }),
-              })
-            }
-          />
-        )}
+      <StyledStatusBoardKpiGrid columns={5}>
+        {depositObjectMetadataItem !== undefined &&
+          hasStatusBoardField(
+            depositObjectMetadataItem,
+            STATUS_BOARD_FIELD.expectedPaymentDate,
+          ) && (
+            <StatusBoardLinkedCountKpi
+              objectMetadataItem={depositObjectMetadataItem}
+              filter={overdueFilter}
+              label="미입금"
+              tone="red"
+              withSum={hasStatusBoardField(
+                depositObjectMetadataItem,
+                STATUS_BOARD_FIELD.amount,
+              )}
+              onOpenSheet={onOpenSheet}
+            />
+          )}
         {depositObjectMetadataItem !== undefined && (
           <StatusBoardCountKpi
             objectNameSingular={STATUS_BOARD_OBJECT_NAME_SINGULAR.deposit}
@@ -218,6 +219,35 @@ export const StatusBoardPeriodSection = ({
                 tone: 'orange',
                 objectNameSingular: STATUS_BOARD_OBJECT_NAME_SINGULAR.deposit,
                 filter: dueFilter,
+                recordGqlFields: buildStatusBoardRecordGqlFields({
+                  objectMetadataItem: depositObjectMetadataItem,
+                  fieldNames: [
+                    STATUS_BOARD_FIELD.name,
+                    STATUS_BOARD_FIELD.company,
+                    STATUS_BOARD_FIELD.amount,
+                  ],
+                }),
+              })
+            }
+          />
+        )}
+        {depositObjectMetadataItem !== undefined && (
+          <StatusBoardCountKpi
+            objectNameSingular={STATUS_BOARD_OBJECT_NAME_SINGULAR.deposit}
+            filter={paidFilter}
+            label="입금 완료"
+            tone="green"
+            showAmountAsValue={hasStatusBoardField(
+              depositObjectMetadataItem,
+              STATUS_BOARD_FIELD.amount,
+            )}
+            onClick={() =>
+              onOpenSheet({
+                title: `${periodRange.label} 입금 완료`,
+                kpiLabel: '입금 완료',
+                tone: 'green',
+                objectNameSingular: STATUS_BOARD_OBJECT_NAME_SINGULAR.deposit,
+                filter: paidFilter,
                 recordGqlFields: buildStatusBoardRecordGqlFields({
                   objectMetadataItem: depositObjectMetadataItem,
                   fieldNames: [

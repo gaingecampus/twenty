@@ -1,5 +1,7 @@
 import { StatusBoardRecordAvatar } from '@/status-board/components/StatusBoardRecordAvatar';
 import { StatusBoardEmptyState } from '@/status-board/components/StatusBoardEmptyState';
+import { useStatusBoardDummyData } from '@/status-board/contexts/StatusBoardDummyDataContext';
+import { getStatusBoardMemberGroupId } from '@/status-board/utils/getStatusBoardMemberGroupId';
 import {
   StyledStatusBoardMuted,
   StyledStatusBoardWeekSection,
@@ -88,6 +90,8 @@ const StatusBoardWeekSectionLoaded = ({
   members: ObjectRecord[];
   memberIds: string[] | undefined;
 }) => {
+  const { groups } = useStatusBoardDummyData();
+  const groupOrder = new Map(groups.map((group, index) => [group.id, index]));
   const { records, loading, error, refetch } = useStatusBoardFindManyRecords({
     objectNameSingular: STATUS_BOARD_OBJECT_NAME_SINGULAR.onboarding,
     filter: buildStatusBoardActiveOnboardingFilter({
@@ -130,7 +134,10 @@ const StatusBoardWeekSectionLoaded = ({
     .filter(({ memberOnboardings }) => memberOnboardings.length > 0)
     .sort(
       (left, right) =>
-        right.memberOnboardings.length - left.memberOnboardings.length,
+        (groupOrder.get(getStatusBoardMemberGroupId(left.member) ?? '') ??
+          groups.length) -
+        (groupOrder.get(getStatusBoardMemberGroupId(right.member) ?? '') ??
+          groups.length),
     );
 
   const undatedCount = records.filter(

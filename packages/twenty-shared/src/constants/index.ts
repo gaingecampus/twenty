@@ -47,6 +47,7 @@ export { MULTI_ITEM_FIELD_DEFAULT_MAX_VALUES } from './MultiItemFieldDefaultMaxV
 export { MULTI_ITEM_FIELD_MIN_MAX_VALUES } from './MultiItemFieldMinMaxValues';
 export { MUTATION_MAX_MERGE_RECORDS } from './MutationMaxMergeRecords';
 export { OBJECTS_WITH_CHANNEL_VISIBILITY_CONSTRAINTS } from './ObjectsWithChannelVisibilityConstraints';
+export { OPPORTUNITY_STAGE_TIMINGS } from './OpportunityStageTiming';
 export { PermissionFlagType } from './PermissionFlagType';
 export { PermissionsOnAllObjectRecords } from './PermissionsOnAllObjectRecords';
 export { QUERY_DEFAULT_LIMIT_RECORDS } from './QueryDefaultLimitRecords';
@@ -64,4 +65,3 @@ export { TWENTY_ICONS_BASE_URL } from './TwentyIconsBaseUrl';
 export type { UiThemeId } from './UiThemeIds';
 export { UI_THEME_IDS } from './UiThemeIds';
 export { VIEW_GROUP_VISIBLE_OPTIONS_MAX } from './ViewGroupVisibleOptionsMax';
-export { OPPORTUNITY_STAGE_TIMINGS } from './OpportunityStageTiming';

@@ -1,0 +1,290 @@
+[
+  {
+    "name": "company",
+    "label": "기업",
+    "type": "RELATION",
+    "icon": "IconBuildingSkyscraper",
+    "description": "Outreaches tied to the Company",
+    "target": "company"
+  },
+  {
+    "name": "person",
+    "label": "고객",
+    "type": "RELATION",
+    "icon": "IconUser",
+    "description": "Outreaches tied to the Person",
+    "target": "person"
+  },
+  {
+    "name": "opportunity",
+    "label": "관련 기회 (최초 문의)",
+    "type": "RELATION",
+    "icon": "IconTargetArrow",
+    "description": "Outreaches tied to the Opportunity",
+    "target": "opportunity"
+  },
+  {
+    "name": "campaignType",
+    "label": "심방 유형 / 캠페인명",
+    "type": "SELECT",
+    "icon": "IconTag",
+    "options": [
+      {
+        "color": "blue",
+        "label": "비전워크샵",
+        "value": "VISION_WORKSHOP",
+        "position": 0
+      },
+      {
+        "color": "green",
+        "label": "CC클래스 연회원",
+        "value": "CC_CLASS",
+        "position": 1
+      },
+      {
+        "color": "yellow",
+        "label": "설 연휴 연락",
+        "value": "LUNAR_NEW_YEAR",
+        "position": 2
+      },
+      {
+        "color": "purple",
+        "label": "컨퍼런스 연락",
+        "value": "CONFERENCE",
+        "position": 3
+      }
+    ]
+  },
+  {
+    "name": "status",
+    "label": "진행 상태",
+    "type": "SELECT",
+    "icon": "IconActivity",
+    "options": [
+      {
+        "color": "gray",
+        "label": "대기 중 (연락 전)",
+        "value": "PENDING",
+        "position": 0
+      },
+      {
+        "color": "blue",
+        "label": "진행 중 (응답 대기)",
+        "value": "IN_PROGRESS",
+        "position": 1
+      },
+      {
+        "color": "green",
+        "label": "완료 / 참석 확정",
+        "value": "COMPLETED",
+        "position": 2
+      },
+      {
+        "color": "red",
+        "label": "보류 / 응답 없음",
+        "value": "UNRESPONSIVE",
+        "position": 3
+      }
+    ]
+  },
+  {
+    "name": "nextFollowUpDate",
+    "label": "다음 연락 예정일",
+    "type": "DATE",
+    "icon": "IconCalendarEvent"
+  },
+  {
+    "name": "isGiftSent",
+    "label": "선물 전송 여부",
+    "type": "BOOLEAN",
+    "icon": "IconGift"
+  },
+  {
+    "name": "isOnboarded",
+    "label": "온보딩 여부",
+    "type": "BOOLEAN",
+    "icon": "IconChecklist"
+  },
+  {
+    "name": "contactedAt",
+    "label": "연락 일시",
+    "type": "DATE_TIME",
+    "icon": "IconCalendarTime"
+  },
+  {
+    "name": "communicationChannel",
+    "label": "소통 채널",
+    "type": "SELECT",
+    "icon": "IconMessageCircle",
+    "description": "심방 시 사용한 커뮤니케이션 채널",
+    "options": [
+      {
+        "color": "yellow",
+        "label": "카톡",
+        "value": "KAKAOTALK",
+        "position": 0
+      },
+      {
+        "color": "green",
+        "label": "문자",
+        "value": "SMS",
+        "position": 1
+      },
+      {
+        "color": "blue",
+        "label": "전화",
+        "value": "PHONE",
+        "position": 2
+      },
+      {
+        "color": "purple",
+        "label": "이메일",
+        "value": "EMAIL",
+        "position": 3
+      },
+      {
+        "color": "red",
+        "label": "대면 방문",
+        "value": "IN_PERSON",
+        "position": 4
+      },
+      {
+        "color": "turquoise",
+        "label": "협업툴",
+        "value": "COLLAB_TOOL",
+        "position": 5
+      },
+      {
+        "color": "gray",
+        "label": "기타",
+        "value": "ETC",
+        "position": 6
+      }
+    ]
+  },
+  {
+    "name": "outreachPurpose",
+    "label": "심방 목적",
+    "type": "SELECT",
+    "icon": "IconTarget",
+    "description": "심방 연락의 주된 목적",
+    "options": [
+      {
+        "color": "blue",
+        "label": "관계 유지",
+        "value": "RELATIONSHIP",
+        "position": 0
+      },
+      {
+        "color": "purple",
+        "label": "행사 초청",
+        "value": "EVENT_INVITE",
+        "position": 1
+      },
+      {
+        "color": "green",
+        "label": "재계약 제안",
+        "value": "RENEWAL",
+        "position": 2
+      },
+      {
+        "color": "turquoise",
+        "label": "신규 제안",
+        "value": "NEW_PROPOSAL",
+        "position": 3
+      },
+      {
+        "color": "yellow",
+        "label": "만족도 확인",
+        "value": "SATISFACTION",
+        "position": 4
+      },
+      {
+        "color": "orange",
+        "label": "사후 관리",
+        "value": "FOLLOW_UP",
+        "position": 5
+      }
+    ]
+  },
+  {
+    "name": "customerTier",
+    "label": "고객 등급 / 관계",
+    "type": "SELECT",
+    "icon": "IconStar",
+    "description": "심방 시점의 고객 등급 및 관계 구분",
+    "options": [
+      {
+        "color": "blue",
+        "label": "신규",
+        "value": "NEW",
+        "position": 0
+      },
+      {
+        "color": "green",
+        "label": "기존 고객",
+        "value": "EXISTING",
+        "position": 1
+      },
+      {
+        "color": "purple",
+        "label": "VIP",
+        "value": "VIP",
+        "position": 2
+      },
+      {
+        "color": "gray",
+        "label": "휴면 고객",
+        "value": "DORMANT",
+        "position": 3
+      },
+      {
+        "color": "yellow",
+        "label": "잠재 고객",
+        "value": "PROSPECT",
+        "position": 4
+      }
+    ]
+  },
+  {
+    "name": "responseSentiment",
+    "label": "응답 반응",
+    "type": "SELECT",
+    "icon": "IconMoodSmile",
+    "description": "고객의 응답 반응 구분",
+    "options": [
+      {
+        "color": "green",
+        "label": "긍정적",
+        "value": "POSITIVE",
+        "position": 0
+      },
+      {
+        "color": "blue",
+        "label": "중립",
+        "value": "NEUTRAL",
+        "position": 1
+      },
+      {
+        "color": "red",
+        "label": "부정적",
+        "value": "NEGATIVE",
+        "position": 2
+      },
+      {
+        "color": "gray",
+        "label": "무응답",
+        "value": "NO_RESPONSE",
+        "position": 3
+      }
+    ]
+  },
+  {
+    "name": "driMember",
+    "label": "담당자 (DRI)",
+    "type": "RELATION",
+    "icon": "IconUsers",
+    "description": "담당 구성원 (Team Member)",
+    "target": "teamMember"
+  }
+]

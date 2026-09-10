@@ -14,7 +14,8 @@ import { useStatusBoardDummyData } from '@/status-board/contexts/StatusBoardDumm
 import { andStatusBoardFilters } from '@/status-board/utils/andStatusBoardFilters';
 import { buildStatusBoardMemberFilter } from '@/status-board/utils/buildStatusBoardSectionFilters';
 import { buildStatusBoardRecordGqlFields } from '@/status-board/utils/buildStatusBoardRecordGqlFields';
-import { OPPORTUNITY_STAGE_TIMINGS } from 'twenty-shared/constants';
+import { type OPPORTUNITY_STAGE_TIMINGS } from 'twenty-shared/constants';
+import { getStatusBoardStageTimings } from '@/status-board/utils/getStatusBoardStageTimings';
 import {
   FieldMetadataType,
   type RecordGqlOperationFilter,
@@ -31,7 +32,9 @@ export const StatusBoardStageTimingSection = ({
   memberIds,
   onOpenSheet,
 }: StatusBoardStageTimingSectionProps) => {
-  const stages = OPPORTUNITY_STAGE_TIMINGS.filter((stage) =>
+  const stages = getStatusBoardStageTimings(
+    opportunityObjectMetadataItem,
+  ).filter((stage) =>
     opportunityObjectMetadataItem?.readableFields.some(
       (field) =>
         field.name === stage.daysField &&

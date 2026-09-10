@@ -19,9 +19,11 @@ export const StatusBoardKpiIcon = ({
   tone?: StatusBoardTone;
 }) => {
   const Icon =
-    label.includes('미지급') || label.includes('완료')
+    label.includes('미지급') ||
+    label.includes('미입금') ||
+    label.includes('완료')
       ? IconCoins
-      : label.includes('문의')
+      : label.includes('문의') || label.includes('리드')
         ? IconMessageCirclePlus
         : label.includes('종료')
           ? IconCalendar

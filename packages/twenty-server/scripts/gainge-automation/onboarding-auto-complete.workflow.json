@@ -1,0 +1,122 @@
+{
+  "name": "계약 종료일 경과 시 온보딩 자동 종료",
+  "description": "매일 00:05 UTC(한국 09:05), 계약 종료일이 오늘보다 이전이고 온보딩 상태가 ACTIVE인 계약을 DONE으로 변경합니다. 종료일 당일·미입력·PRE·DONE은 제외합니다. 한 번에 최대 200건, 실패 시 재시도 후 중단하며 잔여 ACTIVE는 다음 실행에서 재처리합니다.",
+  "trigger": {
+    "name": "매일 한국 시간 오전 9시 5분",
+    "type": "CRON",
+    "settings": {
+      "type": "CUSTOM",
+      "pattern": "5 0 * * *",
+      "outputSchema": {}
+    },
+    "nextStepIds": [
+      "491e215e-8e21-4078-a0d2-a5c027e3c045"
+    ]
+  },
+  "steps": [
+    {
+      "id": "491e215e-8e21-4078-a0d2-a5c027e3c045",
+      "name": "종료일이 지난 온보딩 중 계약 조회",
+      "type": "FIND_RECORDS",
+      "valid": true,
+      "nextStepIds": [
+        "9758cc1d-955e-4a20-ae3d-4031fa6780e9"
+      ],
+      "settings": {
+        "input": {
+          "objectName": "onboarding",
+          "limit": 200,
+          "filter": {
+            "recordFilterGroups": [],
+            "recordFilters": [
+              {
+                "id": "8c215109-3ba5-46fc-ad85-d413a51b95b7",
+                "fieldMetadataId": "cd814568-03f3-4594-8767-41568a7af3d9",
+                "type": "SELECT",
+                "operand": "IS",
+                "value": "[\"ACTIVE\"]"
+              },
+              {
+                "id": "cb86f5f6-fb62-4cff-9779-05577861ac7e",
+                "fieldMetadataId": "32a08431-c6b6-4985-b3a3-07e4d15717ec",
+                "type": "DATE",
+                "operand": "IS_IN_PAST",
+                "value": ""
+              }
+            ]
+          },
+          "orderBy": {
+            "gqlOperationOrderBy": [
+              {
+                "contractEndDate": "AscNullsLast"
+              }
+            ]
+          }
+        },
+        "outputSchema": {},
+        "errorHandlingOptions": {
+          "retryOnFailure": {
+            "value": true
+          },
+          "continueOnFailure": {
+            "value": false
+          }
+        }
+      }
+    },
+    {
+      "id": "9758cc1d-955e-4a20-ae3d-4031fa6780e9",
+      "name": "계약별 상태 변경",
+      "type": "ITERATOR",
+      "valid": true,
+      "nextStepIds": [],
+      "settings": {
+        "input": {
+          "items": "{{491e215e-8e21-4078-a0d2-a5c027e3c045.all}}",
+          "initialLoopStepIds": [
+            "1594b29a-01f8-427b-9c53-bb0bc41e4d26"
+          ],
+          "shouldContinueOnIterationFailure": false
+        },
+        "outputSchema": {},
+        "errorHandlingOptions": {
+          "retryOnFailure": {
+            "value": true
+          },
+          "continueOnFailure": {
+            "value": false
+          }
+        }
+      }
+    },
+    {
+      "id": "1594b29a-01f8-427b-9c53-bb0bc41e4d26",
+      "name": "온보딩 종료로 변경",
+      "type": "UPDATE_RECORD",
+      "valid": true,
+      "nextStepIds": [],
+      "settings": {
+        "input": {
+          "objectName": "onboarding",
+          "objectRecordId": "{{9758cc1d-955e-4a20-ae3d-4031fa6780e9.currentItem.id}}",
+          "objectRecord": {
+            "onboardingStatus": "DONE"
+          },
+          "fieldsToUpdate": [
+            "onboardingStatus"
+          ]
+        },
+        "outputSchema": {},
+        "errorHandlingOptions": {
+          "retryOnFailure": {
+            "value": true
+          },
+          "continueOnFailure": {
+            "value": false
+          }
+        }
+      }
+    }
+  ],
+  "activate": false
+}

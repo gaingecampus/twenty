@@ -25,9 +25,9 @@ const StyledContainer = styled.div<{ isExpanded: boolean }>`
     --t-nav-header-padding-right,
     ${themeCssVariables.spacing[2]}
   );
-  width: 100%;
   transition: gap calc(${themeCssVariables.animation.duration.normal} * 1s) ease;
   user-select: none;
+  width: 100%;
 
   @media (max-width: ${MOBILE_VIEWPORT}px) {
     padding-left: ${themeCssVariables.spacing[5]};

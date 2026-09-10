@@ -22,11 +22,11 @@ const StyledLastColumnHeader = styled.div<{
       ? `1px solid ${themeCssVariables.border.color.light}`
       : 'none'};
   border-left: none !important;
+  box-sizing: border-box;
+
   color: ${themeCssVariables.font.color.tertiary};
 
   cursor: pointer;
-
-  box-sizing: border-box;
   height: ${RECORD_TABLE_ROW_HEIGHT}px;
   max-height: ${RECORD_TABLE_ROW_HEIGHT}px;
 `;

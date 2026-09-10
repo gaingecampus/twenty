@@ -75,10 +75,13 @@ export const StyledStatusBoardMuted = styled.span`
   font-size: 13px;
 `;
 
-export const StyledStatusBoardKpiGrid = styled.div`
+export const StyledStatusBoardKpiGrid = styled.div<{ columns?: number }>`
   display: grid;
   gap: 8px;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(
+    ${({ columns }) => columns ?? 4},
+    minmax(0, 1fr)
+  );
   @container (max-width: 720px) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }

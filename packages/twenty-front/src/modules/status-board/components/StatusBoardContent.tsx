@@ -148,16 +148,14 @@ const StatusBoardContentBody = ({
             <>
               <StatusBoardNowSection
                 onOpenSheet={setSheet}
-                depositObjectMetadataItem={metadata.deposit}
                 opportunityObjectMetadataItem={metadata.opportunity}
                 onboardingObjectMetadataItem={metadata.onboarding}
                 memberIds={memberIds}
-                selectedGroupIds={filters.selectedGroupIds}
-                todayIsoDate={todayIsoDate}
                 monthStartDate={monthRange.startDate}
                 monthEndDate={monthRange.endDate}
               />
               <StatusBoardPeriodSection
+                todayIsoDate={todayIsoDate}
                 depositObjectMetadataItem={metadata.deposit}
                 opportunityObjectMetadataItem={metadata.opportunity}
                 onboardingObjectMetadataItem={metadata.onboarding}
