@@ -23,7 +23,7 @@ try {
     throw new Error('API and database mismatch');
   const existing = (
     await c.query(
-      'SELECT name,type FROM core."fieldMetadata" WHERE "objectMetadataId"=$1 AND "isActive"=true',
+      'SELECT id,name,type,description FROM core."fieldMetadata" WHERE "objectMetadataId"=$1 AND "isActive"=true',
       [object.id],
     )
   ).rows;
@@ -39,6 +39,11 @@ try {
         {
           input: { field: { ...field, objectMetadataId: object.id } },
         },
+      );
+    if (match && match.description !== field.description)
+      await gql(
+        'mutation($input:UpdateOneFieldMetadataInput!){updateOneField(input:$input){id}}',
+        { input: { id: match.id, update: { description: field.description } } },
       );
   }
   await c.query('BEGIN');
