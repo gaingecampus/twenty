@@ -298,17 +298,22 @@ const StatusBoardMemberModal = ({
       aria-labelledby="status-board-member-title"
       onCancel={onClose}
       onClose={onClose}
+      onClick={(event) => {
+        if (event.target !== event.currentTarget) return;
+        const bounds = event.currentTarget.getBoundingClientRect();
+        if (
+          event.clientX < bounds.left ||
+          event.clientX > bounds.right ||
+          event.clientY < bounds.top ||
+          event.clientY > bounds.bottom
+        ) {
+          onClose();
+        }
+      }}
     >
       <StyledMemberDialogBody>
         <StyledMemberDialogHeader>
           <h2 id="status-board-member-title">구성원 선택</h2>
-          <StyledStatusBoardChip
-            type="button"
-            isActive={false}
-            onClick={onClose}
-          >
-            완료
-          </StyledStatusBoardChip>
         </StyledMemberDialogHeader>
         {children}
       </StyledMemberDialogBody>

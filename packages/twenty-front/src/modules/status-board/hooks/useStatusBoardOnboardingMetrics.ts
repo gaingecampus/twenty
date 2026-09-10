@@ -101,6 +101,7 @@ export const useStatusBoardOnboardingMetrics = ({
       : undefined;
   return {
     ...metrics,
+    assignments,
     loading: contracts.loading || links.loading,
     error: contracts.error ?? links.error ?? configurationError,
   };

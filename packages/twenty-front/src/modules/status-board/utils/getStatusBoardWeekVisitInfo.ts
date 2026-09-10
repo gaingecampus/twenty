@@ -1,3 +1,4 @@
+import { getStatusBoardRelationId } from '@/status-board/utils/getStatusBoardOnboardingMetrics';
 import { STATUS_BOARD_FIELD } from '@/status-board/constants/StatusBoardFieldNames';
 import { type ObjectRecord } from '@/object-record/types/ObjectRecord';
 import { isDefined } from 'twenty-shared/utils';
@@ -76,54 +77,36 @@ export const getStatusBoardCompanyName = (record: ObjectRecord): string => {
 export const getStatusBoardMemberRoleOnOnboarding = ({
   onboarding,
   memberId,
+  assignments = [],
+  showLeadConsultants = false,
 }: {
   onboarding: ObjectRecord;
   memberId: string;
-}): '리드' | '실행' | undefined => {
-  const leadConsultantId =
-    typeof onboarding[STATUS_BOARD_FIELD.leadConsultantId] === 'string'
-      ? onboarding[STATUS_BOARD_FIELD.leadConsultantId]
-      : typeof onboarding[STATUS_BOARD_FIELD.leadConsultant] === 'object' &&
-          isDefined(onboarding[STATUS_BOARD_FIELD.leadConsultant]) &&
-          'id' in onboarding[STATUS_BOARD_FIELD.leadConsultant] &&
-          typeof onboarding[STATUS_BOARD_FIELD.leadConsultant].id === 'string'
-        ? onboarding[STATUS_BOARD_FIELD.leadConsultant].id
-        : undefined;
-
-  if (leadConsultantId === memberId) {
-    return '리드';
-  }
-
-  const executionConsultantId =
-    typeof onboarding[STATUS_BOARD_FIELD.executionConsultantId] === 'string'
-      ? onboarding[STATUS_BOARD_FIELD.executionConsultantId]
-      : typeof onboarding[STATUS_BOARD_FIELD.executionConsultant] ===
-            'object' &&
-          isDefined(onboarding[STATUS_BOARD_FIELD.executionConsultant]) &&
-          'id' in onboarding[STATUS_BOARD_FIELD.executionConsultant] &&
-          typeof onboarding[STATUS_BOARD_FIELD.executionConsultant].id ===
-            'string'
-        ? onboarding[STATUS_BOARD_FIELD.executionConsultant].id
-        : undefined;
-
-  if (executionConsultantId === memberId) {
-    return '실행';
-  }
-
+  assignments?: { onboardingId: string; memberId: string }[];
+  showLeadConsultants?: boolean;
+}): '리드' | '실행' | '공동 실행' | undefined => {
+  const executionId =
+    getStatusBoardRelationId(onboarding.executionConsultantId) ??
+    getStatusBoardRelationId(onboarding.executionConsultant);
+  if (executionId === memberId) return '실행';
+  if (
+    assignments.some(
+      (assignment) =>
+        assignment.onboardingId === onboarding.id &&
+        assignment.memberId === memberId,
+    )
+  )
+    return '공동 실행';
+  const leadId =
+    getStatusBoardRelationId(onboarding.leadConsultantId) ??
+    getStatusBoardRelationId(onboarding.leadConsultant);
+  if (showLeadConsultants && leadId === memberId) return '리드';
   return undefined;
 };
 
-export const isStatusBoardOnboardingOwnedByMember = ({
-  onboarding,
-  memberId,
-}: {
-  onboarding: ObjectRecord;
-  memberId: string;
-}): boolean => {
-  return (
-    getStatusBoardMemberRoleOnOnboarding({ onboarding, memberId }) !== undefined
-  );
-};
+export const isStatusBoardOnboardingOwnedByMember = (
+  options: Parameters<typeof getStatusBoardMemberRoleOnOnboarding>[0],
+): boolean => getStatusBoardMemberRoleOnOnboarding(options) !== undefined;
 
 export const getStatusBoardShortMemberName = (name: string): string => {
   return name.replace(/\(.*\)/, '').trim();

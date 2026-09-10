@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import { useStatusBoardOnboardingMetrics } from '@/status-board/hooks/useStatusBoardOnboardingMetrics';
 import { StatusBoardRecordAvatar } from '@/status-board/components/StatusBoardRecordAvatar';
 import { StatusBoardEmptyState } from '@/status-board/components/StatusBoardEmptyState';
 import { useStatusBoardDummyData } from '@/status-board/contexts/StatusBoardDummyDataContext';
@@ -27,7 +29,7 @@ import { STATUS_BOARD_LIMITS } from '@/status-board/constants/StatusBoardLimits'
 import { STATUS_BOARD_OBJECT_NAME_SINGULAR } from '@/status-board/constants/StatusBoardObjectNames';
 import { STATUS_BOARD_FIELD } from '@/status-board/constants/StatusBoardFieldNames';
 import { STATUS_BOARD_WEEK_DAYS } from '@/status-board/constants/StatusBoardWeekDays';
-import { useStatusBoardFindManyRecords } from '@/status-board/hooks/useStatusBoardFindManyRecords';
+import { useStatusBoardAllRecords } from '@/status-board/hooks/useStatusBoardAllRecords';
 import { isStatusBoardDummyRecordId } from '@/status-board/utils/buildStatusBoardDummyDataset';
 import { buildStatusBoardRecordGqlFields } from '@/status-board/utils/buildStatusBoardRecordGqlFields';
 import { buildStatusBoardActiveOnboardingFilter } from '@/status-board/utils/buildStatusBoardSectionFilters';
@@ -92,11 +94,21 @@ const StatusBoardWeekSectionLoaded = ({
 }) => {
   const { groups } = useStatusBoardDummyData();
   const groupOrder = new Map(groups.map((group, index) => [group.id, index]));
-  const { records, loading, error, refetch } = useStatusBoardFindManyRecords({
+  const [showLeadConsultants, setShowLeadConsultants] = useState(false);
+  const assignmentData = useStatusBoardOnboardingMetrics({
+    objectMetadataItem: onboardingObjectMetadataItem,
+  });
+  const { assignments } = assignmentData;
+  const {
+    records,
+    loading: contractsLoading,
+    error: contractsError,
+    refetch,
+  } = useStatusBoardAllRecords({
     objectNameSingular: STATUS_BOARD_OBJECT_NAME_SINGULAR.onboarding,
     filter: buildStatusBoardActiveOnboardingFilter({
       onboardingObjectMetadataItem,
-      memberIds,
+      memberIds: undefined,
     }),
     limit: STATUS_BOARD_LIMITS.week,
     recordGqlFields: buildStatusBoardRecordGqlFields({
@@ -114,16 +126,22 @@ const StatusBoardWeekSectionLoaded = ({
     }),
   });
 
+  const loading = contractsLoading || assignmentData.loading;
+  const error = contractsError ?? assignmentData.error;
   const todayKey = STATUS_BOARD_WEEK_DAYS[new Date().getDay() - 1]?.[0];
   const weekdayKeys = STATUS_BOARD_WEEK_DAYS.map(([key]) => key);
 
   const memberRows = [...members]
     .map((member) => {
-      const memberOnboardings = records.filter((onboarding) =>
-        isStatusBoardOnboardingOwnedByMember({
-          onboarding,
-          memberId: member.id,
-        }),
+      const memberOnboardings = records.filter(
+        (onboarding) =>
+          (memberIds === undefined || memberIds.includes(member.id)) &&
+          isStatusBoardOnboardingOwnedByMember({
+            onboarding,
+            memberId: member.id,
+            assignments,
+            showLeadConsultants,
+          }),
       );
 
       return {
@@ -131,7 +149,6 @@ const StatusBoardWeekSectionLoaded = ({
         memberOnboardings,
       };
     })
-    .filter(({ memberOnboardings }) => memberOnboardings.length > 0)
     .sort(
       (left, right) =>
         (groupOrder.get(getStatusBoardMemberGroupId(left.member) ?? '') ??
@@ -140,8 +157,14 @@ const StatusBoardWeekSectionLoaded = ({
           groups.length),
     );
 
+  const visibleContractIds = new Set(
+    memberRows.flatMap((row) =>
+      row.memberOnboardings.map((record) => record.id),
+    ),
+  );
   const undatedCount = records.filter(
     (onboarding) =>
+      visibleContractIds.has(onboarding.id) &&
       !getStatusBoardVisitDays(onboarding).some((day) =>
         weekdayKeys.some((key) => key === day),
       ),
@@ -159,6 +182,14 @@ const StatusBoardWeekSectionLoaded = ({
           </StyledStatusBoardMuted>
         )}
       </StyledStatusBoardSectionHeader>
+      <label>
+        <input
+          type="checkbox"
+          checked={showLeadConsultants}
+          onChange={(event) => setShowLeadConsultants(event.target.checked)}
+        />
+        리드 컨설턴트 표시
+      </label>
       <StyledStatusBoardCadenceRow aria-label="방문 주기 구분">
         {(['WEEKLY', 'BIWEEKLY', 'MONTHLY'] as const).map((cadence) => (
           <StyledStatusBoardCadenceBadge key={cadence} cadence={cadence}>
@@ -183,8 +214,8 @@ const StatusBoardWeekSectionLoaded = ({
         />
       ) : memberRows.length === 0 ? (
         <StatusBoardEmptyState
-          title="표시할 방문 일정이 없어요"
-          description="선택한 구성원의 방문 일정을 찾지 못했어요. 진행 중 계약의 담당자와 방문 요일을 확인해 주세요."
+          title="표시할 구성원이 없어요"
+          description="선택한 그룹과 구성원 필터를 확인해 주세요."
           variant="calendar"
         />
       ) : (
@@ -292,6 +323,8 @@ const StatusBoardWeekSectionLoaded = ({
                             const role = getStatusBoardMemberRoleOnOnboarding({
                               onboarding,
                               memberId: member.id,
+                              assignments,
+                              showLeadConsultants,
                             });
                             const titleCadence =
                               cadence === 'BIWEEKLY'
