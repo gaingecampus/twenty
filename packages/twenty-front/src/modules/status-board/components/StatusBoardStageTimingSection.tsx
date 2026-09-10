@@ -57,8 +57,8 @@ export const StatusBoardStageTimingSection = ({
         </StyledStatusBoardSectionTitle>
       </StyledStatusBoardSectionHeader>
       <StyledStatusBoardMuted>
-        전체 기간 · 생성일부터 최초 관측 도달일까지 평균 · 한국 날짜 기준, 주말
-        포함. 측정 전 이력과 미도달 단계는 제외됩니다.
+        전체 기간 · 최초 문의 날짜부터 최초 도달일까지 평균 · 한국 날짜 기준,
+        주말 포함. 측정 전 이력과 미도달 단계는 제외됩니다.
       </StyledStatusBoardMuted>
       <StyledStatusBoardKpiGrid>
         {stages.map((stage) => (

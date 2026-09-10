@@ -23,6 +23,8 @@ test('transactional stage timing across creation, edits, reentry, imports and de
     await client.query(`CREATE TABLE ${table} (
       id integer PRIMARY KEY, name text, "customStage" text,
       "createdAt" timestamptz NOT NULL DEFAULT now(), "deletedAt" timestamptz,
+      "firstInquiryDate" date DEFAULT (now() AT TIME ZONE 'Asia/Seoul')::date,
+      "sotongWanryoIlja" date,
       ${fields.map((f) => `"${f.name}" ${f.type === 'NUMBER' ? 'integer' : 'timestamptz'}`).join(',')}
     )`);
     await client.query(buildStageTimingSql(schema));
@@ -53,8 +55,9 @@ test('transactional stage timing across creation, edits, reentry, imports and de
     );
     assert.equal(record.stageProposalReachedAt.getTime(), firstProposal);
     // The KST midnight boundary, not rounded 24-hour intervals, defines a day.
-    record = await run(`INSERT INTO ${table}(id,"customStage","createdAt")
-      VALUES(2,'MATCHING_SUCCESS', ((now() AT TIME ZONE 'Asia/Seoul')::date - 3 + time '23:59') AT TIME ZONE 'Asia/Seoul') RETURNING *`);
+    record =
+      await run(`INSERT INTO ${table}(id,"customStage","firstInquiryDate")
+      VALUES(2,'MATCHING_SUCCESS', (now() AT TIME ZONE 'Asia/Seoul')::date - 3) RETURNING *`);
     assert.equal(record.stageMatchingSuccessDays, 3);
     assert.equal(record.stageInquiryDays, null);
     record = await run(
@@ -66,14 +69,14 @@ test('transactional stage timing across creation, edits, reentry, imports and de
     );
     assert.equal(record.stageOnHoldDays, null); // restoration is not an observed transition
     record = await run(
-      `INSERT INTO ${table}(id,"customStage","createdAt") VALUES(3,'INQUIRY',now()+interval '2 days') RETURNING *`,
+      `INSERT INTO ${table}(id,"customStage","firstInquiryDate") VALUES(3,'INQUIRY',now()+interval '2 days') RETURNING *`,
     );
     assert.equal(record.stageInquiryDays, null); // no negative duration
     await client.query(
       `ALTER TABLE ${table} DISABLE TRIGGER gainge_opportunity_stage_timing`,
     );
     await client.query(
-      `INSERT INTO ${table}(id,"customStage","createdAt") VALUES(4,'COMMUNICATING',now()-interval '10 days')`,
+      `INSERT INTO ${table}(id,"customStage","firstInquiryDate") VALUES(4,'COMMUNICATING',now()-interval '10 days')`,
     );
     await client.query(
       `ALTER TABLE ${table} ENABLE TRIGGER gainge_opportunity_stage_timing`,
@@ -101,6 +104,39 @@ test('transactional stage timing across creation, edits, reentry, imports and de
       results.map((r) => r.stageFollowUpDays),
       [0, 10],
     );
+    // Completion is the first terminal transition, not every edit or reentry.
+    record = await run(
+      `UPDATE ${table} SET "customStage"='ON_HOLD' WHERE id=1 RETURNING *`,
+    );
+    const completion = record.sotongWanryoIlja;
+    assert.ok(completion);
+    await run(
+      `UPDATE ${table} SET "customStage"='COMMUNICATING' WHERE id=1 RETURNING *`,
+    );
+    record = await run(
+      `UPDATE ${table} SET "customStage"='MATCHING_SUCCESS', "sotongWanryoIlja"='2000-01-01' WHERE id=1 RETURNING *`,
+    );
+    assert.deepEqual(record.sotongWanryoIlja, completion);
+    // Missing inquiry dates still record completion, but never invent a duration.
+    record = await run(
+      `INSERT INTO ${table}(id,"customStage","firstInquiryDate") VALUES(5,'MATCHING_HOLD_COMPLETED',NULL) RETURNING *`,
+    );
+    assert.ok(record.sotongWanryoIlja);
+    assert.ok(record.stageClosedReachedAt);
+    assert.equal(record.stageClosedDays, null);
+    const reached = record.stageClosedReachedAt.getTime();
+    record = await run(
+      `UPDATE ${table} SET "firstInquiryDate"=(now() AT TIME ZONE 'Asia/Seoul')::date - 20 WHERE id=5 RETURNING *`,
+    );
+    assert.equal(record.stageClosedDays, 20);
+    assert.equal(record.stageClosedReachedAt.getTime(), reached);
+    // Correcting the date rebases all measured durations without moving history.
+    record = await run(
+      `UPDATE ${table} SET "firstInquiryDate"=(now() AT TIME ZONE 'Asia/Seoul')::date - 30 WHERE id=1 RETURNING *`,
+    );
+    assert.equal(record.stageInquiryDays, 30);
+    assert.equal(record.stageMatchingSuccessDays, 30);
+    assert.deepEqual(record.sotongWanryoIlja, completion);
   } finally {
     await client.query('ROLLBACK');
     await client.end();

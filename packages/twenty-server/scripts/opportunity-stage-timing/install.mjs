@@ -1,7 +1,12 @@
 // Explicit operator installation: metadata via CRM API, trigger via the matching database.
 // No credentials are stored or printed. Default is a read-only plan; pass --apply to install.
 import pg from 'pg';
-import { fields, buildStageTimingSql } from './schema.mjs';
+import {
+  fields as timingFields,
+  communicationCompletionField,
+  buildStageTimingSql,
+} from './schema.mjs';
+const fields = [...timingFields, communicationCompletionField];
 
 const workspaceId = process.argv
   .find((arg) => arg.startsWith('--workspace-id='))

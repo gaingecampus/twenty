@@ -1,5 +1,10 @@
 import connect from '../local-status-board-client.cjs';
-import { fields, buildStageTimingSql } from './schema.mjs';
+import {
+  fields as timingFields,
+  communicationCompletionField,
+  buildStageTimingSql,
+} from './schema.mjs';
+const fields = [...timingFields, communicationCompletionField];
 
 const { c, gql, workspaceId, schema } = await connect();
 try {

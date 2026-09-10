@@ -1,6 +1,16 @@
-name: Repair CRM automation audit columns
+name: Repair CRM automations
 on:
   workflow_dispatch:
+    inputs:
+      operation:
+        description: Audit repair or inquiry timing migration (plan before apply)
+        type: choice
+        default: audit
+        options:
+          - audit
+          - plan
+          - apply
+          - verify
 permissions:
   contents: read
   id-token: write
@@ -24,12 +34,29 @@ jobs:
           jq -r '.value' <<<"${token_response}" >"${token_file}"
           echo "AWS_WEB_IDENTITY_TOKEN_FILE=${token_file}" >>"${GITHUB_ENV}"
       - name: Repair only GAINGE junction trigger audit columns
+        if: inputs.operation == 'audit'
         shell: bash
         run: |
           set -euo pipefail
           script_b64="$(base64 -w 0 packages/twenty-server/scripts/gainge-automation/repair-junction-audit.cjs)"
           parameters="$(jq -n --arg script "$script_b64" '{commands:["set -eu", "container=$(docker ps -q --filter label=com.docker.compose.project=twenty-ec2 --filter label=com.docker.compose.service=server)", "test -n \"$container\"", "printf %s " + ($script | @sh) + " | base64 -d | docker exec -i \"$container\" node"]}')"
           command_id="$(aws ssm send-command --instance-ids "$EC2_INSTANCE_ID" --document-name AWS-RunShellScript --comment 'Fix GAINGE automation junction audit columns' --parameters "$parameters" --query Command.CommandId --output text)"
+          aws ssm wait command-executed --command-id "$command_id" --instance-id "$EC2_INSTANCE_ID" || true
+          result="$(aws ssm get-command-invocation --command-id "$command_id" --instance-id "$EC2_INSTANCE_ID" --query '{Status:Status,Output:StandardOutputContent,Error:StandardErrorContent}' --output json)"
+          echo "$result"
+          test "$(jq -r .Status <<<"$result")" = Success
+
+      - name: Plan, apply or verify inquiry timing migration
+        if: inputs.operation != 'audit'
+        shell: bash
+        env:
+          MIGRATION_MODE: ${{ inputs.operation }}
+        run: |
+          set -euo pipefail
+          script_b64="$(base64 -w 0 packages/twenty-server/scripts/opportunity-stage-timing/migrate-legacy.cjs)"
+          sql_b64="$(base64 -w 0 packages/twenty-server/scripts/opportunity-stage-timing/stage-timing-v2.sql)"
+          parameters="$(jq -n --arg script "$script_b64" --arg sql "$sql_b64" --arg mode "$MIGRATION_MODE" '{commands:["set -eu", "container=$(docker ps -q --filter label=com.docker.compose.project=twenty-ec2 --filter label=com.docker.compose.service=server)", "test -n \"$container\"", "printf %s " + ($script | @sh) + " | base64 -d | docker exec -i -e GAINGE_TIMING_WORKSPACE_ID=5cd16cee-0d32-4404-93b9-e707e01ada9d -e GAINGE_TIMING_MODE=" + ($mode | @sh) + " -e GAINGE_TIMING_SQL_B64=" + ($sql | @sh) + " \"$container\" node"]}')"
+          command_id="$(aws ssm send-command --instance-ids "$EC2_INSTANCE_ID" --document-name AWS-RunShellScript --comment 'GAINGE inquiry timing migration' --parameters "$parameters" --query Command.CommandId --output text)"
           aws ssm wait command-executed --command-id "$command_id" --instance-id "$EC2_INSTANCE_ID" || true
           result="$(aws ssm get-command-invocation --command-id "$command_id" --instance-id "$EC2_INSTANCE_ID" --query '{Status:Status,Output:StandardOutputContent,Error:StandardErrorContent}' --output json)"
           echo "$result"

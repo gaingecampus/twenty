@@ -4,13 +4,16 @@ import { ActiveOrSuspendedWorkspaceCommandRunner } from 'src/database/commands/c
 import { WorkspaceIteratorService } from 'src/database/commands/command-runners/workspace-iterator.service';
 import { type RunOnWorkspaceArgs } from 'src/database/commands/command-runners/workspace.command-runner';
 import {
-  fields,
+  fields as timingFields,
+  communicationCompletionField,
   buildStageTimingSql,
 } from 'src/database/commands/upgrade-version-command/2-20/opportunity-stage-timing-schema';
 import { RegisteredWorkspaceCommand } from 'src/engine/core-modules/upgrade/decorators/registered-workspace-command.decorator';
 import { FieldMetadataService } from 'src/engine/metadata-modules/field-metadata/services/field-metadata.service';
 import { WorkspaceCacheService } from 'src/engine/workspace-cache/services/workspace-cache.service';
 import { getWorkspaceSchemaName } from 'src/engine/workspace-datasource/utils/get-workspace-schema-name.util';
+
+const fields = [...timingFields, communicationCompletionField];
 
 @RegisteredWorkspaceCommand('2.20.0', 1803000000000)
 @Command({
