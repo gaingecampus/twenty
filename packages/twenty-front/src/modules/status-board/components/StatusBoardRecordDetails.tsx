@@ -57,6 +57,54 @@ const DAYS: Record<string, string> = {
   SUN: '일',
 };
 
+export const StatusBoardContractDday = ({
+  record,
+}: {
+  record: ObjectRecord;
+}) => {
+  const progress = getStatusBoardContractProgress(
+    record.contractStartDate,
+    record.contractEndDate,
+  );
+  if (record.onboardingStatus === 'DONE' || progress === undefined) return null;
+  return (
+    <StyledStatusBoardRowCaption>
+      <SelectDisplay
+        color={
+          progress.remaining < 0
+            ? 'red'
+            : progress.remaining <= 30
+              ? 'orange'
+              : 'gray'
+        }
+        label={
+          progress.remaining < 0
+            ? `${-progress.remaining}일 초과`
+            : `D-${progress.remaining}`
+        }
+      />
+    </StyledStatusBoardRowCaption>
+  );
+};
+
+export const StatusBoardContractProgress = ({
+  record,
+}: {
+  record: ObjectRecord;
+}) => {
+  const progress = getStatusBoardContractProgress(
+    record.contractStartDate,
+    record.contractEndDate,
+  );
+  return progress === undefined ? null : (
+    <StyledStatusBoardProgress
+      aria-label="계약 기간 진행률"
+      value={progress.percent}
+      max={100}
+    />
+  );
+};
+
 export const StatusBoardRecordDetails = ({
   record,
   objectNameSingular,
@@ -90,10 +138,6 @@ export const StatusBoardRecordDetails = ({
     );
   }
   if (typeof record.onboardingStatus === 'string') {
-    const progress = getStatusBoardContractProgress(
-      record.contractStartDate,
-      record.contractEndDate,
-    );
     return (
       <StyledStatusBoardContractLabels>
         <StatusBoardStageLabel
@@ -101,24 +145,7 @@ export const StatusBoardRecordDetails = ({
           fieldName="onboardingStatus"
           value={record.onboardingStatus}
         />
-        {record.onboardingStatus !== 'DONE' && progress !== undefined && (
-          <StyledStatusBoardRowCaption>
-            <SelectDisplay
-              color={
-                progress.remaining < 0
-                  ? 'red'
-                  : progress.remaining <= 30
-                    ? 'orange'
-                    : 'gray'
-              }
-              label={
-                progress.remaining < 0
-                  ? `${-progress.remaining}일 초과`
-                  : `D-${progress.remaining}`
-              }
-            />
-          </StyledStatusBoardRowCaption>
-        )}
+        <StatusBoardContractDday record={record} />
       </StyledStatusBoardContractLabels>
     );
   }
@@ -148,10 +175,6 @@ export const StatusBoardContractDetails = ({
 }: {
   record: ObjectRecord;
 }) => {
-  const progress = getStatusBoardContractProgress(
-    record.contractStartDate,
-    record.contractEndDate,
-  );
   const cadence =
     typeof record.visitCadence === 'string'
       ? (CADENCES[record.visitCadence] ?? record.visitCadence)
@@ -184,13 +207,7 @@ export const StatusBoardContractDetails = ({
           </StyledStatusBoardTag>
         )}
       </StyledStatusBoardContractMeta>
-      {progress !== undefined && (
-        <StyledStatusBoardProgress
-          aria-label="계약 기간 진행률"
-          value={progress.percent}
-          max={100}
-        />
-      )}
+      <StatusBoardContractProgress record={record} />
     </>
   );
 };

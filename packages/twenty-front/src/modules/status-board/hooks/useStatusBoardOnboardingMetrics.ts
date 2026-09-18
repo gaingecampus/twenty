@@ -3,7 +3,9 @@ import { useObjectMetadataItems } from '@/object-metadata/hooks/useObjectMetadat
 import { type EnrichedObjectMetadataItem } from '@/object-metadata/types/EnrichedObjectMetadataItem';
 import { getJunctionConfig } from '@/object-record/record-field/ui/utils/junction/getJunctionConfig';
 import { getRelationJoinColumnName } from '@/object-record/record-field/ui/utils/junction/getRelationJoinColumnName';
+import { STATUS_BOARD_ONBOARDING_COMPANY_TYPES } from '@/status-board/constants/StatusBoardOnboardingCompanyTypes';
 import { useStatusBoardAllRecords } from '@/status-board/hooks/useStatusBoardAllRecords';
+import { getStatusBoardOnboardingCompanyMetrics } from '@/status-board/utils/getStatusBoardOnboardingCompanyMetrics';
 import { buildStatusBoardActiveOnboardingFilter } from '@/status-board/utils/buildStatusBoardSectionFilters';
 import {
   getStatusBoardOnboardingMetrics,
@@ -63,9 +65,19 @@ export const useStatusBoardOnboardingMetrics = ({
       id: true,
       ...(hasExecutionId ? { [executionIdField]: true } : {}),
       ...(objectMetadataItem.readableFields.some(
+        (field) => field.name === 'leadConsultant',
+      )
+        ? { leadConsultantId: true }
+        : {}),
+      ...(objectMetadataItem.readableFields.some(
         (field) => field.name === 'company',
       )
         ? { company: { id: true } }
+        : {}),
+      ...(objectMetadataItem.readableFields.some(
+        (field) => field.name === 'onboardingType',
+      )
+        ? { onboardingType: true }
         : {}),
     },
   });
@@ -95,12 +107,19 @@ export const useStatusBoardOnboardingMetrics = ({
     memberIds,
     executionIdField,
   });
+  const companyMetrics = getStatusBoardOnboardingCompanyMetrics({
+    records: contracts.records,
+    assignments,
+    memberIds,
+    onboardingTypes: STATUS_BOARD_ONBOARDING_COMPANY_TYPES,
+  });
   const configurationError =
     coField && (!sourceKey || !targetKey || !canReadAssignments)
       ? new Error('공동 실행 컨설턴트 관계를 확인할 수 없습니다')
       : undefined;
   return {
     ...metrics,
+    companyMetrics,
     assignments,
     loading: contracts.loading || links.loading,
     error: contracts.error ?? links.error ?? configurationError,

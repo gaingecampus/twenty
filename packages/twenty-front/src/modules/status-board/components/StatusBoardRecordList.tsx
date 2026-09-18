@@ -2,13 +2,18 @@ import { StatusBoardCompanyActivity } from '@/status-board/components/StatusBoar
 import { useState } from 'react';
 import { StatusBoardRecordAvatar } from '@/status-board/components/StatusBoardRecordAvatar';
 import { StatusBoardEmptyState } from '@/status-board/components/StatusBoardEmptyState';
+import { StatusBoardConsultantAvatars } from '@/status-board/components/StatusBoardConsultantAvatars';
 import {
   StatusBoardRecordDetails,
+  StatusBoardContractDday,
   StatusBoardContractDetails,
+  StatusBoardContractProgress,
 } from '@/status-board/components/StatusBoardRecordDetails';
 import {
   StyledStatusBoardContract,
   StyledStatusBoardPagination,
+  StyledStatusBoardPageButton,
+  StyledStatusBoardPageGap,
   StyledStatusBoardPeriodNavButton,
   StyledStatusBoardContractTop,
   StyledStatusBoardGroupTitle,
@@ -19,10 +24,16 @@ import {
   StyledStatusBoardRowLink,
   StyledStatusBoardRowList,
   StyledStatusBoardRowName,
+  StyledStatusBoardRowBadge,
   type StatusBoardTone,
 } from '@/status-board/components/statusBoardStyled';
 import { STATUS_BOARD_LIMITS } from '@/status-board/constants/StatusBoardLimits';
 import { useStatusBoardFindManyRecords } from '@/status-board/hooks/useStatusBoardFindManyRecords';
+import { useObjectMetadataItem } from '@/object-metadata/hooks/useObjectMetadataItem';
+import { STATUS_BOARD_FIELD } from '@/status-board/constants/StatusBoardFieldNames';
+import { buildStatusBoardRecordGqlFields } from '@/status-board/utils/buildStatusBoardRecordGqlFields';
+import { useStatusBoardRecordPage } from '@/status-board/hooks/useStatusBoardRecordPage';
+import { getStatusBoardPageItems } from '@/status-board/utils/getStatusBoardPageItems';
 import { isStatusBoardDummyRecordId } from '@/status-board/utils/buildStatusBoardDummyDataset';
 import { getStatusBoardRecordCaption } from '@/status-board/utils/getStatusBoardRecordInitial';
 import { getStatusBoardRecordLabel } from '@/status-board/utils/getStatusBoardRecordLabel';
@@ -36,6 +47,11 @@ import {
 } from 'twenty-shared/types';
 import { getAppPath } from 'twenty-shared/utils';
 
+export type StatusBoardRecordMembers = {
+  objectNameSingular: string;
+  memberIdsByRecordId: Record<string, string[]>;
+};
+
 type StatusBoardRecordListProps = {
   objectNameSingular: string;
   filter?: RecordGqlOperationFilter;
@@ -47,16 +63,23 @@ type StatusBoardRecordListProps = {
   tone?: StatusBoardTone;
   paginated?: boolean;
   onPageChange?: () => void;
-  totalCount?: number;
   orderBy?: RecordGqlOperationVariables['orderBy'];
+  recordBadges?: Record<string, string>;
+  recordMembers?: StatusBoardRecordMembers;
 };
 
 const StatusBoardRecordRowContent = ({
   record,
   objectNameSingular,
+  badge,
+  members,
+  memberObjectNameSingular,
 }: {
   record: ObjectRecord;
   objectNameSingular: string;
+  badge?: string;
+  members?: ObjectRecord[];
+  memberObjectNameSingular?: string;
 }) => {
   const companyCaption = getStatusBoardRecordCaption(record);
   const owners = ['assignee', 'leadConsultant', 'executionConsultant'].flatMap(
@@ -79,6 +102,35 @@ const StatusBoardRecordRowContent = ({
     .filter(Boolean)
     .join(' · ');
   const isContract = record.onboardingStatus !== undefined;
+
+  if (badge !== undefined) {
+    return (
+      <StyledStatusBoardContract>
+        <StyledStatusBoardContractTop>
+          <StatusBoardRecordAvatar
+            record={record.company?.id ? record.company : record}
+            objectNameSingular={
+              record.company?.id ? 'company' : objectNameSingular
+            }
+          />
+          <StyledStatusBoardRowBody>
+            <StyledStatusBoardRowName title={getStatusBoardRecordLabel(record)}>
+              {getStatusBoardRecordLabel(record)}
+            </StyledStatusBoardRowName>
+          </StyledStatusBoardRowBody>
+          <StatusBoardContractDday record={record} />
+          {members !== undefined && memberObjectNameSingular !== undefined && (
+            <StatusBoardConsultantAvatars
+              members={members}
+              objectNameSingular={memberObjectNameSingular}
+            />
+          )}
+          <StyledStatusBoardRowBadge>{badge}</StyledStatusBoardRowBadge>
+        </StyledStatusBoardContractTop>
+        <StatusBoardContractProgress record={record} />
+      </StyledStatusBoardContract>
+    );
+  }
 
   return (
     <StyledStatusBoardContract>
@@ -121,20 +173,65 @@ export const StatusBoardRecordList = ({
   heading,
   paginated = false,
   onPageChange,
-  totalCount = 0,
   orderBy,
+  recordBadges,
+  recordMembers,
 }: StatusBoardRecordListProps) => {
   const [page, setPage] = useState(0);
-  const [fetchingPage, setFetchingPage] = useState(false);
   const pageSize = 10;
-  const { records, loading, error, refetch, hasNextPage, fetchMoreRecords } =
-    useStatusBoardFindManyRecords({
-      objectNameSingular,
-      filter,
-      limit: paginated ? pageSize : STATUS_BOARD_LIMITS.list,
-      orderBy,
-      recordGqlFields,
+  const list = useStatusBoardFindManyRecords({
+    objectNameSingular,
+    filter,
+    limit: STATUS_BOARD_LIMITS.list,
+    orderBy,
+    recordGqlFields,
+    skip: paginated,
+  });
+  const pageResult = useStatusBoardRecordPage({
+    objectNameSingular,
+    filter,
+    orderBy,
+    recordGqlFields,
+    page,
+    pageSize,
+    skip: !paginated,
+  });
+  const { records, loading, error, refetch } = paginated ? pageResult : list;
+  const memberObjectNameSingular =
+    recordMembers?.objectNameSingular ?? objectNameSingular;
+  const { objectMetadataItem: memberObjectMetadataItem } =
+    useObjectMetadataItem({ objectNameSingular: memberObjectNameSingular });
+  const memberIds = [
+    ...new Set(
+      records.flatMap(
+        (record) => recordMembers?.memberIdsByRecordId[record.id] ?? [],
+      ),
+    ),
+  ];
+  const { records: memberRecords } = useStatusBoardFindManyRecords({
+    objectNameSingular: memberObjectNameSingular,
+    filter: { id: { in: memberIds } },
+    limit: STATUS_BOARD_LIMITS.list,
+    recordGqlFields: buildStatusBoardRecordGqlFields({
+      objectMetadataItem: memberObjectMetadataItem,
+      fieldNames: [STATUS_BOARD_FIELD.name],
+    }),
+    skip: memberIds.length === 0,
+  });
+  const getRecordMembers = (recordId: string) => {
+    const ids = recordMembers?.memberIdsByRecordId[recordId];
+    return ids?.flatMap((id) => {
+      const member = memberRecords.find((candidate) => candidate.id === id);
+      return member ? [member] : [];
     });
+  };
+  const { hasNextPage, fetchMoreRecords } = list;
+  const totalCount = pageResult.totalCount;
+  const pageCount = Math.max(1, Math.ceil(totalCount / pageSize));
+  const goToPage = (nextPage: number) => {
+    setPage(Math.min(Math.max(nextPage, 0), pageCount - 1));
+    onPageChange?.();
+  };
 
   if (loading && records.length === 0) {
     return (
@@ -161,7 +258,7 @@ export const StatusBoardRecordList = ({
     );
   }
 
-  if (records.length === 0) {
+  if (records.length === 0 && page === 0) {
     return (
       <StatusBoardEmptyState
         title={heading ?? emptyLabel}
@@ -185,15 +282,15 @@ export const StatusBoardRecordList = ({
       <StyledStatusBoardRowList
         hideSeparators={objectNameSingular === 'onboarding'}
       >
-        {(paginated
-          ? records.slice(page * pageSize, (page + 1) * pageSize)
-          : records
-        ).map((record) =>
+        {records.map((record) =>
           isStatusBoardDummyRecordId(record.id) ? (
             <StyledStatusBoardRow key={record.id}>
               <StatusBoardRecordRowContent
                 record={record}
                 objectNameSingular={objectNameSingular}
+                badge={recordBadges?.[record.id]}
+                members={getRecordMembers(record.id)}
+                memberObjectNameSingular={recordMembers?.objectNameSingular}
               />
             </StyledStatusBoardRow>
           ) : (
@@ -207,6 +304,9 @@ export const StatusBoardRecordList = ({
               <StatusBoardRecordRowContent
                 record={record}
                 objectNameSingular={objectNameSingular}
+                badge={recordBadges?.[record.id]}
+                members={getRecordMembers(record.id)}
+                memberObjectNameSingular={recordMembers?.objectNameSingular}
               />
             </StyledStatusBoardRowLink>
           ),
@@ -225,46 +325,42 @@ export const StatusBoardRecordList = ({
       {paginated && (
         <StyledStatusBoardPagination aria-label="목록 페이지 이동">
           <span>
-            {page * pageSize + 1}–
-            {Math.min((page + 1) * pageSize, records.length)} /{' '}
+            {(page * pageSize + 1).toLocaleString('ko-KR')}–
+            {(page * pageSize + records.length).toLocaleString('ko-KR')} /{' '}
             {totalCount.toLocaleString('ko-KR')}건
           </span>
           <StyledStatusBoardPeriodNavButton
             type="button"
             aria-label="이전 페이지"
-            disabled={page === 0 || fetchingPage || loading}
-            onClick={() => {
-              setPage(page - 1);
-              onPageChange?.();
-            }}
+            disabled={page === 0}
+            onClick={() => goToPage(page - 1)}
           >
             ‹
           </StyledStatusBoardPeriodNavButton>
-          <span>
-            {page + 1} / {Math.max(1, Math.ceil(totalCount / pageSize))}
-          </span>
+          {getStatusBoardPageItems({ currentPage: page, pageCount }).map(
+            (item, index) =>
+              item === 'gap' ? (
+                <StyledStatusBoardPageGap key={`gap-${index}`} aria-hidden>
+                  …
+                </StyledStatusBoardPageGap>
+              ) : (
+                <StyledStatusBoardPageButton
+                  key={item}
+                  type="button"
+                  isActive={item === page}
+                  aria-label={`${item + 1}페이지`}
+                  aria-current={item === page ? 'page' : undefined}
+                  onClick={() => goToPage(item)}
+                >
+                  {item + 1}
+                </StyledStatusBoardPageButton>
+              ),
+          )}
           <StyledStatusBoardPeriodNavButton
             type="button"
             aria-label="다음 페이지"
-            disabled={
-              fetchingPage ||
-              loading ||
-              ((page + 1) * pageSize >= records.length && !hasNextPage)
-            }
-            onClick={async () => {
-              if ((page + 1) * pageSize >= records.length) {
-                setFetchingPage(true);
-                try {
-                  await fetchMoreRecords();
-                } catch {
-                  return;
-                } finally {
-                  setFetchingPage(false);
-                }
-              }
-              setPage(page + 1);
-              onPageChange?.();
-            }}
+            disabled={page >= pageCount - 1}
+            onClick={() => goToPage(page + 1)}
           >
             ›
           </StyledStatusBoardPeriodNavButton>

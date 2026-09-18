@@ -24,7 +24,10 @@ import {
   StyledStatusBoardModalSearchInput,
   StyledStatusBoardSearchClear,
 } from '@/status-board/components/statusBoardStyled';
-import { StatusBoardRecordList } from '@/status-board/components/StatusBoardRecordList';
+import {
+  StatusBoardRecordList,
+  type StatusBoardRecordMembers,
+} from '@/status-board/components/StatusBoardRecordList';
 import { type RecordGqlFields } from '@/object-record/graphql/record-gql-fields/types/RecordGqlFields';
 import { type RecordGqlOperationFilter } from 'twenty-shared/types';
 
@@ -39,6 +42,9 @@ export type StatusBoardSheetState = {
   objectNameSingular: string;
   filter?: RecordGqlOperationFilter;
   recordGqlFields: RecordGqlFields;
+  recordBadges?: Record<string, string>;
+  recordMembers?: StatusBoardRecordMembers;
+  summary?: string;
 };
 
 type StatusBoardSheetProps = {
@@ -126,7 +132,11 @@ export const StatusBoardSheet = ({ sheet, onClose }: StatusBoardSheetProps) => {
             {sheet.title}
           </StyledStatusBoardSectionTitle>
           <StyledStatusBoardSheetCount>
-            {loading ? '…' : error ? '조회 실패' : `${count}건`}
+            {loading
+              ? '…'
+              : error
+                ? '조회 실패'
+                : (sheet.summary ?? `${count}건`)}
           </StyledStatusBoardSheetCount>
           <StyledStatusBoardSheetActions>
             {sheet.listTarget && (
@@ -195,7 +205,6 @@ export const StatusBoardSheet = ({ sheet, onClose }: StatusBoardSheetProps) => {
           <StatusBoardRecordList
             key={JSON.stringify({ filter, sort })}
             paginated
-            totalCount={count}
             onPageChange={() => bodyRef.current?.scrollTo({ top: 0 })}
             orderBy={[
               {
@@ -206,6 +215,8 @@ export const StatusBoardSheet = ({ sheet, onClose }: StatusBoardSheetProps) => {
             objectNameSingular={sheet.objectNameSingular}
             filter={filter}
             recordGqlFields={sheet.recordGqlFields}
+            recordBadges={sheet.recordBadges}
+            recordMembers={sheet.recordMembers}
             emptyLabel={
               search.trim() ? '검색 결과가 없어요' : '해당하는 항목이 없어요'
             }

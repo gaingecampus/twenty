@@ -1094,3 +1094,42 @@ export const StyledStatusBoardContractLabels = styled.div`
   flex-shrink: 0;
   gap: 6px;
 `;
+
+export const StyledStatusBoardRowBadge = styled(StyledStatusBoardTag)`
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+  margin-left: auto;
+`;
+
+export const StyledStatusBoardPageButton = styled(
+  StyledStatusBoardPeriodNavButton,
+)<{ isActive?: boolean }>`
+  background: ${({ isActive }) =>
+    isActive === true ? themeCssVariables.background.secondary : 'transparent'};
+  color: ${({ isActive }) =>
+    isActive === true
+      ? themeCssVariables.font.color.primary
+      : themeCssVariables.font.color.secondary};
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  font-weight: ${({ isActive }) =>
+    isActive === true
+      ? themeCssVariables.font.weight.semiBold
+      : themeCssVariables.font.weight.regular};
+  min-width: 32px;
+  padding: 0 6px;
+  width: auto;
+`;
+
+export const StyledStatusBoardPageGap = styled.span`
+  color: ${themeCssVariables.font.color.tertiary};
+  text-align: center;
+  width: 20px;
+`;
+
+export const StyledStatusBoardAvatarStack = styled.span`
+  align-items: center;
+  display: inline-flex;
+  flex-shrink: 0;
+  gap: 2px;
+`;

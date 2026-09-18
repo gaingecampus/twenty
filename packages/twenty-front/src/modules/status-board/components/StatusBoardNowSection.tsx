@@ -67,7 +67,7 @@ export const StatusBoardNowSection = ({
         <StyledStatusBoardSectionTitle>주요 현황</StyledStatusBoardSectionTitle>
         <StyledStatusBoardMuted>오늘 기준</StyledStatusBoardMuted>
       </StyledStatusBoardSectionHeader>
-      <StyledStatusBoardKpiGrid columns={3}>
+      <StyledStatusBoardKpiGrid columns={4}>
         {opportunityObjectMetadataItem !== undefined && (
           <StatusBoardLinkedCountKpi
             onOpenSheet={onOpenSheet}
