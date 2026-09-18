@@ -11,6 +11,9 @@ import {
   StyledStatusBoardSectionTitle,
 } from '@/status-board/components/statusBoardStyled';
 import { useStatusBoardDummyData } from '@/status-board/contexts/StatusBoardDummyDataContext';
+import { STATUS_BOARD_FIELD } from '@/status-board/constants/StatusBoardFieldNames';
+import { STATUS_BOARD_STAGE_TIMING_START_DATE } from '@/status-board/constants/StatusBoardStageTimingStartDate';
+import { hasStatusBoardField } from '@/status-board/utils/hasStatusBoardField';
 import { andStatusBoardFilters } from '@/status-board/utils/andStatusBoardFilters';
 import { buildStatusBoardMemberFilter } from '@/status-board/utils/buildStatusBoardSectionFilters';
 import { buildStatusBoardRecordGqlFields } from '@/status-board/utils/buildStatusBoardRecordGqlFields';
@@ -43,11 +46,23 @@ export const StatusBoardStageTimingSection = ({
   );
   if (!opportunityObjectMetadataItem || stages.length === 0) return null;
 
-  const filter = buildStatusBoardMemberFilter({
-    objectMetadataItem: opportunityObjectMetadataItem,
-    memberIds,
-    fieldNames: ['assignee', 'assigneeId'],
-  });
+  const filter = andStatusBoardFilters([
+    buildStatusBoardMemberFilter({
+      objectMetadataItem: opportunityObjectMetadataItem,
+      memberIds,
+      fieldNames: ['assignee', 'assigneeId'],
+    }),
+    hasStatusBoardField(
+      opportunityObjectMetadataItem,
+      STATUS_BOARD_FIELD.firstInquiryDate,
+    )
+      ? {
+          [STATUS_BOARD_FIELD.firstInquiryDate]: {
+            gte: STATUS_BOARD_STAGE_TIMING_START_DATE,
+          },
+        }
+      : undefined,
+  ]);
 
   return (
     <StyledStatusBoardSection>
@@ -57,8 +72,9 @@ export const StatusBoardStageTimingSection = ({
         </StyledStatusBoardSectionTitle>
       </StyledStatusBoardSectionHeader>
       <StyledStatusBoardMuted>
-        전체 기간 · 최초 문의 날짜부터 최초 도달일까지 평균 · 한국 날짜 기준,
-        주말 포함. 측정 전 이력과 미도달 단계는 제외됩니다.
+        {STATUS_BOARD_STAGE_TIMING_START_DATE.replaceAll('-', '.')} 이후 문의 ·
+        최초 문의 날짜부터 최초 도달일까지 평균 · 한국 날짜 기준, 주말 포함.
+        측정 전 이력과 미도달 단계는 제외됩니다.
       </StyledStatusBoardMuted>
       <StyledStatusBoardKpiGrid>
         {stages.map((stage) => (
