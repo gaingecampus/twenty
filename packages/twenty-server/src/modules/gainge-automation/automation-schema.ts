@@ -4,6 +4,7 @@ export const AUTOMATION_TARGETS = [
     dri: 'driMemberId',
     link: 'companyGuseongweonLink',
     parent: 'companyId',
+    assignsEditorAsDri: true,
     addsEditorAsCollaborator: true,
   },
   {
@@ -11,6 +12,7 @@ export const AUTOMATION_TARGETS = [
     dri: 'driMemberId',
     link: 'personGuseongweonLink',
     parent: 'personId',
+    assignsEditorAsDri: true,
     addsEditorAsCollaborator: true,
   },
   {
@@ -18,6 +20,7 @@ export const AUTOMATION_TARGETS = [
     dri: 'assigneeId',
     link: 'opportunityGuseongweonLink',
     parent: 'opportunityId',
+    assignsEditorAsDri: true,
     addsEditorAsCollaborator: true,
   },
   {
@@ -25,8 +28,9 @@ export const AUTOMATION_TARGETS = [
     dri: 'executionConsultantId',
     link: 'gyeyagGuseongweonLink',
     parent: 'gyeyagId',
-    // Contract co-consultants are assigned by people only; editing a contract
-    // must not add the editor as a co-consultant.
+    // Contract consultants are assigned by people only; editing a contract
+    // must not make the editor its execution consultant or a co-consultant.
+    assignsEditorAsDri: false,
     addsEditorAsCollaborator: false,
   },
 ] as const;
@@ -46,6 +50,30 @@ export function buildAutomatedCollaboratorCleanupSql(
   linkTable: string,
 ) {
   return `UPDATE ${quoteAutomationSchema(schema)}.${quoteAutomationSchema(linkTable)} SET "deletedAt"=now() WHERE "deletedAt" IS NULL AND "createdBySource"='SYSTEM' AND "createdByName"=$1`;
+}
+
+// Clears contract consultants that point to a missing or nameless team member
+// (shown as "제목없음"). Previous values are kept as completed automation events
+// so they can be restored; links are soft-deleted.
+export function buildBlankConsultantCleanupSql(
+  schema: string,
+  tables: { onboarding: string; teamMember: string; link: string },
+) {
+  const ns = quoteAutomationSchema(schema);
+  const onboarding = `${ns}.${quoteAutomationSchema(tables.onboarding)}`;
+  const link = `${ns}.${quoteAutomationSchema(tables.link)}`;
+  const invalid = (column: string) =>
+    `(${column} IS NOT NULL AND NOT EXISTS(SELECT 1 FROM ${ns}.${quoteAutomationSchema(tables.teamMember)} m WHERE m.id=${column} AND COALESCE(trim(m.name),'')<>''))`;
+  return `
+INSERT INTO ${ns}."_gaingeAutomationEvent"("recordId","objectName",kind,payload,"enrichmentStatus","chatStatus","completedAt")
+  SELECT o.id,'onboarding','BLANK_CONSULTANT_CLEARED',jsonb_build_object('leadConsultantId',o."leadConsultantId",'executionConsultantId',o."executionConsultantId"),'NOT_APPLICABLE','NOT_APPLICABLE',now()
+  FROM ${onboarding} o WHERE ${invalid('o."leadConsultantId"')} OR ${invalid('o."executionConsultantId"')};
+UPDATE ${onboarding} o SET
+  "leadConsultantId"=CASE WHEN ${invalid('o."leadConsultantId"')} THEN NULL ELSE o."leadConsultantId" END,
+  "executionConsultantId"=CASE WHEN ${invalid('o."executionConsultantId"')} THEN NULL ELSE o."executionConsultantId" END,
+  "updatedBySource"='SYSTEM',"updatedByName"='CRM 빈 컨설턴트 정리'
+  WHERE ${invalid('o."leadConsultantId"')} OR ${invalid('o."executionConsultantId"')};
+UPDATE ${link} l SET "deletedAt"=now() WHERE l."deletedAt" IS NULL AND ${invalid('l."guseongweonId"')};`;
 }
 
 // Resume newly created companies when a person supplies their website later.
@@ -91,7 +119,9 @@ CREATE INDEX IF NOT EXISTS gainge_automation_pending ON ${ns}."_gaingeAutomation
 ${targets
   .map(
     (t) => `
-CREATE OR REPLACE FUNCTION ${ns}.gainge_assign_${t.table}() RETURNS trigger LANGUAGE plpgsql AS $assign$
+${
+  t.assignsEditorAsDri
+    ? `CREATE OR REPLACE FUNCTION ${ns}.gainge_assign_${t.table}() RETURNS trigger LANGUAGE plpgsql AS $assign$
 DECLARE actor_id uuid; member_ids uuid[]; row_json jsonb; actor_source text;
 BEGIN
   IF NEW."deletedAt" IS NOT NULL THEN RETURN NEW; END IF;
@@ -105,7 +135,10 @@ BEGIN
   RETURN NEW;
 END;$assign$;
 DROP TRIGGER IF EXISTS gainge_assign_owner ON ${ns}.${table(t.table)};
-CREATE TRIGGER gainge_assign_owner BEFORE INSERT OR UPDATE ON ${ns}.${table(t.table)} FOR EACH ROW EXECUTE FUNCTION ${ns}.gainge_assign_${t.table}();
+CREATE TRIGGER gainge_assign_owner BEFORE INSERT OR UPDATE ON ${ns}.${table(t.table)} FOR EACH ROW EXECUTE FUNCTION ${ns}.gainge_assign_${t.table}();`
+    : `DROP TRIGGER IF EXISTS gainge_assign_owner ON ${ns}.${table(t.table)};
+DROP FUNCTION IF EXISTS ${ns}.gainge_assign_${t.table}();`
+}
 CREATE OR REPLACE FUNCTION ${ns}.gainge_record_${t.table}() RETURNS trigger LANGUAGE plpgsql AS $record$
 DECLARE actor_id uuid; member_ids uuid[]; j jsonb; old_j jsonb; actor_source text; changed_fields text[]; stage_key text; event_kind text; actor_name text;
 BEGIN
@@ -138,7 +171,7 @@ BEGIN
   stage_key := CASE WHEN '${t.table}'='opportunity' THEN 'customStage' WHEN '${t.table}'='onboarding' THEN 'onboardingStatus' ELSE '' END;
   event_kind := CASE WHEN TG_OP='INSERT' THEN 'CREATED' WHEN stage_key=ANY(changed_fields) THEN 'STATUS_CHANGED' ELSE 'UPDATED' END;
   INSERT INTO ${ns}."_gaingeAutomationEvent"("recordId","objectName",kind,payload,"enrichmentStatus") VALUES
-    (NEW.id,'${t.table}',event_kind,jsonb_build_object('name',COALESCE(j->>'name',trim(COALESCE(j->>'nameFirstName','') || ' ' || COALESCE(j->>'nameLastName',''))),'driId',NEW."${t.dri}",'actorId',actor_id,'actorName',actor_name,'actorSource',actor_source,'changedFields',changed_fields,'beforeStage',old_j->>stage_key,'afterStage',j->>stage_key,'driResult',CASE WHEN actor_source IS DISTINCT FROM 'MANUAL' THEN 'NON_MANUAL' WHEN cardinality(member_ids)=1 THEN '${t.addsEditorAsCollaborator ? 'ASSIGNED_OR_COLLABORATOR' : 'ASSIGNED_IF_EMPTY'}' ELSE 'ACCOUNT_MAPPING_MISSING_OR_AMBIGUOUS' END),
+    (NEW.id,'${t.table}',event_kind,jsonb_build_object('name',COALESCE(j->>'name',trim(COALESCE(j->>'nameFirstName','') || ' ' || COALESCE(j->>'nameLastName',''))),'driId',NEW."${t.dri}",'actorId',actor_id,'actorName',actor_name,'actorSource',actor_source,'changedFields',changed_fields,'beforeStage',old_j->>stage_key,'afterStage',j->>stage_key,'driResult',CASE WHEN actor_source IS DISTINCT FROM 'MANUAL' THEN 'NON_MANUAL' WHEN cardinality(member_ids)=1 THEN '${t.addsEditorAsCollaborator ? 'ASSIGNED_OR_COLLABORATOR' : t.assignsEditorAsDri ? 'ASSIGNED_IF_EMPTY' : 'NOT_AUTO_ASSIGNED'}' ELSE 'ACCOUNT_MAPPING_MISSING_OR_AMBIGUOUS' END),
     CASE WHEN '${t.table}'='company' AND TG_OP='INSERT' THEN 'PENDING' ELSE 'NOT_APPLICABLE' END);
   RETURN NEW;
 END;$record$;

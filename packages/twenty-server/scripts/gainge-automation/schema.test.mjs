@@ -1,17 +1,17 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import pg from 'pg';
-import {buildAutomationSql,buildEnrichmentResumeSql,buildAutomatedCollaboratorCleanupSql,AUTOMATED_COLLABORATOR_NAME,AUTOMATION_TARGETS} from '../../src/modules/gainge-automation/automation-schema.ts';
+import {buildAutomationSql,buildEnrichmentResumeSql,buildAutomatedCollaboratorCleanupSql,buildBlankConsultantCleanupSql,AUTOMATED_COLLABORATOR_NAME,AUTOMATION_TARGETS} from '../../src/modules/gainge-automation/automation-schema.ts';
 test('transactional DRI and durable events across four objects',async()=>{
  const url=new URL(process.env.PG_DATABASE_URL);assert.ok(['localhost','127.0.0.1'].includes(url.hostname));
  const c=new pg.Client({connectionString:url.href});await c.connect();const ns='automation_test_'+Date.now(); const tables=Object.fromEntries(AUTOMATION_TARGETS.flatMap(t=>[[t.table,t.table==='onboarding'?'_onboarding':t.table],[t.link,'_'+t.link]]));tables.teamMember='_teamMember';
  try{await c.query('BEGIN');await c.query(`CREATE SCHEMA "${ns}"`);
- await c.query(`CREATE TABLE "${ns}"."${tables.teamMember}" (id uuid PRIMARY KEY,"workspaceMemberAccountId" uuid,"deletedAt" timestamptz)`);
+ await c.query(`CREATE TABLE "${ns}"."${tables.teamMember}" (id uuid PRIMARY KEY,"workspaceMemberAccountId" uuid,"deletedAt" timestamptz,name text)`);
  const actor='11111111-1111-4111-8111-111111111111', member='22222222-2222-4222-8222-222222222222',owner='33333333-3333-4333-8333-333333333333';
  await c.query(`INSERT INTO "${ns}"."${tables.teamMember}" VALUES($1,$2,NULL)`,[member,actor]);
  for(const t of AUTOMATION_TARGETS){await c.query(`CREATE TABLE "${ns}"."${tables[t.table]}" (id uuid PRIMARY KEY DEFAULT gen_random_uuid(),name text,"${t.dri}" uuid,"deletedAt" timestamptz,"createdBySource" text,"createdByWorkspaceMemberId" uuid,"createdByName" text,"updatedBySource" text,"updatedByWorkspaceMemberId" uuid,"updatedByName" text,"customStage" text,"onboardingStatus" text)`);await c.query(`CREATE TABLE "${ns}"."${tables[t.link]}" (id uuid DEFAULT gen_random_uuid(),"${t.parent}" uuid REFERENCES "${ns}"."${tables[t.table]}"(id),"guseongweonId" uuid,"deletedAt" timestamptz,"createdBySource" text NOT NULL,"createdByName" text NOT NULL,"updatedBySource" text NOT NULL,"updatedByName" text NOT NULL)`);}
  await c.query(buildAutomationSql(ns,AUTOMATION_TARGETS,tables));await c.query(buildAutomationSql(ns,AUTOMATION_TARGETS,tables));
- for(const t of AUTOMATION_TARGETS){const row=(await c.query(`INSERT INTO "${ns}"."${tables[t.table]}"(name,"createdBySource","createdByWorkspaceMemberId") VALUES('test','MANUAL',$1) RETURNING *`,[actor])).rows[0];assert.equal(row[t.dri],member);
+ for(const t of AUTOMATION_TARGETS){const row=(await c.query(`INSERT INTO "${ns}"."${tables[t.table]}"(name,"createdBySource","createdByWorkspaceMemberId") VALUES('test','MANUAL',$1) RETURNING *`,[actor])).rows[0];assert.equal(row[t.dri],t.assignsEditorAsDri?member:null);
  await c.query(`UPDATE "${ns}"."${tables[t.table]}" SET "${t.dri}"=$1,"updatedBySource"='MANUAL',"updatedByWorkspaceMemberId"=$2 WHERE id=$3`,[owner,actor,row.id]);
  await c.query(`UPDATE "${ns}"."${tables[t.table]}" SET name='repeat' WHERE id=$1`,[row.id]);
  assert.equal((await c.query(`SELECT count(*)::int AS n FROM "${ns}"."${tables[t.link]}" WHERE "${t.parent}"=$1`,[row.id])).rows[0].n,t.addsEditorAsCollaborator?1:0);
@@ -47,9 +47,9 @@ test('reinstalling contract triggers stops adding the editor as a co-consultant 
  const url=new URL(process.env.PG_DATABASE_URL);assert.ok(['localhost','127.0.0.1'].includes(url.hostname));
  const c=new pg.Client({connectionString:url.href});await c.connect();const ns='automation_upgrade_'+Date.now();
  const tables=Object.fromEntries(AUTOMATION_TARGETS.flatMap(t=>[[t.table,t.table==='onboarding'?'_onboarding':t.table],[t.link,'_'+t.link]]));tables.teamMember='_teamMember';
- const legacyTargets=AUTOMATION_TARGETS.map(t=>({...t,addsEditorAsCollaborator:true}));
+ const legacyTargets=AUTOMATION_TARGETS.map(t=>({...t,assignsEditorAsDri:true,addsEditorAsCollaborator:true}));
  try{await c.query('BEGIN');await c.query(`CREATE SCHEMA "${ns}"`);
- await c.query(`CREATE TABLE "${ns}"."${tables.teamMember}" (id uuid PRIMARY KEY,"workspaceMemberAccountId" uuid,"deletedAt" timestamptz)`);
+ await c.query(`CREATE TABLE "${ns}"."${tables.teamMember}" (id uuid PRIMARY KEY,"workspaceMemberAccountId" uuid,"deletedAt" timestamptz,name text)`);
  const actor='11111111-1111-4111-8111-111111111111',member='22222222-2222-4222-8222-222222222222',owner='33333333-3333-4333-8333-333333333333';
  await c.query(`INSERT INTO "${ns}"."${tables.teamMember}" VALUES($1,$2,NULL)`,[member,actor]);
  for(const t of AUTOMATION_TARGETS){await c.query(`CREATE TABLE "${ns}"."${tables[t.table]}" (id uuid PRIMARY KEY DEFAULT gen_random_uuid(),name text,"${t.dri}" uuid,"deletedAt" timestamptz,"createdBySource" text,"createdByWorkspaceMemberId" uuid,"createdByName" text,"updatedBySource" text,"updatedByWorkspaceMemberId" uuid,"updatedByName" text,"customStage" text,"onboardingStatus" text)`);await c.query(`CREATE TABLE "${ns}"."${tables[t.link]}" (id uuid DEFAULT gen_random_uuid(),"${t.parent}" uuid REFERENCES "${ns}"."${tables[t.table]}"(id),"guseongweonId" uuid,"deletedAt" timestamptz,"createdBySource" text NOT NULL,"createdByName" text NOT NULL,"updatedBySource" text NOT NULL,"updatedByName" text NOT NULL)`);}
@@ -61,11 +61,37 @@ test('reinstalling contract triggers stops adding the editor as a co-consultant 
  links[t.table]=(await c.query(`SELECT count(*)::int n FROM "${ns}"."${tables[t.link]}" WHERE "${t.parent}"=$1`,[row.id])).rows[0].n;}
  assert.deepEqual(links,{company:1,person:1,opportunity:1,onboarding:0});
  const empty=(await c.query(`INSERT INTO "${ns}"."${tables.onboarding}"(name,"createdBySource","createdByWorkspaceMemberId") VALUES('empty','MANUAL',$1) RETURNING *`,[actor])).rows[0];
- assert.equal(empty.executionConsultantId,member);
+ assert.equal(empty.executionConsultantId,null);
  const link=tables.gyeyagGuseongweonLink,parent=(await c.query(`SELECT id FROM "${ns}"."${tables.onboarding}" LIMIT 1`)).rows[0].id;
  await c.query(`INSERT INTO "${ns}"."${link}"("gyeyagId","guseongweonId","createdBySource","createdByName","updatedBySource","updatedByName") VALUES($1,$2,'SYSTEM',$3,'SYSTEM',$3),($1,$4,'MANUAL','사람','MANUAL','사람'),($1,$2,'SYSTEM','다른 시스템','SYSTEM','다른 시스템')`,[parent,member,AUTOMATED_COLLABORATOR_NAME,owner]);
  const cleanup=await c.query(buildAutomatedCollaboratorCleanupSql(ns,link),[AUTOMATED_COLLABORATOR_NAME]);assert.equal(cleanup.rowCount,1);
  assert.deepEqual((await c.query(`SELECT "createdByName" n FROM "${ns}"."${link}" WHERE "deletedAt" IS NULL`)).rows.map(r=>r.n).sort(),['다른 시스템','사람'].sort());
  assert.equal((await c.query(buildAutomatedCollaboratorCleanupSql(ns,link),[AUTOMATED_COLLABORATOR_NAME])).rowCount,0);
+ }finally{await c.query('ROLLBACK');await c.end();}
+});
+
+test('blank contract consultants are cleared with restorable history while named consultants stay',async()=>{
+ const url=new URL(process.env.PG_DATABASE_URL);assert.ok(['localhost','127.0.0.1'].includes(url.hostname));
+ const c=new pg.Client({connectionString:url.href});await c.connect();const ns='blank_consultant_'+Date.now();
+ try{await c.query('BEGIN');await c.query(`CREATE SCHEMA "${ns}"`);
+ await c.query(buildAutomationSql(ns,[]));
+ await c.query(`CREATE TABLE "${ns}"."_teamMember"(id uuid PRIMARY KEY,name text,"deletedAt" timestamptz)`);
+ await c.query(`CREATE TABLE "${ns}"."_onboarding"(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),"leadConsultantId" uuid,"executionConsultantId" uuid,"deletedAt" timestamptz,"updatedBySource" text,"updatedByName" text)`);
+ await c.query(`CREATE TABLE "${ns}"."_gyeyagGuseongweonLink"(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),"gyeyagId" uuid,"guseongweonId" uuid,"deletedAt" timestamptz)`);
+ const named='11111111-1111-4111-8111-111111111111',blank='22222222-2222-4222-8222-222222222222',missing='33333333-3333-4333-8333-333333333333',departed='44444444-4444-4444-8444-444444444444';
+ await c.query(`INSERT INTO "${ns}"."_teamMember" VALUES($1,'라이언',NULL),($2,'',now()),($3,'퇴사자',now())`,[named,blank,departed]);
+ const rows=(await c.query(`INSERT INTO "${ns}"."_onboarding"("leadConsultantId","executionConsultantId") VALUES($1,$2),($3,$1),($4,NULL),($1,$5) RETURNING id`,[named,blank,missing,null,departed])).rows;
+ await c.query(`INSERT INTO "${ns}"."_gyeyagGuseongweonLink"("gyeyagId","guseongweonId") VALUES($1,$2),($1,$3)`,[rows[0].id,blank,named]);
+ const sql=buildBlankConsultantCleanupSql(ns,{onboarding:'_onboarding',teamMember:'_teamMember',link:'_gyeyagGuseongweonLink'});
+ await c.query(sql);
+ const after=(await c.query(`SELECT id,"leadConsultantId" lead,"executionConsultantId" exec FROM "${ns}"."_onboarding"`)).rows;
+ const byId=Object.fromEntries(after.map(r=>[r.id,r]));
+ assert.deepEqual([byId[rows[0].id].lead,byId[rows[0].id].exec],[named,null]);
+ assert.deepEqual([byId[rows[1].id].lead,byId[rows[1].id].exec],[null,named]);
+ assert.deepEqual([byId[rows[3].id].lead,byId[rows[3].id].exec],[named,departed]);
+ assert.deepEqual((await c.query(`SELECT "guseongweonId" g FROM "${ns}"."_gyeyagGuseongweonLink" WHERE "deletedAt" IS NULL`)).rows.map(r=>r.g),[named]);
+ const history=(await c.query(`SELECT "recordId",payload FROM "${ns}"."_gaingeAutomationEvent" WHERE kind='BLANK_CONSULTANT_CLEARED'`)).rows;
+ assert.equal(history.length,2);assert.equal(history.find(h=>h.recordId===rows[0].id).payload.executionConsultantId,blank);
+ await c.query(sql);assert.equal((await c.query(`SELECT count(*)::int n FROM "${ns}"."_gaingeAutomationEvent"`)).rows[0].n,2);
  }finally{await c.query('ROLLBACK');await c.end();}
 });
