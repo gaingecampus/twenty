@@ -4,31 +4,48 @@ export const AUTOMATION_TARGETS = [
     dri: 'driMemberId',
     link: 'companyGuseongweonLink',
     parent: 'companyId',
+    addsEditorAsCollaborator: true,
   },
   {
     table: 'person',
     dri: 'driMemberId',
     link: 'personGuseongweonLink',
     parent: 'personId',
+    addsEditorAsCollaborator: true,
   },
   {
     table: 'opportunity',
     dri: 'assigneeId',
     link: 'opportunityGuseongweonLink',
     parent: 'opportunityId',
+    addsEditorAsCollaborator: true,
   },
   {
     table: 'onboarding',
     dri: 'executionConsultantId',
     link: 'gyeyagGuseongweonLink',
     parent: 'gyeyagId',
+    // Contract co-consultants are assigned by people only; editing a contract
+    // must not add the editor as a co-consultant.
+    addsEditorAsCollaborator: false,
   },
 ] as const;
+
+export const AUTOMATED_COLLABORATOR_NAME = 'CRM 담당자 자동 배정';
 
 export function quoteAutomationSchema(schema: string) {
   if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(schema))
     throw new Error('Invalid workspace schema');
   return `"${schema}"`;
+}
+
+// Soft-deletes links the automation created; takes AUTOMATED_COLLABORATOR_NAME
+// as $1 so links added by people are never matched.
+export function buildAutomatedCollaboratorCleanupSql(
+  schema: string,
+  linkTable: string,
+) {
+  return `UPDATE ${quoteAutomationSchema(schema)}.${quoteAutomationSchema(linkTable)} SET "deletedAt"=now() WHERE "deletedAt" IS NULL AND "createdBySource"='SYSTEM' AND "createdByName"=$1`;
 }
 
 // Resume newly created companies when a person supplies their website later.
@@ -99,13 +116,17 @@ BEGIN
   actor_id := (CASE WHEN TG_OP='INSERT' THEN j->>'createdByWorkspaceMemberId' ELSE j->>'updatedByWorkspaceMemberId' END)::uuid;
   actor_name := CASE WHEN TG_OP='INSERT' THEN j->>'createdByName' ELSE j->>'updatedByName' END;
   IF actor_source='MANUAL' THEN
-    SELECT array_agg(id) INTO member_ids FROM ${ns}.${table('teamMember')} WHERE "workspaceMemberAccountId"=actor_id AND "deletedAt" IS NULL;
+    SELECT array_agg(id) INTO member_ids FROM ${ns}.${table('teamMember')} WHERE "workspaceMemberAccountId"=actor_id AND "deletedAt" IS NULL;${
+      t.addsEditorAsCollaborator
+        ? `
     IF cardinality(member_ids)=1 AND NEW."${t.dri}" IS DISTINCT FROM member_ids[1] THEN
       PERFORM pg_advisory_xact_lock(hashtextextended('${t.table}:' || NEW.id::text,0));
       INSERT INTO ${ns}.${table(t.link)} ("${t.parent}","guseongweonId","createdBySource","createdByName","updatedBySource","updatedByName")
-        SELECT NEW.id,member_ids[1],'SYSTEM','CRM 담당자 자동 배정','SYSTEM','CRM 담당자 자동 배정'
+        SELECT NEW.id,member_ids[1],'SYSTEM','${AUTOMATED_COLLABORATOR_NAME}','SYSTEM','${AUTOMATED_COLLABORATOR_NAME}'
         WHERE NOT EXISTS(SELECT 1 FROM ${ns}.${table(t.link)} WHERE "${t.parent}"=NEW.id AND "guseongweonId"=member_ids[1] AND "deletedAt" IS NULL);
-    END IF;
+    END IF;`
+        : ''
+    }
   END IF;
   IF TG_OP='UPDATE' THEN
     IF actor_source IN ('SYSTEM','AGENT','WORKFLOW') THEN RETURN NEW; END IF;
@@ -117,7 +138,7 @@ BEGIN
   stage_key := CASE WHEN '${t.table}'='opportunity' THEN 'customStage' WHEN '${t.table}'='onboarding' THEN 'onboardingStatus' ELSE '' END;
   event_kind := CASE WHEN TG_OP='INSERT' THEN 'CREATED' WHEN stage_key=ANY(changed_fields) THEN 'STATUS_CHANGED' ELSE 'UPDATED' END;
   INSERT INTO ${ns}."_gaingeAutomationEvent"("recordId","objectName",kind,payload,"enrichmentStatus") VALUES
-    (NEW.id,'${t.table}',event_kind,jsonb_build_object('name',COALESCE(j->>'name',trim(COALESCE(j->>'nameFirstName','') || ' ' || COALESCE(j->>'nameLastName',''))),'driId',NEW."${t.dri}",'actorId',actor_id,'actorName',actor_name,'actorSource',actor_source,'changedFields',changed_fields,'beforeStage',old_j->>stage_key,'afterStage',j->>stage_key,'driResult',CASE WHEN actor_source IS DISTINCT FROM 'MANUAL' THEN 'NON_MANUAL' WHEN cardinality(member_ids)=1 THEN 'ASSIGNED_OR_COLLABORATOR' ELSE 'ACCOUNT_MAPPING_MISSING_OR_AMBIGUOUS' END),
+    (NEW.id,'${t.table}',event_kind,jsonb_build_object('name',COALESCE(j->>'name',trim(COALESCE(j->>'nameFirstName','') || ' ' || COALESCE(j->>'nameLastName',''))),'driId',NEW."${t.dri}",'actorId',actor_id,'actorName',actor_name,'actorSource',actor_source,'changedFields',changed_fields,'beforeStage',old_j->>stage_key,'afterStage',j->>stage_key,'driResult',CASE WHEN actor_source IS DISTINCT FROM 'MANUAL' THEN 'NON_MANUAL' WHEN cardinality(member_ids)=1 THEN '${t.addsEditorAsCollaborator ? 'ASSIGNED_OR_COLLABORATOR' : 'ASSIGNED_IF_EMPTY'}' ELSE 'ACCOUNT_MAPPING_MISSING_OR_AMBIGUOUS' END),
     CASE WHEN '${t.table}'='company' AND TG_OP='INSERT' THEN 'PENDING' ELSE 'NOT_APPLICABLE' END);
   RETURN NEW;
 END;$record$;
