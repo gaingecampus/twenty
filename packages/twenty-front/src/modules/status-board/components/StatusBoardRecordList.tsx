@@ -211,7 +211,8 @@ export const StatusBoardRecordList = ({
   const { records: memberRecords } = useStatusBoardFindManyRecords({
     objectNameSingular: memberObjectNameSingular,
     filter: { id: { in: memberIds } },
-    limit: STATUS_BOARD_LIMITS.list,
+    // A page can reference more consultants than a list page shows.
+    limit: STATUS_BOARD_LIMITS.picker,
     recordGqlFields: buildStatusBoardRecordGqlFields({
       objectMetadataItem: memberObjectMetadataItem,
       fieldNames: [STATUS_BOARD_FIELD.name],

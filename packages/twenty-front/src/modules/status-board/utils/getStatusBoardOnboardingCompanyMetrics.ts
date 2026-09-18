@@ -49,7 +49,8 @@ export const getStatusBoardOnboardingCompanyMetrics = ({
     const personCount = countedMemberIds.length;
     if (personCount === 0) continue;
     personCountByOnboardingId[record.id] = personCount;
-    memberIdsByOnboardingId[record.id] = countedMemberIds;
+    // Show every consultant on the contract; the member filter only scopes counts.
+    memberIdsByOnboardingId[record.id] = [...members];
     totalCount += personCount;
   }
   return { totalCount, personCountByOnboardingId, memberIdsByOnboardingId };

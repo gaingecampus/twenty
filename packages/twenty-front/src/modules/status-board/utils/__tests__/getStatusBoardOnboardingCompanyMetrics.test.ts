@@ -52,7 +52,7 @@ describe('getStatusBoardOnboardingCompanyMetrics', () => {
     ).toEqual({
       totalCount: 1,
       personCountByOnboardingId: { full: 1 },
-      memberIdsByOnboardingId: { full: ['co'] },
+      memberIdsByOnboardingId: { full: ['lead', 'execution', 'co'] },
     });
   });
 });
