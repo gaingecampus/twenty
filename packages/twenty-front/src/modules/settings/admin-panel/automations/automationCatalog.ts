@@ -29,7 +29,7 @@ export const AUTOMATION_CATALOG = [
     category: 'GAINGE',
     schedule: '30초마다 대기 건 처리',
     description:
-      '공식 홈페이지를 근거로 비어 있는 기업 소개·직원 수를 보완합니다. 하루 최대 50회. GAINGE_ENRICHMENT_ENABLED 설정에 따릅니다.',
+      '공식 홈페이지를 근거로 비어 있는 기업 소개·직원 수를 보완합니다. 최신 등록 기업부터 하루 최대 150회. GAINGE_ENRICHMENT_ENABLED 설정에 따릅니다.',
     source:
       'packages/twenty-server/src/modules/gainge-automation/gainge-automation.service.ts',
   },
