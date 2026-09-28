@@ -149,6 +149,8 @@ jobs:
           build_script_b64="$(base64 -w 0 deploy/ec2/scripts/build-and-push.sh)"
           deploy_script_b64="$(base64 -w 0 deploy/ec2/scripts/deploy-on-ec2.sh)"
           upgrade_script_b64="$(base64 -w 0 deploy/ec2/scripts/run-upgrade.sh)"
+          backup_script_b64="$(base64 -w 0 deploy/ec2/scripts/backup-database.py)"
+          backup_installer_b64="$(base64 -w 0 deploy/ec2/scripts/install-database-backup.sh)"
 
           commands_json="$(jq -n \
             --arg appDir "${EC2_APP_DIR}" \
@@ -159,6 +161,8 @@ jobs:
             --arg buildScriptB64 "${build_script_b64}" \
             --arg deployScriptB64 "${deploy_script_b64}" \
             --arg upgradeScriptB64 "${upgrade_script_b64}" \
+            --arg backupScriptB64 "${backup_script_b64}" \
+            --arg backupInstallerB64 "${backup_installer_b64}" \
             '{
               commands: ([
                 "set -euo pipefail",
@@ -180,6 +184,8 @@ jobs:
                 "printf %s " + ($buildScriptB64 | @sh) + " | base64 -d > scripts/build-and-push.sh",
                 "printf %s " + ($deployScriptB64 | @sh) + " | base64 -d > scripts/deploy-on-ec2.sh",
                 "printf %s " + ($upgradeScriptB64 | @sh) + " | base64 -d > scripts/run-upgrade.sh",
+                "printf %s " + ($backupScriptB64 | @sh) + " | base64 -d > scripts/backup-database.py",
+                "printf %s " + ($backupInstallerB64 | @sh) + " | base64 -d > scripts/install-database-backup.sh",
                 "chmod +x scripts/*.sh",
                 "EC2_APP_DIR=" + ($appDir | @sh) + " bash scripts/bootstrap-ec2.sh",
                 "if [ ! -f docker-compose.env ]; then echo Missing docker-compose.env in " + ($appDir | @sh) + " >&2; exit 1; fi",

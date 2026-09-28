@@ -349,3 +349,7 @@ cd /opt/twenty/deploy/ec2 && sudo bash scripts/run-upgrade.sh
 | `deploy/ec2/docker-compose.env.example` | env 템플릿 |
 | `deploy/ec2/scripts/run-upgrade.sh` | DB migrate + upgrade + cron |
 | `deploy/ec2/scripts/deploy-on-ec2.sh` | pull + compose up + healthz |
+
+## Daily database dump to S3
+
+See [DATABASE_BACKUP.md](DATABASE_BACKUP.md) for the 03:00 Asia/Seoul timer, 30-day backup-prefix retention, installation and restore verification. App deployment copies the backup scripts but does not enable the timer; install it once after the S3 lifecycle policy is configured.
