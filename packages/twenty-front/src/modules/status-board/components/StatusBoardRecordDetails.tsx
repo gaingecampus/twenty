@@ -43,8 +43,8 @@ const CADENCES: Record<string, string> = {
   BIWEEKLY: '격주',
   MONTHLY: '월 1회',
   BIMONTHLY: '격월',
-  PROJECT: '프로젝트',
-  LECTURE: '강의',
+  PROJECT: '프로젝트형',
+  LECTURE: '특강',
   ADVISORY: '자문',
 };
 const DAYS: Record<string, string> = {

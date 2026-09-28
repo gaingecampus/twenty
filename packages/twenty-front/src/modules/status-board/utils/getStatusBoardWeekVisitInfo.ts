@@ -6,10 +6,10 @@ import { isDefined } from 'twenty-shared/utils';
 export const STATUS_BOARD_VISIT_CADENCE_LABEL = {
   WEEKLY: '매주',
   BIWEEKLY: '격주',
-  MONTHLY: '월간',
+  MONTHLY: '월 1회',
   BIMONTHLY: '격월',
-  PROJECT: '프로젝트',
-  LECTURE: '강의',
+  PROJECT: '프로젝트형',
+  LECTURE: '특강',
   ADVISORY: '자문',
 } as const;
 
