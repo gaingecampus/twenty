@@ -78,6 +78,29 @@ UPDATE ${link} l SET "deletedAt"=now() WHERE l."deletedAt" IS NULL AND ${invalid
 
 // Resume newly created companies when a person supplies their website later.
 // Historical companies have no AI status and are deliberately excluded.
+// The company registration date, not the retry/event date, determines priority.
+export function buildAutomationLeaseSql(
+  schema: string,
+  companyTable = 'company',
+) {
+  const ns = quoteAutomationSchema(schema);
+  return `UPDATE ${ns}."_gaingeAutomationEvent" SET "leaseId"=$1,"leaseUntil"=now()+interval '5 minutes'
+    WHERE id=(SELECT e.id FROM ${ns}."_gaingeAutomationEvent" e
+      WHERE e."completedAt" IS NULL AND e."nextAttemptAt"<=now()
+        AND (e."leaseUntil" IS NULL OR e."leaseUntil"<now())
+      ORDER BY CASE WHEN e."objectName"='company' AND e."enrichmentStatus"='PENDING'
+        THEN (SELECT c."createdAt" FROM ${ns}.${quoteAutomationSchema(companyTable)} c WHERE c.id=e."recordId" AND c."deletedAt" IS NULL)
+        END DESC NULLS LAST, e."createdAt", e.id
+      LIMIT 1 FOR UPDATE OF e SKIP LOCKED) RETURNING *`;
+}
+
+export function buildEnrichmentBudgetSql(schema: string) {
+  const ns = quoteAutomationSchema(schema);
+  return `INSERT INTO ${ns}."_gaingeAutomationBudget"(day,calls) VALUES((now() AT TIME ZONE 'Asia/Seoul')::date,1)
+    ON CONFLICT(day) DO UPDATE SET calls=${ns}."_gaingeAutomationBudget".calls+1
+    WHERE ${ns}."_gaingeAutomationBudget".calls<150 RETURNING calls`;
+}
+
 export function buildEnrichmentResumeSql(
   schema: string,
   companyTable = 'company',
@@ -92,7 +115,7 @@ export function buildEnrichmentResumeSql(
       AND c."updatedAt">c."aiEnrichmentCheckedAt"
       AND NOT EXISTS(SELECT 1 FROM ${ns}."_gaingeAutomationEvent" e WHERE e."recordId"=c.id AND e."enrichmentStatus"='PENDING' AND e."completedAt" IS NULL)
       AND NOT EXISTS(SELECT 1 FROM ${ns}."_gaingeAutomationEvent" e WHERE e.id=md5('gainge-enrichment:' || c.id::text || ':' || c."updatedAt"::text)::uuid)
-    ORDER BY c."updatedAt" LIMIT 5 ON CONFLICT(id) DO NOTHING`;
+    ORDER BY c."createdAt" DESC, c.id DESC LIMIT 5 ON CONFLICT(id) DO NOTHING`;
 }
 
 export function buildAutomationSql(

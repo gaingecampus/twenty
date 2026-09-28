@@ -32,7 +32,7 @@ test('website entered after creation resumes enrichment once and excludes histor
  const c=new pg.Client({connectionString:url.href});await c.connect();const ns='enrichment_resume_'+Date.now();
  try {
  await c.query('BEGIN');await c.query(`CREATE SCHEMA "${ns}"`);
- await c.query(`CREATE TABLE "${ns}".company(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),name text,"updatedAt" timestamptz,"deletedAt" timestamptz,"aiEnrichmentStatus" text,"aiCompanyProfile" text,"domainNamePrimaryLinkUrl" text,"aiEnrichmentCheckedAt" timestamptz)`);
+ await c.query(`CREATE TABLE "${ns}".company(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),name text,"createdAt" timestamptz DEFAULT now(),"updatedAt" timestamptz,"deletedAt" timestamptz,"aiEnrichmentStatus" text,"aiCompanyProfile" text,"domainNamePrimaryLinkUrl" text,"aiEnrichmentCheckedAt" timestamptz)`);
  await c.query(buildAutomationSql(ns,[]));
  await c.query(`INSERT INTO "${ns}".company(name,"updatedAt","aiEnrichmentCheckedAt","aiEnrichmentStatus","domainNamePrimaryLinkUrl","deletedAt") VALUES('new',now(),now()-interval '1 minute','NEEDS_WEBSITE','https://example.com',NULL),('historical',now(),NULL,NULL,'https://example.com',NULL),('deleted',now(),now()-interval '1 minute','NEEDS_WEBSITE','https://example.com',now())`);
  await c.query(buildEnrichmentResumeSql(ns));await c.query(buildEnrichmentResumeSql(ns));

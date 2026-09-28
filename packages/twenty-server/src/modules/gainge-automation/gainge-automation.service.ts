@@ -13,6 +13,8 @@ import { getWorkspaceSchemaName } from 'src/engine/workspace-datasource/utils/ge
 import {
   AUTOMATION_TARGETS,
   buildEnrichmentResumeSql,
+  buildAutomationLeaseSql,
+  buildEnrichmentBudgetSql,
   quoteAutomationSchema,
 } from './automation-schema';
 import {
@@ -82,7 +84,10 @@ export class GaingeAutomationService {
         const lease = randomUUID();
         const rows: AutomationEvent[] = await queryAutomationDatabase(
           ds,
-          `UPDATE ${ns}."_gaingeAutomationEvent" SET "leaseId"=$1,"leaseUntil"=now()+interval '5 minutes' WHERE id=(SELECT id FROM ${ns}."_gaingeAutomationEvent" WHERE "completedAt" IS NULL AND "nextAttemptAt"<=now() AND ("leaseUntil" IS NULL OR "leaseUntil"<now()) ORDER BY "createdAt" LIMIT 1 FOR UPDATE SKIP LOCKED) RETURNING *`,
+          buildAutomationLeaseSql(
+            getWorkspaceSchemaName(workspaceId),
+            await this.tables.name(workspaceId, 'company'),
+          ),
           [lease],
         );
         if (!rows.length) break;
@@ -176,7 +181,11 @@ export class GaingeAutomationService {
     // Reserve a daily call budget atomically, across server and worker processes.
     const budget = await queryAutomationDatabase(
       ds,
-      `INSERT INTO ${ns}."_gaingeAutomationBudget"(day,calls) VALUES((now() AT TIME ZONE 'Asia/Seoul')::date,1) ON CONFLICT(day) DO UPDATE SET calls=${ns}."_gaingeAutomationBudget".calls+1 WHERE ${ns}."_gaingeAutomationBudget".calls<50 RETURNING calls`,
+      buildEnrichmentBudgetSql(
+        getWorkspaceSchemaName(
+          this.config.get('GAINGE_AUTOMATION_WORKSPACE_ID'),
+        ),
+      ),
     );
     if (!budget.length) return 'PENDING';
     const response = await this.http
