@@ -2,6 +2,7 @@
 // Local-only, additive fixtures. Stable IDs make repeated runs update only this dataset.
 const connect = require('./local-status-board-client.cjs');
 const crypto = require('crypto');
+const production = require('./status-board-production-schema.json');
 const id = (key) => {
   const h = crypto
     .createHash('sha256')
@@ -40,15 +41,19 @@ const id = (key) => {
       console.log('Created local teamMember object');
     }
     const field = async (object, name, label, type, extra = {}) => {
-      if (
-        (
-          await c.query(
-            'select id from core."fieldMetadata" where "objectMetadataId"=$1 and name=$2 and "isActive"=true',
-            [objects[object], name],
-          )
-        ).rowCount
-      )
+      const existing = (
+        await c.query(
+          'select id,type from core."fieldMetadata" where "objectMetadataId"=$1 and name=$2 and "isActive"=true',
+          [objects[object], name],
+        )
+      ).rows[0];
+      if (existing) {
+        if (existing.type !== type)
+          throw Error(
+            `Run align-status-board-local.cjs --apply first: ${object}.${name}`,
+          );
         return;
+      }
       await gql(
         'mutation($input:CreateOneFieldMetadataInput!){createOneField(input:$input){id}}',
         {
@@ -84,13 +89,12 @@ const id = (key) => {
       '운영형 더미 구성원',
     );
     await field('teamMember', 'employmentStatus', '재직 여부', 'SELECT', {
-      options: ['ACTIVE', 'INACTIVE'].map((value, position) => ({
-        id: id('employment-' + value),
-        value,
-        label: position ? '퇴사' : '재직',
-        color: position ? 'gray' : 'green',
-        position,
-      })),
+      options: production.teamMember
+        .find((f) => f.name === 'employmentStatus')
+        .options.map((option) => ({
+          ...option,
+          id: id('employment-' + option.value),
+        })),
     });
     await relation(
       'opportunity',
@@ -99,17 +103,33 @@ const id = (key) => {
       'teamMember',
       '담당 문의',
     );
-    await field(
+    await relation(
       'onboarding',
-      'leadConsultantId',
-      '리드 담당자 ID (더미 연결)',
-      'UUID',
+      'leadConsultant',
+      '리드 컨설턴트',
+      'teamMember',
+      '리드 계약',
     );
-    await field(
+    await relation(
       'onboarding',
-      'executionConsultantId',
-      '실행 담당자 ID (더미 연결)',
-      'UUID',
+      'executionConsultant',
+      '실행 컨설턴트',
+      'teamMember',
+      '실행 계약',
+    );
+    await relation(
+      'company',
+      'driMember',
+      '담당 구성원',
+      'teamMember',
+      '담당 기업',
+    );
+    await relation(
+      'person',
+      'driMember',
+      '담당 구성원',
+      'teamMember',
+      '담당 고객',
     );
     await relation(
       'onboarding',
@@ -133,6 +153,16 @@ const id = (key) => {
       '운영형 더미 입금',
     );
     await relation('deposit', 'company', '기업', 'company', '운영형 더미 입금');
+    const weekdayField = (
+      await c.query(
+        'select type from core."fieldMetadata" where "objectMetadataId"=$1 and name=$2',
+        [objects.onboarding, 'visitDays'],
+      )
+    ).rows[0];
+    if (weekdayField?.type !== 'MULTI_SELECT')
+      throw Error(
+        'Run align-status-board-local.cjs --apply before seeding visitDays',
+      );
     const tables = {};
     for (const name of [
       'group',
@@ -184,7 +214,13 @@ const id = (key) => {
         'select options from core."fieldMetadata" where "objectMetadataId"=$1 and name=$2',
         [objects.opportunity, 'customStage'],
       )
-    ).rows[0].options.map((o) => o.value);
+    ).rows[0].options
+      .map((o) => o.value)
+      .filter((value) =>
+        production.opportunity
+          .find((f) => f.name === 'customStage')
+          .options.some((option) => option.value === value),
+      );
     const groups = ['AX센터', '1BU', '2BU', '캠퍼스BU', '빈 그룹'];
     const memberNames = [
       '한스 더미',
@@ -234,10 +270,12 @@ const id = (key) => {
         await put('company', 'company-' + i, {
           name,
           position: i - 100,
+          driMemberId: mid,
           domainNamePrimaryLinkUrl: `https://demo-${i + 1}.example.com`,
           createdAt: day(-i) + 'T09:00:00+09:00',
         });
         await put('person', 'person-' + i, {
+          driMemberId: mid,
           nameFirstName: '담당자' + (i + 1),
           nameLastName: '[더미]',
           companyId: cid,
@@ -258,16 +296,22 @@ const id = (key) => {
         await put('onboarding', 'onboarding-' + i, {
           name: name + ' AX 컨설팅',
           companyId: cid,
-          gyeyagGieobId: cid,
-          munyiGihoeId: id('opportunity-' + i),
+          opportunityId: id('opportunity-' + i),
           onboardingStatus: ['ACTIVE', 'ACTIVE', 'PRE', 'DONE'][i % 4],
-          leadConsultant: memberNames[m],
-          executionConsultant: memberNames[m],
+          // Mixed types exercise the consulting/coaching-only company count.
+          onboardingType: [
+            'CONSULTING',
+            'COACHING',
+            'HEADHUNTING',
+            'CONSULTING',
+            'SOFTWARE_DEVELOPMENT',
+            'COACHING',
+          ][i % 6],
           leadConsultantId: mid,
           executionConsultantId: mid,
           contractStartDate: day(i % 4 === 2 ? 7 : -45),
           contractEndDate: day(i % 4 === 3 ? -2 : i % 3 === 0 ? 7 : 90),
-          visitDays: ['MON', 'TUE', 'WED', 'THU', 'FRI'][i % 5],
+          visitDays: [['MON', 'TUE', 'WED', 'THU', 'FRI'][i % 5]],
           visitCadence: 'WEEKLY',
           totalFeeAmountMicros: (12000000 + i * 1000000) * 1000000,
           totalFeeCurrencyCode: 'KRW',
@@ -277,11 +321,9 @@ const id = (key) => {
           await put('deposit', `deposit-${i}-${j}`, {
             name: name + ` ${j + 1}차 입금`,
             companyId: cid,
-            ibgeumHoesaId: cid,
             onboardingId: id('onboarding-' + i),
             creatorId: mid,
             revenueDeptId: gid,
-            maeculGwisogBuseoBuId: gid,
             depositStatus: ['PAID', 'ISSUED', 'SCHEDULED'][j],
             expectedPaymentDate: day([-3, -1, 3][j]),
             issueDate: day(-5),

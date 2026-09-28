@@ -1,0 +1,3983 @@
+{
+  "company": [
+    {
+      "name": "id",
+      "label": "Id",
+      "type": "UUID"
+    },
+    {
+      "name": "createdAt",
+      "label": "Creation date",
+      "type": "DATE_TIME",
+      "settings": {
+        "displayFormat": "RELATIVE"
+      }
+    },
+    {
+      "name": "updatedAt",
+      "label": "Last update",
+      "type": "DATE_TIME",
+      "settings": {
+        "displayFormat": "RELATIVE"
+      }
+    },
+    {
+      "name": "deletedAt",
+      "label": "Deleted at",
+      "type": "DATE_TIME",
+      "settings": {
+        "displayFormat": "RELATIVE"
+      }
+    },
+    {
+      "name": "name",
+      "label": "Name",
+      "type": "TEXT"
+    },
+    {
+      "name": "domainName",
+      "label": "Domain Name",
+      "type": "LINKS",
+      "settings": {
+        "maxNumberOfValues": 1
+      }
+    },
+    {
+      "name": "address",
+      "label": "Address",
+      "type": "ADDRESS"
+    },
+    {
+      "name": "linkedinLink",
+      "label": "Linkedin",
+      "type": "LINKS"
+    },
+    {
+      "name": "createdBy",
+      "label": "Created by",
+      "type": "ACTOR"
+    },
+    {
+      "name": "attachments",
+      "label": "Attachments",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "attachment",
+      "inverseName": "targetCompany",
+      "inverseLabel": "Target"
+    },
+    {
+      "name": "people",
+      "label": "People",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "person",
+      "inverseName": "company",
+      "inverseLabel": "Company"
+    },
+    {
+      "name": "accountOwner",
+      "label": "Account Owner",
+      "type": "RELATION",
+      "settings": {
+        "onDelete": "SET_NULL",
+        "relationType": "MANY_TO_ONE",
+        "joinColumnName": "accountOwnerId"
+      },
+      "target": "workspaceMember",
+      "inverseName": "accountOwnerForCompanies",
+      "inverseLabel": "Account Owner For Companies"
+    },
+    {
+      "name": "taskTargets",
+      "label": "Tasks",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "taskTarget",
+      "inverseName": "targetCompany",
+      "inverseLabel": "Target"
+    },
+    {
+      "name": "noteTargets",
+      "label": "Notes",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "noteTarget",
+      "inverseName": "targetCompany",
+      "inverseLabel": "Target"
+    },
+    {
+      "name": "opportunities",
+      "label": "Opportunities",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "opportunity",
+      "inverseName": "company",
+      "inverseLabel": "Company"
+    },
+    {
+      "name": "timelineActivities",
+      "label": "Timeline Activities",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "timelineActivity",
+      "inverseName": "targetCompany",
+      "inverseLabel": "Target"
+    },
+    {
+      "name": "employees",
+      "label": "직원수",
+      "type": "NUMBER"
+    },
+    {
+      "name": "phone",
+      "label": "대표 전화번호",
+      "type": "PHONES"
+    },
+    {
+      "name": "executiveType",
+      "label": "경영자 유형",
+      "type": "SELECT",
+      "options": [
+        {
+          "value": "OPT_1",
+          "label": "창업자",
+          "color": "green",
+          "position": 0
+        },
+        {
+          "value": "OPT_2",
+          "label": "2세 경영자",
+          "color": "turquoise",
+          "position": 1
+        },
+        {
+          "value": "OPT_3",
+          "label": "3세 경영자",
+          "color": "sky",
+          "position": 2
+        },
+        {
+          "value": "OPT_4",
+          "label": "전문 경영인",
+          "color": "blue",
+          "position": 3
+        }
+      ]
+    },
+    {
+      "name": "industry",
+      "label": "업종",
+      "type": "MULTI_SELECT",
+      "options": [
+        {
+          "value": "OPT_1",
+          "label": "컴퓨터시스템 통합 자문 및 구축",
+          "color": "green",
+          "position": 0
+        },
+        {
+          "value": "OPT_2",
+          "label": "시스템 소프트웨어 개발 및 공급업",
+          "color": "turquoise",
+          "position": 1
+        },
+        {
+          "value": "OPT_3",
+          "label": "피부 미용업",
+          "color": "sky",
+          "position": 2
+        },
+        {
+          "value": "OPT_4",
+          "label": "IT 스타트업",
+          "color": "blue",
+          "position": 3
+        },
+        {
+          "value": "OPT_5",
+          "label": "경영컨설팅업",
+          "color": "purple",
+          "position": 4
+        },
+        {
+          "value": "OPT_6",
+          "label": "소프트웨어 개발",
+          "color": "pink",
+          "position": 5
+        },
+        {
+          "value": "OPT_7",
+          "label": "자동차용 전자부품",
+          "color": "red",
+          "position": 6
+        },
+        {
+          "value": "OPT_8",
+          "label": "통신장비 및 부품 도매업",
+          "color": "orange",
+          "position": 7
+        },
+        {
+          "value": "OPT_9",
+          "label": "전자상거래업",
+          "color": "yellow",
+          "position": 8
+        },
+        {
+          "value": "OPT_10",
+          "label": "비주거용 건물 임대업",
+          "color": "gray",
+          "position": 9
+        },
+        {
+          "value": "OPT_11",
+          "label": "기타 정보기술 및 컴퓨터운영 관련 서비스",
+          "color": "green",
+          "position": 10
+        },
+        {
+          "value": "OPT_12",
+          "label": "의료업",
+          "color": "turquoise",
+          "position": 11
+        },
+        {
+          "value": "OPT_13",
+          "label": "공공기관 및 공기업",
+          "color": "sky",
+          "position": 12
+        },
+        {
+          "value": "OPT_14",
+          "label": "식품제조업",
+          "color": "blue",
+          "position": 13
+        },
+        {
+          "value": "OPT_15",
+          "label": "뷰티",
+          "color": "purple",
+          "position": 14
+        },
+        {
+          "value": "OPT_16",
+          "label": "교육",
+          "color": "pink",
+          "position": 15
+        },
+        {
+          "value": "OPT_17",
+          "label": "사단법인",
+          "color": "red",
+          "position": 16
+        },
+        {
+          "value": "OPT_18",
+          "label": "물류유통업",
+          "color": "orange",
+          "position": 17
+        },
+        {
+          "value": "OPT_19",
+          "label": "귀금속 및 관련제품 제조업",
+          "color": "yellow",
+          "position": 18
+        },
+        {
+          "value": "OPT_20",
+          "label": "제조업",
+          "color": "gray",
+          "position": 19
+        },
+        {
+          "value": "OPT_21",
+          "label": "정부 출자 재단",
+          "color": "green",
+          "position": 20
+        },
+        {
+          "value": "OPT_22",
+          "label": "마케팅대행사",
+          "color": "turquoise",
+          "position": 21
+        },
+        {
+          "value": "OPT_23",
+          "label": "건설업",
+          "color": "sky",
+          "position": 22
+        },
+        {
+          "value": "OPT_24",
+          "label": "요식업",
+          "color": "blue",
+          "position": 23
+        },
+        {
+          "value": "OPT_25",
+          "label": "식자재유통업",
+          "color": "purple",
+          "position": 24
+        },
+        {
+          "value": "OPT_26",
+          "label": "사회공헌재단",
+          "color": "pink",
+          "position": 25
+        },
+        {
+          "value": "OPT_27",
+          "label": "서비스업",
+          "color": "red",
+          "position": 26
+        },
+        {
+          "value": "OPT_28",
+          "label": "도소매업",
+          "color": "orange",
+          "position": 27
+        },
+        {
+          "value": "OPT_29",
+          "label": "관광업",
+          "color": "yellow",
+          "position": 28
+        }
+      ]
+    },
+    {
+      "name": "annualRevenue",
+      "label": "Annual Revenue",
+      "type": "CURRENCY",
+      "settings": {
+        "format": "full",
+        "decimals": 0
+      }
+    },
+    {
+      "name": "driMember",
+      "label": "DRI",
+      "type": "RELATION",
+      "settings": {
+        "onDelete": "SET_NULL",
+        "relationType": "MANY_TO_ONE",
+        "joinColumnName": "driMemberId"
+      },
+      "target": "teamMember",
+      "inverseName": "driDamdangGieob",
+      "inverseLabel": "DRI 담당 기업"
+    },
+    {
+      "name": "onboding",
+      "label": "온보딩",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "onboarding",
+      "inverseName": "company",
+      "inverseLabel": "고객사"
+    },
+    {
+      "name": "gongdongDamdangja",
+      "label": "공동 담당자",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "companyGuseongweonLink",
+      "inverseName": "company",
+      "inverseLabel": "Company",
+      "junctionTargetFieldName": "guseongweon"
+    },
+    {
+      "name": "ibgeum",
+      "label": "입금",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "deposit",
+      "inverseName": "company",
+      "inverseLabel": "기업"
+    },
+    {
+      "name": "aiCompanyProfile",
+      "label": "AI 기업 소개",
+      "type": "TEXT"
+    },
+    {
+      "name": "aiEnrichmentSource",
+      "label": "AI 정보 출처",
+      "type": "TEXT"
+    },
+    {
+      "name": "gogaegSarye",
+      "label": "고객 사례",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "customerCase",
+      "inverseName": "company",
+      "inverseLabel": "기업"
+    },
+    {
+      "name": "notionBackedUp",
+      "label": "노션 백업 여부 (임시)",
+      "type": "BOOLEAN"
+    },
+    {
+      "name": "notionBackedUpAt",
+      "label": "노션 백업 일시 (임시)",
+      "type": "DATE_TIME"
+    },
+    {
+      "name": "notionLink",
+      "label": "노션 링크",
+      "type": "LINKS"
+    },
+    {
+      "name": "aiEnrichmentStatus",
+      "label": "AI 정보 보완 상태",
+      "type": "TEXT"
+    },
+    {
+      "name": "ecountBackedUp",
+      "label": "이카운트 백업 여부 (임시)",
+      "type": "BOOLEAN"
+    },
+    {
+      "name": "ecountBackedUpAt",
+      "label": "이카운트 백업 일시 (임시)",
+      "type": "DATE_TIME"
+    },
+    {
+      "name": "campusBackedUp",
+      "label": "가인지캠퍼스 백업 여부 (임시)",
+      "type": "BOOLEAN"
+    },
+    {
+      "name": "campusBackedUpAt",
+      "label": "가인지캠퍼스 백업 일시 (임시)",
+      "type": "DATE_TIME"
+    },
+    {
+      "name": "aiEnrichmentCheckedAt",
+      "label": "AI 정보 확인일",
+      "type": "DATE_TIME"
+    },
+    {
+      "name": "email",
+      "label": "이메일",
+      "type": "TEXT"
+    },
+    {
+      "name": "aiEnrichmentModel",
+      "label": "AI 정보 보완 모델",
+      "type": "TEXT"
+    },
+    {
+      "name": "gainjiSheetBackedUpAt",
+      "label": "가인지 시트 백업 일시 (임시)",
+      "type": "DATE_TIME"
+    },
+    {
+      "name": "gainjiSheetBackedUp",
+      "label": "가인지 시트 백업 여부 (임시)",
+      "type": "BOOLEAN"
+    },
+    {
+      "name": "robinBusinessCard",
+      "label": "로빈 명함 여부",
+      "type": "BOOLEAN"
+    },
+    {
+      "name": "simbangRiseuteu",
+      "label": "심방 리스트",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "outreach",
+      "inverseName": "company",
+      "inverseLabel": "기업"
+    },
+    {
+      "name": "flowLink",
+      "label": "플로우 링크",
+      "type": "LINKS"
+    },
+    {
+      "name": "sheetLink",
+      "label": "시트 원본 링크",
+      "type": "LINKS"
+    }
+  ],
+  "person": [
+    {
+      "name": "id",
+      "label": "Id",
+      "type": "UUID"
+    },
+    {
+      "name": "createdAt",
+      "label": "Creation date",
+      "type": "DATE_TIME",
+      "settings": {
+        "displayFormat": "RELATIVE"
+      }
+    },
+    {
+      "name": "updatedAt",
+      "label": "Last update",
+      "type": "DATE_TIME",
+      "settings": {
+        "displayFormat": "RELATIVE"
+      }
+    },
+    {
+      "name": "deletedAt",
+      "label": "Deleted at",
+      "type": "DATE_TIME",
+      "settings": {
+        "displayFormat": "RELATIVE"
+      }
+    },
+    {
+      "name": "name",
+      "label": "Name",
+      "type": "FULL_NAME"
+    },
+    {
+      "name": "emails",
+      "label": "Emails",
+      "type": "EMAILS",
+      "settings": {
+        "maxNumberOfValues": 1
+      }
+    },
+    {
+      "name": "linkedinLink",
+      "label": "Linkedin",
+      "type": "LINKS"
+    },
+    {
+      "name": "jobTitle",
+      "label": "Job Title",
+      "type": "TEXT"
+    },
+    {
+      "name": "phones",
+      "label": "Phones",
+      "type": "PHONES",
+      "settings": {
+        "maxNumberOfValues": 1
+      }
+    },
+    {
+      "name": "avatarUrl",
+      "label": "Avatar",
+      "type": "TEXT"
+    },
+    {
+      "name": "avatarFile",
+      "label": "Avatar File",
+      "type": "FILES",
+      "settings": {
+        "maxNumberOfValues": 1
+      }
+    },
+    {
+      "name": "createdBy",
+      "label": "Created by",
+      "type": "ACTOR"
+    },
+    {
+      "name": "attachments",
+      "label": "Attachments",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "attachment",
+      "inverseName": "targetPerson",
+      "inverseLabel": "Target"
+    },
+    {
+      "name": "calendarEventParticipants",
+      "label": "Calendar Event Participants",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "calendarEventParticipant",
+      "inverseName": "person",
+      "inverseLabel": "Person"
+    },
+    {
+      "name": "company",
+      "label": "Company",
+      "type": "RELATION",
+      "settings": {
+        "onDelete": "SET_NULL",
+        "relationType": "MANY_TO_ONE",
+        "joinColumnName": "companyId"
+      },
+      "target": "company",
+      "inverseName": "people",
+      "inverseLabel": "People"
+    },
+    {
+      "name": "messageParticipants",
+      "label": "Message Participants",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "messageParticipant",
+      "inverseName": "person",
+      "inverseLabel": "Person"
+    },
+    {
+      "name": "noteTargets",
+      "label": "Notes",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "noteTarget",
+      "inverseName": "targetPerson",
+      "inverseLabel": "Target"
+    },
+    {
+      "name": "pointOfContactForOpportunities",
+      "label": "Opportunities",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "opportunity",
+      "inverseName": "pointOfContact",
+      "inverseLabel": "Point of Contact"
+    },
+    {
+      "name": "taskTargets",
+      "label": "Tasks",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "taskTarget",
+      "inverseName": "targetPerson",
+      "inverseLabel": "Target"
+    },
+    {
+      "name": "timelineActivities",
+      "label": "Events",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "timelineActivity",
+      "inverseName": "targetPerson",
+      "inverseLabel": "Target"
+    },
+    {
+      "name": "driMember",
+      "label": "DRI",
+      "type": "RELATION",
+      "settings": {
+        "onDelete": "SET_NULL",
+        "relationType": "MANY_TO_ONE",
+        "joinColumnName": "driMemberId"
+      },
+      "target": "teamMember",
+      "inverseName": "damdangGogaegSaram",
+      "inverseLabel": "DRI 담당 고객"
+    },
+    {
+      "name": "notionBackedUp",
+      "label": "노션 백업 여부 (임시)",
+      "type": "BOOLEAN"
+    },
+    {
+      "name": "notionLink",
+      "label": "노션 링크",
+      "type": "LINKS"
+    },
+    {
+      "name": "notionBackedUpAt",
+      "label": "노션 백업 일시 (임시)",
+      "type": "DATE_TIME"
+    },
+    {
+      "name": "gongdongDamdangja",
+      "label": "공동 담당자",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "personGuseongweonLink",
+      "inverseName": "person",
+      "inverseLabel": "Person",
+      "junctionTargetFieldName": "guseongweon"
+    },
+    {
+      "name": "ecountBackedUp",
+      "label": "이카운트 백업 여부 (임시)",
+      "type": "BOOLEAN"
+    },
+    {
+      "name": "ecountBackedUpAt",
+      "label": "이카운트 백업 일시 (임시)",
+      "type": "DATE_TIME"
+    },
+    {
+      "name": "campusBackedUp",
+      "label": "가인지캠퍼스 백업 여부 (임시)",
+      "type": "BOOLEAN"
+    },
+    {
+      "name": "campusBackedUpAt",
+      "label": "가인지캠퍼스 백업 일시 (임시)",
+      "type": "DATE_TIME"
+    },
+    {
+      "name": "leadSource",
+      "label": "유입 경로",
+      "type": "SELECT",
+      "options": [
+        {
+          "value": "BUSINESS_CARD",
+          "label": "명함 (엑셀 등록)",
+          "color": "blue"
+        }
+      ]
+    },
+    {
+      "name": "sheetLink",
+      "label": "시트 원본 링크",
+      "type": "LINKS"
+    },
+    {
+      "name": "gainjiSheetBackedUp",
+      "label": "가인지 시트 백업 여부 (임시)",
+      "type": "BOOLEAN"
+    },
+    {
+      "name": "gainjiSheetBackedUpAt",
+      "label": "가인지 시트 백업 일시 (임시)",
+      "type": "DATE_TIME"
+    },
+    {
+      "name": "robinBusinessCard",
+      "label": "로빈 명함 여부",
+      "type": "BOOLEAN"
+    },
+    {
+      "name": "simbangRiseuteu",
+      "label": "심방 리스트",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "outreach",
+      "inverseName": "person",
+      "inverseLabel": "고객"
+    },
+    {
+      "name": "flowLink",
+      "label": "플로우 링크",
+      "type": "LINKS"
+    },
+    {
+      "name": "listMemberships",
+      "label": "Lists",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "messageListMember",
+      "inverseName": "person",
+      "inverseLabel": "Person",
+      "junctionTargetFieldName": "list"
+    }
+  ],
+  "opportunity": [
+    {
+      "name": "id",
+      "label": "Id",
+      "type": "UUID"
+    },
+    {
+      "name": "createdAt",
+      "label": "Creation date",
+      "type": "DATE_TIME",
+      "settings": {
+        "displayFormat": "RELATIVE"
+      }
+    },
+    {
+      "name": "updatedAt",
+      "label": "Last update",
+      "type": "DATE_TIME",
+      "settings": {
+        "displayFormat": "RELATIVE"
+      }
+    },
+    {
+      "name": "deletedAt",
+      "label": "Deleted at",
+      "type": "DATE_TIME",
+      "settings": {
+        "displayFormat": "RELATIVE"
+      }
+    },
+    {
+      "name": "name",
+      "label": "Name",
+      "type": "TEXT"
+    },
+    {
+      "name": "createdBy",
+      "label": "Created by",
+      "type": "ACTOR"
+    },
+    {
+      "name": "attachments",
+      "label": "Attachments",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "attachment",
+      "inverseName": "targetOpportunity",
+      "inverseLabel": "Target"
+    },
+    {
+      "name": "company",
+      "label": "Company",
+      "type": "RELATION",
+      "settings": {
+        "onDelete": "SET_NULL",
+        "relationType": "MANY_TO_ONE",
+        "joinColumnName": "companyId"
+      },
+      "target": "company",
+      "inverseName": "opportunities",
+      "inverseLabel": "Opportunities"
+    },
+    {
+      "name": "noteTargets",
+      "label": "Notes",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "noteTarget",
+      "inverseName": "targetOpportunity",
+      "inverseLabel": "Target"
+    },
+    {
+      "name": "pointOfContact",
+      "label": "Point of Contact",
+      "type": "RELATION",
+      "settings": {
+        "onDelete": "SET_NULL",
+        "relationType": "MANY_TO_ONE",
+        "joinColumnName": "pointOfContactId"
+      },
+      "target": "person",
+      "inverseName": "pointOfContactForOpportunities",
+      "inverseLabel": "Opportunities"
+    },
+    {
+      "name": "taskTargets",
+      "label": "Tasks",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "taskTarget",
+      "inverseName": "targetOpportunity",
+      "inverseLabel": "Target"
+    },
+    {
+      "name": "timelineActivities",
+      "label": "Timeline Activities",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "timelineActivity",
+      "inverseName": "targetOpportunity",
+      "inverseLabel": "Target"
+    },
+    {
+      "name": "owner",
+      "label": "Owner",
+      "type": "RELATION",
+      "settings": {
+        "onDelete": "SET_NULL",
+        "relationType": "MANY_TO_ONE",
+        "joinColumnName": "ownerId"
+      },
+      "target": "workspaceMember",
+      "inverseName": "ownedOpportunities",
+      "inverseLabel": "Owned opportunities"
+    },
+    {
+      "name": "leadSource",
+      "label": "인지 경로",
+      "type": "SELECT",
+      "options": [
+        {
+          "value": "OPT_1",
+          "label": "사일사",
+          "color": "green",
+          "position": 0
+        },
+        {
+          "value": "OPT_2",
+          "label": "파트너 소개",
+          "color": "turquoise",
+          "position": 1
+        },
+        {
+          "value": "OPT_3",
+          "label": "지인추천",
+          "color": "sky",
+          "position": 2
+        },
+        {
+          "value": "OPT_4",
+          "label": "경영벙커",
+          "color": "blue",
+          "position": 3
+        },
+        {
+          "value": "OPT_5",
+          "label": "유튜브",
+          "color": "purple",
+          "position": 4
+        },
+        {
+          "value": "OPT_6",
+          "label": "네이버",
+          "color": "pink",
+          "position": 5
+        },
+        {
+          "value": "OPT_7",
+          "label": "검색",
+          "color": "red",
+          "position": 6
+        },
+        {
+          "value": "OPT_8",
+          "label": "멤버십",
+          "color": "orange",
+          "position": 7
+        },
+        {
+          "value": "OPT_9",
+          "label": "인스타그램",
+          "color": "yellow",
+          "position": 8
+        },
+        {
+          "value": "OPT_10",
+          "label": "모퉁이",
+          "color": "gray",
+          "position": 9
+        },
+        {
+          "value": "OPT_11",
+          "label": "재교육 문의",
+          "color": "green",
+          "position": 10
+        },
+        {
+          "value": "OPT_12",
+          "label": "주제 확장",
+          "color": "turquoise",
+          "position": 11
+        },
+        {
+          "value": "OPT_13",
+          "label": "컨설팅",
+          "color": "sky",
+          "position": 12
+        },
+        {
+          "value": "OPT_14",
+          "label": "가인지교육",
+          "color": "blue",
+          "position": 13
+        },
+        {
+          "value": "OPT_15",
+          "label": "도서",
+          "color": "purple",
+          "position": 14
+        },
+        {
+          "value": "OPT_16",
+          "label": "MBA",
+          "color": "pink",
+          "position": 15
+        },
+        {
+          "value": "OPT_17",
+          "label": "가인지컨퍼런스",
+          "color": "red",
+          "position": 16
+        },
+        {
+          "value": "OPT_18",
+          "label": "일잘러페스타",
+          "color": "orange",
+          "position": 17
+        },
+        {
+          "value": "OPT_19",
+          "label": "경영계획 실전워크샵",
+          "color": "yellow",
+          "position": 18
+        },
+        {
+          "value": "OPT_20",
+          "label": "AI실전세미나",
+          "color": "gray",
+          "position": 19
+        },
+        {
+          "value": "OPT_21",
+          "label": "아웃바운드(가칭)",
+          "color": "green",
+          "position": 20
+        }
+      ]
+    },
+    {
+      "name": "firstInquiryDate",
+      "label": "문의 일시",
+      "type": "DATE"
+    },
+    {
+      "name": "inquiryTopic",
+      "label": "문의 주제",
+      "type": "MULTI_SELECT",
+      "options": [
+        {
+          "value": "OPT_1",
+          "label": "가인지",
+          "color": "green",
+          "position": 0
+        },
+        {
+          "value": "OPT_2",
+          "label": "조직문화",
+          "color": "turquoise",
+          "position": 1
+        },
+        {
+          "value": "OPT_3",
+          "label": "가치체계수립",
+          "color": "sky",
+          "position": 2
+        },
+        {
+          "value": "OPT_4",
+          "label": "비전하우스",
+          "color": "blue",
+          "position": 3
+        },
+        {
+          "value": "OPT_5",
+          "label": "조직역동성",
+          "color": "purple",
+          "position": 4
+        },
+        {
+          "value": "OPT_6",
+          "label": "팀빌딩",
+          "color": "pink",
+          "position": 5
+        },
+        {
+          "value": "OPT_7",
+          "label": "ESG",
+          "color": "red",
+          "position": 6
+        },
+        {
+          "value": "OPT_8",
+          "label": "채용정착",
+          "color": "orange",
+          "position": 7
+        },
+        {
+          "value": "OPT_9",
+          "label": "면접역량교육",
+          "color": "yellow",
+          "position": 8
+        },
+        {
+          "value": "OPT_10",
+          "label": "면접관교육",
+          "color": "gray",
+          "position": 9
+        },
+        {
+          "value": "OPT_11",
+          "label": "HRM",
+          "color": "green",
+          "position": 10
+        },
+        {
+          "value": "OPT_12",
+          "label": "비즈니스 매너",
+          "color": "turquoise",
+          "position": 11
+        },
+        {
+          "value": "OPT_13",
+          "label": "성장",
+          "color": "sky",
+          "position": 12
+        },
+        {
+          "value": "OPT_14",
+          "label": "리더십",
+          "color": "blue",
+          "position": 13
+        },
+        {
+          "value": "OPT_15",
+          "label": "원온원",
+          "color": "purple",
+          "position": 14
+        },
+        {
+          "value": "OPT_16",
+          "label": "조직개편",
+          "color": "pink",
+          "position": 15
+        },
+        {
+          "value": "OPT_17",
+          "label": "인사평가",
+          "color": "red",
+          "position": 16
+        },
+        {
+          "value": "OPT_18",
+          "label": "평가역량",
+          "color": "orange",
+          "position": 17
+        },
+        {
+          "value": "OPT_19",
+          "label": "평가보상",
+          "color": "yellow",
+          "position": 18
+        },
+        {
+          "value": "OPT_20",
+          "label": "후계자 양성",
+          "color": "gray",
+          "position": 19
+        },
+        {
+          "value": "OPT_21",
+          "label": "중간관리자 양성",
+          "color": "green",
+          "position": 20
+        },
+        {
+          "value": "OPT_22",
+          "label": "인사정책 서베이",
+          "color": "turquoise",
+          "position": 21
+        },
+        {
+          "value": "OPT_23",
+          "label": "성과관리",
+          "color": "sky",
+          "position": 22
+        },
+        {
+          "value": "OPT_24",
+          "label": "OKR",
+          "color": "blue",
+          "position": 23
+        },
+        {
+          "value": "OPT_25",
+          "label": "KPI",
+          "color": "purple",
+          "position": 24
+        },
+        {
+          "value": "OPT_26",
+          "label": "피드백",
+          "color": "pink",
+          "position": 25
+        },
+        {
+          "value": "OPT_27",
+          "label": "전략수립",
+          "color": "red",
+          "position": 26
+        },
+        {
+          "value": "OPT_28",
+          "label": "업무소통",
+          "color": "orange",
+          "position": 27
+        },
+        {
+          "value": "OPT_29",
+          "label": "KMS",
+          "color": "yellow",
+          "position": 28
+        },
+        {
+          "value": "OPT_30",
+          "label": "지식뱅크",
+          "color": "gray",
+          "position": 29
+        },
+        {
+          "value": "OPT_31",
+          "label": "CAC",
+          "color": "green",
+          "position": 30
+        },
+        {
+          "value": "OPT_32",
+          "label": "물류 비용 혁신",
+          "color": "turquoise",
+          "position": 31
+        },
+        {
+          "value": "OPT_33",
+          "label": "AI/생산성",
+          "color": "sky",
+          "position": 32
+        },
+        {
+          "value": "OPT_34",
+          "label": "애자일",
+          "color": "blue",
+          "position": 33
+        },
+        {
+          "value": "OPT_35",
+          "label": "업무사고예방",
+          "color": "purple",
+          "position": 34
+        },
+        {
+          "value": "OPT_36",
+          "label": "우선순위",
+          "color": "pink",
+          "position": 35
+        },
+        {
+          "value": "OPT_37",
+          "label": "커뮤니케이션",
+          "color": "red",
+          "position": 36
+        },
+        {
+          "value": "OPT_38",
+          "label": "경영계획",
+          "color": "orange",
+          "position": 37
+        },
+        {
+          "value": "OPT_39",
+          "label": "온채널관리",
+          "color": "yellow",
+          "position": 38
+        },
+        {
+          "value": "OPT_40",
+          "label": "시스템 부재",
+          "color": "gray",
+          "position": 39
+        },
+        {
+          "value": "OPT_41",
+          "label": "워크샵",
+          "color": "green",
+          "position": 40
+        },
+        {
+          "value": "OPT_42",
+          "label": "교육",
+          "color": "turquoise",
+          "position": 41
+        },
+        {
+          "value": "OPT_43",
+          "label": "컨퍼런스",
+          "color": "sky",
+          "position": 42
+        },
+        {
+          "value": "OPT_44",
+          "label": "AI 교육",
+          "color": "blue",
+          "position": 43
+        },
+        {
+          "value": "OPT_45",
+          "label": "MBA",
+          "color": "purple",
+          "position": 44
+        },
+        {
+          "value": "OPT_46",
+          "label": "직장인학교",
+          "color": "pink",
+          "position": 45
+        },
+        {
+          "value": "OPT_47",
+          "label": "경영전략 시뮬레이션 워크샵",
+          "color": "red",
+          "position": 46
+        },
+        {
+          "value": "OPT_48",
+          "label": "경영계획실전워크샵",
+          "color": "orange",
+          "position": 47
+        },
+        {
+          "value": "OPT_49",
+          "label": "컨퍼런스 부스참여",
+          "color": "yellow",
+          "position": 48
+        },
+        {
+          "value": "OPT_50",
+          "label": "멤버십",
+          "color": "gray",
+          "position": 49
+        },
+        {
+          "value": "OPT_51",
+          "label": "챗봇제작",
+          "color": "green",
+          "position": 50
+        },
+        {
+          "value": "OPT_52",
+          "label": "대외협력",
+          "color": "turquoise",
+          "position": 51
+        },
+        {
+          "value": "OPT_53",
+          "label": "코칭",
+          "color": "sky",
+          "position": 52
+        },
+        {
+          "value": "OPT_54",
+          "label": "자문",
+          "color": "blue",
+          "position": 53
+        },
+        {
+          "value": "OPT_55",
+          "label": "기업유치전략 교육",
+          "color": "purple",
+          "position": 54
+        },
+        {
+          "value": "OPT_56",
+          "label": "헤드헌팅",
+          "color": "pink",
+          "position": 55
+        },
+        {
+          "value": "OPT_57",
+          "label": "취업역량교육",
+          "color": "red",
+          "position": 56
+        },
+        {
+          "value": "OPT_58",
+          "label": "내부자료제작",
+          "color": "orange",
+          "position": 57
+        },
+        {
+          "value": "OPT_59",
+          "label": "레크레이션",
+          "color": "yellow",
+          "position": 58
+        },
+        {
+          "value": "OPT_61",
+          "label": "기타",
+          "color": "green",
+          "position": 59
+        },
+        {
+          "value": "OPT_60",
+          "label": "투자",
+          "color": "gray",
+          "position": 60
+        },
+        {
+          "value": "OPT_62",
+          "label": "인사정책 세팅",
+          "color": "turquoise",
+          "position": 61
+        },
+        {
+          "value": "OPT_63",
+          "label": "소프트웨어 개발",
+          "color": "sky",
+          "position": 62
+        }
+      ]
+    },
+    {
+      "name": "metaAdName",
+      "label": "메타 광고명",
+      "type": "TEXT"
+    },
+    {
+      "name": "customStage",
+      "label": "현재 단계",
+      "type": "SELECT",
+      "options": [
+        {
+          "value": "INQUIRY",
+          "label": "문의",
+          "color": "red",
+          "position": 0
+        },
+        {
+          "value": "COMMUNICATING",
+          "label": "초기 상담",
+          "color": "blue",
+          "position": 1
+        },
+        {
+          "value": "TECHNICAL_CONSULT",
+          "label": "기술 상담",
+          "color": "yellow",
+          "position": 2
+        },
+        {
+          "value": "PROPOSAL",
+          "label": "제안/견적 (소통)",
+          "color": "orange",
+          "position": 3
+        },
+        {
+          "value": "ON_HOLD",
+          "label": "보류 (이유 포함)",
+          "color": "gray",
+          "position": 4
+        },
+        {
+          "value": "MATCHING_HOLD_COMPLETED",
+          "label": "종료 (26/7/31 미확인)",
+          "color": "gray",
+          "position": 5
+        },
+        {
+          "value": "MATCHING_SUCCESS",
+          "label": "매칭 성공",
+          "color": "sky",
+          "position": 6
+        }
+      ]
+    },
+    {
+      "name": "stageTimingStartedAt",
+      "label": "단계 측정 시작일",
+      "type": "DATE_TIME"
+    },
+    {
+      "name": "stageClosedReachedAt",
+      "label": "종료 최초 관측일",
+      "type": "DATE_TIME"
+    },
+    {
+      "name": "stageMatchingSuccessDays",
+      "label": "매칭 성공 도달 소요일",
+      "type": "NUMBER"
+    },
+    {
+      "name": "metaAdVideoLink",
+      "label": "광고 영상 링크",
+      "type": "LINKS"
+    },
+    {
+      "name": "sotongWanryoIlja",
+      "label": "소통 완료 일자",
+      "type": "DATE"
+    },
+    {
+      "name": "stageTimingOriginAt",
+      "label": "단계 소요일 기준일",
+      "type": "DATE_TIME"
+    },
+    {
+      "name": "stageCommunicatingReachedAt",
+      "label": "초기 소통중 최초 관측일",
+      "type": "DATE_TIME"
+    },
+    {
+      "name": "stageMatchingSuccessReachedAt",
+      "label": "매칭 성공 최초 관측일",
+      "type": "DATE_TIME"
+    },
+    {
+      "name": "notionLink",
+      "label": "노션 링크",
+      "type": "LINKS"
+    },
+    {
+      "name": "notionBackedUp",
+      "label": "노션 백업 여부 (임시)",
+      "type": "BOOLEAN"
+    },
+    {
+      "name": "notionBackedUpAt",
+      "label": "노션 백업 일시 (임시)",
+      "type": "DATE_TIME"
+    },
+    {
+      "name": "preferredConsultationDay",
+      "label": "상담 희망 요일",
+      "type": "TEXT"
+    },
+    {
+      "name": "stageOnHoldReachedAt",
+      "label": "보류 최초 관측일",
+      "type": "DATE_TIME"
+    },
+    {
+      "name": "stageInquiryReachedAt",
+      "label": "문의 최초 관측일",
+      "type": "DATE_TIME"
+    },
+    {
+      "name": "stageTechnicalConsultReachedAt",
+      "label": "기술상담 최초 관측일",
+      "type": "DATE_TIME"
+    },
+    {
+      "name": "ecountNo",
+      "label": "이카운트 상담 번호",
+      "type": "TEXT"
+    },
+    {
+      "name": "ecountBackedUp",
+      "label": "이카운트 백업 여부 (임시)",
+      "type": "BOOLEAN"
+    },
+    {
+      "name": "ecountBackedUpAt",
+      "label": "이카운트 백업 일시 (임시)",
+      "type": "DATE_TIME"
+    },
+    {
+      "name": "campusBackedUp",
+      "label": "가인지캠퍼스 백업 여부 (임시)",
+      "type": "BOOLEAN"
+    },
+    {
+      "name": "campusBackedUpAt",
+      "label": "가인지캠퍼스 백업 일시 (임시)",
+      "type": "DATE_TIME"
+    },
+    {
+      "name": "campusSeq",
+      "label": "가인지캠퍼스 seq",
+      "type": "TEXT"
+    },
+    {
+      "name": "confirmedFeeVatExcluded",
+      "label": "확정된 수수료 (VAT 별도)",
+      "type": "CURRENCY",
+      "settings": {
+        "format": "full",
+        "decimals": 0
+      }
+    },
+    {
+      "name": "assignee",
+      "label": "DRI",
+      "type": "RELATION",
+      "settings": {
+        "onDelete": "SET_NULL",
+        "relationType": "MANY_TO_ONE",
+        "joinColumnName": "assigneeId"
+      },
+      "target": "teamMember",
+      "inverseName": "damdangYeongeobgihoe",
+      "inverseLabel": "담당 영업 기회"
+    },
+    {
+      "name": "stageInquiryDays",
+      "label": "문의 도달 소요일",
+      "type": "NUMBER"
+    },
+    {
+      "name": "stageTechnicalConsultDays",
+      "label": "기술상담 도달 소요일",
+      "type": "NUMBER"
+    },
+    {
+      "name": "stageProposalDays",
+      "label": "제안 도달 소요일",
+      "type": "NUMBER"
+    },
+    {
+      "name": "alimtalkStatus",
+      "label": "알림톡 상태",
+      "type": "SELECT",
+      "options": [
+        {
+          "value": "PENDING",
+          "label": "대기",
+          "color": "gray",
+          "position": 0
+        },
+        {
+          "value": "REQUESTING",
+          "label": "요청중",
+          "color": "yellow",
+          "position": 1
+        },
+        {
+          "value": "ACCEPTED",
+          "label": "요청접수",
+          "color": "blue",
+          "position": 2
+        },
+        {
+          "value": "DELIVERED",
+          "label": "발송성공",
+          "color": "green",
+          "position": 3
+        },
+        {
+          "value": "FAILED",
+          "label": "실패",
+          "color": "red",
+          "position": 4
+        },
+        {
+          "value": "UNKNOWN",
+          "label": "결과확인필요",
+          "color": "orange",
+          "position": 5
+        },
+        {
+          "value": "SKIPPED",
+          "label": "발송제외",
+          "color": "gray",
+          "position": 6
+        }
+      ]
+    },
+    {
+      "name": "isMetaInquiry",
+      "label": "메타용 문의",
+      "type": "BOOLEAN"
+    },
+    {
+      "name": "gongdongDamdangja",
+      "label": "공동 담당자",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "opportunityGuseongweonLink",
+      "inverseName": "opportunity",
+      "inverseLabel": "Opportunity",
+      "junctionTargetFieldName": "guseongweon"
+    },
+    {
+      "name": "stageCommunicatingDays",
+      "label": "초기 소통중 도달 소요일",
+      "type": "NUMBER"
+    },
+    {
+      "name": "stageClosedDays",
+      "label": "종료 도달 소요일",
+      "type": "NUMBER"
+    },
+    {
+      "name": "alimtalkTemplateCode",
+      "label": "알림톡 템플릿 코드",
+      "type": "TEXT"
+    },
+    {
+      "name": "alimtalkRefKey",
+      "label": "알림톡 요청 참조키",
+      "type": "TEXT"
+    },
+    {
+      "name": "alimtalkMessageKey",
+      "label": "알림톡 메시지 키",
+      "type": "TEXT"
+    },
+    {
+      "name": "alimtalkRequestedAt",
+      "label": "알림톡 요청 시각",
+      "type": "DATE_TIME"
+    },
+    {
+      "name": "alimtalkResultAt",
+      "label": "알림톡 결과 확인 시각",
+      "type": "DATE_TIME"
+    },
+    {
+      "name": "alimtalkError",
+      "label": "알림톡 오류",
+      "type": "TEXT"
+    },
+    {
+      "name": "inquiryChannel",
+      "label": "문의 채널",
+      "type": "SELECT",
+      "options": [
+        {
+          "value": "OPT_1",
+          "label": "사일사(문의 받은 사일사를 '문의(사일사)'에서 선택해주세요.)",
+          "color": "green",
+          "position": 0
+        },
+        {
+          "value": "OPT_2",
+          "label": "사랑이폰",
+          "color": "turquoise",
+          "position": 1
+        },
+        {
+          "value": "OPT_3",
+          "label": "산초폰",
+          "color": "sky",
+          "position": 2
+        },
+        {
+          "value": "OPT_4",
+          "label": "이평화폰",
+          "color": "blue",
+          "position": 3
+        },
+        {
+          "value": "GAINJIKAEMPEOSEU",
+          "label": "가인지캠퍼스",
+          "color": "blue",
+          "position": 4
+        },
+        {
+          "value": "OPT_5",
+          "label": "홈페이지 문의",
+          "color": "purple",
+          "position": 5
+        },
+        {
+          "value": "OPT_6",
+          "label": "구글폼",
+          "color": "pink",
+          "position": 6
+        },
+        {
+          "value": "OPT_7",
+          "label": "채널톡",
+          "color": "red",
+          "position": 7
+        },
+        {
+          "value": "OPT_8",
+          "label": "가인지CS메일문의",
+          "color": "orange",
+          "position": 8
+        },
+        {
+          "value": "OPT_9",
+          "label": "사례뉴스 홈페이지",
+          "color": "yellow",
+          "position": 9
+        },
+        {
+          "value": "OPT_10",
+          "label": "서비스소개서 받기",
+          "color": "gray",
+          "position": 10
+        },
+        {
+          "value": "OPT_11",
+          "label": "경벙 오픈카톡",
+          "color": "green",
+          "position": 11
+        },
+        {
+          "value": "OPT_12",
+          "label": "경영계획 실전워크샵",
+          "color": "turquoise",
+          "position": 12
+        },
+        {
+          "value": "OPT_13",
+          "label": "성장클럽",
+          "color": "sky",
+          "position": 13
+        },
+        {
+          "value": "OPT_14",
+          "label": "메타 광고",
+          "color": "pink",
+          "position": 14
+        },
+        {
+          "value": "TULMARU_MUNYI",
+          "label": "툴마루 문의",
+          "color": "bronze",
+          "position": 15
+        }
+      ]
+    },
+    {
+      "name": "initialConsultationDate",
+      "label": "초기 상담일자",
+      "type": "DATE"
+    },
+    {
+      "name": "technicalConsultationDate",
+      "label": "기술상담일자",
+      "type": "DATE"
+    },
+    {
+      "name": "secondContactDate",
+      "label": "2차 소통일자",
+      "type": "DATE"
+    },
+    {
+      "name": "contractDate",
+      "label": "계약일자",
+      "type": "DATE"
+    },
+    {
+      "name": "stageProposalReachedAt",
+      "label": "제안 최초 관측일",
+      "type": "DATE_TIME"
+    },
+    {
+      "name": "stageOnHoldDays",
+      "label": "보류 도달 소요일",
+      "type": "NUMBER"
+    },
+    {
+      "name": "metaLeadId",
+      "label": "메타 리드 ID",
+      "type": "TEXT"
+    },
+    {
+      "name": "closeDate",
+      "label": "Close date",
+      "type": "DATE_TIME"
+    },
+    {
+      "name": "simbangRiseuteu",
+      "label": "심방 리스트",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "outreach",
+      "inverseName": "opportunity",
+      "inverseLabel": "관련 기회 (최초 문의)"
+    },
+    {
+      "name": "amount",
+      "label": "Amount",
+      "type": "CURRENCY",
+      "settings": {
+        "format": "full",
+        "decimals": 0
+      }
+    },
+    {
+      "name": "boryudoenSayu",
+      "label": "보류된 사유",
+      "type": "TEXT"
+    },
+    {
+      "name": "metaCampaignName",
+      "label": "메타 캠페인",
+      "type": "TEXT"
+    },
+    {
+      "name": "stageFollowUpReachedAt",
+      "label": "팔로우업 최초 관측일",
+      "type": "DATE_TIME"
+    },
+    {
+      "name": "gogaegBunryu",
+      "label": "고객 분류",
+      "type": "SELECT",
+      "options": [
+        {
+          "value": "HOT",
+          "label": "HOT(즉시필요)",
+          "color": "red",
+          "position": 0
+        },
+        {
+          "value": "WARM",
+          "label": "WARM(니즈파악)",
+          "color": "orange",
+          "position": 1
+        },
+        {
+          "value": "COLD",
+          "label": "COLD(후순위)",
+          "color": "blue",
+          "position": 2
+        },
+        {
+          "value": "JUNK",
+          "label": "JUNK(리드아님)",
+          "color": "gray",
+          "position": 3
+        }
+      ]
+    },
+    {
+      "name": "metaAdsetName",
+      "label": "메타 광고세트",
+      "type": "TEXT"
+    },
+    {
+      "name": "metaFormName",
+      "label": "메타 리드폼",
+      "type": "TEXT"
+    },
+    {
+      "name": "preferredConsultationTime",
+      "label": "상담 희망 시간",
+      "type": "TEXT"
+    },
+    {
+      "name": "damdangGeurup",
+      "label": "담당 그룹",
+      "type": "RELATION",
+      "settings": {
+        "onDelete": "SET_NULL",
+        "relationType": "MANY_TO_ONE",
+        "joinColumnName": "damdangGeurupId"
+      },
+      "target": "group",
+      "inverseName": "yeongyeoldoenMunyi",
+      "inverseLabel": "연결된 문의"
+    },
+    {
+      "name": "isOfficialWebsiteInquiry",
+      "label": "공홈용 문의",
+      "type": "BOOLEAN"
+    },
+    {
+      "name": "stageFollowUpDays",
+      "label": "팔로우업 도달 소요일",
+      "type": "NUMBER"
+    },
+    {
+      "name": "yeongyeoldoenGyeyag",
+      "label": "연결된 계약",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "onboarding",
+      "inverseName": "opportunity",
+      "inverseLabel": "연관 문의"
+    },
+    {
+      "name": "stage",
+      "label": "Stage",
+      "type": "SELECT",
+      "options": [
+        {
+          "value": "NEW",
+          "label": "New",
+          "color": "red",
+          "position": 0
+        },
+        {
+          "value": "SCREENING",
+          "label": "Screening",
+          "color": "purple",
+          "position": 1
+        },
+        {
+          "value": "MEETING",
+          "label": "Meeting",
+          "color": "sky",
+          "position": 2
+        },
+        {
+          "value": "PROPOSAL",
+          "label": "Proposal",
+          "color": "turquoise",
+          "position": 3
+        },
+        {
+          "value": "CUSTOMER",
+          "label": "Customer",
+          "color": "yellow",
+          "position": 4
+        }
+      ]
+    },
+    {
+      "name": "customerConcern",
+      "label": "고객 서술 고민",
+      "type": "TEXT"
+    }
+  ],
+  "onboarding": [
+    {
+      "name": "id",
+      "label": "Id",
+      "type": "UUID"
+    },
+    {
+      "name": "createdAt",
+      "label": "Creation date",
+      "type": "DATE_TIME"
+    },
+    {
+      "name": "createdBy",
+      "label": "Created by",
+      "type": "ACTOR"
+    },
+    {
+      "name": "deletedAt",
+      "label": "Deleted at",
+      "type": "DATE_TIME"
+    },
+    {
+      "name": "updatedAt",
+      "label": "Last update",
+      "type": "DATE_TIME"
+    },
+    {
+      "name": "company",
+      "label": "고객사",
+      "type": "RELATION",
+      "settings": {
+        "onDelete": "SET_NULL",
+        "relationType": "MANY_TO_ONE",
+        "joinColumnName": "companyId"
+      },
+      "target": "company",
+      "inverseName": "onboding",
+      "inverseLabel": "온보딩"
+    },
+    {
+      "name": "attachments",
+      "label": "첨부파일",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "attachment",
+      "inverseName": "targetOnboarding",
+      "inverseLabel": "Onboarding"
+    },
+    {
+      "name": "noteTargets",
+      "label": "메모",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "noteTarget",
+      "inverseName": "targetOnboarding",
+      "inverseLabel": "Onboarding"
+    },
+    {
+      "name": "taskTargets",
+      "label": "작업",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "taskTarget",
+      "inverseName": "targetOnboarding",
+      "inverseLabel": "Onboarding"
+    },
+    {
+      "name": "ibgeum",
+      "label": "입금",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "deposit",
+      "inverseName": "onboarding",
+      "inverseLabel": "계약"
+    },
+    {
+      "name": "notionLink",
+      "label": "노션 링크",
+      "type": "LINKS"
+    },
+    {
+      "name": "onboardingStatus",
+      "label": "온보딩 상태",
+      "type": "SELECT",
+      "options": [
+        {
+          "value": "PRE",
+          "label": "온보딩 전",
+          "color": "gray",
+          "position": 0
+        },
+        {
+          "value": "ACTIVE",
+          "label": "온보딩 중",
+          "color": "blue",
+          "position": 1
+        },
+        {
+          "value": "DONE",
+          "label": "온보딩 종료",
+          "color": "green",
+          "position": 2
+        }
+      ]
+    },
+    {
+      "name": "visitCadence",
+      "label": "방문 주기",
+      "type": "SELECT",
+      "options": [
+        {
+          "value": "WEEKLY",
+          "label": "매주",
+          "color": "blue",
+          "position": 0
+        },
+        {
+          "value": "BIWEEKLY",
+          "label": "격주",
+          "color": "sky",
+          "position": 1
+        },
+        {
+          "value": "MONTHLY",
+          "label": "월 1회",
+          "color": "green",
+          "position": 2
+        },
+        {
+          "value": "BIMONTHLY",
+          "label": "격월",
+          "color": "turquoise",
+          "position": 3
+        },
+        {
+          "value": "PROJECT",
+          "label": "프로젝트형",
+          "color": "yellow",
+          "position": 4
+        },
+        {
+          "value": "LECTURE",
+          "label": "특강",
+          "color": "purple",
+          "position": 5
+        },
+        {
+          "value": "ADVISORY",
+          "label": "자문",
+          "color": "red",
+          "position": 6
+        }
+      ]
+    },
+    {
+      "name": "contractStartDate",
+      "label": "계약 시작일",
+      "type": "DATE"
+    },
+    {
+      "name": "contractEndDate",
+      "label": "계약 종료일",
+      "type": "DATE"
+    },
+    {
+      "name": "eContractIssuedDate",
+      "label": "전자계약서 발행일",
+      "type": "DATE"
+    },
+    {
+      "name": "eContractEmail",
+      "label": "전자계약서 발행 이메일",
+      "type": "EMAILS"
+    },
+    {
+      "name": "taxInvoiceEmail",
+      "label": "세금계산서 발행 이메일",
+      "type": "EMAILS"
+    },
+    {
+      "name": "leadConsultant",
+      "label": "리드 컨설턴트",
+      "type": "RELATION",
+      "settings": {
+        "onDelete": "SET_NULL",
+        "relationType": "MANY_TO_ONE",
+        "joinColumnName": "leadConsultantId"
+      },
+      "target": "teamMember",
+      "inverseName": "rideuOnboding",
+      "inverseLabel": "리드 온보딩"
+    },
+    {
+      "name": "onboardingMonths",
+      "label": "온보딩 월",
+      "type": "TEXT"
+    },
+    {
+      "name": "executionConsultant",
+      "label": "실행 컨설턴트",
+      "type": "RELATION",
+      "settings": {
+        "onDelete": "SET_NULL",
+        "relationType": "MANY_TO_ONE",
+        "joinColumnName": "executionConsultantId"
+      },
+      "target": "teamMember",
+      "inverseName": "silhaengOnboding",
+      "inverseLabel": "실행 온보딩"
+    },
+    {
+      "name": "timelineActivities",
+      "label": "타임라인",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "timelineActivity",
+      "inverseName": "targetOnboarding",
+      "inverseLabel": "Onboarding"
+    },
+    {
+      "name": "newOrRenewal",
+      "label": "신규/모퉁이",
+      "type": "SELECT",
+      "options": [
+        {
+          "value": "NEW",
+          "label": "신규",
+          "color": "green",
+          "position": 0
+        },
+        {
+          "value": "RENEWAL",
+          "label": "모퉁이",
+          "color": "yellow",
+          "position": 1
+        },
+        {
+          "value": "EDUCATION",
+          "label": "교육",
+          "color": "gray",
+          "position": 2
+        }
+      ]
+    },
+    {
+      "name": "name",
+      "label": "계약명",
+      "type": "TEXT"
+    },
+    {
+      "name": "totalFee",
+      "label": "총 수수료(VAT 별도)",
+      "type": "CURRENCY",
+      "settings": {
+        "format": "full",
+        "decimals": 0
+      }
+    },
+    {
+      "name": "notionBackedUp",
+      "label": "노션 백업 여부 (임시)",
+      "type": "BOOLEAN"
+    },
+    {
+      "name": "notionBackedUpAt",
+      "label": "노션 백업 일시 (임시)",
+      "type": "DATE_TIME"
+    },
+    {
+      "name": "gyeyagGiyeo",
+      "label": "기여도",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "contractSplit",
+      "inverseName": "onboarding",
+      "inverseLabel": "계약"
+    },
+    {
+      "name": "visitDays",
+      "label": "온보딩 요일",
+      "type": "MULTI_SELECT",
+      "options": [
+        {
+          "value": "MON",
+          "label": "월요일",
+          "color": "gray",
+          "position": 0
+        },
+        {
+          "value": "TUE",
+          "label": "화요일",
+          "color": "gray",
+          "position": 1
+        },
+        {
+          "value": "WED",
+          "label": "수요일",
+          "color": "gray",
+          "position": 2
+        },
+        {
+          "value": "THU",
+          "label": "목요일",
+          "color": "gray",
+          "position": 3
+        },
+        {
+          "value": "FRI",
+          "label": "금요일",
+          "color": "gray",
+          "position": 4
+        },
+        {
+          "value": "IRREGULAR",
+          "label": "비정기",
+          "color": "yellow",
+          "position": 5
+        }
+      ]
+    },
+    {
+      "name": "gongdongSilhaengKeonseolteonteu",
+      "label": "공동 실행 컨설턴트",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "gyeyagGuseongweonLink",
+      "inverseName": "gyeyag",
+      "inverseLabel": "계약",
+      "junctionTargetFieldName": "guseongweon"
+    },
+    {
+      "name": "onboardingType",
+      "label": "계약 유형",
+      "type": "SELECT",
+      "options": [
+        {
+          "value": "CONSULTING",
+          "label": "컨설팅",
+          "color": "blue",
+          "position": 0
+        },
+        {
+          "value": "COACHING",
+          "label": "코칭",
+          "color": "red",
+          "position": 1
+        },
+        {
+          "value": "EDUCATION",
+          "label": "1회성 특강/워크샵",
+          "color": "green",
+          "position": 2
+        },
+        {
+          "value": "GONGGAEGYOYUG",
+          "label": "공개교육",
+          "color": "plum",
+          "position": 3
+        },
+        {
+          "value": "HEADHUNTING",
+          "label": "헤드헌팅",
+          "color": "orange",
+          "position": 4
+        },
+        {
+          "value": "JEHYU",
+          "label": "제휴",
+          "color": "plum",
+          "position": 5
+        },
+        {
+          "value": "SOFTWARE_DEVELOPMENT",
+          "label": "소프트웨어 개발",
+          "color": "indigo",
+          "position": 6
+        },
+        {
+          "value": "ONLINE_SERVICE",
+          "label": "온라인 서비스",
+          "color": "turquoise",
+          "position": 7
+        }
+      ]
+    },
+    {
+      "name": "opportunity",
+      "label": "연관 문의",
+      "type": "RELATION",
+      "settings": {
+        "onDelete": "SET_NULL",
+        "relationType": "MANY_TO_ONE",
+        "joinColumnName": "opportunityId"
+      },
+      "target": "opportunity",
+      "inverseName": "yeongyeoldoenGyeyag",
+      "inverseLabel": "연결된 계약"
+    }
+  ],
+  "deposit": [
+    {
+      "name": "id",
+      "label": "Id",
+      "type": "UUID"
+    },
+    {
+      "name": "createdAt",
+      "label": "Creation date",
+      "type": "DATE_TIME"
+    },
+    {
+      "name": "createdBy",
+      "label": "Created by",
+      "type": "ACTOR"
+    },
+    {
+      "name": "deletedAt",
+      "label": "Deleted at",
+      "type": "DATE_TIME"
+    },
+    {
+      "name": "updatedAt",
+      "label": "Last update",
+      "type": "DATE_TIME"
+    },
+    {
+      "name": "name",
+      "label": "입금명",
+      "type": "TEXT"
+    },
+    {
+      "name": "company",
+      "label": "기업",
+      "type": "RELATION",
+      "settings": {
+        "onDelete": "SET_NULL",
+        "relationType": "MANY_TO_ONE",
+        "joinColumnName": "companyId"
+      },
+      "target": "company",
+      "inverseName": "ibgeum",
+      "inverseLabel": "입금"
+    },
+    {
+      "name": "timelineActivities",
+      "label": "타임라인",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "timelineActivity",
+      "inverseName": "targetDeposit",
+      "inverseLabel": "Deposit"
+    },
+    {
+      "name": "attachments",
+      "label": "첨부파일",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "attachment",
+      "inverseName": "targetDeposit",
+      "inverseLabel": "Deposit"
+    },
+    {
+      "name": "noteTargets",
+      "label": "메모",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "noteTarget",
+      "inverseName": "targetDeposit",
+      "inverseLabel": "Deposit"
+    },
+    {
+      "name": "taskTargets",
+      "label": "작업",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "taskTarget",
+      "inverseName": "targetDeposit",
+      "inverseLabel": "Deposit"
+    },
+    {
+      "name": "notionLink",
+      "label": "노션 링크",
+      "type": "LINKS"
+    },
+    {
+      "name": "issueDate",
+      "label": "세금계산서 발행일",
+      "type": "DATE"
+    },
+    {
+      "name": "expectedPaymentDate",
+      "label": "입금 예정일",
+      "type": "DATE"
+    },
+    {
+      "name": "depositStatus",
+      "label": "상태",
+      "type": "SELECT",
+      "options": [
+        {
+          "value": "PENDING",
+          "label": "대기",
+          "color": "gray",
+          "position": 0
+        },
+        {
+          "value": "SCHEDULED",
+          "label": "발행 예약",
+          "color": "yellow",
+          "position": 1
+        },
+        {
+          "value": "ISSUED",
+          "label": "발행 완료",
+          "color": "blue",
+          "position": 2
+        },
+        {
+          "value": "PAID",
+          "label": "입금 완료",
+          "color": "green",
+          "position": 3
+        }
+      ]
+    },
+    {
+      "name": "paymentMethod",
+      "label": "결제 방법",
+      "type": "SELECT",
+      "options": [
+        {
+          "value": "TAX_INVOICE",
+          "label": "세금계산서",
+          "color": "blue",
+          "position": 0
+        },
+        {
+          "value": "ONLINE",
+          "label": "온라인결제",
+          "color": "green",
+          "position": 1
+        },
+        {
+          "value": "BANK_TRANSFER",
+          "label": "계좌이체",
+          "color": "orange",
+          "position": 2
+        },
+        {
+          "value": "GASANGGYEJWA",
+          "label": "가상계좌",
+          "color": "amber",
+          "position": 3
+        }
+      ]
+    },
+    {
+      "name": "amount",
+      "label": "수수료 (VAT 별도)",
+      "type": "CURRENCY",
+      "settings": {
+        "format": "full",
+        "decimals": 0
+      }
+    },
+    {
+      "name": "notionBackedUp",
+      "label": "노션 백업 여부 (임시)",
+      "type": "BOOLEAN"
+    },
+    {
+      "name": "notionBackedUpAt",
+      "label": "노션 백업 일시 (임시)",
+      "type": "DATE_TIME"
+    },
+    {
+      "name": "businessRegistrationCertificate",
+      "label": "사업자등록증",
+      "type": "FILES",
+      "settings": {
+        "maxNumberOfValues": 10
+      }
+    },
+    {
+      "name": "taxInvoiceIssuanceEmail",
+      "label": "세금계산서 발행 이메일",
+      "type": "TEXT"
+    },
+    {
+      "name": "revenueDept",
+      "label": "매출 부서",
+      "type": "RELATION",
+      "settings": {
+        "onDelete": "SET_NULL",
+        "relationType": "MANY_TO_ONE",
+        "joinColumnName": "revenueDeptId"
+      },
+      "target": "group",
+      "inverseName": "maeculIbgeum",
+      "inverseLabel": "매출 입금"
+    },
+    {
+      "name": "creator",
+      "label": "DRI",
+      "type": "RELATION",
+      "settings": {
+        "onDelete": "SET_NULL",
+        "relationType": "MANY_TO_ONE",
+        "joinColumnName": "creatorId"
+      },
+      "target": "teamMember",
+      "inverseName": "jagseonghanIbgeum",
+      "inverseLabel": "작성한 입금"
+    },
+    {
+      "name": "onboarding",
+      "label": "계약",
+      "type": "RELATION",
+      "settings": {
+        "onDelete": "SET_NULL",
+        "relationType": "MANY_TO_ONE",
+        "joinColumnName": "onboardingId"
+      },
+      "target": "onboarding",
+      "inverseName": "ibgeum",
+      "inverseLabel": "입금"
+    }
+  ],
+  "group": [
+    {
+      "name": "taskTargets",
+      "label": "Tasks",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "taskTarget",
+      "inverseName": "targetGroup",
+      "inverseLabel": "Group"
+    },
+    {
+      "name": "sosogGuseongweon",
+      "label": "소속 구성원",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "teamMember",
+      "inverseName": "currentGroup",
+      "inverseLabel": "현재 소속 그룹"
+    },
+    {
+      "name": "id",
+      "label": "Id",
+      "type": "UUID"
+    },
+    {
+      "name": "createdAt",
+      "label": "Creation date",
+      "type": "DATE_TIME"
+    },
+    {
+      "name": "createdBy",
+      "label": "Created by",
+      "type": "ACTOR"
+    },
+    {
+      "name": "deletedAt",
+      "label": "Deleted at",
+      "type": "DATE_TIME"
+    },
+    {
+      "name": "updatedAt",
+      "label": "Last update",
+      "type": "DATE_TIME"
+    },
+    {
+      "name": "timelineActivities",
+      "label": "Timeline Activities",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "timelineActivity",
+      "inverseName": "targetGroup",
+      "inverseLabel": "Group"
+    },
+    {
+      "name": "attachments",
+      "label": "Attachments",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "attachment",
+      "inverseName": "targetGroup",
+      "inverseLabel": "Group"
+    },
+    {
+      "name": "noteTargets",
+      "label": "Notes",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "noteTarget",
+      "inverseName": "targetGroup",
+      "inverseLabel": "Group"
+    },
+    {
+      "name": "name",
+      "label": "그룹명",
+      "type": "TEXT"
+    },
+    {
+      "name": "maeculIbgeum",
+      "label": "매출 입금",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "deposit",
+      "inverseName": "revenueDept",
+      "inverseLabel": "매출 부서"
+    },
+    {
+      "name": "weokeuseupeiseuMembeo",
+      "label": "워크스페이스 멤버",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "workspaceMember",
+      "inverseName": "weokeuseupeiseuMembeo",
+      "inverseLabel": "워크스페이스 멤버"
+    },
+    {
+      "name": "gyeyagGiyeoNaeyeog",
+      "label": "기여도 내역",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "contractSplit",
+      "inverseName": "contributingGroup",
+      "inverseLabel": "기여 당시 그룹"
+    },
+    {
+      "name": "yeongyeoldoenMunyi",
+      "label": "연결된 문의",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "opportunity",
+      "inverseName": "damdangGeurup",
+      "inverseLabel": "담당 그룹"
+    }
+  ],
+  "teamMember": [
+    {
+      "name": "notionUserId",
+      "label": "Notion 사용자 ID",
+      "type": "TEXT"
+    },
+    {
+      "name": "id",
+      "label": "Id",
+      "type": "UUID"
+    },
+    {
+      "name": "createdAt",
+      "label": "Creation date",
+      "type": "DATE_TIME"
+    },
+    {
+      "name": "createdBy",
+      "label": "Created by",
+      "type": "ACTOR"
+    },
+    {
+      "name": "deletedAt",
+      "label": "Deleted at",
+      "type": "DATE_TIME"
+    },
+    {
+      "name": "email",
+      "label": "이메일",
+      "type": "EMAILS"
+    },
+    {
+      "name": "name",
+      "label": "이름",
+      "type": "TEXT"
+    },
+    {
+      "name": "updatedAt",
+      "label": "Last update",
+      "type": "DATE_TIME"
+    },
+    {
+      "name": "driDamdangGieob",
+      "label": "DRI 담당 기업",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "company",
+      "inverseName": "driMember",
+      "inverseLabel": "DRI"
+    },
+    {
+      "name": "attachments",
+      "label": "첨부",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "attachment",
+      "inverseName": "targetTeamMember",
+      "inverseLabel": "TeamMember"
+    },
+    {
+      "name": "noteTargets",
+      "label": "메모",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "noteTarget",
+      "inverseName": "targetTeamMember",
+      "inverseLabel": "TeamMember"
+    },
+    {
+      "name": "taskTargets",
+      "label": "할 일",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "taskTarget",
+      "inverseName": "targetTeamMember",
+      "inverseLabel": "TeamMember"
+    },
+    {
+      "name": "timelineActivities",
+      "label": "타임라인 활동",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "timelineActivity",
+      "inverseName": "targetTeamMember",
+      "inverseLabel": "TeamMember"
+    },
+    {
+      "name": "damdangYeongeobgihoe",
+      "label": "담당 영업 기회",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "opportunity",
+      "inverseName": "assignee",
+      "inverseLabel": "DRI"
+    },
+    {
+      "name": "memberRole",
+      "label": "역할/별칭",
+      "type": "TEXT"
+    },
+    {
+      "name": "jagseonghanJageob",
+      "label": "작성한 작업",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "task",
+      "inverseName": "author",
+      "inverseLabel": "작성자"
+    },
+    {
+      "name": "jagseonghanMemo",
+      "label": "작성한 메모",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "note",
+      "inverseName": "author",
+      "inverseLabel": "작성자"
+    },
+    {
+      "name": "employmentStatus",
+      "label": "재직 여부",
+      "type": "SELECT",
+      "options": [
+        {
+          "value": "ACTIVE",
+          "label": "재직",
+          "color": "green",
+          "position": 0
+        },
+        {
+          "value": "LEFT",
+          "label": "퇴사",
+          "color": "gray",
+          "position": 1
+        },
+        {
+          "value": "HYUJIG",
+          "label": "휴직",
+          "color": "red",
+          "position": 2
+        }
+      ]
+    },
+    {
+      "name": "rideuOnboding",
+      "label": "리드 온보딩",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "onboarding",
+      "inverseName": "leadConsultant",
+      "inverseLabel": "리드 컨설턴트"
+    },
+    {
+      "name": "silhaengOnboding",
+      "label": "실행 온보딩",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "onboarding",
+      "inverseName": "executionConsultant",
+      "inverseLabel": "실행 컨설턴트"
+    },
+    {
+      "name": "gongdongDamdangGieob",
+      "label": "공동 담당 기업",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "companyGuseongweonLink",
+      "inverseName": "guseongweon",
+      "inverseLabel": "구성원",
+      "junctionTargetFieldName": "company"
+    },
+    {
+      "name": "damdangGogaegSaram",
+      "label": "DRI 담당 고객",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "person",
+      "inverseName": "driMember",
+      "inverseLabel": "DRI"
+    },
+    {
+      "name": "damdangGogaegSarye",
+      "label": "담당 고객 사례",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "customerCase",
+      "inverseName": "consultant",
+      "inverseLabel": "컨설턴트"
+    },
+    {
+      "name": "workspaceMemberAccount",
+      "label": "워크스페이스 계정",
+      "type": "RELATION",
+      "settings": {
+        "onDelete": "SET_NULL",
+        "relationType": "MANY_TO_ONE",
+        "joinColumnName": "workspaceMemberAccountId"
+      },
+      "target": "workspaceMember",
+      "inverseName": "guseongweon",
+      "inverseLabel": "구성원"
+    },
+    {
+      "name": "currentGroup",
+      "label": "현재 소속 그룹",
+      "type": "RELATION",
+      "settings": {
+        "onDelete": "SET_NULL",
+        "relationType": "MANY_TO_ONE",
+        "joinColumnName": "currentGroupId"
+      },
+      "target": "group",
+      "inverseName": "sosogGuseongweon",
+      "inverseLabel": "소속 구성원"
+    },
+    {
+      "name": "gongdongDamdangGogaeg",
+      "label": "공동 담당 고객",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "personGuseongweonLink",
+      "inverseName": "guseongweon",
+      "inverseLabel": "구성원",
+      "junctionTargetFieldName": "person"
+    },
+    {
+      "name": "gyeyagGiyeoNaeyeog",
+      "label": "기여도 내역",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "contractSplit",
+      "inverseName": "teamMember",
+      "inverseLabel": "기여 구성원"
+    },
+    {
+      "name": "jagseonghanIbgeum",
+      "label": "작성한 입금",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "deposit",
+      "inverseName": "creator",
+      "inverseLabel": "DRI"
+    },
+    {
+      "name": "gongdongSilhaengGyeyag",
+      "label": "공동 실행 계약",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "gyeyagGuseongweonLink",
+      "inverseName": "guseongweon",
+      "inverseLabel": "구성원",
+      "junctionTargetFieldName": "gyeyag"
+    },
+    {
+      "name": "gongdongDamdangMunyi",
+      "label": "공동 담당 문의",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "opportunityGuseongweonLink",
+      "inverseName": "guseongweon",
+      "inverseLabel": "구성원",
+      "junctionTargetFieldName": "opportunity"
+    },
+    {
+      "name": "googleChatUserId",
+      "label": "Google Chat 사용자 ID",
+      "type": "TEXT"
+    },
+    {
+      "name": "googleChatNotificationsEnabled",
+      "label": "Google Chat 개별 알림",
+      "type": "BOOLEAN"
+    },
+    {
+      "name": "phoneNumber",
+      "label": "전화번호",
+      "type": "PHONES"
+    },
+    {
+      "name": "birthDate",
+      "label": "생년월일",
+      "type": "DATE"
+    },
+    {
+      "name": "gender",
+      "label": "성별",
+      "type": "SELECT",
+      "options": [
+        {
+          "value": "FEMALE",
+          "label": "여",
+          "color": "pink",
+          "position": 0
+        },
+        {
+          "value": "MALE",
+          "label": "남",
+          "color": "blue",
+          "position": 1
+        }
+      ]
+    },
+    {
+      "name": "englishNickname",
+      "label": "영어 닉네임",
+      "type": "TEXT"
+    },
+    {
+      "name": "personalEmail",
+      "label": "개인 이메일(구글)",
+      "type": "EMAILS"
+    },
+    {
+      "name": "googleCalendarLink",
+      "label": "구글 캘린더 링크",
+      "type": "LINKS"
+    },
+    {
+      "name": "jobGrade",
+      "label": "직급",
+      "type": "TEXT"
+    },
+    {
+      "name": "simbangGirogdeul",
+      "label": "심방 기록들",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "outreach",
+      "inverseName": "driMember",
+      "inverseLabel": "담당자 (DRI)"
+    }
+  ],
+  "outreach": [
+    {
+      "name": "id",
+      "label": "Id",
+      "type": "UUID"
+    },
+    {
+      "name": "createdAt",
+      "label": "Creation date",
+      "type": "DATE_TIME"
+    },
+    {
+      "name": "createdBy",
+      "label": "Created by",
+      "type": "ACTOR"
+    },
+    {
+      "name": "deletedAt",
+      "label": "Deleted at",
+      "type": "DATE_TIME"
+    },
+    {
+      "name": "updatedAt",
+      "label": "Last update",
+      "type": "DATE_TIME"
+    },
+    {
+      "name": "timelineActivities",
+      "label": "Timeline Activities",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "timelineActivity",
+      "inverseName": "targetOutreach",
+      "inverseLabel": "Outreach"
+    },
+    {
+      "name": "attachments",
+      "label": "Attachments",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "attachment",
+      "inverseName": "targetOutreach",
+      "inverseLabel": "Outreach"
+    },
+    {
+      "name": "noteTargets",
+      "label": "Notes",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "noteTarget",
+      "inverseName": "targetOutreach",
+      "inverseLabel": "Outreach"
+    },
+    {
+      "name": "taskTargets",
+      "label": "Tasks",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "taskTarget",
+      "inverseName": "targetOutreach",
+      "inverseLabel": "Outreach"
+    },
+    {
+      "name": "company",
+      "label": "기업",
+      "type": "RELATION",
+      "settings": {
+        "onDelete": "SET_NULL",
+        "relationType": "MANY_TO_ONE",
+        "joinColumnName": "companyId"
+      },
+      "target": "company",
+      "inverseName": "simbangRiseuteu",
+      "inverseLabel": "심방 리스트"
+    },
+    {
+      "name": "name",
+      "label": "제목",
+      "type": "TEXT"
+    },
+    {
+      "name": "person",
+      "label": "고객",
+      "type": "RELATION",
+      "settings": {
+        "onDelete": "SET_NULL",
+        "relationType": "MANY_TO_ONE",
+        "joinColumnName": "personId"
+      },
+      "target": "person",
+      "inverseName": "simbangRiseuteu",
+      "inverseLabel": "심방 리스트"
+    },
+    {
+      "name": "opportunity",
+      "label": "관련 기회 (최초 문의)",
+      "type": "RELATION",
+      "settings": {
+        "onDelete": "SET_NULL",
+        "relationType": "MANY_TO_ONE",
+        "joinColumnName": "opportunityId"
+      },
+      "target": "opportunity",
+      "inverseName": "simbangRiseuteu",
+      "inverseLabel": "심방 리스트"
+    },
+    {
+      "name": "campaignType",
+      "label": "심방 유형 / 캠페인명",
+      "type": "SELECT",
+      "options": [
+        {
+          "value": "VISION_WORKSHOP",
+          "label": "비전워크샵",
+          "color": "blue",
+          "position": 0
+        },
+        {
+          "value": "CC_CLASS",
+          "label": "CC클래스 연회원",
+          "color": "green",
+          "position": 1
+        },
+        {
+          "value": "LUNAR_NEW_YEAR",
+          "label": "설 연휴 연락",
+          "color": "yellow",
+          "position": 2
+        },
+        {
+          "value": "CONFERENCE",
+          "label": "컨퍼런스 연락",
+          "color": "purple",
+          "position": 3
+        }
+      ]
+    },
+    {
+      "name": "status",
+      "label": "진행 상태",
+      "type": "SELECT",
+      "options": [
+        {
+          "value": "PENDING",
+          "label": "대기 중 (연락 전)",
+          "color": "gray",
+          "position": 0
+        },
+        {
+          "value": "IN_PROGRESS",
+          "label": "진행 중 (응답 대기)",
+          "color": "blue",
+          "position": 1
+        },
+        {
+          "value": "COMPLETED",
+          "label": "완료 / 참석 확정",
+          "color": "green",
+          "position": 2
+        },
+        {
+          "value": "UNRESPONSIVE",
+          "label": "보류 / 응답 없음",
+          "color": "red",
+          "position": 3
+        }
+      ]
+    },
+    {
+      "name": "nextFollowUpDate",
+      "label": "다음 연락 예정일",
+      "type": "DATE"
+    },
+    {
+      "name": "isGiftSent",
+      "label": "선물 전송 여부",
+      "type": "BOOLEAN"
+    },
+    {
+      "name": "isOnboarded",
+      "label": "온보딩 여부",
+      "type": "BOOLEAN"
+    },
+    {
+      "name": "contactedAt",
+      "label": "연락 일시",
+      "type": "DATE_TIME"
+    },
+    {
+      "name": "communicationChannel",
+      "label": "소통 채널",
+      "type": "SELECT",
+      "options": [
+        {
+          "value": "KAKAOTALK",
+          "label": "카톡",
+          "color": "yellow",
+          "position": 0
+        },
+        {
+          "value": "SMS",
+          "label": "문자",
+          "color": "green",
+          "position": 1
+        },
+        {
+          "value": "PHONE",
+          "label": "전화",
+          "color": "blue",
+          "position": 2
+        },
+        {
+          "value": "EMAIL",
+          "label": "이메일",
+          "color": "purple",
+          "position": 3
+        },
+        {
+          "value": "IN_PERSON",
+          "label": "대면 방문",
+          "color": "red",
+          "position": 4
+        },
+        {
+          "value": "COLLAB_TOOL",
+          "label": "협업툴",
+          "color": "turquoise",
+          "position": 5
+        },
+        {
+          "value": "ETC",
+          "label": "기타",
+          "color": "gray",
+          "position": 6
+        }
+      ]
+    },
+    {
+      "name": "outreachPurpose",
+      "label": "심방 목적",
+      "type": "SELECT",
+      "options": [
+        {
+          "value": "RELATIONSHIP",
+          "label": "관계 유지",
+          "color": "blue",
+          "position": 0
+        },
+        {
+          "value": "EVENT_INVITE",
+          "label": "행사 초청",
+          "color": "purple",
+          "position": 1
+        },
+        {
+          "value": "RENEWAL",
+          "label": "재계약 제안",
+          "color": "green",
+          "position": 2
+        },
+        {
+          "value": "NEW_PROPOSAL",
+          "label": "신규 제안",
+          "color": "turquoise",
+          "position": 3
+        },
+        {
+          "value": "SATISFACTION",
+          "label": "만족도 확인",
+          "color": "yellow",
+          "position": 4
+        },
+        {
+          "value": "FOLLOW_UP",
+          "label": "사후 관리",
+          "color": "orange",
+          "position": 5
+        }
+      ]
+    },
+    {
+      "name": "customerTier",
+      "label": "고객 등급 / 관계",
+      "type": "SELECT",
+      "options": [
+        {
+          "value": "NEW",
+          "label": "신규",
+          "color": "blue",
+          "position": 0
+        },
+        {
+          "value": "EXISTING",
+          "label": "기존 고객",
+          "color": "green",
+          "position": 1
+        },
+        {
+          "value": "VIP",
+          "label": "VIP",
+          "color": "purple",
+          "position": 2
+        },
+        {
+          "value": "DORMANT",
+          "label": "휴면 고객",
+          "color": "gray",
+          "position": 3
+        },
+        {
+          "value": "PROSPECT",
+          "label": "잠재 고객",
+          "color": "yellow",
+          "position": 4
+        }
+      ]
+    },
+    {
+      "name": "responseSentiment",
+      "label": "응답 반응",
+      "type": "SELECT",
+      "options": [
+        {
+          "value": "POSITIVE",
+          "label": "긍정적",
+          "color": "green",
+          "position": 0
+        },
+        {
+          "value": "NEUTRAL",
+          "label": "중립",
+          "color": "blue",
+          "position": 1
+        },
+        {
+          "value": "NEGATIVE",
+          "label": "부정적",
+          "color": "red",
+          "position": 2
+        },
+        {
+          "value": "NO_RESPONSE",
+          "label": "무응답",
+          "color": "gray",
+          "position": 3
+        }
+      ]
+    },
+    {
+      "name": "driMember",
+      "label": "담당자 (DRI)",
+      "type": "RELATION",
+      "settings": {
+        "onDelete": "SET_NULL",
+        "relationType": "MANY_TO_ONE",
+        "joinColumnName": "driMemberId"
+      },
+      "target": "teamMember",
+      "inverseName": "simbangGirogdeul",
+      "inverseLabel": "심방 기록들"
+    }
+  ],
+  "companyGuseongweonLink": [
+    {
+      "name": "id",
+      "label": "Id",
+      "type": "UUID"
+    },
+    {
+      "name": "createdAt",
+      "label": "Creation date",
+      "type": "DATE_TIME"
+    },
+    {
+      "name": "createdBy",
+      "label": "Created by",
+      "type": "ACTOR"
+    },
+    {
+      "name": "deletedAt",
+      "label": "Deleted at",
+      "type": "DATE_TIME"
+    },
+    {
+      "name": "updatedAt",
+      "label": "Last update",
+      "type": "DATE_TIME"
+    },
+    {
+      "name": "timelineActivities",
+      "label": "Timeline Activities",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "timelineActivity",
+      "inverseName": "targetCompanyGuseongweonLink",
+      "inverseLabel": "CompanyGuseongweonLink"
+    },
+    {
+      "name": "attachments",
+      "label": "Attachments",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "attachment",
+      "inverseName": "targetCompanyGuseongweonLink",
+      "inverseLabel": "CompanyGuseongweonLink"
+    },
+    {
+      "name": "noteTargets",
+      "label": "Notes",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "noteTarget",
+      "inverseName": "targetCompanyGuseongweonLink",
+      "inverseLabel": "CompanyGuseongweonLink"
+    },
+    {
+      "name": "taskTargets",
+      "label": "Tasks",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "taskTarget",
+      "inverseName": "targetCompanyGuseongweonLink",
+      "inverseLabel": "CompanyGuseongweonLink"
+    },
+    {
+      "name": "company",
+      "label": "Company",
+      "type": "RELATION",
+      "settings": {
+        "onDelete": "SET_NULL",
+        "relationType": "MANY_TO_ONE",
+        "joinColumnName": "companyId"
+      },
+      "target": "company",
+      "inverseName": "gongdongDamdangja",
+      "inverseLabel": "공동 담당자"
+    },
+    {
+      "name": "guseongweon",
+      "label": "구성원",
+      "type": "RELATION",
+      "settings": {
+        "onDelete": "SET_NULL",
+        "relationType": "MANY_TO_ONE",
+        "joinColumnName": "guseongweonId"
+      },
+      "target": "teamMember",
+      "inverseName": "gongdongDamdangGieob",
+      "inverseLabel": "공동 담당 기업"
+    }
+  ],
+  "personGuseongweonLink": [
+    {
+      "name": "id",
+      "label": "Id",
+      "type": "UUID"
+    },
+    {
+      "name": "createdAt",
+      "label": "Creation date",
+      "type": "DATE_TIME"
+    },
+    {
+      "name": "createdBy",
+      "label": "Created by",
+      "type": "ACTOR"
+    },
+    {
+      "name": "deletedAt",
+      "label": "Deleted at",
+      "type": "DATE_TIME"
+    },
+    {
+      "name": "updatedAt",
+      "label": "Last update",
+      "type": "DATE_TIME"
+    },
+    {
+      "name": "timelineActivities",
+      "label": "Timeline Activities",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "timelineActivity",
+      "inverseName": "targetPersonGuseongweonLink",
+      "inverseLabel": "PersonGuseongweonLink"
+    },
+    {
+      "name": "attachments",
+      "label": "Attachments",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "attachment",
+      "inverseName": "targetPersonGuseongweonLink",
+      "inverseLabel": "PersonGuseongweonLink"
+    },
+    {
+      "name": "noteTargets",
+      "label": "Notes",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "noteTarget",
+      "inverseName": "targetPersonGuseongweonLink",
+      "inverseLabel": "PersonGuseongweonLink"
+    },
+    {
+      "name": "taskTargets",
+      "label": "Tasks",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "taskTarget",
+      "inverseName": "targetPersonGuseongweonLink",
+      "inverseLabel": "PersonGuseongweonLink"
+    },
+    {
+      "name": "person",
+      "label": "Person",
+      "type": "RELATION",
+      "settings": {
+        "onDelete": "SET_NULL",
+        "relationType": "MANY_TO_ONE",
+        "joinColumnName": "personId"
+      },
+      "target": "person",
+      "inverseName": "gongdongDamdangja",
+      "inverseLabel": "공동 담당자"
+    },
+    {
+      "name": "guseongweon",
+      "label": "구성원",
+      "type": "RELATION",
+      "settings": {
+        "onDelete": "SET_NULL",
+        "relationType": "MANY_TO_ONE",
+        "joinColumnName": "guseongweonId"
+      },
+      "target": "teamMember",
+      "inverseName": "gongdongDamdangGogaeg",
+      "inverseLabel": "공동 담당 고객"
+    }
+  ],
+  "opportunityGuseongweonLink": [
+    {
+      "name": "name",
+      "label": "Name",
+      "type": "TEXT"
+    },
+    {
+      "name": "id",
+      "label": "Id",
+      "type": "UUID"
+    },
+    {
+      "name": "createdAt",
+      "label": "Creation date",
+      "type": "DATE_TIME"
+    },
+    {
+      "name": "createdBy",
+      "label": "Created by",
+      "type": "ACTOR"
+    },
+    {
+      "name": "deletedAt",
+      "label": "Deleted at",
+      "type": "DATE_TIME"
+    },
+    {
+      "name": "updatedAt",
+      "label": "Last update",
+      "type": "DATE_TIME"
+    },
+    {
+      "name": "timelineActivities",
+      "label": "Timeline Activities",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "timelineActivity",
+      "inverseName": "targetOpportunityGuseongweonLink",
+      "inverseLabel": "OpportunityGuseongweonLink"
+    },
+    {
+      "name": "attachments",
+      "label": "Attachments",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "attachment",
+      "inverseName": "targetOpportunityGuseongweonLink",
+      "inverseLabel": "OpportunityGuseongweonLink"
+    },
+    {
+      "name": "noteTargets",
+      "label": "Notes",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "noteTarget",
+      "inverseName": "targetOpportunityGuseongweonLink",
+      "inverseLabel": "OpportunityGuseongweonLink"
+    },
+    {
+      "name": "taskTargets",
+      "label": "Tasks",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "taskTarget",
+      "inverseName": "targetOpportunityGuseongweonLink",
+      "inverseLabel": "OpportunityGuseongweonLink"
+    },
+    {
+      "name": "opportunity",
+      "label": "Opportunity",
+      "type": "RELATION",
+      "settings": {
+        "onDelete": "SET_NULL",
+        "relationType": "MANY_TO_ONE",
+        "joinColumnName": "opportunityId"
+      },
+      "target": "opportunity",
+      "inverseName": "gongdongDamdangja",
+      "inverseLabel": "공동 담당자"
+    },
+    {
+      "name": "guseongweon",
+      "label": "구성원",
+      "type": "RELATION",
+      "settings": {
+        "onDelete": "SET_NULL",
+        "relationType": "MANY_TO_ONE",
+        "joinColumnName": "guseongweonId"
+      },
+      "target": "teamMember",
+      "inverseName": "gongdongDamdangMunyi",
+      "inverseLabel": "공동 담당 문의"
+    }
+  ],
+  "gyeyagGuseongweonLink": [
+    {
+      "name": "id",
+      "label": "Id",
+      "type": "UUID"
+    },
+    {
+      "name": "createdAt",
+      "label": "Creation date",
+      "type": "DATE_TIME"
+    },
+    {
+      "name": "createdBy",
+      "label": "Created by",
+      "type": "ACTOR"
+    },
+    {
+      "name": "deletedAt",
+      "label": "Deleted at",
+      "type": "DATE_TIME"
+    },
+    {
+      "name": "updatedAt",
+      "label": "Last update",
+      "type": "DATE_TIME"
+    },
+    {
+      "name": "timelineActivities",
+      "label": "Timeline Activities",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "timelineActivity",
+      "inverseName": "targetGyeyagGuseongweonLink",
+      "inverseLabel": "GyeyagGuseongweonLink"
+    },
+    {
+      "name": "attachments",
+      "label": "Attachments",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "attachment",
+      "inverseName": "targetGyeyagGuseongweonLink",
+      "inverseLabel": "GyeyagGuseongweonLink"
+    },
+    {
+      "name": "noteTargets",
+      "label": "Notes",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "noteTarget",
+      "inverseName": "targetGyeyagGuseongweonLink",
+      "inverseLabel": "GyeyagGuseongweonLink"
+    },
+    {
+      "name": "taskTargets",
+      "label": "Tasks",
+      "type": "RELATION",
+      "settings": {
+        "relationType": "ONE_TO_MANY"
+      },
+      "target": "taskTarget",
+      "inverseName": "targetGyeyagGuseongweonLink",
+      "inverseLabel": "GyeyagGuseongweonLink"
+    },
+    {
+      "name": "gyeyag",
+      "label": "계약",
+      "type": "RELATION",
+      "settings": {
+        "onDelete": "SET_NULL",
+        "relationType": "MANY_TO_ONE",
+        "joinColumnName": "gyeyagId"
+      },
+      "target": "onboarding",
+      "inverseName": "gongdongSilhaengKeonseolteonteu",
+      "inverseLabel": "공동 실행 컨설턴트"
+    },
+    {
+      "name": "guseongweon",
+      "label": "구성원",
+      "type": "RELATION",
+      "settings": {
+        "onDelete": "SET_NULL",
+        "relationType": "MANY_TO_ONE",
+        "joinColumnName": "guseongweonId"
+      },
+      "target": "teamMember",
+      "inverseName": "gongdongSilhaengGyeyag",
+      "inverseLabel": "공동 실행 계약"
+    }
+  ]
+}
