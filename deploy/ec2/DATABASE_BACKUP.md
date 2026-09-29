@@ -80,3 +80,37 @@ bash -n deploy/ec2/scripts/install-database-backup.sh
 Unit coverage includes failed dumps, failed uploads/verification, failed manifest upload, credential handling, lifecycle rule merging, and lifecycle AccessDenied. Actual S3 upload and Linux timer behavior must be verified on the deployment host; mock success is not production activation.
 
 References: [PostgreSQL pg_dump](https://www.postgresql.org/docs/current/app-pgdump.html), [S3 lifecycle configurations](https://docs.aws.amazon.com/AmazonS3/latest/userguide/lifecycle-configuration-examples.html).
+
+
+## 실행 이력 DB 기록
+
+백업 실행 시 동일 DB의 `backup_ops.database_backup_runs` 테이블을 자동 생성하고,
+시작 시 `RUNNING`, 정상 종료 시 `SUCCESS`, 예외 발생 시 `FAILED`로 기록한다.
+초기 설치 계정에는 DB의 스키마 생성 권한이 필요하다. 테이블은 업무 메타데이터와
+분리되어 있으며 관리자 목록 화면에 실행 이력을 표시하는 기능은 별도다.
+
+- `run_id`: 실행 고유 ID (systemd 재시도는 별도 실행)
+- `started_at`, `completed_at`: 시간대가 포함된 시작·완료 시각
+- `duration_ms`: 단조 시계 기준 경과 시간, DB 최종 기록 시간은 제외
+- `file_size_bytes`: 검증된 덤프 크기. 덤프/검증 실패 시 NULL일 수 있음
+- `s3_path`: 대상 덤프 경로. FAILED 행은 파일 존재를 보장하지 않음
+- `error_message`: 실패 단계와 오류 유형. 자격 증명이 포함될 수 있는 원문은 저장하지 않음
+
+DB 또는 로컬 이력 기록 실패는 백업 자체를 중단하거나 원래 백업 오류를 덮어쓰지 않으며 서버 journal에 경고한다.
+실행별 로컬 사본은 `/var/lib/twenty-db-backup/history/<run_id>.json`에 보존한다.
+로컬 저장 실패 시에도 DB 이력 기록을 시도한다.
+DB 장애 중 기록은 자동 재전송하지 않는다. 강제 종료(SIGKILL)나 호스트 장애에서는
+종료 처리 자체가 불가능하므로 RUNNING이 남을 수 있다. 자동 실패로 단정하지 말고
+systemd 상태, S3 manifest와 로컬 이력을 함께 확인한다.
+
+```sql
+SELECT run_id, status, started_at, completed_at, duration_ms,
+       file_size_bytes, s3_path, error_message
+FROM backup_ops.database_backup_runs
+ORDER BY started_at DESC
+LIMIT 50;
+```
+
+이력 테이블은 덤프에 포함되지만 해당 실행의 완료 기록은 덤프 이후 작성되므로,
+복원본에는 해당 실행이 RUNNING으로 보일 수 있다. S3 30일 보관 정책은 DB 및 로컬
+이력에 적용하지 않는다. 기존 설치에서는 새 스크립트로 재설치해야 적용된다.

@@ -69,10 +69,48 @@ class BackupTests(unittest.TestCase):
             backup.backup(self.env, self.root / 'state')
         result = json.loads((self.root / 'state/last-success.json').read_text())
         self.assertEqual(result['bytes'], 12)
-        self.assertIn('/manifest.json', ' '.join(calls[-1]))
+        self.assertTrue(any('/manifest.json' in ' '.join(c) for c in calls))
+        history = json.loads(next((self.root / 'state/history').glob('*.json')).read_text())
+        self.assertEqual(history['status'], 'SUCCESS')
+        self.assertEqual(history['fileSizeBytes'], 12)
+        self.assertGreaterEqual(history['durationMs'], 0)
+        self.assertIsNotNone(history['completedAt'])
         self.assertNotIn('p@ss', repr(calls))
         self.assertNotIn('postgres://', repr(calls))
         self.assertEqual(list((self.root / 'state').glob('run-*')), [])
+
+    def test_history_database_failure_does_not_prevent_backup(self):
+        calls, runner = self.scenario()
+        def unavailable(command, **kwargs):
+            if 'psql' in command:
+                raise RuntimeError('database unavailable secret')
+            return runner(command, **kwargs)
+        with patch.object(backup, 'run', side_effect=unavailable):
+            backup.backup(self.env, self.root / 'state')
+        history = json.loads(next((self.root / 'state/history').glob('*.json')).read_text())
+        self.assertEqual(history['status'], 'SUCCESS')
+        self.assertTrue((self.root / 'state/last-success.json').exists())
+
+    def test_history_file_failures_do_not_change_backup_result(self):
+        original_write = Path.write_text
+        for failing_file in ('local', 'history.sql'):
+            for dump_fails in (False, True):
+                with self.subTest(failing_file=failing_file, dump_fails=dump_fails):
+                    state = self.root / (failing_file + str(dump_fails))
+                    calls, runner = self.scenario(fail='dump' if dump_fails else None)
+                    def write(path, *args, **kwargs):
+                        if (failing_file == 'local' and path.parent.name == 'history') or path.name == failing_file:
+                            raise OSError('history write failed')
+                        return original_write(path, *args, **kwargs)
+                    with patch.object(backup, 'run', side_effect=runner), patch.object(Path, 'write_text', write):
+                        if dump_fails:
+                            with self.assertRaisesRegex(RuntimeError, 'dump failed'):
+                                backup.backup(self.env, state)
+                        else:
+                            backup.backup(self.env, state)
+                    self.assertEqual((state / 'last-success.json').exists(), not dump_fails)
+                    if failing_file == 'local':
+                        self.assertTrue(any('psql' in call for call in calls))
 
     def test_dump_failure_never_uploads(self):
         calls, runner = self.scenario(fail='dump')
@@ -80,6 +118,9 @@ class BackupTests(unittest.TestCase):
             with self.assertRaises(RuntimeError):
                 backup.backup(self.env, self.root / 'state')
         self.assertFalse(any('s3' in c for c in calls))
+        history = json.loads(next((self.root / 'state/history').glob('*.json')).read_text())
+        self.assertEqual(history['status'], 'FAILED')
+        self.assertIn('RuntimeError', history['errorMessage'])
         self.assertFalse((self.root / 'state/last-success.json').exists())
 
     def test_bad_upload_or_failed_manifest_never_marks_success(self):

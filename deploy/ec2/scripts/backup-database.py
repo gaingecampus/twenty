@@ -12,6 +12,7 @@ import signal
 import subprocess
 import sys
 import tempfile
+import time
 import uuid
 from urllib.parse import parse_qsl, unquote, urlsplit
 
@@ -116,6 +117,56 @@ def configure_retention(env_file):
     print('Configured 30-day expiration only for s3://' + bucket + '/' + PREFIX, flush=True)
 
 
+def record_history(base, work, state, record):
+    """Keep a local fallback even if the database is unavailable; never log SQL errors."""
+    local_saved = False
+    try:
+        history = state / 'history'
+        history.mkdir(mode=0o700, exist_ok=True)
+        target = history / (record['runId'] + '.json')
+        temporary = target.with_suffix('.tmp')
+        temporary.write_text(json.dumps(record, indent=2) + '\n')
+        temporary.replace(target)
+        local_saved = True
+    except Exception:
+        print('WARNING: Backup local history update failed for ' + record['runId'], file=sys.stderr, flush=True)
+    try:
+        # All values travel in a private SQL file, not shell interpolation or argv.
+        payload = json.dumps(record).replace("'", "''")
+        sql = work / 'history.sql'
+        sql.write_text(r"""\set ON_ERROR_STOP on
+SET statement_timeout = '20s';
+SET lock_timeout = '5s';
+CREATE SCHEMA IF NOT EXISTS backup_ops;
+CREATE TABLE IF NOT EXISTS backup_ops.database_backup_runs (
+  run_id text PRIMARY KEY,
+  status text NOT NULL CHECK (status IN ('RUNNING','SUCCESS','FAILED')),
+  started_at timestamptz NOT NULL,
+  completed_at timestamptz,
+  duration_ms bigint,
+  file_size_bytes bigint,
+  s3_path text NOT NULL,
+  error_message text
+);
+INSERT INTO backup_ops.database_backup_runs
+SELECT j->>'runId', j->>'status', (j->>'startedAt')::timestamptz,
+  (j->>'completedAt')::timestamptz, (j->>'durationMs')::bigint,
+  (j->>'fileSizeBytes')::bigint, j->>'s3Path', j->>'errorMessage'
+FROM (SELECT '""" + payload + """'::jsonb AS j) payload
+ON CONFLICT (run_id) DO UPDATE SET
+ status=EXCLUDED.status, completed_at=EXCLUDED.completed_at,
+ duration_ms=EXCLUDED.duration_ms, file_size_bytes=EXCLUDED.file_size_bytes,
+ error_message=EXCLUDED.error_message;
+""")
+        sql.chmod(0o600)
+        run(base + ['psql', '--no-password', '-X', '--file=/backup/history.sql'], timeout=60)
+        return True
+    except Exception:
+        fallback = '; retained local history' if local_saved else '; local history also unavailable'
+        print('WARNING: Backup history DB update failed' + fallback + ' for ' + record['runId'], file=sys.stderr, flush=True)
+        return False
+
+
 def backup(env_file, state_dir):
     values, bucket, region, pg = settings(env_file)
     state = Path(state_dir)
@@ -126,6 +177,7 @@ def backup(env_file, state_dir):
         except BlockingIOError:
             raise RuntimeError('Another database backup is running') from None
         started = dt.datetime.now(dt.timezone.utc)
+        monotonic_started = time.monotonic()
         run_id = started.strftime('%Y%m%dT%H%M%SZ') + '-' + uuid.uuid4().hex[:12]
         key = PREFIX + started.strftime('%Y/%m/%d/') + run_id
         image = values.get('DB_BACKUP_PG_IMAGE', 'postgres:18')
@@ -137,42 +189,65 @@ def backup(env_file, state_dir):
             credentials.chmod(0o600)
             base = ['docker', 'run', '--rm', '--name', container, '--network', values.get('DB_BACKUP_DOCKER_NETWORK', 'host'),
                     '--env-file', str(credentials), '--mount', 'type=bind,src=' + str(work.resolve()) + ',dst=/backup', image]
-            print('Starting database export ' + run_id, flush=True)
-            run(base + ['pg_dump', '--no-password', '--format=custom', '--lock-wait-timeout=30s',
-                        '--file=/backup/database.dump'])
-            dump = work / 'database.dump'
-            if not dump.is_file() or dump.stat().st_size == 0:
-                raise RuntimeError('Database dump is empty')
-            run(base + ['pg_restore', '--list', '/backup/database.dump'], timeout=300)
-            # Also read every archive data block, so a truncated data section fails.
-            run(base + ['pg_restore', '--file=/dev/null', '/backup/database.dump'])
-            digest = hashlib.sha256()
-            with dump.open('rb') as handle:
-                for chunk in iter(lambda: handle.read(1024 * 1024), b''):
-                    digest.update(chunk)
-            sha = digest.hexdigest()
-            size = dump.stat().st_size
-            aws = ['aws', '--region', region]
             dump_key = key + '/database.dump'
-            run(aws + ['s3', 'cp', str(dump), 's3://' + bucket + '/' + dump_key,
-                       '--sse', 'AES256', '--only-show-errors', '--metadata', 'sha256=' + sha])
-            head = json.loads(run(aws + ['s3api', 'head-object', '--bucket', bucket, '--key', dump_key]).stdout)
-            if head.get('ContentLength') != size or head.get('Metadata', {}).get('sha256') != sha:
-                raise RuntimeError('Uploaded dump verification failed; no completion manifest written')
-            completed = dt.datetime.now(dt.timezone.utc).isoformat()
-            manifest = dict(format='postgresql-custom', startedAt=started.isoformat(), completedAt=completed,
-                            bucket=bucket, key=dump_key, bytes=size, sha256=sha, clientImage=image,
-                            database=pg['PGDATABASE'], scope='single database; all schemas and data',
-                            restoreNotes='Provision matching extensions and roles separately. App encryption keys and S3 files are separate.')
-            manifest_path = work / 'manifest.json'
-            manifest_path.write_text(json.dumps(manifest, indent=2) + '\n')
-            run(aws + ['s3', 'cp', str(manifest_path), 's3://' + bucket + '/' + key + '/manifest.json',
-                       '--sse', 'AES256', '--only-show-errors'])
-            # A run is complete only if the manifest upload also succeeds.
-            status = state / 'last-success.tmp'
-            status.write_text(json.dumps(manifest, indent=2) + '\n')
-            status.replace(state / 'last-success.json')
-            print('Backup complete: s3://' + bucket + '/' + dump_key + ' (' + str(size) + ' bytes)', flush=True)
+            record = dict(runId=run_id, status='RUNNING', startedAt=started.isoformat(),
+                          completedAt=None, durationMs=None, fileSizeBytes=None,
+                          s3Path='s3://' + bucket + '/' + dump_key, errorMessage=None)
+            record_history(base, work, state, record)
+            stage = 'database dump'
+            try:
+                print('Starting database export ' + run_id, flush=True)
+                run(base + ['pg_dump', '--no-password', '--format=custom', '--lock-wait-timeout=30s',
+                            '--file=/backup/database.dump'])
+                dump = work / 'database.dump'
+                if not dump.is_file() or dump.stat().st_size == 0:
+                    raise RuntimeError('Database dump is empty')
+                stage = 'archive validation'
+                run(base + ['pg_restore', '--list', '/backup/database.dump'], timeout=300)
+                # Also read every archive data block, so a truncated data section fails.
+                run(base + ['pg_restore', '--file=/dev/null', '/backup/database.dump'])
+                digest = hashlib.sha256()
+                with dump.open('rb') as handle:
+                    for chunk in iter(lambda: handle.read(1024 * 1024), b''):
+                        digest.update(chunk)
+                sha = digest.hexdigest()
+                size = dump.stat().st_size
+                record['fileSizeBytes'] = size
+                aws = ['aws', '--region', region]
+                stage = 'S3 dump upload'
+                run(aws + ['s3', 'cp', str(dump), 's3://' + bucket + '/' + dump_key,
+                           '--sse', 'AES256', '--only-show-errors', '--metadata', 'sha256=' + sha])
+                stage = 'S3 upload verification'
+                head = json.loads(run(aws + ['s3api', 'head-object', '--bucket', bucket, '--key', dump_key]).stdout)
+                if head.get('ContentLength') != size or head.get('Metadata', {}).get('sha256') != sha:
+                    raise RuntimeError('Uploaded dump verification failed; no completion manifest written')
+                completed = dt.datetime.now(dt.timezone.utc).isoformat()
+                manifest = dict(format='postgresql-custom', startedAt=started.isoformat(), completedAt=completed,
+                                bucket=bucket, key=dump_key, bytes=size, sha256=sha, clientImage=image,
+                                database=pg['PGDATABASE'], scope='single database; all schemas and data',
+                                restoreNotes='Provision matching extensions and roles separately. App encryption keys and S3 files are separate.')
+                manifest_path = work / 'manifest.json'
+                manifest_path.write_text(json.dumps(manifest, indent=2) + '\n')
+                stage = 'S3 manifest upload'
+                run(aws + ['s3', 'cp', str(manifest_path), 's3://' + bucket + '/' + key + '/manifest.json',
+                           '--sse', 'AES256', '--only-show-errors'])
+                # A run is complete only if the manifest upload also succeeds.
+                stage = 'local success record'
+                status = state / 'last-success.tmp'
+                status.write_text(json.dumps(manifest, indent=2) + '\n')
+                status.replace(state / 'last-success.json')
+                print('Backup complete: s3://' + bucket + '/' + dump_key + ' (' + str(size) + ' bytes)', flush=True)
+                record['status'] = 'SUCCESS'
+            except BaseException as error:
+                record['status'] = 'FAILED'
+                # Exception text can include credentials, argv, and customer data.
+                record['errorMessage'] = stage + ' failed: ' + type(error).__name__ + '; inspect server journal'
+                raise
+            finally:
+                record['completedAt'] = dt.datetime.now(dt.timezone.utc).isoformat()
+                record['durationMs'] = round((time.monotonic() - monotonic_started) * 1000)
+                record_history(base, work, state, record)
+
 
 
 def main():
