@@ -24,29 +24,39 @@ export class StopOpportunityDriAutoAssignCommand extends ActiveOrSuspendedWorksp
   }: RunOnWorkspaceArgs): Promise<void> {
     if (!dataSource) throw new Error('Missing data source');
     const schema = getWorkspaceSchemaName(workspaceId);
-    // Locate installed triggers by function, including renamed/custom tables.
-    const triggers: { tableName: string; triggerName: string }[] =
-      await dataSource.query(
-        `SELECT c.relname AS "tableName", t.tgname AS "triggerName" FROM pg_trigger t JOIN pg_class c ON c.oid=t.tgrelid JOIN pg_namespace n ON n.oid=c.relnamespace JOIN pg_proc p ON p.oid=t.tgfoid WHERE n.nspname=$1 AND p.proname='gainge_assign_opportunity' AND NOT t.tgisinternal`,
-        [schema],
-      );
-    if (options.dryRun) {
-      this.logger.log(
-        `Would remove ${triggers.length} inquiry DRI assignment triggers`,
-      );
-      return;
-    }
-    await dataSource.transaction(async (manager) => {
-      await manager.query("SET LOCAL lock_timeout='5s'");
-      await manager.query("SET LOCAL statement_timeout='30s'");
+    const runner = dataSource.createQueryRunner();
+    await runner.connect();
+    try {
+      await runner.startTransaction();
+      await runner.query("SET LOCAL lock_timeout='5s'");
+      await runner.query("SET LOCAL statement_timeout='30s'");
+      // Locate installed triggers by function, including renamed/custom tables.
+      const triggers: { tableName: string; triggerName: string }[] =
+        await runner.query(
+          `SELECT c.relname AS "tableName", t.tgname AS "triggerName" FROM pg_trigger t JOIN pg_class c ON c.oid=t.tgrelid JOIN pg_namespace n ON n.oid=c.relnamespace JOIN pg_proc p ON p.oid=t.tgfoid WHERE n.nspname=$1 AND p.proname='gainge_assign_opportunity' AND NOT t.tgisinternal`,
+          [schema],
+        );
+      if (options.dryRun) {
+        this.logger.log(
+          `Would remove ${triggers.length} inquiry DRI assignment triggers`,
+        );
+        await runner.rollbackTransaction();
+        return;
+      }
       for (const trigger of triggers)
-        await manager.query(
+        await runner.query(
           `DROP TRIGGER IF EXISTS ${quoteAutomationSchema(trigger.triggerName)} ON ${quoteAutomationSchema(schema)}.${quoteAutomationSchema(trigger.tableName)}`,
         );
-      await manager.query(
+      await runner.query(
         `DROP FUNCTION IF EXISTS ${quoteAutomationSchema(schema)}.gainge_assign_opportunity()`,
       );
-    });
+      await runner.commitTransaction();
+    } catch (error) {
+      if (runner.isTransactionActive) await runner.rollbackTransaction();
+      throw error;
+    } finally {
+      await runner.release();
+    }
     this.logger.log(
       'Inquiry DRI auto-assignment removed; existing assignments preserved',
     );
