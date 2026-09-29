@@ -20485,3 +20485,36 @@ msgstr "워크스페이스가 비활성화됩니다"
 #: src/modules/settings/billing/components/SettingsBillingSubscriptionInfo.tsx
 msgid "yr"
 msgstr ""
+
+msgid "Trash"
+msgstr "휴지통"
+
+msgid "Trash is empty"
+msgstr "휴지통이 비어 있어요"
+
+msgid "Deleted records will appear here until they are restored or permanently erased."
+msgstr "삭제한 기록은 복원하거나 영구 삭제할 때까지 여기에 표시됩니다."
+
+msgid "Deleted by"
+msgstr "삭제한 사람"
+
+msgid "Failed to restore record"
+msgstr "기록을 복원하지 못했어요"
+
+msgid "Failed to permanently delete record"
+msgstr "기록을 영구 삭제하지 못했어요"
+
+msgid "Permanently destroy {0}"
+msgstr "{0} 영구 삭제"
+
+msgid "This record cannot be recovered."
+msgstr "이 기록은 복구할 수 없습니다."
+
+msgid "Permanently destroy"
+msgstr "영구 삭제"
+
+msgid "Destroy"
+msgstr "영구 삭제"
+
+msgid "Permanently deleted after {trashRetentionDays} days"
+msgstr "{trashRetentionDays}일 후 영구 삭제됩니다"
