@@ -40,6 +40,17 @@ const TrashPage = lazy(() =>
   })),
 );
 
+const FieldVisitDetailPage = lazy(() =>
+  import('~/pages/field-management/MyFieldsPage').then((module) => ({
+    default: module.FieldVisitDetailPage,
+  })),
+);
+const MyFieldsPage = lazy(() =>
+  import('~/pages/field-management/MyFieldsPage').then((module) => ({
+    default: module.MyFieldsPage,
+  })),
+);
+
 const StatusBoardPage = lazy(() =>
   import('~/pages/status-board/StatusBoardPage').then((module) => ({
     default: module.StatusBoardPage,
@@ -294,6 +305,22 @@ export const useCreateAppRouter = (
               element={
                 <LazyRoute>
                   <TrashPage />
+                </LazyRoute>
+              }
+            />
+            <Route
+              path="/my-fields/records/:visitId"
+              element={
+                <LazyRoute>
+                  <FieldVisitDetailPage />
+                </LazyRoute>
+              }
+            />
+            <Route
+              path="/my-fields"
+              element={
+                <LazyRoute>
+                  <MyFieldsPage />
                 </LazyRoute>
               }
             />

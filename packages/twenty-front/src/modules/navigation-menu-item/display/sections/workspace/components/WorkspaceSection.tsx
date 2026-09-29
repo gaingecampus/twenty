@@ -35,7 +35,11 @@ import { useAtomState } from '@/ui/utilities/state/jotai/hooks/useAtomState';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 import { useSetAtomState } from '@/ui/utilities/state/jotai/hooks/useSetAtomState';
 import { viewsSelector } from '@/views/states/selectors/viewsSelector';
-import { NavigationMenuItemType, SidePanelPages } from 'twenty-shared/types';
+import {
+  AppPath,
+  NavigationMenuItemType,
+  SidePanelPages,
+} from 'twenty-shared/types';
 import { lastVisitedViewPerObjectMetadataItemState } from '@/navigation/states/lastVisitedViewPerObjectMetadataItemState';
 
 const StyledRightIconsContainer = styled.div`
@@ -189,7 +193,25 @@ export const WorkspaceSection = () => {
   return (
     <WorkspaceSectionContainer
       sectionTitle={t`Workspace`}
-      items={items}
+      items={items.filter((item) => {
+        // Keep saved links editable; the fixed shortcut handles normal navigation.
+        if (
+          isLayoutCustomizationModeEnabled ||
+          item.type !== NavigationMenuItemType.LINK
+        )
+          return true;
+        try {
+          const link = new URL(item.link ?? '', window.location.origin);
+          return (
+            link.origin !== window.location.origin ||
+            link.pathname.replace(/\/$/, '') !== AppPath.StatusBoard ||
+            !!link.search ||
+            !!link.hash
+          );
+        } catch {
+          return true;
+        }
+      })}
       rightIcon={
         <StyledRightIconsContainer>
           {isLayoutCustomizationModeEnabled ? (

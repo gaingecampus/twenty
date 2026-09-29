@@ -1,3 +1,5 @@
+import { StatusBoardNavigationItem } from '@/status-board/components/StatusBoardNavigationItem';
+import { MyFieldsNavigationItem } from '@/field-management/FieldManagement';
 import { NavigationDrawerOpenedSection } from '@/navigation-menu-item/display/sections/components/NavigationDrawerOpenedSection';
 import { NavigationDrawerWorkspaceSectionSkeletonLoader } from '@/object-metadata/components/NavigationDrawerWorkspaceSectionSkeletonLoader';
 import { TrashNavigationDrawerItem } from '@/trash/components/TrashNavigationDrawerItem';
@@ -35,6 +37,10 @@ export const MainNavigationDrawerScrollableItems = () => {
       <NavigationDrawerOpenedSection />
       <Suspense fallback={<NavigationDrawerWorkspaceSectionSkeletonLoader />}>
         <FavoritesSectionDispatcher />
+        <div>
+          <StatusBoardNavigationItem />
+          <MyFieldsNavigationItem />
+        </div>
         <WorkspaceSectionDispatcher />
         <TrashNavigationDrawerItem />
       </Suspense>

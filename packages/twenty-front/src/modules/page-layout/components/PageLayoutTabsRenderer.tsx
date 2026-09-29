@@ -1,3 +1,5 @@
+import { FieldManagement } from '@/field-management/FieldManagement';
+import { useFieldManagementRecordTab } from '@/field-management/useFieldManagementRecordTab';
 import { metadataStoreState } from '@/metadata-store/states/metadataStoreState';
 import { type FlatObjectMetadataItem } from '@/metadata-store/types/FlatObjectMetadataItem';
 import { useObjectMetadataItems } from '@/object-metadata/hooks/useObjectMetadataItems';
@@ -189,6 +191,20 @@ export const PageLayoutTabsRenderer = () => {
     [sortedTabs, inactiveRelationFieldNames],
   );
 
+  const fieldManagementTab = useFieldManagementRecordTab(
+    currentPageLayout.id,
+    isPageLayoutInEditMode,
+  );
+  const displayTabs = fieldManagementTab
+    ? [
+        ...sortedActiveTabs.slice(0, 1),
+        fieldManagementTab,
+        ...sortedActiveTabs.slice(1),
+      ]
+    : sortedActiveTabs;
+  const isFieldManagementTabActive =
+    !!fieldManagementTab && activeTabId === fieldManagementTab.id;
+
   const activeTabExistsInCurrentPageLayout = currentPageLayout.tabs.some(
     (tab) => tab.id === activeTabId,
   );
@@ -201,17 +217,17 @@ export const PageLayoutTabsRenderer = () => {
 
       <StyledTabsAndDashboardContainer>
         <PageLayoutTabListEffect
-          tabs={sortedActiveTabs}
+          tabs={displayTabs}
           componentInstanceId={tabListInstanceId}
           defaultTabToFocusOnMobileAndSidePanelId={
             currentPageLayout.defaultTabToFocusOnMobileAndSidePanelId ??
             undefined
           }
         />
-        {(sortedActiveTabs.length > 1 || isPageLayoutInEditMode) && (
+        {(displayTabs.length > 1 || isPageLayoutInEditMode) && (
           <PageLayoutTabList
             className="page-layout-tab-list-print-hidden"
-            tabs={sortedActiveTabs}
+            tabs={displayTabs}
             behaveAsLinks={!isInSidePanel && !isPageLayoutInEditMode}
             isInSidePanel={isInSidePanel}
             componentInstanceId={tabListInstanceId}
@@ -243,9 +259,18 @@ export const PageLayoutTabsRenderer = () => {
             )}
             defaultEnableXScroll={false}
           >
-            {isDefined(activeTabId) && activeTabExistsInCurrentPageLayout && (
+            {isFieldManagementTabActive && targetRecordIdentifier ? (
+              <FieldManagement
+                key={targetRecordIdentifier.id}
+                scope={
+                  targetRecordIdentifier.targetObjectNameSingular === 'company'
+                    ? { company: targetRecordIdentifier.id }
+                    : { contract: targetRecordIdentifier.id }
+                }
+              />
+            ) : isDefined(activeTabId) && activeTabExistsInCurrentPageLayout ? (
               <PageLayoutMainContent tabId={activeTabId} />
-            )}
+            ) : null}
           </ScrollWrapper>
         </StyledScrollWrapperContainer>
       </StyledTabsAndDashboardContainer>

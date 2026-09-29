@@ -18,7 +18,7 @@ export const AUTOMATION_CATALOG = [
     category: 'GAINGE',
     schedule: '레코드 생성·수정 시',
     description:
-      '기업·고객·문의의 빈 담당자를 배정하고 공동 담당자를 중복 없이 추가합니다. 계약 컨설턴트 자동 배정은 제외합니다.',
+      '기업·고객의 빈 담당자를 배정하고 기업·고객·문의의 공동 담당자를 중복 없이 추가합니다. 문의 DRI와 계약 컨설턴트는 자동 배정하지 않습니다.',
     source:
       'packages/twenty-server/src/modules/gainge-automation/automation-schema.ts',
   },

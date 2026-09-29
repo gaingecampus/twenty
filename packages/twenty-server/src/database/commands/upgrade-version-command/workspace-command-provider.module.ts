@@ -1,3 +1,4 @@
+import { V2_24_UpgradeVersionCommandModule } from './2-24/2-24-upgrade-version-command.module';
 import { Module } from '@nestjs/common';
 
 import { V1_21_UpgradeVersionCommandModule } from 'src/database/commands/upgrade-version-command/1-21/1-21-upgrade-version-command.module';
@@ -53,6 +54,7 @@ import { V2_23_UpgradeVersionCommandModule } from 'src/database/commands/upgrade
     V2_21_UpgradeVersionCommandModule,
     V2_22_UpgradeVersionCommandModule,
     V2_23_UpgradeVersionCommandModule,
+    V2_24_UpgradeVersionCommandModule,
   ],
 })
 export class WorkspaceCommandProviderModule {}

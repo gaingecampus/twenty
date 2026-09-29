@@ -1,3 +1,4 @@
+import { FieldManagement } from '@/field-management/FieldManagement';
 import { StatusBoardEmptyState } from '@/status-board/components/StatusBoardEmptyState';
 import { StatusBoardStageTimingSection } from '@/status-board/components/StatusBoardStageTimingSection';
 import { hasStatusBoardField } from '@/status-board/utils/hasStatusBoardField';
@@ -120,6 +121,16 @@ const StatusBoardContentBody = ({
         }
       >
         <StyledStatusBoardScroll>
+          {!dummy.enabled && !isGroupUnavailable && (
+            <FieldManagement
+              scope={{
+                dashboard: true,
+                memberIds,
+                start: periodRange.startDate,
+                end: periodRange.endDate,
+              }}
+            />
+          )}
           {dummy.enabled && (
             <StyledStatusBoardMuted>
               미리보기 · 예시 데이터

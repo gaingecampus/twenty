@@ -68,7 +68,7 @@ type StatusBoardRecordListProps = {
   recordMembers?: StatusBoardRecordMembers;
 };
 
-const StatusBoardRecordRowContent = ({
+export const StatusBoardRecordRowContent = ({
   record,
   objectNameSingular,
   badge,

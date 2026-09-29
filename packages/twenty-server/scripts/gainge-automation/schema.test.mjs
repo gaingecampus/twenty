@@ -17,6 +17,12 @@ test('transactional DRI and durable events across four objects',async()=>{
  assert.equal((await c.query(`SELECT count(*)::int AS n FROM "${ns}"."${tables[t.link]}" WHERE "${t.parent}"=$1`,[row.id])).rows[0].n,t.addsEditorAsCollaborator?1:0);
  assert.equal((await c.query(`SELECT "${t.dri}" AS id FROM "${ns}"."${tables[t.table]}" WHERE id=$1`,[row.id])).rows[0].id,owner);
  assert.equal((await c.query(`SELECT \"objectName\" FROM \"${ns}\".\"_gaingeAutomationEvent\" WHERE \"recordId\"=$1 LIMIT 1`,[row.id])).rows[0].objectName,t.table);
+ if(t.table==='opportunity') {
+   await c.query(`UPDATE "${ns}"."${tables[t.table]}" SET "${t.dri}"=NULL,"updatedBySource"='MANUAL',"updatedByWorkspaceMemberId"=$1 WHERE id=$2`,[actor,row.id]);
+   assert.equal((await c.query(`SELECT "${t.dri}" AS id FROM "${ns}"."${tables[t.table]}" WHERE id=$1`,[row.id])).rows[0].id,null,'clearing inquiry DRI must persist');
+   await c.query(`UPDATE "${ns}"."${tables[t.table]}" SET name='still unassigned' WHERE id=$1`,[row.id]);
+   assert.equal((await c.query(`SELECT "${t.dri}" AS id FROM "${ns}"."${tables[t.table]}" WHERE id=$1`,[row.id])).rows[0].id,null,'later edits must not reassign inquiry DRI');
+ }
  const events=()=>c.query(`SELECT count(*)::int n FROM "${ns}"."_gaingeAutomationEvent" WHERE "recordId"=$1`,[row.id]);const n=(await events()).rows[0].n;
  await c.query(`UPDATE "${ns}"."${tables[t.table]}" SET name='system',"updatedBySource"='SYSTEM' WHERE id=$1`,[row.id]);assert.equal((await events()).rows[0].n,n);
  await c.query(`UPDATE "${ns}"."${tables[t.table]}" SET "deletedAt"=now() WHERE id=$1`,[row.id]);assert.equal((await events()).rows[0].n,n);

@@ -69,22 +69,10 @@ const StyledTopBarIconStyledTitleContainer = styled.div`
 `;
 
 const StyledPageActionContainer = styled.div`
-  --t-button-padding-x: var(
-    --t-page-header-action-padding-x,
-    var(--t-button-padding-x)
-  );
-  --t-button-padding-x-sm: var(
-    --t-page-header-action-padding-x,
-    var(--t-button-padding-x-sm)
-  );
-  --t-control-height-md: var(
-    --t-page-header-action-height,
-    var(--t-control-height-md)
-  );
-  --t-control-height-sm: var(
-    --t-page-header-action-height,
-    var(--t-control-height-sm)
-  );
+  --t-button-padding-x: var(--t-page-header-action-padding-x, 8px);
+  --t-button-padding-x-sm: var(--t-page-header-action-padding-x, 8px);
+  --t-control-height-md: var(--t-page-header-action-height, 32px);
+  --t-control-height-sm: var(--t-page-header-action-height, 24px);
   align-items: center;
   display: flex;
   flex: 1 1 0;

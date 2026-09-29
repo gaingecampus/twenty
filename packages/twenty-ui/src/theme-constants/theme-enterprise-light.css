@@ -192,6 +192,8 @@ html.light[data-ui-theme='enterprise'] {
   /* Controls */
   --t-control-height-sm: 32px;
   --t-control-height-md: 40px;
+  --t-page-header-action-height: 40px;
+  --t-page-header-action-padding-x: 16px;
   --t-page-bar-min-height: 72px;
   --t-button-font-weight: 600;
   --t-button-gap: 8px;

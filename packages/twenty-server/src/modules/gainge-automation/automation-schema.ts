@@ -20,7 +20,7 @@ export const AUTOMATION_TARGETS = [
     dri: 'assigneeId',
     link: 'opportunityGuseongweonLink',
     parent: 'opportunityId',
-    assignsEditorAsDri: true,
+    assignsEditorAsDri: false,
     addsEditorAsCollaborator: true,
   },
   {
