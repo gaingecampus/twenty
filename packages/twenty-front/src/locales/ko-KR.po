@@ -418,7 +418,7 @@ msgstr "{duration}일 체험"
 #. js-lingui-id: JBSWmp
 #: src/modules/activities/timeline-activities/rows/activity/components/EventRowActivity.tsx
 msgid "{eventAction} a related {eventObject}"
-msgstr "관련된 {eventObject}를 {eventAction}"
+msgstr "관련 {eventObject} {eventAction}"
 
 #. js-lingui-id: nRKZKb
 #: src/modules/settings/admin-panel/utils/getWorkspacesUpgradeHealthText.ts
@@ -1586,7 +1586,7 @@ msgstr "첫 번째 {objectLabel} 추가"
 #. js-lingui-id: vLO+NG
 #: src/modules/ui/layout/show-page/components/ShowPageSummaryCard.tsx
 msgid "Added {beautifiedCreatedAt}"
-msgstr "{beautifiedCreatedAt} 추가"
+msgstr "{beautifiedCreatedAt} 생성"
 
 #. js-lingui-id: jEHeq+
 #: src/modules/settings/security/components/approvedAccessDomains/SettingsApprovedAccessDomainsListCard.tsx
@@ -4999,10 +4999,13 @@ msgstr "워크스페이스 보기 생성, 편집 및 삭제"
 msgid "Created"
 msgstr "생성됨"
 
+msgid "You"
+msgstr "나"
+
 #. js-lingui-id: 4fBuqE
 #: src/modules/side-panel/components/SidePanelRecordInfo.tsx
 msgid "Created {beautifiedCreatedAt}"
-msgstr "{beautifiedCreatedAt}를 생성했습니다."
+msgstr "{beautifiedCreatedAt} 생성"
 
 #. js-lingui-id: 6vWyWm
 #: src/modules/ai/constants/crud-tool-operation-verbs.constant.ts
@@ -9975,37 +9978,37 @@ msgstr "아이리스"
 #. js-lingui-id: W153SA
 #: src/modules/object-record/object-filter-dropdown/utils/getOperandLabel.ts
 msgid "Is"
-msgstr "임"
+msgstr "같음"
 
 #. js-lingui-id: jI6+Q3
 #: src/modules/object-record/object-filter-dropdown/utils/getOperandLabel.ts
 msgid "Is after or equal"
-msgstr "이후 또는 같음"
+msgstr "이후 (당일 포함)"
 
 #. js-lingui-id: NgIlDJ
 #: src/modules/object-record/object-filter-dropdown/utils/getOperandLabel.ts
 msgid "Is before"
-msgstr "다음 이전입니다"
+msgstr "이전"
 
 #. js-lingui-id: Hte7bc
 #: src/modules/object-record/object-filter-dropdown/utils/getOperandLabel.ts
 msgid "Is empty"
-msgstr "비어 있습니다"
+msgstr "비어 있음"
 
 #. js-lingui-id: glSyvW
 #: src/modules/object-record/object-filter-dropdown/utils/getOperandLabel.ts
 msgid "Is in future"
-msgstr "미래에 있음"
+msgstr "현재 이후"
 
 #. js-lingui-id: F9Vw4E
 #: src/modules/object-record/object-filter-dropdown/utils/getOperandLabel.ts
 msgid "Is in past"
-msgstr "과거에 있음"
+msgstr "과거"
 
 #. js-lingui-id: 5pz6vU
 #: src/modules/object-record/object-filter-dropdown/utils/getOperandLabel.ts
 msgid "Is not"
-msgstr "아님"
+msgstr "같지 않음"
 
 #. js-lingui-id: /2on+O
 #: src/modules/object-record/spreadsheet-import/utils/getSpreadSheetFieldValidationDefinitions.ts
@@ -10070,7 +10073,7 @@ msgstr "널이 아님"
 #. js-lingui-id: jPtV7x
 #: src/modules/object-record/object-filter-dropdown/utils/getOperandLabel.ts
 msgid "Is relative"
-msgstr "상대적임"
+msgstr "상대 날짜"
 
 #. js-lingui-id: 8vhfz7
 #: src/modules/object-record/object-filter-dropdown/utils/getOperandLabel.ts
@@ -20560,3 +20563,12 @@ msgstr "이메일·캘린더 웹훅"
 
 msgid "Sync Gmail, Google Calendar, and Microsoft 365 mail/calendar via provider push notifications instead of cron polling"
 msgstr "주기적인 조회 대신 푸시 알림으로 Gmail, Google 캘린더, Microsoft 365 이메일·캘린더를 동기화합니다."
+
+msgid "Note"
+msgstr "노트"
+
+msgid "Task"
+msgstr "할 일"
+
+msgid "Restored"
+msgstr "복원됨"

@@ -12,7 +12,7 @@ import { recordStoreIdentifierFamilySelector } from '@/object-record/record-stor
 import { RecordTitleCell } from '@/object-record/record-title-cell/components/RecordTitleCell';
 import { RecordTitleCellContainerType } from '@/object-record/record-title-cell/types/RecordTitleCellContainerType';
 import { useAtomComponentStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomComponentStateValue';
-import { Trans } from '@lingui/react/macro';
+import { useLingui } from '@lingui/react/macro';
 import { isNonEmptyString } from '@sniptt/guards';
 import { styled } from '@linaria/react';
 import { useAtomFamilySelectorValue } from '@/ui/utilities/state/jotai/hooks/useAtomFamilySelectorValue';
@@ -47,6 +47,7 @@ export const SidePanelRecordInfo = ({
 }: {
   sidePanelPageInstanceId: string;
 }) => {
+  const { t } = useLingui();
   const viewableRecordNameSingular = useAtomComponentStateValue(
     viewableRecordNameSingularComponentState,
     sidePanelPageInstanceId,
@@ -167,9 +168,7 @@ export const SidePanelRecordInfo = ({
         )
       }
       label={
-        beautifiedCreatedAt ? (
-          <Trans>Created {beautifiedCreatedAt}</Trans>
-        ) : undefined
+        beautifiedCreatedAt ? t`Created ${beautifiedCreatedAt}` : undefined
       }
     />
   );

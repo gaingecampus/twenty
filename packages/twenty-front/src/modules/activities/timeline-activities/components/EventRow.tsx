@@ -1,3 +1,4 @@
+import { useLingui } from '@lingui/react/macro';
 import { styled } from '@linaria/react';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 import { useContext } from 'react';
@@ -89,6 +90,7 @@ export const EventRow = ({
   event,
   mainObjectMetadataItem,
 }: EventRowProps) => {
+  const { t } = useLingui();
   const currentWorkspaceMember = useAtomStateValue(currentWorkspaceMemberState);
 
   const allowRequestsToTwentyIcons = useAtomStateValue(
@@ -129,6 +131,7 @@ export const EventRow = ({
   const authorFullName = getTimelineActivityAuthorFullName(
     event,
     currentWorkspaceMember,
+    t`You`,
   );
 
   if (isUndefinedOrNull(mainObjectMetadataItem)) {

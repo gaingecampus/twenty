@@ -1,3 +1,4 @@
+import { dateLocaleState } from '~/localization/states/dateLocaleState';
 import { styled } from '@linaria/react';
 import { lazy, Suspense, useContext, type ComponentType } from 'react';
 import type { DatePickerProps as ReactDatePickerLibProps } from 'react-datepicker';
@@ -130,6 +131,7 @@ export const DatePicker = ({
   onRelativeDateChange,
   hideHeaderInput,
 }: DatePickerProps) => {
+  const { localeCatalog } = useAtomStateValue(dateLocaleState);
   const { theme } = useContext(ThemeContext);
   const plainDate = isDefined(plainDateString)
     ? Temporal.PlainDate.from(plainDateString)
@@ -255,6 +257,7 @@ export const DatePicker = ({
           }
         >
           <ReactDatePicker
+            locale={localeCatalog}
             key={relativeDateRangeKey}
             open={true}
             disabledKeyboardNavigation

@@ -12,7 +12,7 @@ import {
 import { isTimelineActivityWithLinkedRecord } from '@/activities/timeline-activities/types/TimelineActivity';
 import { useOpenRecordInSidePanel } from '@/side-panel/hooks/useOpenRecordInSidePanel';
 import { parseTimelineActivityAction } from 'twenty-shared/timeline';
-import { type CoreObjectNameSingular } from 'twenty-shared/types';
+import { CoreObjectNameSingular } from 'twenty-shared/types';
 import { useGetRecordFromCache } from '@/object-record/cache/hooks/useGetRecordFromCache';
 import { isNonEmptyString } from '@sniptt/guards';
 import { OverflowingTextWithTooltip } from 'twenty-ui/surfaces';
@@ -38,9 +38,20 @@ export const EventRowActivity = ({
   objectNameSingular,
   createdAt,
 }: EventRowActivityProps & { objectNameSingular: CoreObjectNameSingular }) => {
-  const eventAction = parseTimelineActivityAction(event.name);
+  const action = parseTimelineActivityAction(event.name);
+  const eventAction =
+    action === 'created'
+      ? t`Created`
+      : action === 'updated'
+        ? t`Updated`
+        : action === 'deleted'
+          ? t`Deleted`
+          : action === 'restored'
+            ? t`Restored`
+            : action;
 
-  const eventObject = objectNameSingular;
+  const eventObject =
+    objectNameSingular === CoreObjectNameSingular.Note ? t`Note` : t`Task`;
 
   if (!isTimelineActivityWithLinkedRecord(event)) {
     throw new Error('Could not find linked record id for event');

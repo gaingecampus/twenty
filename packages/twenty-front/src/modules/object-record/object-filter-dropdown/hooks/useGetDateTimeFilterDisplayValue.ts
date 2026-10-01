@@ -1,3 +1,4 @@
+import { useLingui } from '@lingui/react/macro';
 import { useUserDateFormat } from '@/ui/input/components/internal/date/hooks/useUserDateFormat';
 import { useUserTimeFormat } from '@/ui/input/components/internal/date/hooks/useUserTimeFormat';
 import { useUserTimezone } from '@/ui/input/components/internal/date/hooks/useUserTimezone';
@@ -7,6 +8,7 @@ import { formatZonedDateTimeDatePart } from '~/utils/dates/formatZonedDateTimeDa
 import { formatZonedDateTimeTimePart } from '~/utils/dates/formatZonedDateTimeTimePart';
 
 export const useGetDateTimeFilterDisplayValue = () => {
+  const { i18n } = useLingui();
   const { isSystemTimezone } = useUserTimezone();
 
   const { userDateFormat } = useUserDateFormat();
@@ -19,7 +21,7 @@ export const useGetDateTimeFilterDisplayValue = () => {
       ? ` (${getTimezoneAbbreviationForZonedDateTime(referenceZonedDateTime)})`
       : '';
 
-    const displayValue = `${formatZonedDateTimeDatePart(referenceZonedDateTime, userDateFormat)} ${formatZonedDateTimeTimePart(referenceZonedDateTime, userTimeFormat)}${timezoneSuffix}`;
+    const displayValue = `${formatZonedDateTimeDatePart(referenceZonedDateTime, userDateFormat, i18n.locale)} ${formatZonedDateTimeTimePart(referenceZonedDateTime, userTimeFormat)}${timezoneSuffix}`;
 
     return { displayValue };
   };

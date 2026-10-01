@@ -5,10 +5,11 @@ import { isDefined } from 'twenty-shared/utils';
 export const getTimelineActivityAuthorFullName = (
   event: TimelineActivity,
   currentWorkspaceMember: CurrentWorkspaceMember,
+  currentUserLabel = 'You',
 ) => {
   if (isDefined(event.workspaceMember)) {
     return currentWorkspaceMember.id === event.workspaceMember.id
-      ? 'You'
+      ? currentUserLabel
       : `${event.workspaceMember?.name.firstName} ${event.workspaceMember?.name.lastName}`;
   }
   return 'Twenty';

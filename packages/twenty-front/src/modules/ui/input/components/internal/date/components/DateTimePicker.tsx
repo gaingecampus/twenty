@@ -1,3 +1,5 @@
+import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
+import { dateLocaleState } from '~/localization/states/dateLocaleState';
 import { SKELETON_LOADER_HEIGHT_SIZES } from '@/activities/components/SkeletonLoader';
 import {
   convertFirstDayOfTheWeekToCalendarStartDayNumber,
@@ -146,6 +148,7 @@ export const DateTimePicker = ({
   hideHeaderInput,
   timeZone,
 }: DateTimePickerProps) => {
+  const { localeCatalog } = useAtomStateValue(dateLocaleState);
   const { theme } = useContext(ThemeContext);
   const { userFirstDayOfTheWeek } = useUserFirstDayOfTheWeek();
 
@@ -316,6 +319,7 @@ export const DateTimePicker = ({
             }
           >
             <ReactDatePicker
+            locale={localeCatalog}
               key={relativeDateRangeKey}
               open={true}
               disabledKeyboardNavigation
