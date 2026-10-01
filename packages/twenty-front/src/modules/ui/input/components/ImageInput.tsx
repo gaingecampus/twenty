@@ -1,3 +1,5 @@
+import { ImageCropModal } from '@/ui/input/components/ImageCropModal';
+import { useModal } from '@/ui/layout/modal/hooks/useModal';
 import { styled } from '@linaria/react';
 import { Trans, useLingui } from '@lingui/react/macro';
 
@@ -105,6 +107,14 @@ export const ImageInput = ({
   className,
 }: ImageInputProps) => {
   const { t } = useLingui();
+  const modalInstanceId = React.useId();
+  const { openModal, closeModal } = useModal();
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [fileError, setFileError] = useState('');
+  const cancelCrop = () => {
+    closeModal(modalInstanceId);
+    setPendingFile(null);
+  };
   const { theme } = useContext(ThemeContext);
   const hiddenFileInput = React.useRef<HTMLInputElement>(null);
   const onUploadButtonClick = () => {
@@ -121,6 +131,18 @@ export const ImageInput = ({
 
   return (
     <StyledContainer className={className}>
+      {pendingFile && (
+        <ImageCropModal
+          file={pendingFile}
+          modalInstanceId={modalInstanceId}
+          onCancel={cancelCrop}
+          onConfirm={(file) => {
+            cancelCrop();
+            setIsPictureURLError(false);
+            onUpload?.(file);
+          }}
+        />
+      )}
       <StyledPicture
         withPicture={!!pictureURI}
         disabled={disabled}
@@ -146,7 +168,23 @@ export const ImageInput = ({
             accept="image/jpeg, image/png, image/gif" // to desired specification
             onChange={(event) => {
               if (isDefined(onUpload) && isDefined(event.target.files)) {
-                onUpload(event.target.files[0]);
+                const file = event.target.files[0];
+                event.target.value = '';
+                if (!file) return;
+                if (
+                  !['image/jpeg', 'image/png', 'image/gif'].includes(
+                    file.type,
+                  ) ||
+                  file.size > 10 * 1024 * 1024
+                ) {
+                  setFileError(
+                    '10MB 이하의 PNG, JPEG, GIF 이미지를 선택해 주세요.',
+                  );
+                  return;
+                }
+                setFileError('');
+                setPendingFile(file);
+                openModal(modalInstanceId);
               }
             }}
           />
@@ -178,7 +216,9 @@ export const ImageInput = ({
         <StyledText>
           <Trans>We support your square PNGs, JPEGs and GIFs under 10MB</Trans>
         </StyledText>
-        {errorMessage && <StyledErrorText>{errorMessage}</StyledErrorText>}
+        {(fileError || errorMessage) && (
+          <StyledErrorText>{fileError || errorMessage}</StyledErrorText>
+        )}
       </StyledContent>
     </StyledContainer>
   );
