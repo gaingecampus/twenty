@@ -1,4 +1,7 @@
-import { sidePanelHeaderActionsElementState } from '@/side-panel/states/sidePanelHeaderActionsElementState';
+import {
+  sidePanelHeaderActionsElementState,
+  sidePanelHeaderTitleSuffixElementState,
+} from '@/side-panel/states/sidePanelHeaderActionsElementState';
 import { useSetAtomState } from '@/ui/utilities/state/jotai/hooks/useSetAtomState';
 import { SidePanelBackButton } from '@/side-panel/components/SidePanelBackButton';
 import { SidePanelPageInfo } from '@/side-panel/components/SidePanelPageInfo';
@@ -42,12 +45,18 @@ const StyledInputContainer = styled.div`
   gap: ${themeCssVariables.spacing[4]};
   justify-content: space-between;
   margin: 0;
-  min-height: var(--t-page-bar-min-height, ${SIDE_PANEL_TOP_BAR_HEIGHT}px);
+  min-height: max(
+    var(--t-page-bar-min-height, ${SIDE_PANEL_TOP_BAR_HEIGHT}px),
+    calc(
+      var(--t-control-height-md, 32px) + 2 *
+        var(--t-page-header-padding-y, 0px) + 1px
+    )
+  );
 
   outline: none;
   overflow: hidden;
   padding: var(--t-page-header-padding-y, 0)
-    var(--t-page-header-padding-y, ${themeCssVariables.spacing[3]});
+    var(--t-page-header-padding-x, ${themeCssVariables.spacing[3]});
   position: relative;
 `;
 
@@ -97,6 +106,9 @@ const StyledCloseButton = styled(IconButton)`
 `;
 
 export const SidePanelTopBar = () => {
+  const setSidePanelHeaderTitleSuffixElement = useSetAtomState(
+    sidePanelHeaderTitleSuffixElementState,
+  );
   const setSidePanelHeaderActionsElement = useSetAtomState(
     sidePanelHeaderActionsElementState,
   );
@@ -196,6 +208,7 @@ export const SidePanelTopBar = () => {
             <SidePanelTopBarInputFocusEffect inputRef={inputRef} />
           </>
         )}
+        <span ref={setSidePanelHeaderTitleSuffixElement} />
       </StyledContentContainer>
       <StyledRightControlsContainer>
         <StyledRightControlsContainer ref={setSidePanelHeaderActionsElement} />

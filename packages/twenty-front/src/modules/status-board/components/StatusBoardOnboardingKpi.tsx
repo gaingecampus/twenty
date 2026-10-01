@@ -9,15 +9,24 @@ export const StatusBoardOnboardingKpi = ({
   objectMetadataItem,
   memberIds,
   onOpenSheet,
+  variant = 'company',
 }: {
   objectMetadataItem: EnrichedObjectMetadataItem;
   memberIds?: string[];
+  variant?: 'company' | 'project';
   onOpenSheet: (sheet: StatusBoardSheetState) => void;
 }) => {
-  const { companyMetrics, loading, error } = useStatusBoardOnboardingMetrics({
+  const {
+    companyMetrics: companies,
+    projectMetrics,
+    loading,
+    error,
+  } = useStatusBoardOnboardingMetrics({
     objectMetadataItem,
     memberIds,
   });
+  const companyMetrics = variant === 'project' ? projectMetrics : companies;
+  const label = variant === 'project' ? '온보딩 프로젝트 수' : '온보딩 기업 수';
   const companyCount = companyMetrics.totalCount;
   const companyOnboardingIds = Object.keys(
     companyMetrics.personCountByOnboardingId,
@@ -31,12 +40,13 @@ export const StatusBoardOnboardingKpi = ({
   });
   return (
     <StatusBoardKpiCard
-      label="온보딩 기업 수"
+      label={label}
       value={error ? '—' : formatStatusBoardCount(companyCount)}
       exactValue={error ? undefined : `${companyCount}건`}
-      subtitle={
-        error
-          ? '불러오지 못했어요'
+      subtitle={error ? '불러오지 못했어요' : undefined}
+      description={
+        variant === 'project'
+          ? '컨설팅·코칭 외 계약의 리드·실행·공동 인원 합계'
           : '컨설팅·코칭 계약의 리드·실행·공동 인원 합계'
       }
       loading={loading}
@@ -47,8 +57,8 @@ export const StatusBoardOnboardingKpi = ({
           ? undefined
           : () =>
               onOpenSheet({
-                title: '온보딩 기업 수',
-                kpiLabel: '온보딩 기업 수',
+                title: label,
+                kpiLabel: label,
                 tone: 'green',
                 objectNameSingular: objectMetadataItem.nameSingular,
                 filter: companyOnboardingIds.length

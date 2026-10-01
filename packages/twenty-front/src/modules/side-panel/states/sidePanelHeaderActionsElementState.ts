@@ -5,3 +5,9 @@ export const sidePanelHeaderActionsElementState =
     key: 'sidePanelHeaderActionsElementState',
     defaultValue: null,
   });
+
+export const sidePanelHeaderTitleSuffixElementState =
+  createAtomState<HTMLElement | null>({
+    key: 'sidePanelHeaderTitleSuffixElementState',
+    defaultValue: null,
+  });

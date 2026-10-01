@@ -146,7 +146,7 @@ export const StatusBoardPeriodSection = ({
     <StyledStatusBoardSection>
       <StyledStatusBoardSectionHeader>
         <StyledStatusBoardSectionTitle>
-          {periodRange.title}
+          {periodRange.title} 입금·신규 계약
         </StyledStatusBoardSectionTitle>
         <StyledStatusBoardPeriodControls>
           <StyledStatusBoardPeriodNav>

@@ -1,3 +1,7 @@
+import { getContractSessionProgress } from '@/field-management/getContractSessionProgress';
+import { useObjectMetadataItems } from '@/object-metadata/hooks/useObjectMetadataItems';
+import { useObjectPermissionsForObject } from '@/object-record/hooks/useObjectPermissionsForObject';
+import { useOpenRecordInSidePanel } from '@/side-panel/hooks/useOpenRecordInSidePanel';
 import { useState } from 'react';
 import { useStatusBoardOnboardingMetrics } from '@/status-board/hooks/useStatusBoardOnboardingMetrics';
 import { StatusBoardRecordAvatar } from '@/status-board/components/StatusBoardRecordAvatar';
@@ -92,13 +96,15 @@ const StatusBoardWeekSectionLoaded = ({
   members: ObjectRecord[];
   memberIds: string[] | undefined;
 }) => {
+  const { openRecordInSidePanel } = useOpenRecordInSidePanel();
   const { groups } = useStatusBoardDummyData();
   const groupOrder = new Map(groups.map((group, index) => [group.id, index]));
   const [showLeadConsultants, setShowLeadConsultants] = useState(false);
   const assignmentData = useStatusBoardOnboardingMetrics({
     objectMetadataItem: onboardingObjectMetadataItem,
   });
-  const { assignments } = assignmentData;
+  const { assignments, projectMetrics } = assignmentData;
+  const projectMemberIds = projectMetrics.memberIdsByOnboardingId;
   const {
     records,
     loading: contractsLoading,
@@ -114,6 +120,7 @@ const StatusBoardWeekSectionLoaded = ({
     recordGqlFields: buildStatusBoardRecordGqlFields({
       objectMetadataItem: onboardingObjectMetadataItem,
       fieldNames: [
+        'plannedSessionCount',
         STATUS_BOARD_FIELD.name,
         STATUS_BOARD_FIELD.company,
         STATUS_BOARD_FIELD.visitDays,
@@ -126,6 +133,37 @@ const StatusBoardWeekSectionLoaded = ({
     }),
   });
 
+  const { objectMetadataItems } = useObjectMetadataItems();
+  const visitMetadata = objectMetadataItems.find(
+    (item) => item.nameSingular === 'fieldVisit',
+  );
+  const { canReadObjectRecords } = useObjectPermissionsForObject(
+    visitMetadata?.id ?? onboardingObjectMetadataItem.id,
+  );
+  const canReadProgress = Boolean(
+    visitMetadata &&
+    canReadObjectRecords &&
+    ['contract', 'sessionNumber', 'recordStatus'].every((name) =>
+      hasStatusBoardField(visitMetadata, name),
+    ),
+  );
+  const sessionVisits = useStatusBoardAllRecords({
+    objectNameSingular:
+      visitMetadata?.nameSingular ?? onboardingObjectMetadataItem.nameSingular,
+    skip: !canReadProgress || records.length === 0,
+    filter: {
+      contractId: { in: records.map((record) => record.id) },
+      recordStatus: { eq: 'SUBMITTED' },
+    },
+    limit: 200,
+    recordGqlFields: {
+      id: true,
+      contractId: true,
+      sessionNumber: true,
+      recordStatus: true,
+    },
+  });
+
   const loading = contractsLoading || assignmentData.loading;
   const error = contractsError ?? assignmentData.error;
   const todayKey = STATUS_BOARD_WEEK_DAYS[new Date().getDay() - 1]?.[0];
@@ -136,12 +174,14 @@ const StatusBoardWeekSectionLoaded = ({
       const memberOnboardings = records.filter(
         (onboarding) =>
           (memberIds === undefined || memberIds.includes(member.id)) &&
-          isStatusBoardOnboardingOwnedByMember({
-            onboarding,
-            memberId: member.id,
-            assignments,
-            showLeadConsultants,
-          }),
+          (projectMemberIds[onboarding.id]
+            ? projectMemberIds[onboarding.id].includes(member.id)
+            : isStatusBoardOnboardingOwnedByMember({
+                onboarding,
+                memberId: member.id,
+                assignments,
+                showLeadConsultants,
+              })),
       );
 
       return {
@@ -165,6 +205,7 @@ const StatusBoardWeekSectionLoaded = ({
   const undatedCount = records.filter(
     (onboarding) =>
       visibleContractIds.has(onboarding.id) &&
+      !projectMemberIds[onboarding.id] &&
       !getStatusBoardVisitDays(onboarding).some((day) =>
         weekdayKeys.some((key) => key === day),
       ),
@@ -174,29 +215,31 @@ const StatusBoardWeekSectionLoaded = ({
     <StyledStatusBoardWeekSection>
       <StyledStatusBoardSectionHeader>
         <StyledStatusBoardSectionTitle>
-          온보딩 현황
+          담당자별 수행 일정
         </StyledStatusBoardSectionTitle>
-        {undatedCount > 0 && (
-          <StyledStatusBoardMuted>
-            {`요일 미정 ${undatedCount}건`}
-          </StyledStatusBoardMuted>
-        )}
+        <div data-week-header-controls>
+          {undatedCount > 0 && (
+            <StyledStatusBoardMuted>
+              {`요일 미정 ${undatedCount}건`}
+            </StyledStatusBoardMuted>
+          )}
+          <label>
+            <input
+              type="checkbox"
+              checked={showLeadConsultants}
+              onChange={(event) => setShowLeadConsultants(event.target.checked)}
+            />
+            리드 컨설턴트 표시
+          </label>
+          <StyledStatusBoardCadenceRow aria-label="방문 주기 구분">
+            {(['WEEKLY', 'BIWEEKLY', 'MONTHLY'] as const).map((cadence) => (
+              <StyledStatusBoardCadenceBadge key={cadence} cadence={cadence}>
+                {STATUS_BOARD_VISIT_CADENCE_LABEL[cadence]}
+              </StyledStatusBoardCadenceBadge>
+            ))}
+          </StyledStatusBoardCadenceRow>
+        </div>
       </StyledStatusBoardSectionHeader>
-      <label>
-        <input
-          type="checkbox"
-          checked={showLeadConsultants}
-          onChange={(event) => setShowLeadConsultants(event.target.checked)}
-        />
-        리드 컨설턴트 표시
-      </label>
-      <StyledStatusBoardCadenceRow aria-label="방문 주기 구분">
-        {(['WEEKLY', 'BIWEEKLY', 'MONTHLY'] as const).map((cadence) => (
-          <StyledStatusBoardCadenceBadge key={cadence} cadence={cadence}>
-            {STATUS_BOARD_VISIT_CADENCE_LABEL[cadence]}
-          </StyledStatusBoardCadenceBadge>
-        ))}
-      </StyledStatusBoardCadenceRow>
       {loading && records.length === 0 ? (
         <StatusBoardEmptyState
           title="방문 일정을 불러오는 중이에요"
@@ -232,6 +275,9 @@ const StatusBoardWeekSectionLoaded = ({
                     {label}
                   </StyledStatusBoardWeekHeaderCell>
                 ))}
+                <StyledStatusBoardWeekHeaderCell>
+                  프로젝트
+                </StyledStatusBoardWeekHeaderCell>
               </StyledStatusBoardWeekRow>
               {memberRows.map(({ member, memberOnboardings }) => {
                 const memberName = getStatusBoardRecordLabel(member);
@@ -266,7 +312,11 @@ const StatusBoardWeekSectionLoaded = ({
                         <StyledStatusBoardCadenceRow>
                           {[
                             ...new Set(
-                              memberOnboardings.map(getStatusBoardVisitCadence),
+                              memberOnboardings
+                                .filter(
+                                  (record) => !projectMemberIds[record.id],
+                                )
+                                .map(getStatusBoardVisitCadence),
                             ),
                           ].map((cadence) => (
                             <StyledStatusBoardCadenceBadge
@@ -289,9 +339,17 @@ const StatusBoardWeekSectionLoaded = ({
                         </StyledStatusBoardCadenceRow>
                       </StyledStatusBoardWeekWho>
                     </StyledStatusBoardWeekIdentity>
-                    {STATUS_BOARD_WEEK_DAYS.map(([key]) => {
+                    {[
+                      ...STATUS_BOARD_WEEK_DAYS,
+                      ['PROJECT', '프로젝트'] as const,
+                    ].map(([key]) => {
                       const visits = memberOnboardings.filter((onboarding) =>
-                        getStatusBoardVisitDays(onboarding).includes(key),
+                        key === 'PROJECT'
+                          ? Boolean(projectMemberIds[onboarding.id])
+                          : !projectMemberIds[onboarding.id] &&
+                            getStatusBoardVisitDays(onboarding).some(
+                              (day) => day === key,
+                            ),
                       );
                       const firstCadence =
                         visits.length > 0
@@ -332,20 +390,39 @@ const StatusBoardWeekSectionLoaded = ({
                                 : cadence === 'WEEKLY'
                                   ? 'WEEKLY'
                                   : 'OTHER';
+                            const progress = getContractSessionProgress(
+                              onboarding,
+                              sessionVisits.records,
+                            );
+                            const progressLabel =
+                              !canReadProgress || sessionVisits.error
+                                ? '회차 확인 불가'
+                                : sessionVisits.loading
+                                  ? '회차 확인 중…'
+                                  : progress.total === null
+                                    ? `현재 ${progress.current}회차 · 총 회차 미정`
+                                    : `${progress.current}회차 / 총 ${progress.total}회`;
                             const content = (
                               <>
                                 <StyledStatusBoardWeekCellTitle
                                   cadence={titleCadence}
                                 >
-                                  {getStatusBoardCompanyName(onboarding)}
+                                  {key === 'PROJECT'
+                                    ? getStatusBoardRecordLabel(onboarding)
+                                    : getStatusBoardCompanyName(onboarding)}
                                 </StyledStatusBoardWeekCellTitle>
                                 <StyledStatusBoardCadenceRow>
                                   <StyledStatusBoardCadenceBadge
                                     cadence={cadence}
                                   >
-                                    {cadenceLabel || '주기 미정'}
+                                    {key === 'PROJECT'
+                                      ? '프로젝트'
+                                      : cadenceLabel || '주기 미정'}
                                   </StyledStatusBoardCadenceBadge>
                                 </StyledStatusBoardCadenceRow>
+                                <StyledStatusBoardWeekCellMeta>
+                                  {progressLabel}
+                                </StyledStatusBoardWeekCellMeta>
                                 {role && (
                                   <StyledStatusBoardWeekCellMeta>
                                     {role}
@@ -367,6 +444,21 @@ const StatusBoardWeekSectionLoaded = ({
                             return (
                               <StyledStatusBoardWeekCellLink
                                 key={onboarding.id}
+                                onClick={(event) => {
+                                  if (
+                                    event.metaKey ||
+                                    event.ctrlKey ||
+                                    event.shiftKey ||
+                                    event.altKey
+                                  )
+                                    return;
+                                  event.preventDefault();
+                                  openRecordInSidePanel({
+                                    recordId: onboarding.id,
+                                    objectNameSingular:
+                                      STATUS_BOARD_OBJECT_NAME_SINGULAR.onboarding,
+                                  });
+                                }}
                                 href={getAppPath(AppPath.RecordShowPage, {
                                   objectNameSingular:
                                     STATUS_BOARD_OBJECT_NAME_SINGULAR.onboarding,

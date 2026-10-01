@@ -2,15 +2,14 @@ import { styled } from '@linaria/react';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 import { type RecordGqlOperationFilter } from 'twenty-shared/types';
 import { useStatusBoardSum } from '@/status-board/hooks/useStatusBoardSum';
-import { formatStatusBoardAmount } from '@/status-board/utils/formatStatusBoardAmount';
 
 const StyledShare = styled.div`
   border-top: 1px solid ${themeCssVariables.border.color.light};
   display: flex;
   flex-direction: column;
   gap: 10px;
-  min-height: 84px;
-  padding: 16px 16px 0;
+  margin: 0 16px;
+  padding: 16px 0 0;
 `;
 const StyledHeader = styled.div`
   align-items: baseline;
@@ -20,6 +19,20 @@ const StyledHeader = styled.div`
   font-size: 13px;
   gap: 6px 16px;
   justify-content: space-between;
+`;
+const StyledTotal = styled.div`
+  align-items: baseline;
+  display: flex;
+  flex-wrap: wrap;
+  font-size: var(--t-font-size-lg, 16px);
+  gap: 12px;
+
+  strong {
+    color: ${themeCssVariables.font.color.primary};
+    font-size: 18px;
+    font-variant-numeric: tabular-nums;
+    font-weight: ${themeCssVariables.font.weight.semiBold};
+  }
 `;
 const StyledTrack = styled.div`
   background: ${themeCssVariables.background.tertiary};
@@ -83,40 +96,41 @@ export const StatusBoardDepositShare = ({
         ? '금액을 확인해야 비중을 표시할 수 있어요'
         : '선택한 기간에 집계된 입금 금액이 없어요';
   return (
-    <StyledShare aria-busy={loading}>
+    <StyledShare
+      aria-busy={loading}
+      aria-label={`입금 요약 · ${dateBasis} 기준`}
+    >
       <StyledHeader>
-        <strong>입금 금액 비중</strong>
-        <span>{dateBasis} 기준</span>
-      </StyledHeader>
-      <StyledTrack
-        role="img"
-        aria-label={
-          hasShare
-            ? `입금 완료 ${paidPercent}%, 입금 예정 ${duePercent}%`
-            : message
-        }
-      >
+        <StyledTotal>
+          <span>총 받은 금액</span>
+          <strong>
+            {loading || error || invalid
+              ? '—'
+              : `${(paidAmount / 1_000_000).toLocaleString('ko-KR')}원`}
+          </strong>
+        </StyledTotal>
         {hasShare && (
-          <>
+          <span>예정 {(dueAmount / 1_000_000).toLocaleString('ko-KR')}원</span>
+        )}
+      </StyledHeader>
+      {hasShare && (
+        <>
+          <StyledTrack
+            role="img"
+            aria-label={`입금 완료 ${paidPercent}%, 입금 예정 ${duePercent}%`}
+          >
             <StyledFill paid share={share} />
             <StyledFill paid={false} share={100 - share} />
-          </>
-        )}
-      </StyledTrack>
-      <StyledHeader>
-        {hasShare ? (
-          <>
-            <StyledLegend paid>
-              입금 완료 {paidPercent}% · {formatStatusBoardAmount(paidAmount)}
-            </StyledLegend>
-            <StyledLegend paid={false}>
-              입금 예정 {duePercent}% · {formatStatusBoardAmount(dueAmount)}
-            </StyledLegend>
-          </>
-        ) : (
-          <span>{message}</span>
-        )}
-      </StyledHeader>
+          </StyledTrack>
+          <StyledHeader>
+            <StyledLegend paid>입금 완료 {paidPercent}%</StyledLegend>
+            <StyledLegend paid={false}>예정 {duePercent}%</StyledLegend>
+          </StyledHeader>
+        </>
+      )}
+      {(loading || error || invalid) && (
+        <StyledHeader role="status">{message}</StyledHeader>
+      )}
     </StyledShare>
   );
 };

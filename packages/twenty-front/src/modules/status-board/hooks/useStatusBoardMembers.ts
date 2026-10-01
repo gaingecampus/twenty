@@ -37,6 +37,7 @@ export const useStatusBoardMembers = ({
           objectMetadataItem: memberObjectMetadataItem,
           fieldNames: [
             STATUS_BOARD_FIELD.name,
+            'workspaceMemberAccountId',
             STATUS_BOARD_FIELD.currentGroup,
             STATUS_BOARD_FIELD.currentGroupId,
             STATUS_BOARD_FIELD.employmentStatus,

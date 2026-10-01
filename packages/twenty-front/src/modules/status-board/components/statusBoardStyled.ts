@@ -1,3 +1,4 @@
+import { StyledControlContainer } from '@/ui/input/components/SelectControl';
 import { styled } from '@linaria/react';
 import { Link } from 'react-router-dom';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
@@ -111,11 +112,22 @@ export const StyledStatusBoardKpiButton = styled.button<{
   }
 `;
 
-export const StyledStatusBoardKpiLabel = styled.div`
+export const StyledStatusBoardKpiLabel = styled.div<{ tone?: StatusBoardTone }>`
+  align-items: center;
   align-self: center;
-  color: ${themeCssVariables.font.color.secondary};
+  color: ${({ tone }) =>
+    tone && tone !== 'default'
+      ? themeCssVariables.color[tone]
+      : themeCssVariables.font.color.secondary};
+  display: flex;
   font-size: 14px;
+  [data-kpi-info] {
+    cursor: help;
+    display: inline-flex;
+    flex-shrink: 0;
+  }
   font-weight: ${themeCssVariables.font.weight.medium};
+  gap: 6px;
 `;
 
 export const StyledStatusBoardKpiValue = styled.div<{
@@ -123,7 +135,7 @@ export const StyledStatusBoardKpiValue = styled.div<{
   isEmpty?: boolean;
 }>`
   color: ${({ tone, isEmpty }) => {
-    if (isEmpty) return themeCssVariables.font.color.tertiary;
+    if (isEmpty) return themeCssVariables.font.color.light;
     if (tone === 'red') {
       return themeCssVariables.color.red;
     }
@@ -168,10 +180,10 @@ export const StyledStatusBoardKpiSubtitle = styled.div`
 export const StyledStatusBoardChipRow = styled.div`
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: var(--t-view-tab-gap, 4px);
   min-width: 0;
   overflow-x: auto;
-  padding: 2px;
+  padding: 0;
 
   &::-webkit-scrollbar {
     display: none;
@@ -182,47 +194,41 @@ export const StyledStatusBoardChip = styled.button<{
   isActive: boolean;
   variant?: 'default' | 'soft';
 }>`
-  background: ${({ isActive, variant }) => {
-    if (isActive !== true) {
-      return themeCssVariables.background.primary;
-    }
-
-    if (variant === 'soft') {
-      return themeCssVariables.background.transparent.blue;
-    }
-
-    return themeCssVariables.font.color.primary;
-  }};
-  border: 1px solid
-    ${({ isActive, variant }) => {
-      if (isActive === true && variant !== 'soft') {
-        return themeCssVariables.font.color.primary;
-      }
-
-      return themeCssVariables.border.color.medium;
-    }};
-  border-radius: ${themeCssVariables.border.radius.pill};
-  color: ${({ isActive, variant }) => {
-    if (isActive !== true) {
-      return themeCssVariables.font.color.secondary;
-    }
-
-    if (variant === 'soft') {
-      return themeCssVariables.color.blue;
-    }
-
-    return themeCssVariables.font.color.inverted;
-  }};
+  align-items: center;
+  background: ${({ isActive }) =>
+    isActive
+      ? themeCssVariables.font.color.primary
+      : themeCssVariables.background.primary};
+  border: ${({ isActive }) =>
+    isActive
+      ? `1px solid ${themeCssVariables.font.color.primary}`
+      : `1px solid ${themeCssVariables.border.color.medium}`};
+  border-radius: var(--t-view-tab-radius, 6px);
+  color: ${({ isActive }) =>
+    isActive
+      ? themeCssVariables.font.color.inverted
+      : 'var(--t-view-tab-color)'};
   cursor: pointer;
+  display: inline-flex;
   flex: none;
-  font-size: 14px;
-  font-weight: ${themeCssVariables.font.weight.semiBold};
-  min-height: 32px;
-  padding: 6px 10px;
+  font-size: var(--t-view-tab-font-size, 14px);
+  font-weight: ${({ isActive }) =>
+    isActive ? 'var(--t-view-tab-active-weight)' : 'var(--t-view-tab-weight)'};
+  gap: 6px;
+  min-height: var(--t-view-tab-height, 36px);
+  padding: 0 var(--t-view-tab-padding-x, 10px);
   white-space: nowrap;
 
-  &:active {
-    transform: scale(0.97);
+  [data-selected-member] {
+    --t-font-color-primary: ${themeCssVariables.font.color.inverted};
+    --t-font-color-secondary: ${themeCssVariables.font.color.inverted};
+  }
+
+  &:hover {
+    background: ${({ isActive }) =>
+      isActive
+        ? themeCssVariables.font.color.primary
+        : 'var(--t-view-tab-hover-bg)'};
   }
 
   &:disabled {
@@ -486,31 +492,23 @@ export const StyledStatusBoardCumulativeButton = styled.button`
   }
 `;
 
-export const StyledStatusBoardCumulativeValue = styled.div<{
-  isEmpty?: boolean;
-}>`
-  color: ${({ isEmpty }) =>
-    isEmpty
-      ? themeCssVariables.font.color.tertiary
-      : themeCssVariables.font.color.primary};
-  font-size: 24px;
-  font-variant-numeric: tabular-nums;
-  small {
-    font-size: 13px;
-    font-weight: 500;
-    margin-left: 3px;
-  }
-  font-weight: ${themeCssVariables.font.weight.semiBold};
-  letter-spacing: -0.02em;
-  line-height: 1.1;
-  white-space: nowrap;
+export const StyledStatusBoardCumulativeValue = styled(
+  StyledStatusBoardKpiValue,
+)`
+  align-self: flex-start;
+  text-align: left;
 `;
 
-export const StyledStatusBoardCumulativeLabel = styled.div`
-  color: ${themeCssVariables.font.color.secondary};
-  font-size: 13px;
-  font-weight: ${themeCssVariables.font.weight.medium};
-  margin-top: 4px;
+export const StyledStatusBoardCumulativeLabel = styled(
+  StyledStatusBoardKpiLabel,
+)`
+  align-items: center;
+  align-self: flex-start;
+  display: flex;
+  gap: ${themeCssVariables.spacing[2]};
+  svg {
+    flex-shrink: 0;
+  }
 `;
 
 export const StyledStatusBoardGroupTitle = styled.div`
@@ -564,38 +562,17 @@ export const StyledStatusBoardMoreButton = styled.button`
   }
 `;
 
-export const StyledStatusBoardSheetBackdrop = styled.div`
-  align-items: center;
-  background: ${themeCssVariables.background.transparent.primary};
-  display: flex;
-  inset: 0;
-  justify-content: center;
-  padding: 24px;
-  position: fixed;
-  z-index: 50;
-
-  @media (max-width: 640px) {
-    align-items: flex-end;
-    padding: 0;
-  }
-`;
-
 export const StyledStatusBoardSheet = styled.div`
   background: ${themeCssVariables.background.primary};
-  border-radius: 24px;
-  box-shadow: ${themeCssVariables.boxShadow.strong};
+  box-sizing: border-box;
   display: flex;
+  flex: 1;
   flex-direction: column;
-  max-height: min(80vh, 760px);
-  max-width: 720px;
-  padding: 20px 24px 20px;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  padding: 16px;
   width: 100%;
-
-  @media (max-width: 640px) {
-    border-radius: 24px 24px 0 0;
-    max-height: 88vh;
-    padding: 20px;
-  }
 `;
 
 export const StyledStatusBoardSheetHeader = styled.div`
@@ -632,18 +609,18 @@ export const StyledStatusBoardWeekGrid = styled.div`
   display: flex;
   flex-direction: column;
   gap: 8px;
-  min-width: 560px;
+  min-width: 828px;
 `;
 
 export const StyledStatusBoardWeekRow = styled.div`
   align-items: stretch;
   display: grid;
   gap: 8px;
-  grid-template-columns: 180px repeat(5, 1fr);
+  grid-template-columns: 180px repeat(6, minmax(100px, 1fr));
 
   @media (max-width: 640px) {
     gap: 6px;
-    grid-template-columns: 160px repeat(5, 1fr);
+    grid-template-columns: 160px repeat(6, minmax(100px, 1fr));
   }
 `;
 
@@ -755,6 +732,7 @@ export const StyledStatusBoardWeekCellMeta = styled.span`
   color: ${themeCssVariables.font.color.tertiary};
   display: block;
   font-size: 11px;
+  margin-top: 4px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -767,6 +745,16 @@ export const StyledStatusBoardWeekNote = styled.div`
 `;
 
 export const StyledStatusBoardKpiIcon = styled(StyledStatusBoardRowAvatar)`
+  background: ${({ tone }) =>
+    tone === 'blue'
+      ? themeCssVariables.background.transparent.blue
+      : tone === 'green'
+        ? themeCssVariables.background.transparent.success
+        : tone === 'red'
+          ? themeCssVariables.background.transparent.danger
+          : tone === 'orange'
+            ? themeCssVariables.background.transparent.orange
+            : themeCssVariables.background.tertiary};
   border-radius: 6px;
   grid-column: 1;
   grid-row: 1;
@@ -848,18 +836,28 @@ export const StyledStatusBoardProgress = styled.progress`
 `;
 
 export const StyledStatusBoardToolbar = styled.div`
-  background: ${themeCssVariables.background.primary};
-  border-radius: 16px;
+  background: transparent;
+  border: none;
+  border-radius: 0;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding: 16px 20px;
+  padding: 0;
 `;
 
 export const StyledStatusBoardSheetBody = styled.div`
+  display: flex;
+  flex: 1;
+  flex-direction: column;
   min-height: 0;
   overflow-y: auto;
   padding-right: 12px;
+
+  > [data-status-board-empty] {
+    box-sizing: border-box;
+    flex: 1;
+    justify-content: center;
+  }
 `;
 
 export const StyledStatusBoardSearch = styled.input`
@@ -875,25 +873,49 @@ export const StyledStatusBoardSearch = styled.input`
   }
 `;
 
-export const StyledStatusBoardWeekSection = StyledStatusBoardSection;
+export const StyledStatusBoardWeekSection = styled(StyledStatusBoardSection)`
+  [data-week-header-controls] {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    justify-content: flex-end;
+    margin-left: auto;
+  }
+
+  [data-week-header-controls] > div {
+    margin-top: 0;
+  }
+
+  [data-week-header-controls] > label {
+    align-items: center;
+    display: inline-flex;
+    gap: ${themeCssVariables.spacing[1]};
+  }
+
+  [data-week-header-controls] > label > input {
+    margin: 0;
+  }
+`;
 
 export const StyledStatusBoardModalSearch = styled.div`
   align-items: center;
-  background: ${themeCssVariables.background.secondary};
-  border: 1px solid ${themeCssVariables.border.color.medium};
-  border-radius: 12px;
+  background: var(--t-search-bg);
+  border: 1px solid var(--t-search-border-color);
+  border-radius: var(--t-search-radius);
   color: ${themeCssVariables.font.color.secondary};
   display: flex;
   flex-shrink: 0;
   gap: 10px;
   margin: 16px 0 12px;
-  min-height: 46px;
+  min-height: var(--t-search-height);
   padding: 0 12px;
 
   &:focus-within {
-    border-color: ${themeCssVariables.border.color.blue};
-    outline: 2px solid ${themeCssVariables.border.color.blue};
-    outline-offset: 2px;
+    background: var(--t-search-focus-bg);
+    border-color: ${themeCssVariables.color.blue};
+    box-shadow: var(--t-search-focus-ring);
+    outline: none;
   }
 
   > svg {
@@ -910,7 +932,7 @@ export const StyledStatusBoardModalSearchInput = styled.input`
   font-size: 14px;
   min-width: 0;
   outline: none;
-  padding: 12px 0;
+  padding: 0;
 
   &::placeholder {
     color: ${themeCssVariables.font.color.secondary};
@@ -959,10 +981,13 @@ export const StyledStatusBoardSheetListLink = styled(Link)`
   border-radius: 8px;
   color: ${themeCssVariables.font.color.secondary};
   display: inline-flex;
+  font-size: ${themeCssVariables.font.size.sm};
+  gap: ${themeCssVariables.spacing[1]};
   height: 32px;
   justify-content: center;
+  padding: 0 ${themeCssVariables.spacing[2]};
   text-decoration: none;
-  width: 32px;
+  white-space: nowrap;
   &:hover {
     background: ${themeCssVariables.background.tertiary};
   }
@@ -1043,34 +1068,38 @@ export const StyledStatusBoardSheetToolbar = styled.div`
   flex-shrink: 0;
   gap: 12px;
   grid-template-columns: minmax(0, 3fr) minmax(128px, 1fr);
-  margin: 16px 0 12px;
+  margin: 0 0 12px;
 
   > div {
     box-sizing: border-box;
-    height: 48px;
+    height: var(--t-search-height);
     margin: 0;
     min-height: 0;
     min-width: 0;
   }
 `;
 
-export const StyledStatusBoardSort = styled.label`
-  color: ${themeCssVariables.font.color.secondary};
-  display: flex;
-  font-size: 14px;
+export const StyledStatusBoardSort = styled.div`
   min-width: 0;
 
-  select {
-    background: ${themeCssVariables.background.secondary};
-    border: 1px solid ${themeCssVariables.border.color.medium};
-    border-radius: 12px;
-    box-sizing: border-box;
-    color: ${themeCssVariables.font.color.primary};
-    font: inherit;
-    height: 48px;
-    min-width: 0;
+  ${StyledControlContainer} {
+    background: var(--t-toolbar-chip-bg);
+    border: var(--t-toolbar-chip-border);
+    border-radius: var(--t-toolbar-chip-radius);
+    font-size: var(--t-toolbar-chip-font-size);
+    font-weight: var(--t-toolbar-chip-font-weight);
+    height: var(--t-search-height);
     padding: 0 12px;
-    width: 100%;
+  }
+
+  &:focus-within {
+    ${StyledControlContainer} {
+      border-color: ${themeCssVariables.border.color.blue};
+    }
+  }
+
+  :focus-visible {
+    outline: none;
   }
 `;
 export const StyledStatusBoardPagination = styled.nav`

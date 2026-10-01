@@ -1,7 +1,6 @@
 import { StatusBoardCountKpi } from '@/status-board/components/StatusBoardCountKpi';
 import {
   StyledStatusBoardCumulativeGrid,
-  StyledStatusBoardMuted,
   StyledStatusBoardSection,
   StyledStatusBoardSectionHeader,
   StyledStatusBoardSectionTitle,
@@ -45,8 +44,9 @@ export const StatusBoardCumulativeSection = ({
   return (
     <StyledStatusBoardSection>
       <StyledStatusBoardSectionHeader>
-        <StyledStatusBoardSectionTitle>누적 담당</StyledStatusBoardSectionTitle>
-        <StyledStatusBoardMuted>전체 기간</StyledStatusBoardMuted>
+        <StyledStatusBoardSectionTitle>
+          누적 담당 내역
+        </StyledStatusBoardSectionTitle>
       </StyledStatusBoardSectionHeader>
       <StyledStatusBoardCumulativeGrid>
         {companyObjectMetadataItem !== undefined && (
@@ -61,6 +61,8 @@ export const StatusBoardCumulativeSection = ({
               memberIds,
             })}
             label="기업"
+            tone="blue"
+            iconName={companyObjectMetadataItem.icon}
             variant="stat"
             onClick={() =>
               onOpenSheet({
@@ -94,6 +96,8 @@ export const StatusBoardCumulativeSection = ({
               memberIds,
             })}
             label="고객"
+            tone="green"
+            iconName={personObjectMetadataItem.icon}
             variant="stat"
             onClick={() =>
               onOpenSheet({
@@ -127,6 +131,8 @@ export const StatusBoardCumulativeSection = ({
               memberIds,
             })}
             label="문의"
+            tone="red"
+            iconName={opportunityObjectMetadataItem.icon}
             variant="stat"
             onClick={() =>
               onOpenSheet({
@@ -163,6 +169,8 @@ export const StatusBoardCumulativeSection = ({
               memberIds,
             })}
             label="계약"
+            tone="orange"
+            iconName={onboardingObjectMetadataItem.icon}
             variant="stat"
             onClick={() =>
               onOpenSheet({
@@ -199,6 +207,8 @@ export const StatusBoardCumulativeSection = ({
               memberIds,
             })}
             label="입금"
+            tone="green"
+            iconName={depositObjectMetadataItem.icon}
             variant="stat"
             onClick={() =>
               onOpenSheet({

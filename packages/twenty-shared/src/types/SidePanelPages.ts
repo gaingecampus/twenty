@@ -1,4 +1,5 @@
 export enum SidePanelPages {
+  StatusBoardDetails = 'status-board-details',
   CommandMenuDisplay = 'command-menu-display',
   ViewRecord = 'view-record',
   MergeRecords = 'merge-records',

@@ -10,6 +10,7 @@ type StatusBoardCountKpiProps = {
   objectNameSingular: string;
   filter?: RecordGqlOperationFilter;
   label: string;
+  iconName?: string | null;
   withSum?: boolean;
   showAmountAsValue?: boolean;
   tone?: StatusBoardTone;
@@ -22,6 +23,7 @@ export const StatusBoardCountKpi = ({
   objectNameSingular,
   filter,
   label,
+  iconName,
   withSum = false,
   showAmountAsValue = false,
   tone = 'default',
@@ -55,6 +57,8 @@ export const StatusBoardCountKpi = ({
   return (
     <StatusBoardKpiCard
       label={label}
+      iconName={iconName}
+      inlineSubtitle={(showAmountAsValue || withSum) && !hasError}
       exactValue={!hasError && !showAmountAsValue ? countLabel : undefined}
       value={
         hasError

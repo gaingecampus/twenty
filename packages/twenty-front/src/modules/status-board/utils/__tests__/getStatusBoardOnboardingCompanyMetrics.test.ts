@@ -56,3 +56,49 @@ describe('getStatusBoardOnboardingCompanyMetrics', () => {
     });
   });
 });
+
+describe('project onboarding metrics', () => {
+  it('counts other contract types, deduplicates roles and applies the member filter', () => {
+    const result = getStatusBoardOnboardingCompanyMetrics({
+      records: [
+        {
+          id: 'project',
+          __typename: 'Onboarding',
+          onboardingType: 'HEADHUNTING',
+          leadConsultantId: 'a',
+          executionConsultantId: 'a',
+        },
+        {
+          id: 'consulting',
+          __typename: 'Onboarding',
+          onboardingType: 'CONSULTING',
+          leadConsultantId: 'a',
+        },
+        {
+          id: 'coaching',
+          __typename: 'Onboarding',
+          onboardingType: 'COACHING',
+          leadConsultantId: 'a',
+        },
+        {
+          id: 'unknown',
+          __typename: 'Onboarding',
+          onboardingType: null,
+          leadConsultantId: 'a',
+        },
+      ],
+      assignments: [
+        { onboardingId: 'project', memberId: 'b' },
+        { onboardingId: 'project', memberId: 'c' },
+      ],
+      memberIds: ['a', 'b'],
+      onboardingTypes: ['CONSULTING', 'COACHING'],
+      excludeTypes: true,
+    });
+    expect(result.totalCount).toBe(2);
+    expect(result.personCountByOnboardingId).toEqual({ project: 2 });
+    expect(result.memberIdsByOnboardingId).toEqual({
+      project: ['a', 'b', 'c'],
+    });
+  });
+});

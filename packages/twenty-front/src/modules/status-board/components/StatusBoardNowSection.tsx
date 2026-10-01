@@ -3,7 +3,6 @@ import { type StatusBoardSheetState } from '@/status-board/components/StatusBoar
 import { StatusBoardLinkedCountKpi } from '@/status-board/components/StatusBoardLinkedCountKpi';
 import {
   StyledStatusBoardKpiGrid,
-  StyledStatusBoardMuted,
   StyledStatusBoardSection,
   StyledStatusBoardSectionHeader,
   StyledStatusBoardSectionTitle,
@@ -64,10 +63,11 @@ export const StatusBoardNowSection = ({
   return (
     <StyledStatusBoardSection>
       <StyledStatusBoardSectionHeader>
-        <StyledStatusBoardSectionTitle>주요 현황</StyledStatusBoardSectionTitle>
-        <StyledStatusBoardMuted>오늘 기준</StyledStatusBoardMuted>
+        <StyledStatusBoardSectionTitle>
+          진행 중인 온보딩 현황
+        </StyledStatusBoardSectionTitle>
       </StyledStatusBoardSectionHeader>
-      <StyledStatusBoardKpiGrid columns={3}>
+      <StyledStatusBoardKpiGrid columns={4}>
         {opportunityObjectMetadataItem !== undefined && (
           <StatusBoardLinkedCountKpi
             onOpenSheet={onOpenSheet}
@@ -79,6 +79,14 @@ export const StatusBoardNowSection = ({
         )}
         {onboardingObjectMetadataItem !== undefined && (
           <StatusBoardOnboardingKpi
+            onOpenSheet={onOpenSheet}
+            objectMetadataItem={onboardingObjectMetadataItem}
+            memberIds={memberIds}
+          />
+        )}
+        {onboardingObjectMetadataItem !== undefined && (
+          <StatusBoardOnboardingKpi
+            variant="project"
             onOpenSheet={onOpenSheet}
             objectMetadataItem={onboardingObjectMetadataItem}
             memberIds={memberIds}

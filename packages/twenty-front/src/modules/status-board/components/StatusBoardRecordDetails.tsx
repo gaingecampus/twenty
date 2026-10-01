@@ -1,3 +1,4 @@
+import { themeCssVariables } from 'twenty-ui/theme-constants';
 import { useObjectMetadataItem } from '@/object-metadata/hooks/useObjectMetadataItem';
 import { SelectDisplay } from '@/ui/field/display/components/SelectDisplay';
 import { type ObjectRecord } from '@/object-record/types/ObjectRecord';
@@ -127,7 +128,13 @@ export const StatusBoardRecordDetails = ({
     return (
       <StyledStatusBoardRowAside>
         {formatStatusBoardAmount(getStatusBoardAmountMicros(record.amount))}
-        <StyledStatusBoardRowCaption>
+        <StyledStatusBoardRowCaption
+          style={
+            record.depositStatus !== 'PAID' && overdueDays > 0
+              ? { color: themeCssVariables.color.red }
+              : undefined
+          }
+        >
           {record.depositStatus === 'PAID'
             ? '입금 완료'
             : overdueDays > 0

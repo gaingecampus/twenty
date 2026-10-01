@@ -113,6 +113,13 @@ export const useStatusBoardOnboardingMetrics = ({
     memberIds,
     onboardingTypes: STATUS_BOARD_ONBOARDING_COMPANY_TYPES,
   });
+  const projectMetrics = getStatusBoardOnboardingCompanyMetrics({
+    records: contracts.records,
+    assignments,
+    memberIds,
+    onboardingTypes: STATUS_BOARD_ONBOARDING_COMPANY_TYPES,
+    excludeTypes: true,
+  });
   const configurationError =
     coField && (!sourceKey || !targetKey || !canReadAssignments)
       ? new Error('공동 실행 컨설턴트 관계를 확인할 수 없습니다')
@@ -120,6 +127,7 @@ export const useStatusBoardOnboardingMetrics = ({
   return {
     ...metrics,
     companyMetrics,
+    projectMetrics,
     assignments,
     loading: contracts.loading || links.loading,
     error: contracts.error ?? links.error ?? configurationError,

@@ -1,3 +1,5 @@
+import { createPortal } from 'react-dom';
+import { RecordPaginationBar } from '@/object-record/record-index/components/RecordIndexPaginationBar';
 import { StatusBoardCompanyActivity } from '@/status-board/components/StatusBoardCompanyActivity';
 import { useState } from 'react';
 import { StatusBoardRecordAvatar } from '@/status-board/components/StatusBoardRecordAvatar';
@@ -11,10 +13,6 @@ import {
 } from '@/status-board/components/StatusBoardRecordDetails';
 import {
   StyledStatusBoardContract,
-  StyledStatusBoardPagination,
-  StyledStatusBoardPageButton,
-  StyledStatusBoardPageGap,
-  StyledStatusBoardPeriodNavButton,
   StyledStatusBoardContractTop,
   StyledStatusBoardGroupTitle,
   StyledStatusBoardMoreButton,
@@ -33,7 +31,6 @@ import { useObjectMetadataItem } from '@/object-metadata/hooks/useObjectMetadata
 import { STATUS_BOARD_FIELD } from '@/status-board/constants/StatusBoardFieldNames';
 import { buildStatusBoardRecordGqlFields } from '@/status-board/utils/buildStatusBoardRecordGqlFields';
 import { useStatusBoardRecordPage } from '@/status-board/hooks/useStatusBoardRecordPage';
-import { getStatusBoardPageItems } from '@/status-board/utils/getStatusBoardPageItems';
 import { isStatusBoardDummyRecordId } from '@/status-board/utils/buildStatusBoardDummyDataset';
 import { getStatusBoardRecordCaption } from '@/status-board/utils/getStatusBoardRecordInitial';
 import { getStatusBoardRecordLabel } from '@/status-board/utils/getStatusBoardRecordLabel';
@@ -62,7 +59,9 @@ type StatusBoardRecordListProps = {
   heading?: string;
   tone?: StatusBoardTone;
   paginated?: boolean;
+  paginationContainer?: HTMLElement | null;
   onPageChange?: () => void;
+  onOpenRecord?: (recordId: string) => void;
   orderBy?: RecordGqlOperationVariables['orderBy'];
   recordBadges?: Record<string, string>;
   recordMembers?: StatusBoardRecordMembers;
@@ -172,7 +171,9 @@ export const StatusBoardRecordList = ({
   emptyVariant,
   heading,
   paginated = false,
+  paginationContainer,
   onPageChange,
+  onOpenRecord,
   orderBy,
   recordBadges,
   recordMembers,
@@ -297,6 +298,18 @@ export const StatusBoardRecordList = ({
           ) : (
             <StyledStatusBoardRowLink
               key={record.id}
+              onClick={(event) => {
+                if (
+                  onOpenRecord &&
+                  !event.metaKey &&
+                  !event.ctrlKey &&
+                  !event.shiftKey &&
+                  !event.altKey
+                ) {
+                  event.preventDefault();
+                  onOpenRecord(record.id);
+                }
+              }}
               to={getAppPath(AppPath.RecordShowPage, {
                 objectNameSingular,
                 objectRecordId: record.id,
@@ -323,50 +336,25 @@ export const StatusBoardRecordList = ({
           </StyledStatusBoardMoreButton>
         )}
       </StyledStatusBoardRowList>
-      {paginated && (
-        <StyledStatusBoardPagination aria-label="목록 페이지 이동">
-          <span>
-            {(page * pageSize + 1).toLocaleString('ko-KR')}–
-            {(page * pageSize + records.length).toLocaleString('ko-KR')} /{' '}
-            {totalCount.toLocaleString('ko-KR')}건
-          </span>
-          <StyledStatusBoardPeriodNavButton
-            type="button"
-            aria-label="이전 페이지"
-            disabled={page === 0}
-            onClick={() => goToPage(page - 1)}
-          >
-            ‹
-          </StyledStatusBoardPeriodNavButton>
-          {getStatusBoardPageItems({ currentPage: page, pageCount }).map(
-            (item, index) =>
-              item === 'gap' ? (
-                <StyledStatusBoardPageGap key={`gap-${index}`} aria-hidden>
-                  …
-                </StyledStatusBoardPageGap>
-              ) : (
-                <StyledStatusBoardPageButton
-                  key={item}
-                  type="button"
-                  isActive={item === page}
-                  aria-label={`${item + 1}페이지`}
-                  aria-current={item === page ? 'page' : undefined}
-                  onClick={() => goToPage(item)}
-                >
-                  {item + 1}
-                </StyledStatusBoardPageButton>
-              ),
-          )}
-          <StyledStatusBoardPeriodNavButton
-            type="button"
-            aria-label="다음 페이지"
-            disabled={page >= pageCount - 1}
-            onClick={() => goToPage(page + 1)}
-          >
-            ›
-          </StyledStatusBoardPeriodNavButton>
-        </StyledStatusBoardPagination>
-      )}
+      {paginated &&
+        (paginationContainer ? (
+          createPortal(
+            <RecordPaginationBar
+              currentPage={page + 1}
+              pageSize={pageSize}
+              totalCount={totalCount}
+              onPageChange={(nextPage) => goToPage(nextPage - 1)}
+            />,
+            paginationContainer,
+          )
+        ) : (
+          <RecordPaginationBar
+            currentPage={page + 1}
+            pageSize={pageSize}
+            totalCount={totalCount}
+            onPageChange={(nextPage) => goToPage(nextPage - 1)}
+          />
+        ))}
     </>
   );
 };

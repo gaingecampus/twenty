@@ -1,3 +1,5 @@
+import { IconX } from 'twenty-ui/icon';
+import { FieldContractAssignees } from '@/field-management/FieldContractAssignees';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { getStatusBoardMemberGroupId } from '@/status-board/utils/getStatusBoardMemberGroupId';
@@ -93,8 +95,10 @@ export const StatusBoardFilterBar = ({
                   aria-label={`${getStatusBoardRecordLabel(member)} 선택 해제`}
                   onClick={() => onToggleMemberId(member.id)}
                 >
-                  {getStatusBoardRecordLabel(member)}{' '}
-                  <span aria-hidden="true">×</span>
+                  <span data-selected-member>
+                    <FieldContractAssignees members={[member]} />
+                  </span>
+                  <IconX size={14} aria-hidden />
                 </StyledStatusBoardChip>
               ))}
           </StyledStatusBoardChipRow>
@@ -236,7 +240,7 @@ const StatusBoardMemberChips = ({
                   {selectedMemberIds.includes(member.id) && (
                     <span aria-hidden="true">✓ </span>
                   )}
-                  {getStatusBoardRecordLabel(member)}
+                  <FieldContractAssignees members={[member]} />
                 </StyledStatusBoardChip>
               ))}
             </StyledMemberOptions>

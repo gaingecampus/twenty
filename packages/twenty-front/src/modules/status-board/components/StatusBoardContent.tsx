@@ -1,3 +1,7 @@
+import { useNavigateSidePanel } from '@/side-panel/hooks/useNavigateSidePanel';
+import { statusBoardDetailsState } from '@/status-board/states/statusBoardDetailsState';
+import { useSetAtomState } from '@/ui/utilities/state/jotai/hooks/useSetAtomState';
+import { SidePanelPages } from 'twenty-shared/types';
 import { StatusBoardEmptyState } from '@/status-board/components/StatusBoardEmptyState';
 import { StatusBoardStageTimingSection } from '@/status-board/components/StatusBoardStageTimingSection';
 import { hasStatusBoardField } from '@/status-board/utils/hasStatusBoardField';
@@ -8,10 +12,7 @@ import { StatusBoardFilterBar } from '@/status-board/components/StatusBoardFilte
 import { StatusBoardListsSection } from '@/status-board/components/StatusBoardListsSection';
 import { StatusBoardNowSection } from '@/status-board/components/StatusBoardNowSection';
 import { StatusBoardPeriodSection } from '@/status-board/components/StatusBoardPeriodSection';
-import {
-  StatusBoardSheet,
-  type StatusBoardSheetState,
-} from '@/status-board/components/StatusBoardSheet';
+import { type StatusBoardSheetState } from '@/status-board/components/StatusBoardSheet';
 import { StatusBoardWeekSection } from '@/status-board/components/StatusBoardWeekSection';
 import {
   StyledStatusBoardScroll,
@@ -31,7 +32,7 @@ import { PageCardHeader } from '@/ui/layout/page/components/PageCardHeader';
 import { PageCardLayout } from '@/ui/layout/page/components/PageCardLayout';
 import { PageTitle } from '@/ui/utilities/page-title/components/PageTitle';
 import { useState } from 'react';
-import { IconLayoutDashboard } from 'twenty-ui/icon';
+import { IconList, IconLayoutDashboard } from 'twenty-ui/icon';
 import { useTheme } from 'twenty-ui/theme-constants';
 import { type ObjectRecord } from '@/object-record/types/ObjectRecord';
 
@@ -90,9 +91,17 @@ const StatusBoardContentBody = ({
   const [onboardingTab, setOnboardingTab] = useState<'ACTIVE' | 'PRE' | 'DONE'>(
     'ACTIVE',
   );
-  const [sheet, setSheet] = useState<StatusBoardSheetState | undefined>(
-    undefined,
-  );
+  const setStatusBoardDetails = useSetAtomState(statusBoardDetailsState);
+  const { navigateSidePanel } = useNavigateSidePanel();
+  const setSheet = (sheet: StatusBoardSheetState) => {
+    setStatusBoardDetails({ sheet, dummy });
+    navigateSidePanel({
+      page: SidePanelPages.StatusBoardDetails,
+      pageTitle: sheet.title,
+      pageIcon: IconList,
+      resetNavigationStack: true,
+    });
+  };
 
   const isGroupUnavailable =
     !dummy.enabled &&
@@ -202,9 +211,6 @@ const StatusBoardContentBody = ({
           )}
         </StyledStatusBoardScroll>
       </PageCardLayout>
-      {sheet !== undefined && (
-        <StatusBoardSheet sheet={sheet} onClose={() => setSheet(undefined)} />
-      )}
     </>
   );
 };

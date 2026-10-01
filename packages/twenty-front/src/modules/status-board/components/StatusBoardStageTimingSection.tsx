@@ -1,3 +1,7 @@
+import { useId } from 'react';
+import { IconInfoCircle } from 'twenty-ui/icon';
+import { AppTooltip } from 'twenty-ui/surfaces';
+import { themeCssVariables } from 'twenty-ui/theme-constants';
 import { type EnrichedObjectMetadataItem } from '@/object-metadata/types/EnrichedObjectMetadataItem';
 import { useAggregateRecords } from '@/object-record/hooks/useAggregateRecords';
 import { AggregateOperations } from '@/object-record/record-table/constants/AggregateOperations';
@@ -5,7 +9,6 @@ import { StatusBoardKpiCard } from '@/status-board/components/StatusBoardKpiCard
 import { type StatusBoardSheetState } from '@/status-board/components/StatusBoardSheet';
 import {
   StyledStatusBoardKpiGrid,
-  StyledStatusBoardMuted,
   StyledStatusBoardSection,
   StyledStatusBoardSectionHeader,
   StyledStatusBoardSectionTitle,
@@ -35,6 +38,8 @@ export const StatusBoardStageTimingSection = ({
   memberIds,
   onOpenSheet,
 }: StatusBoardStageTimingSectionProps) => {
+  const infoId = useId();
+  const description = `${STATUS_BOARD_STAGE_TIMING_START_DATE.replaceAll('-', '.')} 이후 문의 · 최초 문의 날짜부터 최초 도달일까지 평균 · 한국 날짜 기준, 주말 포함. 측정 전 이력과 미도달 단계는 제외됩니다.`;
   const stages = getStatusBoardStageTimings(
     opportunityObjectMetadataItem,
   ).filter((stage) =>
@@ -68,14 +73,26 @@ export const StatusBoardStageTimingSection = ({
     <StyledStatusBoardSection>
       <StyledStatusBoardSectionHeader>
         <StyledStatusBoardSectionTitle>
-          문의 단계별 도달 소요일
+          문의 단계별 평균 소요일
+          <span
+            data-stage-timing-info={infoId}
+            tabIndex={0}
+            aria-label={`집계 기준: ${description}`}
+            style={{
+              display: 'inline-flex',
+              marginLeft: 6,
+              verticalAlign: 'middle',
+              color: themeCssVariables.font.color.tertiary,
+            }}
+          >
+            <IconInfoCircle size={16} aria-hidden />
+          </span>
+          <AppTooltip
+            anchorSelect={`[data-stage-timing-info="${infoId}"]`}
+            content={description}
+          />
         </StyledStatusBoardSectionTitle>
       </StyledStatusBoardSectionHeader>
-      <StyledStatusBoardMuted>
-        {STATUS_BOARD_STAGE_TIMING_START_DATE.replaceAll('-', '.')} 이후 문의 ·
-        최초 문의 날짜부터 최초 도달일까지 평균 · 한국 날짜 기준, 주말 포함.
-        측정 전 이력과 미도달 단계는 제외됩니다.
-      </StyledStatusBoardMuted>
       <StyledStatusBoardKpiGrid>
         {stages.map((stage) => (
           <StageTimingCard
@@ -139,12 +156,9 @@ const StageTimingCard = ({
       value={hasMeasurement ? `${average.toFixed(1)}일` : '—'}
       loading={!dummy.enabled && loading}
       isEmpty={!hasMeasurement}
+      inlineSubtitle={hasMeasurement}
       subtitle={
-        error
-          ? '조회 실패'
-          : hasMeasurement
-            ? `측정 ${count}건`
-            : '측정 데이터 없음'
+        error ? '조회 실패' : hasMeasurement ? `측정 ${count}건` : undefined
       }
       onClick={() =>
         onOpenSheet({

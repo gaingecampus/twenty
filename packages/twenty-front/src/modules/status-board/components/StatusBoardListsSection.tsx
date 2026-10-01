@@ -1,8 +1,10 @@
+import { useOpenRecordInSidePanel } from '@/side-panel/hooks/useOpenRecordInSidePanel';
 import { useStatusBoardCount } from '@/status-board/hooks/useStatusBoardCount';
 import { type RecordGqlOperationFilter } from 'twenty-shared/types';
 import {
   StyledStatusBoardContractSection,
   StyledStatusBoardSectionTitle,
+  StyledStatusBoardSectionHeader,
   StyledStatusBoardSoftTab,
   StyledStatusBoardTabCount,
   StyledStatusBoardContractTabs,
@@ -63,6 +65,8 @@ export const StatusBoardListsSection = ({
   onboardingTab,
   onOnboardingTabChange,
 }: StatusBoardListsSectionProps) => {
+  const { openRecordInSidePanel } = useOpenRecordInSidePanel();
+
   if (onboardingObjectMetadataItem === undefined) return null;
 
   const getContractFilter = (
@@ -93,7 +97,11 @@ export const StatusBoardListsSection = ({
 
   return (
     <StyledStatusBoardContractSection>
-      <StyledStatusBoardSectionTitle>계약 현황</StyledStatusBoardSectionTitle>
+      <StyledStatusBoardSectionHeader>
+        <StyledStatusBoardSectionTitle>
+          계약 진행 현황
+        </StyledStatusBoardSectionTitle>
+      </StyledStatusBoardSectionHeader>
       {hasStatusBoardField(
         onboardingObjectMetadataItem,
         STATUS_BOARD_FIELD.onboardingStatus,
@@ -118,6 +126,12 @@ export const StatusBoardListsSection = ({
       )}
       <StyledStatusBoardContractBody>
         <StatusBoardRecordList
+          onOpenRecord={(recordId) =>
+            openRecordInSidePanel({
+              recordId,
+              objectNameSingular: STATUS_BOARD_OBJECT_NAME_SINGULAR.onboarding,
+            })
+          }
           objectNameSingular={STATUS_BOARD_OBJECT_NAME_SINGULAR.onboarding}
           filter={getContractFilter(onboardingTab)}
           tone="green"
