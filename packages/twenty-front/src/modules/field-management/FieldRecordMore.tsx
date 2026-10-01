@@ -35,6 +35,7 @@ const StyledMore = styled.details`
   }
   &&& > div button {
     background: transparent;
+    border-radius: var(--t-border-radius-sm, 6px);
     align-items: center;
     display: flex;
     gap: 10px;
