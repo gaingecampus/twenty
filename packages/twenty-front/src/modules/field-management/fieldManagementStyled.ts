@@ -87,11 +87,12 @@ export const StyledFieldPanel = styled.div`
   &[data-contextual] {
     font-size: 14px;
   }
-  &[data-contract-list-page] {
+  &[data-contextual][data-contract-list-page] {
     background: transparent;
     padding: 0;
   }
-  &[data-contract-list-page] > [data-contract-group] {
+  &[data-contextual][data-contract-list-page] [data-field-header],
+  &[data-contextual][data-contract-list-page] > [data-contract-group] {
     background: transparent;
   }
   &[data-inline-detail] {
