@@ -1,3 +1,4 @@
+import { isAdvancedModeEnabledState } from '@/ui/navigation/navigation-drawer/states/isAdvancedModeEnabledState';
 import { type EnrichedObjectMetadataItem } from '@/object-metadata/types/EnrichedObjectMetadataItem';
 
 import { useDeleteOneObjectMetadataItem } from '@/object-metadata/hooks/useDeleteOneObjectMetadataItem';
@@ -55,6 +56,7 @@ export const ObjectSettings = ({
   setIsDeleting,
 }: ObjectSettingsProps) => {
   const { t } = useLingui();
+  const isAdvancedModeEnabled = useAtomStateValue(isAdvancedModeEnabledState);
   const navigate = useNavigateSettings();
   const getIsMetadataItemCustom = useGetIsMetadataItemCustom();
   const { updateOneObjectMetadataItem } = useUpdateOneObjectMetadataItem();
@@ -125,34 +127,38 @@ export const ObjectSettings = ({
           />
         </Section>
       </StyledFormSectionContainer>
-      <AdvancedSettingsWrapper>
-        <StyledFormSectionContainer>
-          <Section>
-            <H2Title
-              title={t`Search`}
-              description={t`Configure how this object appears in search results`}
-            />
-            <SettingsObjectSearchSection
-              objectMetadataItem={objectMetadataItem}
-              isReadOnly={isReadOnly}
-            />
-          </Section>
-        </StyledFormSectionContainer>
-      </AdvancedSettingsWrapper>
-      <AdvancedSettingsWrapper>
-        <StyledFormSectionContainer>
-          <Section>
-            <H2Title
-              title={t`Indexes`}
-              description={t`Speed up reads on the fields you filter or sort by most. Each index also slows down writes and uses disk space, so add them with intent.`}
-            />
-            <SettingsObjectIndexesSection
-              objectMetadataItem={objectMetadataItem}
-              isReadOnly={isReadOnly}
-            />
-          </Section>
-        </StyledFormSectionContainer>
-      </AdvancedSettingsWrapper>
+      {isAdvancedModeEnabled && (
+        <AdvancedSettingsWrapper>
+          <StyledFormSectionContainer>
+            <Section>
+              <H2Title
+                title={t`Search`}
+                description={t`Configure how this object appears in search results`}
+              />
+              <SettingsObjectSearchSection
+                objectMetadataItem={objectMetadataItem}
+                isReadOnly={isReadOnly}
+              />
+            </Section>
+          </StyledFormSectionContainer>
+        </AdvancedSettingsWrapper>
+      )}
+      {isAdvancedModeEnabled && (
+        <AdvancedSettingsWrapper>
+          <StyledFormSectionContainer>
+            <Section>
+              <H2Title
+                title={t`Indexes`}
+                description={t`Speed up reads on the fields you filter or sort by most. Each index also slows down writes and uses disk space, so add them with intent.`}
+              />
+              <SettingsObjectIndexesSection
+                objectMetadataItem={objectMetadataItem}
+                isReadOnly={isReadOnly}
+              />
+            </Section>
+          </StyledFormSectionContainer>
+        </AdvancedSettingsWrapper>
+      )}
       {!isReadOnly && (
         <StyledFormSectionContainer>
           <Section>

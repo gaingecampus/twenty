@@ -1,3 +1,5 @@
+import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
+import { isAdvancedModeEnabledState } from '@/ui/navigation/navigation-drawer/states/isAdvancedModeEnabledState';
 import { useGetIsMetadataItemCustom } from '@/object-metadata/hooks/useGetIsMetadataItemCustom';
 import { type EnrichedObjectMetadataItem } from '@/object-metadata/types/EnrichedObjectMetadataItem';
 import { AdvancedSettingsWrapper } from '@/settings/components/AdvancedSettingsWrapper';
@@ -80,6 +82,7 @@ export const SettingsDataModelObjectAboutForm = ({
   const { control, watch, setValue } =
     useFormContext<SettingsDataModelObjectAboutFormValues>();
   const { t } = useLingui();
+  const isAdvancedModeEnabled = useAtomStateValue(isAdvancedModeEnabledState);
   const navigateSettings = useNavigateSettings();
   const getIsMetadataItemCustom = useGetIsMetadataItemCustom();
 
@@ -253,173 +256,175 @@ export const SettingsDataModelObjectAboutForm = ({
           />
         )}
       />
-      <StyledAdvancedSettingsOuterContainer>
-        <StyledAdvancedSettingsContainer>
-          <StyledAdvancedSettingsSectionInputWrapper>
-            {isDefined(conflictingObjectMetadataItem) && (
-              <InlineBanner
-                color={'blue'}
-                message={t`An object with this name already exists`}
-                button={{
-                  title: t`Open`,
-                  onClick: () =>
-                    navigateSettings(SettingsPath.ObjectDetail, {
-                      objectNamePlural:
-                        conflictingObjectMetadataItem.namePlural,
-                    }),
-                }}
-              />
-            )}
-            {[
-              {
-                label: t`API Name (Singular)`,
-                fieldName:
-                  'nameSingular' as const satisfies StringKeyOf<EnrichedObjectMetadataItem>,
-                placeholder: `listing`,
-                defaultValue: objectMetadataItem?.nameSingular ?? '',
-                disableEdition:
-                  isStandardObject || disableEdition || isLabelSyncedWithName,
-                tooltip: apiNameTooltipText,
-              },
-              {
-                label: t`API Name (Plural)`,
-                fieldName:
-                  'namePlural' as const satisfies StringKeyOf<EnrichedObjectMetadataItem>,
-                placeholder: `listings`,
-                defaultValue: objectMetadataItem?.namePlural ?? '',
-                disableEdition:
-                  isStandardObject || disableEdition || isLabelSyncedWithName,
-                tooltip: apiNameTooltipText,
-              },
-            ].map(
-              ({
-                fieldName,
-                label,
-                placeholder,
-                disableEdition,
-                tooltip,
-                defaultValue,
-              }) => (
-                <AdvancedSettingsWrapper
-                  key={`object-${fieldName}-text-input`}
-                  dotPosition="top"
-                >
-                  <StyledInputContainer>
-                    <Controller
-                      name={fieldName}
-                      control={control}
-                      defaultValue={defaultValue}
-                      render={({
-                        field: { onChange, value },
-                        formState: { errors },
-                      }) => (
-                        <>
-                          <SettingsTextInput
-                            instanceId={`${objectMetadataItem?.id}-${fieldName}`}
-                            label={label}
-                            placeholder={placeholder}
-                            value={value}
-                            onChange={onChange}
-                            disabled={disableEdition}
-                            fullWidth
-                            maxLength={OBJECT_NAME_MAXIMUM_LENGTH}
-                            onBlur={() => onNewDirtyField?.()}
-                            error={errors[fieldName]?.message}
-                            // TODO we should discuss on how to notify user about form validation schema issue, from now just displaying red borders
-                            noErrorHelper={true}
-                            RightIcon={() =>
-                              tooltip && (
-                                <>
-                                  <IconInfoCircle
-                                    id={infoCircleElementId + fieldName}
-                                    size={theme.icon.size.md}
-                                    color={theme.font.color.tertiary}
-                                    style={{ outline: 'none' }}
-                                  />
-                                  <AppTooltip
-                                    anchorSelect={`#${infoCircleElementId}${fieldName}`}
-                                    content={tooltip}
-                                    offset={5}
-                                    noArrow
-                                    place="bottom"
-                                    positionStrategy="fixed"
-                                    delay={TooltipDelay.shortDelay}
-                                  />
-                                </>
-                              )
+      {(isAdvancedModeEnabled || isDefined(conflictingObjectMetadataItem)) && (
+        <StyledAdvancedSettingsOuterContainer>
+          <StyledAdvancedSettingsContainer>
+            <StyledAdvancedSettingsSectionInputWrapper>
+              {isDefined(conflictingObjectMetadataItem) && (
+                <InlineBanner
+                  color={'blue'}
+                  message={t`An object with this name already exists`}
+                  button={{
+                    title: t`Open`,
+                    onClick: () =>
+                      navigateSettings(SettingsPath.ObjectDetail, {
+                        objectNamePlural:
+                          conflictingObjectMetadataItem.namePlural,
+                      }),
+                  }}
+                />
+              )}
+              {[
+                {
+                  label: t`API Name (Singular)`,
+                  fieldName:
+                    'nameSingular' as const satisfies StringKeyOf<EnrichedObjectMetadataItem>,
+                  placeholder: `listing`,
+                  defaultValue: objectMetadataItem?.nameSingular ?? '',
+                  disableEdition:
+                    isStandardObject || disableEdition || isLabelSyncedWithName,
+                  tooltip: apiNameTooltipText,
+                },
+                {
+                  label: t`API Name (Plural)`,
+                  fieldName:
+                    'namePlural' as const satisfies StringKeyOf<EnrichedObjectMetadataItem>,
+                  placeholder: `listings`,
+                  defaultValue: objectMetadataItem?.namePlural ?? '',
+                  disableEdition:
+                    isStandardObject || disableEdition || isLabelSyncedWithName,
+                  tooltip: apiNameTooltipText,
+                },
+              ].map(
+                ({
+                  fieldName,
+                  label,
+                  placeholder,
+                  disableEdition,
+                  tooltip,
+                  defaultValue,
+                }) => (
+                  <AdvancedSettingsWrapper
+                    key={`object-${fieldName}-text-input`}
+                    dotPosition="top"
+                  >
+                    <StyledInputContainer>
+                      <Controller
+                        name={fieldName}
+                        control={control}
+                        defaultValue={defaultValue}
+                        render={({
+                          field: { onChange, value },
+                          formState: { errors },
+                        }) => (
+                          <>
+                            <SettingsTextInput
+                              instanceId={`${objectMetadataItem?.id}-${fieldName}`}
+                              label={label}
+                              placeholder={placeholder}
+                              value={value}
+                              onChange={onChange}
+                              disabled={disableEdition}
+                              fullWidth
+                              maxLength={OBJECT_NAME_MAXIMUM_LENGTH}
+                              onBlur={() => onNewDirtyField?.()}
+                              error={errors[fieldName]?.message}
+                              // TODO we should discuss on how to notify user about form validation schema issue, from now just displaying red borders
+                              noErrorHelper={true}
+                              RightIcon={() =>
+                                tooltip && (
+                                  <>
+                                    <IconInfoCircle
+                                      id={infoCircleElementId + fieldName}
+                                      size={theme.icon.size.md}
+                                      color={theme.font.color.tertiary}
+                                      style={{ outline: 'none' }}
+                                    />
+                                    <AppTooltip
+                                      anchorSelect={`#${infoCircleElementId}${fieldName}`}
+                                      content={tooltip}
+                                      offset={5}
+                                      noArrow
+                                      place="bottom"
+                                      positionStrategy="fixed"
+                                      delay={TooltipDelay.shortDelay}
+                                    />
+                                  </>
+                                )
+                              }
+                            />
+                          </>
+                        )}
+                      />
+                    </StyledInputContainer>
+                  </AdvancedSettingsWrapper>
+                ),
+              )}
+              {!isStandardObject && (
+                <AdvancedSettingsWrapper>
+                  <Controller
+                    name="isLabelSyncedWithName"
+                    control={control}
+                    defaultValue={objectMetadataItem?.isLabelSyncedWithName}
+                    render={({ field: { onChange, value } }) => (
+                      <Card rounded>
+                        <SettingsOptionCardContentToggle
+                          Icon={IconRefresh}
+                          title={t`Synchronize Objects Labels and API Names`}
+                          description={t`Should changing an object's label also change the API?`}
+                          checked={value ?? true}
+                          advancedMode
+                          disabled={disableEdition}
+                          onChange={(value) => {
+                            onChange(value);
+                            const isCustomObject =
+                              isDefined(objectMetadataItem) &&
+                              getIsMetadataItemCustom(objectMetadataItem);
+                            const isbeingCreatedObject =
+                              !isDefined(objectMetadataItem);
+                            if (
+                              value === true &&
+                              (isCustomObject || isbeingCreatedObject)
+                            ) {
+                              fillNamesFromLabels(labelSingular, labelPlural);
                             }
-                          />
-                        </>
-                      )}
-                    />
-                  </StyledInputContainer>
+                            onNewDirtyField?.();
+                          }}
+                        />
+                      </Card>
+                    )}
+                  />
                 </AdvancedSettingsWrapper>
-              ),
-            )}
-            {!isStandardObject && (
-              <AdvancedSettingsWrapper>
-                <Controller
-                  name="isLabelSyncedWithName"
-                  control={control}
-                  defaultValue={objectMetadataItem?.isLabelSyncedWithName}
-                  render={({ field: { onChange, value } }) => (
-                    <Card rounded>
-                      <SettingsOptionCardContentToggle
-                        Icon={IconRefresh}
-                        title={t`Synchronize Objects Labels and API Names`}
-                        description={t`Should changing an object's label also change the API?`}
-                        checked={value ?? true}
-                        advancedMode
-                        disabled={disableEdition}
-                        onChange={(value) => {
-                          onChange(value);
-                          const isCustomObject =
-                            isDefined(objectMetadataItem) &&
-                            getIsMetadataItemCustom(objectMetadataItem);
-                          const isbeingCreatedObject =
-                            !isDefined(objectMetadataItem);
-                          if (
-                            value === true &&
-                            (isCustomObject || isbeingCreatedObject)
-                          ) {
-                            fillNamesFromLabels(labelSingular, labelPlural);
-                          }
-                          onNewDirtyField?.();
-                        }}
-                      />
-                    </Card>
-                  )}
-                />
-              </AdvancedSettingsWrapper>
-            )}
-            {!isDefined(objectMetadataItem) && (
-              <AdvancedSettingsWrapper>
-                <Controller
-                  name="skipNameField"
-                  control={control}
-                  defaultValue={false}
-                  render={({ field: { onChange, value } }) => (
-                    <Card rounded>
-                      <SettingsOptionCardContentToggle
-                        Icon={IconLink}
-                        title={t`Skip creating a Name field `}
-                        description={t`Useful for pivot/junction tables`}
-                        checked={value ?? false}
-                        advancedMode
-                        disabled={disableEdition}
-                        onChange={(value) => {
-                          onChange(value);
-                          onNewDirtyField?.();
-                        }}
-                      />
-                    </Card>
-                  )}
-                />
-              </AdvancedSettingsWrapper>
-            )}
-          </StyledAdvancedSettingsSectionInputWrapper>
-        </StyledAdvancedSettingsContainer>
-      </StyledAdvancedSettingsOuterContainer>
+              )}
+              {!isDefined(objectMetadataItem) && (
+                <AdvancedSettingsWrapper>
+                  <Controller
+                    name="skipNameField"
+                    control={control}
+                    defaultValue={false}
+                    render={({ field: { onChange, value } }) => (
+                      <Card rounded>
+                        <SettingsOptionCardContentToggle
+                          Icon={IconLink}
+                          title={t`Skip creating a Name field `}
+                          description={t`Useful for pivot/junction tables`}
+                          checked={value ?? false}
+                          advancedMode
+                          disabled={disableEdition}
+                          onChange={(value) => {
+                            onChange(value);
+                            onNewDirtyField?.();
+                          }}
+                        />
+                      </Card>
+                    )}
+                  />
+                </AdvancedSettingsWrapper>
+              )}
+            </StyledAdvancedSettingsSectionInputWrapper>
+          </StyledAdvancedSettingsContainer>
+        </StyledAdvancedSettingsOuterContainer>
+      )}
     </>
   );
 };
