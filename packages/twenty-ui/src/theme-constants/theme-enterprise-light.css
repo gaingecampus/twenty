@@ -103,8 +103,8 @@ html.light[data-ui-theme='enterprise'] {
   --t-page-title-font-size: 26px;
   --t-page-title-font-weight: 700;
   --t-page-header-icon-display: none;
-  --t-page-header-padding-x: 24px;
-  --t-page-header-padding-y: 12px;
+  --t-page-header-padding-x: 16px;
+  --t-page-header-padding-y: 8px;
   --t-page-header-border: 1px solid #eeeef3;
   --t-page-header-grid: minmax(0, auto) minmax(0, 1fr) minmax(min-content, 1fr);
   --t-page-header-center-justify: stretch;
@@ -201,7 +201,7 @@ html.light[data-ui-theme='enterprise'] {
   --t-input-label-font-size: 11px;
   --t-page-header-action-height: 40px;
   --t-page-header-action-padding-x: 16px;
-  --t-page-bar-min-height: 72px;
+  --t-page-bar-min-height: 56px;
   --t-button-font-weight: 600;
   --t-button-gap: 8px;
   --t-button-padding-x: 20px;
@@ -251,7 +251,7 @@ html.light[data-ui-theme='enterprise'] {
   --t-nav-icon-pack: flex-start;
   --t-nav-drawer-bg: #ffffff;
   --t-nav-drawer-border-right: 1px solid #eeeef3;
-  --t-nav-drawer-padding: 16px;
+  --t-nav-drawer-padding: 8px;
   --t-nav-drawer-padding-x: 16px;
   --t-nav-drawer-padding-right: var(--t-nav-drawer-padding-x);
   --t-nav-drawer-gap: 8px;
@@ -791,7 +791,7 @@ html.light[data-ui-theme='enterprise'] [id$='-options'] li > span {
 
 html.light[data-ui-theme='enterprise'] [data-nav-expanded='false'] {
   --t-nav-collapsed-width: 56px;
-  --t-nav-drawer-padding: 16px;
+  --t-nav-drawer-padding: 8px;
   --t-nav-drawer-padding-x: 8px;
   --t-nav-drawer-padding-right: 8px;
   --t-nav-drawer-gap: 12px;

@@ -1,3 +1,6 @@
+import { recordShowReturnContextState } from '@/object-record/record-show/states/recordShowReturnContextState';
+import { restoreRecordShowSidePanel } from '@/object-record/record-show/utils/recordShowSidePanelSnapshot';
+import { useNavigateSidePanel } from '@/side-panel/hooks/useNavigateSidePanel';
 import {
   setSessionId,
   useEventTracker,
@@ -65,6 +68,7 @@ export const PageChangeEffect = () => {
   const [previousLocation, setPreviousLocation] = useState('');
 
   const location = useLocation();
+  const { navigateSidePanel } = useNavigateSidePanel();
 
   const pageChangeEffectNavigateLocation =
     usePageChangeEffectNavigateLocation();
@@ -141,8 +145,31 @@ export const PageChangeEffect = () => {
   const { openNewRecordTitleCell } = useOpenNewRecordTitleCell();
 
   useEffect(() => {
+    const returnContext = store.get(recordShowReturnContextState.atom);
+    const isReturning =
+      returnContext &&
+      `${location.pathname}${location.search}${location.hash}` ===
+        returnContext.url &&
+      (location.key === returnContext.locationKey ||
+        location.state?.recordIndexReturnKey === returnContext.locationKey);
+    const snapshot = isReturning ? returnContext.sidePanel : undefined;
+    const page = snapshot?.stack.at(-1);
+    if (snapshot && page) {
+      navigateSidePanel(page);
+      restoreRecordShowSidePanel(store, snapshot);
+      return;
+    }
     closeSidePanelUnlessNotRelevant();
-  }, [location.pathname, closeSidePanelUnlessNotRelevant]);
+  }, [
+    location.pathname,
+    location.search,
+    location.hash,
+    location.key,
+    location.state?.recordIndexReturnKey,
+    closeSidePanelUnlessNotRelevant,
+    navigateSidePanel,
+    store,
+  ]);
 
   useEffect(() => {
     if (!previousLocation || previousLocation !== location.pathname) {

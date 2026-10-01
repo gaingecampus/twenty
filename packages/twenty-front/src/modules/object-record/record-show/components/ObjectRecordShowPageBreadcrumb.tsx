@@ -109,7 +109,7 @@ export const ObjectRecordShowPageBreadcrumb = ({
         <StyledBreadcrumbPrefixObjectIcon>
           <ObjectMetadataIcon
             objectMetadataItem={objectMetadataItem}
-            size={24}
+            size={18}
           />
         </StyledBreadcrumbPrefixObjectIcon>
         {objectLabel}

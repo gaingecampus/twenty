@@ -28,16 +28,20 @@ import { useAtomComponentStateValue } from '@/ui/utilities/state/jotai/hooks/use
 import { useAtomFamilyStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomFamilyStateValue';
 import { styled } from '@linaria/react';
 import { useLingui } from '@lingui/react/macro';
-import { useMemo } from 'react';
+import { useMemo, useRef, useState } from 'react';
+import { themeCssVariables } from 'twenty-ui/theme-constants';
 import { CoreObjectNameSingular, FieldMetadataType } from 'twenty-shared/types';
 import { isDefined } from 'twenty-shared/utils';
 import { useIsMobile } from 'twenty-ui/utilities';
 import { PageLayoutType, WidgetType } from '~/generated-metadata/graphql';
 
-const StyledContainer = styled.div<{ hasPinnedTab: boolean }>`
+const StyledContainer = styled.div<{
+  hasPinnedTab: boolean;
+  panelWidth: number;
+}>`
   display: grid;
-  grid-template-columns: ${({ hasPinnedTab }) =>
-    hasPinnedTab ? `${PAGE_LAYOUT_LEFT_PANEL_CONTAINER_WIDTH}px 1fr` : '1fr'};
+  grid-template-columns: ${({ hasPinnedTab, panelWidth }) =>
+    hasPinnedTab ? `min(${panelWidth}px, 60%) 0px minmax(0, 1fr)` : '1fr'};
   grid-template-rows: minmax(0, 1fr);
   height: 100%;
   width: 100%;
@@ -46,6 +50,24 @@ const StyledContainer = styled.div<{ hasPinnedTab: boolean }>`
     display: block;
     height: auto;
     width: 100%;
+  }
+`;
+
+const StyledResizeHandle = styled.div`
+  cursor: col-resize;
+  margin-inline: -4px;
+  position: relative;
+  touch-action: none;
+  width: 8px;
+  z-index: 2;
+
+  &:hover,
+  &:focus-visible {
+    background: ${themeCssVariables.border.color.medium};
+  }
+
+  @media print {
+    display: none;
   }
 `;
 
@@ -80,6 +102,17 @@ const StyledScrollWrapperContainer = styled.div`
 
 export const PageLayoutTabsRenderer = () => {
   const { t } = useLingui();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [panelWidth, setPanelWidth] = useState(
+    PAGE_LAYOUT_LEFT_PANEL_CONTAINER_WIDTH,
+  );
+  const resizePanel = (width: number) => {
+    const maximum = Math.max(
+      260,
+      Math.min(600, (containerRef.current?.clientWidth ?? 1000) * 0.6),
+    );
+    setPanelWidth(Math.max(260, Math.min(maximum, width)));
+  };
   const { currentPageLayout } = useCurrentPageLayoutOrThrow();
 
   const { isInSidePanel, layoutType, targetRecordIdentifier } =
@@ -221,9 +254,50 @@ export const PageLayoutTabsRenderer = () => {
   );
 
   return (
-    <StyledContainer hasPinnedTab={isDefined(pinnedLeftTab)}>
+    <StyledContainer
+      ref={containerRef}
+      hasPinnedTab={isDefined(pinnedLeftTab)}
+      panelWidth={panelWidth}
+    >
       {isDefined(pinnedLeftTab) && (
-        <PageLayoutLeftPanel pinnedLeftTabId={pinnedLeftTab.id} />
+        <>
+          <PageLayoutLeftPanel pinnedLeftTabId={pinnedLeftTab.id} />
+          <StyledResizeHandle
+            role="separator"
+            aria-label={t`Resize`}
+            aria-orientation="vertical"
+            aria-valuenow={panelWidth}
+            aria-valuemin={260}
+            aria-valuemax={600}
+            tabIndex={0}
+            onPointerDown={(event) => {
+              event.preventDefault();
+              event.currentTarget.setPointerCapture(event.pointerId);
+            }}
+            onPointerMove={(event) => {
+              if (!event.currentTarget.hasPointerCapture(event.pointerId))
+                return;
+              const bounds = containerRef.current?.getBoundingClientRect();
+              if (bounds) resizePanel(event.clientX - bounds.left);
+            }}
+            onPointerUp={(event) => {
+              if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+                event.currentTarget.releasePointerCapture(event.pointerId);
+              }
+            }}
+            onKeyDown={(event) => {
+              if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+                event.preventDefault();
+                resizePanel(
+                  panelWidth + (event.key === 'ArrowRight' ? 16 : -16),
+                );
+              }
+            }}
+            onDoubleClick={() =>
+              setPanelWidth(PAGE_LAYOUT_LEFT_PANEL_CONTAINER_WIDTH)
+            }
+          />
+        </>
       )}
 
       <StyledTabsAndDashboardContainer>

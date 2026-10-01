@@ -1,3 +1,4 @@
+import { captureRecordShowSidePanel } from '@/object-record/record-show/utils/recordShowSidePanelSnapshot';
 import { CommandMenuComponentInstanceContext } from '@/command-menu/states/contexts/CommandMenuComponentInstanceContext';
 import { getSidePanelCommandMenuDropdownIdFromCommandMenuId } from '@/command-menu-item/utils/getSidePanelCommandMenuDropdownIdFromCommandMenuId';
 import { SIDE_PANEL_FOCUS_ID } from '@/side-panel/constants/SidePanelFocusId';
@@ -124,6 +125,7 @@ export const RecordShowSidePanelOpenRecordButton = ({
       : null;
 
     store.set(recordShowReturnContextState.atom, {
+      sidePanel: captureRecordShowSidePanel(store),
       locationKey: location.key,
       url: `${location.pathname}${location.search}${location.hash}`,
       recordPath: `/object/${objectNameSingular}/${recordId}`,

@@ -1,9 +1,11 @@
+import { type RecordShowSidePanelSnapshot } from '@/object-record/record-show/utils/recordShowSidePanelSnapshot';
 import { type RecordFilterGroup } from '@/object-record/record-filter-group/types/RecordFilterGroup';
 import { type RecordFilter } from '@/object-record/record-filter/types/RecordFilter';
 import { type RecordSort } from '@/object-record/record-sort/types/RecordSort';
 import { createAtomState } from '@/ui/utilities/state/jotai/utils/createAtomState';
 
 export type RecordShowReturnContext = {
+  sidePanel?: RecordShowSidePanelSnapshot;
   locationKey: string;
   url: string;
   recordPath: string;
