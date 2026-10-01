@@ -58,6 +58,16 @@ export const findActivityTargetsOperationSignatureFactory: RecordGqlOperationSig
         },
         attachments: {
           id: true,
+          name: true,
+          fullPath: true,
+          fileCategory: true,
+          file: {
+            fileId: true,
+            label: true,
+            extension: true,
+            url: true,
+            fileCategory: true,
+          },
         },
         [targetObjectMetadataItem.namePlural]:
           generateDepthRecordGqlFieldsFromObject({

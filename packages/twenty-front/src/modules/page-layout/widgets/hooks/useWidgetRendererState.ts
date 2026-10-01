@@ -17,6 +17,7 @@ import { useIsMobile } from '@/ui/utilities/responsive/hooks/useIsMobile';
 import { useAtomComponentStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomComponentStateValue';
 import { useSetAtomComponentFamilyState } from '@/ui/utilities/state/jotai/hooks/useSetAtomComponentFamilyState';
 import { type MouseEvent } from 'react';
+import { CoreObjectNameSingular } from 'twenty-shared/types';
 import {
   PageLayoutTabLayoutMode,
   WidgetType,
@@ -48,7 +49,7 @@ export const useWidgetRendererState = (widget: PageLayoutWidget) => {
 
   const { layoutMode } = usePageLayoutContentContext();
   const { isInPinnedTab } = useIsInPinnedTab();
-  const { isInSidePanel } = useLayoutRenderingContext();
+  const { isInSidePanel, targetRecordIdentifier } = useLayoutRenderingContext();
   const isMobile = useIsMobile();
 
   const { currentPageLayout } = useCurrentPageLayoutOrThrow();
@@ -57,7 +58,10 @@ export const useWidgetRendererState = (widget: PageLayoutWidget) => {
 
   const isHeaderHiddenInViewMode =
     widget.type === WidgetType.STANDALONE_RICH_TEXT ||
-    widget.type === WidgetType.EMAIL_THREAD;
+    widget.type === WidgetType.EMAIL_THREAD ||
+    (widget.type === WidgetType.FIELD_RICH_TEXT &&
+      targetRecordIdentifier?.targetObjectNameSingular ===
+        CoreObjectNameSingular.Note);
   const hideHeaderInViewMode =
     isHeaderHiddenInViewMode && !isPageLayoutInEditMode;
 

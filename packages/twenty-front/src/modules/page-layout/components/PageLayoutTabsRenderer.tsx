@@ -27,11 +27,12 @@ import { ScrollWrapper } from '@/ui/utilities/scroll/components/ScrollWrapper';
 import { useAtomComponentStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomComponentStateValue';
 import { useAtomFamilyStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomFamilyStateValue';
 import { styled } from '@linaria/react';
+import { useLingui } from '@lingui/react/macro';
 import { useMemo } from 'react';
-import { FieldMetadataType } from 'twenty-shared/types';
+import { CoreObjectNameSingular, FieldMetadataType } from 'twenty-shared/types';
 import { isDefined } from 'twenty-shared/utils';
 import { useIsMobile } from 'twenty-ui/utilities';
-import { PageLayoutType } from '~/generated-metadata/graphql';
+import { PageLayoutType, WidgetType } from '~/generated-metadata/graphql';
 
 const StyledContainer = styled.div<{ hasPinnedTab: boolean }>`
   display: grid;
@@ -78,6 +79,7 @@ const StyledScrollWrapperContainer = styled.div`
 `;
 
 export const PageLayoutTabsRenderer = () => {
+  const { t } = useLingui();
   const { currentPageLayout } = useCurrentPageLayoutOrThrow();
 
   const { isInSidePanel, layoutType, targetRecordIdentifier } =
@@ -195,13 +197,22 @@ export const PageLayoutTabsRenderer = () => {
     currentPageLayout.id,
     isPageLayoutInEditMode,
   );
-  const displayTabs = fieldManagementTab
+  const tabsWithFieldManagement = fieldManagementTab
     ? [
         ...sortedActiveTabs.slice(0, 1),
         fieldManagementTab,
         ...sortedActiveTabs.slice(1),
       ]
     : sortedActiveTabs;
+  const displayTabs = tabsWithFieldManagement.map((tab) => {
+    const isNoteContentTab =
+      targetRecordIdentifier?.targetObjectNameSingular ===
+        CoreObjectNameSingular.Note &&
+      ['Note', 'Notes', '노트'].includes(tab.title) &&
+      tab.widgets.some((widget) => widget.type === WidgetType.FIELD_RICH_TEXT);
+
+    return isNoteContentTab ? { ...tab, title: t`Content` } : tab;
+  });
   const isFieldManagementTabActive =
     !!fieldManagementTab && activeTabId === fieldManagementTab.id;
 

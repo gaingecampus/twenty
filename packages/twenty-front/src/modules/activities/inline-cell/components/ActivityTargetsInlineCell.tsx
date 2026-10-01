@@ -22,6 +22,7 @@ type ActivityTargetsInlineCellProps = {
   activityRecordId: string;
   showLabel?: boolean;
   maxWidth?: number;
+  compactLabel?: boolean;
   activityObjectNameSingular:
     | CoreObjectNameSingular.Note
     | CoreObjectNameSingular.Task;
@@ -32,6 +33,7 @@ export const ActivityTargetsInlineCell = ({
   activityRecordId,
   showLabel = true,
   maxWidth,
+  compactLabel = false,
   activityObjectNameSingular,
   componentInstanceId,
 }: ActivityTargetsInlineCellProps) => {
@@ -100,7 +102,9 @@ export const ActivityTargetsInlineCell = ({
                 IconLabel: showLabel ? IconArrowUpRight : undefined,
                 showLabel: showLabel,
                 readonly: isReadOnly,
-                labelWidth: fieldDefinition?.labelWidth,
+                labelWidth: compactLabel
+                  ? undefined
+                  : fieldDefinition?.labelWidth,
                 label: t`Relations`,
                 displayModeContent: (
                   <ActivityTargetChips

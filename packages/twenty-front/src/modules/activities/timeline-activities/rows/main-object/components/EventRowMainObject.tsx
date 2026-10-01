@@ -19,6 +19,8 @@ const StyledRowContainer = styled.div`
   display: flex;
   gap: ${themeCssVariables.spacing[1]};
   justify-content: space-between;
+  line-height: 20px;
+  min-height: 20px;
 `;
 
 const StyledItemTitleDate = styled.div`
