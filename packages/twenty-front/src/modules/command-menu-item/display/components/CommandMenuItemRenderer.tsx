@@ -19,7 +19,10 @@ import { assertUnreachable, isDefined } from 'twenty-shared/utils';
 import { useIcons } from 'twenty-ui/icon';
 import { Loader } from 'twenty-ui/feedback';
 import { MenuItem } from 'twenty-ui/navigation';
-import { type CommandMenuItemFieldsFragment } from '~/generated-metadata/graphql';
+import {
+  EngineComponentKey,
+  type CommandMenuItemFieldsFragment,
+} from '~/generated-metadata/graphql';
 
 const StyledPreviewWrapper = styled.div`
   cursor: not-allowed;
@@ -165,6 +168,11 @@ const CommandMenuItemSelectableRenderer = ({
   return (
     <SelectableListItem itemId={item.id} onEnter={onItemClick}>
       <MenuItem
+        accent={
+          item.engineComponentKey === EngineComponentKey.DELETE_RECORDS
+            ? 'danger'
+            : 'default'
+        }
         focused={isSelectedItemId}
         LeftIcon={Icon}
         onClick={onItemClick}

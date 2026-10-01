@@ -1,3 +1,4 @@
+import { useSnackBar } from '@/ui/feedback/snack-bar-manager/hooks/useSnackBar';
 import { HeadlessEngineCommandWrapperEffect } from '@/command-menu-item/engine-command/components/HeadlessEngineCommandWrapperEffect';
 import { useHeadlessCommandContextApi } from '@/command-menu-item/engine-command/hooks/useHeadlessCommandContextApi';
 import { useRemoveNavigationMenuItemByTargetRecordId } from '@/navigation-menu-item/common/hooks/useRemoveNavigationMenuItemByTargetRecordId';
@@ -44,10 +45,32 @@ export const DeleteRecordsCommand = () => {
 
   const { closeSidePanelMenu } = useSidePanelMenu();
 
+  const { enqueueSuccessSnackBar, enqueueErrorSnackBar } = useSnackBar();
+
   const handleExecute = async () => {
+    if (!isDefined(graphqlFilter)) {
+      enqueueErrorSnackBar({ message: '삭제할 항목을 확인할 수 없습니다.' });
+      return;
+    }
+
+    let deletedCount: number;
+    try {
+      deletedCount = await incrementalDeleteManyRecords();
+    } catch {
+      enqueueErrorSnackBar({
+        message: '삭제하지 못했습니다. 잠시 후 다시 시도해 주세요.',
+        options: { duration: 8000 },
+      });
+      return;
+    }
+
     removeSelectedRecordsFromRecordBoard();
     resetTableRowSelection();
     closeSidePanelMenu();
+    enqueueSuccessSnackBar({
+      message: `${objectMetadataItem.labelSingular} ${deletedCount}건을 삭제했습니다. 휴지통에서 복원할 수 있습니다.`,
+      options: { duration: 8000 },
+    });
 
     if (isDefined(recordId)) {
       const foundNavigationMenuItem = [
@@ -59,12 +82,6 @@ export const DeleteRecordsCommand = () => {
         removeNavigationMenuItemsByTargetRecordIds([recordId]);
       }
     }
-
-    if (!isDefined(graphqlFilter)) {
-      throw new Error('Cannot delete records without a valid filter');
-    }
-
-    await incrementalDeleteManyRecords();
   };
 
   return <HeadlessEngineCommandWrapperEffect execute={handleExecute} />;

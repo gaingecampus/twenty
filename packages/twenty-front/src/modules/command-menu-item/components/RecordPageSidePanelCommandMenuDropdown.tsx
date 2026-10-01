@@ -10,7 +10,10 @@ import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomState
 import { useContext, useMemo } from 'react';
 import { HorizontalSeparator } from 'twenty-ui/layout';
 import { MenuItem } from 'twenty-ui/navigation';
-import { CommandMenuItemAvailabilityType } from '~/generated-metadata/graphql';
+import {
+  EngineComponentKey,
+  CommandMenuItemAvailabilityType,
+} from '~/generated-metadata/graphql';
 
 export const RecordPageSidePanelCommandMenuDropdown = () => {
   const { commandMenuItems } = useContext(CommandMenuContext);
@@ -32,11 +35,21 @@ export const RecordPageSidePanelCommandMenuDropdown = () => {
 
   const recordSelectionCommandMenuItems = useMemo(
     () =>
-      commandMenuItems.filter(
-        (item) =>
-          item.availabilityType ===
-          CommandMenuItemAvailabilityType.RECORD_SELECTION,
-      ),
+      commandMenuItems
+        .filter(
+          (item) =>
+            item.availabilityType ===
+            CommandMenuItemAvailabilityType.RECORD_SELECTION,
+        )
+        .sort(
+          (left, right) =>
+            Number(
+              left.engineComponentKey === EngineComponentKey.DELETE_RECORDS,
+            ) -
+            Number(
+              right.engineComponentKey === EngineComponentKey.DELETE_RECORDS,
+            ),
+        ),
     [commandMenuItems],
   );
 

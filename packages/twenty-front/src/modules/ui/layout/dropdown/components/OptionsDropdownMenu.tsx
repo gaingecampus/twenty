@@ -43,12 +43,10 @@ export const OptionsDropdownMenu = ({
   const { toggleDropdown } = useToggleDropdown();
 
   const listId = selectableListId ?? dropdownId;
-  const { setSelectedItemId } = useSelectableList(listId);
+  const { resetSelectedItem } = useSelectableList(listId);
 
   const handleOpen = () => {
-    if (selectableItemIdArray.length > 0) {
-      setSelectedItemId(selectableItemIdArray[0]);
-    }
+    resetSelectedItem();
     onOpen?.();
   };
 
