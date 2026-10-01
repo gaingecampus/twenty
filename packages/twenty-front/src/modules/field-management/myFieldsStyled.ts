@@ -13,7 +13,7 @@ export const StyledMyFieldsSurface = styled.div`
     gap: 16px;
     margin: 0 auto;
     max-width: 1080px;
-    padding: 28px 24px 48px;
+    padding: 24px 24px 48px;
   }
   button:focus-visible,
   a:focus-visible,

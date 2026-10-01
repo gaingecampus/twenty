@@ -1,3 +1,4 @@
+import { FieldVisitEditorModal } from './FieldVisitEditorModal';
 import { useNavigate } from 'react-router-dom';
 import { useFieldUnsavedChanges } from './useFieldUnsavedChanges';
 import { useRef, useState } from 'react';
@@ -15,7 +16,9 @@ export const FieldVisitEditor = ({
   onSaved,
   onCancel,
   onOpenContract,
+  modal = false,
 }: {
+  modal?: boolean;
   contract: ObjectRecord;
   visit?: ObjectRecord;
   onSaved: () => Promise<void>;
@@ -107,7 +110,7 @@ export const FieldVisitEditor = ({
       setBusy(false);
     }
   };
-  return (
+  const content = (
     <StyledFieldVisitEditor ref={rootRef} aria-label="현장 기록 작성">
       {unsaved.dialog}
       <header>
@@ -141,10 +144,7 @@ export const FieldVisitEditor = ({
         }}
       >
         <FieldContractLabel name={text(contract.name)} />
-        <p>
-          <span>계약 목표</span>
-          {text(contract.consultingGoal) || '아직 등록된 목표가 없습니다.'}
-        </p>
+        <p>{text(contract.consultingGoal) || '아직 등록된 목표가 없습니다.'}</p>
       </div>
       <section data-editor-section>
         <label>
@@ -307,5 +307,12 @@ export const FieldVisitEditor = ({
         </button>
       </StyledFieldRow>
     </StyledFieldVisitEditor>
+  );
+  return modal ? (
+    <FieldVisitEditorModal onCancel={unsaved.cancel}>
+      {content}
+    </FieldVisitEditorModal>
+  ) : (
+    content
   );
 };

@@ -1,13 +1,29 @@
 import { styled } from '@linaria/react';
 import { themeCssVariables as theme } from 'twenty-ui/theme-constants';
 export const StyledFieldVisitEditor = styled.section`
+  [data-kr-list] {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  [data-kr-list] > div {
+    flex-wrap: nowrap;
+  }
+  [data-kr-list] input {
+    flex: 1;
+    min-width: 0;
+  }
+  [data-kr-list] > button {
+    align-self: flex-start;
+  }
+
   align-self: center;
   color: ${theme.font.color.primary};
   container-type: inline-size;
   display: flex;
   flex-direction: column;
   font-family: inherit;
-  gap: 32px;
+  gap: 16px;
   margin: 0;
   width: 100%;
   > :not([data-editor-actions]) {
@@ -47,7 +63,7 @@ export const StyledFieldVisitEditor = styled.section`
     display: flex;
     flex-direction: column;
     gap: 12px;
-    padding: 20px 24px;
+    padding: 16px;
   }
   a[data-editor-contract] {
     align-items: center;
@@ -97,7 +113,7 @@ export const StyledFieldVisitEditor = styled.section`
   [data-editor-section] {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 16px;
   }
   h3 {
     font-size: 18px;
@@ -125,7 +141,7 @@ export const StyledFieldVisitEditor = styled.section`
   }
   [data-editor-grid] {
     display: flex;
-    gap: 20px;
+    gap: 16px;
   }
   [data-editor-grid] > label {
     flex: 1;
@@ -184,21 +200,29 @@ export const StyledFieldVisitEditor = styled.section`
     right: 0;
     top: -32px;
   }
-  && [data-editor-actions] button {
+  && [data-editor-actions]:not([data-goal-actions]) button {
     border: none;
     border-radius: 12px;
     box-shadow: none;
     min-height: 44px;
     padding: 10px 18px;
   }
-  && [data-editor-actions] button:not([data-primary]) {
+  && [data-editor-actions]:not([data-goal-actions]) button:not([data-primary]) {
     background: ${theme.background.tertiary};
     border: none;
     box-shadow: none;
     color: ${theme.font.color.primary};
   }
-  && [data-editor-actions] button:not([data-primary]):hover {
+  &&
+    [data-editor-actions]:not([data-goal-actions])
+    button:not([data-primary]):hover {
     background: ${theme.background.quaternary};
+  }
+  &&& [data-editor-actions] button[data-cancel],
+  &&& [data-editor-actions] button[data-cancel]:hover {
+    background: ${theme.background.primary};
+    border: 1px solid ${theme.color.red};
+    color: ${theme.color.red};
   }
   [data-action-spacer] {
     flex: 1;
@@ -223,5 +247,145 @@ export const StyledFieldVisitEditor = styled.section`
     [data-editor-grid] {
       flex-direction: column;
     }
+  }
+
+  &&[data-inline-goal-editor] {
+    gap: 8px;
+  }
+  &&[data-inline-goal-editor] [data-session-count-row],
+  &&[data-inline-goal-editor] [data-goal-input-row],
+  &&[data-inline-goal-editor] [data-kr-list] {
+    align-items: start;
+    background: ${theme.background.tertiary};
+    border-radius: 8px;
+    display: grid;
+    gap: 12px;
+    grid-template-columns: 32px minmax(0, 1fr);
+    max-width: none;
+    padding: 14px 12px;
+  }
+  &&[data-inline-goal-editor] [data-session-count-row] > span,
+  &&[data-inline-goal-editor] [data-goal-input-row] > span,
+  &&[data-inline-goal-editor] [data-kr-list] > span {
+    font-size: 16px;
+    font-weight: ${theme.font.weight.semiBold};
+    line-height: 24px;
+    align-self: center;
+    justify-content: center;
+    padding-top: 0;
+    text-align: center;
+  }
+  &&[data-inline-goal-editor] [data-goal-input-row] > span {
+    align-self: start;
+    padding-top: 7px;
+  }
+  && [data-kr-label] {
+    align-items: center;
+    align-self: start;
+    display: flex;
+    flex-direction: column;
+    font-size: 16px;
+    font-weight: ${theme.font.weight.semiBold};
+    gap: 8px;
+    line-height: 24px;
+    padding-top: 7px;
+  }
+  [data-kr-inputs] {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+  }
+  [data-kr-inputs][data-empty] {
+    justify-content: center;
+    min-height: 64px;
+  }
+  [data-kr-inputs] > div {
+    flex-wrap: nowrap;
+  }
+  [data-kr-inputs] > button {
+    align-self: center;
+  }
+  &&[data-inline-goal-editor] textarea,
+  &&[data-inline-goal-editor] input {
+    background: ${theme.background.primary};
+    border: 1px solid ${theme.border.color.medium};
+    border-radius: 6px;
+    box-shadow: none;
+    box-sizing: border-box;
+    font-size: 14px;
+    line-height: 24px;
+    min-height: 36px;
+    padding: 6px 10px;
+    width: 100%;
+  }
+  &&[data-inline-goal-editor] textarea:focus,
+  &&[data-inline-goal-editor] input:focus {
+    border-color: ${theme.color.blue};
+    outline: none;
+  }
+  &&[data-inline-goal-editor] [data-editor-actions] {
+    gap: 8px;
+    padding: 8px 0 0;
+    position: static;
+    width: 100%;
+  }
+  &&[data-inline-goal-editor] [data-editor-actions]::before {
+    display: none;
+  }
+  &&[data-inline-goal-editor] button:not([data-variant]) {
+    border-radius: 6px;
+    min-height: 32px;
+    padding: 6px 12px;
+  }
+  &&[data-inline-goal-editor] [data-kr-inputs] > button {
+    align-items: center;
+    background: ${theme.background.primary};
+    border: 1px solid ${theme.border.color.medium};
+    color: ${theme.font.color.secondary};
+    display: inline-flex;
+    font-size: 14px;
+    gap: 6px;
+  }
+  &&[data-inline-goal-editor] [data-kr-inputs] > button:hover {
+    background: ${theme.background.secondary};
+    border-color: ${theme.border.color.strong};
+  }
+  &&&& button[data-kr-add],
+  &&&& [data-kr-inputs] button[data-kr-delete] {
+    align-items: center;
+    background: ${theme.background.primary};
+    border: 1px solid ${theme.border.color.medium};
+    display: inline-flex;
+    flex: 0 0 28px;
+    height: 28px;
+    justify-content: center;
+    min-height: 28px;
+    padding: 0;
+    width: 28px;
+  }
+  &&&& [data-kr-inputs] button[data-kr-delete] {
+    border-color: ${theme.border.color.medium};
+    box-sizing: border-box;
+    color: ${theme.font.color.secondary};
+    flex-basis: 38px;
+    height: 38px;
+    min-height: 38px;
+    min-width: 38px;
+    width: 38px;
+  }
+  &&&& [data-kr-inputs] button[data-kr-delete]:hover {
+    border-color: ${theme.color.red};
+    color: ${theme.color.red};
+  }
+  button[data-kr-add] > svg,
+  button[data-kr-delete] > svg {
+    flex-shrink: 0;
+  }
+  &&&& button[data-kr-add] {
+    color: ${theme.font.color.secondary};
+  }
+  &&[data-inline-goal-editor] [data-session-count-row] input {
+    max-width: none;
   }
 `;

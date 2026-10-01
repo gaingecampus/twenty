@@ -1,3 +1,4 @@
+import { FieldManagementPageContent } from '@/field-management/FieldManagementPageContent';
 import { useParams } from 'react-router-dom';
 import { StyledMyFieldsSurface } from '@/field-management/myFieldsStyled';
 import { FieldManagement } from '@/field-management/FieldManagement';
@@ -7,11 +8,9 @@ import { PageCardHeader } from '@/ui/layout/page/components/PageCardHeader';
 import { PageTitle } from '@/ui/utilities/page-title/components/PageTitle';
 export const MyFieldsPage = () => (
   <PageContainer>
-    <PageTitle title="나의 현장" />
-    <PageCardLayout header={<PageCardHeader title="나의 현장" />}>
-      <StyledMyFieldsSurface>
-        <FieldManagement />
-      </StyledMyFieldsSurface>
+    <PageTitle title="현장 관리" />
+    <PageCardLayout header={<PageCardHeader title="현장 관리" />}>
+      <FieldManagementPageContent />
     </PageCardLayout>
   </PageContainer>
 );

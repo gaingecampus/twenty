@@ -99,12 +99,12 @@ export const MyFieldContractCard = ({
       </StyledMyFieldSchedule>
       <StyledMyFieldGoal>
         <div data-goal-primary>
-          <span>계약 목표</span>
+          <span>O</span>
           <p data-missing={!goal || undefined}>{goal || '목표 미등록'}</p>
         </div>
         {text(contract.successCriteria).trim() && (
           <div data-criteria>
-            <span>성공 기준</span>
+            <span>KR</span>
             <p>{text(contract.successCriteria)}</p>
           </div>
         )}

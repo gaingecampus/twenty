@@ -32,6 +32,7 @@ export const useFieldManagementData = () => {
       leadConsultantId: true,
       consultingGoal: true,
       successCriteria: true,
+      plannedSessionCount: true,
       createdBy: true,
       createdAt: true,
       updatedAt: true,

@@ -1,18 +1,28 @@
+import { useStore } from 'jotai';
+import { usePageLayoutIdForRecord } from '@/page-layout/hooks/usePageLayoutIdForRecord';
+import { getTabListInstanceIdFromPageLayoutAndRecord } from '@/page-layout/utils/getTabListInstanceIdFromPageLayoutAndRecord';
+import { activeTabIdComponentState } from '@/ui/layout/tab-list/states/activeTabIdComponentState';
+import { getFieldManagementRecordTabId } from './useFieldManagementRecordTab';
+import { PageLayoutType } from '~/generated-metadata/graphql';
+import { useOpenRecordInSidePanel } from '@/side-panel/hooks/useOpenRecordInSidePanel';
+import { useSnackBar } from '@/ui/feedback/snack-bar-manager/hooks/useSnackBar';
+import { getContractSessionProgress } from './getContractSessionProgress';
+import { StyledFieldEmptyState } from './FieldEmptyState';
 import { StatusBoardRecordRowContent } from '@/status-board/components/StatusBoardRecordList';
 import { FieldSortModal } from './FieldSortModal';
 import { FieldRecordMore } from './FieldRecordMore';
 import { FieldContractLabel } from './FieldContractLabel';
 import { FieldContractAssignees } from './FieldContractAssignees';
+import { Button } from 'twenty-ui/input';
 import {
   IconMap,
-  IconCheck,
+  IconArrowLeft,
   IconCalendarEvent,
   IconHistory,
   IconSearch,
   IconRefresh,
   IconPencil,
   IconPlus,
-  IconChevronRight,
 } from 'twenty-ui/icon';
 import { FieldVisitStatus } from './FieldVisitStatus';
 import { useEffect, useRef, useState } from 'react';
@@ -65,6 +75,8 @@ type Scope = {
   contract?: string;
   company?: string;
   dashboard?: boolean;
+  contractList?: boolean;
+  contractStatus?: 'PRE' | 'ACTIVE' | 'DONE';
   memberIds?: string[];
   start?: string;
   end?: string;
@@ -75,7 +87,7 @@ export const MyFieldsNavigationItem = () => {
   if (!isFieldManagementReady(metadata)) return null;
   return (
     <NavigationDrawerItem
-      label="나의 현장"
+      label="현장 관리"
       Icon={IconMap}
       to="/my-fields"
       active={location.pathname === '/my-fields'}
@@ -114,6 +126,12 @@ const FieldManagementLoaded = ({
   onClose?: () => void;
 }) => {
   const data = useFieldManagementData();
+  const store = useStore();
+  const { pageLayoutId: contractPageLayoutId } = usePageLayoutIdForRecord({
+    id: scope.contract ?? '',
+    targetObjectNameSingular: 'onboarding',
+  });
+  const { openRecordInSidePanel } = useOpenRecordInSidePanel();
   const navigate = useNavigate();
   const location = useLocation();
   const detailVisit = scope.visit
@@ -131,6 +149,10 @@ const FieldManagementLoaded = ({
   const contractPermissions = useObjectPermissionsForObject(
     metadata.contract!.id,
   );
+  const [inlineGoalContractId, setInlineGoalContractId] = useState<string>();
+  const [addKeyResult, setAddKeyResult] = useState(false);
+  const [recordSortContainer, setRecordSortContainer] =
+    useState<HTMLDivElement | null>(null);
   const [reading, setReading] = useState(false);
   const [selectedContractId, setSelectedContractId] = useState<string>();
   const contractDetailRef = useRef<HTMLElement>(null);
@@ -146,20 +168,23 @@ const FieldManagementLoaded = ({
   const [editor, setEditor] = useState<{
     contract: ObjectRecord;
     visit?: ObjectRecord;
-    goal?: boolean;
   }>();
   const editorRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    if (editor)
+    if (editor?.visit)
       editorRef.current?.scrollIntoView({ block: 'start', behavior: 'smooth' });
   }, [editor]);
-  const [saved, setSaved] = useState('');
+  const { enqueueSuccessSnackBar } = useSnackBar();
   const matches = data.members.filter(
     (m) =>
       relationId(m.workspaceMemberAccountId) === currentWorkspaceMember?.id,
   );
   const myMemberId = matches.length === 1 ? matches[0].id : '';
-  const contextual = !!scope.contract || !!scope.company || !!scope.visit;
+  const contextual =
+    !!scope.contract ||
+    !!scope.company ||
+    !!scope.visit ||
+    !!scope.contractList;
   const scopedContracts = data.contracts.filter((c) =>
     scope.visit
       ? c.id === (detailVisit ? contractId(detailVisit) : undefined)
@@ -167,7 +192,7 @@ const FieldManagementLoaded = ({
         ? c.id === scope.contract
         : scope.company
           ? companyId(c) === scope.company
-          : scope.dashboard
+          : scope.dashboard || scope.contractList
             ? !scope.memberIds ||
               scope.memberIds.some((id) => assigned(c, id, data.links, true))
             : assigned(c, myMemberId, data.links, includeLead),
@@ -178,8 +203,10 @@ const FieldManagementLoaded = ({
         Number(b.onboardingStatus === 'ACTIVE') -
         Number(a.onboardingStatus === 'ACTIVE'),
     )
-    .filter(
-      (c) => contextual || status === 'ALL' || c.onboardingStatus === status,
+    .filter((c) =>
+      scope.contractList
+        ? c.onboardingStatus === (scope.contractStatus ?? 'ACTIVE')
+        : contextual || status === 'ALL' || c.onboardingStatus === status,
     )
     .filter((c) => {
       const company =
@@ -202,7 +229,7 @@ const FieldManagementLoaded = ({
   const metrics = visitMetrics(contracts, data.visits, scope.start, scope.end);
   const onSaved = async () => {
     setEditor(undefined);
-    setSaved('저장했습니다.');
+    enqueueSuccessSnackBar({ message: '저장했습니다.' });
     await data.refresh();
   };
   if (data.error)
@@ -231,7 +258,7 @@ const FieldManagementLoaded = ({
           </span>
           <span>기간 내 제출 {metrics.submitted}건</span>
           <span>제출 기록 없는 계약 {metrics.withoutRecord}건</span>
-          <Link to="/my-fields">나의 현장 열기</Link>
+          <Link to="/my-fields">현장 관리 열기</Link>
         </StyledFieldRow>
       </StyledFieldPanel>
     );
@@ -249,135 +276,171 @@ const FieldManagementLoaded = ({
     ].every((n) => metadata.visit?.updatableFields.some((f) => f.name === n));
   const canWriteGoals =
     contractPermissions.canUpdateObjectRecords &&
-    ['consultingGoal', 'successCriteria'].every((n) =>
+    ['consultingGoal', 'successCriteria', 'plannedSessionCount'].every((n) =>
       metadata.contract?.updatableFields.some((f) => f.name === n),
     );
   const contextVisits = data.visits
-    .filter((v) => contracts.some((c) => c.id === contractId(v)))
+    .filter((v) =>
+      selectedContractId
+        ? contractId(v) === selectedContractId
+        : contracts.some((c) => c.id === contractId(v)),
+    )
     .sort(
       (a, b) =>
         text(b.visitDate).localeCompare(text(a.visitDate)) ||
         text(b.createdAt).localeCompare(text(a.createdAt)),
     );
   const renderContractDetail = (c: ObjectRecord) => {
-    const submitted = visitsFor(data.visits, c.id).filter(
-      (v) => v.recordStatus === 'SUBMITTED',
-    );
+    const sessionProgress = getContractSessionProgress(c, data.visits);
     return (
-      <StyledFieldRecordSection ref={contractDetailRef} data-contract-detail>
-        <StyledFieldRow data-detail-toolbar>
-          <button
-            onClick={() => {
-              setSelectedContractId(undefined);
-              setEditor(undefined);
-            }}
-          >
-            목록으로
-          </button>
-          {canWriteGoals && (
+      <div data-contract-detail-group>
+        <StyledFieldRow
+          data-detail-toolbar
+          style={{ justifyContent: 'space-between' }}
+        >
+          <nav data-contract-breadcrumb aria-label="계약 목표 경로">
             <button
+              type="button"
+              aria-label="계약 목표 목록으로 돌아가기"
+              title="뒤로가기"
               onClick={() => {
-                setSaved('');
-                setEditor({ contract: c, goal: true });
+                setSelectedContractId(undefined);
+                setEditor(undefined);
+              }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: 28,
+                height: 28,
               }}
             >
-              {text(c.consultingGoal).trim() ? '목표 편집' : '목표 등록'}
+              <IconArrowLeft size={18} aria-hidden />
             </button>
-          )}
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedContractId(undefined);
+                setEditor(undefined);
+              }}
+            >
+              계약 목표
+            </button>
+            <span aria-hidden="true">/</span>
+            <span aria-current="page">상세</span>
+          </nav>
         </StyledFieldRow>
-        <div data-contract-heading>
-          <h2>
-            <Link
-              data-contract-title-link
-              to={`/object/onboarding/${c.id}`}
-              aria-label={`${text(c.name)} 계약 보기`}
-            >
-              <FieldContractLabel name={text(c.name)} />
-            </Link>
-          </h2>
-          <div data-contract-byline>
-            <FieldVisitAuthor visit={c} />
-            <span
-              title="최초 작성일"
-              aria-label={`최초 작성일 ${fieldVisitTimestamp(c.createdAt)}`}
-            >
-              <IconCalendarEvent size={14} aria-hidden="true" />
-              {fieldVisitTimestamp(c.createdAt)}
+        <StyledFieldRecordSection ref={contractDetailRef} data-contract-detail>
+          <span data-contract-card-heading>
+            <span data-contract-title>
+              <Link to={`/object/onboarding/${c.id}`}>
+                <FieldContractLabel name={text(c.name)} />
+              </Link>
             </span>
-            <span
-              title="최근 수정일"
-              aria-label={`최근 수정일 ${fieldVisitTimestamp(c.updatedAt)}`}
-            >
-              <IconHistory size={14} aria-hidden="true" />
-              {fieldVisitTimestamp(c.updatedAt)}
-            </span>
-          </div>
-          <div data-field-schedule>
-            <span data-period>
-              <span data-schedule-label>계약 기간</span>
-              <span data-schedule-value>
-                {contractDateLabel(c.contractStartDate) || '미정'} -{' '}
-                {contractDateLabel(c.contractEndDate) || '미정'}
+            <span data-contract-summary>
+              <FieldContractAssignees
+                members={data.members.filter((member) =>
+                  assigned(c, member.id, data.links, true),
+                )}
+              />
+              <span data-contract-meta>
+                <span data-contract-status={text(c.onboardingStatus)}>
+                  {c.onboardingStatus === 'ACTIVE'
+                    ? '계약중'
+                    : c.onboardingStatus === 'PRE'
+                      ? '계약 예정'
+                      : c.onboardingStatus === 'DONE'
+                        ? '계약 종료'
+                        : '상태 미등록'}
+                </span>
+                {contractDateLabel(c.contractStartDate) || '시작일 미정'} -{' '}
+                {contractDateLabel(c.contractEndDate) || '종료일 미정'}
               </span>
             </span>
-            <span data-visit-schedule>
-              <span data-schedule-label>최근 현장</span>
-              <span data-schedule-value>
-                {submitted.length ? (
-                  <>
-                    <strong data-session-badge>
-                      {submitted[0].sessionNumber
-                        ? `${String(submitted[0].sessionNumber)}회차`
-                        : '회차 미입력'}
-                    </strong>
-                    {contractDateLabel(submitted[0].visitDate) || '날짜 미정'}
-                  </>
-                ) : (
-                  <span>제출 기록 없음</span>
-                )}
-              </span>
-            </span>
-          </div>
-        </div>
-        <div data-contract-content>
-          <dl data-goal-grid>
-            <div>
-              <dt>계약 목표</dt>
-              <dd
-                data-unregistered={!text(c.consultingGoal).trim() || undefined}
-              >
-                {text(c.consultingGoal).trim() || (
-                  <span data-missing-goal>목표 미등록</span>
-                )}
-              </dd>
-            </div>
-            <div>
-              <dt>성공 기준</dt>
-              <dd
-                data-unregistered={!text(c.successCriteria).trim() || undefined}
-              >
-                {text(c.successCriteria).trim() || (
-                  <span data-missing-goal>성공 기준 미등록</span>
-                )}
-              </dd>
-            </div>
-          </dl>
-          <StyledFieldRow>
-            {canWriteVisits && (
-              <button
-                data-primary
-                onClick={() => {
-                  setSaved('');
-                  setEditor({ contract: c });
+          </span>
+          <div data-contract-content>
+            {inlineGoalContractId === c.id && canWriteGoals ? (
+              <ContractGoalEditor
+                key={c.id}
+                compact
+                addKeyResult={addKeyResult}
+                contract={c}
+                onCancel={() => setInlineGoalContractId(undefined)}
+                onSaved={async () => {
+                  await data.refresh();
+                  setInlineGoalContractId(undefined);
                 }}
-              >
-                <IconPlus size={16} aria-hidden="true" />
-                현장 기록 작성
-              </button>
+              />
+            ) : (
+              <dl data-goal-grid>
+                {[
+                  {
+                    label: '회차',
+                    value:
+                      sessionProgress.total === null
+                        ? `현재 ${sessionProgress.current}회차 · 총 회차 미정`
+                        : `현재 ${sessionProgress.current}회차 / 총 ${sessionProgress.total}회 · ${sessionProgress.percent}%`,
+                    empty: '총 예정 회차를 입력하세요',
+                  },
+                  {
+                    label: 'O',
+                    value: text(c.consultingGoal).trim(),
+                    empty: 'O를 입력하세요',
+                  },
+                  {
+                    label: 'KR',
+                    value: text(c.successCriteria).trim(),
+                    empty: '등록된 KR이 없습니다.',
+                  },
+                ].map(({ label, value, empty }) => (
+                  <div
+                    key={label}
+                    data-editable-goal={canWriteGoals || undefined}
+                  >
+                    <dt>{label}</dt>
+                    <dd
+                      data-unregistered={
+                        (label === '회차'
+                          ? sessionProgress.total === null
+                          : !value) || undefined
+                      }
+                    >
+                      {label === 'KR' && value ? (
+                        <ol data-kr-items>
+                          {value
+                            .split(/\r?\n/)
+                            .filter((line) => line.trim())
+                            .map((line, index) => (
+                              <li key={index}>
+                                <span data-kr-number>{index + 1}</span>
+                                <span>{line}</span>
+                              </li>
+                            ))}
+                        </ol>
+                      ) : (
+                        value || empty
+                      )}
+                      {canWriteGoals && (
+                        <button
+                          type="button"
+                          data-goal-edit-overlay
+                          aria-label={`${label} 수정`}
+                          onClick={() => {
+                            setAddKeyResult(label === 'KR' && !value);
+                            setInlineGoalContractId(c.id);
+                          }}
+                        >
+                          <IconPencil size={16} aria-hidden />
+                        </button>
+                      )}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
             )}
-          </StyledFieldRow>
-        </div>
-      </StyledFieldRecordSection>
+          </div>
+        </StyledFieldRecordSection>
+      </div>
     );
   };
   const renderVisitActions = (v: ObjectRecord) => {
@@ -389,7 +452,6 @@ const FieldManagementLoaded = ({
           {canWriteVisits && (
             <button
               onClick={() => {
-                setSaved('');
                 setEditor({ contract: c, visit: v });
               }}
             >
@@ -501,7 +563,6 @@ const FieldManagementLoaded = ({
             </StyledFieldRow>
           )}
         </StyledFieldRow>
-        {saved && <p role="status">{saved}</p>}
         {!detailVisit || !contracts.length ? (
           <p role="status">기록을 찾을 수 없거나 조회 권한이 없습니다.</p>
         ) : editor ? (
@@ -519,7 +580,8 @@ const FieldManagementLoaded = ({
   return (
     <StyledFieldPanel
       data-contextual={contextual || undefined}
-      data-writing={!!editor || undefined}
+      data-contract-list-page={scope.contractList || undefined}
+      data-writing={!!editor?.visit || undefined}
       data-reading={reading || undefined}
       data-contract-reading={!!selectedContractId || undefined}
     >
@@ -528,32 +590,7 @@ const FieldManagementLoaded = ({
         renderContractDetail(
           contracts.find((c) => c.id === selectedContractId)!,
         )}
-      {contextual ? (
-        <StyledFieldRow data-field-header>
-          <h3 data-field-heading>
-            전체 <span>{contextVisits.length}</span>
-          </h3>
-          <StyledFieldRow>
-            {canWriteVisits && (
-              <button
-                data-field-add
-                onClick={() => {
-                  setSaved('');
-                  if (contracts.length === 1)
-                    setEditor({ contract: contracts[0] });
-                  else {
-                    setChoosingContract(true);
-                  }
-                }}
-                disabled={!contracts.length || !!editor}
-              >
-                <IconPlus size={16} aria-hidden="true" />
-                기록 추가
-              </button>
-            )}
-          </StyledFieldRow>
-        </StyledFieldRow>
-      ) : (
+      {!contextual && (
         <StyledMyFieldToolbar>
           <StyledMyFieldHeading>
             <div>
@@ -647,30 +684,25 @@ const FieldManagementLoaded = ({
           }}
         />
       )}
-      {saved && <p role="status">{saved}</p>}
       {editor && (
-        <div ref={editorRef} data-field-editor>
-          {editor.goal ? (
-            <ContractGoalEditor
-              key={editor.contract.id}
-              contract={editor.contract}
-              onSaved={onSaved}
-              onCancel={() => setEditor(undefined)}
-            />
-          ) : (
-            <FieldVisitEditor
-              key={editor.visit?.id ?? editor.contract.id}
-              onOpenContract={() => {
-                setSelectedContractId(editor.contract.id);
-                setReading(false);
-                setEditor(undefined);
-              }}
-              contract={editor.contract}
-              visit={editor.visit}
-              onSaved={onSaved}
-              onCancel={() => setEditor(undefined)}
-            />
-          )}
+        <div
+          ref={editorRef}
+          data-field-editor
+          style={!editor.visit ? { display: 'contents' } : undefined}
+        >
+          <FieldVisitEditor
+            modal={!editor.visit}
+            key={editor.visit?.id ?? editor.contract.id}
+            onOpenContract={() => {
+              setSelectedContractId(editor.contract.id);
+              setReading(false);
+              setEditor(undefined);
+            }}
+            contract={editor.contract}
+            visit={editor.visit}
+            onSaved={onSaved}
+            onCancel={() => setEditor(undefined)}
+          />
         </div>
       )}
       <StyledFieldRecordSection
@@ -678,27 +710,32 @@ const FieldManagementLoaded = ({
         data-plain={!contextual || undefined}
       >
         {contextual && (
-          <h3 data-section-title>
-            계약 목표 <span data-count>{contracts.length}건</span>
-          </h3>
+          <StyledFieldRow data-field-header>
+            <h3 data-field-heading>
+              계약 목표 <span>{contracts.length}</span>
+            </h3>
+          </StyledFieldRow>
         )}
-        {!contracts.length && (
-          <StyledMyFieldEmpty>
-            <IconMap size={28} />
-            <h3>표시할 현장이 없습니다</h3>
-            <p>
-              {contextual
-                ? '기업에 연결된 계약을 등록하면 목표와 현장 기록을 관리할 수 있습니다.'
-                : '검색어나 필터를 변경하십시오.'}
-            </p>
-          </StyledMyFieldEmpty>
-        )}
+        {!contracts.length &&
+          (contextual ? (
+            <StyledFieldEmptyState>
+              <span>
+                표시할 계약이 없습니다.
+                <br />
+                기업에 연결된 계약을 등록하면 목표와 현장 기록을 관리할 수
+                있습니다.
+              </span>
+            </StyledFieldEmptyState>
+          ) : (
+            <StyledMyFieldEmpty>
+              <IconMap size={28} />
+              <h3>표시할 현장이 없습니다</h3>
+              <p>검색어나 필터를 변경하십시오.</p>
+            </StyledMyFieldEmpty>
+          ))}
         {contracts.map((c) => {
           const records = visitsFor(data.visits, c.id);
-          const submitted = records.filter(
-            (v) => v.recordStatus === 'SUBMITTED',
-          );
-          const drafts = records.filter((v) => v.recordStatus === 'DRAFT');
+          const progress = getContractSessionProgress(c, records);
           if (!contextual)
             return (
               <MyFieldContractCard
@@ -708,11 +745,11 @@ const FieldManagementLoaded = ({
                 canWriteGoals={canWriteGoals}
                 canWriteVisits={canWriteVisits}
                 onEditGoal={() => {
-                  setSaved('');
-                  setEditor({ contract: c, goal: true });
+                  setSelectedContractId(c.id);
+                  setAddKeyResult(false);
+                  setInlineGoalContractId(c.id);
                 }}
                 onWrite={(visit) => {
-                  setSaved('');
                   setEditor({ contract: c, visit });
                 }}
               >
@@ -736,57 +773,140 @@ const FieldManagementLoaded = ({
               data-contract-item
               key={c.id}
               onClick={() => {
+                if (scope.contractList) {
+                  if (contractPageLayoutId) {
+                    store.set(
+                      activeTabIdComponentState.atomFamily({
+                        instanceId: getTabListInstanceIdFromPageLayoutAndRecord(
+                          {
+                            pageLayoutId: contractPageLayoutId,
+                            layoutType: PageLayoutType.RECORD_PAGE,
+                            targetRecordIdentifier: {
+                              id: c.id,
+                              targetObjectNameSingular: 'onboarding',
+                            },
+                          },
+                        ),
+                      }),
+                      getFieldManagementRecordTabId(contractPageLayoutId),
+                    );
+                  }
+                  openRecordInSidePanel({
+                    recordId: c.id,
+                    objectNameSingular: 'onboarding',
+                    resetNavigationStack: true,
+                  });
+                  return;
+                }
                 setSelectedContractId(c.id);
                 setEditor(undefined);
               }}
               aria-label={`${text(c.name)} 계약 상세 보기`}
             >
-              <span data-contract-title>
-                <FieldContractLabel name={text(c.name)} />
-                <IconChevronRight size={18} aria-hidden="true" />
-              </span>
-              <span
-                data-goal-preview
-                data-empty={!text(c.consultingGoal).trim() || undefined}
-              >
-                {text(c.consultingGoal).trim() || (
-                  <span data-missing-goal>목표 미등록</span>
-                )}
-              </span>
-              <span data-contract-summary>
-                <FieldContractAssignees
-                  members={data.members.filter((member) =>
-                    assigned(c, member.id, data.links, true),
-                  )}
-                />
-                <span data-contract-meta>
-                  <IconCalendarEvent size={14} aria-hidden="true" />
-                  {contractDateLabel(c.contractStartDate) || '시작일 미정'} -{' '}
-                  {contractDateLabel(c.contractEndDate) || '종료일 미정'}
+              <span data-contract-card-heading>
+                <span data-contract-title>
+                  <FieldContractLabel name={text(c.name)} />
                 </span>
-                <span data-contract-counts>
-                  {submitted.length > 0 && (
-                    <span data-submitted>
-                      <IconCheck size={13} aria-hidden="true" />
-                      제출 <strong>{submitted.length}</strong>
+                <span data-contract-summary>
+                  <FieldContractAssignees
+                    members={data.members.filter((member) =>
+                      assigned(c, member.id, data.links, true),
+                    )}
+                  />
+                  <span data-contract-meta>
+                    <span data-contract-status={text(c.onboardingStatus)}>
+                      {c.onboardingStatus === 'ACTIVE'
+                        ? '계약중'
+                        : c.onboardingStatus === 'PRE'
+                          ? '계약 예정'
+                          : c.onboardingStatus === 'DONE'
+                            ? '계약 종료'
+                            : '상태 미등록'}
                     </span>
-                  )}
-                  {drafts.length > 0 && (
-                    <span data-draft>
-                      <IconPencil size={13} aria-hidden="true" />
-                      초안 <strong>{drafts.length}</strong>
-                    </span>
-                  )}
+                    {contractDateLabel(c.contractStartDate) || '시작일 미정'} -{' '}
+                    {contractDateLabel(c.contractEndDate) || '종료일 미정'}
+                  </span>
+                </span>
+              </span>
+              <span data-contract-goal-summary>
+                <span data-goal-summary-row>
+                  <strong>회차</strong>
+                  <span
+                    data-unregistered={progress.total === null || undefined}
+                  >
+                    {progress.total === null
+                      ? `현재 ${progress.current}회차 · 총 회차 미정`
+                      : `현재 ${progress.current}회차 / 총 ${progress.total}회 · ${progress.percent}%`}
+                  </span>
+                </span>
+                <span data-goal-summary-row>
+                  <strong>O</strong>
+                  <span
+                    data-unregistered={
+                      !text(c.consultingGoal).trim() || undefined
+                    }
+                  >
+                    {text(c.consultingGoal).trim() || 'O를 입력하세요'}
+                  </span>
+                </span>
+                <span data-goal-summary-row>
+                  <strong>KR</strong>
+                  <span
+                    data-unregistered={
+                      !text(c.successCriteria).trim() || undefined
+                    }
+                  >
+                    {text(c.successCriteria).trim()
+                      ? text(c.successCriteria)
+                          .split(/\r?\n/)
+                          .filter((line) => line.trim())
+                          .map((line, index) => (
+                            <span data-kr-summary-item key={index}>
+                              <span data-kr-number>{index + 1}</span>
+                              <span>{line}</span>
+                            </span>
+                          ))
+                      : '등록된 KR이 없습니다.'}
+                  </span>
                 </span>
               </span>
             </button>
           );
         })}
       </StyledFieldRecordSection>
-      {contextual && (
+      {!scope.contractList && (contextual || selectedContractId) && (
         <StyledFieldRecordSection data-record-list>
+          {!reading && (
+            <StyledFieldRow data-record-header>
+              <h3 data-field-heading>
+                기록 목록 <span>{contextVisits.length}</span>
+              </h3>
+              <StyledFieldRow>
+                <div ref={setRecordSortContainer} />
+                {canWriteVisits && (
+                  <Button
+                    Icon={IconPlus}
+                    size="small"
+                    variant="secondary"
+                    title="기록 추가"
+                    onClick={() => {
+                      const selectedContract = contracts.find(
+                        (contract) => contract.id === selectedContractId,
+                      );
+                      if (selectedContract)
+                        setEditor({ contract: selectedContract });
+                      else if (contracts.length === 1)
+                        setEditor({ contract: contracts[0] });
+                      else setChoosingContract(true);
+                    }}
+                    disabled={!contracts.length || !!editor}
+                  />
+                )}
+              </StyledFieldRow>
+            </StyledFieldRow>
+          )}
           <FieldVisitList
-            heading="기록 목록"
+            sortContainer={recordSortContainer}
             visits={contextVisits}
             contracts={contracts}
             onSelectionChange={setReading}

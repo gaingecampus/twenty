@@ -37,11 +37,23 @@ export const StyledFieldPanel = styled.div`
     min-height: 100px;
     resize: vertical;
   }
-  button,
+  button:not(
+    [data-field-header] button,
+    [data-record-header] button,
+    [data-detail-toolbar] button,
+    [data-goal-actions] button,
+    button[data-goal-edit-overlay]
+  ),
   a {
     font: inherit;
   }
-  button {
+  button:not(
+    [data-field-header] button,
+    [data-record-header] button,
+    [data-detail-toolbar] button,
+    [data-goal-actions] button,
+    button[data-goal-edit-overlay]
+  ) {
     background: ${theme.background.secondary};
     border: 1px solid ${theme.border.color.medium};
     border-radius: 6px;
@@ -49,11 +61,23 @@ export const StyledFieldPanel = styled.div`
     cursor: pointer;
     padding: 8px 12px;
   }
-  button[aria-pressed='true'] {
+  button:not(
+      [data-field-header] button,
+      [data-record-header] button,
+      [data-detail-toolbar] button,
+      [data-goal-actions] button,
+      button[data-goal-edit-overlay]
+    )[aria-pressed='true'] {
     background: ${theme.background.tertiary};
     font-weight: 600;
   }
-  button:disabled {
+  button:not(
+      [data-field-header] button,
+      [data-record-header] button,
+      [data-detail-toolbar] button,
+      [data-goal-actions] button,
+      button[data-goal-edit-overlay]
+    ):disabled {
     cursor: not-allowed;
     opacity: 0.5;
   }
@@ -62,6 +86,13 @@ export const StyledFieldPanel = styled.div`
   }
   &[data-contextual] {
     font-size: 14px;
+  }
+  &[data-contract-list-page] {
+    background: transparent;
+    padding: 0;
+  }
+  &[data-contract-list-page] > [data-contract-group] {
+    background: transparent;
   }
   &[data-inline-detail] {
     gap: 16px;
@@ -76,17 +107,25 @@ export const StyledFieldPanel = styled.div`
     display: none;
   }
   &[data-writing] [data-field-editor] {
-    --field-editor-inset: 32px;
+    --field-editor-inset: 0px;
     background: ${theme.background.primary};
-    border-radius: 20px;
-    padding: 32px;
+    border-radius: 0;
+    padding: 0;
   }
   &[data-writing] [data-field-editor] > section {
     border: none;
     padding: 0;
   }
+  &[data-contextual][data-writing]
+    [data-field-editor]
+    > section
+    > :not([data-editor-actions]) {
+    max-width: none;
+  }
   &[data-contract-reading]
-    > :not([data-contract-detail]):not([data-field-header]):not(
+    > :not([data-contract-detail-group]):not([data-contract-detail]):not(
+      [data-detail-toolbar]
+    ):not([data-record-list]):not([data-field-header]):not(
       [data-field-editor]
     ):not([data-contract-picker]):not([role='status']) {
     display: none;
@@ -96,6 +135,15 @@ export const StyledFieldPanel = styled.div`
       [data-field-editor]
     ):not([data-contract-picker]):not([role='status']) {
     display: none;
+  }
+  [data-contract-detail] [data-inline-goal-editor] {
+    border: none;
+    margin: 0;
+    padding: 0;
+  }
+  [data-contract-detail] [data-contract-title] a {
+    color: inherit;
+    text-decoration: none;
   }
   [data-field-schedule] {
     display: flex;
@@ -124,7 +172,20 @@ export const StyledFieldPanel = styled.div`
     font-weight: 600;
     padding: 4px 8px;
   }
+  [data-detail-toolbar] button[data-variant='tertiary'] {
+    background: ${theme.background.tertiary};
+  }
+  [data-detail-toolbar] button[data-variant='tertiary']:hover {
+    background: ${theme.background.quaternary};
+  }
+  [data-contract-detail-group] {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
   [data-detail-toolbar] {
+    align-items: center;
+    min-height: 32px;
     justify-content: space-between;
   }
   [data-detail-toolbar] > div > span {
@@ -140,6 +201,29 @@ export const StyledFieldPanel = styled.div`
     width: 15px;
     height: 15px;
   }
+  [data-contract-breadcrumb] {
+    align-items: center;
+    display: flex;
+    gap: 8px;
+    font-size: 16px;
+    font-weight: ${theme.font.weight.semiBold};
+  }
+  && [data-detail-toolbar] [data-contract-breadcrumb] button {
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    color: ${theme.font.color.primary};
+    cursor: pointer;
+    font: inherit;
+    padding: 0;
+  }
+  && [data-detail-toolbar] [data-contract-breadcrumb] button:hover {
+    color: ${theme.color.blue};
+    text-decoration: none;
+  }
+  [data-contract-breadcrumb] span {
+    color: ${theme.font.color.tertiary};
+  }
   [data-detail-toolbar][hidden] {
     display: none;
   }
@@ -150,18 +234,14 @@ export const StyledFieldPanel = styled.div`
   [data-field-header] {
     background: ${theme.background.primary};
     justify-content: space-between;
-    order: -1;
-    padding: 4px 0;
-    position: sticky;
-    top: 0;
-    z-index: 11;
+    min-height: 32px;
   }
   [data-contract-detail],
   [data-detail-start],
   [data-field-editor] {
     scroll-margin-top: 110px;
   }
-  [data-field-header] [data-field-heading] {
+  [data-field-heading] {
     align-items: center;
     display: flex;
     font-size: 16px;
@@ -171,15 +251,18 @@ export const StyledFieldPanel = styled.div`
   [data-field-heading] > span {
     color: ${theme.font.color.light};
   }
-  &[data-contextual] [data-field-header] button[data-field-add] {
-    background: ${theme.background.primary};
-    color: ${theme.font.color.secondary};
-    font-size: 13px;
-    min-height: 28px;
-    padding: 4px 12px;
+  [data-record-header] {
+    justify-content: space-between;
+    min-height: 32px;
   }
-  &[data-contextual] [data-field-header] button[data-field-add]:hover {
-    background: ${theme.background.tertiary};
+  &[data-contextual] > [data-contract-group],
+  &[data-contextual] > [data-record-list] {
+    border: none;
+    border-radius: 0;
+    padding: 0;
+  }
+  &[data-contextual] > [data-record-list] {
+    margin-top: 8px;
   }
   &[data-contextual] {
     background: ${theme.background.primary};
@@ -187,13 +270,13 @@ export const StyledFieldPanel = styled.div`
     container-type: inline-size;
     gap: 16px;
     min-height: 100%;
-    padding: 20px 24px 48px;
+    padding: 24px 24px 48px;
     > section {
       border: 1px solid ${theme.border.color.medium};
       border-radius: 8px;
       padding: 16px;
     }
-    > div:first-child {
+    > div:first-child:not([data-contract-detail-group]) {
       justify-content: space-between;
       margin-bottom: 0;
     }
@@ -224,7 +307,13 @@ export const StyledFieldPanel = styled.div`
       display: flex;
       gap: 12px;
     }
-    button {
+    button:not(
+      [data-field-header] button,
+      [data-record-header] button,
+      [data-detail-toolbar] button,
+      [data-goal-actions] button,
+      button[data-goal-edit-overlay]
+    ) {
       align-items: center;
       display: inline-flex;
       font-weight: 500;
@@ -233,10 +322,22 @@ export const StyledFieldPanel = styled.div`
       min-height: 40px;
       transition: background 0.15s;
     }
-    button:hover {
+    button:not(
+        [data-field-header] button,
+        [data-record-header] button,
+        [data-detail-toolbar] button,
+        [data-goal-actions] button,
+        button[data-goal-edit-overlay]
+      ):hover {
       background: ${theme.background.tertiary};
     }
-    button:focus-visible,
+    button:not(
+        [data-field-header] button,
+        [data-record-header] button,
+        [data-detail-toolbar] button,
+        [data-goal-actions] button,
+        button[data-goal-edit-overlay]
+      ):focus-visible,
     summary:focus-visible,
     a:focus-visible {
       outline: 2px solid ${theme.border.color.blue};
@@ -314,7 +415,10 @@ export const StyledFieldPanel = styled.div`
       color: ${theme.font.color.secondary};
       font-size: 12px;
     }
-    [data-contract-content] button:not([data-primary]) {
+    [data-contract-content]
+      button:not([data-primary]):not([data-variant]):not(
+        [data-goal-edit-overlay]
+      ):not([data-kr-add]) {
       background: ${theme.background.tertiary};
       border: 1px solid ${theme.border.color.medium};
     }
@@ -338,7 +442,7 @@ export const StyledFieldPanel = styled.div`
       background: ${theme.background.tertiary};
     }
     [data-contract-detail] {
-      gap: 24px;
+      gap: 16px;
     }
     [data-contract-detail] [data-contract-content] {
       background: transparent;
@@ -385,54 +489,43 @@ export const StyledFieldPanel = styled.div`
     [data-contract-detail] [data-goal-grid] {
       display: flex;
       flex-direction: column;
-      gap: 24px;
+      gap: ${theme.spacing[2]};
+      margin: 0;
     }
     [data-contract-detail] [data-goal-grid] > div {
-      background: transparent;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      padding: 0;
-    }
-    [data-contract-detail] [data-goal-grid] {
+      align-items: baseline;
       background: ${theme.background.tertiary};
-      border-radius: 16px;
-      padding: 24px;
+      border-radius: 8px;
+      display: grid;
+      gap: 16px;
+      grid-template-columns: 88px minmax(0, 1fr);
+      padding: 14px 12px;
     }
     [data-contract-detail] [data-goal-grid] dt {
-      line-height: 20px;
+      align-self: start;
       color: ${theme.font.color.primary};
-      font-size: 14px;
-      font-weight: 600;
+      font-size: 16px;
+      font-weight: ${theme.font.weight.semiBold};
+      line-height: 1.6;
       margin: 0;
+      text-align: center;
     }
     [data-contract-detail] [data-goal-grid] dd {
-      margin: 0;
-      font-size: 15px;
-      line-height: 1.7;
-    }
-    [data-contract-detail] [data-goal-grid] > div:first-child dt {
-      color: ${theme.color.blue};
-      font-size: 13px;
-    }
-    [data-contract-detail] [data-goal-grid] > div:first-child dd {
-      font-size: 22px;
-      font-weight: 600;
-      letter-spacing: -0.3px;
+      color: ${theme.font.color.primary};
+      font-size: ${theme.font.size.lg};
       line-height: 1.6;
+      margin: 0;
+      min-width: 0;
     }
     [data-contract-detail] [data-goal-grid] dd[data-unregistered] {
-      color: ${theme.font.color.secondary};
-      font-size: 13px;
-      font-weight: 400;
-      letter-spacing: 0;
-      line-height: 1.5;
-    }
-    [data-contract-detail] [data-goal-grid] > div:has([data-unregistered]) dt {
-      color: ${theme.font.color.secondary};
+      color: ${theme.font.color.tertiary};
+      font-size: ${theme.font.size.lg};
     }
     [data-contract-detail] {
-      padding: 32px;
+      background: ${theme.background.primary};
+      border: 1px solid ${theme.border.color.medium};
+      border-radius: 8px;
+      padding: 16px;
     }
     [data-contract-title-link] {
       color: inherit;
@@ -509,7 +602,11 @@ export const StyledFieldPanel = styled.div`
       line-height: 1.5;
       margin: 0;
     }
-    && [data-contract-detail] button,
+    &&
+      [data-contract-detail]
+      button:not([data-variant]):not([data-goal-edit-overlay]):not(
+        [data-kr-add]
+      ):not([data-kr-delete]),
     && [data-contract-detail] [data-contract-link] {
       align-items: center;
       border: none;
@@ -524,12 +621,20 @@ export const StyledFieldPanel = styled.div`
       min-height: 44px;
       padding: 10px 18px;
     }
-    && [data-contract-detail] button:not([data-primary]),
+    &&
+      [data-contract-detail]
+      button:not([data-primary]):not([data-variant]):not(
+        [data-goal-edit-overlay]
+      ):not([data-kr-add]):not([data-kr-delete]),
     && [data-contract-detail] [data-contract-link] {
       background: ${theme.background.tertiary};
       color: ${theme.font.color.primary};
     }
-    && [data-contract-detail] button:not([data-primary]):hover,
+    &&
+      [data-contract-detail]
+      button:not([data-primary]):not([data-variant]):not(
+        [data-goal-edit-overlay]
+      ):not([data-kr-add]):not([data-kr-delete]):hover,
     && [data-contract-detail] [data-contract-link]:hover {
       background: ${theme.background.quaternary};
     }
@@ -539,6 +644,7 @@ export const StyledFieldPanel = styled.div`
       padding-bottom: 8px;
     }
     && [data-contract-group] > [data-contract-item] {
+      box-shadow: ${theme.boxShadow.light};
       background: ${theme.background.primary};
       border: 1px solid ${theme.border.color.medium};
       border-radius: 8px;
@@ -551,24 +657,80 @@ export const StyledFieldPanel = styled.div`
       align-items: stretch;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 16px;
       justify-content: flex-start;
     }
-    [data-contract-item] [data-contract-title] {
+    [data-contract-card-heading] {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    :is([data-contract-item], [data-contract-detail]) [data-contract-title] {
+      flex-wrap: wrap;
       font-size: 16px;
       font-weight: 600;
       line-height: 1.5;
     }
-    [data-contract-item] [data-contract-title] > span {
+    :is([data-contract-item], [data-contract-detail])
+      [data-contract-title]
+      > span {
       min-width: 0;
     }
-    [data-contract-item] [data-contract-title] > span > span:last-child {
+    :is([data-contract-item], [data-contract-detail])
+      [data-contract-title]
+      > span
+      > span:last-child {
       white-space: normal;
       overflow-wrap: anywhere;
     }
-    [data-contract-item] [data-contract-title] > svg {
+    :is([data-contract-item], [data-contract-detail])
+      [data-contract-title]
+      > svg {
       color: ${theme.font.color.tertiary};
       flex-shrink: 0;
+    }
+    [data-contract-goal-summary] {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: 100%;
+    }
+    [data-goal-summary-row] {
+      align-items: start;
+      background: ${theme.background.tertiary};
+      border-radius: 8px;
+      display: grid;
+      gap: 12px;
+      grid-template-columns: 32px minmax(0, 1fr);
+      padding: 14px 12px;
+    }
+    [data-goal-summary-row] > strong {
+      align-self: start;
+      color: ${theme.font.color.primary};
+      font-size: 16px;
+      font-weight: ${theme.font.weight.semiBold};
+      line-height: 1.6;
+      text-align: center;
+    }
+    [data-goal-summary-row] > span {
+      color: ${theme.font.color.primary};
+      font-size: ${theme.font.size.lg};
+      font-weight: 400;
+      line-height: 1.6;
+      overflow-wrap: anywhere;
+      white-space: pre-wrap;
+    }
+    [data-goal-summary-row] > span[data-unregistered] {
+      color: ${theme.font.color.tertiary};
+      font-size: ${theme.font.size.lg};
+    }
+    [data-kr-summary-item] {
+      align-items: baseline;
+      display: flex;
+      gap: 8px;
+    }
+    [data-kr-summary-item] + [data-kr-summary-item] {
+      margin-top: 8px;
     }
     [data-contract-item] [data-goal-preview] {
       flex: 1;
@@ -588,21 +750,50 @@ export const StyledFieldPanel = styled.div`
       font-weight: 500;
       padding: 6px 10px;
     }
+    [data-contract-item] [data-missing-goal] {
+      align-items: center;
+      background: ${theme.background.tertiary};
+      border: 1px dashed ${theme.border.color.medium};
+      border-radius: ${theme.border.radius.md};
+      box-sizing: border-box;
+      color: ${theme.font.color.tertiary};
+      font-size: ${theme.font.size.sm};
+      font-weight: 400;
+      justify-content: center;
+      padding: 24px 16px;
+      text-align: center;
+      width: 100%;
+    }
     [data-contract-summary] {
       align-items: center;
       display: flex;
       flex-wrap: wrap;
-      justify-content: space-between;
-      gap: 8px 16px;
+      justify-content: flex-start;
+      gap: ${theme.spacing[1]};
+      line-height: 20px;
     }
-    [data-contract-item] [data-contract-meta] {
+    :is([data-contract-item], [data-contract-detail]) [data-contract-meta] {
+      font-weight: 400;
       align-items: center;
       color: ${theme.font.color.secondary};
       display: inline-flex;
       gap: 6px;
-      font-size: 12px;
+      font-size: 14px;
       line-height: 1.5;
       margin: 0;
+    }
+    [data-contract-status] {
+      background: ${theme.background.tertiary};
+      border-radius: 4px;
+      color: ${theme.font.color.secondary};
+      font-size: 12px;
+      font-weight: 500;
+      padding: 2px 6px;
+      white-space: nowrap;
+    }
+    [data-contract-status='ACTIVE'] {
+      background: ${theme.background.transparent.success};
+      color: ${theme.color.green};
     }
     [data-contract-counts] {
       color: ${theme.font.color.secondary};
@@ -669,20 +860,138 @@ export const StyledFieldPanel = styled.div`
       color: ${theme.font.color.secondary};
       margin: 10px 0;
     }
-    button {
+    button:not(
+      [data-field-header] button,
+      [data-record-header] button,
+      [data-detail-toolbar] button,
+      [data-goal-actions] button,
+      button[data-goal-edit-overlay]
+    ) {
       border-color: transparent;
       border-radius: 8px;
       font-size: 13px;
     }
-    button[data-primary] {
+    button:not(
+        [data-field-header] button,
+        [data-record-header] button,
+        [data-detail-toolbar] button,
+        [data-goal-actions] button,
+        button[data-goal-edit-overlay]
+      )[data-primary] {
       background: ${theme.color.blue};
       color: white;
     }
-    button[data-primary]:hover {
+    button:not(
+        [data-field-header] button,
+        [data-record-header] button,
+        [data-detail-toolbar] button,
+        [data-goal-actions] button,
+        button[data-goal-edit-overlay]
+      )[data-primary]:hover {
       filter: brightness(0.94);
     }
-    button[aria-pressed='true'] {
+    button:not(
+        [data-field-header] button,
+        [data-record-header] button,
+        [data-detail-toolbar] button,
+        [data-goal-actions] button,
+        button[data-goal-edit-overlay]
+      )[aria-pressed='true'] {
       background: ${theme.background.tertiary};
+    }
+    && [data-contract-detail] [data-goal-grid] button[data-inline-goal-action] {
+      align-items: center;
+      background: transparent;
+      border: none;
+      border-radius: 4px;
+      color: inherit;
+      display: inline-flex;
+      font-size: inherit;
+      font-weight: 400;
+      gap: 8px;
+      justify-content: flex-start;
+      line-height: 1.6;
+      min-height: 24px;
+      padding: 0;
+      text-align: left;
+      white-space: pre-wrap;
+    }
+    &&
+      [data-contract-detail]
+      [data-goal-grid]
+      button[data-inline-goal-action]:hover {
+      color: ${theme.color.blue};
+    }
+    [data-inline-goal-action] svg {
+      opacity: 0;
+      color: ${theme.font.color.tertiary};
+      flex-shrink: 0;
+    }
+    [data-inline-goal-action]:hover svg,
+    [data-inline-goal-action]:focus-visible svg {
+      opacity: 1;
+    }
+    @media (hover: none) {
+      [data-inline-goal-action] svg {
+        opacity: 1;
+      }
+    }
+    [data-contract-detail] [data-goal-grid] > div {
+      align-items: start;
+      gap: 12px;
+      grid-template-columns: 32px minmax(0, 1fr);
+    }
+    [data-goal-grid] > [data-editable-goal] {
+      position: relative;
+      padding-right: 44px;
+    }
+    && [data-goal-grid] button[data-goal-edit-overlay] {
+      align-items: center;
+      background: transparent;
+      border: none;
+      border-radius: 8px;
+      color: ${theme.font.color.secondary};
+      display: flex;
+      inset: 0;
+      justify-content: flex-end;
+      padding: 0 14px;
+      position: absolute;
+      width: 100%;
+    }
+    && [data-goal-grid] button[data-goal-edit-overlay]:hover {
+      background: transparent;
+      color: ${theme.font.color.secondary};
+    }
+    [data-goal-edit-overlay] svg {
+      opacity: 0;
+    }
+    [data-goal-edit-overlay]:hover svg,
+    [data-goal-edit-overlay]:focus-visible svg {
+      opacity: 1;
+    }
+    @media (hover: none) {
+      [data-goal-edit-overlay] svg {
+        opacity: 1;
+      }
+    }
+    [data-kr-items] {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    [data-kr-items] li {
+      align-items: baseline;
+      display: flex;
+      gap: 8px;
+    }
+    [data-kr-number] {
+      color: ${theme.font.color.tertiary};
+      flex-shrink: 0;
+      font-size: ${theme.font.size.sm};
+      min-width: 12px;
     }
   }
 `;
@@ -850,14 +1159,41 @@ export const StyledFieldVisitDetail = styled(StyledFieldCard)`
 
 // Share the status board card sizing, spacing and responsive treatment.
 export const StyledFieldRecordSection = styled(StyledStatusBoardSection)`
+  &[data-contract-detail] {
+    box-shadow: ${theme.boxShadow.light};
+  }
   border-radius: 20px;
   min-width: 0;
   padding: 28px;
   &:has([data-inline-detail]) > [data-section-title] {
     display: none;
   }
+  [data-detail-toolbar] button[data-variant='tertiary'] {
+    background: ${theme.background.tertiary};
+  }
+  [data-detail-toolbar] button[data-variant='tertiary']:hover {
+    background: ${theme.background.quaternary};
+  }
+  [data-contract-detail-group] {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
   [data-detail-toolbar] {
+    align-items: center;
+    min-height: 32px;
     justify-content: space-between;
+  }
+  [data-detail-toolbar] button[data-variant='tertiary'] {
+    background: ${theme.background.tertiary};
+  }
+  [data-detail-toolbar] button[data-variant='tertiary']:hover {
+    background: ${theme.background.quaternary};
+  }
+  [data-contract-detail-group] {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
   }
   [data-detail-toolbar] {
     padding-bottom: 0;

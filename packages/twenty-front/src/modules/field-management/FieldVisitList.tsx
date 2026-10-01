@@ -1,9 +1,13 @@
+import { FieldVisitEditorModal } from './FieldVisitEditorModal';
+import { createPortal } from 'react-dom';
+import { Button } from 'twenty-ui/input';
+import { StyledFieldEmptyState } from './FieldEmptyState';
 import { FieldContractLabel } from './FieldContractLabel';
 import { FieldSortModal } from './FieldSortModal';
 import { FieldVisitStatus } from './FieldVisitStatus';
 import { IconArrowsSort } from 'twenty-ui/icon';
 import { sortFieldVisits, type FieldVisitSortKey } from './sortFieldVisits';
-import { useContext, useEffect, useRef, useState, type ReactNode } from 'react';
+import { useContext, useState, type ReactNode } from 'react';
 import { styled } from '@linaria/react';
 import { themeCssVariables as theme } from 'twenty-ui/theme-constants';
 import { AvatarOrIcon } from 'twenty-ui/data-display';
@@ -12,16 +16,6 @@ import { type ObjectRecord } from '@/object-record/types/ObjectRecord';
 import { getAbsoluteImageUrl } from '~/utils/image/getAbsoluteImageUrl';
 import { contractId, text } from './fieldManagementUtils';
 
-const StyledEmptyRecords = styled.p`
-  align-items: center;
-  color: ${theme.font.color.secondary};
-  display: flex;
-  font-size: 14px;
-  justify-content: center;
-  min-height: 88px;
-  text-align: center;
-  width: 100%;
-`;
 const StyledAuthor = styled.span`
   align-items: center;
   display: inline-flex;
@@ -290,10 +284,11 @@ export const FieldVisitList = ({
   visits,
   contracts,
   renderDetail,
-  onSelectionChange,
   heading,
+  sortContainer,
 }: {
   heading?: string;
+  sortContainer?: HTMLElement | null;
   visits: ObjectRecord[];
   contracts: ObjectRecord[];
   onSelectionChange?: (selected: boolean) => void;
@@ -301,57 +296,58 @@ export const FieldVisitList = ({
 }) => {
   const [selectedId, setSelectedId] = useState<string>();
   const [sortOpen, setSortOpen] = useState(false);
-  const detailRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (selectedId) detailRef.current?.scrollIntoView({ block: 'start' });
-  }, [selectedId]);
   const [sortKey, setSortKey] = useState<FieldVisitSortKey>('visitDate');
   const [direction, setDirection] = useState<'asc' | 'desc'>('desc');
   const sortedVisits = sortFieldVisits(visits, sortKey, direction);
-  if (selectedId)
-    return (
-      <div ref={detailRef} data-detail-start>
-        {renderDetail(selectedId, () => {
-          setSelectedId(undefined);
-          onSelectionChange?.(false);
-        })}
-      </div>
-    );
   if (!visits.length)
     return (
       <>
-        <h3>{heading}</h3>
-        <StyledEmptyRecords>
-          아직 현장 기록이 없습니다. 첫 기록을 작성하십시오.
-        </StyledEmptyRecords>
+        {heading && <h3>{heading}</h3>}
+        <StyledFieldEmptyState>
+          <span>
+            아직 현장 기록이 없습니다.
+            <br />
+            첫 기록을 작성하십시오.
+          </span>
+        </StyledFieldEmptyState>
       </>
     );
+  const sortButton = (
+    <Button
+      Icon={IconArrowsSort}
+      title={
+        SORT_OPTIONS.find(
+          (option) => option.key === sortKey && option.direction === direction,
+        )?.label
+      }
+      ariaLabel="현장 기록 정렬"
+      variant="secondary"
+      size="small"
+      onClick={() => setSortOpen(true)}
+    />
+  );
   return (
     <>
-      <StyledSortToolbar>
-        {heading && (
-          <h3>
-            {heading}
-            <span data-record-count>{visits.length}건</span>
-          </h3>
-        )}
-        <div data-sort-control>
-          <IconArrowsSort size={16} aria-hidden="true" />
-          <button
-            type="button"
-            aria-haspopup="dialog"
-            aria-label="현장 기록 정렬"
-            onClick={() => setSortOpen(true)}
-          >
-            {
-              SORT_OPTIONS.find(
-                (option) =>
-                  option.key === sortKey && option.direction === direction,
-              )?.label
-            }
-          </button>
-        </div>
-      </StyledSortToolbar>
+      {selectedId && (
+        <FieldVisitEditorModal
+          title="현장 기록"
+          onCancel={() => setSelectedId(undefined)}
+        >
+          {renderDetail(selectedId, () => setSelectedId(undefined))}
+        </FieldVisitEditorModal>
+      )}
+      {(heading || !sortContainer) && (
+        <StyledSortToolbar>
+          {heading && (
+            <h3>
+              {heading}
+              <span data-record-count>{visits.length}건</span>
+            </h3>
+          )}
+          {!sortContainer && sortButton}
+        </StyledSortToolbar>
+      )}
+      {sortContainer && createPortal(sortButton, sortContainer)}
       {sortOpen && (
         <FieldSortModal
           value={`${sortKey}:${direction}`}
@@ -397,13 +393,11 @@ export const FieldVisitList = ({
               tabIndex={0}
               onClick={() => {
                 setSelectedId(visit.id);
-                onSelectionChange?.(true);
               }}
               onKeyDown={(event) => {
                 if (event.key === 'Enter' || event.key === ' ') {
                   event.preventDefault();
                   setSelectedId(visit.id);
-                  onSelectionChange?.(true);
                 }
               }}
               key={visit.id}
@@ -420,9 +414,9 @@ export const FieldVisitList = ({
                     ? `${String(visit.sessionNumber)}회차`
                     : '미입력'}
                 </span>
-                <FieldVisitStatus
-                  submitted={visit.recordStatus === 'SUBMITTED'}
-                />
+                {visit.recordStatus !== 'SUBMITTED' && (
+                  <FieldVisitStatus submitted={false} />
+                )}
               </span>
               <span role="cell" title={text(visit.name)}>
                 {text(visit.name) || '제목 없음'}
