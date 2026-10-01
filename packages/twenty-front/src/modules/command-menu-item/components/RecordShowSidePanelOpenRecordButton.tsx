@@ -28,9 +28,25 @@ import { currentRecordFilterGroupsComponentState } from '@/object-record/record-
 import { currentRecordSortsComponentState } from '@/object-record/record-sort/states/currentRecordSortsComponentState';
 import { recordIndexCurrentPageComponentState } from '@/object-record/record-index/states/recordIndexCurrentPageComponentState';
 import { isDefined } from 'twenty-shared/utils';
-import { Button } from 'twenty-ui/input';
+import { Button, IconButton } from 'twenty-ui/input';
+import { IconExternalLink } from 'twenty-ui/icon';
+import { styled } from '@linaria/react';
 import { getOsControlSymbol } from 'twenty-ui/utilities';
 import { useNavigateApp } from '~/hooks/useNavigateApp';
+
+const StyledFullLabel = styled.span`
+  @container side-panel-header (max-width: 560px) {
+    display: none;
+  }
+`;
+
+const StyledIconOnly = styled.span`
+  display: none;
+
+  @container side-panel-header (max-width: 560px) {
+    display: inline-flex;
+  }
+`;
 
 type RecordShowSidePanelOpenRecordButtonProps = {
   objectNameSingular: string;
@@ -195,12 +211,23 @@ export const RecordShowSidePanelOpenRecordButton = ({
 
   return (
     <span title={`전체 페이지로 열기 (${getOsControlSymbol()}⏎)`}>
-      <Button
-        title="전체 페이지로 열기 ↗"
-        variant="secondary"
-        size="small"
-        onClick={handleOpenRecord}
-      />
+      <StyledFullLabel>
+        <Button
+          title="전체 페이지로 열기 ↗"
+          variant="secondary"
+          size="small"
+          onClick={handleOpenRecord}
+        />
+      </StyledFullLabel>
+      <StyledIconOnly>
+        <IconButton
+          Icon={IconExternalLink}
+          ariaLabel="전체 페이지로 열기"
+          variant="secondary"
+          size="small"
+          onClick={handleOpenRecord}
+        />
+      </StyledIconOnly>
     </span>
   );
 };

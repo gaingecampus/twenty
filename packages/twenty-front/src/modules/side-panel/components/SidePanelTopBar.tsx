@@ -33,6 +33,8 @@ const StyledInputContainer = styled.div`
   border-bottom: 1px solid ${themeCssVariables.border.color.medium};
   border-radius: 0;
   box-sizing: border-box;
+  container-name: side-panel-header;
+  container-type: inline-size;
 
   display: flex;
   flex-shrink: 0;
