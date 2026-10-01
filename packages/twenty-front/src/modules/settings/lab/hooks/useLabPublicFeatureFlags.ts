@@ -67,9 +67,28 @@ export const useLabPublicFeatureFlags = () => {
     return !!response.data;
   };
 
+  const localizedMetadata: Record<
+    string,
+    { label: string; description: string }
+  > = {
+    IS_JUNCTION_RELATIONS_ENABLED: {
+      label: t`Junction Relations`,
+      description: t`Enable many-to-many relations through junction tables configuration`,
+    },
+    IS_SETTINGS_DISCOVERY_HERO_ENABLED: {
+      label: t`Settings Discovery Hero`,
+      description: t`Show the per-page hero illustration + video walkthrough modal on settings pages`,
+    },
+    IS_MESSAGING_CALENDAR_WEBHOOK_ENABLED: {
+      label: t`Messaging & Calendar Webhooks`,
+      description: t`Sync Gmail, Google Calendar, and Microsoft 365 mail/calendar via provider push notifications instead of cron polling`,
+    },
+  };
+
   return {
     labPublicFeatureFlags: labPublicFeatureFlags.map((flag) => ({
       ...flag,
+      metadata: { ...flag.metadata, ...localizedMetadata[flag.key] },
       value:
         currentWorkspace?.featureFlags?.find(
           (workspaceFlag) => workspaceFlag.key === flag.key,

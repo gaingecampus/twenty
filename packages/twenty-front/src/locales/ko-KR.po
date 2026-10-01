@@ -259,7 +259,7 @@ msgstr "{pageSize}개씩 보기"
 #: src/modules/object-record/record-index/components/RecordIndexPageHeader.tsx
 #: src/modules/side-panel/components/SidePanelMultipleRecordsInfo.tsx
 msgid "{0} selected"
-msgstr ""
+msgstr "{0}개 선택됨"
 
 #. js-lingui-id: peiknr
 #. placeholder {0}: activeFilterLabels.length
@@ -1292,7 +1292,7 @@ msgstr "사용자 지정 공급자 추가"
 #. js-lingui-id: WT0Ie4
 #: src/modules/settings/workspace/components/SettingsWorkspaceEmailGroupSection.tsx
 msgid "Add email channel"
-msgstr ""
+msgstr "이메일 채널 추가"
 
 #. js-lingui-id: +Gf1IN
 #: src/modules/settings/workspace/components/SettingsWorkspaceEmailGroupSection.tsx
@@ -1532,7 +1532,7 @@ msgstr "즐겨찾기에 추가"
 #. js-lingui-id: YttdVS
 #: src/modules/settings/unsubscribe-topics/components/SettingsWorkspaceUnsubscribeTopicSection.tsx
 msgid "Add unsubscribe topic"
-msgstr ""
+msgstr "수신 거부 주제 추가"
 
 #. js-lingui-id: XnwceV
 #: src/pages/settings/applications/components/SettingsApplicationRegistrationRedirectURIsInput.tsx
@@ -1623,7 +1623,7 @@ msgstr "관리자"
 #: src/modules/settings/admin-panel/components/SettingsAdminServerAdminAccess.tsx
 #: src/modules/settings/admin-panel/components/SettingsAdminServerAdmins.tsx
 msgid "Admin panel"
-msgstr ""
+msgstr "관리자 패널"
 
 #. js-lingui-id: g1in8j
 #: src/modules/settings/hooks/useSettingsNavigationItems.tsx
@@ -1669,12 +1669,12 @@ msgstr "관리자 패널 - 건강"
 #. js-lingui-id: Faptqt
 #: src/modules/settings/admin-panel/components/SettingsAdminServerAdmins.tsx
 msgid "Administrator"
-msgstr ""
+msgstr "관리자"
 
 #. js-lingui-id: 3zE1mx
 #: src/modules/settings/admin-panel/components/SettingsAdminServerAdmins.tsx
 msgid "Administrators"
-msgstr ""
+msgstr "관리자"
 
 #. js-lingui-id: sxkWRg
 #: src/modules/navigation/components/SettingsNavigationDrawer.tsx
@@ -4245,7 +4245,7 @@ msgstr "SSO 우회 권한이 있는 사용자를 위한 대체 로그인 방법 
 #. js-lingui-id: zXzR4W
 #: src/modules/settings/security/components/SettingsSecuritySettings.tsx
 msgid "Configure how long audit logs are retained"
-msgstr ""
+msgstr "감사 로그의 보관 기간을 설정하세요."
 
 #. js-lingui-id: OLqG0t
 #: src/modules/settings/data-model/object-details/components/tabs/ObjectSettings.tsx
@@ -6739,12 +6739,12 @@ msgstr "이메일은 비워 둘 수 없습니다"
 #. js-lingui-id: TezkhJ
 #: src/modules/settings/unsubscribe-topics/components/SettingsWorkspaceUnsubscribeTopicSection.tsx
 msgid "Email categories recipients can opt out of."
-msgstr ""
+msgstr "수신자가 수신을 거부할 수 있는 이메일 주제입니다."
 
 #. js-lingui-id: KHxfvN
 #: src/modules/settings/workspace/components/SettingsWorkspaceEmailGroupSection.tsx
 msgid "Email Channels"
-msgstr ""
+msgstr "이메일 채널"
 
 #. js-lingui-id: UZQ5eW
 #: src/modules/object-record/record-field/ui/meta-types/display/components/EmailsFieldDisplay.tsx
@@ -6847,7 +6847,7 @@ msgstr "이메일/도메인"
 #. js-lingui-id: 4B3eAl
 #: src/pages/settings/email/SettingsWorkspaceEmail.tsx
 msgid "Emailing is in demo mode"
-msgstr ""
+msgstr "이메일이 데모 모드로 설정되어 있습니다"
 
 #. js-lingui-id: BXEcos
 #: src/modules/settings/accounts/components/SettingsAccountsSettingsSection.tsx
@@ -6865,7 +6865,7 @@ msgstr "이메일 및 캘린더"
 #. js-lingui-id: qryOF/
 #: src/pages/settings/email/SettingsWorkspaceEmail.tsx
 msgid "Emails are logged, not sent. Sending requires the AWS SES driver with an Enterprise license, or Twenty Cloud."
-msgstr ""
+msgstr "이메일은 실제로 발송되지 않고 로그에만 기록됩니다. 발송하려면 엔터프라이즈 라이선스와 AWS SES 드라이버를 사용하거나 Twenty Cloud를 이용해야 합니다."
 
 #. js-lingui-id: mHrqHa
 #: src/modules/settings/accounts/components/SettingsAccountsMessageChannelDetails.tsx
@@ -8048,7 +8048,7 @@ msgstr ""
 #. js-lingui-id: OX7bKt
 #: src/modules/settings/admin-panel/apps/components/SettingsAdminApps.tsx
 msgid "Failed to synchronize the marketplace catalog."
-msgstr ""
+msgstr "마켓플레이스 앱 목록을 동기화하지 못했습니다."
 
 #. js-lingui-id: LVcnN8
 #: src/pages/settings/admin-panel/SettingsAdminApplicationRegistrationDangerZone.tsx
@@ -8196,7 +8196,7 @@ msgstr "추천만"
 #. js-lingui-id: PpZkda
 #: src/pages/settings/community/SettingsCommunity.tsx
 msgid "Features"
-msgstr ""
+msgstr "기능"
 
 #. js-lingui-id: 2lOBKV
 #: src/modules/metadata-error-handler/hooks/useMetadataErrorHandler.ts
@@ -8554,7 +8554,7 @@ msgstr "폴더"
 #. js-lingui-id: I7Exsw
 #: src/pages/settings/community/SettingsCommunity.tsx
 msgid "Follow us on X"
-msgstr ""
+msgstr "X에서 팔로우하기"
 
 #. js-lingui-id: Ghistm
 #: src/modules/settings/applications/hooks/useComputeApplicationContentForLayoutAndLogic.ts
@@ -9512,7 +9512,7 @@ msgstr ""
 #: src/modules/settings/admin-panel/components/SettingsAdminServerAdminAccess.tsx
 #: src/modules/settings/admin-panel/components/SettingsAdminServerAdmins.tsx
 msgid "Impersonation"
-msgstr ""
+msgstr "대리 로그인"
 
 #. js-lingui-id: yImXof
 #: src/pages/settings/admin-panel/SettingsAdminUserDetail.tsx
@@ -10168,7 +10168,7 @@ msgstr "우리의 디스코드에 참여하세요"
 #. js-lingui-id: cIo6Vk
 #: src/pages/settings/community/SettingsCommunity.tsx
 msgid "Join the community"
-msgstr ""
+msgstr "커뮤니티에 참여하세요"
 
 #. js-lingui-id: B2Zb/F
 #: src/modules/settings/data-model/constants/SettingsNonCompositeFieldTypeConfigs.ts
@@ -10992,7 +10992,7 @@ msgstr "지원 액세스 설정 관리"
 #. js-lingui-id: WJEtVC
 #: src/modules/settings/admin-panel/apps/components/SettingsAdminApps.tsx
 msgid "Manage the marketplace application catalog"
-msgstr ""
+msgstr "마켓플레이스 앱 목록을 관리하세요."
 
 #. js-lingui-id: N7fMy9
 #: src/pages/settings/members/tabs/SettingsWorkspaceMembersTeamTab.tsx
@@ -11038,7 +11038,7 @@ msgstr "마켓플레이스"
 #. js-lingui-id: qPiqVD
 #: src/modules/settings/admin-panel/apps/components/SettingsAdminApps.tsx
 msgid "Marketplace catalog synchronization started."
-msgstr ""
+msgstr "마켓플레이스 앱 목록 동기화를 시작했습니다."
 
 #. js-lingui-id: 8r6vNs
 #. placeholder {0}: fieldLabel ?? ''
@@ -12530,7 +12530,7 @@ msgstr ""
 #. js-lingui-id: m3W0Yn
 #: src/modules/settings/data-model/object-details/components/SettingsObjectRelationsTable.tsx
 msgid "No relations found"
-msgstr ""
+msgstr "관계를 찾을 수 없습니다"
 
 #. js-lingui-id: YLozFb
 #: src/modules/workflow/workflow-run/observability/WorkflowRunStepLogsHttpRequestDetail.tsx
@@ -13128,7 +13128,7 @@ msgstr ""
 #. js-lingui-id: oFTo3P
 #: src/modules/settings/event-logs/components/SettingsLogs.tsx
 msgid "Only application logs are available on your current plan. Other log types require an Enterprise subscription."
-msgstr ""
+msgstr "현재 요금제에서는 애플리케이션 로그만 이용할 수 있습니다. 다른 로그를 확인하려면 엔터프라이즈 요금제가 필요합니다."
 
 #. js-lingui-id: zii2Qj
 #: src/modules/settings/accounts/components/SettingsAccountsCalendarVisibilitySettingsCard.tsx
@@ -13512,7 +13512,7 @@ msgstr "페이지 레이아웃"
 #. js-lingui-id: zQF6Kb
 #: src/modules/settings/event-logs/components/EventLogFilters.tsx
 msgid "Page name"
-msgstr ""
+msgstr "페이지 이름"
 
 #. js-lingui-id: IVBjIH
 #: src/pages/settings/security/event-logs/components/EventLogFilters.tsx
@@ -13682,7 +13682,7 @@ msgstr "관리 작업을 수행하거나 이 사용자를 영구적으로 삭제
 #. js-lingui-id: NtQvjo
 #: src/modules/settings/event-logs/components/EventLogFilters.tsx
 msgid "Period"
-msgstr ""
+msgstr "기간"
 
 #. js-lingui-id: wSpwGR
 #: src/modules/settings/security/components/SettingsSecuritySettings.tsx
@@ -16844,7 +16844,7 @@ msgstr "상태"
 #. js-lingui-id: oCQwvS
 #: src/pages/settings/community/SettingsCommunity.tsx
 msgid "Stay up to date with product news and community updates."
-msgstr ""
+msgstr "제품 소식과 커뮤니티의 새로운 소식을 확인하세요."
 
 #. js-lingui-id: lATgy+
 #: src/modules/workflow/workflow-steps/filters/components/WorkflowStepFilterGroupOptionsDropdown.tsx
@@ -17171,7 +17171,7 @@ msgstr "동기화됨"
 #. js-lingui-id: 2XrCFd
 #: src/modules/settings/admin-panel/apps/components/SettingsAdminApps.tsx
 msgid "Synchronize catalog"
-msgstr ""
+msgstr "앱 목록 동기화"
 
 #. js-lingui-id: AtzMpB
 #: src/modules/settings/data-model/fields/forms/components/SettingsDataModelFieldIconLabelForm.tsx
@@ -18625,7 +18625,7 @@ msgstr ""
 #. js-lingui-id: Molx4x
 #: src/modules/settings/unsubscribe-topics/components/SettingsWorkspaceUnsubscribeTopicSection.tsx
 msgid "Unsubscribe Topics"
-msgstr ""
+msgstr "수신 거부 주제"
 
 #. js-lingui-id: wja8aL
 #: src/modules/activities/timeline-activities/rows/activity/components/EventRowActivity.tsx
@@ -18871,7 +18871,7 @@ msgstr "접근하려면 업그레이드하세요."
 #. js-lingui-id: bihQKI
 #: src/modules/settings/event-logs/components/SettingsLogs.tsx
 msgid "Upgrade to access audit logs"
-msgstr ""
+msgstr "감사 로그를 이용하려면 업그레이드하세요"
 
 #. js-lingui-id: Wurpq2
 #: src/modules/settings/security/components/SettingsSecuritySettings.tsx
@@ -19181,7 +19181,7 @@ msgstr "사용자"
 #. js-lingui-id: zCO0/Y
 #: src/modules/settings/admin-panel/components/SettingsAdminServerAdmins.tsx
 msgid "Users with server-level access. Open a user to grant or revoke access; use the search below to find anyone."
-msgstr ""
+msgstr "서버 수준의 접근 권한이 있는 사용자입니다. 사용자를 선택해 권한을 부여하거나 해제할 수 있습니다. 아래 검색창에서 사용자를 찾아보세요."
 
 #. js-lingui-id: UIOjSC
 #: src/modules/settings/admin-panel/signing-keys/components/SettingsAdminSigningKeysTable.tsx
@@ -20518,3 +20518,37 @@ msgstr "영구 삭제"
 
 msgid "Permanently deleted after {trashRetentionDays} days"
 msgstr "{trashRetentionDays}일 후 영구 삭제됩니다"
+
+#: src/modules/object-record/record-index/components/RecordIndexInlineEditModeButton.tsx
+msgid "Editing"
+msgstr "편집 중"
+
+#: src/modules/settings/workspace/components/SettingsWorkspaceUiThemePicker.tsx
+msgid "Applies to everyone in this workspace. Light and dark stay a personal setting."
+msgstr "이 워크스페이스의 모든 구성원에게 적용됩니다. 라이트·다크 모드는 개인별로 설정할 수 있습니다."
+
+#: src/modules/settings/workspace/components/SettingsWorkspaceUiThemePicker.tsx
+msgid "The current Twenty look"
+msgstr "Twenty의 기본 디자인"
+
+#: src/modules/settings/workspace/components/SettingsWorkspaceUiThemePicker.tsx
+msgid "Pretendard, royal-blue navigation, rounded toolbar chips"
+msgstr "프리텐다드 글꼴, 파란색 메뉴, 둥근 도구 모음 버튼"
+
+msgid "Junction Relations"
+msgstr "다대다 관계"
+
+msgid "Enable many-to-many relations through junction tables configuration"
+msgstr "연결 테이블을 설정해 여러 레코드를 서로 연결할 수 있습니다."
+
+msgid "Settings Discovery Hero"
+msgstr "설정 도움말"
+
+msgid "Show the per-page hero illustration + video walkthrough modal on settings pages"
+msgstr "설정 페이지에 안내 이미지와 사용법 동영상을 표시합니다."
+
+msgid "Messaging & Calendar Webhooks"
+msgstr "이메일·캘린더 웹훅"
+
+msgid "Sync Gmail, Google Calendar, and Microsoft 365 mail/calendar via provider push notifications instead of cron polling"
+msgstr "주기적인 조회 대신 푸시 알림으로 Gmail, Google 캘린더, Microsoft 365 이메일·캘린더를 동기화합니다."
