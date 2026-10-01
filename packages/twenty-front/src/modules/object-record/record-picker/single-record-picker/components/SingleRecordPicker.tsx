@@ -1,3 +1,4 @@
+import { StyledCompactRecordPicker } from '@/object-record/record-picker/components/StyledCompactRecordPicker';
 import { useRef } from 'react';
 
 import {
@@ -74,21 +75,23 @@ export const SingleRecordPicker = ({
     <SingleRecordPickerComponentInstanceContext.Provider
       value={{ instanceId: componentInstanceId }}
     >
-      <DropdownContent ref={containerRef} widthInPixels={dropdownWidth}>
-        <SingleRecordPickerMenuItemsWithSearch
-          focusId={focusId}
-          {...{
-            EmptyIcon,
-            emptyLabel,
-            excludedRecordIds,
-            onCancel: handleCancel,
-            onCreate,
-            onMorphItemSelected: handleMorphItemSelected,
-            objectNameSingulars,
-            layoutDirection,
-          }}
-        />
-      </DropdownContent>
+      <StyledCompactRecordPicker>
+        <DropdownContent ref={containerRef} widthInPixels={dropdownWidth}>
+          <SingleRecordPickerMenuItemsWithSearch
+            focusId={focusId}
+            {...{
+              EmptyIcon,
+              emptyLabel,
+              excludedRecordIds,
+              onCancel: handleCancel,
+              onCreate,
+              onMorphItemSelected: handleMorphItemSelected,
+              objectNameSingulars,
+              layoutDirection,
+            }}
+          />
+        </DropdownContent>
+      </StyledCompactRecordPicker>
     </SingleRecordPickerComponentInstanceContext.Provider>
   );
 };

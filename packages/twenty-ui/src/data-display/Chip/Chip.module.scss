@@ -29,11 +29,11 @@
 }
 
 .sizeSmall {
-  // Border-box so 24px avatars fit inside padding instead of overflowing a 20px pill.
+  --t-avatar-size-sm: 20px;
+
   box-sizing: border-box;
-  height: calc(
-    var(--t-avatar-size-sm) + 2 * var(--chip-vertical-padding)
-  );
+  height: 24px;
+  padding-block: 2px;
   overflow: visible;
 
   &.hasMaxWidth {

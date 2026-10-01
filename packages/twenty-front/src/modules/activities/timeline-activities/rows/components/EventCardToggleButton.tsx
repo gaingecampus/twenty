@@ -9,7 +9,14 @@ type EventCardToggleButtonProps = {
 };
 
 const StyledButtonContainer = styled.div`
+  --t-control-height-sm: 24px;
+
   border-radius: ${themeCssVariables.border.radius.sm};
+
+  svg {
+    height: 14px;
+    width: 14px;
+  }
 `;
 
 export const EventCardToggleButton = ({

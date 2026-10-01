@@ -24,6 +24,7 @@ const StyledEventRow = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${themeCssVariables.spacing[1]};
+  line-height: 20px;
   width: 100%;
 `;
 

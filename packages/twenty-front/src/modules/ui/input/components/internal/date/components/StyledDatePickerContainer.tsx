@@ -151,17 +151,23 @@ export const StyledDatePickerContainer = styled.div<{
   }
 
   & .react-datepicker__day-name {
+    align-items: center;
+    box-sizing: border-box;
     color: ${themeCssVariables.font.color.secondary};
+    display: inline-flex;
+    justify-content: center;
+    padding: 0;
+    text-align: center;
+    vertical-align: middle;
     width: 34px;
     height: 40px;
     line-height: 40px;
-    // Uniform 2px margin keeps the header row aligned with the day grid below;
-    // react-datepicker's default (0.166rem) leaves the grid tighter on the right.
-    margin: 2px;
+    margin: 0;
   }
 
   & .react-datepicker__month-container {
     float: none;
+    width: 100%;
   }
 
   // Days
@@ -177,17 +183,27 @@ export const StyledDatePickerContainer = styled.div<{
       hideCalendar === true ? 'none' : 'visible'};
   }
 
+  & .react-datepicker__day-names,
+  & .react-datepicker__week {
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    justify-items: center;
+    padding-inline: 6px;
+    width: 100%;
+  }
+
   & .react-datepicker__day-names {
     display: ${({ hideCalendar }) =>
-      hideCalendar === true ? 'none' : 'visible'};
+      hideCalendar === true ? 'none' : 'grid'};
   }
 
   & .react-datepicker__day {
     width: 34px;
     height: 34px;
     line-height: 34px;
-    // Matches the day-name margin so each column lines up symmetrically.
-    margin: 2px;
+    margin: 2px 0;
+    text-align: center;
   }
 
   & .react-datepicker__navigation--previous,

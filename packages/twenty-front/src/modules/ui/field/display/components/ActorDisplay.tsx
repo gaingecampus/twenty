@@ -1,6 +1,7 @@
 import { type FieldActorValue } from '@/object-record/record-field/ui/types/FieldMetadata';
 
 import { t } from '@lingui/core/macro';
+import { styled } from '@linaria/react';
 import { ConnectedAccountProvider } from 'twenty-shared/types';
 import { AvatarOrIcon, Chip, ChipVariant } from 'twenty-ui/data-display';
 import {
@@ -23,6 +24,14 @@ import { getAbsoluteImageUrl } from '~/utils/image/getAbsoluteImageUrl';
 type ActorDisplayProps = Partial<FieldActorValue> & {
   avatarUrl?: string | null;
 };
+
+const StyledActorChip = styled(Chip)`
+  --t-avatar-size-sm: 20px;
+
+  box-sizing: border-box;
+  height: 24px;
+  padding-block: 2px;
+`;
 
 const PROVIDERS_ICON_MAPPING = {
   EMAIL: {
@@ -91,7 +100,7 @@ export const ActorDisplay = ({
       : (name ?? '');
 
   return (
-    <Chip
+    <StyledActorChip
       label={label}
       clickable={false}
       emptyLabel={t`Untitled`}

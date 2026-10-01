@@ -1,3 +1,4 @@
+import { css } from '@linaria/core';
 import { useOpenRecordInSidePanel } from '@/side-panel/hooks/useOpenRecordInSidePanel';
 import { CoreObjectNameSingular } from 'twenty-shared/types';
 import { getLinkToShowPage } from '@/object-metadata/utils/getLinkToShowPage';
@@ -19,6 +20,14 @@ import {
   LinkChip,
 } from 'twenty-ui/data-display';
 import { type TriggerEventType } from 'twenty-ui/utilities';
+
+const compactRecordChip = css`
+  --t-avatar-size-sm: 20px;
+
+  box-sizing: border-box;
+  height: 24px;
+  padding-block: 2px;
+`;
 
 export type RecordChipProps = {
   objectNameSingular: string;
@@ -91,7 +100,7 @@ export const RecordChip = ({
         isBold={isBold}
         size={size}
         maxWidth={maxWidth}
-        className={className}
+        className={`${className ?? ''} ${size === undefined || size === 'small' ? compactRecordChip : ''}`}
         variant={ChipVariant.Transparent}
         leftComponent={
           isIconHidden ? null : (
@@ -125,7 +134,7 @@ export const RecordChip = ({
           />
         )
       }
-      className={className}
+      className={`${className ?? ''} ${size === undefined || size === 'small' ? compactRecordChip : ''}`}
       variant={
         variant ??
         (!forceDisableClick ? ChipVariant.Highlighted : ChipVariant.Transparent)

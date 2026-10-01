@@ -28,6 +28,11 @@ import { beautifyPastDateRelativeToNow } from '~/utils/date-utils';
 import { getAbsoluteImageUrl } from '~/utils/image/getAbsoluteImageUrl';
 import { SidePanelPageInfoLayout } from './SidePanelPageInfoLayout';
 
+const StyledHeaderAvatar = styled(Avatar)`
+  --t-avatar-font-size-md: 16px;
+  --t-avatar-size-md: 40px;
+`;
+
 const StyledClickableTitle = styled.div`
   cursor: pointer;
 
@@ -130,7 +135,7 @@ export const SidePanelRecordInfo = ({
       }}
     >
       <RecordTitleCell
-        sizeVariant="sm"
+        sizeVariant="md"
         containerType={RecordTitleCellContainerType.PageHeader}
       />
     </FieldContext.Provider>
@@ -141,7 +146,7 @@ export const SidePanelRecordInfo = ({
       recordType={objectMetadataItem.labelSingular}
       icon={
         recordIdentifier ? (
-          <Avatar
+          <StyledHeaderAvatar
             avatarUrl={getAbsoluteImageUrl(recordIdentifier.avatarUrl)}
             placeholder={recordIdentifier.name}
             placeholderColorSeed={objectRecordId}

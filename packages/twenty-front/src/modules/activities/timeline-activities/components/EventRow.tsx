@@ -24,7 +24,7 @@ const StyledTimelineItemContainer = styled.div`
   color: ${themeCssVariables.font.color.primary};
   display: flex;
   gap: ${themeCssVariables.spacing[4]};
-  height: 'auto';
+  height: auto;
   justify-content: space-between;
   overflow: hidden;
   white-space: nowrap;
@@ -41,7 +41,7 @@ const StyledIconContainer = styled.div`
   display: flex;
   height: 16px;
   justify-content: center;
-  margin: 5px;
+  margin: 2px 5px;
   text-decoration-line: underline;
   user-select: none;
   width: 16px;
@@ -74,7 +74,7 @@ const StyledItemContainer = styled.div<{ isMarginBottom?: boolean }>`
   gap: ${themeCssVariables.spacing[1]};
   margin-bottom: ${({ isMarginBottom }) =>
     isMarginBottom ? themeCssVariables.spacing[3] : '0'};
-  min-height: 26px;
+  min-height: 20px;
   overflow: hidden;
 `;
 

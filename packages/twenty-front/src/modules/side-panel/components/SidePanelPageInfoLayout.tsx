@@ -6,18 +6,18 @@ import { themeCssVariables } from 'twenty-ui/theme-constants';
 export const StyledPageInfoContainer = styled.div`
   align-items: center;
   display: flex;
-  gap: ${themeCssVariables.spacing[0.5]};
+  gap: ${themeCssVariables.spacing[1]};
+  min-width: 0;
 `;
 
 export const StyledPageInfoIcon = styled.div<{ iconColor?: string }>`
   align-items: center;
-  background: ${themeCssVariables.background.transparent.light};
   border-radius: ${themeCssVariables.border.radius.sm};
   color: ${({ iconColor }) => iconColor ?? ''};
   display: flex;
   flex-shrink: 0;
   justify-content: center;
-  padding: ${themeCssVariables.spacing[1]};
+  padding: 0;
 `;
 
 export const StyledPageInfoTextContainer = styled.div`
@@ -45,14 +45,41 @@ export const StyledPageInfoLabel = styled.div`
 `;
 
 const StyledRecordType = styled.span`
-  background: ${themeCssVariables.background.tertiary};
-  border: 1px solid ${themeCssVariables.border.color.medium};
-  border-radius: ${themeCssVariables.border.radius.sm};
-  color: ${themeCssVariables.font.color.secondary};
-  flex-shrink: 0;
+  color: ${themeCssVariables.font.color.tertiary};
   font-size: ${themeCssVariables.font.size.sm};
-  padding: ${themeCssVariables.spacing[0.5]} ${themeCssVariables.spacing[2]};
+  padding-inline: ${themeCssVariables.spacing[1]};
   white-space: nowrap;
+`;
+
+const StyledRecordHeading = styled.div`
+  align-items: flex-start;
+  display: flex;
+  flex-direction: column;
+  gap: ${themeCssVariables.spacing[0.5]};
+  min-width: 0;
+
+  ${StyledPageInfoTitleContainer} {
+    --record-title-justify-content: flex-start;
+    text-align: left;
+    font-size: 16px;
+    line-height: 24px;
+    width: 260px;
+    max-width: 100%;
+    height: 24px;
+
+    input {
+      border-radius: 4px;
+      height: 24px;
+      line-height: 24px;
+    }
+    padding-inline: 0;
+  }
+
+  ${StyledRecordType} {
+    font-size: 11px;
+    line-height: 14px;
+    padding-inline: 5px;
+  }
 `;
 
 type SidePanelPageInfoLayoutProps = {
@@ -61,6 +88,7 @@ type SidePanelPageInfoLayoutProps = {
   title: ReactNode;
   label?: ReactNode;
   recordType?: string;
+  recordTypeTooltip?: string;
 };
 
 export const SidePanelPageInfoLayout = ({
@@ -69,6 +97,7 @@ export const SidePanelPageInfoLayout = ({
   title,
   label,
   recordType,
+  recordTypeTooltip,
 }: SidePanelPageInfoLayoutProps) => {
   return (
     <StyledPageInfoContainer>
@@ -76,9 +105,20 @@ export const SidePanelPageInfoLayout = ({
         <StyledPageInfoIcon iconColor={iconColor}>{icon}</StyledPageInfoIcon>
       )}
       <StyledPageInfoTextContainer>
-        {recordType && <StyledRecordType>{recordType}</StyledRecordType>}
-        <StyledPageInfoTitleContainer>{title}</StyledPageInfoTitleContainer>
-        {isDefined(label) && <StyledPageInfoLabel>{label}</StyledPageInfoLabel>}
+        {recordType ? (
+          <StyledRecordHeading>
+            <StyledPageInfoTitleContainer>{title}</StyledPageInfoTitleContainer>
+            <StyledRecordType title={recordTypeTooltip}>
+              {recordType}
+              {isDefined(label) && <> · {label}</>}
+            </StyledRecordType>
+          </StyledRecordHeading>
+        ) : (
+          <StyledPageInfoTitleContainer>{title}</StyledPageInfoTitleContainer>
+        )}
+        {!recordType && isDefined(label) && (
+          <StyledPageInfoLabel>{label}</StyledPageInfoLabel>
+        )}
       </StyledPageInfoTextContainer>
     </StyledPageInfoContainer>
   );

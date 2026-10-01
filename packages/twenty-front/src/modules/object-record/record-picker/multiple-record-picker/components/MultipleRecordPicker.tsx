@@ -1,3 +1,4 @@
+import { StyledCompactRecordPicker } from '@/object-record/record-picker/components/StyledCompactRecordPicker';
 import { useCallback, useRef } from 'react';
 import { useStore } from 'jotai';
 
@@ -143,27 +144,29 @@ export const MultipleRecordPicker = ({
         containerRef={containerRef}
         onClickOutside={handleClickOutside}
       />
-      <DropdownContent ref={containerRef} widthInPixels={dropdownWidth}>
-        {layoutDirection === 'search-bar-on-bottom' && (
-          <>
-            {createNewButtonSection}
-            <MultipleRecordPickerItemsDisplay
-              onChange={onChange}
-              focusId={focusId}
-            />
-          </>
-        )}
-        <MultipleRecordPickerSearchInput />
-        {layoutDirection === 'search-bar-on-top' && (
-          <>
-            <MultipleRecordPickerItemsDisplay
-              onChange={onChange}
-              focusId={focusId}
-            />
-            {createNewButtonSection}
-          </>
-        )}
-      </DropdownContent>
+      <StyledCompactRecordPicker>
+        <DropdownContent ref={containerRef} widthInPixels={dropdownWidth}>
+          {layoutDirection === 'search-bar-on-bottom' && (
+            <>
+              {createNewButtonSection}
+              <MultipleRecordPickerItemsDisplay
+                onChange={onChange}
+                focusId={focusId}
+              />
+            </>
+          )}
+          <MultipleRecordPickerSearchInput />
+          {layoutDirection === 'search-bar-on-top' && (
+            <>
+              <MultipleRecordPickerItemsDisplay
+                onChange={onChange}
+                focusId={focusId}
+              />
+              {createNewButtonSection}
+            </>
+          )}
+        </DropdownContent>
+      </StyledCompactRecordPicker>
     </MultipleRecordPickerComponentInstanceContext.Provider>
   );
 };

@@ -77,10 +77,21 @@ const StyledContentContainer = styled.div`
 `;
 
 const StyledRightControlsContainer = styled.div`
+  --t-control-height-sm: 32px;
+
   align-items: center;
   display: flex;
   flex-shrink: 0;
   gap: ${themeCssVariables.spacing[1]};
+`;
+
+const StyledCloseButton = styled(IconButton)`
+  flex-shrink: 0;
+
+  svg {
+    height: 16px;
+    width: 16px;
+  }
 `;
 
 export const SidePanelTopBar = () => {
@@ -188,9 +199,9 @@ export const SidePanelTopBar = () => {
         <StyledRightControlsContainer ref={setSidePanelHeaderActionsElement} />
         <SidePanelTopBarRightCornerIcon />
         {!shouldHideCloseButton && (
-          <IconButton
+          <StyledCloseButton
             Icon={IconX}
-            size="medium"
+            size="small"
             variant="secondary"
             onClick={closeSidePanelMenu}
             ariaLabel={t`Close side panel`}

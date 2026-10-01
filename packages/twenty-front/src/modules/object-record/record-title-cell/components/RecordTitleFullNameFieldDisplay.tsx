@@ -21,7 +21,7 @@ const StyledDiv = styled.div`
   cursor: pointer;
   display: flex;
   height: 24px;
-  justify-content: center;
+  justify-content: var(--record-title-justify-content, center);
   overflow: hidden;
   padding: ${themeCssVariables.spacing[0]} 5px;
   &:hover {
