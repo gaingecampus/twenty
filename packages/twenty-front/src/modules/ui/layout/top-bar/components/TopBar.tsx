@@ -20,7 +20,7 @@ const StyledContainer = styled.div`
   display: flex;
   flex-direction: column;
   gap: var(--t-view-bar-stack-gap, ${themeCssVariables.spacing[2]});
-  padding: var(--t-view-bar-padding-x, ${themeCssVariables.spacing[3]});
+  padding: var(--t-view-bar-padding-x, ${themeCssVariables.spacing[4]});
 `;
 
 const StyledTopBar = styled.div`

@@ -30,6 +30,12 @@ const StyledContainerWithPadding = styled.div`
   min-height: 0;
 `;
 
+const StyledBoardContainer = styled.div`
+  background: var(--t-view-canvas-bg, ${themeCssVariables.background.primary});
+  flex: 1;
+  min-height: 0;
+`;
+
 export const RecordIndexContainer = () => {
   const recordIndexViewType = useAtomStateValue(recordIndexViewTypeState);
 
@@ -52,13 +58,13 @@ export const RecordIndexContainer = () => {
             <RecordIndexTableContainer recordTableId={recordIndexId} />
           )}
           {recordIndexViewType === ViewType.KANBAN && (
-            <StyledContainerWithPadding>
+            <StyledBoardContainer>
               <RecordBoardContainer
                 recordBoardId={recordIndexId}
                 viewBarId={recordIndexId}
                 objectNameSingular={objectNameSingular}
               />
-            </StyledContainerWithPadding>
+            </StyledBoardContainer>
           )}
           {recordIndexViewType === ViewType.CALENDAR && (
             <StyledContainerWithPadding>

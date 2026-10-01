@@ -52,7 +52,7 @@ const StyledHeader = styled.div<{ headerLayout: HeaderLayout }>`
 
   @container record-index-header (max-width: 720px) {
     grid-template-columns: minmax(0, 1fr) auto;
-    row-gap: ${themeCssVariables.spacing[3]};
+    row-gap: ${themeCssVariables.spacing[1]};
 
     > [data-header-part='left'] {
       grid-column: 1;
@@ -175,7 +175,8 @@ export const PageCardHeader = ({
 
   const hasTitleContent =
     !isMobile && (isDefined(icon) || isDefined(title) || isDefined(tag));
-  const shouldCenterTitle = centerTitle && hasTitleContent && !centerContent;
+  const shouldCenterTitle =
+    centerTitle && hasTitleContent && !isDefined(centerContent);
   const hasCenterContent = isDefined(centerContent);
 
   const headerLayout: HeaderLayout = shouldCenterTitle

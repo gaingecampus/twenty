@@ -19,6 +19,7 @@ const StyledPaginationBar = styled.div`
   align-items: center;
   display: flex;
   flex-shrink: 0;
+  flex-wrap: wrap;
   gap: ${themeCssVariables.spacing[2]};
   justify-content: space-between;
   padding-top: ${themeCssVariables.spacing[3]};
@@ -92,11 +93,31 @@ export const RecordIndexPaginationBar = () => {
     recordIndexTotalCountComponentState,
   );
 
-  const { formatNumber } = useNumberFormat();
+  if (!isRecordIndexPaginationEnabled) return null;
 
-  if (!isRecordIndexPaginationEnabled || recordIndexTotalCount === 0) {
-    return null;
-  }
+  return (
+    <RecordPaginationBar
+      currentPage={recordIndexCurrentPage}
+      pageSize={recordIndexPageSize}
+      totalCount={recordIndexTotalCount}
+      onPageChange={setRecordIndexCurrentPage}
+    />
+  );
+};
+
+export const RecordPaginationBar = ({
+  currentPage: recordIndexCurrentPage,
+  pageSize: recordIndexPageSize,
+  totalCount: recordIndexTotalCount,
+  onPageChange: setRecordIndexCurrentPage,
+}: {
+  currentPage: number;
+  pageSize: number;
+  totalCount: number;
+  onPageChange: (page: number) => void;
+}) => {
+  const { formatNumber } = useNumberFormat();
+  if (recordIndexTotalCount === 0) return null;
 
   const pageCount = getRecordIndexPageCount(
     recordIndexTotalCount,

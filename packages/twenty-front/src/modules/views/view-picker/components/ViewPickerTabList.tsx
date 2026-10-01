@@ -56,7 +56,7 @@ const StyledTabList = styled.div`
   gap: var(--t-view-tab-gap, ${themeCssVariables.spacing[1]});
   min-width: 0;
   overflow-x: auto;
-  padding: 3px;
+  padding: 0;
   scrollbar-width: thin;
 `;
 

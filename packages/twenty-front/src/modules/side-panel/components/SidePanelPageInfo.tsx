@@ -23,7 +23,7 @@ import { useContext } from 'react';
 import { ThemeContext, themeCssVariables } from 'twenty-ui/theme-constants';
 const StyledPageTitle = styled.div`
   color: ${themeCssVariables.font.color.primary};
-  font-size: ${themeCssVariables.font.size.sm};
+  font-size: ${themeCssVariables.font.size.lg};
   font-weight: ${themeCssVariables.font.weight.semiBold};
 `;
 

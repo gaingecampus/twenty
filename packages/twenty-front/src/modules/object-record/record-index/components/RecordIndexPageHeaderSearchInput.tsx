@@ -9,6 +9,8 @@ import { useDebouncedCallback } from 'use-debounce';
 const SEARCH_DEBOUNCE_MS = 500;
 
 const StyledSearchInputWrapper = styled.div`
+  --t-search-height: 40px;
+
   max-width: var(--t-page-search-width, 280px);
   min-width: 0;
   width: 100%;

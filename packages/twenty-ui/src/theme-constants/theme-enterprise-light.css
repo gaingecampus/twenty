@@ -100,7 +100,7 @@ html.light[data-ui-theme='enterprise'] {
   --t-font-color-light: #a0a6b4;
   --t-font-color-extra-light: #c4c8d2;
   --t-font-color-inverted: #ffffff;
-  --t-page-title-font-size: 26px;
+  --t-page-title-font-size: 22px;
   --t-page-title-font-weight: 700;
   --t-page-header-icon-display: none;
   --t-page-header-padding-x: 16px;
@@ -220,7 +220,7 @@ html.light[data-ui-theme='enterprise'] {
   --t-search-radius: var(--t-border-radius-sm);
   --t-search-height: 40px;
   --t-search-focus-bg: #ffffff;
-  --t-search-focus-ring: 0 0 0 3px #eef2ff;
+  --t-search-focus-ring: none;
 
   /* Navigation — light-blue active menu (CTA buttons stay filled) */
   --t-nav-item-height: 40px;
@@ -334,7 +334,7 @@ html.light[data-ui-theme='enterprise'] {
   --t-view-bar-details-min-height: auto;
   --t-view-bar-details-padding-y: 0;
   --t-view-bar-details-border-top: none;
-  --t-view-bar-padding-x: 24px;
+  --t-view-bar-padding-x: var(--t-page-header-padding-x);
   --t-view-bar-section-gap: 24px;
   --t-view-bar-stack-gap: 12px;
 

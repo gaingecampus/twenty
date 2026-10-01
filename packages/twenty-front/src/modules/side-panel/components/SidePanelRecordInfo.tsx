@@ -30,7 +30,6 @@ import { SidePanelPageInfoLayout } from './SidePanelPageInfoLayout';
 
 const StyledHeaderAvatar = styled(Avatar)`
   --t-avatar-font-size-md: 16px;
-  --t-avatar-size-md: 36px;
 `;
 
 const StyledClickableTitle = styled.div`

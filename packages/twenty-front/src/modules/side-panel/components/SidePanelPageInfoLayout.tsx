@@ -52,9 +52,8 @@ const StyledRecordType = styled.span`
 `;
 
 const StyledRecordHeading = styled.div`
-  align-items: flex-start;
+  align-items: center;
   display: flex;
-  flex-direction: column;
   gap: ${themeCssVariables.spacing[0.5]};
   min-width: 0;
 
@@ -63,7 +62,7 @@ const StyledRecordHeading = styled.div`
     text-align: left;
     font-size: 16px;
     line-height: 24px;
-    width: 260px;
+    flex: 0 1 auto;
     max-width: 100%;
     height: 24px;
 
@@ -76,8 +75,8 @@ const StyledRecordHeading = styled.div`
   }
 
   ${StyledRecordType} {
-    font-size: 11px;
-    line-height: 14px;
+    font-size: ${themeCssVariables.font.size.sm};
+    line-height: 24px;
     padding-inline: 5px;
   }
 `;
@@ -107,11 +106,13 @@ export const SidePanelPageInfoLayout = ({
       <StyledPageInfoTextContainer>
         {recordType ? (
           <StyledRecordHeading>
-            <StyledPageInfoTitleContainer>{title}</StyledPageInfoTitleContainer>
             <StyledRecordType title={recordTypeTooltip}>
-              {recordType}
-              {isDefined(label) && <> · {label}</>}
+              {recordType} /
             </StyledRecordType>
+            <StyledPageInfoTitleContainer>{title}</StyledPageInfoTitleContainer>
+            {isDefined(label) && (
+              <StyledPageInfoLabel>· {label}</StyledPageInfoLabel>
+            )}
           </StyledRecordHeading>
         ) : (
           <StyledPageInfoTitleContainer>{title}</StyledPageInfoTitleContainer>
