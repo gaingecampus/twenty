@@ -61,9 +61,22 @@ const StyledResizeHandle = styled.div`
   width: 8px;
   z-index: 2;
 
-  &:hover,
-  &:focus-visible {
-    background: ${themeCssVariables.border.color.medium};
+  &::before {
+    background: ${themeCssVariables.color.blue};
+    bottom: 0;
+    content: '';
+    left: 3px;
+    opacity: 0;
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+    width: 2px;
+  }
+
+  &:hover::before,
+  &:focus-visible::before,
+  &[data-resizing='true']::before {
+    opacity: 1;
   }
 
   @media print {
@@ -103,6 +116,7 @@ const StyledScrollWrapperContainer = styled.div`
 export const PageLayoutTabsRenderer = () => {
   const { t } = useLingui();
   const containerRef = useRef<HTMLDivElement>(null);
+  const [isResizing, setIsResizing] = useState(false);
   const [panelWidth, setPanelWidth] = useState(
     PAGE_LAYOUT_LEFT_PANEL_CONTAINER_WIDTH,
   );
@@ -270,9 +284,11 @@ export const PageLayoutTabsRenderer = () => {
             aria-valuemin={260}
             aria-valuemax={600}
             tabIndex={0}
+            data-resizing={isResizing}
             onPointerDown={(event) => {
               event.preventDefault();
               event.currentTarget.setPointerCapture(event.pointerId);
+              setIsResizing(true);
             }}
             onPointerMove={(event) => {
               if (!event.currentTarget.hasPointerCapture(event.pointerId))
@@ -285,6 +301,7 @@ export const PageLayoutTabsRenderer = () => {
                 event.currentTarget.releasePointerCapture(event.pointerId);
               }
             }}
+            onLostPointerCapture={() => setIsResizing(false)}
             onKeyDown={(event) => {
               if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
                 event.preventDefault();

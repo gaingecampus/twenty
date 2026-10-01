@@ -1,4 +1,5 @@
 import { styled } from '@linaria/react';
+import { themeCssVariables } from 'twenty-ui/theme-constants';
 
 import { useResizablePanel } from '@/ui/layout/resizable-panel/hooks/useResizablePanel';
 import { type ResizablePanelConstraints } from '@/ui/layout/resizable-panel/types/ResizablePanelConstraints';
@@ -17,6 +18,24 @@ const StyledGap = styled.div<{ gapWidth: number }>`
   transition: width 0.15s ease;
   width: ${({ gapWidth }) => gapWidth}px;
   z-index: 1;
+
+  &::before {
+    background: ${themeCssVariables.color.blue};
+    bottom: 0;
+    content: '';
+    left: 50%;
+    opacity: 0;
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+    transform: translateX(-50%);
+    width: 2px;
+  }
+
+  &:hover::before,
+  &[data-resizing='true']::before {
+    opacity: 1;
+  }
 `;
 
 type ResizablePanelGapProps = {
@@ -40,7 +59,7 @@ export const ResizablePanelGap = ({
   cssVariableName,
   onResizeStart,
 }: ResizablePanelGapProps) => {
-  const { handleMouseDown, handleMouseEnter, handleMouseLeave } =
+  const { handleMouseDown, handleMouseEnter, handleMouseLeave, isResizing } =
     useResizablePanel({
       side,
       constraints,
@@ -54,6 +73,7 @@ export const ResizablePanelGap = ({
   return (
     <StyledGap
       gapWidth={gapWidth}
+      data-resizing={isResizing}
       onMouseDown={handleMouseDown}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
