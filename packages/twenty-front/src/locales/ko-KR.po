@@ -9241,7 +9241,7 @@ msgid ""
 "```\n"
 "\n"
 "See the [Getting Started guide](https://twenty.com/developers/extend/apps/getting-started) for the full walkthrough, and [Building Apps](https://twenty.com/developers/extend/apps/building) for the `defineApplication` / `defineEntity` APIs."
-msgstr "작업 공간의 사용자 정의 및 재정의를 호스팅하세요.\\n\\n#### 포함 내용\\n표준 앱 위에 생성하는 모든 확장 프로그램은 사용자 정의 아래에 그룹화됩니다. 스키마 변경 사항, 인터페이스 변경 사항, 작업 영역별 로직을 한 곳에 유지합니다.\\n\\n- 고유한 데이터 모델을 위한 맞춤 개체 및 필드\\n- 팀의 작업 방식을 형성하는 보기, 탐색 항목 및 레코드 레이아웃\\n- 작업 영역을 자동화하거나 확장하는 논리 함수, 전면 구성 요소 및 에이전트\\n\\n#### 존재 이유\\n이 작업 영역에 로컬로 유지되어야 하는 작업 영역별 맞춤 설정에 이 앱을 사용하세요.\\n\\n한 비즈니스에 대해 하나의 작업 영역을 구성하는 경우 유지하세요. 여기. 작업 공간 전반에 걸쳐 버전 관리, 공유 또는 설치해야 하는 자체 데이터 모델, UI 및 자동화를 갖춘 재사용 가능한 비즈니스 앱을 구축하는 경우 대신 전용 앱을 생성하십시오.\\n\\n#### 자신만의 앱 구축\\n\\n다음 명령으로 새 앱을 스캐폴드하세요.\\n\\n```bash\\nnpx create-twenty-app@latest my-twenty-app\\n```\\n\\n[시작하기]를 참조하세요. 전체 연습은 가이드](https://twenty.com/developers/extend/apps/getting-started), `defineApplication` / `defineEntity` API는 [앱 빌드](https://twenty.com/developers/extend/apps/building)를 참조하세요."
+msgstr "작업 공간의 사용자 정의 및 재정의를 호스팅하세요.\n\n#### 포함 내용\n표준 앱 위에 생성하는 모든 확장 프로그램은 사용자 정의 아래에 그룹화됩니다. 스키마 변경 사항, 인터페이스 변경 사항, 작업 영역별 로직을 한 곳에 유지합니다.\n\n- 고유한 데이터 모델을 위한 맞춤 개체 및 필드\n- 팀의 작업 방식을 형성하는 보기, 탐색 항목 및 레코드 레이아웃\n- 작업 영역을 자동화하거나 확장하는 논리 함수, 전면 구성 요소 및 에이전트\n\n#### 존재 이유\n이 작업 영역에 로컬로 유지되어야 하는 작업 영역별 맞춤 설정에 이 앱을 사용하세요.\n\n한 비즈니스에 대해 하나의 작업 영역을 구성하는 경우 유지하세요. 여기. 작업 공간 전반에 걸쳐 버전 관리, 공유 또는 설치해야 하는 자체 데이터 모델, UI 및 자동화를 갖춘 재사용 가능한 비즈니스 앱을 구축하는 경우 대신 전용 앱을 생성하십시오.\n\n#### 자신만의 앱 구축\n\n다음 명령으로 새 앱을 스캐폴드하세요.\n\n```bash\nnpx create-twenty-app@latest my-twenty-app\n```\n\n[시작하기]를 참조하세요. 전체 연습은 가이드](https://twenty.com/developers/extend/apps/getting-started), `defineApplication` / `defineEntity` API는 [앱 빌드](https://twenty.com/developers/extend/apps/building)를 참조하세요."
 
 #. js-lingui-id: yY8wAv
 #: src/modules/workflow/workflow-steps/workflow-actions/delay-actions/components/WorkflowEditActionDelay.tsx
@@ -14966,7 +14966,7 @@ msgstr "응답 형식"
 #: src/pages/settings/api-webhooks/SettingsApiWebhooks.tsx
 #: src/pages/settings/developers/playground/SettingsRestPlayground.tsx
 msgid "REST"
-msgstr "휴식"
+msgstr "REST"
 
 #. js-lingui-id: 6z9W13
 #: src/modules/spreadsheet-import/steps/components/MatchColumnsStep/MatchColumnsStep.tsx
@@ -17422,7 +17422,7 @@ msgid ""
 "```\n"
 "\n"
 "See the [Getting Started guide](https://twenty.com/developers/extend/apps/getting-started) for the full walkthrough, and [Building Apps](https://twenty.com/developers/extend/apps/building) for the `defineApplication` / `defineEntity` APIs."
-msgstr "모든 Twenty 작업공간이 실행되는 기본 데이터 모델입니다.\\n\\n#### \\\"토대\\\"의 의미\\n\\n모든 Twenty 작업공간은 이 개체 세트로 시작됩니다. 관계, 활동, 보고 등 CRM의 형태를 정의합니다. 마켓플레이스 앱, AI 에이전트, 맞춤 개체를 포함한 다른 모든 항목이 여기에 연결됩니다.\\n\\n#### 포함된 개체\\n- **고객 및 기업**: 연락처 및 계정 기록\\n- **문의**: 영업 파이프라인\\n- **노트 및 할 일**: 활동 및 후속 조치\\n- **워크플로 및 대시보드**: 자동화 및 보고\\n\\n이 앱을 제거하면 나머지 20개는 중단될 것이 없습니다.\\n\\n#### 나만의 앱을 빌드하세요\\n\\n자신만의 개체, 필드, 논리 함수 또는 AI 기술로 Twenty를 확장하세요. 하나의 명령으로 새 앱을 스캐폴드합니다:\\n\\n```bash\\nnpx create-twenty-app@latest my-twenty-app\\n```\\n\\n그런 다음 폴더 내부:\\n\\n```bash\\ncd my-twenty-app\\narn 20 dev\\n```\\n\\n[시작하기]를 참조하세요. 전체 연습은 가이드](https://twenty.com/developers/extend/apps/getting-started), `defineApplication` / `defineEntity` API는 [앱 빌드](https://twenty.com/developers/extend/apps/building)를 참조하세요."
+msgstr "모든 Twenty 작업공간이 실행되는 기본 데이터 모델입니다.\n\n#### \\\"토대\\\"의 의미\n\n모든 Twenty 작업공간은 이 개체 세트로 시작됩니다. 관계, 활동, 보고 등 CRM의 형태를 정의합니다. 마켓플레이스 앱, AI 에이전트, 맞춤 개체를 포함한 다른 모든 항목이 여기에 연결됩니다.\n\n#### 포함된 개체\n- **고객 및 기업**: 연락처 및 계정 기록\n- **문의**: 영업 파이프라인\n- **노트 및 할 일**: 활동 및 후속 조치\n- **워크플로 및 대시보드**: 자동화 및 보고\n\n이 앱을 제거하면 나머지 20개는 중단될 것이 없습니다.\n\n#### 나만의 앱을 빌드하세요\n\n자신만의 개체, 필드, 논리 함수 또는 AI 기술로 Twenty를 확장하세요. 하나의 명령으로 새 앱을 스캐폴드합니다:\n\n```bash\nnpx create-twenty-app@latest my-twenty-app\n```\n\n그런 다음 폴더 내부:\n\n```bash\ncd my-twenty-app\narn 20 dev\n```\n\n[시작하기]를 참조하세요. 전체 연습은 가이드](https://twenty.com/developers/extend/apps/getting-started), `defineApplication` / `defineEntity` API는 [앱 빌드](https://twenty.com/developers/extend/apps/building)를 참조하세요."
 
 #. js-lingui-id: /kfzmx
 #: src/pages/settings/legal/SettingsLegalDpa.tsx
@@ -20518,6 +20518,14 @@ msgstr "영구 삭제"
 
 msgid "Permanently deleted after {trashRetentionDays} days"
 msgstr "{trashRetentionDays}일 후 영구 삭제됩니다"
+
+#: src/modules/activities/notes/components/NoteAttachmentSummary.tsx
+msgid "Spreadsheet"
+msgstr "스프레드시트"
+
+#: src/modules/activities/notes/components/NoteAttachmentSummary.tsx
+msgid "Presentation"
+msgstr "프레젠테이션"
 
 #: src/modules/object-record/record-index/components/RecordIndexInlineEditModeButton.tsx
 msgid "Editing"
