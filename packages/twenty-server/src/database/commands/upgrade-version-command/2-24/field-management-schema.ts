@@ -1,4 +1,5 @@
 export const CONTRACT_GOAL_FIELDS = [
+  { name: 'plannedSessionCount', label: '총 예정 회차', type: 'NUMBER' },
   { name: 'consultingGoal', label: '계약 목표', type: 'TEXT' },
   { name: 'successCriteria', label: '성공 기준', type: 'TEXT' },
 ];
