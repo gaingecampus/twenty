@@ -94,12 +94,16 @@ export const MyFieldsNavigationItem = () => {
     />
   );
 };
+export type FieldContractCounts = Record<'PRE' | 'ACTIVE' | 'DONE', number>;
+
 export const FieldManagement = ({
   scope = {},
   onClose,
+  onContractCountsChange,
 }: {
   scope?: Scope;
   onClose?: () => void;
+  onContractCountsChange?: (counts: FieldContractCounts | undefined) => void;
 }) => {
   const metadata = useFieldManagementMetadata();
   if (!isFieldManagementReady(metadata))
@@ -113,6 +117,7 @@ export const FieldManagement = ({
       metadata={metadata}
       scope={scope}
       onClose={onClose}
+      onContractCountsChange={onContractCountsChange}
     />
   );
 };
@@ -120,10 +125,12 @@ const FieldManagementLoaded = ({
   metadata,
   scope,
   onClose,
+  onContractCountsChange,
 }: {
   metadata: ReturnType<typeof useFieldManagementMetadata>;
   scope: Scope;
   onClose?: () => void;
+  onContractCountsChange?: (counts: FieldContractCounts | undefined) => void;
 }) => {
   const data = useFieldManagementData();
   const store = useStore();
@@ -154,7 +161,9 @@ const FieldManagementLoaded = ({
   const [recordSortContainer, setRecordSortContainer] =
     useState<HTMLDivElement | null>(null);
   const [reading, setReading] = useState(false);
-  const [selectedContractId, setSelectedContractId] = useState<string>();
+  const [selectedContractIdFromList, setSelectedContractId] =
+    useState<string>();
+  const selectedContractId = scope.contract ?? selectedContractIdFromList;
   const contractDetailRef = useRef<HTMLElement>(null);
   useEffect(() => {
     if (selectedContractId)
@@ -197,6 +206,23 @@ const FieldManagementLoaded = ({
               scope.memberIds.some((id) => assigned(c, id, data.links, true))
             : assigned(c, myMemberId, data.links, includeLead),
   );
+  const preCount = scopedContracts.filter(
+    (c) => c.onboardingStatus === 'PRE',
+  ).length;
+  const activeCount = scopedContracts.filter(
+    (c) => c.onboardingStatus === 'ACTIVE',
+  ).length;
+  const doneCount = scopedContracts.filter(
+    (c) => c.onboardingStatus === 'DONE',
+  ).length;
+  const countsReady = !data.loading && !data.error;
+  useEffect(() => {
+    onContractCountsChange?.(
+      countsReady
+        ? { PRE: preCount, ACTIVE: activeCount, DONE: doneCount }
+        : undefined,
+    );
+  }, [onContractCountsChange, countsReady, preCount, activeCount, doneCount]);
   const contracts = [...scopedContracts]
     .sort(
       (a, b) =>
@@ -290,47 +316,56 @@ const FieldManagementLoaded = ({
         text(b.visitDate).localeCompare(text(a.visitDate)) ||
         text(b.createdAt).localeCompare(text(a.createdAt)),
     );
-  const renderContractDetail = (c: ObjectRecord) => {
+  const renderContractDetail = (c: ObjectRecord, embedded = false) => {
     const sessionProgress = getContractSessionProgress(c, data.visits);
     return (
       <div data-contract-detail-group>
-        <StyledFieldRow
-          data-detail-toolbar
-          style={{ justifyContent: 'space-between' }}
+        {!embedded && (
+          <StyledFieldRow
+            data-detail-toolbar
+            style={{ justifyContent: 'space-between' }}
+          >
+            {scope.contract ? (
+              <h3 data-field-heading>계약 목표</h3>
+            ) : (
+              <nav data-contract-breadcrumb aria-label="계약 목표 경로">
+                <button
+                  type="button"
+                  aria-label="계약 목표 목록으로 돌아가기"
+                  title="뒤로가기"
+                  onClick={() => {
+                    setSelectedContractId(undefined);
+                    setEditor(undefined);
+                  }}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: 28,
+                    height: 28,
+                  }}
+                >
+                  <IconArrowLeft size={18} aria-hidden />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedContractId(undefined);
+                    setEditor(undefined);
+                  }}
+                >
+                  계약 목표
+                </button>
+                <span aria-hidden="true">/</span>
+                <span aria-current="page">상세</span>
+              </nav>
+            )}
+          </StyledFieldRow>
+        )}
+        <StyledFieldRecordSection
+          ref={embedded ? undefined : contractDetailRef}
+          data-contract-detail
         >
-          <nav data-contract-breadcrumb aria-label="계약 목표 경로">
-            <button
-              type="button"
-              aria-label="계약 목표 목록으로 돌아가기"
-              title="뒤로가기"
-              onClick={() => {
-                setSelectedContractId(undefined);
-                setEditor(undefined);
-              }}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: 28,
-                height: 28,
-              }}
-            >
-              <IconArrowLeft size={18} aria-hidden />
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setSelectedContractId(undefined);
-                setEditor(undefined);
-              }}
-            >
-              계약 목표
-            </button>
-            <span aria-hidden="true">/</span>
-            <span aria-current="page">상세</span>
-          </nav>
-        </StyledFieldRow>
-        <StyledFieldRecordSection ref={contractDetailRef} data-contract-detail>
           <span data-contract-card-heading>
             <span data-contract-title>
               <Link to={`/object/onboarding/${c.id}`}>
@@ -479,11 +514,21 @@ const FieldManagementLoaded = ({
     return (
       <StyledFieldVisitDetail key={v.id}>
         <div data-detail-heading>
+          <strong data-detail-session>
+            {v.sessionNumber ? `${String(v.sessionNumber)}회차` : '회차 미입력'}
+          </strong>
           <div data-detail-title-row>
             <h2>{text(v.name)}</h2>
+            <StyledFieldRow data-detail-actions>
+              <FieldVisitStatus submitted={v.recordStatus === 'SUBMITTED'} />
+              {renderVisitActions(v)}
+            </StyledFieldRow>
           </div>
           <div data-detail-byline>
             <FieldVisitAuthor visit={v} />
+            <span>
+              현장 날짜 {contractDateLabel(v.visitDate) || '날짜 미정'}
+            </span>
             <span
               title="최초 작성일"
               aria-label={`최초 작성일 ${fieldVisitTimestamp(v.createdAt)}`}
@@ -500,30 +545,9 @@ const FieldManagementLoaded = ({
             </span>
           </div>
         </div>
-        <div data-detail-context>
-          <Link to={`/object/onboarding/${c.id}#gainge-field-records`}>
-            <FieldContractLabel name={text(c.name)} />
-          </Link>
-          <div data-detail-goal>
-            <span>현재 계약 목표</span>
-            <p data-empty={!text(c.consultingGoal).trim() || undefined}>
-              {text(c.consultingGoal).trim() || '목표 미등록'}
-            </p>
-          </div>
-          <div data-field-schedule>
-            <span data-visit-schedule>
-              <span data-schedule-label>현장 기록</span>
-              <span data-schedule-value>
-                <strong data-session-badge>
-                  {v.sessionNumber
-                    ? `${String(v.sessionNumber)}회차`
-                    : '회차 미입력'}
-                </strong>
-                {contractDateLabel(v.visitDate) || '날짜 미정'}
-              </span>
-            </span>
-          </div>
-        </div>
+        <StyledFieldPanel data-contextual data-inline-detail>
+          {renderContractDetail(c, true)}
+        </StyledFieldPanel>
         <div data-detail-body>
           <section>
             <h3>수행 내용</h3>
@@ -548,21 +572,6 @@ const FieldManagementLoaded = ({
   if (scope.visit)
     return (
       <StyledFieldPanel data-inline-detail={!!onClose || undefined}>
-        <StyledFieldRow data-detail-toolbar hidden={!!editor}>
-          {onClose ? (
-            <button onClick={onClose}>목록으로</button>
-          ) : (
-            <Link to={returnPath}>목록으로</Link>
-          )}
-          {detailVisit && (
-            <StyledFieldRow>
-              <FieldVisitStatus
-                submitted={detailVisit.recordStatus === 'SUBMITTED'}
-              />
-              {renderVisitActions(detailVisit)}
-            </StyledFieldRow>
-          )}
-        </StyledFieldRow>
         {!detailVisit || !contracts.length ? (
           <p role="status">기록을 찾을 수 없거나 조회 권한이 없습니다.</p>
         ) : editor ? (
@@ -709,7 +718,7 @@ const FieldManagementLoaded = ({
         data-contract-group={contextual || undefined}
         data-plain={!contextual || undefined}
       >
-        {contextual && (
+        {contextual && !scope.contractList && (
           <StyledFieldRow data-field-header>
             <h3 data-field-heading>
               계약 목표 <span>{contracts.length}</span>

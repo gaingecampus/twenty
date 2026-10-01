@@ -88,12 +88,16 @@ export const StyledFieldPanel = styled.div`
     font-size: 14px;
   }
   &[data-contextual][data-contract-list-page] {
+    display: contents;
     background: transparent;
     padding: 0;
   }
-  &[data-contextual][data-contract-list-page] [data-field-header],
   &[data-contextual][data-contract-list-page] > [data-contract-group] {
-    background: transparent;
+    display: contents;
+  }
+  &[data-contextual][data-contract-list-page] [data-contract-item] {
+    flex-shrink: 0;
+    height: auto;
   }
   &[data-inline-detail] {
     gap: 16px;
@@ -1031,7 +1035,16 @@ export const StyledFieldVisitDetail = styled(StyledFieldCard)`
     padding: 6px 10px;
   }
   [data-detail-title-row] h2 {
+    flex: 1;
     min-width: 0;
+  }
+  [data-detail-session] {
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+  [data-detail-actions] {
+    flex-shrink: 0;
   }
   [data-detail-heading] {
     align-items: flex-start;

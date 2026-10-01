@@ -1003,6 +1003,9 @@ export const StyledStatusBoardTabCount = styled.span`
 
 export const StyledStatusBoardContractTabs = styled.div`
   background: ${themeCssVariables.background.tertiary};
+  &[data-on-page-canvas] {
+    background: ${themeCssVariables.background.quaternary};
+  }
   border-radius: 10px;
   display: flex;
   padding: 4px;

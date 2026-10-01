@@ -4,7 +4,7 @@ import {
   StyledStatusBoardSoftTab,
   StyledStatusBoardScroll,
 } from '@/status-board/components/statusBoardStyled';
-import { FieldManagement } from './FieldManagement';
+import { FieldManagement, type FieldContractCounts } from './FieldManagement';
 import { StatusBoardDummyDataProvider } from '@/status-board/components/StatusBoardDummyDataProvider';
 import { StatusBoardFilterBar } from '@/status-board/components/StatusBoardFilterBar';
 import { useStatusBoardDummyData } from '@/status-board/contexts/StatusBoardDummyDataContext';
@@ -36,6 +36,7 @@ const FieldManagementPageBody = ({
   const [contractStatus, setContractStatus] = useState<
     'PRE' | 'ACTIVE' | 'DONE'
   >('ACTIVE');
+  const [contractCounts, setContractCounts] = useState<FieldContractCounts>();
   const { members } = useStatusBoardDummyData();
   const filters = useStatusBoardFilters(members);
   const { visibleMembers, memberIds } = useStatusBoardMemberIds({
@@ -56,7 +57,7 @@ const FieldManagementPageBody = ({
         onClearSelectedGroupIds={filters.clearSelectedGroupIds}
         onClearSelectedMemberIds={filters.clearSelectedMemberIds}
       />
-      <StyledStatusBoardContractTabs aria-label="계약 상태">
+      <StyledStatusBoardContractTabs aria-label="계약 상태" data-on-page-canvas>
         {(
           [
             ['PRE', '진행 전 계약'],
@@ -72,11 +73,13 @@ const FieldManagementPageBody = ({
             onClick={() => setContractStatus(value)}
           >
             {label}
+            <span>{contractCounts?.[value] ?? '—'}</span>
           </StyledStatusBoardSoftTab>
         ))}
       </StyledStatusBoardContractTabs>
       <FieldManagement
         scope={{ contractList: true, memberIds, contractStatus }}
+        onContractCountsChange={setContractCounts}
       />
     </StyledStatusBoardScroll>
   );
