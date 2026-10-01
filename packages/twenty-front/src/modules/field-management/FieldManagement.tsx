@@ -2,6 +2,7 @@ import { StatusBoardRecordRowContent } from '@/status-board/components/StatusBoa
 import { FieldSortModal } from './FieldSortModal';
 import { FieldRecordMore } from './FieldRecordMore';
 import { FieldContractLabel } from './FieldContractLabel';
+import { FieldContractAssignees } from './FieldContractAssignees';
 import {
   IconMap,
   IconCheck,
@@ -529,29 +530,13 @@ const FieldManagementLoaded = ({
         )}
       {contextual ? (
         <StyledFieldRow data-field-header>
-          <div>
-            <h2>현장 기록</h2>
-            <p data-subtitle>
-              계약 {contracts.length}건 · 제출{' '}
-              {
-                contextVisits.filter((v) => v.recordStatus === 'SUBMITTED')
-                  .length
-              }
-              건 · 초안{' '}
-              {contextVisits.filter((v) => v.recordStatus === 'DRAFT').length}건
-            </p>
-          </div>
+          <h3 data-field-heading>
+            전체 <span>{contextVisits.length}</span>
+          </h3>
           <StyledFieldRow>
-            <button
-              aria-label="현장 기록 새로고침"
-              title="새로고침"
-              onClick={() => void data.refresh()}
-            >
-              <IconRefresh size={16} aria-hidden="true" />
-            </button>
             {canWriteVisits && (
               <button
-                data-primary
+                data-field-add
                 onClick={() => {
                   setSaved('');
                   if (contracts.length === 1)
@@ -563,7 +548,7 @@ const FieldManagementLoaded = ({
                 disabled={!contracts.length || !!editor}
               >
                 <IconPlus size={16} aria-hidden="true" />
-                기록 작성
+                기록 추가
               </button>
             )}
           </StyledFieldRow>
@@ -769,6 +754,11 @@ const FieldManagementLoaded = ({
                 )}
               </span>
               <span data-contract-summary>
+                <FieldContractAssignees
+                  members={data.members.filter((member) =>
+                    assigned(c, member.id, data.links, true),
+                  )}
+                />
                 <span data-contract-meta>
                   <IconCalendarEvent size={14} aria-hidden="true" />
                   {contractDateLabel(c.contractStartDate) || '시작일 미정'} -{' '}

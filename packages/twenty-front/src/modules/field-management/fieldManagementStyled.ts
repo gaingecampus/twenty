@@ -148,7 +148,7 @@ export const StyledFieldPanel = styled.div`
     overflow: visible;
   }
   [data-field-header] {
-    background: var(--t-app-bg, ${theme.background.tertiary});
+    background: ${theme.background.primary};
     justify-content: space-between;
     order: -1;
     padding: 4px 0;
@@ -161,13 +161,38 @@ export const StyledFieldPanel = styled.div`
   [data-field-editor] {
     scroll-margin-top: 110px;
   }
+  [data-field-header] [data-field-heading] {
+    align-items: center;
+    display: flex;
+    font-size: 16px;
+    font-weight: ${theme.font.weight.semiBold};
+    gap: 8px;
+  }
+  [data-field-heading] > span {
+    color: ${theme.font.color.light};
+  }
+  &[data-contextual] [data-field-header] button[data-field-add] {
+    background: ${theme.background.primary};
+    color: ${theme.font.color.secondary};
+    font-size: 13px;
+    min-height: 28px;
+    padding: 4px 12px;
+  }
+  &[data-contextual] [data-field-header] button[data-field-add]:hover {
+    background: ${theme.background.tertiary};
+  }
   &[data-contextual] {
-    background: var(--t-app-bg, ${theme.background.tertiary});
+    background: ${theme.background.primary};
     box-sizing: border-box;
     container-type: inline-size;
     gap: 16px;
     min-height: 100%;
     padding: 20px 24px 48px;
+    > section {
+      border: 1px solid ${theme.border.color.medium};
+      border-radius: 8px;
+      padding: 16px;
+    }
     > div:first-child {
       justify-content: space-between;
       margin-bottom: 0;
@@ -183,7 +208,7 @@ export const StyledFieldPanel = styled.div`
       margin-top: 8px;
     }
     [data-section-title] {
-      font-size: 18px;
+      font-size: 16px;
       font-weight: 600;
       letter-spacing: -0.01em;
       margin: 0;
@@ -514,11 +539,11 @@ export const StyledFieldPanel = styled.div`
       padding-bottom: 8px;
     }
     && [data-contract-group] > [data-contract-item] {
-      background: ${theme.background.tertiary};
-      border: none;
-      border-radius: 16px;
+      background: ${theme.background.primary};
+      border: 1px solid ${theme.border.color.medium};
+      border-radius: 8px;
       display: block;
-      padding: 20px;
+      padding: 16px;
       text-align: left;
       width: 100%;
     }
@@ -530,8 +555,8 @@ export const StyledFieldPanel = styled.div`
       justify-content: flex-start;
     }
     [data-contract-item] [data-contract-title] {
-      font-size: 17px;
-      font-weight: 650;
+      font-size: 16px;
+      font-weight: 600;
       line-height: 1.5;
     }
     [data-contract-item] [data-contract-title] > span {
@@ -601,9 +626,6 @@ export const StyledFieldPanel = styled.div`
     [data-contract-counts] strong {
       color: inherit;
       font-weight: 600;
-    }
-    [data-contract-group] > [data-contract-item] + [data-contract-item] {
-      border-top: none;
     }
     summary {
       cursor: pointer;
