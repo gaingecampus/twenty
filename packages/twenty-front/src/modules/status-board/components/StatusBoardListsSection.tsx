@@ -93,7 +93,7 @@ export const StatusBoardListsSection = ({
 
   return (
     <StyledStatusBoardContractSection>
-      <StyledStatusBoardSectionTitle>계약</StyledStatusBoardSectionTitle>
+      <StyledStatusBoardSectionTitle>계약 현황</StyledStatusBoardSectionTitle>
       {hasStatusBoardField(
         onboardingObjectMetadataItem,
         STATUS_BOARD_FIELD.onboardingStatus,

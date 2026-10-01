@@ -1,4 +1,3 @@
-import { FieldManagement } from '@/field-management/FieldManagement';
 import { StatusBoardEmptyState } from '@/status-board/components/StatusBoardEmptyState';
 import { StatusBoardStageTimingSection } from '@/status-board/components/StatusBoardStageTimingSection';
 import { hasStatusBoardField } from '@/status-board/utils/hasStatusBoardField';
@@ -121,16 +120,6 @@ const StatusBoardContentBody = ({
         }
       >
         <StyledStatusBoardScroll>
-          {!dummy.enabled && !isGroupUnavailable && (
-            <FieldManagement
-              scope={{
-                dashboard: true,
-                memberIds,
-                start: periodRange.startDate,
-                end: periodRange.endDate,
-              }}
-            />
-          )}
           {dummy.enabled && (
             <StyledStatusBoardMuted>
               미리보기 · 예시 데이터
@@ -183,16 +172,17 @@ const StatusBoardContentBody = ({
                 }
                 onOpenSheet={setSheet}
               />
-              <StatusBoardStageTimingSection
-                opportunityObjectMetadataItem={metadata.opportunity}
-                memberIds={memberIds}
-                onOpenSheet={setSheet}
-              />
               <StatusBoardListsSection
                 onboardingObjectMetadataItem={metadata.onboarding}
                 memberIds={memberIds}
                 onboardingTab={onboardingTab}
                 onOnboardingTabChange={setOnboardingTab}
+              />
+              <StatusBoardWeekSection
+                memberObjectMetadataItem={metadata.member}
+                onboardingObjectMetadataItem={metadata.onboarding}
+                members={visibleMembers}
+                memberIds={memberIds}
               />
               <StatusBoardCumulativeSection
                 companyObjectMetadataItem={metadata.company}
@@ -203,11 +193,10 @@ const StatusBoardContentBody = ({
                 memberIds={memberIds}
                 onOpenSheet={setSheet}
               />
-              <StatusBoardWeekSection
-                memberObjectMetadataItem={metadata.member}
-                onboardingObjectMetadataItem={metadata.onboarding}
-                members={visibleMembers}
+              <StatusBoardStageTimingSection
+                opportunityObjectMetadataItem={metadata.opportunity}
                 memberIds={memberIds}
+                onOpenSheet={setSheet}
               />
             </>
           )}
