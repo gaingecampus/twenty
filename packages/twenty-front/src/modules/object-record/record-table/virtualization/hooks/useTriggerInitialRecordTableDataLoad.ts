@@ -44,9 +44,13 @@ import { useAtomComponentSelectorCallbackState } from '@/ui/utilities/state/jota
 import { useAtomComponentStateCallbackState } from '@/ui/utilities/state/jotai/hooks/useAtomComponentStateCallbackState';
 import { useSetAtomComponentState } from '@/ui/utilities/state/jotai/hooks/useSetAtomComponentState';
 import { isDefined } from 'twenty-shared/utils';
+import { useLocation } from 'react-router-dom';
+import { recordShowReturnContextState } from '@/object-record/record-show/states/recordShowReturnContextState';
+import { isRecordShowReturnLocation } from '@/object-record/record-show/utils/isRecordShowReturnLocation';
 
 export const useTriggerInitialRecordTableDataLoad = () => {
   const { recordTableId, objectNameSingular } = useRecordTableContextOrThrow();
+  const location = useLocation();
 
   const { recordLimit } = useRecordIndexContextOrThrow();
 
@@ -269,7 +273,26 @@ export const useTriggerInitialRecordTableDataLoad = () => {
         setIsRecordTableScrolledVertically(false);
         resetTableFocuses();
 
-        if (shouldScrollToStart) {
+        const returnContext = store.get(recordShowReturnContextState.atom);
+        if (
+          isRecordShowReturnLocation(
+            returnContext,
+            location.key,
+            recordTableId,
+            location.state?.recordIndexReturnKey,
+          ) &&
+          returnContext
+        ) {
+          requestAnimationFrame(() => {
+            if (store.get(recordShowReturnContextState.atom) !== returnContext)
+              return;
+            scrollTableToPosition({
+              horizontalScrollInPx: returnContext.scrollLeft,
+              verticalScrollInPx: returnContext.scrollTop,
+            });
+            store.set(recordShowReturnContextState.atom, null);
+          });
+        } else if (shouldScrollToStart) {
           scrollTableToPosition({
             horizontalScrollInPx: 0,
             verticalScrollInPx: 0,
@@ -282,6 +305,8 @@ export const useTriggerInitialRecordTableDataLoad = () => {
     },
     [
       isInitializingVirtualTableDataLoadingCallbackState,
+      location.key,
+      location.state?.recordIndexReturnKey,
       resetTableFocuses,
       resetVirtualizedRowTreadmill,
       recordIndexAllRecordIds,

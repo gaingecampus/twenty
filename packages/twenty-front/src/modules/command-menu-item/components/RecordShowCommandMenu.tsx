@@ -39,7 +39,7 @@ export const RecordShowCommandMenu = () => {
             containerType="show-page-header"
             isInPreviewMode={isLayoutCustomizationModeEnabled}
           >
-            {!isMobile && <PinnedCommandMenuItemButtons />}
+            {!isMobile && <PinnedCommandMenuItemButtons expandToFill={false} />}
           </CommandMenuContextProvider>
           <CommandMenuItemEditButton />
         </>

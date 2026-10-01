@@ -20,10 +20,16 @@ import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomState
 import { useGetCurrentViewOnly } from '@/views/hooks/useGetCurrentViewOnly';
 import isEmpty from 'lodash.isempty';
 import { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
+import { useStore } from 'jotai';
+import { recordShowReturnContextState } from '@/object-record/record-show/states/recordShowReturnContextState';
+import { isRecordShowReturnLocation } from '@/object-record/record-show/utils/isRecordShowReturnLocation';
 
 // TODO: see if we can merge the initial and load more processes, to have only one load at scroll index effect
 export const RecordTableVirtualizedInitialDataLoadEffect = () => {
   const { recordTableId, objectNameSingular } = useRecordTableContextOrThrow();
+  const location = useLocation();
+  const store = useStore();
 
   const { queryIdentifier } = useRecordIndexTableLazyQuery(objectNameSingular);
 
@@ -91,13 +97,22 @@ export const RecordTableVirtualizedInitialDataLoadEffect = () => {
     }
 
     (async () => {
+      const returnContext = store.get(recordShowReturnContextState.atom);
+      const pageToLoad = isRecordShowReturnLocation(
+        returnContext,
+        location.key,
+        recordTableId,
+        location.state?.recordIndexReturnKey,
+      )
+        ? (returnContext?.page ?? 1)
+        : 1;
       if ((currentView?.id ?? null) !== lastContextStoreVirtualizedViewId) {
         setLastContextStoreVirtualizedViewId(currentView?.id ?? null);
         setLastRecordTableQueryIdentifier(queryIdentifier);
         setLastContextStoreVirtualizedVisibleRecordFields(visibleRecordFields);
-        setRecordIndexCurrentPage(1);
+        setRecordIndexCurrentPage(pageToLoad);
         setLastLoadedRecordIndexPagination({
-          page: 1,
+          page: pageToLoad,
           pageSize: recordIndexPageSize,
         });
 
@@ -107,9 +122,9 @@ export const RecordTableVirtualizedInitialDataLoadEffect = () => {
         !isFetchingMoreRecords
       ) {
         setLastRecordTableQueryIdentifier(queryIdentifier);
-        setRecordIndexCurrentPage(1);
+        setRecordIndexCurrentPage(pageToLoad);
         setLastLoadedRecordIndexPagination({
-          page: 1,
+          page: pageToLoad,
           pageSize: recordIndexPageSize,
         });
 
@@ -152,6 +167,10 @@ export const RecordTableVirtualizedInitialDataLoadEffect = () => {
     })();
   }, [
     recordTableWentFromEmptyToNotEmpty,
+    location.key,
+    location.state?.recordIndexReturnKey,
+    store,
+    recordTableId,
     setRecordTableWentFromEmptyToNotEmpty,
     queryIdentifier,
     lastRecordTableQueryIdentifier,

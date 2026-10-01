@@ -1,5 +1,12 @@
 import { useState } from 'react';
-import { useParams, useSearchParams } from 'react-router-dom';
+import {
+  useLocation,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from 'react-router-dom';
+import { useStore } from 'jotai';
+import { recordShowReturnContextState } from '@/object-record/record-show/states/recordShowReturnContextState';
 
 import { useObjectMetadataItem } from '@/object-metadata/hooks/useObjectMetadataItem';
 import { useFindManyRecords } from '@/object-record/hooks/useFindManyRecords';
@@ -23,6 +30,12 @@ export const useRecordShowPagePagination = (
   } = useParams();
 
   const navigate = useNavigateApp();
+  const navigateHistory = useNavigate();
+  const location = useLocation();
+  const store = useStore();
+  const returnContext = store.get(recordShowReturnContextState.atom);
+  const hasReturnContext =
+    returnContext !== null && location.pathname === returnContext.recordPath;
   const [searchParams] = useSearchParams();
   const viewIdQueryParam = searchParams.get('viewId');
 
@@ -164,10 +177,17 @@ export const useRecordShowPagePagination = (
 
   // oxlint-disable-next-line twenty/no-navigate-prefer-link
   const navigateToRecord = (targetRecordId: string) => {
+    if (hasReturnContext) {
+      store.set(recordShowReturnContextState.atom, {
+        ...returnContext,
+        recordPath: `/object/${objectNameSingular}/${targetRecordId}`,
+      });
+    }
     navigate(
       AppPath.RecordShowPage,
       { objectNameSingular, objectRecordId: targetRecordId },
       { viewId: viewIdQueryParam },
+      hasReturnContext ? { replace: true, state: location.state } : undefined,
     );
   };
 
@@ -196,6 +216,14 @@ export const useRecordShowPagePagination = (
   };
 
   const navigateToIndexView = () => {
+    if (hasReturnContext) {
+      navigateHistory(returnContext.url, {
+        replace: true,
+        state: { recordIndexReturnKey: returnContext.locationKey },
+      });
+      return;
+    }
+
     navigate(
       AppPath.RecordIndexPage,
       { objectNamePlural: objectMetadataItem.namePlural },

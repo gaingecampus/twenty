@@ -22,6 +22,12 @@ import { useSetAtomComponentState } from '@/ui/utilities/state/jotai/hooks/useSe
 import { t } from '@lingui/core/macro';
 import { useStore } from 'jotai';
 import { useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
+import { recordShowReturnContextState } from '@/object-record/record-show/states/recordShowReturnContextState';
+import { currentRecordFiltersComponentState } from '@/object-record/record-filter/states/currentRecordFiltersComponentState';
+import { currentRecordFilterGroupsComponentState } from '@/object-record/record-filter-group/states/currentRecordFilterGroupsComponentState';
+import { currentRecordSortsComponentState } from '@/object-record/record-sort/states/currentRecordSortsComponentState';
+import { recordIndexCurrentPageComponentState } from '@/object-record/record-index/states/recordIndexCurrentPageComponentState';
 import { isDefined } from 'twenty-shared/utils';
 import { IconBrowserMaximize } from 'twenty-ui/icon';
 import { Button } from 'twenty-ui/input';
@@ -74,6 +80,7 @@ export const RecordShowSidePanelOpenRecordButton = ({
   const store = useStore();
 
   const navigate = useNavigateApp();
+  const location = useLocation();
 
   const commandMenuId = useAvailableComponentInstanceIdOrThrow(
     CommandMenuComponentInstanceContext,
@@ -93,6 +100,51 @@ export const RecordShowSidePanelOpenRecordButton = ({
     setActiveTabId(tabIdToOpen);
 
     const parentView = store.get(parentViewState);
+    const recordIndexId = location.pathname.startsWith('/objects/')
+      ? parentView?.parentViewComponentId
+      : undefined;
+    const scrollElement = recordIndexId
+      ? document.getElementById(
+          `scroll-wrapper-record-table-scroll-${recordIndexId}`,
+        )
+      : null;
+
+    store.set(recordShowReturnContextState.atom, {
+      locationKey: location.key,
+      url: `${location.pathname}${location.search}${location.hash}`,
+      recordPath: `/object/${objectNameSingular}/${recordId}`,
+      recordIndexId,
+      filters: recordIndexId
+        ? store.get(
+            currentRecordFiltersComponentState.atomFamily({
+              instanceId: recordIndexId,
+            }),
+          )
+        : [],
+      filterGroups: recordIndexId
+        ? store.get(
+            currentRecordFilterGroupsComponentState.atomFamily({
+              instanceId: recordIndexId,
+            }),
+          )
+        : [],
+      sorts: recordIndexId
+        ? store.get(
+            currentRecordSortsComponentState.atomFamily({
+              instanceId: recordIndexId,
+            }),
+          )
+        : [],
+      page: recordIndexId
+        ? store.get(
+            recordIndexCurrentPageComponentState.atomFamily({
+              instanceId: recordIndexId,
+            }),
+          )
+        : 1,
+      scrollTop: scrollElement?.scrollTop ?? 0,
+      scrollLeft: scrollElement?.scrollLeft ?? 0,
+    });
 
     if (
       isDefined(parentView) &&
@@ -103,10 +155,15 @@ export const RecordShowSidePanelOpenRecordButton = ({
 
     store.set(sidePanelNavigationStackState.atom, []);
 
-    navigate(AppPath.RecordShowPage, {
-      objectNameSingular,
-      objectRecordId: recordId,
-    });
+    navigate(
+      AppPath.RecordShowPage,
+      {
+        objectNameSingular,
+        objectRecordId: recordId,
+      },
+      undefined,
+      { state: { recordShowReturnKey: location.key } },
+    );
 
     closeDropdown(
       getSidePanelCommandMenuDropdownIdFromCommandMenuId(commandMenuId),
@@ -115,6 +172,7 @@ export const RecordShowSidePanelOpenRecordButton = ({
     closeSidePanelMenu();
   }, [
     commandMenuId,
+    location,
     activeTabId,
     closeSidePanelMenu,
     closeDropdown,

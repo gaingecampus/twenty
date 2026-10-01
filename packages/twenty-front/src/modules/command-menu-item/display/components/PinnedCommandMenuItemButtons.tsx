@@ -29,8 +29,8 @@ const StyledPrimaryCommandMenuItemContainer = styled.div`
   justify-content: center;
 `;
 
-const StyledWrapper = styled.div`
-  flex: 1 1 0;
+const StyledWrapper = styled.div<{ expandToFill: boolean }>`
+  flex: ${({ expandToFill }) => (expandToFill ? '1 1 0' : '0 1 auto')};
   min-width: 0;
   overflow: hidden;
 `;
@@ -49,7 +49,11 @@ const StyledItemsContainer = styled.div`
   overflow: hidden;
 `;
 
-export const PinnedCommandMenuItemButtons = () => {
+export const PinnedCommandMenuItemButtons = ({
+  expandToFill = true,
+}: {
+  expandToFill?: boolean;
+}) => {
   const { theme } = useContext(ThemeContext);
   const { commandMenuItems } = useContext(CommandMenuContext);
   const isMobile = useIsMobile();
@@ -78,6 +82,7 @@ export const PinnedCommandMenuItemButtons = () => {
   );
 
   const {
+    totalPinnedCommandMenuItemsWidth,
     pinnedInlineCommandMenuItems,
     pinnedOverflowCommandMenuItems,
     onContainerDimensionChange,
@@ -128,7 +133,14 @@ export const PinnedCommandMenuItemButtons = () => {
         />
       )}
       {hasOverflowCandidatePinnedCommandMenuItems && !isMobile && (
-        <StyledWrapper>
+        <StyledWrapper
+          expandToFill={expandToFill}
+          style={
+            expandToFill
+              ? undefined
+              : { flexBasis: totalPinnedCommandMenuItemsWidth }
+          }
+        >
           <NodeDimension onDimensionChange={onContainerDimensionChange}>
             <StyledContainer>
               <StyledItemsContainer>

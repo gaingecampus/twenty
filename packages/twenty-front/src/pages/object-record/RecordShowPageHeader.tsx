@@ -1,6 +1,8 @@
 import { getObjectMetadataIdentifierFields } from '@/object-metadata/utils/getObjectMetadataIdentifierFields';
 import { ObjectRecordShowPageBreadcrumb } from '@/object-record/record-show/components/ObjectRecordShowPageBreadcrumb';
 import { useRecordShowPagePagination } from '@/object-record/record-show/hooks/useRecordShowPagePagination';
+import { Button } from 'twenty-ui/input';
+import { IconArrowLeft } from 'twenty-ui/icon';
 import { PageCardHeader } from '@/ui/layout/page/components/PageCardHeader';
 
 export const RecordShowPageHeader = ({
@@ -12,10 +14,8 @@ export const RecordShowPageHeader = ({
   objectRecordId: string;
   children?: React.ReactNode;
 }) => {
-  const { objectMetadataItem } = useRecordShowPagePagination(
-    objectNameSingular,
-    objectRecordId,
-  );
+  const { objectMetadataItem, navigateToIndexView } =
+    useRecordShowPagePagination(objectNameSingular, objectRecordId);
 
   const { labelIdentifierFieldMetadataItem } =
     getObjectMetadataIdentifierFields({ objectMetadataItem });
@@ -30,7 +30,18 @@ export const RecordShowPageHeader = ({
           labelIdentifierFieldMetadataItem={labelIdentifierFieldMetadataItem}
         />
       }
-      actionButton={children}
+      actionButton={
+        <>
+          <Button
+            title="뒤로가기"
+            Icon={IconArrowLeft}
+            variant="secondary"
+            size="medium"
+            onClick={navigateToIndexView}
+          />
+          {children}
+        </>
+      }
     />
   );
 };

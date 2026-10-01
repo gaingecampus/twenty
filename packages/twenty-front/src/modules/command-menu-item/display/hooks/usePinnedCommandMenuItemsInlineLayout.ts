@@ -105,7 +105,18 @@ export const usePinnedCommandMenuItemsInlineLayout = ({
     [setCommandMenuPinnedInlineLayout],
   );
 
+  const totalPinnedCommandMenuItemsWidth =
+    pinnedCommandMenuItemKeysInDisplayOrder.reduce(
+      (width, key) =>
+        width +
+        (commandMenuPinnedInlineLayout.commandMenuItemWidthsByKey[key] ?? 0),
+      0,
+    ) +
+    Math.max(0, pinnedCommandMenuItems.length - 1) *
+      PINNED_COMMAND_MENU_ITEMS_GAP;
+
   return {
+    totalPinnedCommandMenuItemsWidth,
     pinnedInlineCommandMenuItems,
     pinnedOverflowCommandMenuItems,
     onContainerDimensionChange,
