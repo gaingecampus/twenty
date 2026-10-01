@@ -53,10 +53,16 @@ const StyledLeftSection = styled.div`
 `;
 
 const StyledRightSection = styled.div`
+  align-items: center;
   display: flex;
   flex-shrink: 0;
+  flex-wrap: wrap;
   font-weight: ${themeCssVariables.font.weight.regular};
   gap: var(--t-toolbar-chip-gap, ${themeCssVariables.betweenSiblingsGap});
+
+  > * {
+    flex-shrink: 0;
+  }
 `;
 
 export const TopBar = ({

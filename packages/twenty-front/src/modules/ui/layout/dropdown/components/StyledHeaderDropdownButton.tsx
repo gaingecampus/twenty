@@ -24,6 +24,7 @@ export const StyledHeaderDropdownButton = styled.button<StyledDropdownButtonProp
       : themeCssVariables.font.color.secondary};
   cursor: pointer;
   display: flex;
+  flex-shrink: 0;
   font-family: inherit;
   font-size: var(--t-toolbar-chip-font-size, inherit);
   font-weight: var(--t-toolbar-chip-font-weight, inherit);
@@ -31,6 +32,7 @@ export const StyledHeaderDropdownButton = styled.button<StyledDropdownButtonProp
   padding: var(--t-toolbar-chip-padding-y, ${themeCssVariables.spacing[1]})
     var(--t-toolbar-chip-padding-x, ${themeCssVariables.spacing[2]});
   user-select: none;
+  white-space: nowrap;
 
   &:hover {
     background: ${({ isUnfolded }) =>

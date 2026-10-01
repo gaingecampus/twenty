@@ -42,7 +42,7 @@ const StyledInputContainer = styled.div`
   gap: ${themeCssVariables.spacing[4]};
   justify-content: space-between;
   margin: 0;
-  min-height: ${SIDE_PANEL_TOP_BAR_HEIGHT}px;
+  min-height: var(--t-page-bar-min-height, ${SIDE_PANEL_TOP_BAR_HEIGHT}px);
 
   outline: none;
   overflow: hidden;
