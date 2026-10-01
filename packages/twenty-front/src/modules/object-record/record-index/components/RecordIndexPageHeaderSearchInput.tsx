@@ -12,6 +12,10 @@ const StyledSearchInputWrapper = styled.div`
   max-width: var(--t-page-search-width, 280px);
   min-width: 0;
   width: 100%;
+
+  @container record-index-header (max-width: 720px) {
+    max-width: none;
+  }
 `;
 
 type RecordIndexPageHeaderSearchInputProps = {

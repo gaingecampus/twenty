@@ -1,3 +1,4 @@
+import { styled } from '@linaria/react';
 import { AnimatedIconCrossfade } from 'twenty-ui/layout';
 import { isLayoutCustomizationModeEnabledState } from '@/layout-customization/states/isLayoutCustomizationModeEnabledState';
 import { useNavigateSidePanel } from '@/side-panel/hooks/useNavigateSidePanel';
@@ -9,6 +10,13 @@ import { useLingui } from '@lingui/react/macro';
 import { SidePanelPages } from 'twenty-shared/types';
 import { IconPencil, IconX } from 'twenty-ui/icon';
 import { AnimatedButton } from 'twenty-ui/input';
+
+const StyledEditButton = styled(AnimatedButton)`
+  box-sizing: border-box;
+  gap: var(--t-button-gap, 4px);
+  height: var(--t-page-header-action-height, var(--t-control-height-sm, 24px));
+  padding: 0 var(--t-page-header-action-padding-x, 8px);
+`;
 
 export const CommandMenuItemEditButton = () => {
   const { t } = useLingui();
@@ -44,7 +52,7 @@ export const CommandMenuItemEditButton = () => {
   };
 
   return (
-    <AnimatedButton
+    <StyledEditButton
       animatedSvg={
         <AnimatedIconCrossfade
           isActive={isCommandMenuEditPageActive}

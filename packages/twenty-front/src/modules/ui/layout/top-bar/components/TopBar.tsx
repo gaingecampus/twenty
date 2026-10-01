@@ -40,6 +40,7 @@ const StyledTopBar = styled.div`
   @container (max-width: 700px) {
     align-items: stretch;
     flex-direction: column;
+    gap: var(--t-toolbar-chip-gap, ${themeCssVariables.spacing[2]});
     height: auto;
   }
 `;

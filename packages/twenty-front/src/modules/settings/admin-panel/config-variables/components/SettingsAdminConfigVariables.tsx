@@ -22,9 +22,10 @@ import { ConfigVariableSearchInput } from './ConfigVariableSearchInput';
 import { useAtomState } from '@/ui/utilities/state/jotai/hooks/useAtomState';
 
 const StyledControlsContainer = styled.div`
-  display: flex;
+  align-items: center;
+  display: grid;
   gap: 8px;
-  justify-content: space-between;
+  grid-template-columns: minmax(0, 1fr) auto;
 `;
 
 const StyledTableContainer = styled.div`

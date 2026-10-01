@@ -32,7 +32,10 @@ const StyledButton = styled.button`
   width: 100%;
 
   &:hover {
-    background: ${themeCssVariables.background.transparent.light};
+    background: var(
+      --t-settings-card-hover-bg,
+      ${themeCssVariables.background.transparent.light}
+    );
   }
 `;
 

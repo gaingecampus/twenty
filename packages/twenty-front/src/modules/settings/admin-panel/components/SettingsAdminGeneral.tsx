@@ -31,6 +31,11 @@ import {
 } from '~/generated-admin/graphql';
 import { getAbsoluteImageUrl } from '~/utils/image/getAbsoluteImageUrl';
 
+const StyledProfileTableCell = styled(TableCell)`
+  --t-avatar-font-size-md: 11px;
+  --t-avatar-size-md: 24px;
+`;
+
 const StyledEmptyState = styled.div`
   color: ${themeCssVariables.font.color.tertiary};
   padding: ${themeCssVariables.spacing[4]} 0;
@@ -137,7 +142,7 @@ export const SettingsAdminGeneral = () => {
                       userId: user.id,
                     })}
                   >
-                    <TableCell
+                    <StyledProfileTableCell
                       color={themeCssVariables.font.color.primary}
                       gap={themeCssVariables.spacing[2]}
                       overflow="hidden"
@@ -158,7 +163,7 @@ export const SettingsAdminGeneral = () => {
                           '\u2014'
                         }
                       />
-                    </TableCell>
+                    </StyledProfileTableCell>
                     <TableCell>{user.email}</TableCell>
                     <TableCell
                       gap={themeCssVariables.spacing[2]}
@@ -235,7 +240,7 @@ export const SettingsAdminGeneral = () => {
                       { workspaceId: workspace.id },
                     )}
                   >
-                    <TableCell
+                    <StyledProfileTableCell
                       color={themeCssVariables.font.color.primary}
                       gap={themeCssVariables.spacing[2]}
                       overflow="hidden"
@@ -249,7 +254,7 @@ export const SettingsAdminGeneral = () => {
                       <OverflowingTextWithTooltip
                         text={workspace.name || '\u2014'}
                       />
-                    </TableCell>
+                    </StyledProfileTableCell>
                     <TableCell align="right">{workspace.totalUsers}</TableCell>
                     <TableCell align="center">
                       <IconChevronRight

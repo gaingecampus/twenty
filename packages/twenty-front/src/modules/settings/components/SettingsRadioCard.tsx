@@ -17,7 +17,10 @@ const StyledRadioCardContentContainer = styled.div`
     padding: ${themeCssVariables.spacing[2]};
 
     &:hover {
-      background: ${themeCssVariables.background.transparent.lighter};
+      background: var(
+        --t-settings-card-hover-bg,
+        ${themeCssVariables.background.transparent.lighter}
+      );
     }
   }
 `;

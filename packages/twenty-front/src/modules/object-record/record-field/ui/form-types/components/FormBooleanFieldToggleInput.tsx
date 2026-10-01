@@ -29,7 +29,10 @@ const StyledDescription = styled.span`
 `;
 
 const StyledToggleContainer = styled.div`
-  background-color: ${themeCssVariables.background.transparent.lighter};
+  background-color: var(
+    --t-input-background,
+    ${themeCssVariables.background.transparent.lighter}
+  );
   border-bottom: 1px solid ${themeCssVariables.border.color.medium};
   border-bottom-right-radius: ${themeCssVariables.border.radius.sm};
   border-right: 1px solid ${themeCssVariables.border.color.medium};

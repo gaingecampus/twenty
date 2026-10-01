@@ -35,7 +35,8 @@ const StyledEditorContainer = styled.div<{
     font-size: ${themeCssVariables.font.size.sm};
     font-weight: ${themeCssVariables.font.weight.regular};
     height: 100%;
-    padding: ${themeCssVariables.spacing[1]} ${themeCssVariables.spacing[2]};
+    padding: var(--t-input-padding-y, ${themeCssVariables.spacing[1]})
+      var(--t-input-padding-x, ${themeCssVariables.spacing[2]});
 
     p.is-editor-empty:first-of-type::before {
       ${FORM_FIELD_PLACEHOLDER_STYLES}

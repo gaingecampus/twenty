@@ -83,7 +83,7 @@ export const SettingsRoleDefaultRole = ({
           description={t`Set a default for this workspace`}
         >
           <Select
-            selectSizeVariant="small"
+            selectSizeVariant="default"
             withSearchInput
             dropdownId="default-role-select"
             options={options}

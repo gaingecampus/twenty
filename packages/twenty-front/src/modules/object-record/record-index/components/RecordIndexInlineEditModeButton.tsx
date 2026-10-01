@@ -13,21 +13,21 @@ import { useIsMobile } from 'twenty-ui/utilities';
 const StyledRecordIndexInlineEditModeButton = styled(Button)`
   --btn-border-color: transparent !important;
   --btn-box-shadow: none !important;
-  --btn-color: ${themeCssVariables.font.color.inverted} !important;
-  --tw-button-color: ${themeCssVariables.font.color.inverted} !important;
-  background: ${themeCssVariables.background.primaryInverted} !important;
+  --btn-color: var(--t-inline-edit-color, ${themeCssVariables.font.color.inverted}) !important;
+  --tw-button-color: var(--t-inline-edit-color, ${themeCssVariables.font.color.inverted}) !important;
+  background: var(--t-inline-edit-bg, ${themeCssVariables.background.primaryInverted}) !important;
   border-color: transparent !important;
   box-shadow: none !important;
-  color: ${themeCssVariables.font.color.inverted} !important;
+  color: var(--t-inline-edit-color, ${themeCssVariables.font.color.inverted}) !important;
   flex-shrink: 0;
   height: 40px;
 
   &:active {
-    background: ${themeCssVariables.background.primaryInvertedHover} !important;
+    background: var(--t-inline-edit-hover-bg, ${themeCssVariables.background.primaryInvertedHover}) !important;
   }
 
   &:hover {
-    background: ${themeCssVariables.background.primaryInvertedHover} !important;
+    background: var(--t-inline-edit-hover-bg, ${themeCssVariables.background.primaryInvertedHover}) !important;
   }
 
   &:focus,
@@ -41,8 +41,8 @@ const StyledRecordIndexInlineEditModeButton = styled(Button)`
   }
 
   svg {
-    color: ${themeCssVariables.font.color.inverted};
-    stroke: ${themeCssVariables.font.color.inverted};
+    color: var(--t-inline-edit-color, ${themeCssVariables.font.color.inverted});
+    stroke: var(--t-inline-edit-color, ${themeCssVariables.font.color.inverted});
   }
 `;
 

@@ -80,8 +80,8 @@ html.dark[data-ui-theme='enterprise'] {
   --t-border-color-blue: #1e3266;
   --t-border-color-transparent-strong: rgb(77 115 255 / 0.35);
   --t-border-radius-xs: 6px;
-  --t-border-radius-sm: 8px;
-  --t-border-radius-md: 12px;
+  --t-border-radius-sm: 6px;
+  --t-border-radius-md: 8px;
   --t-border-radius-xl: 16px;
   --t-page-card-top-left-radius: 0px;
   --t-page-card-radius: 0;
@@ -115,9 +115,18 @@ html.dark[data-ui-theme='enterprise'] {
 
   --t-control-height-sm: 32px;
   --t-control-height-md: 40px;
+  --t-input-background: #161920;
+  --t-input-hover-background: #1d2028;
+  --t-input-height: 40px;
+  --t-input-padding-x: 12px;
+  --t-input-padding-y: 10px;
+  --t-input-label-font-size: 11px;
   --t-page-header-action-height: 40px;
   --t-page-header-action-padding-x: 16px;
   --t-page-bar-min-height: 72px;
+  --t-inline-edit-bg: #303747;
+  --t-inline-edit-hover-bg: #3c4559;
+  --t-inline-edit-color: #eef1f7;
   --t-button-font-weight: 600;
   --t-button-gap: 8px;
   --t-button-padding-x: 20px;
@@ -269,11 +278,12 @@ html.dark[data-ui-theme='enterprise'] {
   --t-view-tab-active-bg: var(--t-background-transparent-blue);
   --t-view-tab-active-border: 1px solid var(--t-border-color-blue);
   --t-view-tab-active-hover-bg: var(--t-background-transparent-blue);
-  --t-view-tab-active-color: var(--t-color-blue);
+  --t-view-tab-active-color: #b8c7ff;
   --t-view-tab-active-weight: 600;
   --t-view-tab-hover-bg: var(--t-control-hover-bg);
   --t-view-tab-hover-color: #c4c8d2;
-  --t-view-tab-count-color: var(--t-color-blue);
+  --t-view-tab-count-bg: #354477;
+  --t-view-tab-count-color: #edf2ff;
   --t-view-tab-add-bg: var(--t-search-bg);
   --t-view-tab-add-border: 1px solid var(--t-search-border-color);
   --t-view-tab-add-color: #8b92a0;

@@ -25,6 +25,22 @@ import { viewPickerReferenceViewIdComponentState } from '@/views/view-picker/sta
 import { ViewVisibility } from '~/generated-metadata/graphql';
 import { moveArrayItem } from '~/utils/array/moveArrayItem';
 
+const StyledViewOptionsButton = styled(LightIconButton)`
+  && {
+    background: transparent;
+    border: none;
+    border-radius: var(--t-toolbar-chip-radius, 4px);
+    box-sizing: border-box;
+    height: var(--t-view-tab-height, 24px);
+    padding: 0;
+    width: var(--t-view-tab-height, 24px);
+
+    &:hover {
+      background: ${themeCssVariables.background.transparent.light};
+    }
+  }
+`;
+
 const StyledTabsAndOptions = styled.div`
   align-items: center;
   display: flex;
@@ -208,7 +224,7 @@ export const ViewPickerTabList = ({
           dropdownId={optionsDropdownId}
           dropdownPlacement="bottom-start"
           clickableComponent={
-            <LightIconButton
+            <StyledViewOptionsButton
               Icon={IconDotsVertical}
               size="medium"
               accent="tertiary"

@@ -53,7 +53,10 @@ const StyledFieldRow = styled.div`
 `;
 
 const StyledFieldGroup = styled.div`
+  display: flex;
   flex: 1;
+  flex-direction: column;
+  min-width: 0;
 
   & > * {
     width: 100%;

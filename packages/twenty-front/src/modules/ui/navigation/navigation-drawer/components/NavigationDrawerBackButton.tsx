@@ -1,6 +1,7 @@
 import { styled } from '@linaria/react';
 
 import { currentMobileNavigationDrawerState } from '@/navigation/states/currentMobileNavigationDrawerState';
+import { PAGE_BAR_MIN_HEIGHT } from '@/ui/layout/page/constants/PageBarMinHeight';
 import { isNavigationDrawerExpandedState } from '@/ui/navigation/states/isNavigationDrawerExpanded';
 import { navigationDrawerExpandedMemorizedState } from '@/ui/navigation/states/navigationDrawerExpandedMemorizedState';
 import { navigationMemorizedUrlState } from '@/ui/navigation/states/navigationMemorizedUrlState';
@@ -28,10 +29,16 @@ const StyledIconAndButtonContainer = styled.button`
   display: flex;
   flex-direction: row;
   font-family: ${themeCssVariables.font.family};
-  font-size: ${themeCssVariables.font.size.md};
-  font-weight: ${themeCssVariables.font.weight.medium};
+  font-size: var(
+    --t-workspace-switcher-font-size,
+    ${themeCssVariables.font.size.md}
+  );
+  font-weight: var(
+    --t-workspace-switcher-font-weight,
+    ${themeCssVariables.font.weight.medium}
+  );
   gap: ${themeCssVariables.spacing[2]};
-  height: var(--t-nav-item-height, ${themeCssVariables.spacing[7]});
+  height: var(--t-workspace-switcher-height, ${themeCssVariables.spacing[8]});
   padding: 2px ${themeCssVariables.spacing[1]} 2px 2px;
   width: fit-content;
   &:hover {
@@ -41,11 +48,12 @@ const StyledIconAndButtonContainer = styled.button`
 
 const StyledContainer = styled.div`
   align-items: center;
+  box-sizing: border-box;
   display: flex;
   flex-direction: row;
   flex-shrink: 0;
-  height: ${themeCssVariables.spacing[8]};
   justify-content: space-between;
+  min-height: var(--t-nav-header-min-height, ${PAGE_BAR_MIN_HEIGHT}px);
 `;
 
 export const NavigationDrawerBackButton = ({

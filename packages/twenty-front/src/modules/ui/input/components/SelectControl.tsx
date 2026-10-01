@@ -19,7 +19,10 @@ export const StyledControlContainer = styled.div<{
   hasRightElement?: boolean;
 }>`
   align-items: center;
-  background-color: ${themeCssVariables.background.transparent.lighter};
+  background-color: var(
+    --t-input-background,
+    ${themeCssVariables.background.transparent.lighter}
+  );
   border: 1px solid ${themeCssVariables.border.color.medium};
   border-bottom-left-radius: ${themeCssVariables.border.radius.sm};
   border-bottom-right-radius: ${({ hasRightElement }) =>
@@ -40,6 +43,7 @@ export const StyledControlContainer = styled.div<{
         : themeCssVariables.font.color.tertiary};
   cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
   display: grid;
+  font-size: ${themeCssVariables.font.size.md};
 
   gap: ${themeCssVariables.spacing[1]};
   grid-template-columns: ${({ hasIcon }) =>
@@ -47,10 +51,14 @@ export const StyledControlContainer = styled.div<{
   height: ${({ selectSizeVariant }) =>
     selectSizeVariant === 'small'
       ? themeCssVariables.spacing[6]
-      : themeCssVariables.spacing[8]};
+      : `var(--t-input-height, ${themeCssVariables.spacing[8]})`};
 
   max-width: 100%;
-  padding: 0 ${themeCssVariables.spacing[2]};
+  padding: 0
+    ${({ selectSizeVariant }) =>
+      selectSizeVariant === 'small'
+        ? themeCssVariables.spacing[2]
+        : `var(--t-input-padding-x, ${themeCssVariables.spacing[2]})`};
   text-align: left;
 `;
 

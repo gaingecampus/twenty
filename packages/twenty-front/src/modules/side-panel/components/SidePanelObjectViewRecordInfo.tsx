@@ -1,4 +1,5 @@
 import { useLingui } from '@lingui/react/macro';
+import { styled } from '@linaria/react';
 import { OverflowingTextWithTooltip } from 'twenty-ui/surfaces';
 
 import { SidePanelPageInfoLayout } from '@/side-panel/components/SidePanelPageInfoLayout';
@@ -7,6 +8,22 @@ import { NavigationMenuItemType } from 'twenty-shared/types';
 import { useSelectedNavigationMenuItemEditItem } from '@/navigation-menu-item/edit/hooks/useSelectedNavigationMenuItemEditItem';
 import { useSelectedNavigationMenuItemEditItemLabel } from '@/navigation-menu-item/edit/hooks/useSelectedNavigationMenuItemEditItemLabel';
 import { useSelectedNavigationMenuItemEditItemObjectMetadata } from '@/navigation-menu-item/edit/hooks/useSelectedNavigationMenuItemEditItemObjectMetadata';
+
+const StyledHeaderIcon = styled.div`
+  --t-avatar-size-md: 24px;
+  --t-avatar-size-sm: 24px;
+  --tinted-icon-tile-dimension: 24px;
+  align-items: center;
+  display: flex;
+  height: 24px;
+  justify-content: center;
+  width: 24px;
+
+  svg {
+    height: 20px;
+    width: 20px;
+  }
+`;
 
 export const SidePanelObjectViewRecordInfo = () => {
   const { t } = useLingui();
@@ -43,7 +60,11 @@ export const SidePanelObjectViewRecordInfo = () => {
 
   return (
     <SidePanelPageInfoLayout
-      icon={<NavigationMenuItemIcon navigationMenuItem={navItem} />}
+      icon={
+        <StyledHeaderIcon>
+          <NavigationMenuItemIcon navigationMenuItem={navItem} />
+        </StyledHeaderIcon>
+      }
       title={<OverflowingTextWithTooltip text={selectedItemLabel} />}
       label={label}
     />

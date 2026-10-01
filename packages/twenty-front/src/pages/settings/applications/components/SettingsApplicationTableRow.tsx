@@ -1,3 +1,4 @@
+import { styled } from '@linaria/react';
 import { type ReactNode } from 'react';
 
 import { ApplicationDisplay } from '@/applications/components/ApplicationDisplay';
@@ -26,6 +27,11 @@ export type SettingsApplicationTableRowProps = {
 export const APPLICATION_TABLE_ROW_GRID_TEMPLATE_COLUMNS =
   '164px 80px minmax(0, 1fr) 36px';
 
+const StyledApplicationNameCell = styled(StyledNameTableCell)`
+  --t-avatar-font-size-md: 11px;
+  --t-avatar-size-md: 24px;
+`;
+
 const SOURCE_TYPE_LABELS: Record<ApplicationRegistrationSourceType, string> = {
   [ApplicationRegistrationSourceType.LOCAL]: 'Local',
   [ApplicationRegistrationSourceType.NPM]: 'NPM',
@@ -50,9 +56,9 @@ export const SettingsApplicationTableRow = ({
       key={application.id}
       to={link}
     >
-      <StyledNameTableCell minWidth="0" overflow="hidden">
+      <StyledApplicationNameCell minWidth="0" overflow="hidden">
         <ApplicationDisplay application={application} />
-      </StyledNameTableCell>
+      </StyledApplicationNameCell>
       <TableCell color={themeCssVariables.font.color.tertiary}>
         {sourceType ? SOURCE_TYPE_LABELS[sourceType] : t`Seeded`}
       </TableCell>

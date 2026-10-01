@@ -37,7 +37,7 @@ const StyledContainer = styled.div`
 const StyledLabel = styled.label`
   color: ${themeCssVariables.font.color.light};
   display: block;
-  font-size: ${themeCssVariables.font.size.xs};
+  font-size: var(--t-input-label-font-size, ${themeCssVariables.font.size.xs});
   font-weight: ${themeCssVariables.font.weight.semiBold};
   margin-bottom: ${themeCssVariables.spacing[1]};
 `;
@@ -47,7 +47,7 @@ const StyledTextAreaContainer = styled.div<{ variant: TextAreaVariant }>`
     background-color: ${({ variant }) =>
       variant === 'transparent'
         ? 'transparent'
-        : themeCssVariables.background.transparent.lighter};
+        : `var(--t-input-background, ${themeCssVariables.background.transparent.lighter})`};
     border: ${({ variant }) =>
       variant === 'transparent'
         ? 'none'
@@ -65,7 +65,9 @@ const StyledTextAreaContainer = styled.div<{ variant: TextAreaVariant }>`
     overflow: ${({ variant }) =>
       variant === 'transparent' ? 'hidden' : 'auto'};
     padding: ${({ variant }) =>
-      variant === 'transparent' ? '0' : themeCssVariables.spacing[2]};
+      variant === 'transparent'
+        ? '0'
+        : `var(--t-input-padding-y, ${themeCssVariables.spacing[2]}) var(--t-input-padding-x, ${themeCssVariables.spacing[2]})`};
     resize: none;
     width: 100%;
 

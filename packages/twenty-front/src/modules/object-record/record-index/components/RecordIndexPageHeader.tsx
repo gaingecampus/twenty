@@ -17,10 +17,18 @@ import { isNonEmptyString } from '@sniptt/guards';
 import { styled } from '@linaria/react';
 import { t } from '@lingui/core/macro';
 import { isDefined } from 'twenty-shared/utils';
+import { IconArrowRight } from 'twenty-ui/icon';
 import { AppTooltip, TooltipDelay } from 'twenty-ui/surfaces';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 
+const StyledResponsiveHeaderContainer = styled.div`
+  container-name: record-index-header;
+  container-type: inline-size;
+  width: 100%;
+`;
+
 const StyledTitleWithSelectedRecords = styled.div`
+  align-items: center;
   display: flex;
   flex-direction: row;
   gap: ${themeCssVariables.spacing[1]};
@@ -67,7 +75,12 @@ export const RecordIndexPageHeader = () => {
     contextStoreNumberOfSelectedRecords > 0 ? (
       <StyledTitleWithSelectedRecords>
         <StyledTitle>{label}</StyledTitle>
-        <>{'->'}</>
+        <IconArrowRight
+          size={20}
+          color={themeCssVariables.font.color.tertiary}
+          aria-hidden
+          style={{ flexShrink: 0 }}
+        />
         <StyledSelectedRecordsCount>
           {t`${formatNumber(contextStoreNumberOfSelectedRecords)} selected`}
         </StyledSelectedRecordsCount>
@@ -101,25 +114,27 @@ export const RecordIndexPageHeader = () => {
   );
 
   return (
-    <PageCardHeader
-      icon={
-        <RecordIndexPageHeaderIcon objectMetadataItem={objectMetadataItem} />
-      }
-      title={titleWithDescription}
-      centerContent={
-        isDefined(contextStoreCurrentViewId) ? (
-          <RecordIndexPageHeaderSearchInput label={label} />
-        ) : undefined
-      }
-      actionButton={
-        isDefined(contextStoreCurrentViewId) ? (
-          <>
-            <RecordIndexCommandMenu />
-            <RecordIndexInlineEditModeButton />
-            {!isLayoutCustomizationModeEnabled && <SidePanelToggleButton />}
-          </>
-        ) : undefined
-      }
-    />
+    <StyledResponsiveHeaderContainer>
+      <PageCardHeader
+        icon={
+          <RecordIndexPageHeaderIcon objectMetadataItem={objectMetadataItem} />
+        }
+        title={titleWithDescription}
+        centerContent={
+          isDefined(contextStoreCurrentViewId) ? (
+            <RecordIndexPageHeaderSearchInput label={label} />
+          ) : undefined
+        }
+        actionButton={
+          isDefined(contextStoreCurrentViewId) ? (
+            <>
+              <RecordIndexCommandMenu />
+              <RecordIndexInlineEditModeButton />
+              {!isLayoutCustomizationModeEnabled && <SidePanelToggleButton />}
+            </>
+          ) : undefined
+        }
+      />
+    </StyledResponsiveHeaderContainer>
   );
 };

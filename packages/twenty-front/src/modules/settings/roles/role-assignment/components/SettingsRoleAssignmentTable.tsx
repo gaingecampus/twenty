@@ -32,13 +32,6 @@ const StyledSearchContainer = styled.div`
   padding-bottom: ${themeCssVariables.spacing[2]};
 `;
 
-const StyledSearchInputContainer = styled.div`
-  > * input {
-    background: ${themeCssVariables.background.transparent.lighter};
-    border: 1px solid ${themeCssVariables.border.color.medium};
-  }
-`;
-
 type RoleTargetType = 'member' | 'agent' | 'apiKey';
 
 type SettingsRoleAssignmentTableProps<T extends RoleTargetType> = {
@@ -145,17 +138,15 @@ export const SettingsRoleAssignmentTable = <T extends RoleTargetType>({
         description={t`This role is assigned to these ${roleTargetDisplayName}.`}
       />
       <StyledSearchContainer>
-        <StyledSearchInputContainer>
-          <SettingsTextInput
-            instanceId={`role-assignment-${roleTargetType}-search`}
-            value={searchFilter}
-            onChange={handleSearchChange}
-            placeholder={t`Search an assigned ${roleTargetDisplayName}...`}
-            fullWidth
-            LeftIcon={IconSearch}
-            sizeVariant="lg"
-          />
-        </StyledSearchInputContainer>
+        <SettingsTextInput
+          instanceId={`role-assignment-${roleTargetType}-search`}
+          value={searchFilter}
+          onChange={handleSearchChange}
+          placeholder={t`Search an assigned ${roleTargetDisplayName}...`}
+          fullWidth
+          LeftIcon={IconSearch}
+          sizeVariant="lg"
+        />
       </StyledSearchContainer>
       <StyledTable>
         <TableRow gridAutoColumns="2fr 4fr">

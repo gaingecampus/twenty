@@ -26,6 +26,9 @@ const StyledNameCell = styled.div`
 `;
 
 const StyledAvatarGroup = styled.div`
+  --t-avatar-font-size-md: 11px;
+  --t-avatar-size-md: 24px;
+  align-items: center;
   display: flex;
   justify-content: flex-end;
 

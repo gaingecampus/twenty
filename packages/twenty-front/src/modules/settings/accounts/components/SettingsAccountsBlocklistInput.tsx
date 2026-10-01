@@ -13,6 +13,7 @@ import { Button } from 'twenty-ui/input';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 
 const StyledContainer = styled.div`
+  align-items: flex-start;
   display: flex;
   flex-direction: row;
 `;
@@ -20,6 +21,11 @@ const StyledContainer = styled.div`
 const StyledLinkContainer = styled.div`
   flex: 1;
   margin-right: ${themeCssVariables.spacing[2]};
+  min-width: 0;
+
+  input {
+    height: var(--t-control-height-md, 32px);
+  }
 `;
 
 const parseHandles = (value: string): string[] =>
@@ -138,7 +144,7 @@ export const SettingsAccountsBlocklistInput = ({
             )}
           />
         </StyledLinkContainer>
-        <Button title={t`Add to blocklist`} type="submit" />
+        <Button title={t`Add to blocklist`} type="submit" size="medium" />
       </StyledContainer>
     </form>
   );

@@ -119,6 +119,7 @@ html.light[data-ui-theme='enterprise'] {
   --t-app-shell-bg: transparent;
   --t-app-shell-shadow: none;
   --t-background-primary: #ffffff;
+  --t-input-background: #fafbfc;
   --t-background-secondary: #ffffff;
   --t-background-tertiary: #f5f6f9;
   --t-background-quaternary: #eef0f4;
@@ -156,8 +157,8 @@ html.light[data-ui-theme='enterprise'] {
   --t-border-color-blue: #c5d2ff;
   --t-border-color-transparent-strong: rgb(46 91 255 / 0.28);
   --t-border-radius-xs: 6px;
-  --t-border-radius-sm: 8px;
-  --t-border-radius-md: 12px;
+  --t-border-radius-sm: 6px;
+  --t-border-radius-md: 8px;
   --t-border-radius-xl: 16px;
   --t-page-card-top-left-radius: 0px;
   --t-page-card-radius: 0;
@@ -192,6 +193,12 @@ html.light[data-ui-theme='enterprise'] {
   /* Controls */
   --t-control-height-sm: 32px;
   --t-control-height-md: 40px;
+  --t-input-hover-background: #f5f6f8;
+  --t-settings-card-hover-bg: #fafbfc;
+  --t-input-height: 40px;
+  --t-input-padding-x: 12px;
+  --t-input-padding-y: 10px;
+  --t-input-label-font-size: 11px;
   --t-page-header-action-height: 40px;
   --t-page-header-action-padding-x: 16px;
   --t-page-bar-min-height: 72px;

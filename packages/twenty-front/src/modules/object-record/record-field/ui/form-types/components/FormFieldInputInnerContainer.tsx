@@ -18,7 +18,10 @@ const StyledFormFieldInputInnerContainer = styled.div<
   Omit<FormFieldInputInnerContainerProps, 'formFieldInputInstanceId'>
 >`
   align-items: ${({ multiline }) => (multiline ? 'flex-start' : 'center')};
-  background-color: ${themeCssVariables.background.transparent.lighter};
+  background-color: var(
+    --t-input-background,
+    ${themeCssVariables.background.transparent.lighter}
+  );
   border: 1px solid ${themeCssVariables.border.color.medium};
   border-bottom-left-radius: ${themeCssVariables.border.radius.sm};
   border-bottom-right-radius: ${({ multiline, hasRightElement }) =>
@@ -46,8 +49,8 @@ const StyledFormFieldInputInnerContainer = styled.div<
   &[data-open='true'] {
     background-color: ${({ hoverable }) =>
       hoverable
-        ? themeCssVariables.background.transparent.light
-        : themeCssVariables.background.transparent.lighter};
+        ? `var(--t-input-hover-background, ${themeCssVariables.background.transparent.light})`
+        : `var(--t-input-background, ${themeCssVariables.background.transparent.lighter})`};
   }
 `;
 

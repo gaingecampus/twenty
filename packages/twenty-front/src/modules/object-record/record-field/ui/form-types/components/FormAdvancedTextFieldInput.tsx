@@ -34,7 +34,10 @@ const StyledAdvancedTextFieldFieldContainer = styled.div`
 `;
 
 const StyledAdvancedTextFieldInnerContainer = styled.div`
-  background-color: ${themeCssVariables.background.transparent.lighter};
+  background-color: var(
+    --t-input-background,
+    ${themeCssVariables.background.transparent.lighter}
+  );
   border: 1px solid ${themeCssVariables.border.color.medium};
   border-radius: ${themeCssVariables.border.radius.sm};
   box-sizing: border-box;
@@ -48,18 +51,20 @@ const StyledAdvancedTextFieldInnerContainer = styled.div`
 const StyledEditorActionButtonContainer = styled.div<{
   hasVariablePicker?: boolean;
 }>`
-  margin-top: ${themeCssVariables.spacing[1]};
   position: absolute;
   right: ${({ hasVariablePicker }) =>
     hasVariablePicker
-      ? `calc(${themeCssVariables.spacing[7]} + ${themeCssVariables.spacing[2]})`
-      : themeCssVariables.spacing[1]};
-  top: ${themeCssVariables.spacing[0]};
+      ? `calc(${themeCssVariables.spacing[7]} + var(--t-input-padding-x, ${themeCssVariables.spacing[2]}))`
+      : `var(--t-input-padding-x, ${themeCssVariables.spacing[1]})`};
+  top: var(--t-input-padding-y, ${themeCssVariables.spacing[1]});
   z-index: 1;
 `;
 
 const StyledFullScreenEditorContainer = styled.div`
-  background-color: ${themeCssVariables.background.secondary};
+  background-color: var(
+    --t-input-background,
+    ${themeCssVariables.background.secondary}
+  );
   border: 1px solid ${themeCssVariables.border.color.medium};
   border-radius: ${themeCssVariables.border.radius.sm};
   flex: 1;

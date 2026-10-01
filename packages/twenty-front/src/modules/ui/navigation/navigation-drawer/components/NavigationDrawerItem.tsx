@@ -539,7 +539,7 @@ export const NavigationDrawerItem = ({
           )}
 
           {isDefined(rightOptions) && isExpanded && (
-            <NavigationDrawerAnimatedCollapseWrapper>
+            <NavigationDrawerAnimatedCollapseWrapper preventShrink>
               {/* When StyledItem renders as a Link, we need both handlers to
                   prevent navigation when interacting with rightOptions:
                   - onMouseDown: stops useMouseDownNavigation from calling navigate()

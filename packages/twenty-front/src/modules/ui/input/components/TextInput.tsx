@@ -42,7 +42,10 @@ type StyledAdornmentContainerProps = {
 
 const StyledAdornmentContainer = styled.div<StyledAdornmentContainerProps>`
   align-items: center;
-  background-color: ${themeCssVariables.background.transparent.light};
+  background-color: var(
+    --t-input-background,
+    ${themeCssVariables.background.transparent.light}
+  );
   border: 1px solid ${themeCssVariables.border.color.medium};
   border-left-style: ${({ position }) =>
     position === 'right' ? 'none' : 'solid'};
@@ -64,7 +67,7 @@ const StyledAdornmentContainer = styled.div<StyledAdornmentContainerProps>`
         ? '24px'
         : sizeVariant === 'md'
           ? '28px'
-          : '32px'};
+          : 'var(--t-input-height, 32px)'};
   justify-content: center;
   line-height: ${({ sizeVariant }) =>
     sizeVariant === 'xs'
@@ -73,7 +76,7 @@ const StyledAdornmentContainer = styled.div<StyledAdornmentContainerProps>`
         ? '24px'
         : sizeVariant === 'md'
           ? '28px'
-          : '32px'};
+          : 'var(--t-input-height, 32px)'};
   min-width: fit-content;
 
   padding: ${themeCssVariables.spacing[2]};
@@ -94,7 +97,10 @@ const StyledInput = styled.input<
     | 'leftAdornment'
   >
 >`
-  background-color: ${themeCssVariables.background.transparent.lighter};
+  background-color: var(
+    --t-input-background,
+    ${themeCssVariables.background.transparent.lighter}
+  );
   border: 1px solid
     ${({ error }) =>
       error
@@ -117,14 +123,16 @@ const StyledInput = styled.input<
     inheritFontStyles ? 'inherit' : themeCssVariables.font.size.md};
   font-weight: ${({ inheritFontStyles }) =>
     inheritFontStyles ? 'inherit' : themeCssVariables.font.weight.regular};
-  height: ${({ sizeVariant }) =>
+  height: ${({ sizeVariant, autoGrow }) =>
     sizeVariant === 'xs'
       ? '20px'
       : sizeVariant === 'sm'
         ? '24px'
         : sizeVariant === 'md'
           ? '28px'
-          : '32px'};
+          : autoGrow
+            ? '32px'
+            : 'var(--t-input-height, 32px)'};
   max-width: ${({ autoGrow }) => (autoGrow ? '100%' : 'none')};
   outline: none;
   padding: ${({ sizeVariant, autoGrow }) =>
@@ -133,18 +141,26 @@ const StyledInput = styled.input<
       : sizeVariant === 'xs'
         ? `${themeCssVariables.spacing[2]} 0`
         : themeCssVariables.spacing[2]};
-  padding-left: ${({ LeftIcon, autoGrow }) =>
+  padding-left: ${({ LeftIcon, autoGrow, sizeVariant }) =>
     autoGrow
       ? themeCssVariables.spacing[1]
-      : LeftIcon
-        ? `calc(${themeCssVariables.spacing[3]} + 16px)`
-        : themeCssVariables.spacing[2]};
-  padding-right: ${({ RightIcon, autoGrow }) =>
+      : sizeVariant === 'lg'
+        ? LeftIcon
+          ? 'calc(var(--t-input-padding-x, 8px) + 20px)'
+          : 'var(--t-input-padding-x, 8px)'
+        : LeftIcon
+          ? `calc(${themeCssVariables.spacing[3]} + 16px)`
+          : themeCssVariables.spacing[2]};
+  padding-right: ${({ RightIcon, autoGrow, sizeVariant }) =>
     autoGrow
       ? themeCssVariables.spacing[1]
-      : RightIcon
-        ? `calc(${themeCssVariables.spacing[3]} + 16px)`
-        : themeCssVariables.spacing[2]};
+      : sizeVariant === 'lg'
+        ? RightIcon
+          ? 'calc(var(--t-input-padding-x, 8px) + 20px)'
+          : 'var(--t-input-padding-x, 8px)'
+        : RightIcon
+          ? `calc(${themeCssVariables.spacing[3]} + 16px)`
+          : themeCssVariables.spacing[2]};
   text-overflow: ellipsis;
   width: ${({ width }) =>
     isDefined(width)

@@ -1,3 +1,4 @@
+import { styled } from '@linaria/react';
 import { useParams } from 'react-router-dom';
 
 import { useMutation, useQuery } from '@apollo/client/react';
@@ -65,6 +66,11 @@ const WORKSPACE_DETAIL_TAB_IDS = {
   FEATURE_FLAGS: 'feature-flags',
   CHATS: 'chats',
 };
+
+const StyledMemberNameCell = styled(TableCell)`
+  --t-avatar-font-size-md: 11px;
+  --t-avatar-size-md: 24px;
+`;
 
 export const SettingsAdminWorkspaceDetail = () => {
   const { workspaceId } = useParams<{ workspaceId: string }>();
@@ -276,7 +282,7 @@ export const SettingsAdminWorkspaceDetail = () => {
                         userId,
                       })}
                     >
-                      <TableCell
+                      <StyledMemberNameCell
                         color={themeCssVariables.font.color.primary}
                         gap={themeCssVariables.spacing[2]}
                         overflow="hidden"
@@ -297,7 +303,7 @@ export const SettingsAdminWorkspaceDetail = () => {
                             '\u2014'
                           }
                         />
-                      </TableCell>
+                      </StyledMemberNameCell>
                       <TableCell>{user.email}</TableCell>
                       <TableCell align="right">
                         {workspace.allowImpersonation &&

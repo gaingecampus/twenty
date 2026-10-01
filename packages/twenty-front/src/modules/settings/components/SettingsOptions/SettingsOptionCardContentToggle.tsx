@@ -24,7 +24,10 @@ const StyledSettingsCardToggleContent = styled.div<{ disabled?: boolean }>`
   position: relative;
 
   &:hover {
-    background: ${themeCssVariables.background.transparent.lighter};
+    background: var(
+      --t-settings-card-hover-bg,
+      ${themeCssVariables.background.transparent.lighter}
+    );
   }
 `;
 

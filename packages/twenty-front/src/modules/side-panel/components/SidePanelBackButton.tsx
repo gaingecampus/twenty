@@ -52,7 +52,7 @@ export const SidePanelBackButton = () => {
         <StyledNavigationIcon onContextMenu={handleBackButtonContextMenu}>
           <IconButton
             Icon={IconChevronLeft}
-            size="small"
+            size="medium"
             variant="tertiary"
             onClick={goBackFromSidePanel}
             ariaLabel={t`Back`}

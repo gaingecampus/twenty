@@ -19,6 +19,7 @@ import { beautifyPastDateRelativeToNowShort } from '~/utils/date-utils';
 const StyledRightOptions = styled.div`
   align-items: center;
   display: flex;
+  flex-shrink: 0;
   height: ${themeCssVariables.spacing[6]};
   justify-content: flex-end;
   min-width: ${themeCssVariables.spacing[6]};
@@ -27,6 +28,7 @@ const StyledRightOptions = styled.div`
 
 const StyledTimestamp = styled.span<{ $isDropdownOpen: boolean }>`
   color: ${themeCssVariables.font.color.light};
+  flex-shrink: 0;
   font-size: ${themeCssVariables.font.size.xs};
   font-weight: ${themeCssVariables.font.weight.regular};
   opacity: ${({ $isDropdownOpen }) => ($isDropdownOpen ? 0 : 1)};

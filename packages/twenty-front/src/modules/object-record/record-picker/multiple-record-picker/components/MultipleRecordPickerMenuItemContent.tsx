@@ -1,3 +1,4 @@
+import { styled } from '@linaria/react';
 import { t } from '@lingui/core/macro';
 
 import { type EnrichedObjectMetadataItem } from '@/object-metadata/types/EnrichedObjectMetadataItem';
@@ -19,6 +20,11 @@ import { MenuItemMultiSelectAvatar } from 'twenty-ui/navigation';
 import { multipleRecordPickerSearchableObjectMetadataItemsComponentState } from '@/object-record/record-picker/multiple-record-picker/states/multipleRecordPickerSearchableObjectMetadataItemsComponentState';
 import { type SearchRecord } from '~/generated/graphql';
 import { getAbsoluteImageUrl } from '~/utils/image/getAbsoluteImageUrl';
+
+const StyledPickerMenuItem = styled(MenuItemMultiSelectAvatar)`
+  --t-avatar-font-size-md: 11px;
+  --t-avatar-size-md: 24px;
+`;
 
 type MultipleRecordPickerMenuItemContentProps = {
   searchRecord: SearchRecord;
@@ -78,7 +84,7 @@ export const MultipleRecordPickerMenuItemContent = ({
       key={searchRecord.recordId}
       onEnter={() => handleSelectChange(!isRecordSelectedWithObjectItem)}
     >
-      <MenuItemMultiSelectAvatar
+      <StyledPickerMenuItem
         onSelectChange={(isSelected) => handleSelectChange(isSelected)}
         isKeySelected={isSelectedItemId}
         selected={isRecordSelectedWithObjectItem}

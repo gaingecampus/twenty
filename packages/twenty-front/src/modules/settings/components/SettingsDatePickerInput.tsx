@@ -32,7 +32,10 @@ const StyledInputContainer = styled.div`
 
 const StyledInput = styled.div<{ hasValue: boolean }>`
   align-items: center;
-  background-color: ${themeCssVariables.background.transparent.lighter};
+  background-color: var(
+    --t-input-background,
+    ${themeCssVariables.background.transparent.lighter}
+  );
   border: 1px solid ${themeCssVariables.border.color.medium};
   border-radius: ${themeCssVariables.border.radius.sm};
   box-sizing: border-box;
@@ -43,8 +46,8 @@ const StyledInput = styled.div<{ hasValue: boolean }>`
   cursor: pointer;
   display: flex;
   gap: ${themeCssVariables.spacing[2]};
-  height: 32px;
-  padding: 0 ${themeCssVariables.spacing[2]};
+  height: var(--t-input-height, 32px);
+  padding: 0 var(--t-input-padding-x, ${themeCssVariables.spacing[2]});
   width: 100%;
 
   &:hover {
@@ -54,7 +57,7 @@ const StyledInput = styled.div<{ hasValue: boolean }>`
 
 const StyledLabel = styled.div`
   color: ${themeCssVariables.font.color.light};
-  font-size: ${themeCssVariables.font.size.xs};
+  font-size: var(--t-input-label-font-size, ${themeCssVariables.font.size.xs});
   font-weight: ${themeCssVariables.font.weight.medium};
   margin-bottom: ${themeCssVariables.spacing[1]};
 `;

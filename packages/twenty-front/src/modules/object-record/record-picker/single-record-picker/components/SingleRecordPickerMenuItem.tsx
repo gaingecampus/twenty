@@ -14,6 +14,12 @@ import { getAbsoluteImageUrl } from '~/utils/image/getAbsoluteImageUrl';
 import { capitalize, isDefined } from 'twenty-shared/utils';
 import { Avatar } from 'twenty-ui/data-display';
 import { MenuItemSelectAvatar } from 'twenty-ui/navigation';
+import { styled } from '@linaria/react';
+
+const StyledPickerMenuItem = styled(MenuItemSelectAvatar)`
+  --t-avatar-font-size-md: 11px;
+  --t-avatar-size-md: 24px;
+`;
 
 type SingleRecordPickerMenuItemProps = {
   morphItem: RecordPickerPickableMorphItem;
@@ -66,7 +72,7 @@ export const SingleRecordPickerMenuItem = ({
         onMorphItemSelected(morphItem);
       }}
     >
-      <MenuItemSelectAvatar
+      <StyledPickerMenuItem
         testId="menu-item"
         onClick={() => onMorphItemSelected(morphItem)}
         text={searchRecordStore.label}

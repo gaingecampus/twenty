@@ -17,6 +17,8 @@ import { formatDateString } from '~/utils/string/formatDateString';
 import { type PartialWorkspaceMember } from '@/settings/roles/types/RoleWithPartialMembers';
 
 const StyledIconWrapper = styled.div`
+  --t-avatar-font-size-md: 11px;
+  --t-avatar-size-md: 24px;
   align-items: center;
   display: flex;
   flex-shrink: 0;

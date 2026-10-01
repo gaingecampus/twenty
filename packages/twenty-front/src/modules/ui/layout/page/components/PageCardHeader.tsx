@@ -49,6 +49,49 @@ const StyledHeader = styled.div<{ headerLayout: HeaderLayout }>`
   padding: var(--t-page-header-padding-y, 0)
     var(--t-page-header-padding-x, ${themeCssVariables.spacing[3]});
   width: 100%;
+
+  @container record-index-header (max-width: 720px) {
+    grid-template-columns: minmax(0, 1fr) auto;
+    row-gap: ${themeCssVariables.spacing[3]};
+
+    > [data-header-part='left'] {
+      grid-column: 1;
+      grid-row: 1;
+    }
+
+    > [data-header-part='center'] {
+      grid-column: 1 / -1;
+      grid-row: 2;
+      justify-self: stretch;
+    }
+
+    > [data-header-part='actions'] {
+      grid-column: 2;
+      grid-row: 1;
+      min-width: 0;
+      width: auto;
+    }
+  }
+
+  @container record-index-header (max-width: 480px) {
+    grid-template-columns: minmax(0, 1fr);
+    padding-left: ${themeCssVariables.spacing[4]};
+    padding-right: ${themeCssVariables.spacing[4]};
+
+    > [data-header-part='center'] {
+      grid-column: 1;
+      grid-row: 3;
+    }
+
+    > [data-header-part='actions'] {
+      flex-wrap: wrap;
+      grid-column: 1;
+      grid-row: 2;
+      justify-content: flex-start;
+      justify-self: stretch;
+      width: 100%;
+    }
+  }
 `;
 
 const StyledLeft = styled.div`
@@ -151,7 +194,7 @@ export const PageCardHeader = ({
 
   return (
     <StyledHeader headerLayout={headerLayout}>
-      <StyledLeft>
+      <StyledLeft data-header-part="left">
         {!isNavigationDrawerExpanded && (
           <NavigationDrawerCollapseButton direction="right" />
         )}
@@ -168,10 +211,13 @@ export const PageCardHeader = ({
         </StyledCenteredTitle>
       )}
       {hasCenterContent && (
-        <StyledCenterContent>{centerContent}</StyledCenterContent>
+        <StyledCenterContent data-header-part="center">
+          {centerContent}
+        </StyledCenterContent>
       )}
       <StyledRight
         headerLayout={headerLayout}
+        data-header-part="actions"
         data-click-outside-id={PAGE_ACTION_CONTAINER_CLICK_OUTSIDE_ID}
       >
         {actionButton}

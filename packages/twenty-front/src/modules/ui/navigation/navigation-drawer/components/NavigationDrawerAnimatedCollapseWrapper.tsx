@@ -9,8 +9,9 @@ import {
 } from 'framer-motion';
 import { useContext } from 'react';
 import { ThemeContext } from 'twenty-ui/theme-constants';
-const StyledAnimatedContainerBase = styled.span`
+const StyledAnimatedContainerBase = styled.span<{ preventShrink: boolean }>`
   display: block;
+  flex-shrink: ${({ preventShrink }) => (preventShrink ? 0 : 1)};
   min-width: 0;
   overflow: hidden;
 `;
@@ -20,9 +21,11 @@ const StyledAnimatedContainer = motion.create(StyledAnimatedContainerBase);
 export const NavigationDrawerAnimatedCollapseWrapper = ({
   children,
   expandToFullWidth = false,
+  preventShrink = false,
 }: {
   children: React.ReactNode;
   expandToFullWidth?: boolean;
+  preventShrink?: boolean;
 }) => {
   const { theme } = useContext(ThemeContext);
   const isSettingsPage = useIsSettingsPage();
@@ -51,6 +54,7 @@ export const NavigationDrawerAnimatedCollapseWrapper = ({
 
   return (
     <StyledAnimatedContainer
+      preventShrink={preventShrink}
       initial={false}
       animate={animate}
       transition={{

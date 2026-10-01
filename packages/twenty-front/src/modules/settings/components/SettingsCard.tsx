@@ -45,7 +45,10 @@ const StyledCardContentContainer = styled.div`
     padding: ${themeCssVariables.spacing[2]} ${themeCssVariables.spacing[2]};
 
     &:hover {
-      background-color: ${themeCssVariables.background.quaternary};
+      background-color: var(
+        --t-settings-card-hover-bg,
+        ${themeCssVariables.background.quaternary}
+      );
       cursor: pointer;
     }
   }

@@ -26,8 +26,26 @@ const StyledCardsContainer = styled.div`
 `;
 
 const StyledCardLinkSlot = styled.div`
+  display: flex;
   flex: 1 1 0;
   min-width: 0;
+
+  > a {
+    display: flex;
+    width: 100%;
+  }
+
+  > a > div,
+  > a > div > div,
+  > a > div > div > div {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+  }
+
+  > a > div > div > div > div {
+    flex: 1;
+  }
 `;
 
 export const SettingsAccountsSettingsSection = () => {

@@ -66,7 +66,10 @@ const StyledDisplayModeContainer = styled.div`
 
   &:hover,
   &[data-open='true'] {
-    background-color: ${themeCssVariables.background.transparent.lighter};
+    background-color: var(
+      --t-input-background,
+      ${themeCssVariables.background.transparent.lighter}
+    );
   }
 `;
 

@@ -41,8 +41,7 @@ type SettingsAdminWorkspaceContentProps = {
 const StyledContainer = styled.div`
   display: flex;
   flex-direction: column;
-  gap: ${themeCssVariables.spacing[3]};
-  margin-top: ${themeCssVariables.spacing[6]};
+  gap: ${themeCssVariables.spacing[8]};
 `;
 
 export const SettingsAdminWorkspaceContent = ({

@@ -32,6 +32,11 @@ import {
   SyncMarketplaceCatalogDocument,
 } from '~/generated-admin/graphql';
 
+const StyledAppNameCell = styled(StyledNameTableCell)`
+  --t-avatar-font-size-md: 11px;
+  --t-avatar-size-md: 24px;
+`;
+
 const StyledTableContainer = styled.div`
   border-bottom: 1px solid ${themeCssVariables.border.color.light};
   margin-top: ${themeCssVariables.spacing[3]};
@@ -212,14 +217,14 @@ const SettingsAdminAppsTableRow = ({
       mobileGridAutoColumns={TABLE_GRID_MOBILE}
       isClickable
     >
-      <StyledNameTableCell minWidth="0" overflow="hidden">
+      <StyledAppNameCell minWidth="0" overflow="hidden">
         <ApplicationDisplay
           application={{
             name: registration.name,
             logo: registration.logoUrl,
           }}
         />
-      </StyledNameTableCell>
+      </StyledAppNameCell>
       <TableCell overflow="hidden" align="right">
         {getFormattedSource(registration)}
       </TableCell>

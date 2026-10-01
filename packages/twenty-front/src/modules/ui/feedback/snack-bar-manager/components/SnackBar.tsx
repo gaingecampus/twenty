@@ -71,8 +71,10 @@ const StyledContainer = styled.div`
 `;
 
 const StyledProgressBarContainer = styled.div`
+  border-radius: inherit;
   bottom: 0;
   left: 0;
+  overflow: hidden;
   pointer-events: none;
   position: absolute;
   right: 0;

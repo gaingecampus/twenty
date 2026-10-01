@@ -1,3 +1,4 @@
+import { InputLabel } from '@/ui/input/components/InputLabel';
 import { styled } from '@linaria/react';
 import { type MouseEvent, useMemo, useRef, useState } from 'react';
 
@@ -59,14 +60,6 @@ export type SelectProps<Value extends SelectValue> = {
 
 const StyledContainer = styled.div<{ fullWidth?: boolean }>`
   width: ${({ fullWidth }) => (fullWidth ? '100%' : 'auto')};
-`;
-
-const StyledLabel = styled.span`
-  color: ${themeCssVariables.font.color.light};
-  display: block;
-  font-size: ${themeCssVariables.font.size.xs};
-  font-weight: ${themeCssVariables.font.weight.semiBold};
-  margin-bottom: ${themeCssVariables.spacing[1]};
 `;
 
 const StyledDescription = styled.span`
@@ -194,7 +187,7 @@ export const Select = <Value extends SelectValue>({
       onBlur={onBlur}
       ref={selectContainerRef}
     >
-      {isNonEmptyString(label) && <StyledLabel>{label}</StyledLabel>}
+      {isNonEmptyString(label) && <InputLabel as="span">{label}</InputLabel>}
       {isDisabled ? (
         <SelectControl
           selectedOption={controlSelectedOption}
