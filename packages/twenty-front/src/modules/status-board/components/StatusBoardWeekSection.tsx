@@ -174,14 +174,12 @@ const StatusBoardWeekSectionLoaded = ({
       const memberOnboardings = records.filter(
         (onboarding) =>
           (memberIds === undefined || memberIds.includes(member.id)) &&
-          (projectMemberIds[onboarding.id]
-            ? projectMemberIds[onboarding.id].includes(member.id)
-            : isStatusBoardOnboardingOwnedByMember({
-                onboarding,
-                memberId: member.id,
-                assignments,
-                showLeadConsultants,
-              })),
+          isStatusBoardOnboardingOwnedByMember({
+            onboarding,
+            memberId: member.id,
+            assignments,
+            showLeadConsultants,
+          }),
       );
 
       return {
