@@ -53,6 +53,29 @@ describe('getTabsWithVisibleWidgets', () => {
     deletedAt: null,
   });
 
+  it.each([false, true])(
+    'keeps a saved content tab visible in read mode (side panel: %s)',
+    (isInSidePanel) => {
+      const tabs = [
+        createMockTab('timeline', [createMockWidget('timeline-widget')]),
+        createMockTab('field-records', []),
+        createMockTab('empty', []),
+        { ...createMockTab('inactive', []), isActive: false },
+      ];
+      const result = getTabsWithVisibleWidgets({
+        tabs,
+        isMobile: false,
+        isInSidePanel,
+        isEditMode: false,
+        contentTabIds: ['field-records', 'inactive'],
+      });
+      expect(result.map((tab) => tab.id)).toEqual([
+        'timeline',
+        'field-records',
+      ]);
+    },
+  );
+
   describe('in read mode', () => {
     it('should filter out tabs with no visible widgets', () => {
       const tabs = [

@@ -6,18 +6,21 @@ import { useLocation } from 'react-router-dom';
 
 type TabListFromUrlOptionalEffectProps = {
   tabListIds: string[];
+  tabIdAliases?: Record<string, string>;
   isInSidePanel: boolean;
 };
 
 export const TabListFromUrlOptionalEffect = ({
   tabListIds,
+  tabIdAliases,
   isInSidePanel,
 }: TabListFromUrlOptionalEffectProps) => {
   const location = useLocation();
   const activeTabId = useAtomComponentStateValue(activeTabIdComponentState);
   const setActiveTabId = useSetAtomComponentState(activeTabIdComponentState);
 
-  const hash = location.hash.replace('#', '');
+  const rawHash = location.hash.replace('#', '');
+  const hash = tabIdAliases?.[rawHash] ?? rawHash;
 
   useEffect(() => {
     if (isInSidePanel) {

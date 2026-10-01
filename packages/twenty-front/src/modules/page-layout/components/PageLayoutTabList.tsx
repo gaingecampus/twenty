@@ -1,4 +1,8 @@
 import {
+  FIELD_MANAGEMENT_RECORD_TAB_ID,
+  getFieldManagementRecordTabId,
+} from '@/field-management/useFieldManagementRecordTab';
+import {
   DragDropContext,
   type DropResult,
   type OnDragEndResponder,
@@ -243,13 +247,22 @@ export const PageLayoutTabList = ({
 
   const openTabSettings = useCallback(
     (tabId: string) => {
+      if (
+        tabId === FIELD_MANAGEMENT_RECORD_TAB_ID ||
+        tabId === getFieldManagementRecordTabId(pageLayoutId)
+      )
+        return;
       setPageLayoutTabSettingsOpenTabId(tabId);
       navigatePageLayoutSidePanel({
         sidePanelPage: SidePanelPages.PageLayoutTabSettings,
         resetNavigationStack: true,
       });
     },
-    [setPageLayoutTabSettingsOpenTabId, navigatePageLayoutSidePanel],
+    [
+      setPageLayoutTabSettingsOpenTabId,
+      navigatePageLayoutSidePanel,
+      pageLayoutId,
+    ],
   );
 
   const isTabSettingsOpen = isDefined(pageLayoutTabSettingsOpenTabId);
@@ -327,6 +340,10 @@ export const PageLayoutTabList = ({
       <TabListFromUrlOptionalEffect
         isInSidePanel={!!isInSidePanel}
         tabListIds={tabsWithIcons.map((tab) => tab.id)}
+        tabIdAliases={{
+          [FIELD_MANAGEMENT_RECORD_TAB_ID]:
+            getFieldManagementRecordTabId(pageLayoutId),
+        }}
       />
 
       {tabsWithIcons.length > 1 && (

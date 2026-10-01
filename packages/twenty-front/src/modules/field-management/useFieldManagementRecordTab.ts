@@ -1,3 +1,4 @@
+import { v5 } from 'uuid';
 import { type PageLayoutTab } from '@/page-layout/types/PageLayoutTab';
 import { useLayoutRenderingContext } from '@/ui/layout/contexts/LayoutRenderingContext';
 import { PageLayoutType } from '~/generated-metadata/graphql';
@@ -8,15 +9,16 @@ import {
 
 export const FIELD_MANAGEMENT_RECORD_TAB_ID = 'gainge-field-records';
 
-// Runtime tab only: never insert this extension into a saved user layout.
+export const getFieldManagementRecordTabId = (pageLayoutId: string) =>
+  v5(`gainge-field-records:${pageLayoutId}`, v5.URL);
+
+// A deterministic UUID lets the built-in tab use the normal layout save API.
 export const useFieldManagementRecordTab = (
   pageLayoutId: string,
-  isEditMode: boolean,
 ): PageLayoutTab | undefined => {
   const { targetRecordIdentifier, layoutType } = useLayoutRenderingContext();
   const metadata = useFieldManagementMetadata();
   if (
-    isEditMode ||
     layoutType !== PageLayoutType.RECORD_PAGE ||
     !['company', 'onboarding'].includes(
       targetRecordIdentifier?.targetObjectNameSingular ?? '',
@@ -27,11 +29,11 @@ export const useFieldManagementRecordTab = (
 
   return {
     __typename: 'PageLayoutTab',
-    id: FIELD_MANAGEMENT_RECORD_TAB_ID,
+    id: getFieldManagementRecordTabId(pageLayoutId),
     title: '현장 기록',
     icon: 'IconMap',
     pageLayoutId,
-    applicationId: 'gainge-field-management',
+    applicationId: '',
     isActive: true,
     position: 1,
     widgets: [],

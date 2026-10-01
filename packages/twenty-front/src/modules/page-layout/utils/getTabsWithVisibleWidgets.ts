@@ -7,6 +7,7 @@ type GetTabsWithVisibleWidgetsParams = {
   isMobile: boolean;
   isInSidePanel: boolean;
   isEditMode: boolean;
+  contentTabIds?: string[];
 };
 
 export const getTabsWithVisibleWidgets = ({
@@ -14,6 +15,7 @@ export const getTabsWithVisibleWidgets = ({
   isMobile,
   isInSidePanel,
   isEditMode,
+  contentTabIds = [],
 }: GetTabsWithVisibleWidgetsParams): PageLayoutTab[] => {
   const activeTabs = tabs.filter((tab) => tab.isActive);
 
@@ -29,7 +31,7 @@ export const getTabsWithVisibleWidgets = ({
   }));
 
   const tabsWithVisibleWidgets = tabsWithFilteredWidgets.filter(
-    (tab) => tab.widgets.length > 0,
+    (tab) => tab.widgets.length > 0 || contentTabIds.includes(tab.id),
   );
 
   if (tabsWithVisibleWidgets.length === 0 && activeTabs.length > 0) {

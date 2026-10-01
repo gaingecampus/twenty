@@ -2,7 +2,7 @@ import { getTabListInstanceIdFromPageLayoutAndRecord } from '@/page-layout/utils
 import { PageLayoutType } from '~/generated-metadata/graphql';
 
 describe('getTabListInstanceIdFromPageLayoutAndRecord', () => {
-  it('should include record ID for RECORD_PAGE layout with targetRecordIdentifier', () => {
+  it('should scope record page tabs to the object', () => {
     const result = getTabListInstanceIdFromPageLayoutAndRecord({
       pageLayoutId: 'layout-1',
       layoutType: PageLayoutType.RECORD_PAGE,
@@ -12,7 +12,22 @@ describe('getTabListInstanceIdFromPageLayoutAndRecord', () => {
       },
     });
 
-    expect(result).toBe('layout-1-tab-list-record-42');
+    expect(result).toBe('layout-1-tab-list-company');
+  });
+
+  it('shares tabs between company records but isolates other objects', () => {
+    const instanceFor = (id: string, targetObjectNameSingular: string) =>
+      getTabListInstanceIdFromPageLayoutAndRecord({
+        pageLayoutId: 'layout-1',
+        layoutType: PageLayoutType.RECORD_PAGE,
+        targetRecordIdentifier: { id, targetObjectNameSingular },
+      });
+    expect(instanceFor('first', 'company')).toBe(
+      instanceFor('second', 'company'),
+    );
+    expect(instanceFor('first', 'company')).not.toBe(
+      instanceFor('first', 'person'),
+    );
   });
 
   it('should omit record ID for DASHBOARD layout', () => {

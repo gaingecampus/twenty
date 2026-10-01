@@ -12,10 +12,13 @@ export const getTabListInstanceIdFromPageLayoutAndRecord = ({
   layoutType: LayoutRenderingContextType['layoutType'];
   targetRecordIdentifier?: TargetRecordIdentifier;
 }) => {
-  // Include record ID in tab instance ID to prevent tab synchronization between different records
-  // Only for RECORD_PAGE layouts, as DASHBOARD layouts are standalone
-  const recordId =
-    layoutType === 'RECORD_PAGE' ? targetRecordIdentifier?.id : undefined;
+  // Share the selected tab across records of the same object and layout.
+  const objectName =
+    layoutType === 'RECORD_PAGE'
+      ? targetRecordIdentifier?.targetObjectNameSingular
+      : undefined;
   const baseInstanceId = getTabListInstanceIdFromPageLayoutId(pageLayoutId);
-  return isDefined(recordId) ? `${baseInstanceId}-${recordId}` : baseInstanceId;
+  return isDefined(objectName)
+    ? `${baseInstanceId}-${objectName}`
+    : baseInstanceId;
 };

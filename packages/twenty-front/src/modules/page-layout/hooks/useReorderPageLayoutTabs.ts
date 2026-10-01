@@ -1,3 +1,4 @@
+import { type PageLayoutTab } from '@/page-layout/types/PageLayoutTab';
 import { PAGE_LAYOUT_TAB_LIST_DROPPABLE_IDS } from '@/page-layout/components/PageLayoutTabListDroppableIds';
 import { useCurrentPageLayout } from '@/page-layout/hooks/useCurrentPageLayout';
 import { usePageLayoutDraftState } from '@/page-layout/hooks/usePageLayoutDraftState';
@@ -8,7 +9,10 @@ import { type DropResult } from '@hello-pangea/dnd';
 import { useCallback } from 'react';
 import { isDefined } from 'twenty-shared/utils';
 
-export const useReorderPageLayoutTabs = (pageLayoutIdFromProps?: string) => {
+export const useReorderPageLayoutTabs = (
+  pageLayoutIdFromProps?: string,
+  additionalTabs: PageLayoutTab[] = [],
+) => {
   const pageLayoutId = useAvailableComponentInstanceIdOrThrow(
     PageLayoutComponentInstanceContext,
     pageLayoutIdFromProps,
@@ -32,9 +36,13 @@ export const useReorderPageLayoutTabs = (pageLayoutIdFromProps?: string) => {
         return false;
       }
 
-      const sortedTabs = sortTabsByPosition(
-        currentPageLayout.tabs.filter((tab) => tab.isActive),
-      );
+      const tabs = [
+        ...currentPageLayout.tabs,
+        ...additionalTabs.filter(
+          (tab) => !currentPageLayout.tabs.some((saved) => saved.id === tab.id),
+        ),
+      ];
+      const sortedTabs = sortTabsByPosition(tabs.filter((tab) => tab.isActive));
 
       const draggedTab = sortedTabs.find((tab) => tab.id === draggableId);
       if (!isDefined(draggedTab)) {
@@ -66,7 +74,7 @@ export const useReorderPageLayoutTabs = (pageLayoutIdFromProps?: string) => {
 
       setPageLayoutDraft((prev) => ({
         ...prev,
-        tabs: prev.tabs.map((tab) => {
+        tabs: tabs.map((tab) => {
           const newPosition = newPositionById.get(tab.id);
           return isDefined(newPosition)
             ? { ...tab, position: newPosition }
@@ -76,7 +84,7 @@ export const useReorderPageLayoutTabs = (pageLayoutIdFromProps?: string) => {
 
       return isDropOnMoreButton;
     },
-    [currentPageLayout, setPageLayoutDraft],
+    [currentPageLayout, setPageLayoutDraft, additionalTabs],
   );
 
   return { reorderTabs };

@@ -1,3 +1,4 @@
+import { type PageLayoutTab } from '@/page-layout/types/PageLayoutTab';
 import { useReorderPageLayoutTabs } from '@/page-layout/hooks/useReorderPageLayoutTabs';
 import { type DropResult, type ResponderProvided } from '@hello-pangea/dnd';
 import { useCallback } from 'react';
@@ -5,8 +6,12 @@ import { isDefined } from 'twenty-shared/utils';
 
 export const useReorderRecordPageLayoutTabs = (
   pageLayoutIdFromProps?: string,
+  additionalTabs: PageLayoutTab[] = [],
 ) => {
-  const { reorderTabs } = useReorderPageLayoutTabs(pageLayoutIdFromProps);
+  const { reorderTabs } = useReorderPageLayoutTabs(
+    pageLayoutIdFromProps,
+    additionalTabs,
+  );
 
   const reorderRecordPageTabs = useCallback(
     (

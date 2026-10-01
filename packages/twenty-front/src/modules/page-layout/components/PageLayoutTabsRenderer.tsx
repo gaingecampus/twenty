@@ -1,5 +1,8 @@
 import { FieldManagement } from '@/field-management/FieldManagement';
-import { useFieldManagementRecordTab } from '@/field-management/useFieldManagementRecordTab';
+import {
+  FIELD_MANAGEMENT_RECORD_TAB_ID,
+  useFieldManagementRecordTab,
+} from '@/field-management/useFieldManagementRecordTab';
 import { metadataStoreState } from '@/metadata-store/states/metadataStoreState';
 import { type FlatObjectMetadataItem } from '@/metadata-store/types/FlatObjectMetadataItem';
 import { useObjectMetadataItems } from '@/object-metadata/hooks/useObjectMetadataItems';
@@ -147,10 +150,6 @@ export const PageLayoutTabsRenderer = () => {
     tabListInstanceId,
   });
 
-  const { reorderRecordPageTabs } = useReorderRecordPageLayoutTabs(
-    currentPageLayout.id,
-  );
-
   const { objectMetadataItems } = useObjectMetadataItems();
 
   const inactiveRelationFieldNames = useMemo(() => {
@@ -196,8 +195,11 @@ export const PageLayoutTabsRenderer = () => {
     isPageLayoutInEditMode &&
     shouldEnableTabEditingFeatures(currentPageLayout.type);
 
+  const fieldManagementTab = useFieldManagementRecordTab(currentPageLayout.id);
+
   const tabsWithVisibleWidgets = getTabsWithVisibleWidgets({
     tabs: currentPageLayout.tabs,
+    contentTabIds: fieldManagementTab ? [fieldManagementTab.id] : [],
     isMobile,
     isInSidePanel,
     isEditMode: isPageLayoutInEditMode,
@@ -240,18 +242,36 @@ export const PageLayoutTabsRenderer = () => {
     [sortedTabs, inactiveRelationFieldNames],
   );
 
-  const fieldManagementTab = useFieldManagementRecordTab(
-    currentPageLayout.id,
-    isPageLayoutInEditMode,
+  const savedFieldManagementTab = currentPageLayout.tabs.find(
+    (tab) => tab.id === fieldManagementTab?.id,
   );
-  const tabsWithFieldManagement = fieldManagementTab
+  const additionalFieldManagementTab =
+    fieldManagementTab && !savedFieldManagementTab
+      ? {
+          ...fieldManagementTab,
+          position:
+            sortedActiveTabs.length > 1
+              ? (sortedActiveTabs[0].position + sortedActiveTabs[1].position) /
+                2
+              : (sortedActiveTabs[0]?.position ?? -1) + 1,
+        }
+      : undefined;
+  const tabsWithFieldManagement = additionalFieldManagementTab
     ? [
         ...sortedActiveTabs.slice(0, 1),
-        fieldManagementTab,
+        additionalFieldManagementTab,
         ...sortedActiveTabs.slice(1),
       ]
     : sortedActiveTabs;
+  const { reorderRecordPageTabs } = useReorderRecordPageLayoutTabs(
+    currentPageLayout.id,
+    additionalFieldManagementTab ? [additionalFieldManagementTab] : [],
+  );
   const displayTabs = tabsWithFieldManagement.map((tab) => {
+    if (fieldManagementTab && tab.id === fieldManagementTab.id) {
+      return { ...tab, icon: fieldManagementTab.icon };
+    }
+
     const isNoteContentTab =
       targetRecordIdentifier?.targetObjectNameSingular ===
         CoreObjectNameSingular.Note &&
@@ -261,7 +281,9 @@ export const PageLayoutTabsRenderer = () => {
     return isNoteContentTab ? { ...tab, title: t`Content` } : tab;
   });
   const isFieldManagementTabActive =
-    !!fieldManagementTab && activeTabId === fieldManagementTab.id;
+    !!fieldManagementTab &&
+    (activeTabId === fieldManagementTab.id ||
+      activeTabId === FIELD_MANAGEMENT_RECORD_TAB_ID);
 
   const activeTabExistsInCurrentPageLayout = currentPageLayout.tabs.some(
     (tab) => tab.id === activeTabId,
