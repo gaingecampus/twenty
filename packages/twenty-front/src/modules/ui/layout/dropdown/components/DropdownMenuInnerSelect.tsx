@@ -10,22 +10,28 @@ import { type SelectOption } from 'twenty-ui/input';
 import { MenuItemSelect } from 'twenty-ui/navigation';
 import { ThemeContext, themeCssVariables } from 'twenty-ui/theme-constants';
 
-const StyledDropdownMenuInnerSelectDropdownButton = styled.div`
+const StyledDropdownMenuInnerSelectDropdownButton = styled.div<{
+  spacious: boolean;
+}>`
   align-items: center;
   box-sizing: border-box;
   color: ${themeCssVariables.font.color.secondary};
   cursor: pointer;
 
   display: flex;
-  font-size: ${themeCssVariables.font.size.sm};
+  font-size: ${({ spacious }) =>
+    spacious ? themeCssVariables.font.size.md : themeCssVariables.font.size.sm};
 
   font-weight: ${themeCssVariables.font.weight.medium};
 
-  height: ${themeCssVariables.spacing[7]};
+  height: ${({ spacious }) =>
+    spacious ? '44px' : themeCssVariables.spacing[7]};
   justify-content: space-between;
-  padding-left: ${themeCssVariables.spacing[2]};
+  padding-left: ${({ spacious }) =>
+    spacious ? themeCssVariables.spacing[4] : themeCssVariables.spacing[2]};
 
-  padding-right: ${themeCssVariables.spacing[2]};
+  padding-right: ${({ spacious }) =>
+    spacious ? themeCssVariables.spacing[4] : themeCssVariables.spacing[2]};
   width: 100%;
 `;
 
@@ -35,6 +41,7 @@ export type DropdownMenuInnerSelectProps = {
   options: SelectOption[];
   dropdownId: string;
   widthInPixels?: number;
+  spacious?: boolean;
 };
 
 export const DropdownMenuInnerSelect = ({
@@ -43,6 +50,7 @@ export const DropdownMenuInnerSelect = ({
   options,
   dropdownId,
   widthInPixels,
+  spacious = false,
 }: DropdownMenuInnerSelectProps) => {
   const { theme } = useContext(ThemeContext);
   const { closeDropdown } = useCloseDropdown();
@@ -50,7 +58,7 @@ export const DropdownMenuInnerSelect = ({
   return (
     <Dropdown
       clickableComponent={
-        <StyledDropdownMenuInnerSelectDropdownButton>
+        <StyledDropdownMenuInnerSelectDropdownButton spacious={spacious}>
           <span>{selectedOption.label}</span>
           <IconChevronDown size={theme.icon.size.sm} />
         </StyledDropdownMenuInnerSelectDropdownButton>
