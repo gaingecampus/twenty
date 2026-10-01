@@ -18,6 +18,10 @@ const StyledEditableTitleContainer = styled.div`
   align-items: center;
   display: flex;
   flex-direction: row;
+  font-size: 16px;
+  gap: ${themeCssVariables.spacing[1]};
+  line-height: 24px;
+  min-height: 32px;
   overflow-x: hidden;
   width: 100%;
 `;
@@ -103,7 +107,10 @@ export const ObjectRecordShowPageBreadcrumb = ({
         }}
       >
         <StyledBreadcrumbPrefixObjectIcon>
-          <ObjectMetadataIcon objectMetadataItem={objectMetadataItem} />
+          <ObjectMetadataIcon
+            objectMetadataItem={objectMetadataItem}
+            size={24}
+          />
         </StyledBreadcrumbPrefixObjectIcon>
         {objectLabel}
         <span>{' / '}</span>
@@ -133,7 +140,7 @@ export const ObjectRecordShowPageBreadcrumb = ({
           }}
         >
           <RecordTitleCell
-            sizeVariant="xs"
+            sizeVariant="md"
             containerType={RecordTitleCellContainerType.PageHeader}
           />
         </FieldContext.Provider>
