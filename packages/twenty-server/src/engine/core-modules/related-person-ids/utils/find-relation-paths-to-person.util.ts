@@ -84,6 +84,26 @@ export const findRelationPathsToPerson = ({
           continue;
         }
 
+        // Internal ownership must never expand a record's correspondence scope.
+        const targetName = relation.targetObjectMetadata.nameSingular;
+        const relationName = relation.sourceFieldMetadata.name
+          .replace(/[^a-z]/gi, '')
+          .toLowerCase();
+
+        if (
+          ['member', 'teamMember', 'workspaceMember'].includes(targetName) ||
+          /^(dri|owner|accountowner|assignee|assignedto|assignedmember|consultant|leadconsultant|executionconsultant|createdby|updatedby)(s|id)?$/.test(
+            relationName,
+          ) ||
+          (sourceObject.nameSingular === 'company' &&
+            !(
+              targetName === PERSON_OBJECT_NAME_SINGULAR &&
+              relation.sourceFieldMetadata.name === 'people'
+            ))
+        ) {
+          continue;
+        }
+
         const joinColumnOwner =
           relation.type === RelationType.MANY_TO_ONE
             ? {

@@ -228,6 +228,12 @@ describe('findRelationPathsToPerson', () => {
         ],
         company: [
           {
+            fieldName: 'dri',
+            relationType: RelationType.MANY_TO_ONE,
+            targetObjectNameSingular: 'person',
+            inverseFieldName: 'ownedCompanies',
+          },
+          {
             fieldName: 'people',
             relationType: RelationType.ONE_TO_MANY,
             targetObjectNameSingular: 'person',
@@ -352,4 +358,54 @@ describe('findRelationPathsToPerson', () => {
       }),
     ).toEqual([]);
   });
+});
+
+describe('internal ownership exclusions', () => {
+  it.each(['opportunity', 'onboarding', 'deposit'])(
+    'excludes DRI and member paths from %s while retaining the customer contact',
+    (rootObjectNameSingular) => {
+      const fixtures = buildGraphFixtures({
+        [rootObjectNameSingular]: [
+          {
+            fieldName: 'dri',
+            relationType: RelationType.MANY_TO_ONE,
+            targetObjectNameSingular: 'person',
+            inverseFieldName: 'ownedRecords',
+          },
+          {
+            fieldName: 'consultingMember',
+            relationType: RelationType.MANY_TO_ONE,
+            targetObjectNameSingular: 'teamMember',
+            inverseFieldName: 'records',
+          },
+          {
+            fieldName: 'pointOfContact',
+            relationType: RelationType.MANY_TO_ONE,
+            targetObjectNameSingular: 'person',
+            inverseFieldName: 'records',
+          },
+        ],
+        teamMember: [
+          {
+            fieldName: 'contact',
+            relationType: RelationType.MANY_TO_ONE,
+            targetObjectNameSingular: 'person',
+            inverseFieldName: 'members',
+          },
+        ],
+        person: [],
+      });
+      expect(
+        findRelationPathsToPerson({ rootObjectNameSingular, ...fixtures }),
+      ).toEqual([
+        [
+          {
+            direction: RelationType.MANY_TO_ONE,
+            queryObjectNameSingular: rootObjectNameSingular,
+            joinColumnName: 'pointOfContactId',
+          },
+        ],
+      ]);
+    },
+  );
 });
