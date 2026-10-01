@@ -28,10 +28,7 @@ export const RecordPageSidePanelCommandMenuDropdown = () => {
     sidePanelWidgetFooterCommandMenuItemsState,
   );
 
-  const dropdownWidgetCommandMenuItems =
-    sidePanelWidgetFooterCommandMenuItems.filter(
-      (commandMenuItem) => commandMenuItem.isPinned === false,
-    );
+  const dropdownWidgetCommandMenuItems = sidePanelWidgetFooterCommandMenuItems;
 
   const recordSelectionCommandMenuItems = useMemo(
     () =>
@@ -52,6 +49,7 @@ export const RecordPageSidePanelCommandMenuDropdown = () => {
 
   return (
     <OptionsDropdownMenu
+      compact
       dropdownId={dropdownId}
       selectableListId={commandMenuId}
       selectableItemIdArray={selectableItemIdArray}
@@ -59,6 +57,7 @@ export const RecordPageSidePanelCommandMenuDropdown = () => {
       {dropdownWidgetCommandMenuItems.map((commandMenuItem) => (
         <MenuItem
           key={commandMenuItem.id}
+          disabled={commandMenuItem.disabled}
           text={commandMenuItem.label}
           LeftIcon={commandMenuItem.Icon}
           onClick={() => {

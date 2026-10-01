@@ -44,11 +44,23 @@ export const StyledPageInfoLabel = styled.div`
   white-space: nowrap;
 `;
 
+const StyledRecordType = styled.span`
+  background: ${themeCssVariables.background.tertiary};
+  border: 1px solid ${themeCssVariables.border.color.medium};
+  border-radius: ${themeCssVariables.border.radius.sm};
+  color: ${themeCssVariables.font.color.secondary};
+  flex-shrink: 0;
+  font-size: ${themeCssVariables.font.size.sm};
+  padding: ${themeCssVariables.spacing[0.5]} ${themeCssVariables.spacing[2]};
+  white-space: nowrap;
+`;
+
 type SidePanelPageInfoLayoutProps = {
   icon?: ReactNode;
   iconColor?: string;
   title: ReactNode;
   label?: ReactNode;
+  recordType?: string;
 };
 
 export const SidePanelPageInfoLayout = ({
@@ -56,6 +68,7 @@ export const SidePanelPageInfoLayout = ({
   iconColor,
   title,
   label,
+  recordType,
 }: SidePanelPageInfoLayoutProps) => {
   return (
     <StyledPageInfoContainer>
@@ -63,6 +76,7 @@ export const SidePanelPageInfoLayout = ({
         <StyledPageInfoIcon iconColor={iconColor}>{icon}</StyledPageInfoIcon>
       )}
       <StyledPageInfoTextContainer>
+        {recordType && <StyledRecordType>{recordType}</StyledRecordType>}
         <StyledPageInfoTitleContainer>{title}</StyledPageInfoTitleContainer>
         {isDefined(label) && <StyledPageInfoLabel>{label}</StyledPageInfoLabel>}
       </StyledPageInfoTextContainer>

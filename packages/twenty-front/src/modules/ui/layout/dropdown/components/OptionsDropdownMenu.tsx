@@ -1,3 +1,4 @@
+import { IconDotsVertical, type IconComponent } from 'twenty-ui/icon';
 import { SIDE_PANEL_FOCUS_ID } from '@/side-panel/constants/SidePanelFocusId';
 import { Dropdown } from '@/ui/layout/dropdown/components/Dropdown';
 import { DropdownContent } from '@/ui/layout/dropdown/components/DropdownContent';
@@ -8,8 +9,16 @@ import { useSelectableList } from '@/ui/layout/selectable-list/hooks/useSelectab
 import { useHotkeysOnFocusedElement } from '@/ui/utilities/hotkey/hooks/useHotkeysOnFocusedElement';
 import { useLingui } from '@lingui/react/macro';
 import { type ReactNode, useId } from 'react';
-import { Button } from 'twenty-ui/input';
+import { Button, IconButton } from 'twenty-ui/input';
 import { getOsControlSymbol } from 'twenty-ui/utilities';
+
+const MoreIcon: IconComponent = ({ size, color }) => (
+  <IconDotsVertical
+    size={size}
+    color={color}
+    style={{ transform: 'rotate(90deg)' }}
+  />
+);
 
 type OptionsDropdownMenuProps = {
   dropdownId?: string;
@@ -17,6 +26,7 @@ type OptionsDropdownMenuProps = {
   selectableItemIdArray?: string[];
   onOpen?: () => void;
   children: ReactNode;
+  compact?: boolean;
 };
 
 export const OptionsDropdownMenu = ({
@@ -25,6 +35,7 @@ export const OptionsDropdownMenu = ({
   selectableItemIdArray = [],
   onOpen,
   children,
+  compact = false,
 }: OptionsDropdownMenuProps) => {
   const generatedDropdownId = useId();
   const dropdownId = dropdownIdFromProps ?? generatedDropdownId;
@@ -66,13 +77,24 @@ export const OptionsDropdownMenu = ({
       dropdownId={dropdownId}
       data-select-disable
       clickableComponent={
-        <Button
-          title={t`Options`}
-          hotkeys={[getOsControlSymbol(), 'O']}
-          size="small"
-        />
+        compact ? (
+          <span title={`더 보기 (${getOsControlSymbol()}O)`}>
+            <IconButton
+              Icon={MoreIcon}
+              variant="secondary"
+              size="small"
+              ariaLabel="더 보기"
+            />
+          </span>
+        ) : (
+          <Button
+            title={t`Options`}
+            hotkeys={[getOsControlSymbol(), 'O']}
+            size="small"
+          />
+        )
       }
-      dropdownPlacement="top-end"
+      dropdownPlacement={compact ? 'bottom-end' : 'top-end'}
       dropdownOffset={{ y: 8 }}
       globalHotkeysConfig={{
         enableGlobalHotkeysWithModifiers: true,

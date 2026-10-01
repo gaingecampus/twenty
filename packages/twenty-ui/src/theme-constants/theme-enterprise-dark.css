@@ -458,8 +458,8 @@ html.dark[data-ui-theme='enterprise']
 
 html.dark[data-ui-theme='enterprise']
   [data-variant='tertiary'][data-accent='default'] {
-  --icon-button-bg: #2a2f3c;
-  --icon-button-hover-bg: #353b4a;
+  --icon-button-bg: #20242e;
+  --icon-button-hover-bg: #2a2f3c;
   --icon-button-color: #c4c8d2;
 }
 

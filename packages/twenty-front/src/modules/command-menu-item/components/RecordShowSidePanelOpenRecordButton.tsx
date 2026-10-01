@@ -19,7 +19,6 @@ import { useAtomComponentStateCallbackState } from '@/ui/utilities/state/jotai/h
 import { useAtomComponentStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomComponentStateValue';
 import { useAtomFamilyStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomFamilyStateValue';
 import { useSetAtomComponentState } from '@/ui/utilities/state/jotai/hooks/useSetAtomComponentState';
-import { t } from '@lingui/core/macro';
 import { useStore } from 'jotai';
 import { useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
@@ -29,7 +28,6 @@ import { currentRecordFilterGroupsComponentState } from '@/object-record/record-
 import { currentRecordSortsComponentState } from '@/object-record/record-sort/states/currentRecordSortsComponentState';
 import { recordIndexCurrentPageComponentState } from '@/object-record/record-index/states/recordIndexCurrentPageComponentState';
 import { isDefined } from 'twenty-shared/utils';
-import { IconBrowserMaximize } from 'twenty-ui/icon';
 import { Button } from 'twenty-ui/input';
 import { getOsControlSymbol } from 'twenty-ui/utilities';
 import { useNavigateApp } from '~/hooks/useNavigateApp';
@@ -196,14 +194,13 @@ export const RecordShowSidePanelOpenRecordButton = ({
   }
 
   return (
-    <Button
-      title={t`Open`}
-      variant="primary"
-      accent="blue"
-      size="small"
-      Icon={IconBrowserMaximize}
-      hotkeys={[getOsControlSymbol(), '⏎']}
-      onClick={handleOpenRecord}
-    />
+    <span title={`전체 페이지로 열기 (${getOsControlSymbol()}⏎)`}>
+      <Button
+        title="전체 페이지로 열기 ↗"
+        variant="secondary"
+        size="small"
+        onClick={handleOpenRecord}
+      />
+    </span>
   );
 };

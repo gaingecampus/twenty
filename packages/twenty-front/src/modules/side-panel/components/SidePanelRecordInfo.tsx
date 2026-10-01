@@ -138,6 +138,7 @@ export const SidePanelRecordInfo = ({
 
   return (
     <SidePanelPageInfoLayout
+      recordType={objectMetadataItem.labelSingular}
       icon={
         recordIdentifier ? (
           <Avatar

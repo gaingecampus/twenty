@@ -1,3 +1,5 @@
+import { sidePanelHeaderActionsElementState } from '@/side-panel/states/sidePanelHeaderActionsElementState';
+import { useSetAtomState } from '@/ui/utilities/state/jotai/hooks/useSetAtomState';
 import { SidePanelBackButton } from '@/side-panel/components/SidePanelBackButton';
 import { SidePanelPageInfo } from '@/side-panel/components/SidePanelPageInfo';
 import { SidePanelTopBarInputFocusEffect } from '@/side-panel/components/SidePanelTopBarInputFocusEffect';
@@ -36,14 +38,14 @@ const StyledInputContainer = styled.div`
   flex-shrink: 0;
   font-size: ${themeCssVariables.font.size.lg};
   gap: ${themeCssVariables.spacing[4]};
-  height: var(--t-page-bar-min-height, ${SIDE_PANEL_TOP_BAR_HEIGHT}px);
   justify-content: space-between;
   margin: 0;
+  min-height: ${SIDE_PANEL_TOP_BAR_HEIGHT}px;
 
   outline: none;
   overflow: hidden;
   padding: var(--t-page-header-padding-y, 0)
-    var(--t-page-header-padding-x, ${themeCssVariables.spacing[3]});
+    var(--t-page-header-padding-y, ${themeCssVariables.spacing[3]});
   position: relative;
 `;
 
@@ -82,6 +84,9 @@ const StyledRightControlsContainer = styled.div`
 `;
 
 export const SidePanelTopBar = () => {
+  const setSidePanelHeaderActionsElement = useSetAtomState(
+    sidePanelHeaderActionsElementState,
+  );
   const [sidePanelSearch, setSidePanelSearch] =
     useAtomState(sidePanelSearchState);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -180,6 +185,7 @@ export const SidePanelTopBar = () => {
         )}
       </StyledContentContainer>
       <StyledRightControlsContainer>
+        <StyledRightControlsContainer ref={setSidePanelHeaderActionsElement} />
         <SidePanelTopBarRightCornerIcon />
         {!shouldHideCloseButton && (
           <IconButton

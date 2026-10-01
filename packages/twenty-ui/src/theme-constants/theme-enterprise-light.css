@@ -543,8 +543,8 @@ html.light[data-ui-theme='enterprise']
 
 html.light[data-ui-theme='enterprise']
   [data-variant='tertiary'][data-accent='default'] {
-  --icon-button-bg: #eef0f4;
-  --icon-button-hover-bg: #e4e7ee;
+  --icon-button-bg: #f7f8fa;
+  --icon-button-hover-bg: #eef0f4;
   --icon-button-color: #5b6170;
 }
 

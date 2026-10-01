@@ -1,3 +1,5 @@
+import { createPortal } from 'react-dom';
+import { sidePanelHeaderActionsElementState } from '@/side-panel/states/sidePanelHeaderActionsElementState';
 import { RecordPageSidePanelCommandMenu } from '@/command-menu-item/components/RecordPageSidePanelCommandMenu';
 import { RecordShowSidePanelOpenRecordButton } from '@/command-menu-item/components/RecordShowSidePanelOpenRecordButton';
 import { InformationBannerDeletedRecord } from '@/information-banner/components/deleted-record/InformationBannerDeletedRecord';
@@ -8,14 +10,11 @@ import { PageLayoutRenderer } from '@/page-layout/components/PageLayoutRenderer'
 import { usePageLayoutIdForRecord } from '@/page-layout/hooks/usePageLayoutIdForRecord';
 import { LayoutRenderingProvider } from '@/ui/layout/contexts/LayoutRenderingContext';
 import { type TargetRecordIdentifier } from '@/ui/layout/contexts/TargetRecordIdentifier';
-import { SidePanelFooter } from '@/ui/layout/side-panel/components/SidePanelFooter';
-import { sidePanelWidgetFooterCommandMenuItemsState } from '@/ui/layout/side-panel/states/sidePanelWidgetFooterCommandMenuItemsState';
 import { useAtomFamilySelectorValue } from '@/ui/utilities/state/jotai/hooks/useAtomFamilySelectorValue';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 import { styled } from '@linaria/react';
 import { CoreObjectNameSingular } from 'twenty-shared/types';
 import { isDefined } from 'twenty-shared/utils';
-import { Button } from 'twenty-ui/input';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 import { PageLayoutType } from '~/generated-metadata/graphql';
 
@@ -58,17 +57,9 @@ export const PageLayoutRecordPageRenderer = ({
     targetObjectNameSingular: targetRecordIdentifier.targetObjectNameSingular,
   });
 
-  const sidePanelWidgetFooterCommandMenuItems = useAtomStateValue(
-    sidePanelWidgetFooterCommandMenuItemsState,
+  const sidePanelHeaderActionsElement = useAtomStateValue(
+    sidePanelHeaderActionsElementState,
   );
-
-  const pinnedWidgetCommandMenuItems =
-    sidePanelWidgetFooterCommandMenuItems.filter(
-      (commandMenuItem) => commandMenuItem.isPinned !== false,
-    );
-
-  const hasPinnedWidgetCommandMenuItems =
-    pinnedWidgetCommandMenuItems.length > 0;
 
   return (
     <>
@@ -113,38 +104,20 @@ export const PageLayoutRecordPageRenderer = ({
           </LayoutRenderingProvider>
         </StyledContentContainer>
 
-        {isInSidePanel && (
-          <SidePanelFooter
-            actions={[
-              <RecordPageSidePanelCommandMenu key="options" />,
-              ...(hasPinnedWidgetCommandMenuItems
-                ? pinnedWidgetCommandMenuItems.map((commandMenuItem) => (
-                    <Button
-                      key={commandMenuItem.id}
-                      size="small"
-                      variant={
-                        commandMenuItem.isPrimaryCTA ? 'primary' : 'secondary'
-                      }
-                      accent={commandMenuItem.isPrimaryCTA ? 'blue' : 'default'}
-                      title={commandMenuItem.label}
-                      Icon={commandMenuItem.Icon}
-                      hotkeys={commandMenuItem.hotkeys}
-                      onClick={commandMenuItem.onClick}
-                      disabled={commandMenuItem.disabled}
-                    />
-                  ))
-                : [
-                    <RecordShowSidePanelOpenRecordButton
-                      key="open"
-                      objectNameSingular={
-                        targetRecordIdentifier.targetObjectNameSingular
-                      }
-                      recordId={targetRecordIdentifier.id}
-                    />,
-                  ]),
-            ]}
-          />
-        )}
+        {isInSidePanel &&
+          sidePanelHeaderActionsElement &&
+          createPortal(
+            <>
+              <RecordShowSidePanelOpenRecordButton
+                objectNameSingular={
+                  targetRecordIdentifier.targetObjectNameSingular
+                }
+                recordId={targetRecordIdentifier.id}
+              />
+              <RecordPageSidePanelCommandMenu />
+            </>,
+            sidePanelHeaderActionsElement,
+          )}
       </StyledShowPageRightContainer>
     </>
   );
