@@ -1,3 +1,4 @@
+import { SettingsDatabaseBackups } from '@/settings/admin-panel/automations/SettingsDatabaseBackups';
 import { currentUserState } from '@/auth/states/currentUserState';
 import { AUTOMATION_CATALOG } from '@/settings/admin-panel/automations/automationCatalog';
 import { SettingsTextInput } from '@/ui/input/components/SettingsTextInput';
@@ -78,59 +79,62 @@ export const SettingsAdminAutomations = () => {
   );
 
   return (
-    <Section>
-      <H2Title
-        title="자동화·배치"
-        description="코드로 구현한 자동화와 저장소에 정의된 예약 작업을 모아 봅니다."
-      />
-      <StyledMeta>
-        코드 기준 목록이며 실시간 실행 상태가 아닙니다. 운영의 활성 여부와 최근
-        실행 결과는 각 실행 환경에서 확인해야 합니다. CRM에서 직접 만든 전체
-        자동화는 워크플로 메뉴에서 확인하세요.
-      </StyledMeta>
-      <StyledFilters role="group" aria-label="개발 구분">
-        {ORIGIN_FILTERS.map((filter) => (
-          <StyledFilter
-            key={filter}
-            type="button"
-            aria-pressed={origin === filter}
-            onClick={() => setOrigin(filter)}
-          >
-            {filter} (
-            {
-              AUTOMATION_CATALOG.filter(
-                (entry) => filter === '전체' || entry.origin === filter,
-              ).length
-            }
-            )
-          </StyledFilter>
+    <>
+      <SettingsDatabaseBackups />
+      <Section>
+        <H2Title
+          title="자동화·배치"
+          description="자동 배정·기록 검증·백업과 예약 작업의 구현 내용을 확인합니다."
+        />
+        <StyledMeta>
+          아래는 코드 기준 목록입니다. 백업 실행 결과는 위에서 확인할 수 있으며,
+          다른 작업의 실행 상태는 각 실행 환경에서 확인하세요. CRM에서 직접 만든
+          자동화는 워크플로 메뉴에서 확인하세요.
+        </StyledMeta>
+        <StyledFilters role="group" aria-label="개발 구분">
+          {ORIGIN_FILTERS.map((filter) => (
+            <StyledFilter
+              key={filter}
+              type="button"
+              aria-pressed={origin === filter}
+              onClick={() => setOrigin(filter)}
+            >
+              {filter} (
+              {
+                AUTOMATION_CATALOG.filter(
+                  (entry) => filter === '전체' || entry.origin === filter,
+                ).length
+              }
+              )
+            </StyledFilter>
+          ))}
+        </StyledFilters>
+        <SettingsTextInput
+          instanceId="admin-automation-search"
+          placeholder="작업 이름, 분류, 설명 검색"
+          aria-label="자동화·배치 검색"
+          value={search}
+          onChange={setSearch}
+        />
+        <StyledMeta role="status">
+          {origin} {originEntries.length}개 중 {entries.length}개 표시 · 실행
+          상태 미조회
+        </StyledMeta>
+        {entries.length === 0 && <StyledMeta>검색 결과가 없습니다.</StyledMeta>}
+        {entries.map((entry) => (
+          <StyledCard key={entry.id}>
+            <strong>{entry.name}</strong>
+            <StyledMeta>
+              {entry.origin} · {entry.category} · {entry.schedule}
+            </StyledMeta>
+            <StyledMeta>{entry.description}</StyledMeta>
+            <StyledDetails>
+              <summary>구현 위치</summary>
+              <p>{entry.source}</p>
+            </StyledDetails>
+          </StyledCard>
         ))}
-      </StyledFilters>
-      <SettingsTextInput
-        instanceId="admin-automation-search"
-        placeholder="작업 이름, 분류, 설명 검색"
-        aria-label="자동화·배치 검색"
-        value={search}
-        onChange={setSearch}
-      />
-      <StyledMeta role="status">
-        {origin} {originEntries.length}개 중 {entries.length}개 표시 · 실행 상태
-        미조회
-      </StyledMeta>
-      {entries.length === 0 && <StyledMeta>검색 결과가 없습니다.</StyledMeta>}
-      {entries.map((entry) => (
-        <StyledCard key={entry.id}>
-          <strong>{entry.name}</strong>
-          <StyledMeta>
-            {entry.origin} · {entry.category} · {entry.schedule}
-          </StyledMeta>
-          <StyledMeta>{entry.description}</StyledMeta>
-          <StyledDetails>
-            <summary>구현 위치</summary>
-            <p>{entry.source}</p>
-          </StyledDetails>
-        </StyledCard>
-      ))}
-    </Section>
+      </Section>
+    </>
   );
 };

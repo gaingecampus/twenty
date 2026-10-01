@@ -1,3 +1,5 @@
+import { DatabaseBackupHistoryDTO } from 'src/engine/core-modules/admin-panel/dtos/database-backup-history.dto';
+import { AdminPanelBackupService } from 'src/engine/core-modules/admin-panel/services/admin-panel-backup.service';
 import { UseFilters, UseGuards, UsePipes } from '@nestjs/common';
 import { Args, Int, Mutation, Query } from '@nestjs/graphql';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -117,6 +119,7 @@ import { SetMaintenanceModeInput } from './dtos/set-maintenance-mode.input';
 )
 export class AdminPanelResolver {
   constructor(
+    private readonly adminBackupService: AdminPanelBackupService,
     private readonly adminUserLookupService: AdminPanelUserLookupService,
     private readonly adminServerAdminService: AdminPanelServerAdminService,
     private readonly adminStatisticsService: AdminPanelStatisticsService,
@@ -145,6 +148,12 @@ export class AdminPanelResolver {
     @InjectMessageQueue(MessageQueue.workspaceQueue)
     private readonly workspaceQueueService: MessageQueueService,
   ) {}
+
+  @UseGuards(AdminPanelGuard, NoImpersonationGuard)
+  @Query(() => DatabaseBackupHistoryDTO)
+  async databaseBackupHistory(): Promise<DatabaseBackupHistoryDTO> {
+    return this.adminBackupService.getHistory();
+  }
 
   @UseGuards(AdminPanelOrImpersonateGuard)
   @Query(() => UserLookup)

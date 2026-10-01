@@ -73,8 +73,18 @@ export const AUTOMATION_CATALOG = [
     category: '인프라',
     schedule: '매일 03:00 Asia/Seoul · 30일 보관',
     description:
-      'EC2 systemd 타이머로 실행하도록 구현했습니다. 설치·활성화 및 최근 성공 여부는 서버에서 확인해야 합니다.',
+      'DB 덤프를 검증한 뒤 S3에 업로드하고, 업로드 검증과 완료 명세 저장까지 성공해야 백업 완료로 처리합니다. EC2 타이머 설치·활성화 여부는 서버에서 확인해야 합니다. 30일 보관 정책은 S3 백업 파일에 적용됩니다.',
     source: 'deploy/ec2/DATABASE_BACKUP.md',
+  },
+  {
+    id: 'backup-run-history',
+    name: 'DB 백업 실행 이력 기록',
+    origin: 'GAINGE 직접 개발',
+    category: '인프라',
+    schedule: '백업 시작·완료·실패 시',
+    description:
+      '실행 상태, 시작·완료 시각, 소요 시간, 파일 크기, S3 경로와 실패 단계를 DB 및 서버의 로컬 파일에 기록합니다. 이력 저장 실패는 백업 자체를 중단하지 않습니다. 이 페이지에서는 실행 이력을 조회하지 않으며, 강제 종료 시 진행 중 상태가 남을 수 있습니다.',
+    source: 'deploy/ec2/scripts/backup-database.py',
   },
   {
     id: 'MARKETPLACE_CATALOG_SYNC_CRON_PATTERN',
