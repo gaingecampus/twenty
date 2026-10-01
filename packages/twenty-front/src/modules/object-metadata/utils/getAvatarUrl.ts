@@ -20,17 +20,17 @@ export const getAvatarUrl = (
         field.relation?.targetObjectMetadata.nameSingular ===
         CoreObjectNameSingular.WorkspaceMember,
     );
-    if (linkedMemberField) {
-      const linkedMember = record[linkedMemberField.name];
-      const linkedMemberId =
-        record[`${linkedMemberField.name}Id`] ?? linkedMember?.id;
-      const workspaceMember = workspaceMembers.find(
-        (member) => member.id === linkedMemberId,
-      );
-      return workspaceMember
-        ? (workspaceMember.avatarUrl ?? '')
-        : (linkedMember?.avatarUrl ?? '');
-    }
+    const linkedMember = linkedMemberField
+      ? record[linkedMemberField.name]
+      : undefined;
+    const linkedMemberId =
+      record.workspaceMemberAccountId ??
+      (linkedMemberField ? record[`${linkedMemberField.name}Id`] : undefined) ??
+      linkedMember?.id;
+    const workspaceMember = workspaceMembers.find(
+      (member) => member.id === linkedMemberId,
+    );
+    return workspaceMember?.avatarUrl ?? linkedMember?.avatarUrl ?? '';
   }
 
   if (objectNameSingular === CoreObjectNameSingular.WorkspaceMember) {

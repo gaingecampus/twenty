@@ -23,7 +23,11 @@ export const getObjectRecordIdentifier = ({
   >;
   record: ObjectRecord;
   allowRequestsToTwentyIcons: boolean;
-  workspaceMembers?: { id: string; avatarUrl?: string | null }[];
+  workspaceMembers?: {
+    id: string;
+    avatarUrl?: string | null;
+    name?: { firstName: string; lastName: string };
+  }[];
 }): ObjectRecordIdentifier => {
   const labelIdentifierFieldMetadataItem =
     getLabelIdentifierFieldMetadataItem(objectMetadataItem);
@@ -54,9 +58,19 @@ export const getObjectRecordIdentifier = ({
     record,
   );
 
+  const account = ['member', 'teamMember'].includes(
+    objectMetadataItem.nameSingular,
+  )
+    ? workspaceMembers.find(
+        (member) => member.id === record.workspaceMemberAccountId,
+      )
+    : undefined;
+  const profileName = account?.name
+    ? [account.name.firstName, account.name.lastName].filter(Boolean).join(' ')
+    : '';
   return {
     id: record.id,
-    name: `${labelIdentifierFieldValue}`,
+    name: profileName || `${labelIdentifierFieldValue}`,
     avatarUrl,
     avatarType,
     linkToShowPage,

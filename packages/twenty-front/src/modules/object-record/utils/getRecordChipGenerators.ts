@@ -1,3 +1,4 @@
+import { getObjectRecordIdentifier } from '@/object-metadata/utils/getObjectRecordIdentifier';
 import {
   type ChipGeneratorPerObjectNameSingularPerFieldName,
   type IdentifierChipGeneratorPerObject,
@@ -6,7 +7,6 @@ import { type EnrichedObjectMetadataItem } from '@/object-metadata/types/Enriche
 import { getAvatarType } from '@/object-metadata/utils/getAvatarType';
 import { getAvatarUrl } from '@/object-metadata/utils/getAvatarUrl';
 import { getLabelIdentifierFieldMetadataItem } from '@/object-metadata/utils/getLabelIdentifierFieldMetadataItem';
-import { getLabelIdentifierFieldValue } from '@/object-metadata/utils/getLabelIdentifierFieldValue';
 import { isLabelIdentifierField } from '@/object-metadata/utils/isLabelIdentifierField';
 import { isFieldIdentifierDisplay } from '@/object-record/record-field/ui/meta-types/display/utils/isFieldIdentifierDisplay';
 import { type RecordChipData } from '@/object-record/record-field/ui/types/RecordChipData';
@@ -17,7 +17,11 @@ import { FieldMetadataType } from '~/generated-metadata/graphql';
 export const getRecordChipGenerators = (
   objectMetadataItems: EnrichedObjectMetadataItem[],
   allowRequestsToTwentyIcons?: boolean,
-  workspaceMembers: { id: string; avatarUrl?: string | null }[] = [],
+  workspaceMembers: {
+    id: string;
+    avatarUrl?: string | null;
+    name?: { firstName: string; lastName: string };
+  }[] = [],
 ) => {
   const chipGeneratorPerObjectPerField: ChipGeneratorPerObjectNameSingularPerFieldName =
     {};
@@ -69,9 +73,6 @@ export const getRecordChipGenerators = (
             return ['', () => ({}) as any];
           }
 
-          const labelIdentifierFieldMetadataItemToUse =
-            getLabelIdentifierFieldMetadataItem(objectMetadataItemToUse);
-
           const imageIdentifierFieldMetadataToUse =
             objectMetadataItemToUse.fields.find(
               (field) =>
@@ -86,10 +87,13 @@ export const getRecordChipGenerators = (
             (record: ObjectRecord) =>
               ({
                 recordId: record.id,
-                name: getLabelIdentifierFieldValue(
+                name: getObjectRecordIdentifier({
+                  objectMetadataItem: objectMetadataItemToUse,
                   record,
-                  labelIdentifierFieldMetadataItemToUse,
-                ),
+                  allowRequestsToTwentyIcons:
+                    allowRequestsToTwentyIcons ?? false,
+                  workspaceMembers,
+                }).name,
                 avatarUrl: getAvatarUrl(
                   objectMetadataItemToUse.nameSingular,
                   record,
