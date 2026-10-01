@@ -102,29 +102,31 @@ export const StatusBoardDepositShare = ({
     >
       <StyledHeader>
         <StyledTotal>
-          <span>총 받은 금액</span>
+          <span>총 발행 매출</span>
           <strong>
             {loading || error || invalid
               ? '—'
-              : `${(paidAmount / 1_000_000).toLocaleString('ko-KR')}원`}
+              : `${(total / 1_000_000).toLocaleString('ko-KR')}원`}
           </strong>
         </StyledTotal>
         {hasShare && (
-          <span>예정 {(dueAmount / 1_000_000).toLocaleString('ko-KR')}원</span>
+          <span>
+            미입금·예정 {(dueAmount / 1_000_000).toLocaleString('ko-KR')}원
+          </span>
         )}
       </StyledHeader>
       {hasShare && (
         <>
           <StyledTrack
             role="img"
-            aria-label={`입금 완료 ${paidPercent}%, 입금 예정 ${duePercent}%`}
+            aria-label={`입금 완료 ${paidPercent}%, 미입금·입금 예정 ${duePercent}%`}
           >
             <StyledFill paid share={share} />
             <StyledFill paid={false} share={100 - share} />
           </StyledTrack>
           <StyledHeader>
             <StyledLegend paid>입금 완료 {paidPercent}%</StyledLegend>
-            <StyledLegend paid={false}>예정 {duePercent}%</StyledLegend>
+            <StyledLegend paid={false}>미입금·예정 {duePercent}%</StyledLegend>
           </StyledHeader>
         </>
       )}

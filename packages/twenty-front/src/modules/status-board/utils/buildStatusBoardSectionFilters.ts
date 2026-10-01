@@ -166,17 +166,19 @@ export const buildStatusBoardPeriodDepositFilter = ({
   selectedGroupIds,
   startDate,
   endDate,
+  dateField = STATUS_BOARD_FIELD.expectedPaymentDate,
 }: {
   depositObjectMetadataItem: EnrichedObjectMetadataItem;
   memberIds: string[] | undefined;
   selectedGroupIds: string[];
   startDate: string;
   endDate: string;
+  dateField?: string;
 }): RecordGqlOperationFilter | undefined => {
   return andStatusBoardFilters([
     buildStatusBoardDateRangeFilter({
       objectMetadataItem: depositObjectMetadataItem,
-      preferredFieldName: STATUS_BOARD_FIELD.expectedPaymentDate,
+      preferredFieldName: dateField,
       fallbackFieldName: 'createdAt',
       startDate,
       endDate,
