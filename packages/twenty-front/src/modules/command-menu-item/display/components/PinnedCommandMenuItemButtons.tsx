@@ -55,12 +55,23 @@ export const PinnedCommandMenuItemButtons = ({
   expandToFill?: boolean;
 }) => {
   const { theme } = useContext(ThemeContext);
-  const { commandMenuItems } = useContext(CommandMenuContext);
+  const { commandMenuItems, containerType } = useContext(CommandMenuContext);
   const isMobile = useIsMobile();
 
   const pinnedCommandMenuItems = useMemo(
-    () => commandMenuItems.filter((item) => item.isPinned === true),
-    [commandMenuItems],
+    () =>
+      commandMenuItems.filter(
+        (item) =>
+          item.isPinned === true &&
+          !(
+            containerType === 'show-page-header' &&
+            (item.engineComponentKey ===
+              EngineComponentKey.NAVIGATE_TO_NEXT_RECORD ||
+              item.engineComponentKey ===
+                EngineComponentKey.NAVIGATE_TO_PREVIOUS_RECORD)
+          ),
+      ),
+    [commandMenuItems, containerType],
   );
 
   const primaryPinnedCommandMenuItem = useMemo(
