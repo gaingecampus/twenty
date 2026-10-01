@@ -14,6 +14,7 @@ import { styled } from '@linaria/react';
 import {
   autoUpdate,
   flip,
+  FloatingPortal,
   offset,
   useFloating,
   type MiddlewareState,
@@ -76,6 +77,7 @@ export const RecordTableCellEditMode = ({
   };
 
   const { refs, floatingStyles } = useFloating({
+    strategy: 'fixed',
     placement: 'bottom-start',
     middleware: [
       flip(),
@@ -110,14 +112,16 @@ export const RecordTableCellEditMode = ({
           {children}
         </StyledInputModeOnlyContainer>
       ) : (
-        <OverlayContainer
-          ref={refs.setFloating}
-          style={floatingStyles}
-          borderRadius="sm"
-          hasDangerBorder={recordFieldInputIsFieldInError}
-        >
-          {children}
-        </OverlayContainer>
+        <FloatingPortal>
+          <OverlayContainer
+            ref={refs.setFloating}
+            style={floatingStyles}
+            borderRadius="sm"
+            hasDangerBorder={recordFieldInputIsFieldInError}
+          >
+            {children}
+          </OverlayContainer>
+        </FloatingPortal>
       )}
     </StyledEditableCellEditModeContainer>
   );
