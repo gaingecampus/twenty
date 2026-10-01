@@ -1,3 +1,7 @@
+import { useGetIsMetadataItemCustom } from '@/object-metadata/hooks/useGetIsMetadataItemCustom';
+import { DuplicateRecordMenuItem } from '@/command-menu-item/components/DuplicateRecordMenuItem';
+import { useRecordIndexContextOrThrow } from '@/object-record/record-index/contexts/RecordIndexContext';
+import { useObjectPermissionsForObject } from '@/object-record/hooks/useObjectPermissionsForObject';
 import { COMMAND_MENU_DROPDOWN_CLICK_OUTSIDE_ID } from '@/command-menu-item/constants/CommandMenuDropdownClickOutsideId';
 import { CommandMenuContext } from '@/command-menu-item/contexts/CommandMenuContext';
 import { CommandMenuItemRenderer } from '@/command-menu-item/display/components/CommandMenuItemRenderer';
@@ -33,7 +37,21 @@ const StyledDropdownMenuContainer = styled.div`
 
 export const RecordIndexCommandMenuDropdown = () => {
   const { t } = useLingui();
-  const { commandMenuItems } = useContext(CommandMenuContext);
+  const { commandMenuItems, commandMenuContextApi } =
+    useContext(CommandMenuContext);
+  const { objectMetadataItem } = useRecordIndexContextOrThrow();
+  const permissions = useObjectPermissionsForObject(objectMetadataItem.id);
+  const getIsMetadataItemCustom = useGetIsMetadataItemCustom();
+  const canDuplicate =
+    commandMenuContextApi.selectedRecords.length === 1 &&
+    permissions.canReadObjectRecords &&
+    permissions.canUpdateObjectRecords &&
+    objectMetadataItem.isUICreatable &&
+    !objectMetadataItem.isRemote &&
+    (getIsMetadataItemCustom(objectMetadataItem) ||
+      ['company', 'person', 'opportunity', 'task', 'note'].includes(
+        objectMetadataItem.nameSingular,
+      ));
 
   const recordIndexCommandMenuItems = commandMenuItems.filter(
     (item) =>
@@ -57,6 +75,7 @@ export const RecordIndexCommandMenuDropdown = () => {
 
   const selectedItemIdArray = [
     ...recordIndexCommandMenuItems.map((item) => item.id),
+    ...(canDuplicate ? ['duplicate-record'] : []),
     'more-actions',
   ];
 
@@ -89,6 +108,12 @@ export const RecordIndexCommandMenuDropdown = () => {
                 {recordIndexCommandMenuItems.map((item) => (
                   <CommandMenuItemRenderer item={item} key={item.id} />
                 ))}
+                {canDuplicate && (
+                  <DuplicateRecordMenuItem
+                    onClose={() => closeDropdown(dropdownId)}
+                    focused={selectedItemId === 'duplicate-record'}
+                  />
+                )}
                 <SelectableListItem
                   itemId="more-actions"
                   key="more-actions"
