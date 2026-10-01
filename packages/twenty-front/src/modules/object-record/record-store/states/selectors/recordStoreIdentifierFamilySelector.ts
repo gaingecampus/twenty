@@ -1,3 +1,4 @@
+import { currentWorkspaceMembersState } from '@/auth/states/currentWorkspaceMembersState';
 import { objectMetadataItemsSelector } from '@/object-metadata/states/objectMetadataItemsSelector';
 import { getObjectRecordIdentifier } from '@/object-metadata/utils/getObjectRecordIdentifier';
 import { type ObjectRecordIdentifier } from '@/object-record/types/ObjectRecordIdentifier';
@@ -40,6 +41,7 @@ export const recordStoreIdentifierFamilySelector = createAtomFamilySelector<
         objectMetadataItem: objectMetadataItem,
         record: recordFromStore,
         allowRequestsToTwentyIcons,
+        workspaceMembers: get(currentWorkspaceMembersState),
       });
     },
 });

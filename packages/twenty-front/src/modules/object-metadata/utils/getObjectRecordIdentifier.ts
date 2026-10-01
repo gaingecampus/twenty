@@ -12,6 +12,7 @@ export const getObjectRecordIdentifier = ({
   objectMetadataItem,
   record,
   allowRequestsToTwentyIcons,
+  workspaceMembers = [],
 }: {
   objectMetadataItem: Pick<
     EnrichedObjectMetadataItem,
@@ -22,6 +23,7 @@ export const getObjectRecordIdentifier = ({
   >;
   record: ObjectRecord;
   allowRequestsToTwentyIcons: boolean;
+  workspaceMembers?: { id: string; avatarUrl?: string | null }[];
 }): ObjectRecordIdentifier => {
   const labelIdentifierFieldMetadataItem =
     getLabelIdentifierFieldMetadataItem(objectMetadataItem);
@@ -43,6 +45,8 @@ export const getObjectRecordIdentifier = ({
     record,
     imageIdentifierFieldMetadata,
     allowRequestsToTwentyIcons,
+    objectMetadataItem.fields,
+    workspaceMembers,
   );
 
   const linkToShowPage = getLinkToShowPage(

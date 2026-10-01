@@ -1,3 +1,4 @@
+import { currentWorkspaceMembersState } from '@/auth/states/currentWorkspaceMembersState';
 import React, { useMemo } from 'react';
 
 import { allowRequestsToTwentyIconsState } from '@/client-config/states/allowRequestsToTwentyIcons';
@@ -9,6 +10,9 @@ import { getRecordChipGenerators } from '@/object-record/utils/getRecordChipGene
 export const PreComputedChipGeneratorsProvider = ({
   children,
 }: React.PropsWithChildren) => {
+  const currentWorkspaceMembers = useAtomStateValue(
+    currentWorkspaceMembersState,
+  );
   const objectMetadataItems = useAtomStateValue(objectMetadataItemsSelector);
   const allowRequestsToTwentyIcons = useAtomStateValue(
     allowRequestsToTwentyIconsState,
@@ -18,8 +22,13 @@ export const PreComputedChipGeneratorsProvider = ({
       return getRecordChipGenerators(
         objectMetadataItems,
         allowRequestsToTwentyIcons,
+        currentWorkspaceMembers,
       );
-    }, [allowRequestsToTwentyIcons, objectMetadataItems]);
+    }, [
+      allowRequestsToTwentyIcons,
+      objectMetadataItems,
+      currentWorkspaceMembers,
+    ]);
 
   return (
     <>

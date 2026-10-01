@@ -1,3 +1,4 @@
+import { currentWorkspaceMembersState } from '@/auth/states/currentWorkspaceMembersState';
 import { objectMetadataItemsSelector } from '@/object-metadata/states/objectMetadataItemsSelector';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 import { getObjectRecordIdentifier } from '@/object-metadata/utils/getObjectRecordIdentifier';
@@ -6,6 +7,9 @@ import { type ObjectRecordIdentifier } from '@/object-record/types/ObjectRecordI
 export const useGetObjectRecordIdentifierByNameSingular = (
   allowRequestsToTwentyIcons: boolean,
 ) => {
+  const currentWorkspaceMembers = useAtomStateValue(
+    currentWorkspaceMembersState,
+  );
   const objectMetadataItems = useAtomStateValue(objectMetadataItemsSelector);
 
   return (record: any, objectNameSingular: string): ObjectRecordIdentifier => {
@@ -23,6 +27,7 @@ export const useGetObjectRecordIdentifierByNameSingular = (
       objectMetadataItem,
       record,
       allowRequestsToTwentyIcons,
+      workspaceMembers: currentWorkspaceMembers,
     });
   };
 };

@@ -11,7 +11,28 @@ export const getAvatarUrl = (
   record: ObjectRecord,
   imageIdentifierFieldMetadataItem: FieldMetadataItem | undefined,
   allowRequestsToTwentyIcons?: boolean | undefined,
+  fields: FieldMetadataItem[] = [],
+  workspaceMembers: { id: string; avatarUrl?: string | null }[] = [],
 ) => {
+  if (objectNameSingular === 'member' || objectNameSingular === 'teamMember') {
+    const linkedMemberField = fields.find(
+      (field) =>
+        field.relation?.targetObjectMetadata.nameSingular ===
+        CoreObjectNameSingular.WorkspaceMember,
+    );
+    if (linkedMemberField) {
+      const linkedMember = record[linkedMemberField.name];
+      const linkedMemberId =
+        record[`${linkedMemberField.name}Id`] ?? linkedMember?.id;
+      const workspaceMember = workspaceMembers.find(
+        (member) => member.id === linkedMemberId,
+      );
+      return workspaceMember
+        ? (workspaceMember.avatarUrl ?? '')
+        : (linkedMember?.avatarUrl ?? '');
+    }
+  }
+
   if (objectNameSingular === CoreObjectNameSingular.WorkspaceMember) {
     return record.avatarUrl ?? undefined;
   }
