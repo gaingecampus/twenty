@@ -1,90 +1,64 @@
 import { FieldInputEventContext } from '@/object-record/record-field/ui/contexts/FieldInputEventContext';
 import { useFullNameField } from '@/object-record/record-field/ui/meta-types/hooks/useFullNameField';
-import { FIRST_NAME_PLACEHOLDER_WITH_SPECIAL_CHARACTER_TO_AVOID_PASSWORD_MANAGERS } from '@/object-record/record-field/ui/meta-types/input/constants/FirstNamePlaceholder';
-import { LAST_NAME_PLACEHOLDER_WITH_SPECIAL_CHARACTER_TO_AVOID_PASSWORD_MANAGERS } from '@/object-record/record-field/ui/meta-types/input/constants/LastNamePlaceholder';
-import { isDoubleTextFieldEmpty } from '@/object-record/record-field/ui/meta-types/input/utils/isDoubleTextFieldEmpty';
-import { type FieldDoubleText } from '@/object-record/record-field/ui/types/FieldDoubleText';
-
-import { useContext } from 'react';
-import { RecordTitleDoubleTextInput } from './RecordTitleDoubleTextInput';
+import { useRegisterInputEvents } from '@/object-record/record-field/ui/meta-types/input/hooks/useRegisterInputEvents';
+import { TextInput } from '@/ui/input/components/TextInput';
+import { useContext, useRef, useState } from 'react';
 
 type RecordTitleFullNameFieldInputProps = {
+  instanceId: string;
   sizeVariant?: 'xs' | 'sm' | 'md';
 };
 
 export const RecordTitleFullNameFieldInput = ({
+  instanceId,
   sizeVariant,
 }: RecordTitleFullNameFieldInputProps) => {
-  const { draftValue, setDraftValue } = useFullNameField();
-
+  const { draftValue, setDraftValue, fieldDefinition } = useFullNameField();
+  const [originalValue] = useState(draftValue);
+  const originalName = [
+    originalValue?.firstName,
+    originalValue?.lastName,
+  ]
+    .filter(Boolean)
+    .join(' ')
+    .trim();
+  const [name, setName] = useState(originalName);
+  const inputRef = useRef<HTMLInputElement>(null);
   const { onEnter, onEscape, onClickOutside, onTab, onShiftTab } = useContext(
     FieldInputEventContext,
   );
 
-  const convertToFullName = (newDoubleText: FieldDoubleText) => {
-    return {
-      firstName: newDoubleText.firstValue.trim(),
-      lastName: newDoubleText.secondValue.trim(),
-    };
-  };
+  const toFullName = (value: string) =>
+    value.trim() === originalName
+      ? originalValue
+      : { firstName: value.trim(), lastName: '' };
 
-  const getRequiredDraftValueFromDoubleText = (
-    newDoubleText: FieldDoubleText,
-  ) => {
-    return isDoubleTextFieldEmpty(newDoubleText)
-      ? undefined
-      : convertToFullName(newDoubleText);
-  };
-
-  const handleEnter = (newDoubleText: FieldDoubleText) => {
-    onEnter?.({ newValue: convertToFullName(newDoubleText) });
-  };
-
-  const handleEscape = (newDoubleText: FieldDoubleText) => {
-    onEscape?.({ newValue: convertToFullName(newDoubleText) });
-  };
-
-  const handleClickOutside = (
-    event: MouseEvent | TouchEvent,
-    newDoubleText: FieldDoubleText,
-  ) => {
-    onClickOutside?.({ newValue: convertToFullName(newDoubleText), event });
-  };
-
-  const handleTab = (newDoubleText: FieldDoubleText) => {
-    onTab?.({ newValue: convertToFullName(newDoubleText) });
-  };
-
-  const handleShiftTab = (newDoubleText: FieldDoubleText) => {
-    onShiftTab?.({ newValue: convertToFullName(newDoubleText) });
-  };
-
-  const handleChange = (newDoubleText: FieldDoubleText) => {
-    setDraftValue(getRequiredDraftValueFromDoubleText(newDoubleText));
-  };
-
-  const handlePaste = (newDoubleText: FieldDoubleText) => {
-    setDraftValue(getRequiredDraftValueFromDoubleText(newDoubleText));
-  };
+  useRegisterInputEvents<string>({
+    focusId: instanceId,
+    inputRef,
+    inputValue: name,
+    onEnter: (value) => onEnter?.({ newValue: toFullName(value) }),
+    onEscape: (value) => onEscape?.({ newValue: toFullName(value) }),
+    onClickOutside: (event, value) =>
+      onClickOutside?.({ newValue: toFullName(value), event }),
+    onTab: (value) => onTab?.({ newValue: toFullName(value) }),
+    onShiftTab: (value) => onShiftTab?.({ newValue: toFullName(value) }),
+  });
 
   return (
-    <RecordTitleDoubleTextInput
-      firstValue={draftValue?.firstName ?? ''}
-      secondValue={draftValue?.lastName ?? ''}
-      firstValuePlaceholder={
-        FIRST_NAME_PLACEHOLDER_WITH_SPECIAL_CHARACTER_TO_AVOID_PASSWORD_MANAGERS
-      }
-      secondValuePlaceholder={
-        LAST_NAME_PLACEHOLDER_WITH_SPECIAL_CHARACTER_TO_AVOID_PASSWORD_MANAGERS
-      }
-      onClickOutside={handleClickOutside}
-      onEnter={handleEnter}
-      onEscape={handleEscape}
-      onShiftTab={handleShiftTab}
-      onTab={handleTab}
-      onPaste={handlePaste}
-      onChange={handleChange}
+    <TextInput
+      ref={inputRef}
+      autoGrow
       sizeVariant={sizeVariant}
+      inheritFontStyles
+      value={name}
+      onChange={(value) => {
+        setName(value);
+        setDraftValue(toFullName(value));
+      }}
+      placeholder={fieldDefinition.label}
+      onFocus={(event) => event.target.select()}
+      autoFocus
     />
   );
 };

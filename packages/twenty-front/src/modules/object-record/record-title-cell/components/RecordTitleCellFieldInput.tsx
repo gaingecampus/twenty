@@ -29,7 +29,10 @@ export const RecordTitleCellFieldInput = ({
           sizeVariant={sizeVariant}
         />
       ) : isFieldFullName(fieldDefinition) ? (
-        <RecordTitleFullNameFieldInput sizeVariant={sizeVariant} />
+        <RecordTitleFullNameFieldInput
+          instanceId={instanceId}
+          sizeVariant={sizeVariant}
+        />
       ) : null}
     </>
   );
