@@ -27,11 +27,13 @@ import { useNavigateApp } from '~/hooks/useNavigateApp';
 type UseCreateNewIndexRecordProps = {
   objectMetadataItem: EnrichedObjectMetadataItem;
   instanceId?: string;
+  openAfterCreate?: boolean;
 };
 
 export const useCreateNewIndexRecord = ({
   objectMetadataItem,
   instanceId,
+  openAfterCreate = true,
 }: UseCreateNewIndexRecordProps) => {
   const recordGroupDefinitions = useAtomComponentSelectorValue(
     recordGroupDefinitionsComponentSelector,
@@ -94,35 +96,38 @@ export const useCreateNewIndexRecord = ({
         ...mergedRecordInput,
       });
 
-      if (
-        recordIndexOpenRecordIn === ViewOpenRecordIn.SIDE_PANEL &&
-        canOpenObjectInSidePanel(objectMetadataItem.nameSingular)
-      ) {
-        openRecordInSidePanel({
-          recordId,
-          objectNameSingular: objectMetadataItem.nameSingular,
-          isNewRecord: true,
-        });
-      } else {
-        const labelIdentifierFieldMetadataItem =
-          getLabelIdentifierFieldMetadataItem(objectMetadataItem);
-
-        closeSidePanelMenu();
-        navigate(
-          AppPath.RecordShowPage,
-          {
+      if (openAfterCreate) {
+        if (
+          recordIndexOpenRecordIn === ViewOpenRecordIn.SIDE_PANEL &&
+          canOpenObjectInSidePanel(objectMetadataItem.nameSingular)
+        ) {
+          openRecordInSidePanel({
+            recordId,
             objectNameSingular: objectMetadataItem.nameSingular,
-            objectRecordId: recordId,
-          },
-          undefined,
-          {
-            state: {
-              isNewRecord: true,
+            isNewRecord: true,
+          });
+        } else {
+          const labelIdentifierFieldMetadataItem =
+            getLabelIdentifierFieldMetadataItem(objectMetadataItem);
+
+          closeSidePanelMenu();
+          navigate(
+            AppPath.RecordShowPage,
+            {
+              objectNameSingular: objectMetadataItem.nameSingular,
               objectRecordId: recordId,
-              labelIdentifierFieldName: labelIdentifierFieldMetadataItem?.name,
             },
-          },
-        );
+            undefined,
+            {
+              state: {
+                isNewRecord: true,
+                objectRecordId: recordId,
+                labelIdentifierFieldName:
+                  labelIdentifierFieldMetadataItem?.name,
+              },
+            },
+          );
+        }
       }
 
       if (isDefined(recordIndexGroupFieldMetadataItem)) {
@@ -177,6 +182,7 @@ export const useCreateNewIndexRecord = ({
       recordIndexRecordIdsByGroupCallbackState,
       upsertRecordsInStore,
       closeSidePanelMenu,
+      openAfterCreate,
     ],
   );
 
