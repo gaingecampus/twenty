@@ -43,7 +43,7 @@ const StyledHeaderActions = styled.div`
 `;
 
 const StyledHeaderContainer = styled.div`
-  background: var(--t-view-canvas-bg, ${themeCssVariables.background.primary});
+  background: transparent;
   display: flex;
   justify-content: space-between;
   width: 100%;
@@ -61,10 +61,7 @@ const StyledRightContainer = styled.div`
 `;
 
 const StyledColumn = styled.div`
-  background-color: var(
-    --t-view-canvas-bg,
-    ${themeCssVariables.background.primary}
-  );
+  background-color: transparent;
   display: flex;
   flex-direction: column;
   max-width: var(
@@ -76,12 +73,18 @@ const StyledColumn = styled.div`
     ${RECORD_BOARD_COLUMN_WIDTH}px
   );
 
-  padding: ${themeCssVariables.spacing[2]};
+  padding: 0 ${themeCssVariables.spacing[2]}
+    var(--t-page-header-padding-x, ${themeCssVariables.spacing[4]});
 
   position: relative;
 `;
 
 const StyledTagContainer = styled.div`
+  align-items: center;
+  display: flex;
+  > span {
+    height: 28px;
+  }
   max-width: 100%;
   min-width: 0;
   overflow: hidden;

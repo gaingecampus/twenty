@@ -30,21 +30,31 @@ const StyledScrollShell = styled.div<{
   width: 100%;
 
   /* Hide native bars — gutters below/right hold custom thumbs */
-  [id^='scroll-wrapper-record-table-scroll-'] {
+  .scroll-wrapper-x-enabled,
+  .scroll-wrapper-y-enabled {
     -ms-overflow-style: none;
     height: 100%;
     scrollbar-width: none;
   }
 
-  [id^='scroll-wrapper-record-table-scroll-'].scroll-wrapper-x-enabled {
+  :is(
+    [id^='scroll-wrapper-record-table-scroll-'],
+    [id^='scroll-wrapper-scroll-wrapper-record-board-']
+  ).scroll-wrapper-x-enabled {
     overflow-x: auto;
   }
 
-  [id^='scroll-wrapper-record-table-scroll-'].scroll-wrapper-y-enabled {
+  :is(
+    [id^='scroll-wrapper-record-table-scroll-'],
+    [id^='scroll-wrapper-scroll-wrapper-record-board-']
+  ).scroll-wrapper-y-enabled {
     overflow-y: auto;
   }
 
-  [id^='scroll-wrapper-record-table-scroll-']::-webkit-scrollbar {
+  :is(
+    [id^='scroll-wrapper-record-table-scroll-'],
+    [id^='scroll-wrapper-scroll-wrapper-record-board-']
+  )::-webkit-scrollbar {
     display: none;
     height: 0;
     width: 0;
@@ -90,6 +100,8 @@ const StyledThumb = styled.div`
 type RecordTableScrollbarsProps = {
   children: ReactNode;
   recordTableId: string;
+  scrollWrapperId?: string;
+  className?: string;
 };
 
 type ScrollMetrics = {
@@ -104,6 +116,8 @@ type ScrollMetrics = {
 export const RecordTableScrollbars = ({
   children,
   recordTableId,
+  scrollWrapperId,
+  className,
 }: RecordTableScrollbarsProps) => {
   const [metrics, setMetrics] = useState<ScrollMetrics>({
     clientHeight: 0,
@@ -116,9 +130,9 @@ export const RecordTableScrollbars = ({
 
   const getScrollElement = useCallback(() => {
     return document.getElementById(
-      `scroll-wrapper-record-table-scroll-${recordTableId}`,
+      scrollWrapperId ?? `scroll-wrapper-record-table-scroll-${recordTableId}`,
     );
-  }, [recordTableId]);
+  }, [recordTableId, scrollWrapperId]);
 
   const syncMetrics = useCallback(() => {
     const scrollElement = getScrollElement();
@@ -245,11 +259,16 @@ export const RecordTableScrollbars = ({
   };
 
   return (
-    <StyledScrollShell hasHorizontal={hasHorizontal} hasVertical={hasVertical}>
+    <StyledScrollShell
+      className={className}
+      hasHorizontal={hasHorizontal}
+      hasVertical={hasVertical}
+    >
       <StyledScrollPort>{children}</StyledScrollPort>
       {hasHorizontal && (
         <StyledHorizontalTrack onPointerDown={handleHorizontalTrackPointerDown}>
           <StyledThumb
+            data-scrollbar-thumb
             style={{
               height: '100%',
               left: `${horizontalThumbLeft}px`,
@@ -262,6 +281,7 @@ export const RecordTableScrollbars = ({
       {hasVertical && (
         <StyledVerticalTrack onPointerDown={handleVerticalTrackPointerDown}>
           <StyledThumb
+            data-scrollbar-thumb
             style={{
               height: `${verticalThumbHeight}px`,
               left: 0,

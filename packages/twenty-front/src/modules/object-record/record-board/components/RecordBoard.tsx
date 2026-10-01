@@ -1,3 +1,4 @@
+import { RecordTableScrollbars } from '@/object-record/record-table/components/RecordTableScrollbars';
 import { styled } from '@linaria/react';
 
 import { useContext, useRef } from 'react';
@@ -25,16 +26,45 @@ const StyledContainer = styled.div`
 `;
 
 const StyledContainerContainer = styled.div`
+  background: var(--t-view-canvas-bg, ${themeCssVariables.background.primary});
+  background-image: radial-gradient(
+    ${themeCssVariables.border.color.medium} 1px,
+    transparent 1px
+  );
+  background-size: 20px 20px;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   height: min-content;
-  min-height: calc(100% - ${themeCssVariables.spacing[2]});
+  min-height: 100%;
+  min-width: 100%;
+  width: max-content;
 `;
 
 const StyledBoardContentContainer = styled.div`
+  box-sizing: border-box;
   display: flex;
   flex: 1;
   flex-direction: column;
+  padding-inline: max(
+    0px,
+    calc(
+      var(--t-page-header-padding-x, ${themeCssVariables.spacing[3]}) -
+        ${themeCssVariables.spacing[2]}
+    )
+  );
+`;
+
+const StyledBoardScrollbars = styled(RecordTableScrollbars)`
+  background: var(--t-view-canvas-bg, ${themeCssVariables.background.primary});
+  border-radius: 0;
+  box-sizing: border-box;
+  height: 100%;
+  padding: 0 6px 6px 0;
+
+  [data-scrollbar-thumb] {
+    background: ${themeCssVariables.border.color.strong};
+  }
 `;
 
 export const RecordBoard = () => {
@@ -43,7 +73,10 @@ export const RecordBoard = () => {
   const { isInlineEditEnabled } = useGuardRecordIndexInlineEdit();
 
   return (
-    <>
+    <StyledBoardScrollbars
+      recordTableId={recordBoardId}
+      scrollWrapperId={`scroll-wrapper-scroll-wrapper-record-board-${recordBoardId}`}
+    >
       <ScrollWrapper
         componentInstanceId={`scroll-wrapper-record-board-${recordBoardId}`}
       >
@@ -64,6 +97,6 @@ export const RecordBoard = () => {
           </StyledBoardContentContainer>
         </StyledContainerContainer>
       </ScrollWrapper>
-    </>
+    </StyledBoardScrollbars>
   );
 };

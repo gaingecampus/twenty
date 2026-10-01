@@ -15,7 +15,7 @@ import { useAtomComponentFamilyStateValue } from '@/ui/utilities/state/jotai/hoo
 import { isDefined } from 'twenty-shared/utils';
 
 const StyledColumn = styled.div`
-  background: var(--t-view-canvas-bg, ${themeCssVariables.background.primary});
+  background: transparent;
   display: flex;
   flex-direction: column;
   max-width: var(
@@ -27,7 +27,7 @@ const StyledColumn = styled.div`
     ${RECORD_BOARD_COLUMN_WIDTH}px
   );
   padding: ${themeCssVariables.spacing[2]};
-  padding-top: ${themeCssVariables.spacing[2]};
+  padding-top: 0;
   position: relative;
 `;
 

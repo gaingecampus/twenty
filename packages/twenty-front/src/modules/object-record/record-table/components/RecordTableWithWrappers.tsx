@@ -37,8 +37,11 @@ const StyledRecordIndexTableInset = styled.div`
   height: 100%;
   min-height: 0;
   padding-bottom: ${themeCssVariables.spacing[6]};
-  padding-left: ${themeCssVariables.spacing[6]};
-  padding-right: ${themeCssVariables.spacing[6]};
+  padding-left: var(--t-page-header-padding-x, ${themeCssVariables.spacing[4]});
+  padding-right: var(
+    --t-page-header-padding-x,
+    ${themeCssVariables.spacing[4]}
+  );
   padding-top: 0;
   width: 100%;
 `;

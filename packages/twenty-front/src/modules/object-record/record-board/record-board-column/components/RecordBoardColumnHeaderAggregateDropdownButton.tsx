@@ -13,6 +13,9 @@ const StyledTagContainer = styled.div`
 
 const StyledHeaderContainer = styled.div`
   > * {
+    box-sizing: border-box;
+    height: 28px;
+    min-height: 28px;
     padding: 0;
   }
 `;

@@ -9,10 +9,22 @@ import { styled } from '@linaria/react';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 
 const StyledHeaderContainer = styled.div`
+  background: var(--t-view-canvas-bg, ${themeCssVariables.background.primary});
+  box-sizing: border-box;
   display: flex;
   flex-direction: row;
-  height: 40px;
+  flex-shrink: 0;
+  height: calc(
+    28px + var(--t-page-header-padding-x, ${themeCssVariables.spacing[4]})
+  );
   overflow: visible;
+  padding-inline: max(
+    0px,
+    calc(
+      var(--t-page-header-padding-x, ${themeCssVariables.spacing[3]}) -
+        ${themeCssVariables.spacing[2]}
+    )
+  );
 
   width: 100%;
   z-index: 10;
