@@ -18,9 +18,20 @@ export const AUTOMATION_CATALOG = [
     category: 'GAINGE',
     schedule: '레코드 생성·수정 시',
     description:
-      '기업·고객의 빈 담당자를 배정하고 기업·고객·문의의 공동 담당자를 중복 없이 추가합니다. 문의 DRI와 계약 컨설턴트는 자동 배정하지 않습니다.',
+      '기업·고객의 빈 담당자를 배정하고 기업·고객·문의의 공동 담당자를 중복 없이 추가합니다. 문의 DRI는 비워 두거나 해제한 상태를 유지하며, 계약 컨설턴트도 자동 배정하지 않습니다. 기존 담당자는 유지합니다.',
     source:
       'packages/twenty-server/src/modules/gainge-automation/automation-schema.ts',
+  },
+  {
+    id: 'field-visit-validation',
+    name: '현장 기록 검증·제출 당시 목표 보존',
+    origin: 'GAINGE 직접 개발',
+    category: 'GAINGE',
+    schedule: '현장 기록 생성·수정·제출 시',
+    description:
+      '계약 연결과 회차 값을 검증하고, 제출 시 제목·현장 날짜·수행 내용을 확인합니다. 최초 제출 당시 계약 목표와 성공 기준을 자동 보존하며, 이후 계약 목표가 바뀌어도 보존한 내용은 유지합니다. 기록의 계약 변경과 제출 후 초안 전환을 차단합니다.',
+    source:
+      'packages/twenty-server/src/database/commands/upgrade-version-command/2-24/field-management-schema.ts',
   },
   {
     id: 'enrichment',
