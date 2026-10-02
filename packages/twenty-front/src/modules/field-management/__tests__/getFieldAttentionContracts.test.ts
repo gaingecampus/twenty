@@ -2,6 +2,7 @@ import { type ObjectRecord } from '@/object-record/types/ObjectRecord';
 import { getFieldAttentionContracts } from '@/field-management/getFieldAttentionContracts';
 
 const contract = {
+  __typename: 'Record',
   id: 'contract',
   onboardingStatus: 'ACTIVE',
   consultingGoal: '목표',
@@ -31,6 +32,7 @@ describe('getFieldAttentionContracts', () => {
   it('compares submitted progress against completed days and ignores drafts', () => {
     const visits = [
       {
+        __typename: 'Record',
         id: 'visit',
         contractId: 'contract',
         sessionNumber: 5,
