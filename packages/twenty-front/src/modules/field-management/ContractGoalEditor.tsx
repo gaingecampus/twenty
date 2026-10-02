@@ -116,7 +116,7 @@ export const ContractGoalEditor = ({
         </>
       )}
       <label data-session-count-row>
-        <span>회차</span>
+        <span>총 예정 회차</span>
         <input
           aria-label="총 예정 회차"
           type="number"

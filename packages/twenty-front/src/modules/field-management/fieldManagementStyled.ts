@@ -723,6 +723,27 @@ export const StyledFieldPanel = styled.div`
         ${theme.background.primary}
       );
     }
+    && [data-session-summary],
+    && [data-session-count-row] {
+      background: transparent;
+      border-bottom: 1px solid ${theme.border.color.light};
+      border-radius: 0;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 8px;
+      padding: 4px 0 16px;
+    }
+    && [data-session-summary] > :first-child {
+      white-space: nowrap;
+      width: auto;
+      color: ${theme.font.color.secondary};
+      font-size: 12px;
+    }
+    && [data-session-count-row] input {
+      max-width: 160px;
+    }
     [data-goal-summary-row] > strong {
       align-self: start;
       color: ${theme.font.color.primary};

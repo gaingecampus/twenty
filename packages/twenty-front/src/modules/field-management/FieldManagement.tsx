@@ -437,9 +437,10 @@ const FieldManagementLoaded = ({
                 ].map(({ label, value, empty }) => (
                   <div
                     key={label}
+                    data-session-summary={label === '회차' || undefined}
                     data-editable-goal={canWriteGoals || undefined}
                   >
-                    <dt>{label}</dt>
+                    <dt>{label === '회차' ? '진행 회차' : label}</dt>
                     <dd
                       data-unregistered={
                         (label === '회차'
@@ -855,8 +856,8 @@ const FieldManagementLoaded = ({
                 </span>
               </span>
               <span data-contract-goal-summary>
-                <span data-goal-summary-row>
-                  <strong>회차</strong>
+                <span data-goal-summary-row data-session-summary>
+                  <strong>진행 회차</strong>
                   <span
                     data-unregistered={progress.total === null || undefined}
                   >
