@@ -1,16 +1,18 @@
+import {
+  StyledDashboardKpiGrid,
+  StyledDashboardSection,
+  StyledDashboardSectionHeader,
+  StyledDashboardSectionTitle,
+} from '@/ui/layout/dashboard/components/dashboardStyled';
 import { StatusBoardLinkedCountKpi } from '@/status-board/components/StatusBoardLinkedCountKpi';
 import { StatusBoardDepositShare } from '@/status-board/components/StatusBoardDepositShare';
 import { IconChevronLeft, IconChevronRight } from 'twenty-ui/icon';
 import { StatusBoardCountKpi } from '@/status-board/components/StatusBoardCountKpi';
 import {
-  StyledStatusBoardKpiGrid,
   StyledStatusBoardPeriodControls,
   StyledStatusBoardPeriodLabel,
   StyledStatusBoardPeriodNav,
   StyledStatusBoardPeriodNavButton,
-  StyledStatusBoardSection,
-  StyledStatusBoardSectionHeader,
-  StyledStatusBoardSectionTitle,
   StyledStatusBoardSegment,
   StyledStatusBoardSegmentButton,
 } from '@/status-board/components/statusBoardStyled';
@@ -154,11 +156,11 @@ export const StatusBoardPeriodSection = ({
   }
 
   return (
-    <StyledStatusBoardSection>
-      <StyledStatusBoardSectionHeader>
-        <StyledStatusBoardSectionTitle>
+    <StyledDashboardSection>
+      <StyledDashboardSectionHeader>
+        <StyledDashboardSectionTitle>
           {periodRange.title} 입금·신규 계약
-        </StyledStatusBoardSectionTitle>
+        </StyledDashboardSectionTitle>
         <StyledStatusBoardPeriodControls>
           <StyledStatusBoardPeriodNav>
             <StyledStatusBoardPeriodNavButton
@@ -194,8 +196,8 @@ export const StatusBoardPeriodSection = ({
             ))}
           </StyledStatusBoardSegment>
         </StyledStatusBoardPeriodControls>
-      </StyledStatusBoardSectionHeader>
-      <StyledStatusBoardKpiGrid columns={5}>
+      </StyledDashboardSectionHeader>
+      <StyledDashboardKpiGrid columns={5}>
         {depositObjectMetadataItem !== undefined &&
           hasStatusBoardField(
             depositObjectMetadataItem,
@@ -321,7 +323,7 @@ export const StatusBoardPeriodSection = ({
             }
           />
         )}
-      </StyledStatusBoardKpiGrid>
+      </StyledDashboardKpiGrid>
       {depositObjectMetadataItem &&
         hasStatusBoardField(
           depositObjectMetadataItem,
@@ -350,6 +352,6 @@ export const StatusBoardPeriodSection = ({
             }
           />
         )}
-    </StyledStatusBoardSection>
+    </StyledDashboardSection>
   );
 };

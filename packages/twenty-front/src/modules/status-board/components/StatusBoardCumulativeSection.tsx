@@ -1,10 +1,10 @@
-import { StatusBoardCountKpi } from '@/status-board/components/StatusBoardCountKpi';
 import {
-  StyledStatusBoardCumulativeGrid,
-  StyledStatusBoardSection,
-  StyledStatusBoardSectionHeader,
-  StyledStatusBoardSectionTitle,
-} from '@/status-board/components/statusBoardStyled';
+  StyledDashboardSection,
+  StyledDashboardSectionHeader,
+  StyledDashboardSectionTitle,
+} from '@/ui/layout/dashboard/components/dashboardStyled';
+import { StatusBoardCountKpi } from '@/status-board/components/StatusBoardCountKpi';
+import { StyledStatusBoardCumulativeGrid } from '@/status-board/components/statusBoardStyled';
 import { type StatusBoardSheetState } from '@/status-board/components/StatusBoardSheet';
 import { STATUS_BOARD_FIELD } from '@/status-board/constants/StatusBoardFieldNames';
 import { STATUS_BOARD_OBJECT_NAME_SINGULAR } from '@/status-board/constants/StatusBoardObjectNames';
@@ -42,12 +42,12 @@ export const StatusBoardCumulativeSection = ({
   }
 
   return (
-    <StyledStatusBoardSection>
-      <StyledStatusBoardSectionHeader>
-        <StyledStatusBoardSectionTitle>
+    <StyledDashboardSection>
+      <StyledDashboardSectionHeader>
+        <StyledDashboardSectionTitle>
           누적 담당 내역
-        </StyledStatusBoardSectionTitle>
-      </StyledStatusBoardSectionHeader>
+        </StyledDashboardSectionTitle>
+      </StyledDashboardSectionHeader>
       <StyledStatusBoardCumulativeGrid>
         {companyObjectMetadataItem !== undefined && (
           <StatusBoardCountKpi
@@ -231,6 +231,6 @@ export const StatusBoardCumulativeSection = ({
           />
         )}
       </StyledStatusBoardCumulativeGrid>
-    </StyledStatusBoardSection>
+    </StyledDashboardSection>
   );
 };

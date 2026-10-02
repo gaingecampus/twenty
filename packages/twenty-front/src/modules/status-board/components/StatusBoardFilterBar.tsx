@@ -1,3 +1,9 @@
+import {
+  StyledDashboardToolbar,
+  StyledDashboardMuted,
+  StyledDashboardChip,
+  StyledDashboardChipRow,
+} from '@/ui/layout/dashboard/components/dashboardStyled';
 import { IconX } from 'twenty-ui/icon';
 import { FieldContractAssignees } from '@/field-management/FieldContractAssignees';
 import { useEffect, useRef, useState } from 'react';
@@ -5,12 +11,7 @@ import { createPortal } from 'react-dom';
 import { getStatusBoardMemberGroupId } from '@/status-board/utils/getStatusBoardMemberGroupId';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 import { styled } from '@linaria/react';
-import {
-  StyledStatusBoardToolbar,
-  StyledStatusBoardMuted,
-  StyledStatusBoardChip,
-  StyledStatusBoardChipRow,
-} from '@/status-board/components/statusBoardStyled';
+
 import { useStatusBoardDummyData } from '@/status-board/contexts/StatusBoardDummyDataContext';
 import { getStatusBoardRecordLabel } from '@/status-board/utils/getStatusBoardRecordLabel';
 import { type EnrichedObjectMetadataItem } from '@/object-metadata/types/EnrichedObjectMetadataItem';
@@ -62,7 +63,7 @@ export const StatusBoardFilterBar = ({
     memberObjectMetadataItem !== undefined || dummy.enabled;
 
   return (
-    <StyledStatusBoardToolbar>
+    <StyledDashboardToolbar>
       {shouldShowGroupChips && (
         <StatusBoardGroupChips
           selectedGroupIds={selectedGroupIds}
@@ -72,8 +73,8 @@ export const StatusBoardFilterBar = ({
       )}
       {shouldShowMemberChips && (
         <>
-          <StyledStatusBoardChipRow>
-            <StyledStatusBoardChip
+          <StyledDashboardChipRow>
+            <StyledDashboardChip
               type="button"
               isActive={false}
               aria-haspopup="dialog"
@@ -83,11 +84,11 @@ export const StatusBoardFilterBar = ({
               {selectedMemberIds.length > 0
                 ? `${selectedMemberIds.length}명`
                 : `전체 ${members.length}명`}
-            </StyledStatusBoardChip>
+            </StyledDashboardChip>
             {members
               .filter((member) => selectedMemberIds.includes(member.id))
               .map((member) => (
-                <StyledStatusBoardChip
+                <StyledDashboardChip
                   key={member.id}
                   type="button"
                   isActive
@@ -99,9 +100,9 @@ export const StatusBoardFilterBar = ({
                     <FieldContractAssignees members={[member]} />
                   </span>
                   <IconX size={14} aria-hidden />
-                </StyledStatusBoardChip>
+                </StyledDashboardChip>
               ))}
-          </StyledStatusBoardChipRow>
+          </StyledDashboardChipRow>
           {isMemberModalOpen && (
             <StatusBoardMemberModal onClose={() => setIsMemberModalOpen(false)}>
               {shouldShowGroupChips && (
@@ -121,7 +122,7 @@ export const StatusBoardFilterBar = ({
           )}
         </>
       )}
-    </StyledStatusBoardToolbar>
+    </StyledDashboardToolbar>
   );
 };
 
@@ -137,17 +138,17 @@ const StatusBoardGroupChips = ({
   const { groups } = useStatusBoardDummyData();
 
   return (
-    <StyledStatusBoardChipRow role="group" aria-label="그룹 선택">
-      <StyledStatusBoardChip
+    <StyledDashboardChipRow role="group" aria-label="그룹 선택">
+      <StyledDashboardChip
         type="button"
         isActive={selectedGroupIds.length === 0}
         aria-pressed={selectedGroupIds.length === 0}
         onClick={onClearSelectedGroupIds}
       >
         전체 그룹
-      </StyledStatusBoardChip>
+      </StyledDashboardChip>
       {groups.map((group) => (
-        <StyledStatusBoardChip
+        <StyledDashboardChip
           key={group.id}
           type="button"
           isActive={selectedGroupIds.includes(group.id)}
@@ -155,9 +156,9 @@ const StatusBoardGroupChips = ({
           onClick={() => onToggleGroupId(group.id)}
         >
           {getStatusBoardRecordLabel(group)}
-        </StyledStatusBoardChip>
+        </StyledDashboardChip>
       ))}
-    </StyledStatusBoardChipRow>
+    </StyledDashboardChipRow>
   );
 };
 
@@ -206,19 +207,19 @@ const StatusBoardMemberChips = ({
     }));
   return (
     <div role="group" aria-label="구성원 선택">
-      <StyledStatusBoardChipRow>
-        <StyledStatusBoardChip
+      <StyledDashboardChipRow>
+        <StyledDashboardChip
           type="button"
           isActive={selectedMemberIds.length === 0}
           aria-pressed={selectedMemberIds.length === 0}
           onClick={onClearSelectedMemberIds}
         >
           {`전체 구성원 ${members.length}명`}
-        </StyledStatusBoardChip>
+        </StyledDashboardChip>
         {selectedMemberIds.length > 0 && (
-          <StyledStatusBoardMuted>{`${selectedMemberIds.length}명 선택`}</StyledStatusBoardMuted>
+          <StyledDashboardMuted>{`${selectedMemberIds.length}명 선택`}</StyledDashboardMuted>
         )}
-      </StyledStatusBoardChipRow>
+      </StyledDashboardChipRow>
       <StyledMemberList>
         {memberGroups.map((group) => (
           <StyledMemberGroup
@@ -229,7 +230,7 @@ const StatusBoardMemberChips = ({
             <StyledMemberGroupName>{String(group.label)}</StyledMemberGroupName>
             <StyledMemberOptions>
               {group.members.map((member) => (
-                <StyledStatusBoardChip
+                <StyledDashboardChip
                   key={member.id}
                   type="button"
                   variant="soft"
@@ -241,16 +242,16 @@ const StatusBoardMemberChips = ({
                     <span aria-hidden="true">✓ </span>
                   )}
                   <FieldContractAssignees members={[member]} />
-                </StyledStatusBoardChip>
+                </StyledDashboardChip>
               ))}
             </StyledMemberOptions>
           </StyledMemberGroup>
         ))}
       </StyledMemberList>
       {members.length === 0 && (
-        <StyledStatusBoardMuted>
+        <StyledDashboardMuted>
           선택한 그룹에 구성원이 없어요.
-        </StyledStatusBoardMuted>
+        </StyledDashboardMuted>
       )}
     </div>
   );

@@ -1,3 +1,9 @@
+import {
+  StyledDashboardKpiGrid,
+  StyledDashboardSection,
+  StyledDashboardSectionHeader,
+  StyledDashboardSectionTitle,
+} from '@/ui/layout/dashboard/components/dashboardStyled';
 import { useId } from 'react';
 import { IconInfoCircle } from 'twenty-ui/icon';
 import { AppTooltip } from 'twenty-ui/surfaces';
@@ -5,14 +11,9 @@ import { themeCssVariables } from 'twenty-ui/theme-constants';
 import { type EnrichedObjectMetadataItem } from '@/object-metadata/types/EnrichedObjectMetadataItem';
 import { useAggregateRecords } from '@/object-record/hooks/useAggregateRecords';
 import { AggregateOperations } from '@/object-record/record-table/constants/AggregateOperations';
-import { StatusBoardKpiCard } from '@/status-board/components/StatusBoardKpiCard';
+import { DashboardKpiCard } from '@/ui/layout/dashboard/components/DashboardKpiCard';
 import { type StatusBoardSheetState } from '@/status-board/components/StatusBoardSheet';
-import {
-  StyledStatusBoardKpiGrid,
-  StyledStatusBoardSection,
-  StyledStatusBoardSectionHeader,
-  StyledStatusBoardSectionTitle,
-} from '@/status-board/components/statusBoardStyled';
+
 import { useStatusBoardDummyData } from '@/status-board/contexts/StatusBoardDummyDataContext';
 import { STATUS_BOARD_FIELD } from '@/status-board/constants/StatusBoardFieldNames';
 import { STATUS_BOARD_STAGE_TIMING_START_DATE } from '@/status-board/constants/StatusBoardStageTimingStartDate';
@@ -70,9 +71,9 @@ export const StatusBoardStageTimingSection = ({
   ]);
 
   return (
-    <StyledStatusBoardSection>
-      <StyledStatusBoardSectionHeader>
-        <StyledStatusBoardSectionTitle>
+    <StyledDashboardSection>
+      <StyledDashboardSectionHeader>
+        <StyledDashboardSectionTitle>
           문의 단계별 평균 소요일
           <span
             data-stage-timing-info={infoId}
@@ -91,9 +92,9 @@ export const StatusBoardStageTimingSection = ({
             anchorSelect={`[data-stage-timing-info="${infoId}"]`}
             content={description}
           />
-        </StyledStatusBoardSectionTitle>
-      </StyledStatusBoardSectionHeader>
-      <StyledStatusBoardKpiGrid>
+        </StyledDashboardSectionTitle>
+      </StyledDashboardSectionHeader>
+      <StyledDashboardKpiGrid>
         {stages.map((stage) => (
           <StageTimingCard
             key={stage.value}
@@ -103,8 +104,8 @@ export const StatusBoardStageTimingSection = ({
             onOpenSheet={onOpenSheet}
           />
         ))}
-      </StyledStatusBoardKpiGrid>
-    </StyledStatusBoardSection>
+      </StyledDashboardKpiGrid>
+    </StyledDashboardSection>
   );
 };
 
@@ -151,7 +152,7 @@ const StageTimingCard = ({
     stage.label;
 
   return (
-    <StatusBoardKpiCard
+    <DashboardKpiCard
       label={label}
       value={hasMeasurement ? `${average.toFixed(1)}일` : '—'}
       loading={!dummy.enabled && loading}

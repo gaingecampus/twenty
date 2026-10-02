@@ -1,13 +1,14 @@
+import { DashboardCountTab } from '@/ui/layout/dashboard/components/DashboardCountTab';
+import {
+  StyledDashboardSectionTitle,
+  StyledDashboardSectionHeader,
+  StyledDashboardContractTabs,
+} from '@/ui/layout/dashboard/components/dashboardStyled';
 import { useOpenRecordInSidePanel } from '@/side-panel/hooks/useOpenRecordInSidePanel';
 import { useStatusBoardCount } from '@/status-board/hooks/useStatusBoardCount';
 import { type RecordGqlOperationFilter } from 'twenty-shared/types';
 import {
   StyledStatusBoardContractSection,
-  StyledStatusBoardSectionTitle,
-  StyledStatusBoardSectionHeader,
-  StyledStatusBoardSoftTab,
-  StyledStatusBoardTabCount,
-  StyledStatusBoardContractTabs,
   StyledStatusBoardContractBody,
 } from '@/status-board/components/statusBoardStyled';
 import { StatusBoardRecordList } from '@/status-board/components/StatusBoardRecordList';
@@ -42,20 +43,14 @@ const StatusBoardContractTab = ({
     filter,
   });
   return (
-    <StyledStatusBoardSoftTab
-      type="button"
+    <DashboardCountTab
+      label={label}
+      count={error ? '—' : `${count.toLocaleString('ko-KR')}건`}
       isActive={isActive}
-      aria-pressed={isActive}
-      aria-busy={loading}
+      loading={loading}
+      countTitle={error ? '건수를 불러오지 못했어요' : undefined}
       onClick={onClick}
-    >
-      {label}
-      <StyledStatusBoardTabCount
-        title={error ? '건수를 불러오지 못했어요' : undefined}
-      >
-        {loading ? '…' : error ? '—' : `${count.toLocaleString('ko-KR')}건`}
-      </StyledStatusBoardTabCount>
-    </StyledStatusBoardSoftTab>
+    />
   );
 };
 
@@ -97,16 +92,16 @@ export const StatusBoardListsSection = ({
 
   return (
     <StyledStatusBoardContractSection>
-      <StyledStatusBoardSectionHeader>
-        <StyledStatusBoardSectionTitle>
+      <StyledDashboardSectionHeader>
+        <StyledDashboardSectionTitle>
           계약 진행 현황
-        </StyledStatusBoardSectionTitle>
-      </StyledStatusBoardSectionHeader>
+        </StyledDashboardSectionTitle>
+      </StyledDashboardSectionHeader>
       {hasStatusBoardField(
         onboardingObjectMetadataItem,
         STATUS_BOARD_FIELD.onboardingStatus,
       ) && (
-        <StyledStatusBoardContractTabs>
+        <StyledDashboardContractTabs>
           {(['PRE', 'ACTIVE', 'DONE'] as const).map((tab) => (
             <StatusBoardContractTab
               key={tab}
@@ -122,7 +117,7 @@ export const StatusBoardListsSection = ({
               }
             />
           ))}
-        </StyledStatusBoardContractTabs>
+        </StyledDashboardContractTabs>
       )}
       <StyledStatusBoardContractBody>
         <StatusBoardRecordList

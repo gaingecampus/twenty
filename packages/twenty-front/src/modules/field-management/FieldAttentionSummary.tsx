@@ -1,3 +1,7 @@
+import {
+  StyledDashboardSection,
+  StyledDashboardKpiGrid,
+} from '@/ui/layout/dashboard/components/dashboardStyled';
 import { IconList } from 'twenty-ui/icon';
 import { SidePanelPages } from 'twenty-shared/types';
 import { type ObjectRecord } from '@/object-record/types/ObjectRecord';
@@ -5,11 +9,8 @@ import { useNavigateSidePanel } from '@/side-panel/hooks/useNavigateSidePanel';
 import { statusBoardDetailsState } from '@/status-board/states/statusBoardDetailsState';
 import { useSetAtomState } from '@/ui/utilities/state/jotai/hooks/useSetAtomState';
 import { useStatusBoardDummyData } from '@/status-board/contexts/StatusBoardDummyDataContext';
-import { StatusBoardKpiCard } from '@/status-board/components/StatusBoardKpiCard';
-import {
-  StyledStatusBoardSection,
-  StyledStatusBoardKpiGrid,
-} from '@/status-board/components/statusBoardStyled';
+import { DashboardKpiCard } from '@/ui/layout/dashboard/components/DashboardKpiCard';
+
 import { getFieldAttentionContracts } from './getFieldAttentionContracts';
 
 export const FieldAttentionSummary = ({
@@ -31,8 +32,8 @@ export const FieldAttentionSummary = ({
   }).format(new Date());
   const groups = getFieldAttentionContracts(contracts, visits, today);
   return (
-    <StyledStatusBoardSection aria-label="현재 계약 점검">
-      <StyledStatusBoardKpiGrid>
+    <StyledDashboardSection aria-label="현재 계약 점검">
+      <StyledDashboardKpiGrid>
         {(
           [
             [
@@ -55,7 +56,7 @@ export const FieldAttentionSummary = ({
             ],
           ] as const
         ).map(([key, label, description, iconName]) => (
-          <StatusBoardKpiCard
+          <DashboardKpiCard
             key={key}
             label={label}
             description={description}
@@ -90,7 +91,7 @@ export const FieldAttentionSummary = ({
             }
           />
         ))}
-      </StyledStatusBoardKpiGrid>
-    </StyledStatusBoardSection>
+      </StyledDashboardKpiGrid>
+    </StyledDashboardSection>
   );
 };

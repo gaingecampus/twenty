@@ -1,12 +1,13 @@
+import {
+  StyledDashboardKpiGrid,
+  StyledDashboardSection,
+  StyledDashboardSectionHeader,
+  StyledDashboardSectionTitle,
+} from '@/ui/layout/dashboard/components/dashboardStyled';
 import { StatusBoardOnboardingKpi } from '@/status-board/components/StatusBoardOnboardingKpi';
 import { type StatusBoardSheetState } from '@/status-board/components/StatusBoardSheet';
 import { StatusBoardLinkedCountKpi } from '@/status-board/components/StatusBoardLinkedCountKpi';
-import {
-  StyledStatusBoardKpiGrid,
-  StyledStatusBoardSection,
-  StyledStatusBoardSectionHeader,
-  StyledStatusBoardSectionTitle,
-} from '@/status-board/components/statusBoardStyled';
+
 import { STATUS_BOARD_FIELD } from '@/status-board/constants/StatusBoardFieldNames';
 import {
   buildStatusBoardEndingOnboardingFilter,
@@ -61,13 +62,13 @@ export const StatusBoardNowSection = ({
   }
 
   return (
-    <StyledStatusBoardSection>
-      <StyledStatusBoardSectionHeader>
-        <StyledStatusBoardSectionTitle>
+    <StyledDashboardSection>
+      <StyledDashboardSectionHeader>
+        <StyledDashboardSectionTitle>
           진행 중인 온보딩 현황
-        </StyledStatusBoardSectionTitle>
-      </StyledStatusBoardSectionHeader>
-      <StyledStatusBoardKpiGrid columns={4}>
+        </StyledDashboardSectionTitle>
+      </StyledDashboardSectionHeader>
+      <StyledDashboardKpiGrid columns={4}>
         {opportunityObjectMetadataItem !== undefined && (
           <StatusBoardLinkedCountKpi
             onOpenSheet={onOpenSheet}
@@ -102,7 +103,7 @@ export const StatusBoardNowSection = ({
               tone="orange"
             />
           )}
-      </StyledStatusBoardKpiGrid>
-    </StyledStatusBoardSection>
+      </StyledDashboardKpiGrid>
+    </StyledDashboardSection>
   );
 };

@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { DashboardCountTab } from '@/ui/layout/dashboard/components/DashboardCountTab';
 import {
-  StyledStatusBoardContractTabs,
-  StyledStatusBoardSoftTab,
-  StyledStatusBoardScroll,
-} from '@/status-board/components/statusBoardStyled';
+  StyledDashboardContractTabs,
+  StyledDashboardScroll,
+} from '@/ui/layout/dashboard/components/dashboardStyled';
+import { useState } from 'react';
+
 import { FieldManagement, type FieldContractCounts } from './FieldManagement';
 import { StatusBoardDummyDataProvider } from '@/status-board/components/StatusBoardDummyDataProvider';
 import { StatusBoardFilterBar } from '@/status-board/components/StatusBoardFilterBar';
@@ -47,7 +48,7 @@ const FieldManagementPageBody = ({
     selectedMemberIds: filters.selectedMemberIds,
   });
   return (
-    <StyledStatusBoardScroll>
+    <StyledDashboardScroll>
       <StatusBoardFilterBar
         groupObjectMetadataItem={metadata.group}
         memberObjectMetadataItem={metadata.member}
@@ -60,7 +61,7 @@ const FieldManagementPageBody = ({
         onClearSelectedMemberIds={filters.clearSelectedMemberIds}
       />
       <div ref={setSummaryContainer} />
-      <StyledStatusBoardContractTabs aria-label="계약 상태" data-on-page-canvas>
+      <StyledDashboardContractTabs aria-label="계약 상태" data-on-page-canvas>
         {(
           [
             ['PRE', '진행 전 계약'],
@@ -68,23 +69,20 @@ const FieldManagementPageBody = ({
             ['DONE', '종료 계약'],
           ] as const
         ).map(([value, label]) => (
-          <StyledStatusBoardSoftTab
+          <DashboardCountTab
             key={value}
-            type="button"
+            label={label}
+            count={contractCounts?.[value] ?? '—'}
             isActive={contractStatus === value}
-            aria-pressed={contractStatus === value}
             onClick={() => setContractStatus(value)}
-          >
-            {label}
-            <span>{contractCounts?.[value] ?? '—'}</span>
-          </StyledStatusBoardSoftTab>
+          />
         ))}
-      </StyledStatusBoardContractTabs>
+      </StyledDashboardContractTabs>
       <FieldManagement
         scope={{ contractList: true, memberIds, contractStatus }}
         onContractCountsChange={setContractCounts}
         summaryContainer={summaryContainer}
       />
-    </StyledStatusBoardScroll>
+    </StyledDashboardScroll>
   );
 };

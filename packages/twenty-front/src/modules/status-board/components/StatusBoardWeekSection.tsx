@@ -1,3 +1,8 @@
+import {
+  StyledDashboardMuted,
+  StyledDashboardSectionHeader,
+  StyledDashboardSectionTitle,
+} from '@/ui/layout/dashboard/components/dashboardStyled';
 import { getContractSessionProgress } from '@/field-management/getContractSessionProgress';
 import { useObjectMetadataItems } from '@/object-metadata/hooks/useObjectMetadataItems';
 import { useObjectPermissionsForObject } from '@/object-record/hooks/useObjectPermissionsForObject';
@@ -9,10 +14,7 @@ import { StatusBoardEmptyState } from '@/status-board/components/StatusBoardEmpt
 import { useStatusBoardDummyData } from '@/status-board/contexts/StatusBoardDummyDataContext';
 import { getStatusBoardMemberGroupId } from '@/status-board/utils/getStatusBoardMemberGroupId';
 import {
-  StyledStatusBoardMuted,
   StyledStatusBoardWeekSection,
-  StyledStatusBoardSectionHeader,
-  StyledStatusBoardSectionTitle,
   StyledStatusBoardWeekCell,
   StyledStatusBoardWeekCellBlock,
   StyledStatusBoardWeekCellLink,
@@ -211,15 +213,15 @@ const StatusBoardWeekSectionLoaded = ({
 
   return (
     <StyledStatusBoardWeekSection>
-      <StyledStatusBoardSectionHeader>
-        <StyledStatusBoardSectionTitle>
+      <StyledDashboardSectionHeader>
+        <StyledDashboardSectionTitle>
           담당자별 수행 일정
-        </StyledStatusBoardSectionTitle>
+        </StyledDashboardSectionTitle>
         <div data-week-header-controls>
           {undatedCount > 0 && (
-            <StyledStatusBoardMuted>
+            <StyledDashboardMuted>
               {`요일 미정 ${undatedCount}건`}
-            </StyledStatusBoardMuted>
+            </StyledDashboardMuted>
           )}
           <label>
             <input
@@ -237,7 +239,7 @@ const StatusBoardWeekSectionLoaded = ({
             ))}
           </StyledStatusBoardCadenceRow>
         </div>
-      </StyledStatusBoardSectionHeader>
+      </StyledDashboardSectionHeader>
       {loading && records.length === 0 ? (
         <StatusBoardEmptyState
           title="방문 일정을 불러오는 중이에요"

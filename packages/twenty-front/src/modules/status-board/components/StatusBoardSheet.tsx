@@ -1,3 +1,4 @@
+import { type DashboardTone } from '@/ui/layout/dashboard/components/dashboardStyled';
 import { Select } from '@/ui/input/components/Select';
 import { createPortal } from 'react-dom';
 import {
@@ -14,7 +15,6 @@ import { useDebounce } from 'use-debounce';
 import { andStatusBoardFilters } from '@/status-board/utils/andStatusBoardFilters';
 import { useStatusBoardCount } from '@/status-board/hooks/useStatusBoardCount';
 import {
-  type StatusBoardTone,
   StyledStatusBoardSort,
   StyledStatusBoardSheetToolbar,
   StyledStatusBoardSheetListLink,
@@ -34,7 +34,7 @@ import { type RecordGqlOperationFilter } from 'twenty-shared/types';
 
 export type StatusBoardSheetState = {
   kpiLabel?: string;
-  tone?: StatusBoardTone;
+  tone?: DashboardTone;
   listTarget?: {
     objectMetadataItem: EnrichedObjectMetadataItem;
     viewId?: string;

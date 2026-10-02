@@ -1,4 +1,8 @@
 import {
+  StyledDashboardKpiIcon,
+  type DashboardTone,
+} from '@/ui/layout/dashboard/components/dashboardStyled';
+import {
   IconCalendar,
   IconCoins,
   IconFlag,
@@ -6,17 +10,13 @@ import {
   IconClock,
   IconFileText,
 } from 'twenty-ui/icon';
-import {
-  StyledStatusBoardKpiIcon,
-  type StatusBoardTone,
-} from '@/status-board/components/statusBoardStyled';
 
-export const StatusBoardKpiIcon = ({
+export const DashboardKpiIcon = ({
   label,
   tone = 'default',
 }: {
   label: string;
-  tone?: StatusBoardTone;
+  tone?: DashboardTone;
 }) => {
   const Icon =
     label.includes('미지급') ||
@@ -33,8 +33,8 @@ export const StatusBoardKpiIcon = ({
               ? IconFileText
               : IconFlag;
   return (
-    <StyledStatusBoardKpiIcon tone={tone}>
+    <StyledDashboardKpiIcon tone={tone}>
       <Icon size={16} aria-hidden />
-    </StyledStatusBoardKpiIcon>
+    </StyledDashboardKpiIcon>
   );
 };

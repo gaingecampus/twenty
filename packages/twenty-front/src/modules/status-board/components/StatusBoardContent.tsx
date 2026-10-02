@@ -1,3 +1,7 @@
+import {
+  StyledDashboardScroll,
+  StyledDashboardMuted,
+} from '@/ui/layout/dashboard/components/dashboardStyled';
 import { useNavigateSidePanel } from '@/side-panel/hooks/useNavigateSidePanel';
 import { statusBoardDetailsState } from '@/status-board/states/statusBoardDetailsState';
 import { useSetAtomState } from '@/ui/utilities/state/jotai/hooks/useSetAtomState';
@@ -14,10 +18,7 @@ import { StatusBoardNowSection } from '@/status-board/components/StatusBoardNowS
 import { StatusBoardPeriodSection } from '@/status-board/components/StatusBoardPeriodSection';
 import { type StatusBoardSheetState } from '@/status-board/components/StatusBoardSheet';
 import { StatusBoardWeekSection } from '@/status-board/components/StatusBoardWeekSection';
-import {
-  StyledStatusBoardScroll,
-  StyledStatusBoardMuted,
-} from '@/status-board/components/statusBoardStyled';
+
 import { useStatusBoardFilters } from '@/status-board/hooks/useStatusBoardFilters';
 import { useStatusBoardMemberIds } from '@/status-board/hooks/useStatusBoardMemberIds';
 import { useStatusBoardMembers } from '@/status-board/hooks/useStatusBoardMembers';
@@ -128,11 +129,9 @@ const StatusBoardContentBody = ({
           />
         }
       >
-        <StyledStatusBoardScroll>
+        <StyledDashboardScroll>
           {dummy.enabled && (
-            <StyledStatusBoardMuted>
-              미리보기 · 예시 데이터
-            </StyledStatusBoardMuted>
+            <StyledDashboardMuted>미리보기 · 예시 데이터</StyledDashboardMuted>
           )}
           <StatusBoardFilterBar
             groupObjectMetadataItem={metadata.group}
@@ -209,7 +208,7 @@ const StatusBoardContentBody = ({
               />
             </>
           )}
-        </StyledStatusBoardScroll>
+        </StyledDashboardScroll>
       </PageCardLayout>
     </>
   );

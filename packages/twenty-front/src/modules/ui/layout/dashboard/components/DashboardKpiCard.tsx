@@ -1,22 +1,22 @@
+import {
+  StyledDashboardCumulativeButton,
+  StyledDashboardCumulativeLabel,
+  StyledDashboardCumulativeValue,
+  StyledDashboardKpiButton,
+  StyledDashboardKpiLabel,
+  StyledDashboardKpiIcon,
+  StyledDashboardKpiSubtitle,
+  StyledDashboardKpiValue,
+  type DashboardTone,
+} from '@/ui/layout/dashboard/components/dashboardStyled';
 import { useId } from 'react';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 import { AppTooltip } from 'twenty-ui/surfaces';
 import { IconInfoCircle, useIcons } from 'twenty-ui/icon';
 import { Link } from 'react-router-dom';
-import { StatusBoardKpiIcon } from '@/status-board/components/StatusBoardKpiIcon';
-import {
-  StyledStatusBoardCumulativeButton,
-  StyledStatusBoardCumulativeLabel,
-  StyledStatusBoardCumulativeValue,
-  StyledStatusBoardKpiButton,
-  StyledStatusBoardKpiLabel,
-  StyledStatusBoardKpiIcon,
-  StyledStatusBoardKpiSubtitle,
-  StyledStatusBoardKpiValue,
-  type StatusBoardTone,
-} from '@/status-board/components/statusBoardStyled';
+import { DashboardKpiIcon } from '@/ui/layout/dashboard/components/DashboardKpiIcon';
 
-type StatusBoardKpiCardProps = {
+type DashboardKpiCardProps = {
   label: string;
   iconName?: string | null;
   exactValue?: string;
@@ -26,13 +26,13 @@ type StatusBoardKpiCardProps = {
   inlineSubtitle?: boolean;
   loading: boolean;
   isEmpty?: boolean;
-  tone?: StatusBoardTone;
+  tone?: DashboardTone;
   variant?: 'tile' | 'stat';
   to?: string;
   onClick?: () => void;
 };
 
-export const StatusBoardKpiCard = ({
+export const DashboardKpiCard = ({
   label,
   iconName,
   exactValue,
@@ -46,7 +46,7 @@ export const StatusBoardKpiCard = ({
   variant = 'tile',
   onClick,
   to,
-}: StatusBoardKpiCardProps) => {
+}: DashboardKpiCardProps) => {
   const infoId = useId();
   const { getIcon } = useIcons();
   const Icon = iconName ? getIcon(iconName) : undefined;
@@ -76,35 +76,33 @@ export const StatusBoardKpiCard = ({
 
   if (variant === 'stat') {
     return (
-      <StyledStatusBoardCumulativeButton
+      <StyledDashboardCumulativeButton
         type="button"
         aria-label={`${label} ${loading ? '불러오는 중' : (exactValue ?? value)} · 상세 목록 보기`}
         title={loading ? undefined : exactValue}
         aria-busy={loading}
         onClick={onClick}
       >
-        <StyledStatusBoardCumulativeLabel tone={tone}>
+        <StyledDashboardCumulativeLabel tone={tone}>
           {Icon && (
-            <StyledStatusBoardKpiIcon tone={isEmpty ? 'default' : tone}>
+            <StyledDashboardKpiIcon tone={isEmpty ? 'default' : tone}>
               <Icon size={16} aria-hidden />
-            </StyledStatusBoardKpiIcon>
+            </StyledDashboardKpiIcon>
           )}
           {label}
-        </StyledStatusBoardCumulativeLabel>
-        <StyledStatusBoardCumulativeValue tone={tone} isEmpty={isEmpty}>
+        </StyledDashboardCumulativeLabel>
+        <StyledDashboardCumulativeValue tone={tone} isEmpty={isEmpty}>
           {displayValue}
-        </StyledStatusBoardCumulativeValue>
+        </StyledDashboardCumulativeValue>
         {!loading && subtitle && (
-          <StyledStatusBoardKpiSubtitle>
-            {subtitle}
-          </StyledStatusBoardKpiSubtitle>
+          <StyledDashboardKpiSubtitle>{subtitle}</StyledDashboardKpiSubtitle>
         )}
-      </StyledStatusBoardCumulativeButton>
+      </StyledDashboardCumulativeButton>
     );
   }
 
   return (
-    <StyledStatusBoardKpiButton
+    <StyledDashboardKpiButton
       as={to ? Link : 'button'}
       to={to}
       type={to ? undefined : 'button'}
@@ -114,8 +112,8 @@ export const StatusBoardKpiCard = ({
       tone={tone}
       onClick={onClick}
     >
-      <StatusBoardKpiIcon label={label} tone={tone} />
-      <StyledStatusBoardKpiLabel tone={tone}>
+      <DashboardKpiIcon label={label} tone={tone} />
+      <StyledDashboardKpiLabel tone={tone}>
         {label}
         {description && (
           <>
@@ -134,8 +132,8 @@ export const StatusBoardKpiCard = ({
             />
           </>
         )}
-      </StyledStatusBoardKpiLabel>
-      <StyledStatusBoardKpiValue tone={tone} isEmpty={isEmpty}>
+      </StyledDashboardKpiLabel>
+      <StyledDashboardKpiValue tone={tone} isEmpty={isEmpty}>
         {displayValue}
         {!loading && inlineSubtitle && subtitle && (
           <small
@@ -148,10 +146,10 @@ export const StatusBoardKpiCard = ({
             · {subtitle}
           </small>
         )}
-      </StyledStatusBoardKpiValue>
+      </StyledDashboardKpiValue>
       {!loading && !inlineSubtitle && subtitle && (
-        <StyledStatusBoardKpiSubtitle>{subtitle}</StyledStatusBoardKpiSubtitle>
+        <StyledDashboardKpiSubtitle>{subtitle}</StyledDashboardKpiSubtitle>
       )}
-    </StyledStatusBoardKpiButton>
+    </StyledDashboardKpiButton>
   );
 };

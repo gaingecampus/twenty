@@ -1,5 +1,5 @@
 import { type EnrichedObjectMetadataItem } from '@/object-metadata/types/EnrichedObjectMetadataItem';
-import { StatusBoardKpiCard } from '@/status-board/components/StatusBoardKpiCard';
+import { DashboardKpiCard } from '@/ui/layout/dashboard/components/DashboardKpiCard';
 import { type StatusBoardSheetState } from '@/status-board/components/StatusBoardSheet';
 import { useStatusBoardOnboardingMetrics } from '@/status-board/hooks/useStatusBoardOnboardingMetrics';
 import { buildStatusBoardRecordGqlFields } from '@/status-board/utils/buildStatusBoardRecordGqlFields';
@@ -39,7 +39,7 @@ export const StatusBoardOnboardingKpi = ({
     fieldNames: ['name', 'company'],
   });
   return (
-    <StatusBoardKpiCard
+    <DashboardKpiCard
       label={label}
       value={error ? '—' : formatStatusBoardCount(companyCount)}
       exactValue={error ? undefined : `${companyCount}건`}

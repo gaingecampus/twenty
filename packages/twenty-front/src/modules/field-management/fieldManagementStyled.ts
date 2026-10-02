@@ -1,4 +1,5 @@
-import { StyledStatusBoardSection } from '@/status-board/components/statusBoardStyled';
+import { StyledDashboardSection } from '@/ui/layout/dashboard/components/dashboardStyled';
+
 import { styled } from '@linaria/react';
 import { themeCssVariables as theme } from 'twenty-ui/theme-constants';
 export const StyledFieldPanel = styled.div`
@@ -1207,7 +1208,7 @@ export const StyledFieldVisitDetail = styled(StyledFieldCard)`
 `;
 
 // Share the status board card sizing, spacing and responsive treatment.
-export const StyledFieldRecordSection = styled(StyledStatusBoardSection)`
+export const StyledFieldRecordSection = styled(StyledDashboardSection)`
   &[data-contract-detail] {
     box-shadow: ${theme.boxShadow.light};
   }

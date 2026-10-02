@@ -1,3 +1,4 @@
+import { type DashboardTone } from '@/ui/layout/dashboard/components/dashboardStyled';
 import { createPortal } from 'react-dom';
 import { RecordPaginationBar } from '@/object-record/record-index/components/RecordIndexPaginationBar';
 import { StatusBoardCompanyActivity } from '@/status-board/components/StatusBoardCompanyActivity';
@@ -23,7 +24,6 @@ import {
   StyledStatusBoardRowList,
   StyledStatusBoardRowName,
   StyledStatusBoardRowBadge,
-  type StatusBoardTone,
 } from '@/status-board/components/statusBoardStyled';
 import { STATUS_BOARD_LIMITS } from '@/status-board/constants/StatusBoardLimits';
 import { useStatusBoardFindManyRecords } from '@/status-board/hooks/useStatusBoardFindManyRecords';
@@ -57,7 +57,7 @@ type StatusBoardRecordListProps = {
   emptyDescription?: string;
   emptyVariant?: 'document' | 'search';
   heading?: string;
-  tone?: StatusBoardTone;
+  tone?: DashboardTone;
   paginated?: boolean;
   paginationContainer?: HTMLElement | null;
   onPageChange?: () => void;

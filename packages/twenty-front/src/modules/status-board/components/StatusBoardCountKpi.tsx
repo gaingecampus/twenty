@@ -1,6 +1,7 @@
+import { type DashboardTone } from '@/ui/layout/dashboard/components/dashboardStyled';
 import { formatStatusBoardCount } from '@/status-board/utils/formatStatusBoardCount';
-import { StatusBoardKpiCard } from '@/status-board/components/StatusBoardKpiCard';
-import { type StatusBoardTone } from '@/status-board/components/statusBoardStyled';
+import { DashboardKpiCard } from '@/ui/layout/dashboard/components/DashboardKpiCard';
+
 import { useStatusBoardCount } from '@/status-board/hooks/useStatusBoardCount';
 import { useStatusBoardSum } from '@/status-board/hooks/useStatusBoardSum';
 import { formatStatusBoardAmount } from '@/status-board/utils/formatStatusBoardAmount';
@@ -13,7 +14,7 @@ type StatusBoardCountKpiProps = {
   iconName?: string | null;
   withSum?: boolean;
   showAmountAsValue?: boolean;
-  tone?: StatusBoardTone;
+  tone?: DashboardTone;
   variant?: 'tile' | 'stat';
   to?: string;
   onClick?: () => void;
@@ -55,7 +56,7 @@ export const StatusBoardCountKpi = ({
   );
 
   return (
-    <StatusBoardKpiCard
+    <DashboardKpiCard
       label={label}
       iconName={iconName}
       inlineSubtitle={(showAmountAsValue || withSum) && !hasError}
