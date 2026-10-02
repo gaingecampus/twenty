@@ -88,12 +88,16 @@ export const StyledFieldPanel = styled.div`
     font-size: 14px;
   }
   &[data-contextual][data-contract-list-page] {
-    display: contents;
+    display: flex;
     background: transparent;
+    min-height: 0;
     padding: 0;
   }
   &[data-contextual][data-contract-list-page] > [data-contract-group] {
-    display: contents;
+    background: transparent;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
   }
   &[data-contextual][data-contract-list-page] [data-contract-item] {
     flex-shrink: 0;
@@ -708,6 +712,16 @@ export const StyledFieldPanel = styled.div`
       gap: 12px;
       grid-template-columns: 32px minmax(0, 1fr);
       padding: 14px 12px;
+    }
+    [data-goal-summary-row]:not(:has(> [data-unregistered])),
+    [data-contract-detail]
+      [data-goal-grid]
+      > div:not(:has(> dd[data-unregistered])) {
+      background: color-mix(
+        in srgb,
+        ${theme.background.transparent.blue} 40%,
+        ${theme.background.primary}
+      );
     }
     [data-goal-summary-row] > strong {
       align-self: start;
