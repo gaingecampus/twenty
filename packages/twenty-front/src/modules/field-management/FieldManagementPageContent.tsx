@@ -36,6 +36,8 @@ const FieldManagementPageBody = ({
   const [contractStatus, setContractStatus] = useState<
     'PRE' | 'ACTIVE' | 'DONE'
   >('ACTIVE');
+  const [summaryContainer, setSummaryContainer] =
+    useState<HTMLDivElement | null>(null);
   const [contractCounts, setContractCounts] = useState<FieldContractCounts>();
   const { members } = useStatusBoardDummyData();
   const filters = useStatusBoardFilters(members);
@@ -57,6 +59,7 @@ const FieldManagementPageBody = ({
         onClearSelectedGroupIds={filters.clearSelectedGroupIds}
         onClearSelectedMemberIds={filters.clearSelectedMemberIds}
       />
+      <div ref={setSummaryContainer} />
       <StyledStatusBoardContractTabs aria-label="계약 상태" data-on-page-canvas>
         {(
           [
@@ -80,6 +83,7 @@ const FieldManagementPageBody = ({
       <FieldManagement
         scope={{ contractList: true, memberIds, contractStatus }}
         onContractCountsChange={setContractCounts}
+        summaryContainer={summaryContainer}
       />
     </StyledStatusBoardScroll>
   );

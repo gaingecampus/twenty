@@ -1,3 +1,5 @@
+import { createPortal } from 'react-dom';
+import { FieldAttentionSummary } from './FieldAttentionSummary';
 import { useStore } from 'jotai';
 import { usePageLayoutIdForRecord } from '@/page-layout/hooks/usePageLayoutIdForRecord';
 import { getTabListInstanceIdFromPageLayoutAndRecord } from '@/page-layout/utils/getTabListInstanceIdFromPageLayoutAndRecord';
@@ -100,9 +102,11 @@ export const FieldManagement = ({
   scope = {},
   onClose,
   onContractCountsChange,
+  summaryContainer,
 }: {
   scope?: Scope;
   onClose?: () => void;
+  summaryContainer?: HTMLDivElement | null;
   onContractCountsChange?: (counts: FieldContractCounts | undefined) => void;
 }) => {
   const metadata = useFieldManagementMetadata();
@@ -118,6 +122,7 @@ export const FieldManagement = ({
       scope={scope}
       onClose={onClose}
       onContractCountsChange={onContractCountsChange}
+      summaryContainer={summaryContainer}
     />
   );
 };
@@ -126,10 +131,12 @@ const FieldManagementLoaded = ({
   scope,
   onClose,
   onContractCountsChange,
+  summaryContainer,
 }: {
   metadata: ReturnType<typeof useFieldManagementMetadata>;
   scope: Scope;
   onClose?: () => void;
+  summaryContainer?: HTMLDivElement | null;
   onContractCountsChange?: (counts: FieldContractCounts | undefined) => void;
 }) => {
   const data = useFieldManagementData();
@@ -594,6 +601,16 @@ const FieldManagementLoaded = ({
       data-reading={reading || undefined}
       data-contract-reading={!!selectedContractId || undefined}
     >
+      {summaryContainer &&
+        createPortal(
+          <FieldAttentionSummary
+            contracts={scopedContracts}
+            visits={data.visits}
+            loading={data.loading}
+            error={false}
+          />,
+          summaryContainer,
+        )}
       {selectedContractId &&
         contracts.find((c) => c.id === selectedContractId) &&
         renderContractDetail(
