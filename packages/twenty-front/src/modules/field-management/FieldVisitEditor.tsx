@@ -1,3 +1,4 @@
+import { FieldVisitHeading } from './FieldVisitHeading';
 import { FieldContractOkrSummary } from './FieldContractOkrSummary';
 import { FieldVisitUploadArea } from './FieldVisitUploadArea';
 import { useFieldVisitUploadQueue } from './useFieldVisitUploadQueue';
@@ -131,9 +132,20 @@ export const FieldVisitEditor = ({
   const content = (
     <StyledFieldVisitEditor ref={rootRef} aria-label="현장 기록 작성">
       {unsaved.dialog}
-      <header>
-        <h2>{visit ? '현장 기록 수정' : '새 현장 기록'}</h2>
-      </header>
+      {visit ? (
+        <FieldVisitHeading
+          visit={{
+            ...visit,
+            name: form.name || '제목 미입력',
+            sessionNumber: form.sessionNumber,
+            visitDate: form.visitDate,
+          }}
+        />
+      ) : (
+        <header>
+          <h2>새 현장 기록</h2>
+        </header>
+      )}
       <StyledFieldPanel data-contextual data-inline-detail>
         <StyledFieldRecordSection data-contract-group>
           <div

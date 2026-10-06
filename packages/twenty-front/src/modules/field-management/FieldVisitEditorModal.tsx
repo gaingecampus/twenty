@@ -29,9 +29,16 @@ const StyledCloseRow = styled.div`
   display: flex;
   gap: 12px;
   justify-content: space-between;
+  padding-bottom: var(--t-gallery-gap, 16px);
   position: sticky;
   top: 0;
   z-index: 1;
+`;
+
+const StyledHeaderActions = styled.div`
+  align-items: center;
+  display: flex;
+  gap: 8px;
 `;
 
 export const FieldVisitEditorModal = ({
@@ -39,7 +46,9 @@ export const FieldVisitEditorModal = ({
   onCancel,
   title = '새 현장 기록',
   onNavigationContainer,
+  onActionsContainer,
 }: {
+  onActionsContainer?: (container: HTMLDivElement | null) => void;
   onNavigationContainer?: (container: HTMLDivElement | null) => void;
   children: ReactNode;
   title?: string;
@@ -102,11 +111,14 @@ export const FieldVisitEditorModal = ({
     >
       <StyledCloseRow>
         <div ref={onNavigationContainer} />
-        <IconButton
-          Icon={IconX}
-          ariaLabel={`${title} 닫기`}
-          onClick={requestClose}
-        />
+        <StyledHeaderActions>
+          <div ref={onActionsContainer} />
+          <IconButton
+            Icon={IconX}
+            ariaLabel={`${title} 닫기`}
+            onClick={requestClose}
+          />
+        </StyledHeaderActions>
       </StyledCloseRow>
       <StyledFieldPanel data-inline-detail>{children}</StyledFieldPanel>
     </StyledDialog>,

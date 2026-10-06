@@ -231,12 +231,16 @@ export const StyledFieldPanel = styled.div`
     font-weight: ${theme.font.weight.semiBold};
   }
   && [data-detail-toolbar] [data-contract-breadcrumb] button {
+    align-items: center;
     background: transparent;
     border: 0;
     border-radius: 0;
     color: ${theme.font.color.primary};
     cursor: pointer;
+    display: inline-flex;
     font: inherit;
+    gap: 8px;
+    min-height: 28px;
     padding: 0;
   }
   && [data-detail-toolbar] [data-contract-breadcrumb] button:hover {
@@ -691,6 +695,29 @@ export const StyledFieldPanel = styled.div`
       gap: 16px;
       justify-content: flex-start;
     }
+    [data-contract-card-header] {
+      align-items: flex-start;
+      display: flex;
+      gap: 12px;
+      justify-content: space-between;
+    }
+    [data-contract-card-header] > [data-contract-card-heading] {
+      flex: 1;
+      min-width: 0;
+    }
+    [data-contract-card-header] > details {
+      flex-shrink: 0;
+    }
+    [data-contract-navigation] {
+      align-items: center;
+      background: ${theme.background.tertiary};
+      border-radius: ${theme.border.radius.md};
+      display: flex;
+      flex-shrink: 0;
+      height: 36px;
+      justify-content: center;
+      width: 36px;
+    }
     [data-contract-card-heading] {
       display: flex;
       flex-direction: column;
@@ -1137,7 +1164,7 @@ export const StyledFieldVisitDetail = styled(StyledFieldCard)`
   overflow-wrap: anywhere;
   padding: 24px;
   [data-detail-title-row] {
-    align-items: flex-start;
+    align-items: center;
     display: flex;
     gap: 12px;
     width: 100%;
@@ -1153,9 +1180,7 @@ export const StyledFieldVisitDetail = styled(StyledFieldCard)`
     min-width: 0;
   }
   [data-detail-session] {
-    font-size: 28px;
-    font-weight: 700;
-    line-height: 1.3;
+    white-space: nowrap;
   }
   [data-detail-actions] {
     flex-shrink: 0;
@@ -1164,7 +1189,7 @@ export const StyledFieldVisitDetail = styled(StyledFieldCard)`
     align-items: flex-start;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: ${theme.spacing[1]};
   }
   [data-detail-heading] h2 {
     font-size: 26px;
@@ -1273,7 +1298,7 @@ export const StyledFieldVisitDetail = styled(StyledFieldCard)`
     flex-wrap: wrap;
     gap: 12px;
     justify-content: space-between;
-    padding-top: 12px;
+    padding-top: 0;
   }
   && button[data-danger] {
     background: transparent;

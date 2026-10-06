@@ -1,3 +1,4 @@
+import { FieldVisitHeading } from './FieldVisitHeading';
 import { FieldLoadingState } from './FieldLoadingState';
 import { FieldContractOkrSummary } from './FieldContractOkrSummary';
 import {
@@ -33,15 +34,13 @@ import { FieldContractAssignees } from './FieldContractAssignees';
 import { Button } from 'twenty-ui/input';
 import {
   IconMap,
+  IconChevronRight,
   IconArrowLeft,
-  IconCalendarEvent,
-  IconHistory,
   IconSearch,
   IconRefresh,
   IconPencil,
   IconPlus,
 } from 'twenty-ui/icon';
-import { FieldVisitStatus } from './FieldVisitStatus';
 import { type ReactNode, useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { currentWorkspaceMemberState } from '@/auth/states/currentWorkspaceMemberState';
@@ -69,11 +68,7 @@ import {
   StyledMyFieldEmpty,
 } from './myFieldsStyled';
 import { FieldVisitEditor } from './FieldVisitEditor';
-import {
-  FieldVisitList,
-  FieldVisitAuthor,
-  fieldVisitTimestamp,
-} from './FieldVisitList';
+import { FieldVisitList } from './FieldVisitList';
 import { FieldVisitDelete } from './FieldVisitDelete';
 import { ContractGoalEditor } from './ContractGoalEditor';
 import {
@@ -120,12 +115,14 @@ export const FieldManagement = ({
   summaryContainer,
   contractListHeader,
   detailNavigation,
+  detailActionsContainer,
 }: {
   scope?: Scope;
   onClose?: () => void;
   summaryContainer?: HTMLDivElement | null;
   contractListHeader?: ReactNode;
   detailNavigation?: ReactNode;
+  detailActionsContainer?: HTMLElement | null;
   onContractCountsChange?: (counts: FieldContractCounts | undefined) => void;
 }) => {
   const metadata = useFieldManagementMetadata();
@@ -146,6 +143,7 @@ export const FieldManagement = ({
       summaryContainer={summaryContainer}
       contractListHeader={contractListHeader}
       detailNavigation={detailNavigation}
+      detailActionsContainer={detailActionsContainer}
     />
   );
 };
@@ -157,6 +155,7 @@ const FieldManagementLoaded = ({
   summaryContainer,
   contractListHeader,
   detailNavigation,
+  detailActionsContainer,
 }: {
   metadata: ReturnType<typeof useFieldManagementMetadata>;
   scope: Scope;
@@ -164,6 +163,7 @@ const FieldManagementLoaded = ({
   summaryContainer?: HTMLDivElement | null;
   contractListHeader?: ReactNode;
   detailNavigation?: ReactNode;
+  detailActionsContainer?: HTMLElement | null;
   onContractCountsChange?: (counts: FieldContractCounts | undefined) => void;
 }) => {
   const data = useFieldManagementData();
@@ -424,23 +424,8 @@ const FieldManagementLoaded = ({
                     setSelectedContractId(undefined);
                     setEditor(undefined);
                   }}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: 28,
-                    height: 28,
-                  }}
                 >
                   <IconArrowLeft size={18} aria-hidden />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSelectedContractId(undefined);
-                    setEditor(undefined);
-                  }}
-                >
                   계약 목표
                 </button>
                 <span aria-hidden="true">/</span>
@@ -453,33 +438,52 @@ const FieldManagementLoaded = ({
           ref={embedded ? undefined : contractDetailRef}
           data-contract-detail
         >
-          <span data-contract-card-heading>
-            <span data-contract-title>
-              <Link to={`/object/onboarding/${c.id}`}>
-                <FieldContractLabel name={text(c.name)} />
-              </Link>
-            </span>
-            <span data-contract-summary>
-              <FieldContractAssignees
-                members={data.members.filter((member) =>
-                  assigned(c, member.id, data.links, true),
-                )}
-              />
-              <span data-contract-meta>
-                <span data-contract-status={text(c.onboardingStatus)}>
-                  {c.onboardingStatus === 'ACTIVE'
-                    ? '계약중'
-                    : c.onboardingStatus === 'PRE'
-                      ? '계약 예정'
-                      : c.onboardingStatus === 'DONE'
-                        ? '계약 종료'
-                        : '상태 미등록'}
+          <div data-contract-card-header>
+            <span data-contract-card-heading>
+              <span data-contract-title>
+                <Link to={`/object/onboarding/${c.id}`}>
+                  <FieldContractLabel name={text(c.name)} />
+                </Link>
+              </span>
+              <span data-contract-summary>
+                <FieldContractAssignees
+                  members={data.members.filter((member) =>
+                    assigned(c, member.id, data.links, true),
+                  )}
+                />
+                <span data-contract-meta>
+                  <span data-contract-status={text(c.onboardingStatus)}>
+                    {c.onboardingStatus === 'ACTIVE'
+                      ? '계약중'
+                      : c.onboardingStatus === 'PRE'
+                        ? '계약 예정'
+                        : c.onboardingStatus === 'DONE'
+                          ? '계약 종료'
+                          : '상태 미등록'}
+                  </span>
+                  {contractDateLabel(c.contractStartDate) || '시작일 미정'} -{' '}
+                  {contractDateLabel(c.contractEndDate) || '종료일 미정'}
                 </span>
-                {contractDateLabel(c.contractStartDate) || '시작일 미정'} -{' '}
-                {contractDateLabel(c.contractEndDate) || '종료일 미정'}
               </span>
             </span>
-          </span>
+            {canWriteGoals && (
+              <FieldRecordMore label="계약 목표 더보기">
+                <button
+                  type="button"
+                  onClick={(event) => {
+                    event.currentTarget
+                      .closest('details')
+                      ?.removeAttribute('open');
+                    setAddKeyResult(false);
+                    setInlineGoalContractId(c.id);
+                  }}
+                >
+                  <IconPencil size={15} aria-hidden="true" />
+                  회차·O·KR 수정
+                </button>
+              </FieldRecordMore>
+            )}
+          </div>
           <div data-contract-content>
             {inlineGoalContractId === c.id && canWriteGoals ? (
               <ContractGoalEditor
@@ -522,18 +526,12 @@ const FieldManagementLoaded = ({
                   <dl
                     key={groupIndex}
                     data-okr-group={groupIndex === 1 || undefined}
-                    data-editable-goal={
-                      (groupIndex === 1 && canWriteGoals) || undefined
-                    }
                     data-session-container={groupIndex === 0 || undefined}
                   >
                     {rows.map(({ label, value, empty }) => (
                       <div
                         key={label}
                         data-session-summary={label === '회차' || undefined}
-                        data-editable-goal={
-                          (label === '회차' && canWriteGoals) || undefined
-                        }
                       >
                         <dt>{label === '회차' ? '진행 회차' : label}</dt>
                         <dd
@@ -557,21 +555,6 @@ const FieldManagementLoaded = ({
                             </ol>
                           ) : (
                             value || empty
-                          )}
-                          {canWriteGoals && label !== 'KR' && (
-                            <button
-                              type="button"
-                              data-goal-edit-overlay
-                              aria-label={
-                                label === '회차' ? '회차 수정' : 'O·KR 수정'
-                              }
-                              onClick={() => {
-                                setAddKeyResult(false);
-                                setInlineGoalContractId(c.id);
-                              }}
-                            >
-                              <IconPencil size={16} aria-hidden />
-                            </button>
                           )}
                         </dd>
                         {label === '회차' && (
@@ -626,38 +609,14 @@ const FieldManagementLoaded = ({
     if (!c) return null;
     return (
       <StyledFieldVisitDetail key={v.id}>
-        <div data-detail-heading>
-          <strong data-detail-session>
-            {v.sessionNumber ? `${String(v.sessionNumber)}회차` : '회차 미입력'}
-          </strong>
-          <div data-detail-title-row>
-            <h2>{text(v.name)}</h2>
-            <StyledFieldRow data-detail-actions>
-              <FieldVisitStatus submitted={v.recordStatus === 'SUBMITTED'} />
-              {renderVisitActions(v)}
-            </StyledFieldRow>
-          </div>
-          <div data-detail-byline>
-            <FieldVisitAuthor visit={v} />
-            <span>
-              현장 날짜 {contractDateLabel(v.visitDate) || '날짜 미정'}
-            </span>
-            <span
-              title="최초 작성일"
-              aria-label={`최초 작성일 ${fieldVisitTimestamp(v.createdAt)}`}
-            >
-              <IconCalendarEvent size={14} aria-hidden="true" />
-              {fieldVisitTimestamp(v.createdAt)}
-            </span>
-            <span
-              title="최근 수정일"
-              aria-label={`최근 수정일 ${fieldVisitTimestamp(v.updatedAt)}`}
-            >
-              <IconHistory size={14} aria-hidden="true" />
-              {fieldVisitTimestamp(v.updatedAt)}
-            </span>
-          </div>
-        </div>
+        <FieldVisitHeading
+          visit={v}
+          actions={
+            detailActionsContainer
+              ? createPortal(renderVisitActions(v), detailActionsContainer)
+              : renderVisitActions(v)
+          }
+        />
         <StyledFieldPanel data-contextual data-inline-detail>
           {renderContractDetail(c, true)}
         </StyledFieldPanel>
@@ -938,29 +897,34 @@ const FieldManagementLoaded = ({
               }}
               aria-label={`${text(c.name)} 계약 상세 보기`}
             >
-              <span data-contract-card-heading>
-                <span data-contract-title>
-                  <FieldContractLabel name={text(c.name)} />
-                </span>
-                <span data-contract-summary>
-                  <FieldContractAssignees
-                    members={data.members.filter((member) =>
-                      assigned(c, member.id, data.links, true),
-                    )}
-                  />
-                  <span data-contract-meta>
-                    <span data-contract-status={text(c.onboardingStatus)}>
-                      {c.onboardingStatus === 'ACTIVE'
-                        ? '계약중'
-                        : c.onboardingStatus === 'PRE'
-                          ? '계약 예정'
-                          : c.onboardingStatus === 'DONE'
-                            ? '계약 종료'
-                            : '상태 미등록'}
-                    </span>
-                    {contractDateLabel(c.contractStartDate) || '시작일 미정'} -{' '}
-                    {contractDateLabel(c.contractEndDate) || '종료일 미정'}
+              <span data-contract-card-header>
+                <span data-contract-card-heading>
+                  <span data-contract-title>
+                    <FieldContractLabel name={text(c.name)} />
                   </span>
+                  <span data-contract-summary>
+                    <FieldContractAssignees
+                      members={data.members.filter((member) =>
+                        assigned(c, member.id, data.links, true),
+                      )}
+                    />
+                    <span data-contract-meta>
+                      <span data-contract-status={text(c.onboardingStatus)}>
+                        {c.onboardingStatus === 'ACTIVE'
+                          ? '계약중'
+                          : c.onboardingStatus === 'PRE'
+                            ? '계약 예정'
+                            : c.onboardingStatus === 'DONE'
+                              ? '계약 종료'
+                              : '상태 미등록'}
+                      </span>
+                      {contractDateLabel(c.contractStartDate) || '시작일 미정'}{' '}
+                      - {contractDateLabel(c.contractEndDate) || '종료일 미정'}
+                    </span>
+                  </span>
+                </span>
+                <span data-contract-navigation aria-hidden="true">
+                  <IconChevronRight size={16} />
                 </span>
               </span>
               <span data-contract-goal-summary>

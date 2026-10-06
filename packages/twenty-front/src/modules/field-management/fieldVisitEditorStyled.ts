@@ -207,6 +207,13 @@ export const StyledFieldVisitEditor = styled.section`
     min-height: 44px;
     padding: 10px 18px;
   }
+  && [data-editor-actions] button[data-primary] {
+    background: ${theme.color.blue};
+    color: ${theme.font.color.inverted};
+  }
+  && [data-editor-actions] button[data-primary]:hover:not(:disabled) {
+    filter: brightness(0.94);
+  }
   && [data-editor-actions]:not([data-goal-actions]) button:not([data-primary]) {
     background: ${theme.background.tertiary};
     border: none;

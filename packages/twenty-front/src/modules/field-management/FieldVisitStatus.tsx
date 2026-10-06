@@ -14,11 +14,24 @@ const StyledStatus = styled.span<{ submitted: boolean }>`
   font-size: 12px;
   font-weight: 500;
   gap: 4px;
+  justify-content: center;
   padding: 4px 6px;
+  &[data-roomy] {
+    box-sizing: border-box;
+    min-height: 32px;
+    min-width: 64px;
+    padding: 6px 12px;
+  }
   white-space: nowrap;
 `;
-export const FieldVisitStatus = ({ submitted }: { submitted: boolean }) => (
-  <StyledStatus submitted={submitted}>
+export const FieldVisitStatus = ({
+  submitted,
+  roomy = false,
+}: {
+  submitted: boolean;
+  roomy?: boolean;
+}) => (
+  <StyledStatus submitted={submitted} data-roomy={roomy || undefined}>
     {submitted ? (
       <IconCheck size={13} aria-hidden="true" />
     ) : (

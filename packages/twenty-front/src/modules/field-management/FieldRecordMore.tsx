@@ -6,7 +6,7 @@ const StyledMore = styled.details`
   position: relative;
   summary {
     align-items: center;
-    background: ${theme.background.tertiary};
+    background: transparent;
     border-radius: 8px;
     cursor: pointer;
     display: flex;
@@ -17,6 +17,9 @@ const StyledMore = styled.details`
   }
   summary::-webkit-details-marker {
     display: none;
+  }
+  summary:hover {
+    background: ${theme.background.tertiary};
   }
   > div {
     background: ${theme.background.primary};
@@ -54,7 +57,13 @@ const StyledMore = styled.details`
     color: ${theme.color.red};
   }
 `;
-export const FieldRecordMore = ({ children }: { children: ReactNode }) => {
+export const FieldRecordMore = ({
+  children,
+  label = '기록 더보기',
+}: {
+  children: ReactNode;
+  label?: string;
+}) => {
   const ref = useRef<HTMLDetailsElement>(null);
   useEffect(() => {
     const outside = (event: PointerEvent) => {
@@ -76,7 +85,7 @@ export const FieldRecordMore = ({ children }: { children: ReactNode }) => {
   }, []);
   return (
     <StyledMore ref={ref}>
-      <summary aria-label="기록 더보기" title="더보기">
+      <summary aria-label={label} title="더보기">
         <IconDotsVertical size={18} />
       </summary>
       <div>{children}</div>

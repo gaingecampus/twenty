@@ -110,15 +110,12 @@ export const FieldVisitAttachments = ({ visitId }: { visitId: string }) => {
           첨부파일을 불러오지 못했습니다.{' '}
           <button onClick={() => void result.refetch()}>다시 시도</button>
         </p>
+      ) : result.files.length === 0 ? (
+        <StyledFieldEmptyState>
+          등록된 사진과 첨부파일이 없습니다.
+        </StyledFieldEmptyState>
       ) : (
-        <>
-          <FieldAttachmentGallery files={result.files} />
-          {!result.loading && result.files.length === 0 && (
-            <StyledFieldEmptyState>
-              등록된 사진과 첨부파일이 없습니다.
-            </StyledFieldEmptyState>
-          )}
-        </>
+        <FieldAttachmentGallery files={result.files} />
       )}
     </StyledFieldAttachments>
   );

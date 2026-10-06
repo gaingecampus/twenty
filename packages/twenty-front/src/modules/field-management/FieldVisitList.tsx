@@ -157,6 +157,10 @@ const StyledTable = styled.div`
     color: ${theme.font.color.primary};
     font-weight: 600;
   }
+  [data-session],
+  [data-compact-session] {
+    text-align: center;
+  }
   [data-session] {
     color: ${theme.font.color.primary};
     font-size: 15px;
@@ -302,6 +306,8 @@ export const FieldVisitList = ({
   contracts: ObjectRecord[];
 }) => {
   const attachments = useFieldVisitAttachments(visits.map((visit) => visit.id));
+  const [actionsContainer, setActionsContainer] =
+    useState<HTMLDivElement | null>(null);
   const [selectedId, openVisit] = useState<string>();
   const [navigationContainer, setNavigationContainer] =
     useState<HTMLDivElement | null>(null);
@@ -345,12 +351,14 @@ export const FieldVisitList = ({
         <FieldVisitEditorModal
           title="현장 기록"
           onNavigationContainer={setNavigationContainer}
+          onActionsContainer={setActionsContainer}
           onCancel={() => openVisit(undefined)}
         >
           <FieldManagement
             key={selectedId}
             scope={{ visit: selectedId }}
             onClose={() => openVisit(undefined)}
+            detailActionsContainer={actionsContainer}
             detailNavigation={
               navigationContainer &&
               createPortal(
