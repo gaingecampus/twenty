@@ -5,6 +5,7 @@ export type FileInput = {
 
 export type FileOutput = FileInput & {
   extension: string;
+  size?: number;
 };
 
 export type SignedFileOutput = FileOutput & {

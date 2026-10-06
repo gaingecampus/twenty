@@ -31,6 +31,7 @@ type FileItem = {
   fileId: string;
   label: string;
   extension?: string;
+  size?: number;
 };
 
 type FilesFieldDiff = {
@@ -486,7 +487,7 @@ export class FilesFieldSync {
         id: In([...allFileIdsToFetch, ...allFileIds.toRemove]),
         workspaceId,
       },
-      select: ['id', 'path', 'settings'],
+      select: ['id', 'path', 'settings', 'size'],
     });
 
     const existingFileMap = new Map(
@@ -524,6 +525,7 @@ export class FilesFieldSync {
           }
 
           file.extension = path.extname(fileEntity.path);
+          file.size = fileEntity.size;
         }
 
         for (const file of diff.toUpdate) {
