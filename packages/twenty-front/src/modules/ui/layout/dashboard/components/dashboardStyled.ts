@@ -387,6 +387,9 @@ export const StyledDashboardContractTabs = styled.div`
 `;
 
 export const StyledDashboardTabCount = styled.span`
+  [data-dashboard-tab]:hover & {
+    color: inherit;
+  }
   color: ${themeCssVariables.font.color.tertiary};
   display: inline-block;
   font-variant-numeric: tabular-nums;

@@ -22,6 +22,7 @@ export const DashboardCountTab = ({
   onClick,
 }: DashboardCountTabProps) => (
   <StyledDashboardSoftTab
+    data-dashboard-tab
     type="button"
     isActive={isActive}
     aria-pressed={isActive}
