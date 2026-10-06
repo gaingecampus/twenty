@@ -45,6 +45,11 @@ const FieldVisitDetailPage = lazy(() =>
     default: module.FieldVisitDetailPage,
   })),
 );
+const LegacyMyFieldsRedirect = lazy(() =>
+  import('~/pages/field-management/MyFieldsPage').then((module) => ({
+    default: module.LegacyMyFieldsRedirect,
+  })),
+);
 const MyFieldsPage = lazy(() =>
   import('~/pages/field-management/MyFieldsPage').then((module) => ({
     default: module.MyFieldsPage,
@@ -309,7 +314,15 @@ export const useCreateAppRouter = (
               }
             />
             <Route
-              path="/my-fields/records/:visitId"
+              path="/my-fields/*"
+              element={
+                <LazyRoute>
+                  <LegacyMyFieldsRedirect />
+                </LazyRoute>
+              }
+            />
+            <Route
+              path="/consulting-quality/records/:visitId"
               element={
                 <LazyRoute>
                   <FieldVisitDetailPage />
@@ -317,7 +330,7 @@ export const useCreateAppRouter = (
               }
             />
             <Route
-              path="/my-fields"
+              path="/consulting-quality"
               element={
                 <LazyRoute>
                   <MyFieldsPage />

@@ -1,3 +1,18 @@
+import { FieldLoadingState } from './FieldLoadingState';
+import { FieldContractOkrSummary } from './FieldContractOkrSummary';
+import {
+  FieldContractListControls,
+  type FieldContractFilter,
+  type FieldContractSort,
+} from './FieldContractListControls';
+import { RecordPaginationBar } from '@/object-record/record-index/components/RecordIndexPaginationBar';
+import { FieldSessionProgressBar } from './FieldSessionProgressBar';
+import {
+  FieldVisitAttachments,
+  FieldContractPhotos,
+} from './FieldAttachmentGallery';
+import { StyledDashboardContractTabs } from '@/ui/layout/dashboard/components/dashboardStyled';
+import { DashboardCountTab } from '@/ui/layout/dashboard/components/DashboardCountTab';
 import { createPortal } from 'react-dom';
 import { FieldAttentionSummary } from './FieldAttentionSummary';
 import { useStore } from 'jotai';
@@ -27,7 +42,7 @@ import {
   IconPlus,
 } from 'twenty-ui/icon';
 import { FieldVisitStatus } from './FieldVisitStatus';
-import { useEffect, useRef, useState } from 'react';
+import { type ReactNode, useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { currentWorkspaceMemberState } from '@/auth/states/currentWorkspaceMemberState';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
@@ -89,10 +104,10 @@ export const MyFieldsNavigationItem = () => {
   if (!isFieldManagementReady(metadata)) return null;
   return (
     <NavigationDrawerItem
-      label="현장 관리"
+      label="컨설팅 품질 관리"
       Icon={IconMap}
-      to="/my-fields"
-      active={location.pathname === '/my-fields'}
+      to="/consulting-quality"
+      active={location.pathname === '/consulting-quality'}
     />
   );
 };
@@ -103,17 +118,23 @@ export const FieldManagement = ({
   onClose,
   onContractCountsChange,
   summaryContainer,
+  contractListHeader,
+  detailNavigation,
 }: {
   scope?: Scope;
   onClose?: () => void;
   summaryContainer?: HTMLDivElement | null;
+  contractListHeader?: ReactNode;
+  detailNavigation?: ReactNode;
   onContractCountsChange?: (counts: FieldContractCounts | undefined) => void;
 }) => {
   const metadata = useFieldManagementMetadata();
   if (!isFieldManagementReady(metadata))
     return (
       <StyledFieldPanel>
-        <p>현장 관리가 준비되지 않았거나 관련 항목의 조회 권한이 없습니다.</p>
+        <p>
+          컨설팅 품질 관리가 준비되지 않았거나 관련 항목의 조회 권한이 없습니다.
+        </p>
       </StyledFieldPanel>
     );
   return (
@@ -123,6 +144,8 @@ export const FieldManagement = ({
       onClose={onClose}
       onContractCountsChange={onContractCountsChange}
       summaryContainer={summaryContainer}
+      contractListHeader={contractListHeader}
+      detailNavigation={detailNavigation}
     />
   );
 };
@@ -132,11 +155,15 @@ const FieldManagementLoaded = ({
   onClose,
   onContractCountsChange,
   summaryContainer,
+  contractListHeader,
+  detailNavigation,
 }: {
   metadata: ReturnType<typeof useFieldManagementMetadata>;
   scope: Scope;
   onClose?: () => void;
   summaryContainer?: HTMLDivElement | null;
+  contractListHeader?: ReactNode;
+  detailNavigation?: ReactNode;
   onContractCountsChange?: (counts: FieldContractCounts | undefined) => void;
 }) => {
   const data = useFieldManagementData();
@@ -153,11 +180,11 @@ const FieldManagementLoaded = ({
     : undefined;
   const returnPath =
     typeof location.state?.from === 'string' &&
-    /^\/(?:my-fields(?:[?#]|$)|object\/(?:company|onboarding)\/)/.test(
+    /^\/(?:consulting-quality(?:[?#]|$)|object\/(?:company|onboarding)\/)/.test(
       location.state.from,
     )
       ? location.state.from
-      : '/my-fields';
+      : '/consulting-quality';
   const currentWorkspaceMember = useAtomStateValue(currentWorkspaceMemberState);
   const visitPermissions = useObjectPermissionsForObject(metadata.visit!.id);
   const contractPermissions = useObjectPermissionsForObject(
@@ -177,9 +204,13 @@ const FieldManagementLoaded = ({
       contractDetailRef.current?.scrollIntoView({ block: 'start' });
   }, [selectedContractId]);
   const [choosingContract, setChoosingContract] = useState(false);
+  const [recordView, setRecordView] = useState<'records' | 'photos'>('records');
   const [includeLead, setIncludeLead] = useState(false);
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('ACTIVE');
+  const [contractPageSize, setContractPageSize] = useState(10);
+  const [contractSort, setContractSort] =
+    useState<FieldContractSort>('default');
   const [needsOnly, setNeedsOnly] = useState(false);
   const [editor, setEditor] = useState<{
     contract: ObjectRecord;
@@ -259,6 +290,55 @@ const FieldManagementLoaded = ({
         ) ||
         visitsFor(data.visits, c.id).some((v) => v.recordStatus === 'DRAFT'),
     );
+  const [contractFilter, setContractFilter] =
+    useState<FieldContractFilter>('all');
+  const filteredListContracts = contracts.filter((contract) => {
+    if (!scope.contractList || contractFilter === 'all') return true;
+    if (contractFilter === 'okr')
+      return (
+        !text(contract.consultingGoal).trim() ||
+        !text(contract.successCriteria).trim()
+      );
+    return getContractSessionProgress(contract, data.visits).total === null;
+  });
+  const sortedContracts = [...filteredListContracts].sort((a, b) => {
+    if (contractSort === 'name')
+      return text(a.name).localeCompare(text(b.name), 'ko');
+    if (contractSort === 'start' || contractSort === 'end') {
+      const field =
+        contractSort === 'start' ? 'contractStartDate' : 'contractEndDate';
+      const left = text(a[field]);
+      const right = text(b[field]);
+      if (!left || !right) return Number(!left) - Number(!right);
+      return contractSort === 'start'
+        ? right.localeCompare(left)
+        : left.localeCompare(right);
+    }
+    return 0;
+  });
+  const contractPageKey = JSON.stringify([
+    contractFilter,
+    contractPageSize,
+    contractSort,
+    scope,
+    search,
+    status,
+    includeLead,
+    needsOnly,
+    contracts.map((contract) => contract.id),
+  ]);
+  const [contractPagination, setContractPagination] = useState({
+    key: '',
+    page: 1,
+  });
+  const contractPage =
+    contractPagination.key === contractPageKey ? contractPagination.page : 1;
+  const visibleContracts = scope.contractList
+    ? sortedContracts.slice(
+        (contractPage - 1) * contractPageSize,
+        contractPage * contractPageSize,
+      )
+    : contracts;
   const metrics = visitMetrics(contracts, data.visits, scope.start, scope.end);
   const onSaved = async () => {
     setEditor(undefined);
@@ -274,10 +354,10 @@ const FieldManagementLoaded = ({
         <button onClick={() => void data.refresh()}>다시 불러오기</button>
       </StyledFieldPanel>
     );
-  if (data.loading && !data.contracts.length && !data.visits.length)
+  if (data.loading && !editor && !data.contracts.length)
     return (
       <StyledFieldPanel>
-        <p role="status">현장 정보를 불러오는 중…</p>
+        <FieldLoadingState label="계약 목표와 현장 기록을 불러오는 중…" />
       </StyledFieldPanel>
     );
   if (scope.dashboard)
@@ -291,7 +371,7 @@ const FieldManagementLoaded = ({
           </span>
           <span>기간 내 제출 {metrics.submitted}건</span>
           <span>제출 기록 없는 계약 {metrics.withoutRecord}건</span>
-          <Link to="/my-fields">현장 관리 열기</Link>
+          <Link to="/consulting-quality">컨설팅 품질 관리 열기</Link>
         </StyledFieldRow>
       </StyledFieldPanel>
     );
@@ -414,72 +494,97 @@ const FieldManagementLoaded = ({
                 }}
               />
             ) : (
-              <dl data-goal-grid>
+              <div data-goal-grid>
                 {[
-                  {
-                    label: '회차',
-                    value:
-                      sessionProgress.total === null
-                        ? `현재 ${sessionProgress.current}회차 · 총 회차 미정`
-                        : `현재 ${sessionProgress.current}회차 / 총 ${sessionProgress.total}회 · ${sessionProgress.percent}%`,
-                    empty: '총 예정 회차를 입력하세요',
-                  },
-                  {
-                    label: 'O',
-                    value: text(c.consultingGoal).trim(),
-                    empty: 'O를 입력하세요',
-                  },
-                  {
-                    label: 'KR',
-                    value: text(c.successCriteria).trim(),
-                    empty: '등록된 KR이 없습니다.',
-                  },
-                ].map(({ label, value, empty }) => (
-                  <div
-                    key={label}
-                    data-session-summary={label === '회차' || undefined}
-                    data-editable-goal={canWriteGoals || undefined}
+                  [
+                    {
+                      label: '회차',
+                      value:
+                        sessionProgress.total === null
+                          ? `현재 ${sessionProgress.current}회차 · 총 회차 미정`
+                          : `현재 ${sessionProgress.current}회차 / 총 ${sessionProgress.total}회 · ${sessionProgress.percent}%`,
+                      empty: '총 예정 회차를 입력하세요',
+                    },
+                  ],
+                  [
+                    {
+                      label: 'O',
+                      value: text(c.consultingGoal).trim(),
+                      empty: 'O를 입력하세요',
+                    },
+                    {
+                      label: 'KR',
+                      value: text(c.successCriteria).trim(),
+                      empty: '등록된 KR이 없습니다.',
+                    },
+                  ],
+                ].map((rows, groupIndex) => (
+                  <dl
+                    key={groupIndex}
+                    data-okr-group={groupIndex === 1 || undefined}
+                    data-editable-goal={
+                      (groupIndex === 1 && canWriteGoals) || undefined
+                    }
+                    data-session-container={groupIndex === 0 || undefined}
                   >
-                    <dt>{label === '회차' ? '진행 회차' : label}</dt>
-                    <dd
-                      data-unregistered={
-                        (label === '회차'
-                          ? sessionProgress.total === null
-                          : !value) || undefined
-                      }
-                    >
-                      {label === 'KR' && value ? (
-                        <ol data-kr-items>
-                          {value
-                            .split(/\r?\n/)
-                            .filter((line) => line.trim())
-                            .map((line, index) => (
-                              <li key={index}>
-                                <span data-kr-number>{index + 1}</span>
-                                <span>{line}</span>
-                              </li>
-                            ))}
-                        </ol>
-                      ) : (
-                        value || empty
-                      )}
-                      {canWriteGoals && (
-                        <button
-                          type="button"
-                          data-goal-edit-overlay
-                          aria-label={`${label} 수정`}
-                          onClick={() => {
-                            setAddKeyResult(label === 'KR' && !value);
-                            setInlineGoalContractId(c.id);
-                          }}
+                    {rows.map(({ label, value, empty }) => (
+                      <div
+                        key={label}
+                        data-session-summary={label === '회차' || undefined}
+                        data-editable-goal={
+                          (label === '회차' && canWriteGoals) || undefined
+                        }
+                      >
+                        <dt>{label === '회차' ? '진행 회차' : label}</dt>
+                        <dd
+                          data-unregistered={
+                            (label === '회차'
+                              ? sessionProgress.total === null
+                              : !value) || undefined
+                          }
                         >
-                          <IconPencil size={16} aria-hidden />
-                        </button>
-                      )}
-                    </dd>
-                  </div>
+                          {label === 'KR' && value ? (
+                            <ol data-kr-items>
+                              {value
+                                .split(/\r?\n/)
+                                .filter((line) => line.trim())
+                                .map((line, index) => (
+                                  <li key={index}>
+                                    <span data-kr-number>{index + 1}</span>
+                                    <span>{line}</span>
+                                  </li>
+                                ))}
+                            </ol>
+                          ) : (
+                            value || empty
+                          )}
+                          {canWriteGoals && label !== 'KR' && (
+                            <button
+                              type="button"
+                              data-goal-edit-overlay
+                              aria-label={
+                                label === '회차' ? '회차 수정' : 'O·KR 수정'
+                              }
+                              onClick={() => {
+                                setAddKeyResult(false);
+                                setInlineGoalContractId(c.id);
+                              }}
+                            >
+                              <IconPencil size={16} aria-hidden />
+                            </button>
+                          )}
+                        </dd>
+                        {label === '회차' && (
+                          <FieldSessionProgressBar
+                            current={sessionProgress.current}
+                            total={sessionProgress.total}
+                          />
+                        )}
+                      </div>
+                    ))}
+                  </dl>
                 ))}
-              </dl>
+              </div>
             )}
           </div>
         </StyledFieldRecordSection>
@@ -574,12 +679,14 @@ const FieldManagementLoaded = ({
             </section>
           )}
         </div>
+        <FieldVisitAttachments visitId={v.id} />
       </StyledFieldVisitDetail>
     );
   };
   if (scope.visit)
     return (
-      <StyledFieldPanel data-inline-detail={!!onClose || undefined}>
+      <StyledFieldPanel data-inline-detail>
+        {!editor && detailNavigation}
         {!detailVisit || !contracts.length ? (
           <p role="status">기록을 찾을 수 없거나 조회 권한이 없습니다.</p>
         ) : editor ? (
@@ -732,6 +839,19 @@ const FieldManagementLoaded = ({
           />
         </div>
       )}
+      {scope.contractList && contractListHeader}
+      {scope.contractList && (
+        <FieldContractListControls
+          search={search}
+          onSearchChange={setSearch}
+          pageSize={contractPageSize}
+          filter={contractFilter}
+          onFilterChange={setContractFilter}
+          sort={contractSort}
+          onPageSizeChange={setContractPageSize}
+          onSortChange={setContractSort}
+        />
+      )}
       <StyledFieldRecordSection
         data-contract-group={contextual || undefined}
         data-plain={!contextual || undefined}
@@ -743,7 +863,7 @@ const FieldManagementLoaded = ({
             </h3>
           </StyledFieldRow>
         )}
-        {!contracts.length &&
+        {!(scope.contractList ? filteredListContracts : contracts).length &&
           (contextual ? (
             <StyledFieldEmptyState>
               <span>
@@ -760,7 +880,7 @@ const FieldManagementLoaded = ({
               <p>검색어나 필터를 변경하십시오.</p>
             </StyledMyFieldEmpty>
           ))}
-        {contracts.map((c) => {
+        {visibleContracts.map((c) => {
           const records = visitsFor(data.visits, c.id);
           const progress = getContractSessionProgress(c, records);
           if (!contextual)
@@ -780,19 +900,7 @@ const FieldManagementLoaded = ({
                   setEditor({ contract: c, visit });
                 }}
               >
-                <FieldVisitList
-                  visits={records}
-                  contracts={contracts}
-                  renderDetail={(visitId, close) => (
-                    <FieldManagement
-                      scope={{ visit: visitId }}
-                      onClose={() => {
-                        close();
-                        void data.refresh();
-                      }}
-                    />
-                  )}
-                />
+                <FieldVisitList visits={records} contracts={contracts} />
               </MyFieldContractCard>
             );
           return (
@@ -865,51 +973,63 @@ const FieldManagementLoaded = ({
                       ? `현재 ${progress.current}회차 · 총 회차 미정`
                       : `현재 ${progress.current}회차 / 총 ${progress.total}회 · ${progress.percent}%`}
                   </span>
+                  <FieldSessionProgressBar
+                    current={progress.current}
+                    total={progress.total}
+                  />
                 </span>
-                <span data-goal-summary-row>
-                  <strong>O</strong>
-                  <span
-                    data-unregistered={
-                      !text(c.consultingGoal).trim() || undefined
-                    }
-                  >
-                    {text(c.consultingGoal).trim() || 'O를 입력하세요'}
-                  </span>
-                </span>
-                <span data-goal-summary-row>
-                  <strong>KR</strong>
-                  <span
-                    data-unregistered={
-                      !text(c.successCriteria).trim() || undefined
-                    }
-                  >
-                    {text(c.successCriteria).trim()
-                      ? text(c.successCriteria)
-                          .split(/\r?\n/)
-                          .filter((line) => line.trim())
-                          .map((line, index) => (
-                            <span data-kr-summary-item key={index}>
-                              <span data-kr-number>{index + 1}</span>
-                              <span>{line}</span>
-                            </span>
-                          ))
-                      : '등록된 KR이 없습니다.'}
-                  </span>
-                </span>
+                <FieldContractOkrSummary contract={c} />
               </span>
             </button>
           );
         })}
       </StyledFieldRecordSection>
+      {scope.contractList && (
+        <div data-contract-pagination>
+          <RecordPaginationBar
+            currentPage={contractPage}
+            pageSize={contractPageSize}
+            totalCount={filteredListContracts.length}
+            onPageChange={(page) =>
+              setContractPagination({ key: contractPageKey, page })
+            }
+          />
+        </div>
+      )}
       {!scope.contractList && (contextual || selectedContractId) && (
         <StyledFieldRecordSection data-record-list>
+          {selectedContractId && (
+            <StyledDashboardContractTabs aria-label="현장 기록 보기">
+              <DashboardCountTab
+                label="기록 목록"
+                count={contextVisits.length}
+                isActive={recordView === 'records'}
+                onClick={() => setRecordView('records')}
+              />
+              <DashboardCountTab
+                label="사진 모아보기"
+                count={null}
+                isActive={recordView === 'photos'}
+                onClick={() => setRecordView('photos')}
+              />
+            </StyledDashboardContractTabs>
+          )}
+
           {!reading && (
             <StyledFieldRow data-record-header>
               <h3 data-field-heading>
-                기록 목록 <span>{contextVisits.length}</span>
+                {recordView === 'photos' && selectedContractId ? (
+                  '현장 사진'
+                ) : (
+                  <>
+                    기록 목록 <span>{contextVisits.length}</span>
+                  </>
+                )}
               </h3>
               <StyledFieldRow>
-                <div ref={setRecordSortContainer} />
+                {recordView === 'records' && (
+                  <div ref={setRecordSortContainer} />
+                )}
                 {canWriteVisits && (
                   <Button
                     Icon={IconPlus}
@@ -932,21 +1052,15 @@ const FieldManagementLoaded = ({
               </StyledFieldRow>
             </StyledFieldRow>
           )}
-          <FieldVisitList
-            sortContainer={recordSortContainer}
-            visits={contextVisits}
-            contracts={contracts}
-            onSelectionChange={setReading}
-            renderDetail={(visitId, close) => (
-              <FieldManagement
-                scope={{ visit: visitId }}
-                onClose={() => {
-                  close();
-                  void data.refresh();
-                }}
-              />
-            )}
-          />
+          {recordView === 'photos' && selectedContractId ? (
+            <FieldContractPhotos visits={contextVisits} />
+          ) : (
+            <FieldVisitList
+              sortContainer={recordSortContainer}
+              visits={contextVisits}
+              contracts={contracts}
+            />
+          )}
         </StyledFieldRecordSection>
       )}
     </StyledFieldPanel>

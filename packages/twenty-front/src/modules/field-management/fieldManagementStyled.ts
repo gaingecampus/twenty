@@ -43,7 +43,10 @@ export const StyledFieldPanel = styled.div`
     [data-record-header] button,
     [data-detail-toolbar] button,
     [data-goal-actions] button,
-    button[data-goal-edit-overlay]
+    button[data-goal-edit-overlay],
+    button[data-dashboard-tab],
+    [data-contract-pagination] button,
+    [data-contract-list-controls] button
   ),
   a {
     font: inherit;
@@ -53,7 +56,10 @@ export const StyledFieldPanel = styled.div`
     [data-record-header] button,
     [data-detail-toolbar] button,
     [data-goal-actions] button,
-    button[data-goal-edit-overlay]
+    button[data-goal-edit-overlay],
+    button[data-dashboard-tab],
+    [data-contract-pagination] button,
+    [data-contract-list-controls] button
   ) {
     background: ${theme.background.secondary};
     border: 1px solid ${theme.border.color.medium};
@@ -67,7 +73,10 @@ export const StyledFieldPanel = styled.div`
       [data-record-header] button,
       [data-detail-toolbar] button,
       [data-goal-actions] button,
-      button[data-goal-edit-overlay]
+      button[data-goal-edit-overlay],
+      button[data-dashboard-tab],
+      [data-contract-pagination] button,
+      [data-contract-list-controls] button
     )[aria-pressed='true'] {
     background: ${theme.background.tertiary};
     font-weight: 600;
@@ -77,7 +86,10 @@ export const StyledFieldPanel = styled.div`
       [data-record-header] button,
       [data-detail-toolbar] button,
       [data-goal-actions] button,
-      button[data-goal-edit-overlay]
+      button[data-goal-edit-overlay],
+      button[data-dashboard-tab],
+      [data-contract-pagination] button,
+      [data-contract-list-controls] button
     ):disabled {
     cursor: not-allowed;
     opacity: 0.5;
@@ -104,11 +116,11 @@ export const StyledFieldPanel = styled.div`
     flex-shrink: 0;
     height: auto;
   }
-  &[data-inline-detail] {
+  &&[data-inline-detail] {
     gap: 16px;
     padding: 0;
   }
-  &[data-inline-detail] > section {
+  &&[data-inline-detail] > section {
     border: none;
     padding: 0;
   }
@@ -322,7 +334,10 @@ export const StyledFieldPanel = styled.div`
       [data-record-header] button,
       [data-detail-toolbar] button,
       [data-goal-actions] button,
-      button[data-goal-edit-overlay]
+      button[data-goal-edit-overlay],
+      button[data-dashboard-tab],
+      [data-contract-pagination] button,
+      [data-contract-list-controls] button
     ) {
       align-items: center;
       display: inline-flex;
@@ -337,7 +352,10 @@ export const StyledFieldPanel = styled.div`
         [data-record-header] button,
         [data-detail-toolbar] button,
         [data-goal-actions] button,
-        button[data-goal-edit-overlay]
+        button[data-goal-edit-overlay],
+        button[data-dashboard-tab],
+        [data-contract-pagination] button,
+        [data-contract-list-controls] button
       ):hover {
       background: ${theme.background.tertiary};
     }
@@ -346,7 +364,10 @@ export const StyledFieldPanel = styled.div`
         [data-record-header] button,
         [data-detail-toolbar] button,
         [data-goal-actions] button,
-        button[data-goal-edit-overlay]
+        button[data-goal-edit-overlay],
+        button[data-dashboard-tab],
+        [data-contract-pagination] button,
+        [data-contract-list-controls] button
       ):focus-visible,
     summary:focus-visible,
     a:focus-visible {
@@ -409,7 +430,7 @@ export const StyledFieldPanel = styled.div`
       grid-template-columns: repeat(2, minmax(0, 1fr));
       margin: 0;
     }
-    [data-goal-grid] > div {
+    [data-goal-grid] > dl > div {
       background: ${theme.background.primary};
       border-radius: 10px;
       padding: 16px;
@@ -499,10 +520,10 @@ export const StyledFieldPanel = styled.div`
     [data-contract-detail] [data-goal-grid] {
       display: flex;
       flex-direction: column;
-      gap: ${theme.spacing[2]};
+      gap: var(--t-gallery-gap, 16px);
       margin: 0;
     }
-    [data-contract-detail] [data-goal-grid] > div {
+    [data-contract-detail] [data-goal-grid] > dl > div {
       align-items: baseline;
       background: ${theme.background.tertiary};
       border-radius: 8px;
@@ -702,7 +723,7 @@ export const StyledFieldPanel = styled.div`
     [data-contract-goal-summary] {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: var(--t-gallery-gap, 16px);
       width: 100%;
     }
     [data-goal-summary-row] {
@@ -727,7 +748,6 @@ export const StyledFieldPanel = styled.div`
     && [data-session-summary],
     && [data-session-count-row] {
       background: transparent;
-      border-bottom: 1px solid ${theme.border.color.light};
       border-radius: 0;
       display: flex;
       align-items: center;
@@ -736,11 +756,49 @@ export const StyledFieldPanel = styled.div`
       margin-bottom: 8px;
       padding: 4px 0 16px;
     }
+    && [data-session-summary] {
+      row-gap: var(--t-record-card-field-gap, 4px);
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+    [data-okr-group] {
+      background: ${theme.background.tertiary};
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin: 0;
+      padding: 14px 12px;
+      overflow: hidden;
+    }
+    [data-session-container] {
+      display: contents;
+    }
+    && [data-okr-group] [data-editable-goal] {
+      padding-right: 32px;
+    }
+    [data-okr-group]:has(> div > dd:not([data-unregistered])),
+    [data-okr-group]:has(
+      [data-goal-summary-row] > span:not([data-unregistered])
+    ) {
+      background: color-mix(
+        in srgb,
+        ${theme.background.transparent.blue} 40%,
+        ${theme.background.primary}
+      );
+    }
+    && [data-okr-group] [data-goal-summary-row],
+    && [data-contract-detail] [data-okr-group] > div {
+      padding: 0;
+      background: transparent;
+      border-radius: 0;
+    }
     && [data-session-summary] > :first-child {
       white-space: nowrap;
       width: auto;
-      color: ${theme.font.color.secondary};
-      font-size: 12px;
+      color: ${theme.font.color.primary};
+      font-size: 16px;
+      font-weight: ${theme.font.weight.semiBold};
     }
     && [data-session-count-row] input {
       max-width: 160px;
@@ -906,7 +964,10 @@ export const StyledFieldPanel = styled.div`
       [data-record-header] button,
       [data-detail-toolbar] button,
       [data-goal-actions] button,
-      button[data-goal-edit-overlay]
+      button[data-goal-edit-overlay],
+      button[data-dashboard-tab],
+      [data-contract-pagination] button,
+      [data-contract-list-controls] button
     ) {
       border-color: transparent;
       border-radius: 8px;
@@ -917,7 +978,10 @@ export const StyledFieldPanel = styled.div`
         [data-record-header] button,
         [data-detail-toolbar] button,
         [data-goal-actions] button,
-        button[data-goal-edit-overlay]
+        button[data-goal-edit-overlay],
+        button[data-dashboard-tab],
+        [data-contract-pagination] button,
+        [data-contract-list-controls] button
       )[data-primary] {
       background: ${theme.color.blue};
       color: white;
@@ -927,7 +991,10 @@ export const StyledFieldPanel = styled.div`
         [data-record-header] button,
         [data-detail-toolbar] button,
         [data-goal-actions] button,
-        button[data-goal-edit-overlay]
+        button[data-goal-edit-overlay],
+        button[data-dashboard-tab],
+        [data-contract-pagination] button,
+        [data-contract-list-controls] button
       )[data-primary]:hover {
       filter: brightness(0.94);
     }
@@ -936,7 +1003,10 @@ export const StyledFieldPanel = styled.div`
         [data-record-header] button,
         [data-detail-toolbar] button,
         [data-goal-actions] button,
-        button[data-goal-edit-overlay]
+        button[data-goal-edit-overlay],
+        button[data-dashboard-tab],
+        [data-contract-pagination] button,
+        [data-contract-list-controls] button
       )[aria-pressed='true'] {
       background: ${theme.background.tertiary};
     }
@@ -977,12 +1047,12 @@ export const StyledFieldPanel = styled.div`
         opacity: 1;
       }
     }
-    [data-contract-detail] [data-goal-grid] > div {
+    [data-contract-detail] [data-goal-grid] > dl > div {
       align-items: start;
       gap: 12px;
       grid-template-columns: 32px minmax(0, 1fr);
     }
-    [data-goal-grid] > [data-editable-goal] {
+    [data-goal-grid] [data-editable-goal] {
       position: relative;
       padding-right: 44px;
     }
@@ -1029,10 +1099,18 @@ export const StyledFieldPanel = styled.div`
       gap: 8px;
     }
     [data-kr-number] {
-      color: ${theme.font.color.tertiary};
+      align-items: center;
+      background: ${theme.background.transparent.blue};
+      border-radius: 50%;
+      color: ${theme.color.blue};
+      display: inline-flex;
       flex-shrink: 0;
       font-size: ${theme.font.size.sm};
-      min-width: 12px;
+      font-weight: ${theme.font.weight.semiBold};
+      height: 22px;
+      justify-content: center;
+      line-height: 1;
+      width: 22px;
     }
   }
 `;
@@ -1258,5 +1336,27 @@ export const StyledFieldRecordSection = styled(StyledDashboardSection)`
   }
   &[data-plain] {
     display: contents;
+  }
+`;
+
+export const StyledFieldContractControls = styled.div`
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+
+  > input {
+    flex: 1 1 200px;
+    min-width: 0;
+    max-width: 320px;
+  }
+
+  > [data-contract-list-actions] {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: flex-end;
+    margin-left: auto;
   }
 `;

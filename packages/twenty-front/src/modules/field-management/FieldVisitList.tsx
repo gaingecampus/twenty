@@ -1,4 +1,7 @@
 import { FieldVisitEditorModal } from './FieldVisitEditorModal';
+import { FieldManagement } from './FieldManagement';
+import { StyledFieldRow } from './fieldManagementStyled';
+import { useFieldVisitAttachments } from './useFieldVisitAttachments';
 import { createPortal } from 'react-dom';
 import { Button } from 'twenty-ui/input';
 import { StyledFieldEmptyState } from './FieldEmptyState';
@@ -7,7 +10,7 @@ import { FieldSortModal } from './FieldSortModal';
 import { FieldVisitStatus } from './FieldVisitStatus';
 import { IconArrowsSort } from 'twenty-ui/icon';
 import { sortFieldVisits, type FieldVisitSortKey } from './sortFieldVisits';
-import { useContext, useState, type ReactNode } from 'react';
+import { useContext, useState } from 'react';
 import { styled } from '@linaria/react';
 import { themeCssVariables as theme } from 'twenty-ui/theme-constants';
 import { AvatarOrIcon } from 'twenty-ui/data-display';
@@ -139,6 +142,13 @@ const StyledTable = styled.div`
   }
   [role='cell']:nth-child(3) {
     font-weight: 600;
+  }
+  [data-attachment-count] {
+    display: block;
+    color: ${theme.font.color.secondary};
+    font-size: 12px;
+    font-weight: 400;
+    margin-top: 4px;
   }
   [data-muted] {
     color: ${theme.font.color.secondary};
@@ -283,7 +293,6 @@ const SORT_OPTIONS: {
 export const FieldVisitList = ({
   visits,
   contracts,
-  renderDetail,
   heading,
   sortContainer,
 }: {
@@ -291,14 +300,18 @@ export const FieldVisitList = ({
   sortContainer?: HTMLElement | null;
   visits: ObjectRecord[];
   contracts: ObjectRecord[];
-  onSelectionChange?: (selected: boolean) => void;
-  renderDetail: (visitId: string, onClose: () => void) => ReactNode;
 }) => {
-  const [selectedId, setSelectedId] = useState<string>();
+  const attachments = useFieldVisitAttachments(visits.map((visit) => visit.id));
+  const [selectedId, openVisit] = useState<string>();
+  const [navigationContainer, setNavigationContainer] =
+    useState<HTMLDivElement | null>(null);
   const [sortOpen, setSortOpen] = useState(false);
   const [sortKey, setSortKey] = useState<FieldVisitSortKey>('visitDate');
   const [direction, setDirection] = useState<'asc' | 'desc'>('desc');
   const sortedVisits = sortFieldVisits(visits, sortKey, direction);
+  const selectedIndex = sortedVisits.findIndex(
+    (visit) => visit.id === selectedId,
+  );
   if (!visits.length)
     return (
       <>
@@ -328,12 +341,46 @@ export const FieldVisitList = ({
   );
   return (
     <>
-      {selectedId && (
+      {selectedId && selectedIndex >= 0 && (
         <FieldVisitEditorModal
           title="현장 기록"
-          onCancel={() => setSelectedId(undefined)}
+          onNavigationContainer={setNavigationContainer}
+          onCancel={() => openVisit(undefined)}
         >
-          {renderDetail(selectedId, () => setSelectedId(undefined))}
+          <FieldManagement
+            key={selectedId}
+            scope={{ visit: selectedId }}
+            onClose={() => openVisit(undefined)}
+            detailNavigation={
+              navigationContainer &&
+              createPortal(
+                <StyledFieldRow aria-label="현장 기록 이동">
+                  <Button
+                    title="이전 기록"
+                    variant="secondary"
+                    size="small"
+                    disabled={selectedIndex <= 0}
+                    onClick={() =>
+                      openVisit(sortedVisits[selectedIndex - 1]?.id)
+                    }
+                  />
+                  <span role="status">
+                    {selectedIndex + 1} / {sortedVisits.length}
+                  </span>
+                  <Button
+                    title="다음 기록"
+                    variant="secondary"
+                    size="small"
+                    disabled={selectedIndex >= sortedVisits.length - 1}
+                    onClick={() =>
+                      openVisit(sortedVisits[selectedIndex + 1]?.id)
+                    }
+                  />
+                </StyledFieldRow>,
+                navigationContainer,
+              )
+            }
+          />
         </FieldVisitEditorModal>
       )}
       {(heading || !sortContainer) && (
@@ -392,12 +439,12 @@ export const FieldVisitList = ({
               data-record-row
               tabIndex={0}
               onClick={() => {
-                setSelectedId(visit.id);
+                openVisit(visit.id);
               }}
               onKeyDown={(event) => {
                 if (event.key === 'Enter' || event.key === ' ') {
                   event.preventDefault();
-                  setSelectedId(visit.id);
+                  openVisit(visit.id);
                 }
               }}
               key={visit.id}
@@ -420,6 +467,13 @@ export const FieldVisitList = ({
               </span>
               <span role="cell" title={text(visit.name)}>
                 {text(visit.name) || '제목 없음'}
+                <small data-attachment-count>
+                  {attachments.loading
+                    ? '첨부 확인 중…'
+                    : !attachments.available || attachments.error
+                      ? '첨부 조회 불가'
+                      : `사진 ${attachments.files.filter((file) => file.visitId === visit.id && file.isImage).length} · 첨부 ${attachments.files.filter((file) => file.visitId === visit.id && !file.isImage).length}`}
+                </small>
                 <span data-compact-contract>
                   <FieldContractLabel
                     name={

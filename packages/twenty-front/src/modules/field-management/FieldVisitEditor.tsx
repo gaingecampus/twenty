@@ -1,3 +1,6 @@
+import { FieldContractOkrSummary } from './FieldContractOkrSummary';
+import { FieldVisitUploadArea } from './FieldVisitUploadArea';
+import { useFieldVisitUploadQueue } from './useFieldVisitUploadQueue';
 import { FieldVisitEditorModal } from './FieldVisitEditorModal';
 import { useNavigate } from 'react-router-dom';
 import { useFieldUnsavedChanges } from './useFieldUnsavedChanges';
@@ -7,7 +10,11 @@ import { type ObjectRecord } from '@/object-record/types/ObjectRecord';
 import { useCreateOneRecord } from '@/object-record/hooks/useCreateOneRecord';
 import { useUpdateOneRecord } from '@/object-record/hooks/useUpdateOneRecord';
 import { text } from './fieldManagementUtils';
-import { StyledFieldRow } from './fieldManagementStyled';
+import {
+  StyledFieldPanel,
+  StyledFieldRecordSection,
+  StyledFieldRow,
+} from './fieldManagementStyled';
 import { StyledFieldVisitEditor } from './fieldVisitEditorStyled';
 import { FieldContractLabel } from './FieldContractLabel';
 export const FieldVisitEditor = ({
@@ -31,6 +38,8 @@ export const FieldVisitEditor = ({
   });
   const { updateOneRecord } = useUpdateOneRecord();
   const [id] = useState(() => visit?.id ?? v4());
+  const [persisted, setPersisted] = useState(!!visit);
+  const uploads = useFieldVisitUploadQueue(id, !!visit);
   // Synchronous mutex prevents two writes before React commits the busy state.
   // oxlint-disable-next-line twenty/no-state-useref
   const pending = useRef(false);
@@ -52,7 +61,7 @@ export const FieldVisitEditor = ({
   const rootRef = useRef<HTMLElement>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const unsaved = useFieldUnsavedChanges(
-    JSON.stringify(form) !== initial,
+    JSON.stringify(form) !== initial || uploads.dirty,
     busy,
     onCancel,
   );
@@ -88,7 +97,7 @@ export const FieldVisitEditor = ({
         sessionNumber: session,
         recordStatus: status,
       };
-      if (visit)
+      if (persisted)
         await updateOneRecord({
           objectNameSingular: 'fieldVisit',
           idToUpdate: id,
@@ -100,6 +109,15 @@ export const FieldVisitEditor = ({
           id: id,
           contractId: contract.id,
         });
+      setPersisted(true);
+      try {
+        await uploads.persist();
+      } catch {
+        setError(
+          '기록은 저장했지만 일부 첨부파일 처리가 실패했습니다. 저장 버튼을 다시 누르면 실패한 항목을 재시도합니다.',
+        );
+        return;
+      }
       await onSaved();
     } catch {
       setError(
@@ -116,36 +134,40 @@ export const FieldVisitEditor = ({
       <header>
         <h2>{visit ? '현장 기록 수정' : '새 현장 기록'}</h2>
       </header>
-      <div
-        data-editor-contract
-        role="button"
-        tabIndex={0}
-        aria-label={`${text(contract.name)} 계약 목표 보기`}
-        onClick={() =>
-          unsaved.requestLeave(
-            onOpenContract ??
-              (() =>
-                navigate(
-                  `/object/onboarding/${contract.id}#gainge-field-records`,
-                )),
-          )
-        }
-        onKeyDown={(event) => {
-          if (event.key === 'Enter' || event.key === ' ') {
-            event.preventDefault();
-            unsaved.requestLeave(
-              onOpenContract ??
-                (() =>
-                  navigate(
-                    `/object/onboarding/${contract.id}#gainge-field-records`,
-                  )),
-            );
-          }
-        }}
-      >
-        <FieldContractLabel name={text(contract.name)} />
-        <p>{text(contract.consultingGoal) || '아직 등록된 목표가 없습니다.'}</p>
-      </div>
+      <StyledFieldPanel data-contextual data-inline-detail>
+        <StyledFieldRecordSection data-contract-group>
+          <div
+            data-contract-item
+            role="button"
+            tabIndex={0}
+            aria-label={`${text(contract.name)} 계약 목표 보기`}
+            onClick={() =>
+              unsaved.requestLeave(
+                onOpenContract ??
+                  (() =>
+                    navigate(
+                      `/object/onboarding/${contract.id}#gainge-field-records`,
+                    )),
+              )
+            }
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                unsaved.requestLeave(
+                  onOpenContract ??
+                    (() =>
+                      navigate(
+                        `/object/onboarding/${contract.id}#gainge-field-records`,
+                      )),
+                );
+              }
+            }}
+          >
+            <FieldContractLabel name={text(contract.name)} />
+            <FieldContractOkrSummary contract={contract} />
+          </div>
+        </StyledFieldRecordSection>
+      </StyledFieldPanel>
       <section data-editor-section>
         <label>
           <span>
@@ -283,6 +305,7 @@ export const FieldVisitEditor = ({
           </label>
         ))}
       </section>
+      <FieldVisitUploadArea queue={uploads} disabled={busy} />
       {error && <p role="alert">{error}</p>}
       <StyledFieldRow data-editor-actions>
         <button data-cancel disabled={busy} onClick={unsaved.cancel}>

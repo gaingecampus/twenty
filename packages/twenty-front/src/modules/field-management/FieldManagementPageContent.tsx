@@ -1,3 +1,4 @@
+import { StatusBoardWeekSection } from '@/status-board/components/StatusBoardWeekSection';
 import { DashboardCountTab } from '@/ui/layout/dashboard/components/DashboardCountTab';
 import {
   StyledDashboardContractTabs,
@@ -61,24 +62,35 @@ const FieldManagementPageBody = ({
         onClearSelectedMemberIds={filters.clearSelectedMemberIds}
       />
       <div ref={setSummaryContainer} />
-      <StyledDashboardContractTabs aria-label="계약 상태" data-on-page-canvas>
-        {(
-          [
-            ['PRE', '진행 전 계약'],
-            ['ACTIVE', '현재 계약'],
-            ['DONE', '종료 계약'],
-          ] as const
-        ).map(([value, label]) => (
-          <DashboardCountTab
-            key={value}
-            label={label}
-            count={contractCounts?.[value] ?? '—'}
-            isActive={contractStatus === value}
-            onClick={() => setContractStatus(value)}
-          />
-        ))}
-      </StyledDashboardContractTabs>
+      <StatusBoardWeekSection
+        memberObjectMetadataItem={metadata.member}
+        onboardingObjectMetadataItem={metadata.onboarding}
+        members={visibleMembers}
+        memberIds={memberIds}
+      />
       <FieldManagement
+        contractListHeader={
+          <StyledDashboardContractTabs
+            aria-label="계약 상태"
+            data-on-page-canvas
+          >
+            {(
+              [
+                ['DONE', '종료 계약'],
+                ['ACTIVE', '현재 계약'],
+                ['PRE', '진행 전 계약'],
+              ] as const
+            ).map(([value, label]) => (
+              <DashboardCountTab
+                key={value}
+                label={label}
+                count={contractCounts?.[value] ?? '—'}
+                isActive={contractStatus === value}
+                onClick={() => setContractStatus(value)}
+              />
+            ))}
+          </StyledDashboardContractTabs>
+        }
         scope={{ contractList: true, memberIds, contractStatus }}
         onContractCountsChange={setContractCounts}
         summaryContainer={summaryContainer}

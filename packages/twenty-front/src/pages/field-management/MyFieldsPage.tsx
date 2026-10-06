@@ -1,5 +1,5 @@
 import { FieldManagementPageContent } from '@/field-management/FieldManagementPageContent';
-import { useParams } from 'react-router-dom';
+import { Navigate, useLocation, useParams } from 'react-router-dom';
 import { StyledMyFieldsSurface } from '@/field-management/myFieldsStyled';
 import { FieldManagement } from '@/field-management/FieldManagement';
 import { PageContainer } from '@/ui/layout/page/components/PageContainer';
@@ -8,8 +8,8 @@ import { PageCardHeader } from '@/ui/layout/page/components/PageCardHeader';
 import { PageTitle } from '@/ui/utilities/page-title/components/PageTitle';
 export const MyFieldsPage = () => (
   <PageContainer>
-    <PageTitle title="현장 관리" />
-    <PageCardLayout header={<PageCardHeader title="현장 관리" />}>
+    <PageTitle title="컨설팅 품질 관리" />
+    <PageCardLayout header={<PageCardHeader title="컨설팅 품질 관리" />}>
       <FieldManagementPageContent />
     </PageCardLayout>
   </PageContainer>
@@ -26,5 +26,15 @@ export const FieldVisitDetailPage = () => {
         </StyledMyFieldsSurface>
       </PageCardLayout>
     </PageContainer>
+  );
+};
+
+export const LegacyMyFieldsRedirect = () => {
+  const { pathname, search, hash } = useLocation();
+  return (
+    <Navigate
+      replace
+      to={`${pathname.replace(/^\/my-fields(?=\/|$)/, '/consulting-quality')}${search}${hash}`}
+    />
   );
 };

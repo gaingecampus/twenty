@@ -8,7 +8,7 @@ export const StatusBoardNavigationItem = () => {
 
   return (
     <NavigationDrawerItem
-      label="현황판"
+      label="CRM 대시보드"
       Icon={IconLayoutDashboard}
       to={AppPath.StatusBoard}
       active={pathname === AppPath.StatusBoard}

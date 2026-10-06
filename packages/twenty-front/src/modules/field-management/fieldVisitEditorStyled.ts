@@ -179,7 +179,7 @@ export const StyledFieldVisitEditor = styled.section`
     align-self: center;
     box-sizing: border-box;
     background: ${theme.background.primary};
-    bottom: 0;
+    bottom: var(--field-editor-sticky-bottom, 0px);
     justify-content: flex-end;
     padding: 16px var(--field-editor-inset, 0px);
     position: sticky;

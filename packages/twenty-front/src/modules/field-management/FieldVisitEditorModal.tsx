@@ -7,6 +7,7 @@ import { themeCssVariables as theme } from 'twenty-ui/theme-constants';
 import { StyledFieldPanel } from './fieldManagementStyled';
 
 const StyledDialog = styled.dialog`
+  --field-editor-sticky-bottom: -24px;
   background: ${theme.background.primary};
   border: 1px solid ${theme.border.color.medium};
   border-radius: ${theme.border.radius.xl};
@@ -23,8 +24,11 @@ const StyledDialog = styled.dialog`
 `;
 
 const StyledCloseRow = styled.div`
+  align-items: center;
+  background: ${theme.background.primary};
   display: flex;
-  justify-content: flex-end;
+  gap: 12px;
+  justify-content: space-between;
   position: sticky;
   top: 0;
   z-index: 1;
@@ -34,7 +38,9 @@ export const FieldVisitEditorModal = ({
   children,
   onCancel,
   title = '새 현장 기록',
+  onNavigationContainer,
 }: {
+  onNavigationContainer?: (container: HTMLDivElement | null) => void;
   children: ReactNode;
   title?: string;
   onCancel: () => void;
@@ -81,19 +87,28 @@ export const FieldVisitEditorModal = ({
         }
         setPointerStartedOutside(false);
       }}
+      onKeyDown={(event) => {
+        if (event.key === 'Escape') {
+          event.preventDefault();
+          event.stopPropagation();
+          requestClose();
+        }
+      }}
       onCancel={(event) => {
         event.preventDefault();
+        event.stopPropagation();
         requestClose();
       }}
     >
       <StyledCloseRow>
+        <div ref={onNavigationContainer} />
         <IconButton
           Icon={IconX}
-          aria-label="현장 기록 닫기"
+          ariaLabel={`${title} 닫기`}
           onClick={requestClose}
         />
       </StyledCloseRow>
-      <StyledFieldPanel>{children}</StyledFieldPanel>
+      <StyledFieldPanel data-inline-detail>{children}</StyledFieldPanel>
     </StyledDialog>,
     document.body,
   );

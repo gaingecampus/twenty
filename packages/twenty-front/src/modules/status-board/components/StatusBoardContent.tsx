@@ -13,11 +13,9 @@ import { StatusBoardCumulativeSection } from '@/status-board/components/StatusBo
 import { StatusBoardDummyDataProvider } from '@/status-board/components/StatusBoardDummyDataProvider';
 import { useStatusBoardDummyData } from '@/status-board/contexts/StatusBoardDummyDataContext';
 import { StatusBoardFilterBar } from '@/status-board/components/StatusBoardFilterBar';
-import { StatusBoardListsSection } from '@/status-board/components/StatusBoardListsSection';
 import { StatusBoardNowSection } from '@/status-board/components/StatusBoardNowSection';
 import { StatusBoardPeriodSection } from '@/status-board/components/StatusBoardPeriodSection';
 import { type StatusBoardSheetState } from '@/status-board/components/StatusBoardSheet';
-import { StatusBoardWeekSection } from '@/status-board/components/StatusBoardWeekSection';
 
 import { useStatusBoardFilters } from '@/status-board/hooks/useStatusBoardFilters';
 import { useStatusBoardMemberIds } from '@/status-board/hooks/useStatusBoardMemberIds';
@@ -32,7 +30,6 @@ import { SidePanelToggleButton } from '@/side-panel/components/SidePanelToggleBu
 import { PageCardHeader } from '@/ui/layout/page/components/PageCardHeader';
 import { PageCardLayout } from '@/ui/layout/page/components/PageCardLayout';
 import { PageTitle } from '@/ui/utilities/page-title/components/PageTitle';
-import { useState } from 'react';
 import { IconList, IconLayoutDashboard } from 'twenty-ui/icon';
 import { useTheme } from 'twenty-ui/theme-constants';
 import { type ObjectRecord } from '@/object-record/types/ObjectRecord';
@@ -89,9 +86,6 @@ const StatusBoardContentBody = ({
     selectedGroupIds: filters.selectedGroupIds,
     selectedMemberIds: filters.selectedMemberIds,
   });
-  const [onboardingTab, setOnboardingTab] = useState<'ACTIVE' | 'PRE' | 'DONE'>(
-    'ACTIVE',
-  );
   const setStatusBoardDetails = useSetAtomState(statusBoardDetailsState);
   const { navigateSidePanel } = useNavigateSidePanel();
   const setSheet = (sheet: StatusBoardSheetState) => {
@@ -119,12 +113,12 @@ const StatusBoardContentBody = ({
 
   return (
     <>
-      <PageTitle title="현황판" />
+      <PageTitle title="CRM 대시보드" />
       <PageCardLayout
         header={
           <PageCardHeader
             icon={<IconLayoutDashboard size={theme.icon.size.xl} />}
-            title="현황판"
+            title="CRM 대시보드"
             actionButton={<SidePanelToggleButton />}
           />
         }
@@ -179,18 +173,6 @@ const StatusBoardContentBody = ({
                   )
                 }
                 onOpenSheet={setSheet}
-              />
-              <StatusBoardListsSection
-                onboardingObjectMetadataItem={metadata.onboarding}
-                memberIds={memberIds}
-                onboardingTab={onboardingTab}
-                onOnboardingTabChange={setOnboardingTab}
-              />
-              <StatusBoardWeekSection
-                memberObjectMetadataItem={metadata.member}
-                onboardingObjectMetadataItem={metadata.onboarding}
-                members={visibleMembers}
-                memberIds={memberIds}
               />
               <StatusBoardCumulativeSection
                 companyObjectMetadataItem={metadata.company}
