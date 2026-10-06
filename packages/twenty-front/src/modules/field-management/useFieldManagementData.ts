@@ -13,6 +13,7 @@ export const useFieldManagementMetadata = () => {
     });
   return {
     contract: resolve('onboarding'),
+    attachment: resolve('attachment'),
     visit: resolve('fieldVisit'),
     member: resolve('teamMember'),
     links: resolve('gyeyagGuseongweonLink'),

@@ -354,6 +354,7 @@ export type FieldPhonesValue = {
 };
 
 export type FieldFilesValue = {
+  size?: number;
   fileId: string;
   label: string;
   extension?: string;
