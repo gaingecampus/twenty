@@ -161,6 +161,13 @@ const StyledTable = styled.div`
   [data-compact-session] {
     text-align: center;
   }
+  [data-visit-state] {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+  }
   [data-session] {
     color: ${theme.font.color.primary};
     font-size: 15px;
@@ -463,7 +470,7 @@ export const FieldVisitList = ({
                   ? `${String(visit.sessionNumber)}회차`
                   : '—'}
               </span>
-              <span role="cell" data-muted>
+              <span role="cell" data-muted data-visit-state>
                 <span data-compact-session>
                   {visit.sessionNumber
                     ? `${String(visit.sessionNumber)}회차`
