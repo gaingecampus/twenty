@@ -1,3 +1,4 @@
+import { EnableFieldSummaryStorageCommand } from './2-24-instance-command-fast-1807200000000-enable-field-summary-storage';
 import { StopOpportunityDriAutoAssignCommand } from './2-24-workspace-command-1807100000000-stop-opportunity-dri-auto-assign.command';
 import { Module } from '@nestjs/common';
 import { WorkspaceIteratorModule } from 'src/database/commands/command-runners/workspace-iterator.module';
@@ -13,6 +14,7 @@ import { InstallFieldManagementCommand } from './2-24-workspace-command-18070000
     ObjectMetadataModule,
   ],
   providers: [
+    EnableFieldSummaryStorageCommand,
     InstallFieldManagementCommand,
     StopOpportunityDriAutoAssignCommand,
   ],

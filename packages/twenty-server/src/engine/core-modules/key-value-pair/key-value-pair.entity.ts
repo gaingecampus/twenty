@@ -20,6 +20,7 @@ import { WorkspaceEntity } from 'src/engine/core-modules/workspace/workspace.ent
 
 export enum KeyValuePairType {
   USER_VARIABLE = 'USER_VARIABLE',
+  FIELD_SUMMARY = 'FIELD_SUMMARY',
   FEATURE_FLAG = 'FEATURE_FLAG',
   CONFIG_VARIABLE = 'CONFIG_VARIABLE',
 }
