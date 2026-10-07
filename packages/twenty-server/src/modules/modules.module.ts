@@ -1,3 +1,4 @@
+import { FieldSummaryModule } from './field-summary/field-summary.module';
 import { Module } from '@nestjs/common';
 
 import { CalendarModule } from 'src/modules/calendar/calendar.module';
@@ -12,6 +13,7 @@ import { GaingeAutomationModule } from 'src/modules/gainge-automation/gainge-aut
 @Module({
   imports: [
     MessagingModule,
+    FieldSummaryModule,
     GaingeAutomationModule,
     CalendarModule,
     ConnectedAccountModule,
