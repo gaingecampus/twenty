@@ -639,9 +639,9 @@ export const StyledFieldPanel = styled.div`
     }
     &&
       [data-contract-detail]
-      button:not([data-variant]):not([data-goal-edit-overlay]):not(
-        [data-kr-add]
-      ):not([data-kr-delete]),
+      button:not([data-record-more] button):not([data-variant]):not(
+        [data-goal-edit-overlay]
+      ):not([data-kr-add]):not([data-kr-delete]),
     && [data-contract-detail] [data-contract-link] {
       align-items: center;
       border: none;
@@ -658,18 +658,20 @@ export const StyledFieldPanel = styled.div`
     }
     &&
       [data-contract-detail]
-      button:not([data-primary]):not([data-variant]):not(
-        [data-goal-edit-overlay]
-      ):not([data-kr-add]):not([data-kr-delete]),
+      button:not([data-record-more] button):not([data-primary]):not(
+        [data-variant]
+      ):not([data-goal-edit-overlay]):not([data-kr-add]):not([data-kr-delete]),
     && [data-contract-detail] [data-contract-link] {
       background: ${theme.background.tertiary};
       color: ${theme.font.color.primary};
     }
     &&
       [data-contract-detail]
-      button:not([data-primary]):not([data-variant]):not(
-        [data-goal-edit-overlay]
-      ):not([data-kr-add]):not([data-kr-delete]):hover,
+      button:not([data-record-more] button):not([data-primary]):not(
+        [data-variant]
+      ):not([data-goal-edit-overlay]):not([data-kr-add]):not(
+        [data-kr-delete]
+      ):hover,
     && [data-contract-detail] [data-contract-link]:hover {
       background: ${theme.background.quaternary};
     }

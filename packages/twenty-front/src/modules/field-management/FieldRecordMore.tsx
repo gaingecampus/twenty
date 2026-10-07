@@ -84,7 +84,7 @@ export const FieldRecordMore = ({
     };
   }, []);
   return (
-    <StyledMore ref={ref}>
+    <StyledMore ref={ref} data-record-more>
       <summary aria-label={label} title="더보기">
         <IconDotsVertical size={18} />
       </summary>
