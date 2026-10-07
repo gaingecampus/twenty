@@ -881,34 +881,29 @@ const FieldManagementLoaded = ({
                 data-contract-item
                 key={c.id}
                 onClick={() => {
-                  if (scope.contractList) {
-                    if (contractPageLayoutId) {
-                      store.set(
-                        activeTabIdComponentState.atomFamily({
-                          instanceId:
-                            getTabListInstanceIdFromPageLayoutAndRecord({
-                              pageLayoutId: contractPageLayoutId,
-                              layoutType: PageLayoutType.RECORD_PAGE,
-                              targetRecordIdentifier: {
-                                id: c.id,
-                                targetObjectNameSingular: 'onboarding',
-                              },
-                            }),
-                        }),
-                        getFieldManagementRecordTabId(contractPageLayoutId),
-                      );
-                    }
-                    openRecordInSidePanel({
-                      recordId: c.id,
-                      objectNameSingular: 'onboarding',
-                      resetNavigationStack: true,
-                    });
-                    return;
+                  if (contractPageLayoutId) {
+                    store.set(
+                      activeTabIdComponentState.atomFamily({
+                        instanceId: getTabListInstanceIdFromPageLayoutAndRecord(
+                          {
+                            pageLayoutId: contractPageLayoutId,
+                            layoutType: PageLayoutType.RECORD_PAGE,
+                            targetRecordIdentifier: {
+                              id: c.id,
+                              targetObjectNameSingular: 'onboarding',
+                            },
+                          },
+                        ),
+                      }),
+                      getFieldManagementRecordTabId(contractPageLayoutId),
+                    );
                   }
-                  setSelectedContractId(c.id);
-                  setEditor(undefined);
+                  openRecordInSidePanel({
+                    recordId: c.id,
+                    objectNameSingular: 'onboarding',
+                  });
                 }}
-                aria-label={`${text(c.name)} 계약 상세 보기`}
+                aria-label={`${text(c.name)} 현장 기록 보기`}
               >
                 <span data-contract-card-header>
                   <span data-contract-card-heading>
