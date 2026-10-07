@@ -1,3 +1,4 @@
+import { FieldContractSummary } from './FieldContractSummary';
 import { FieldContractLabel } from './FieldContractLabel';
 import { type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
@@ -109,6 +110,7 @@ export const MyFieldContractCard = ({
           </div>
         )}
       </StyledMyFieldGoal>
+      <FieldContractSummary contract={contract} visits={records} />
       <StyledMyFieldRecords id={`field-records-${contract.id}`}>
         {records.length ? children : <p>첫 현장 기록을 작성하십시오.</p>}
       </StyledMyFieldRecords>

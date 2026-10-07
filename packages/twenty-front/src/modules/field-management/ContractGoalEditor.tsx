@@ -1,3 +1,4 @@
+import { refreshFieldSummary } from './fieldSummaryRequest';
 import { Button } from 'twenty-ui/input';
 import { Link } from 'react-router-dom';
 import { IconArrowUpRight, IconPlus, IconTrash } from 'twenty-ui/icon';
@@ -83,6 +84,7 @@ export const ContractGoalEditor = ({
           successCriteria: serializedCriteria,
         },
       });
+      refreshFieldSummary(contract.id);
       await onSaved();
     } catch {
       setError('목표를 저장하지 못했습니다. 권한과 연결을 확인하십시오.');

@@ -474,7 +474,7 @@ export const StyledFieldPanel = styled.div`
       gap: 12px;
     }
     && [data-contract-item]:hover {
-      background: ${theme.background.tertiary};
+      background: transparent;
     }
     [data-contract-detail] {
       gap: 16px;
@@ -678,23 +678,6 @@ export const StyledFieldPanel = styled.div`
       margin: 0;
       padding-bottom: 8px;
     }
-    && [data-contract-group] > [data-contract-item] {
-      box-shadow: ${theme.boxShadow.light};
-      background: ${theme.background.primary};
-      border: 1px solid ${theme.border.color.medium};
-      border-radius: 8px;
-      display: block;
-      padding: 16px;
-      text-align: left;
-      width: 100%;
-    }
-    && [data-contract-group] > [data-contract-item] {
-      align-items: stretch;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      justify-content: flex-start;
-    }
     [data-contract-card-header] {
       align-items: flex-start;
       display: flex;
@@ -710,13 +693,16 @@ export const StyledFieldPanel = styled.div`
     }
     [data-contract-navigation] {
       align-items: center;
-      background: ${theme.background.tertiary};
+      background: transparent;
       border-radius: ${theme.border.radius.md};
       display: flex;
       flex-shrink: 0;
       height: 36px;
       justify-content: center;
       width: 36px;
+    }
+    [data-contract-navigation]:hover {
+      background: ${theme.background.tertiary};
     }
     [data-contract-card-heading] {
       display: flex;
@@ -1383,5 +1369,27 @@ export const StyledFieldContractControls = styled.div`
     gap: 8px;
     justify-content: flex-end;
     margin-left: auto;
+  }
+`;
+
+export const StyledFieldContractSummaryCard = styled.div`
+  background: ${theme.background.primary};
+  border: 1px solid ${theme.border.color.medium};
+  border-radius: 8px;
+  box-shadow: ${theme.boxShadow.light};
+  padding: 16px;
+  &&&& > button[data-contract-item] {
+    align-items: stretch;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    justify-content: flex-start;
+    padding: 0;
+    text-align: left;
+    width: 100%;
   }
 `;

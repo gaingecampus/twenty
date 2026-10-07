@@ -1,3 +1,5 @@
+import { refreshFieldSummary } from './fieldSummaryRequest';
+import { FieldContractSummary } from './FieldContractSummary';
 import { FieldVisitHeading } from './FieldVisitHeading';
 import { FieldLoadingState } from './FieldLoadingState';
 import { FieldContractOkrSummary } from './FieldContractOkrSummary';
@@ -55,6 +57,7 @@ import {
 } from './useFieldManagementData';
 import {
   StyledFieldPanel,
+  StyledFieldContractSummaryCard,
   StyledFieldVisitDetail,
   StyledFieldRecordSection,
   StyledFieldRow,
@@ -570,6 +573,12 @@ const FieldManagementLoaded = ({
               </div>
             )}
           </div>
+          {!embedded && (
+            <FieldContractSummary
+              contract={c}
+              visits={visitsFor(data.visits, c.id)}
+            />
+          )}
         </StyledFieldRecordSection>
       </div>
     );
@@ -594,6 +603,7 @@ const FieldManagementLoaded = ({
             <FieldVisitDelete
               id={v.id}
               onDeleted={async () => {
+                refreshFieldSummary(c.id);
                 await data.refresh();
                 if (onClose) onClose();
                 else navigate(returnPath);
@@ -863,88 +873,95 @@ const FieldManagementLoaded = ({
               </MyFieldContractCard>
             );
           return (
-            <button
-              data-contract-item
+            <StyledFieldContractSummaryCard
               key={c.id}
-              onClick={() => {
-                if (scope.contractList) {
-                  if (contractPageLayoutId) {
-                    store.set(
-                      activeTabIdComponentState.atomFamily({
-                        instanceId: getTabListInstanceIdFromPageLayoutAndRecord(
-                          {
-                            pageLayoutId: contractPageLayoutId,
-                            layoutType: PageLayoutType.RECORD_PAGE,
-                            targetRecordIdentifier: {
-                              id: c.id,
-                              targetObjectNameSingular: 'onboarding',
-                            },
-                          },
-                        ),
-                      }),
-                      getFieldManagementRecordTabId(contractPageLayoutId),
-                    );
-                  }
-                  openRecordInSidePanel({
-                    recordId: c.id,
-                    objectNameSingular: 'onboarding',
-                    resetNavigationStack: true,
-                  });
-                  return;
-                }
-                setSelectedContractId(c.id);
-                setEditor(undefined);
-              }}
-              aria-label={`${text(c.name)} 계약 상세 보기`}
+              data-contract-with-summary
             >
-              <span data-contract-card-header>
-                <span data-contract-card-heading>
-                  <span data-contract-title>
-                    <FieldContractLabel name={text(c.name)} />
-                  </span>
-                  <span data-contract-summary>
-                    <FieldContractAssignees
-                      members={data.members.filter((member) =>
-                        assigned(c, member.id, data.links, true),
-                      )}
-                    />
-                    <span data-contract-meta>
-                      <span data-contract-status={text(c.onboardingStatus)}>
-                        {c.onboardingStatus === 'ACTIVE'
-                          ? '계약중'
-                          : c.onboardingStatus === 'PRE'
-                            ? '계약 예정'
-                            : c.onboardingStatus === 'DONE'
-                              ? '계약 종료'
-                              : '상태 미등록'}
+              <button
+                data-contract-item
+                key={c.id}
+                onClick={() => {
+                  if (scope.contractList) {
+                    if (contractPageLayoutId) {
+                      store.set(
+                        activeTabIdComponentState.atomFamily({
+                          instanceId:
+                            getTabListInstanceIdFromPageLayoutAndRecord({
+                              pageLayoutId: contractPageLayoutId,
+                              layoutType: PageLayoutType.RECORD_PAGE,
+                              targetRecordIdentifier: {
+                                id: c.id,
+                                targetObjectNameSingular: 'onboarding',
+                              },
+                            }),
+                        }),
+                        getFieldManagementRecordTabId(contractPageLayoutId),
+                      );
+                    }
+                    openRecordInSidePanel({
+                      recordId: c.id,
+                      objectNameSingular: 'onboarding',
+                      resetNavigationStack: true,
+                    });
+                    return;
+                  }
+                  setSelectedContractId(c.id);
+                  setEditor(undefined);
+                }}
+                aria-label={`${text(c.name)} 계약 상세 보기`}
+              >
+                <span data-contract-card-header>
+                  <span data-contract-card-heading>
+                    <span data-contract-title>
+                      <FieldContractLabel name={text(c.name)} />
+                    </span>
+                    <span data-contract-summary>
+                      <FieldContractAssignees
+                        members={data.members.filter((member) =>
+                          assigned(c, member.id, data.links, true),
+                        )}
+                      />
+                      <span data-contract-meta>
+                        <span data-contract-status={text(c.onboardingStatus)}>
+                          {c.onboardingStatus === 'ACTIVE'
+                            ? '계약중'
+                            : c.onboardingStatus === 'PRE'
+                              ? '계약 예정'
+                              : c.onboardingStatus === 'DONE'
+                                ? '계약 종료'
+                                : '상태 미등록'}
+                        </span>
+                        {contractDateLabel(c.contractStartDate) ||
+                          '시작일 미정'}{' '}
+                        -{' '}
+                        {contractDateLabel(c.contractEndDate) || '종료일 미정'}
                       </span>
-                      {contractDateLabel(c.contractStartDate) || '시작일 미정'}{' '}
-                      - {contractDateLabel(c.contractEndDate) || '종료일 미정'}
                     </span>
                   </span>
-                </span>
-                <span data-contract-navigation aria-hidden="true">
-                  <IconChevronRight size={16} />
-                </span>
-              </span>
-              <span data-contract-goal-summary>
-                <span data-goal-summary-row data-session-summary>
-                  <strong>진행 회차</strong>
-                  <span
-                    data-unregistered={progress.total === null || undefined}
-                  >
-                    {progress.total === null
-                      ? `현재 ${progress.current}회차 · 총 회차 미정`
-                      : `현재 ${progress.current}회차 / 총 ${progress.total}회 · ${progress.percent}%`}
+                  <span data-contract-navigation aria-hidden="true">
+                    <IconChevronRight size={16} />
                   </span>
-                  <FieldSessionProgressBar
-                    current={progress.current}
-                    total={progress.total}
-                  />
                 </span>
-                <FieldContractOkrSummary contract={c} />
-              </span>
-            </button>
+                <span data-contract-goal-summary>
+                  <span data-goal-summary-row data-session-summary>
+                    <strong>진행 회차</strong>
+                    <span
+                      data-unregistered={progress.total === null || undefined}
+                    >
+                      {progress.total === null
+                        ? `현재 ${progress.current}회차 · 총 회차 미정`
+                        : `현재 ${progress.current}회차 / 총 ${progress.total}회 · ${progress.percent}%`}
+                    </span>
+                    <FieldSessionProgressBar
+                      current={progress.current}
+                      total={progress.total}
+                    />
+                  </span>
+                  <FieldContractOkrSummary contract={c} />
+                </span>
+              </button>
+              <FieldContractSummary contract={c} visits={records} />
+            </StyledFieldContractSummaryCard>
           );
         })}
       </StyledFieldRecordSection>

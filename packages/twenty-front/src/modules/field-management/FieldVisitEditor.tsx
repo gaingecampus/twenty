@@ -1,3 +1,4 @@
+import { refreshFieldSummary } from './fieldSummaryRequest';
 import { FieldVisitHeading } from './FieldVisitHeading';
 import { FieldContractOkrSummary } from './FieldContractOkrSummary';
 import { FieldVisitUploadArea } from './FieldVisitUploadArea';
@@ -111,6 +112,7 @@ export const FieldVisitEditor = ({
           contractId: contract.id,
         });
       setPersisted(true);
+      refreshFieldSummary(contract.id);
       try {
         await uploads.persist();
       } catch {
