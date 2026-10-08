@@ -16,6 +16,18 @@ describe('getDateFnsLocale', () => {
     expect(locale?.code).toBe('fr');
   });
 
+  it('should format relative time in Korean', async () => {
+    const locale = await getDateFnsLocale('ko-KR');
+
+    expect(locale?.code).toBe('ko');
+    expect(
+      locale?.formatDistance('aboutXHours', 4, {
+        addSuffix: true,
+        comparison: -1,
+      }),
+    ).toBe('약 4시간 전');
+  });
+
   it('should fall back to en-US for an unknown locale', async () => {
     const locale = await getDateFnsLocale('zz-ZZ');
 
