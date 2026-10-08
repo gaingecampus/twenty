@@ -1,3 +1,4 @@
+import { AddCustomersToMessageListCommand } from '@/command-menu-item/engine-command/global/components/AddCustomersToMessageListCommand';
 import { HeadlessFrontComponentRendererEngineCommand } from '@/command-menu-item/engine-command/components/HeadlessFrontComponentRendererEngineCommand';
 import { HeadlessNavigateEngineCommand } from '@/command-menu-item/engine-command/components/HeadlessNavigateEngineCommand';
 import { HeadlessOpenSidePanelPageEngineCommand } from '@/command-menu-item/engine-command/components/HeadlessOpenSidePanelPageEngineCommand';
@@ -49,6 +50,7 @@ import { CoreObjectNamePlural } from '@/object-metadata/types/CoreObjectNamePlur
 import { msg } from '@lingui/core/macro';
 import { AppPath, SettingsPath, SidePanelPages } from 'twenty-shared/types';
 import { IconHistory, IconSearch, IconSparkles } from 'twenty-ui/icon';
+import { EditScheduledCampaignCommand } from '@/command-menu-item/engine-command/global/components/EditScheduledCampaignCommand';
 import { EngineComponentKey } from '~/generated-metadata/graphql';
 
 export const ENGINE_COMPONENT_KEY_COMPONENT_MAP: Record<
@@ -254,6 +256,12 @@ export const ENGINE_COMPONENT_KEY_COMPONENT_MAP: Record<
   [EngineComponentKey.REPLY_TO_EMAIL_THREAD]: <ReplyToEmailThreadCommand />,
   [EngineComponentKey.COMPOSE_EMAIL]: <ComposeEmailCommand />,
   [EngineComponentKey.COMPOSE_CAMPAIGN]: <ComposeCampaignCommand />,
+  [EngineComponentKey.ADD_CUSTOMERS_TO_MESSAGE_LIST]: (
+    <AddCustomersToMessageListCommand />
+  ),
+  [EngineComponentKey.EDIT_SCHEDULED_CAMPAIGN]: (
+    <EditScheduledCampaignCommand />
+  ),
 
   // Deprecated keys kept for backward compatibility until migration runs
   [EngineComponentKey.DELETE_SINGLE_RECORD]: <DeleteRecordsCommand />,

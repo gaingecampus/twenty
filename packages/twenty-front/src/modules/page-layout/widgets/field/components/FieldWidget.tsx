@@ -1,3 +1,4 @@
+import { MessageListMembers } from '@/activities/emails/components/message-lists/MessageListMembers';
 import { useFieldMetadataItemById } from '@/object-metadata/hooks/useFieldMetadataItemById';
 import { useObjectMetadataItem } from '@/object-metadata/hooks/useObjectMetadataItem';
 import { formatFieldMetadataItemAsColumnDefinition } from '@/object-metadata/utils/formatFieldMetadataItemAsColumnDefinition';
@@ -87,6 +88,13 @@ export const FieldWidget = ({ widget }: FieldWidgetProps) => {
         </StyledContainer>
       </SidePanelProvider>
     );
+  }
+
+  if (
+    objectMetadataItem.nameSingular === 'messageList' &&
+    fieldMetadataItem.name === 'members'
+  ) {
+    return <MessageListMembers listId={targetRecord.id} />;
   }
 
   const fieldDefinition = formatFieldMetadataItemAsColumnDefinition({
