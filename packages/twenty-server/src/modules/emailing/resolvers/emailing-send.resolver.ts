@@ -64,11 +64,28 @@ export class EmailingSendResolver {
       workspaceId: currentWorkspace.id,
       userWorkspaceId,
       unsubscribeTopicId: input.unsubscribeTopicId,
+      scheduledAt: input.scheduledAt,
+      campaignId: input.campaignId,
+      scheduleVersion: input.scheduleVersion,
       listId: input.listId,
       subject: input.subject,
       html: input.body,
       fromAddress: input.fromAddress,
     });
+  }
+
+  @Mutation(() => Boolean)
+  @RequireFeatureFlag(FeatureFlagKey.IS_EMAIL_GROUP_ENABLED)
+  async cancelScheduledMessageCampaign(
+    @Args('campaignId') campaignId: string,
+    @Args('scheduleVersion') scheduleVersion: string,
+    @AuthWorkspace() workspace: WorkspaceEntity,
+  ): Promise<boolean> {
+    return this.messageCampaignService.cancelSchedule(
+      workspace.id,
+      campaignId,
+      scheduleVersion,
+    );
   }
 
   @Query(() => CampaignAudiencePreviewDTO)

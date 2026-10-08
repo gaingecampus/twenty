@@ -1,4 +1,10 @@
-import { Injectable, Logger, type Type } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  Logger,
+  type Type,
+} from '@nestjs/common';
 
 import { isNonEmptyString } from '@sniptt/guards';
 import { In, type ObjectLiteral } from 'typeorm';
@@ -50,6 +56,9 @@ import { MessageParticipantRole } from 'twenty-shared/types';
 import { getDomainFromEmail } from 'src/utils/get-domain-from-email';
 
 type SendCampaignArgs = {
+  scheduledAt?: string;
+  campaignId?: string;
+  scheduleVersion?: string;
   workspaceId: string;
   userWorkspaceId: string;
   listId: string;
@@ -116,58 +125,40 @@ export class MessageCampaignService {
     });
   }
 
-  async send({
-    workspaceId,
-    userWorkspaceId,
-    unsubscribeTopicId,
-    subject,
-    html,
-    fromAddress,
-    listId,
-  }: SendCampaignArgs): Promise<SendCampaignResult> {
-    const fromDomain = getDomainFromEmail(fromAddress)?.toLowerCase();
+  async send(args: SendCampaignArgs): Promise<SendCampaignResult> {
+    const { workspaceId, userWorkspaceId, fromAddress, listId } = args;
+    const scheduledAt = args.scheduledAt ? new Date(args.scheduledAt) : null;
 
-    const emailingDomain = await this.emailingDomainRepository.findOne(
-      workspaceId,
-      { where: { domain: fromDomain, status: EmailingDomainStatus.VERIFIED } },
-    );
-
-    if (emailingDomain === null) {
-      throw new Error(
-        `No verified emailing domain matches the from address ${fromAddress}`,
+    if (
+      scheduledAt &&
+      (!/([zZ]|[+-]\d{2}:\d{2})$/.test(args.scheduledAt ?? '') ||
+        !Number.isFinite(scheduledAt.getTime()) ||
+        scheduledAt.getTime() < Date.now() + 60_000)
+    ) {
+      throw new BadRequestException(
+        '예약 시간은 시간대를 포함하여 현재보다 최소 1분 이후여야 합니다.',
+      );
+    }
+    if (args.campaignId && (!scheduledAt || !args.scheduleVersion)) {
+      throw new BadRequestException(
+        '예약 변경에는 예약 시간과 버전이 필요합니다.',
       );
     }
 
-    const { campaignId, recipients, skipped } =
-      await this.globalWorkspaceOrmManager.executeInWorkspaceContext(
-        async () => {
-          const rawRecipients = await this.resolveRecipientsFromList(
-            workspaceId,
-            listId,
-          );
-
-          const normalized = normalizeCampaignRecipients(
-            rawRecipients,
-            MAX_CAMPAIGN_RECIPIENTS,
-          );
-
-          const newCampaignId = await this.createCampaign({
-            workspaceId,
-            subject,
-            html,
-            fromAddress,
-            unsubscribeTopicId,
-            listId,
-          });
-
-          return {
-            campaignId: newCampaignId,
-            recipients: normalized.recipients,
-            skipped: normalized.skipped,
-          };
+    const emailingDomain = await this.emailingDomainRepository.findOne(
+      workspaceId,
+      {
+        where: {
+          domain: getDomainFromEmail(fromAddress)?.toLowerCase(),
+          status: EmailingDomainStatus.VERIFIED,
         },
+      },
+    );
+    if (!emailingDomain) {
+      throw new BadRequestException(
+        '발신 주소에 연결된 인증된 이메일 도메인이 없습니다.',
       );
-
+    }
     const messageChannel =
       await this.messageChannelMetadataService.getOrCreateEmailGroupChannel({
         fromAddress,
@@ -175,19 +166,119 @@ export class MessageCampaignService {
         workspaceId,
       });
 
-    await this.messageQueueService.add<MaterializeCampaignJobData>(
-      MATERIALIZE_CAMPAIGN_JOB,
-      {
-        workspaceId,
-        campaignId,
-        messageChannelId: messageChannel.id,
-        emailingDomainId: emailingDomain.id,
-        recipients,
-      },
-      { retryLimit: 3 },
-    );
+    return this.globalWorkspaceOrmManager.executeInWorkspaceContext(
+      async () => {
+        const normalized = normalizeCampaignRecipients(
+          await this.resolveRecipientsFromList(workspaceId, listId),
+          MAX_CAMPAIGN_RECIPIENTS,
+        );
+        if (normalized.recipients.length === 0) {
+          throw new BadRequestException('발송 가능한 수신자가 없습니다.');
+        }
+        const repository = await this.getUserRepository(
+          workspaceId,
+          MessageCampaignWorkspaceEntity,
+        );
+        const dataSource =
+          await this.globalWorkspaceOrmManager.getGlobalWorkspaceDataSource();
+        if (!dataSource) throw new Error('Workspace datasource unavailable');
+        const campaignId = args.campaignId ?? v4();
+        const scheduleVersion = scheduledAt ? v4() : null;
 
-    return { campaignId, queuedCount: recipients.length, skipped };
+        await dataSource.transaction(
+          async (manager: WorkspaceEntityManager) => {
+            const content = {
+              subject: args.subject,
+              bodyTemplate: args.html,
+              fromAddress: {
+                primaryEmail: fromAddress,
+                additionalEmails: null,
+              },
+              unsubscribeTopicId: args.unsubscribeTopicId ?? null,
+              listId,
+              scheduledAt,
+              scheduleVersion,
+              status: scheduledAt
+                ? CAMPAIGN_STATUS.SCHEDULED
+                : CAMPAIGN_STATUS.SENDING,
+            };
+            if (args.campaignId) {
+              const result = await repository.update(
+                {
+                  id: campaignId,
+                  status: CAMPAIGN_STATUS.SCHEDULED,
+                  scheduleVersion: args.scheduleVersion,
+                },
+                content,
+                undefined,
+                manager,
+              );
+              if (result.affected !== 1) {
+                throw new ConflictException(
+                  '이미 변경되거나 발송이 시작된 예약입니다. 목록을 새로 고침하세요.',
+                );
+              }
+            } else {
+              await repository.insert({ id: campaignId, ...content }, manager);
+            }
+
+            // Enqueue before committing so a queue failure rolls back the reservation.
+            // Each revision is checked by the worker, making cancelled/replaced jobs harmless.
+            await this.messageQueueService.add<MaterializeCampaignJobData>(
+              MATERIALIZE_CAMPAIGN_JOB,
+              {
+                workspaceId,
+                campaignId,
+                messageChannelId: messageChannel.id,
+                emailingDomainId: emailingDomain.id,
+                recipients: normalized.recipients,
+                scheduleVersion: scheduleVersion ?? undefined,
+              },
+              {
+                retryLimit: 3,
+                delay: scheduledAt
+                  ? Math.max(0, scheduledAt.getTime() - Date.now())
+                  : 0,
+              },
+            );
+          },
+        );
+        return {
+          campaignId,
+          queuedCount: normalized.recipients.length,
+          skipped: normalized.skipped,
+        };
+      },
+    );
+  }
+
+  async cancelSchedule(
+    workspaceId: string,
+    campaignId: string,
+    scheduleVersion: string,
+  ): Promise<boolean> {
+    return this.globalWorkspaceOrmManager.executeInWorkspaceContext(
+      async () => {
+        const repository = await this.getUserRepository(
+          workspaceId,
+          MessageCampaignWorkspaceEntity,
+        );
+        const result = await repository.update(
+          {
+            id: campaignId,
+            scheduleVersion,
+            status: CAMPAIGN_STATUS.SCHEDULED,
+          },
+          { status: CAMPAIGN_STATUS.CANCELLED, scheduleVersion: null },
+        );
+        if (result.affected !== 1) {
+          throw new ConflictException(
+            '이미 변경되거나 발송이 시작된 예약입니다. 목록을 새로 고침하세요.',
+          );
+        }
+        return true;
+      },
+    );
   }
 
   async processMaterializeJob(data: MaterializeCampaignJobData): Promise<void> {
@@ -210,6 +301,34 @@ export class MessageCampaignService {
       });
 
       if (campaign === null) {
+        // The producer may still be committing the campaign transaction.
+        throw new Error('Campaign is not committed yet');
+      }
+      if (data.scheduleVersion) {
+        if (
+          campaign.scheduleVersion !== data.scheduleVersion ||
+          (campaign.status !== CAMPAIGN_STATUS.SCHEDULED &&
+            campaign.status !== CAMPAIGN_STATUS.SENDING)
+        )
+          return;
+        if (
+          campaign.scheduledAt &&
+          new Date(campaign.scheduledAt).getTime() > Date.now()
+        ) {
+          throw new Error('Campaign is not due yet');
+        }
+        if (campaign.status === CAMPAIGN_STATUS.SCHEDULED) {
+          const claimed = await campaignRepository.update(
+            {
+              id: campaignId,
+              status: CAMPAIGN_STATUS.SCHEDULED,
+              scheduleVersion: data.scheduleVersion,
+            },
+            { status: CAMPAIGN_STATUS.SENDING },
+          );
+          if (claimed.affected !== 1) return;
+        }
+      } else if (campaign.status !== CAMPAIGN_STATUS.SENDING) {
         return;
       }
 
@@ -298,8 +417,7 @@ export class MessageCampaignService {
 
       if (
         message === null ||
-        (message.deliveryStatus !== CAMPAIGN_MESSAGE_DELIVERY_STATUS.QUEUED &&
-          message.deliveryStatus !== CAMPAIGN_MESSAGE_DELIVERY_STATUS.FAILED)
+        message.deliveryStatus !== CAMPAIGN_MESSAGE_DELIVERY_STATUS.QUEUED
       ) {
         return;
       }
@@ -345,6 +463,16 @@ export class MessageCampaignService {
       const fromAddress = campaign.fromAddress?.primaryEmail ?? '';
       const unsubscribeTopicId = campaign.unsubscribeTopicId ?? undefined;
 
+      // Claim before contacting the provider: concurrent jobs and retries must not resend.
+      const claimed = await messageRepository.update(
+        {
+          id: messageId,
+          deliveryStatus: CAMPAIGN_MESSAGE_DELIVERY_STATUS.QUEUED,
+        },
+        { deliveryStatus: CAMPAIGN_MESSAGE_DELIVERY_STATUS.SENDING },
+      );
+      if (claimed.affected !== 1) return;
+
       try {
         let result: EmailingDomainSendEmailResult;
 
@@ -384,15 +512,7 @@ export class MessageCampaignService {
             }`,
           );
 
-          const isRetryable =
-            code === null ||
-            code === EmailingDomainDriverExceptionCode.TEMPORARY_ERROR ||
-            code === EmailingDomainDriverExceptionCode.UNKNOWN;
-
-          if (isRetryable) {
-            throw error;
-          }
-
+          // A timeout can mean the provider accepted the email. Do not automatically resend.
           return;
         }
 
@@ -453,38 +573,6 @@ export class MessageCampaignService {
 
       await messageRepository.update(message.id, { deliveryStatus });
     }, buildSystemAuthContext(workspaceId));
-  }
-
-  private async createCampaign({
-    workspaceId,
-    subject,
-    html,
-    fromAddress,
-    unsubscribeTopicId,
-    listId,
-  }: {
-    workspaceId: string;
-    subject: string;
-    html: string;
-    fromAddress: string;
-    unsubscribeTopicId?: string;
-    listId: string;
-  }): Promise<string> {
-    const campaignRepository = await this.getUserRepository(
-      workspaceId,
-      MessageCampaignWorkspaceEntity,
-    );
-
-    const { identifiers } = await campaignRepository.insert({
-      subject,
-      bodyTemplate: html,
-      fromAddress: { primaryEmail: fromAddress, additionalEmails: null },
-      status: CAMPAIGN_STATUS.SENDING,
-      unsubscribeTopicId: unsubscribeTopicId ?? null,
-      listId,
-    });
-
-    return identifiers[0].id;
   }
 
   private async materializeCampaignMessages({
@@ -606,7 +694,10 @@ export class MessageCampaignService {
     const queuedCount = await messageRepository.count({
       where: {
         messageCampaignId: campaignId,
-        deliveryStatus: CAMPAIGN_MESSAGE_DELIVERY_STATUS.QUEUED,
+        deliveryStatus: In([
+          CAMPAIGN_MESSAGE_DELIVERY_STATUS.QUEUED,
+          CAMPAIGN_MESSAGE_DELIVERY_STATUS.SENDING,
+        ]),
       },
     });
 

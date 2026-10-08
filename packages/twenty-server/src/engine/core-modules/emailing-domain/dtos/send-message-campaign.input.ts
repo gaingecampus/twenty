@@ -2,6 +2,7 @@ import { Field, InputType } from '@nestjs/graphql';
 
 import {
   IsEmail,
+  IsISO8601,
   IsOptional,
   IsString,
   IsUUID,
@@ -11,6 +12,21 @@ import {
 
 @InputType()
 export class SendMessageCampaignInput {
+  @Field(() => String, { nullable: true })
+  @IsOptional()
+  @IsISO8601({ strict: true })
+  scheduledAt?: string;
+
+  @Field(() => String, { nullable: true })
+  @IsOptional()
+  @IsUUID('4')
+  campaignId?: string;
+
+  @Field(() => String, { nullable: true })
+  @IsOptional()
+  @IsUUID('4')
+  scheduleVersion?: string;
+
   @Field(() => String)
   @IsUUID('4')
   listId: string;
