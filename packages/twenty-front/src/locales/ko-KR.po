@@ -188,7 +188,7 @@ msgstr ""
 #. placeholder {0}: preview.duplicateEmails
 #: src/modules/activities/emails/components/CampaignComposerFields.tsx
 msgid "{0} duplicate"
-msgstr ""
+msgstr "중복 이메일 {0}명"
 
 #. js-lingui-id: stCODw
 #. placeholder {0}: appObject.fields.length
@@ -207,7 +207,7 @@ msgstr ""
 #. placeholder {1}: preview.sendable
 #: src/modules/activities/emails/components/CampaignComposerFields.tsx
 msgid "{0} in this list — {1} sendable"
-msgstr ""
+msgstr "목록 내 {0}명 중 {1}명에게 발송 가능"
 
 #. js-lingui-id: T8aKxO
 #. placeholder {0}: layout.name
@@ -246,7 +246,7 @@ msgstr "총 {2}건 중 {0}–{1}건"
 #. placeholder {0}: preview.topicUnsubscribed
 #: src/modules/activities/emails/components/CampaignComposerFields.tsx
 msgid "{0} opted out of this topic"
-msgstr ""
+msgstr "이 주제 수신 거부 {0}명"
 
 #. placeholder {pageSize}: pageSize
 #: src/modules/object-record/record-index/components/RecordIndexPageSizeDropdown.tsx
@@ -275,7 +275,7 @@ msgstr "{0}표시됨"
 #. placeholder {0}: preview.globallyUnsubscribed
 #: src/modules/activities/emails/components/CampaignComposerFields.tsx
 msgid "{0} unsubscribed from everything"
-msgstr ""
+msgstr "전체 수신 거부 {0}명"
 
 #. js-lingui-id: r4l/MK
 #. placeholder {0}: formatUsageValue(totalCredits)
@@ -299,7 +299,7 @@ msgstr "{0}위젯"
 #. placeholder {0}: preview.withoutEmail
 #: src/modules/activities/emails/components/CampaignComposerFields.tsx
 msgid "{0} without email"
-msgstr ""
+msgstr "이메일 주소 없음 {0}명"
 
 #. js-lingui-id: 2UKfhY
 #. placeholder {0}: selectedItemNames.length
@@ -3451,12 +3451,12 @@ msgstr "국가 번호"
 #. js-lingui-id: 06mPlO
 #: src/modules/activities/emails/hooks/useSendMessageCampaign.ts
 msgid "Campaign queued to {queuedCount} recipient(s)"
-msgstr ""
+msgstr "{queuedCount}명에게 보낼 캠페인을 발송 대기열에 등록했습니다"
 
 #. js-lingui-id: 6nG/xd
 #: src/modules/activities/emails/hooks/useSendMessageCampaign.ts
 msgid "Campaign queued to {queuedCount} recipient(s), {skippedCount} skipped"
-msgstr ""
+msgstr "{queuedCount}명에게 보낼 캠페인을 발송 대기열에 등록했습니다 ({skippedCount}명 제외)"
 
 #. js-lingui-id: msssZq
 #: src/modules/settings/data-model/objects/forms/components/SettingsDataModelObjectAboutForm.tsx
@@ -8030,7 +8030,7 @@ msgstr "워크스페이스 지침을 저장하지 못했습니다"
 #: src/modules/activities/emails/hooks/useSendMessageCampaign.ts
 #: src/modules/activities/emails/hooks/useSendMessageCampaign.ts
 msgid "Failed to send campaign"
-msgstr ""
+msgstr "캠페인 발송에 실패했습니다"
 
 #. js-lingui-id: Lo/GQ5
 #: src/modules/activities/emails/hooks/useSendEmail.ts
@@ -8647,7 +8647,7 @@ msgstr "프랑스어"
 #: src/modules/activities/emails/components/CampaignComposerFields.tsx
 #: src/modules/activities/emails/components/EmailComposerFields.tsx
 msgid "From"
-msgstr "에서"
+msgstr "보내는 사람"
 
 #. js-lingui-id: qR8gT9
 #: src/modules/workflow/workflow-trigger/utils/cron-to-human/descriptors/getDayOfWeekDescription.ts
@@ -11754,7 +11754,7 @@ msgstr "새 승인된 액세스 도메인"
 #. js-lingui-id: yGfI61
 #: src/modules/side-panel/hooks/useOpenCampaignComposerInSidePanel.ts
 msgid "New Campaign"
-msgstr ""
+msgstr "새 캠페인"
 
 #. js-lingui-id: hIQkLb
 #: src/modules/ai/components/AiChatThreadsList.tsx
@@ -12489,7 +12489,7 @@ msgstr "개별 객체에 대한 권한이 설정되지 않았습니다."
 #. js-lingui-id: 5sv+ia
 #: src/modules/activities/emails/hooks/useSendMessageCampaign.ts
 msgid "No recipients to send to ({skippedCount} skipped)"
-msgstr ""
+msgstr "발송 가능한 수신자가 없습니다 ({skippedCount}명 제외)"
 
 #. js-lingui-id: V/+aTW
 #: src/modules/object-record/record-field/ui/form-types/components/FormMorphRelationToOneFieldInput.tsx
@@ -12624,7 +12624,7 @@ msgstr "호출된 도구가 없습니다."
 #. js-lingui-id: vK0RL8
 #: src/modules/activities/emails/components/CampaignComposerFields.tsx
 msgid "No topic"
-msgstr ""
+msgstr "주제 없음"
 
 #. js-lingui-id: ZCTuAQ
 #: src/modules/settings/logic-functions/components/tabs/SettingsLogicFunctionTriggersTab.tsx
@@ -15855,7 +15855,7 @@ msgstr ""
 #. js-lingui-id: YkYui1
 #: src/modules/activities/emails/components/CampaignComposerFields.tsx
 msgid "Select a sender"
-msgstr ""
+msgstr "발신자 선택"
 
 #. js-lingui-id: jL3gox
 #: src/modules/object-record/record-field/ui/form-types/components/FormBooleanFieldInput.tsx
@@ -16018,7 +16018,7 @@ msgstr "팀에 초대 이메일 보내기"
 #. js-lingui-id: WRLt0i
 #: src/modules/side-panel/pages/compose-campaign/components/SidePanelCampaignComposerPage.tsx
 msgid "Send campaign"
-msgstr ""
+msgstr "캠페인 발송"
 
 #. js-lingui-id: 65dxv8
 #: src/modules/workflow/workflow-run/observability/WorkflowRunStepLogsEmailDetail.tsx
@@ -17537,7 +17537,7 @@ msgstr "선택한 레코드(최대{maxRecordsFormatted})가 워크플로로 전�
 #. js-lingui-id: qrhV2s
 #: src/modules/activities/emails/components/CampaignComposerFields.tsx
 msgid "The unsubscribe topic this email belongs to. Recipients who opted out of it are skipped, and the unsubscribe link is scoped to it."
-msgstr ""
+msgstr "이메일의 수신 거부 주제를 선택하세요. 이 주제를 수신 거부한 고객은 발송 대상에서 제외되며, 이메일의 수신 거부 링크도 이 주제에 적용됩니다."
 
 #. js-lingui-id: uWikAA
 #: src/pages/settings/data-model/SettingsObjectFieldEdit.tsx
@@ -18623,7 +18623,7 @@ msgstr "글머리 기호가 있는 순서가 지정되지 않은 목록"
 #. js-lingui-id: BEZcuL
 #: src/modules/activities/emails/components/CampaignComposerFields.tsx
 msgid "Unsubscribe topic"
-msgstr ""
+msgstr "수신 거부 주제"
 
 #. js-lingui-id: Molx4x
 #: src/modules/settings/unsubscribe-topics/components/SettingsWorkspaceUnsubscribeTopicSection.tsx
@@ -18675,7 +18675,7 @@ msgstr "제목 없음 iFrame"
 #. js-lingui-id: PMPun8
 #: src/modules/activities/emails/components/CampaignComposerFields.tsx
 msgid "Untitled list"
-msgstr ""
+msgstr "제목 없는 목록"
 
 #. js-lingui-id: xzOKup
 #: src/modules/settings/roles/role/components/SettingsRoleCreateEffect.tsx
@@ -18687,7 +18687,7 @@ msgstr "제목 없음 역할"
 #: src/modules/settings/unsubscribe-topics/components/SettingsWorkspaceUnsubscribeTopicSection.tsx
 #: src/pages/settings/email/SettingsWorkspaceUnsubscribeTopicDetail.tsx
 msgid "Untitled topic"
-msgstr ""
+msgstr "제목 없는 주제"
 
 #. js-lingui-id: p1M9l4
 #: src/modules/workflow/workflow-steps/workflow-actions/code-action/components/WorkflowEditActionCode.tsx
