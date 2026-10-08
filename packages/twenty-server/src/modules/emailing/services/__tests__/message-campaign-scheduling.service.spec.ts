@@ -1,4 +1,9 @@
-import { BadRequestException, ConflictException } from '@nestjs/common';
+import { getWorkspaceContext } from 'src/engine/twenty-orm/storage/orm-workspace-context.storage';
+import {
+  BadRequestException,
+  ConflictException,
+  ForbiddenException,
+} from '@nestjs/common';
 
 import { MessageCampaignService } from 'src/modules/emailing/services/message-campaign.service';
 import { MessageCampaignWorkspaceEntity } from 'src/modules/emailing/standard-objects/message-campaign.workspace-entity';
@@ -9,6 +14,13 @@ import {
   EmailingDomainDriverException,
   EmailingDomainDriverExceptionCode,
 } from 'src/engine/core-modules/emailing-domain/drivers/exceptions/emailing-domain-driver.exception';
+
+jest.mock(
+  'src/engine/twenty-orm/storage/orm-workspace-context.storage',
+  () => ({
+    getWorkspaceContext: jest.fn(),
+  }),
+);
 
 describe('Campaign scheduling and delivery guards', () => {
   const now = new Date('2026-10-08T01:00:00.000Z');
@@ -84,8 +96,41 @@ describe('Campaign scheduling and delivery guards', () => {
     emailingDomainId: 'domain',
   };
 
+  it('passes the caller role to customer and campaign repositories', async () => {
+    await service.send(input);
+
+    for (const entity of [
+      MessageListMemberWorkspaceEntity,
+      PersonWorkspaceEntity,
+      MessageCampaignWorkspaceEntity,
+    ]) {
+      expect(orm.getRepository).toHaveBeenCalledWith('workspace', entity, {
+        intersectionOf: ['caller-role'],
+      });
+    }
+  });
+
+  it('rejects an unresolved caller role before querying customers or queuing', async () => {
+    jest.mocked(getWorkspaceContext).mockReturnValue({
+      authContext: { type: 'user', userWorkspaceId: 'unknown-user' },
+      userWorkspaceRoleMap: {},
+      apiKeyRoleMap: {},
+    } as unknown as ReturnType<typeof getWorkspaceContext>);
+
+    await expect(service.send(input)).rejects.toBeInstanceOf(
+      ForbiddenException,
+    );
+    expect(people.find).not.toHaveBeenCalled();
+    expect(queue.add).not.toHaveBeenCalled();
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.mocked(getWorkspaceContext).mockReturnValue({
+      authContext: { type: 'user', userWorkspaceId: 'user' },
+      userWorkspaceRoleMap: { user: 'caller-role' },
+      apiKeyRoleMap: {},
+    } as unknown as ReturnType<typeof getWorkspaceContext>);
     jest.spyOn(Date, 'now').mockReturnValue(now.getTime());
     domains.findOne.mockResolvedValue({ id: 'domain' });
     channels.getOrCreateEmailGroupChannel.mockResolvedValue({ id: 'channel' });

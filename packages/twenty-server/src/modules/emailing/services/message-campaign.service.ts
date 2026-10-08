@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   Injectable,
   Logger,
   type Type,
@@ -37,6 +38,8 @@ import { MessageQueueService } from 'src/engine/core-modules/message-queue/servi
 import { MessageChannelMetadataService } from 'src/engine/metadata-modules/message-channel/message-channel-metadata.service';
 import { type WorkspaceEntityManager } from 'src/engine/twenty-orm/entity-manager/workspace-entity-manager';
 import { GlobalWorkspaceOrmManager } from 'src/engine/twenty-orm/global-workspace-datasource/global-workspace-orm.manager';
+import { getWorkspaceContext } from 'src/engine/twenty-orm/storage/orm-workspace-context.storage';
+import { resolveRolePermissionConfig } from 'src/engine/twenty-orm/utils/resolve-role-permission-config.util';
 import { buildSystemAuthContext } from 'src/engine/twenty-orm/utils/build-system-auth-context.util';
 import { InjectWorkspaceScopedRepository } from 'src/engine/twenty-orm/workspace-scoped-repository/inject-workspace-scoped-repository.decorator';
 import { WorkspaceScopedRepository } from 'src/engine/twenty-orm/workspace-scoped-repository/workspace-scoped-repository';
@@ -113,7 +116,25 @@ export class MessageCampaignService {
     workspaceId: string,
     entity: Type<T>,
   ) {
-    return this.globalWorkspaceOrmManager.getRepository(workspaceId, entity);
+    const { authContext, userWorkspaceRoleMap, apiKeyRoleMap } =
+      getWorkspaceContext();
+    const permissions = resolveRolePermissionConfig({
+      authContext,
+      userWorkspaceRoleMap,
+      apiKeyRoleMap,
+    });
+
+    if (!permissions) {
+      throw new ForbiddenException(
+        '캠페인을 처리할 사용자 역할을 확인할 수 없습니다.',
+      );
+    }
+
+    return this.globalWorkspaceOrmManager.getRepository(
+      workspaceId,
+      entity,
+      permissions,
+    );
   }
 
   private getSystemRepository<T extends ObjectLiteral>(
