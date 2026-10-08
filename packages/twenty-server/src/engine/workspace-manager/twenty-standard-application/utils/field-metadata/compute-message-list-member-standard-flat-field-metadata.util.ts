@@ -182,7 +182,7 @@ export const buildMessageListMemberStandardFlatFieldMetadatas = ({
       type: FieldMetadataType.RELATION,
       morphId: null,
       fieldName: 'list',
-      label: i18nLabel(msg`List`),
+      label: i18nLabel(msg`세그먼트`),
       description: i18nLabel(msg`The list the person belongs to`),
       icon: 'IconUsersGroup',
       isNullable: false,

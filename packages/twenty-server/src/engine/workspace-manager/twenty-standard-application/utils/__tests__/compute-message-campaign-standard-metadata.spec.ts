@@ -37,12 +37,10 @@ describe('Message campaign index metadata', () => {
     ).toEqual([
       campaign.fields.subject.universalIdentifier,
       campaign.fields.status.universalIdentifier,
-      campaign.fields.fromAddress.universalIdentifier,
       campaign.fields.list.universalIdentifier,
-      campaign.fields.sentAt.universalIdentifier,
-      campaign.fields.createdBy.universalIdentifier,
-      campaign.fields.createdAt.universalIdentifier,
       campaign.fields.scheduledAt.universalIdentifier,
+      campaign.fields.sentAt.universalIdentifier,
+      campaign.fields.fromAddress.universalIdentifier,
     ]);
   });
 });

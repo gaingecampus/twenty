@@ -33,7 +33,7 @@ const MESSAGE_CAMPAIGN_PAGE_TABS = {
         universalIdentifier:
           STANDARD_PAGE_LAYOUT_UNIVERSAL_IDENTIFIERS.messageCampaignRecordPage
             .tabs.home.widgets.list.universalIdentifier,
-        title: 'List',
+        title: '세그먼트',
         type: WidgetType.FIELD,
         gridPosition: GRID_POSITIONS.FULL_WIDTH,
         position: VERTICAL_LIST_LAYOUT_POSITIONS.THIRD,
@@ -56,7 +56,7 @@ const MESSAGE_CAMPAIGN_PAGE_TABS = {
         universalIdentifier:
           STANDARD_PAGE_LAYOUT_UNIVERSAL_IDENTIFIERS.messageCampaignRecordPage
             .tabs.home.widgets.messages.universalIdentifier,
-        title: 'Sent Messages',
+        title: '발송 내역',
         type: WidgetType.FIELD,
         gridPosition: GRID_POSITIONS.FULL_WIDTH,
         position: VERTICAL_LIST_LAYOUT_POSITIONS.FIFTH,
