@@ -41,6 +41,7 @@ describe('Campaign scheduling and delivery guards', () => {
   const members = { find: jest.fn() };
   const domains = { findOne: jest.fn() };
   const sender = { sendEmail: jest.fn() };
+  const connectedSender = { resolveChannel: jest.fn(), send: jest.fn() };
   const queue = { add: jest.fn() };
   const channels = { getOrCreateEmailGroupChannel: jest.fn() };
   const transactionManager = {};
@@ -69,6 +70,9 @@ describe('Campaign scheduling and delivery guards', () => {
       typeof MessageCampaignService
     >[4],
     {} as ConstructorParameters<typeof MessageCampaignService>[5],
+    connectedSender as unknown as ConstructorParameters<
+      typeof MessageCampaignService
+    >[6],
   );
   const input = {
     workspaceId: 'workspace',
@@ -126,6 +130,7 @@ describe('Campaign scheduling and delivery guards', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    connectedSender.resolveChannel.mockResolvedValue(null);
     jest.mocked(getWorkspaceContext).mockReturnValue({
       authContext: { type: 'user', userWorkspaceId: 'user' },
       userWorkspaceRoleMap: { user: 'caller-role' },
@@ -160,6 +165,73 @@ describe('Campaign scheduling and delivery guards', () => {
     });
   });
   afterEach(() => jest.restoreAllMocks());
+
+  it('pins the connected sender without requiring a SES domain', async () => {
+    connectedSender.resolveChannel.mockResolvedValue({
+      id: 'mail-channel',
+      connectedAccountId: 'mail-account',
+    });
+    await service.send(input);
+    expect(domains.findOne).not.toHaveBeenCalled();
+    expect(channels.getOrCreateEmailGroupChannel).not.toHaveBeenCalled();
+    expect(queue.add).toHaveBeenCalledWith(
+      'MaterializeCampaignJob',
+      expect.objectContaining({
+        messageChannelId: 'mail-channel',
+        connectedAccountId: 'mail-account',
+        senderUserWorkspaceId: 'user',
+        emailingDomainId: undefined,
+      }),
+      expect.anything(),
+    );
+  });
+
+  it('delivers through the pinned connected account and stores provider IDs', async () => {
+    connectedSender.send.mockResolvedValue({
+      headerMessageId: 'mail-header',
+      messageExternalId: 'mail-external',
+      threadExternalId: 'mail-thread',
+    });
+    await service.processSendJob({
+      ...sendJob,
+      emailingDomainId: undefined,
+      connectedAccountId: 'mail-account',
+      senderUserWorkspaceId: 'user',
+    });
+    expect(sender.sendEmail).not.toHaveBeenCalled();
+    expect(connectedSender.send).toHaveBeenCalledWith(
+      'workspace',
+      'user',
+      'mail-account',
+      expect.objectContaining({ to: ['recipient@example.com'] }),
+    );
+    expect(associations.update).toHaveBeenCalledWith(
+      { messageId: 'message' },
+      {
+        messageExternalId: 'mail-external',
+        messageThreadExternalId: 'mail-thread',
+      },
+    );
+  });
+
+  it('records a revoked connected account as failed without falling back or resending', async () => {
+    connectedSender.send.mockRejectedValueOnce(new ForbiddenException());
+    await service.processSendJob({
+      ...sendJob,
+      emailingDomainId: undefined,
+      connectedAccountId: 'mail-account',
+      senderUserWorkspaceId: 'user',
+    });
+    expect(sender.sendEmail).not.toHaveBeenCalled();
+    expect(messages.update).toHaveBeenCalledWith('message', {
+      deliveryStatus: 'FAILED',
+    });
+    expect(queue.add).not.toHaveBeenCalled();
+    expect(campaign.update).toHaveBeenCalledWith(
+      expect.objectContaining({ status: 'SENDING' }),
+      expect.objectContaining({ sentAt: expect.any(Date) }),
+    );
+  });
 
   it.each([
     '2026-10-08T00:59:00Z',

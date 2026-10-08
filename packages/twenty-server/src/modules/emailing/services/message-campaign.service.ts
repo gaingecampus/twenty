@@ -1,3 +1,4 @@
+import { CampaignConnectedAccountSenderService } from 'src/modules/emailing/services/campaign-connected-account-sender.service';
 import {
   BadRequestException,
   ConflictException,
@@ -110,6 +111,7 @@ export class MessageCampaignService {
     private readonly messageQueueService: MessageQueueService,
     private readonly messageChannelMetadataService: MessageChannelMetadataService,
     private readonly messageSuppressionService: MessageSuppressionService,
+    private readonly connectedAccountSender: CampaignConnectedAccountSenderService,
   ) {}
 
   private getUserRepository<T extends ObjectLiteral>(
@@ -166,26 +168,31 @@ export class MessageCampaignService {
       );
     }
 
-    const emailingDomain = await this.emailingDomainRepository.findOne(
+    const connectedChannel = await this.connectedAccountSender.resolveChannel(
       workspaceId,
-      {
-        where: {
-          domain: getDomainFromEmail(fromAddress)?.toLowerCase(),
-          status: EmailingDomainStatus.VERIFIED,
-        },
-      },
+      userWorkspaceId,
+      fromAddress,
     );
-    if (!emailingDomain) {
+    const emailingDomain = connectedChannel
+      ? null
+      : await this.emailingDomainRepository.findOne(workspaceId, {
+          where: {
+            domain: getDomainFromEmail(fromAddress)?.toLowerCase(),
+            status: EmailingDomainStatus.VERIFIED,
+          },
+        });
+    if (!connectedChannel && !emailingDomain) {
       throw new BadRequestException(
         '발신 주소에 연결된 인증된 이메일 도메인이 없습니다.',
       );
     }
     const messageChannel =
-      await this.messageChannelMetadataService.getOrCreateEmailGroupChannel({
+      connectedChannel ??
+      (await this.messageChannelMetadataService.getOrCreateEmailGroupChannel({
         fromAddress,
         userWorkspaceId,
         workspaceId,
-      });
+      }));
 
     return this.globalWorkspaceOrmManager.executeInWorkspaceContext(
       async () => {
@@ -251,7 +258,9 @@ export class MessageCampaignService {
                 workspaceId,
                 campaignId,
                 messageChannelId: messageChannel.id,
-                emailingDomainId: emailingDomain.id,
+                emailingDomainId: emailingDomain?.id,
+                connectedAccountId: connectedChannel?.connectedAccountId,
+                senderUserWorkspaceId: userWorkspaceId,
                 recipients: normalized.recipients,
                 scheduleVersion: scheduleVersion ?? undefined,
               },
@@ -308,6 +317,8 @@ export class MessageCampaignService {
       campaignId,
       messageChannelId,
       emailingDomainId,
+      connectedAccountId,
+      senderUserWorkspaceId,
       recipients,
     } = data;
 
@@ -407,6 +418,8 @@ export class MessageCampaignService {
             personId: recipient.personId,
             recipientEmail: recipient.email,
             emailingDomainId,
+            connectedAccountId,
+            senderUserWorkspaceId,
           },
           { retryLimit: 3 },
         );
@@ -424,6 +437,8 @@ export class MessageCampaignService {
       personId,
       recipientEmail,
       emailingDomainId,
+      connectedAccountId,
+      senderUserWorkspaceId,
     } = data;
 
     await this.globalWorkspaceOrmManager.executeInWorkspaceContext(async () => {
@@ -496,20 +511,42 @@ export class MessageCampaignService {
 
       try {
         let result: EmailingDomainSendEmailResult;
+        let providerMessageId: string;
+        let providerThreadId: string;
 
         try {
-          result = await this.emailingDomainSenderService.sendEmail(
-            workspaceId,
-            emailingDomainId,
-            {
-              from: fromAddress,
-              to: [recipientEmail],
-              subject,
-              text,
-              html,
-              unsubscribeTopicId,
-            },
-          );
+          const content = {
+            from: fromAddress,
+            to: [recipientEmail],
+            subject,
+            text,
+            html,
+            unsubscribeTopicId,
+          };
+          if (connectedAccountId && senderUserWorkspaceId) {
+            const sent = await this.connectedAccountSender.send(
+              workspaceId,
+              senderUserWorkspaceId,
+              connectedAccountId,
+              content,
+            );
+            result = {
+              messageId: sent.headerMessageId,
+              deliveredRecipients: { to: [recipientEmail], cc: [], bcc: [] },
+            };
+            providerMessageId = sent.messageExternalId ?? sent.headerMessageId;
+            providerThreadId = sent.threadExternalId ?? providerMessageId;
+          } else {
+            if (!emailingDomainId)
+              throw new BadRequestException('발신 계정 정보가 없습니다.');
+            result = await this.emailingDomainSenderService.sendEmail(
+              workspaceId,
+              emailingDomainId,
+              content,
+            );
+            providerMessageId = result.messageId;
+            providerThreadId = result.messageId;
+          }
         } catch (error) {
           const code =
             error instanceof EmailingDomainDriverException ? error.code : null;
@@ -552,8 +589,8 @@ export class MessageCampaignService {
         await associationRepository.update(
           { messageId },
           {
-            messageExternalId: result.messageId,
-            messageThreadExternalId: result.messageId,
+            messageExternalId: providerMessageId,
+            messageThreadExternalId: providerThreadId,
           },
         );
       } finally {

@@ -4,5 +4,7 @@ export type SendCampaignEmailJobData = {
   messageId: string;
   personId: string;
   recipientEmail: string;
-  emailingDomainId: string;
+  emailingDomainId?: string;
+  connectedAccountId?: string;
+  senderUserWorkspaceId?: string;
 };

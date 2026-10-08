@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { EmailingDomainEntity } from 'src/engine/core-modules/emailing-domain/emailing-domain.entity';
@@ -24,7 +24,7 @@ import { SentMessagePersistenceService } from 'src/modules/messaging/message-out
     MessagingIMAPDriverModule,
     MessagingSmtpDriverModule,
     MessagingImportManagerModule,
-    EmailingModule,
+    forwardRef(() => EmailingModule),
     TypeOrmModule.forFeature([
       MessageChannelEntity,
       MessageFolderEntity,

@@ -151,9 +151,10 @@ export const CampaignComposerFields = ({
   });
 
   const senderOptions: SelectOption<string>[] = channels
-    .filter((channel) => channel.type === MessageChannelType.EMAIL_GROUP)
+    .filter((channel) => channel.type === MessageChannelType.EMAIL)
     .map((channel) => channel.connectedAccount?.handle)
     .filter(isDefined)
+    .filter((handle, index, handles) => handles.indexOf(handle) === index)
     .map((handle) => ({ label: handle, value: handle }));
 
   const topicOptions: SelectOption<string>[] = unsubscribeTopics.map(
@@ -202,8 +203,8 @@ export const CampaignComposerFields = ({
         label={t`From`}
         help={
           senderOptions.length === 0
-            ? t`선택 가능한 공용 이메일 발신 계정이 없습니다. 이메일 설정에서 계정을 연결하고 접근 권한을 확인하세요.`
-            : t`이 캠페인을 보낼 공용 이메일 계정을 선택하세요.`
+            ? t`선택 가능한 이메일 발신 계정이 없습니다. 이메일 설정에서 계정을 연결하고 접근 권한을 확인하세요.`
+            : t`이 캠페인을 보낼 연동 이메일 계정을 선택하세요.`
         }
       />
       <Select
@@ -212,7 +213,11 @@ export const CampaignComposerFields = ({
         callToActionButton={{
           text: t`발신 계정 설정 열기 (새 탭)`,
           onClick: () =>
-            window.open('/settings/email', '_blank', 'noopener,noreferrer'),
+            window.open(
+              '/settings/accounts/emails',
+              '_blank',
+              'noopener,noreferrer',
+            ),
         }}
         fullWidth
         value={campaignState.fromAddress}
@@ -220,14 +225,14 @@ export const CampaignComposerFields = ({
         emptyOption={{ label: t`Select a sender`, value: '' }}
         onChange={campaignState.setFromAddress}
       />
-      {(loadingChannels || channelsError) && (
+      {(loadingChannels || channelsError || senderOptions.length === 0) && (
         <StyledHint>
           {loadingChannels
             ? t`발신 계정을 불러오는 중입니다.`
             : channelsError
               ? t`발신 계정을 불러오지 못했습니다. 페이지를 새로 고침해 다시 시도하세요.`
               : senderOptions.length === 0
-                ? t`선택 가능한 공용 이메일 발신 계정이 없습니다. 이메일 설정에서 계정을 연결하고 접근 권한을 확인하세요.`
+                ? t`선택 가능한 이메일 발신 계정이 없습니다. 이메일 설정에서 계정을 연결하고 접근 권한을 확인하세요.`
                 : null}
         </StyledHint>
       )}

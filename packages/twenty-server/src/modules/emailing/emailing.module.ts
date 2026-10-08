@@ -1,4 +1,7 @@
-import { Module } from '@nestjs/common';
+import { MessagingSendManagerModule } from 'src/modules/messaging/message-outbound-manager/messaging-send-manager.module';
+import { ConnectedAccountMetadataModule } from 'src/engine/metadata-modules/connected-account/connected-account-metadata.module';
+import { CampaignConnectedAccountSenderService } from 'src/modules/emailing/services/campaign-connected-account-sender.service';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { EmailingDomainModule } from 'src/engine/core-modules/emailing-domain/emailing-domain.module';
@@ -21,6 +24,8 @@ import { UnsubscribeTopicService } from 'src/modules/emailing/services/unsubscri
 @Module({
   imports: [
     EmailingDomainModule,
+    ConnectedAccountMetadataModule,
+    forwardRef(() => MessagingSendManagerModule),
     MessageChannelMetadataModule,
     FeatureFlagModule,
     PermissionsModule,
@@ -33,6 +38,7 @@ import { UnsubscribeTopicService } from 'src/modules/emailing/services/unsubscri
   ],
   controllers: [UnsubscribeController],
   providers: [
+    CampaignConnectedAccountSenderService,
     MessageCampaignService,
     MessageSuppressionService,
     UnsubscribeTopicService,
