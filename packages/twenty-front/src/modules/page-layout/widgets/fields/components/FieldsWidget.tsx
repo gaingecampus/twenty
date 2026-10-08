@@ -142,7 +142,11 @@ export const FieldsWidget = ({ widget }: FieldsWidgetProps) => {
             </StyledInlineFieldsPropertyBox>
           ) : (
             groups.map((group) => (
-              <FieldsWidgetGroupContainer key={group.id} title={group.name}>
+              <FieldsWidgetGroupContainer
+                key={`${instanceId}-${group.id}-${group.isCollapsed ?? false}`}
+                title={group.name}
+                defaultExpanded={!group.isCollapsed}
+              >
                 <StyledPropertyBox>
                   <FieldsWidgetFieldList
                     fields={group.fields}

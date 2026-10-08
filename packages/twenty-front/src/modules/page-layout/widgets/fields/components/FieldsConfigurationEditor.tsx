@@ -246,6 +246,12 @@ export const FieldsConfigurationEditor = ({
                     onToggleFieldVisibility={(fieldMetadataId) =>
                       toggleFieldVisibility(group.id, fieldMetadataId)
                     }
+                    onToggleCollapsed={() =>
+                      updateGroup({
+                        groupId: group.id,
+                        isCollapsed: !group.isCollapsed,
+                      })
+                    }
                     onRenameGroup={handleRenameGroup}
                     onDeleteGroup={handleDeleteGroup}
                     renamingGroupValue={renamingGroupValue}

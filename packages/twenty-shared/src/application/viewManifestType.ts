@@ -53,6 +53,7 @@ export type ViewGroupManifest = SyncableEntityOptions & {
 };
 
 export type ViewFieldGroupManifest = SyncableEntityOptions & {
+  isCollapsed?: boolean;
   name?: string;
   position: number;
   isVisible?: boolean;

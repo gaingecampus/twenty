@@ -41,6 +41,21 @@ const createFlatViewFieldGroup = (
   }) as FlatViewFieldGroup;
 
 describe('buildFieldsWidgetGroupsFromFlatViewData', () => {
+  it.each([true, false, undefined])(
+    'restores the saved collapse preference (%s)',
+    (isCollapsed) => {
+      const result = buildFieldsWidgetGroupsFromFlatViewData({
+        flatViewFieldGroups: [
+          createFlatViewFieldGroup({ id: 'group', isCollapsed }),
+        ],
+        flatViewFields: [],
+        fieldMetadataItems: [],
+      });
+
+      expect(result.groups[0].isCollapsed).toBe(isCollapsed ?? false);
+    },
+  );
+
   const fm1 = createFieldMetadata({ id: 'fm-1', name: 'name', label: 'Name' });
   const fm2 = createFieldMetadata({
     id: 'fm-2',

@@ -261,6 +261,9 @@ export class FieldsWidgetUpsertService {
               name: inputGroup.name,
               position: inputGroup.position,
               isVisible: inputGroup.isVisible,
+              ...(isDefined(inputGroup.isCollapsed)
+                ? { isCollapsed: inputGroup.isCollapsed }
+                : {}),
             },
             shouldOverride,
           });
@@ -875,6 +878,7 @@ export class FieldsWidgetUpsertService {
       name: inputGroup.name,
       position: inputGroup.position,
       isVisible: inputGroup.isVisible,
+      isCollapsed: inputGroup.isCollapsed ?? false,
       viewId,
       viewUniversalIdentifier,
       isActive: true,
@@ -904,7 +908,10 @@ export class FieldsWidgetUpsertService {
     return (
       resolvedName !== input.name ||
       resolvedPosition !== input.position ||
-      resolvedIsVisible !== input.isVisible
+      resolvedIsVisible !== input.isVisible ||
+      (isDefined(input.isCollapsed) &&
+        (existing.overrides?.isCollapsed ?? existing.isCollapsed) !==
+          input.isCollapsed)
     );
   }
 }

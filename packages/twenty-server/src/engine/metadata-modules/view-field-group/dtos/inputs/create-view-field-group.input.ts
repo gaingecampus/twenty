@@ -37,6 +37,11 @@ export class CreateViewFieldGroupInput {
   @Field({ nullable: true, defaultValue: true })
   isVisible?: boolean;
 
+  @IsOptional()
+  @IsBoolean()
+  @Field(() => Boolean, { nullable: true })
+  isCollapsed?: boolean;
+
   @HideField()
   universalIdentifier?: string;
 

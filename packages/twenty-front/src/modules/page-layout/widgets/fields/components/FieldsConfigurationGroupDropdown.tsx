@@ -1,12 +1,13 @@
 import { useLingui } from '@lingui/react/macro';
 import {
+  IconChevronDown,
   IconDotsVertical,
   IconNewSection,
   IconPencil,
   IconTrash,
 } from 'twenty-ui/icon';
 import { LightIconButton } from 'twenty-ui/input';
-import { MenuItem } from 'twenty-ui/navigation';
+import { MenuItem, MenuItemToggle } from 'twenty-ui/navigation';
 
 import { getFieldsConfigurationGroupEditDropdownId } from '@/page-layout/widgets/fields/utils/getFieldsConfigurationGroupEditDropdownId';
 import { Dropdown } from '@/ui/layout/dropdown/components/Dropdown';
@@ -17,6 +18,8 @@ import { useCloseDropdown } from '@/ui/layout/dropdown/hooks/useCloseDropdown';
 
 type FieldsConfigurationGroupDropdownProps = {
   groupId: string;
+  isCollapsed: boolean;
+  onToggleCollapsed: () => void;
   onStartRename: () => void;
   onDelete: () => void;
   onAddGroup?: () => void;
@@ -24,6 +27,8 @@ type FieldsConfigurationGroupDropdownProps = {
 
 export const FieldsConfigurationGroupDropdown = ({
   groupId,
+  isCollapsed,
+  onToggleCollapsed,
   onStartRename,
   onDelete,
   onAddGroup,
@@ -59,6 +64,13 @@ export const FieldsConfigurationGroupDropdown = ({
       dropdownComponents={
         <DropdownContent widthInPixels={GenericDropdownContentWidth.Narrow}>
           <DropdownMenuItemsContainer>
+            <MenuItemToggle
+              LeftIcon={IconChevronDown}
+              text={t`Collapsed by default`}
+              toggled={isCollapsed}
+              onToggleChange={onToggleCollapsed}
+              toggleSize="small"
+            />
             <MenuItem
               LeftIcon={IconPencil}
               onClick={handleRename}

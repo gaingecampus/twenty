@@ -73,6 +73,7 @@ export const useSaveFieldsWidgetGroups = () => {
                   name: group.name,
                   position: group.position,
                   isVisible: group.isVisible,
+                  isCollapsed: group.isCollapsed ?? false,
                   fields: group.fields.map((field) => ({
                     ...(isDefined(field.viewFieldId)
                       ? { viewFieldId: field.viewFieldId }

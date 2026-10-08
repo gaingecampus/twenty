@@ -31,6 +31,11 @@ class UpdateViewFieldGroupInputUpdates {
   isVisible?: boolean;
 
   @IsOptional()
+  @IsBoolean()
+  @Field(() => Boolean, { nullable: true })
+  isCollapsed?: boolean;
+
+  @IsOptional()
   @IsString()
   @Field({ nullable: true })
   deletedAt?: string;

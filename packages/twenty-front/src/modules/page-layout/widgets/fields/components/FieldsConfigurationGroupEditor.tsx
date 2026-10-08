@@ -76,6 +76,7 @@ type FieldsConfigurationGroupEditorProps = {
   draggableProvided: DraggableProvided;
   isDragging: boolean;
   onAddGroup?: () => void;
+  onToggleCollapsed: () => void;
   onToggleFieldVisibility: (fieldMetadataId: string) => void;
   onRenameGroup: (params: { groupId: string; newName: string }) => void;
   onDeleteGroup: (params: { groupId: string }) => void;
@@ -89,6 +90,7 @@ export const FieldsConfigurationGroupEditor = ({
   draggableProvided,
   isDragging,
   onAddGroup,
+  onToggleCollapsed,
   onToggleFieldVisibility,
   onRenameGroup,
   onDeleteGroup,
@@ -169,6 +171,8 @@ export const FieldsConfigurationGroupEditor = ({
         <StyledDropdownContainer>
           <FieldsConfigurationGroupDropdown
             groupId={group.id}
+            isCollapsed={group.isCollapsed ?? false}
+            onToggleCollapsed={onToggleCollapsed}
             onStartRename={handleStartRename}
             onDelete={() => onDeleteGroup({ groupId: group.id })}
             onAddGroup={onAddGroup}

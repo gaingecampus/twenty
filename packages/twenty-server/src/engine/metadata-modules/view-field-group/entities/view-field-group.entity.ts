@@ -20,6 +20,7 @@ export type ViewFieldGroupOverrides = {
   name?: string;
   position?: number;
   isVisible?: boolean;
+  isCollapsed?: boolean;
 };
 
 @Entity({ name: 'viewFieldGroup', schema: 'core' })
@@ -40,6 +41,9 @@ export class ViewFieldGroupEntity
 
   @Column({ nullable: false, default: true })
   isVisible: boolean;
+
+  @Column({ nullable: false, default: false })
+  isCollapsed: boolean;
 
   @Column({ nullable: false, type: 'uuid' })
   viewId: string;

@@ -5,6 +5,7 @@ import {
   IsBoolean,
   IsNotEmpty,
   IsNumber,
+  IsOptional,
   IsString,
   IsUUID,
   ValidateNested,
@@ -32,6 +33,11 @@ export class UpsertFieldsWidgetGroupInput {
   @IsBoolean()
   @Field()
   isVisible: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  @Field(() => Boolean, { nullable: true })
+  isCollapsed?: boolean;
 
   @ValidateNested({ each: true })
   @Type(() => UpsertFieldsWidgetFieldInput)

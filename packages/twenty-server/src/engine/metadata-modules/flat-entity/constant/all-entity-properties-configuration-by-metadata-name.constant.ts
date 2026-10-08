@@ -415,6 +415,12 @@ export const ALL_ENTITY_PROPERTIES_CONFIGURATION_BY_METADATA_NAME = {
     },
   },
   viewFieldGroup: {
+    isCollapsed: {
+      toStringify: false,
+      universalProperty: undefined,
+      toCompare: true,
+      isOverridable: true,
+    },
     name: {
       toStringify: false,
       universalProperty: undefined,

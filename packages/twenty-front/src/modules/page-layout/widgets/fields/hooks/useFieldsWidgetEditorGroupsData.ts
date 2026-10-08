@@ -140,6 +140,7 @@ export const useFieldsWidgetEditorGroupsData = ({
           name: group.name,
           position: group.position,
           isVisible: group.isVisible,
+          isCollapsed: group.isCollapsed ?? false,
           fields,
         };
       });

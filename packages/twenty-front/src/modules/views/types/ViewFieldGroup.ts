@@ -6,6 +6,7 @@ export type ViewFieldGroup = {
   position: number;
   isActive: boolean;
   isVisible: boolean;
+  isCollapsed?: boolean;
   viewId: string;
   viewFields: ViewField[];
 };

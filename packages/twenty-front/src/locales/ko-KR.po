@@ -20572,3 +20572,7 @@ msgstr "할 일"
 
 msgid "Restored"
 msgstr "복원됨"
+
+#: src/modules/page-layout/widgets/fields/components/FieldsConfigurationGroupDropdown.tsx
+msgid "Collapsed by default"
+msgstr "기본 닫힘"

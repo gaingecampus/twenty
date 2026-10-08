@@ -20,6 +20,9 @@ export class ViewFieldGroupDTO {
   @Field({ nullable: false, defaultValue: true })
   isVisible: boolean;
 
+  @Field({ nullable: false, defaultValue: false })
+  isCollapsed: boolean;
+
   @Field(() => UUIDScalarType, { nullable: false })
   viewId: string;
 

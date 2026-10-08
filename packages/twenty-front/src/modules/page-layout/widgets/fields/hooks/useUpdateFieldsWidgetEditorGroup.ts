@@ -9,6 +9,7 @@ type UpdateGroupParams = {
   name?: string;
   position?: number;
   isVisible?: boolean;
+  isCollapsed?: boolean;
 };
 
 type UseUpdateFieldsWidgetEditorGroupParams = {
@@ -28,7 +29,13 @@ export const useUpdateFieldsWidgetEditorGroup = ({
   const store = useStore();
 
   const updateGroup = useCallback(
-    ({ groupId, name, position, isVisible }: UpdateGroupParams) => {
+    ({
+      groupId,
+      name,
+      position,
+      isVisible,
+      isCollapsed,
+    }: UpdateGroupParams) => {
       store.set(fieldsWidgetGroupsDraftState, (prev) => {
         const currentGroups = prev[widgetId] ?? [];
 
@@ -41,6 +48,7 @@ export const useUpdateFieldsWidgetEditorGroup = ({
                   ...(isDefined(name) ? { name } : {}),
                   ...(isDefined(position) ? { position } : {}),
                   ...(isDefined(isVisible) ? { isVisible } : {}),
+                  ...(isDefined(isCollapsed) ? { isCollapsed } : {}),
                 }
               : group,
           ),

@@ -20,6 +20,27 @@ const makeGroup = (
 });
 
 describe('computeFieldsWidgetGroupDiff', () => {
+  it('detects default collapse changes in either direction', () => {
+    const expanded = makeGroup({ id: 'g1', isCollapsed: false });
+    const collapsed = makeGroup({ id: 'g1', isCollapsed: true });
+
+    expect(
+      computeFieldsWidgetGroupDiff([expanded], [collapsed]).updatedGroups,
+    ).toEqual([collapsed]);
+    expect(
+      computeFieldsWidgetGroupDiff([collapsed], [expanded]).updatedGroups,
+    ).toEqual([expanded]);
+  });
+
+  it('treats legacy groups without a collapse preference as expanded', () => {
+    const legacy = makeGroup({ id: 'g1' });
+    const expanded = makeGroup({ id: 'g1', isCollapsed: false });
+
+    expect(
+      computeFieldsWidgetGroupDiff([legacy], [expanded]).updatedGroups,
+    ).toEqual([]);
+  });
+
   it('should return empty diffs when both arrays are empty', () => {
     const result = computeFieldsWidgetGroupDiff([], []);
 

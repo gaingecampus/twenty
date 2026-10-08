@@ -88,6 +88,7 @@ export const useFieldsWidgetGroups = ({
             name: group.name,
             position: group.position,
             isVisible: group.isVisible,
+            isCollapsed: group.isCollapsed ?? false,
             fields,
           };
         })

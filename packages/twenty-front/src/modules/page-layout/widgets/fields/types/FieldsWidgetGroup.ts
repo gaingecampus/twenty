@@ -9,6 +9,7 @@ export type FieldsWidgetGroupField = {
 };
 
 export type FieldsWidgetGroup = {
+  isCollapsed?: boolean;
   id: string;
   name: string;
   position: number;

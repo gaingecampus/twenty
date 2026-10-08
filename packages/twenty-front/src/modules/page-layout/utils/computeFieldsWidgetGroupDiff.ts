@@ -26,7 +26,9 @@ export const computeFieldsWidgetGroupDiff = (
     return (
       persistedGroup.name !== draftGroup.name ||
       persistedGroup.position !== draftGroup.position ||
-      persistedGroup.isVisible !== draftGroup.isVisible
+      persistedGroup.isVisible !== draftGroup.isVisible ||
+      (persistedGroup.isCollapsed ?? false) !==
+        (draftGroup.isCollapsed ?? false)
     );
   });
 
