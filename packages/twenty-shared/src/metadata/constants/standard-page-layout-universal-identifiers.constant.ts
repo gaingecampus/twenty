@@ -601,6 +601,9 @@ export const STANDARD_PAGE_LAYOUT_UNIVERSAL_IDENTIFIERS = {
           fields: {
             universalIdentifier: 'c1f0a2b3-4d5e-4f60-8a71-9b2c3d4e5f62',
           },
+          campaigns: {
+            universalIdentifier: 'c1f0a2b3-4d5e-4f60-8a71-9b2c3d4e5f64',
+          },
           members: {
             universalIdentifier: 'c1f0a2b3-4d5e-4f60-8a71-9b2c3d4e5f63',
           },

@@ -29,14 +29,25 @@ const MESSAGE_LIST_PAGE_TABS = {
             .home.widgets.fields.universalIdentifier,
         ...WIDGET_PROPS.fields,
       },
+      campaigns: {
+        universalIdentifier:
+          STANDARD_PAGE_LAYOUT_UNIVERSAL_IDENTIFIERS.messageListRecordPage.tabs
+            .home.widgets.campaigns.universalIdentifier,
+        title: '연결된 캠페인',
+        type: WidgetType.FIELD,
+        gridPosition: GRID_POSITIONS.FULL_WIDTH,
+        position: VERTICAL_LIST_LAYOUT_POSITIONS.SECOND,
+        fieldUniversalIdentifier:
+          STANDARD_OBJECTS.messageList.fields.campaigns.universalIdentifier,
+      },
       members: {
         universalIdentifier:
           STANDARD_PAGE_LAYOUT_UNIVERSAL_IDENTIFIERS.messageListRecordPage.tabs
             .home.widgets.members.universalIdentifier,
-        title: '수신자',
+        title: '세그먼트',
         type: WidgetType.FIELD,
         gridPosition: GRID_POSITIONS.FULL_WIDTH,
-        position: VERTICAL_LIST_LAYOUT_POSITIONS.SECOND,
+        position: VERTICAL_LIST_LAYOUT_POSITIONS.THIRD,
         fieldUniversalIdentifier:
           STANDARD_OBJECTS.messageList.fields.members.universalIdentifier,
       },
