@@ -56,6 +56,18 @@ export const computeStandardMessageCampaignViewFields = (
         size: 180,
       },
     }),
+    allMessageCampaignsScheduledAt: createStandardViewFieldFlatMetadata({
+      ...args,
+      objectName: 'messageCampaign',
+      context: {
+        viewName: 'allMessageCampaigns',
+        viewFieldName: 'scheduledAt',
+        fieldName: 'scheduledAt',
+        position: 7,
+        isVisible: true,
+        size: 200,
+      },
+    }),
     allMessageCampaignsSentAt: createStandardViewFieldFlatMetadata({
       ...args,
       objectName: 'messageCampaign',

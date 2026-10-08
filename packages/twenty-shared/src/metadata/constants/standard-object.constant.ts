@@ -972,6 +972,12 @@ export const STANDARD_OBJECTS = {
         universalIdentifier: '91e1a33c-c1ff-411a-b720-9085e13c05db',
       },
       status: { universalIdentifier: 'c7117256-3de6-48e1-87df-c99c32bad610' },
+      scheduledAt: {
+        universalIdentifier: '631b9334-b8b7-4548-bf67-0bd2f7e27ee8',
+      },
+      scheduleVersion: {
+        universalIdentifier: '3d6e6c3b-4f4c-448a-9889-da6fd065d5fa',
+      },
       sentAt: { universalIdentifier: 'e2315b4f-9edf-4df2-96b9-961e76368671' },
       unsubscribeTopicId: {
         universalIdentifier: '0648e7ad-1769-4ff6-a4d5-72da79ef169c',
@@ -1010,6 +1016,9 @@ export const STANDARD_OBJECTS = {
             universalIdentifier: 'c05fcebd-c96e-406d-bdba-a0ae65f0a141',
           },
           list: { universalIdentifier: '86fbb96d-b688-4927-acea-f5f3b9caed0d' },
+          scheduledAt: {
+            universalIdentifier: 'dce5d8f1-b418-4272-b2a1-ed9da96e6482',
+          },
           sentAt: {
             universalIdentifier: '75a7a408-c47e-4853-8473-58b2cd5a3aa8',
           },
@@ -1064,6 +1073,20 @@ export const STANDARD_OBJECTS = {
         universalIdentifier: '8e205171-ed74-4620-b7d2-674aab85033a',
       },
     },
+    views: {
+      allMessageLists: {
+        universalIdentifier: '948edf5e-fcf0-4cf7-9ecc-17318a12fa31',
+        viewFields: {
+          name: { universalIdentifier: '17d170c5-0ab9-4359-a605-3aae8761b4ce' },
+          createdBy: {
+            universalIdentifier: '9aaea613-b2d6-45fb-937c-40486f42d2be',
+          },
+          createdAt: {
+            universalIdentifier: 'abd31741-4e1c-496a-b476-00d4d0ea7d04',
+          },
+        },
+      },
+    },
   },
   messageListMember: {
     universalIdentifier: '27773d24-8ce3-40f8-aa6c-1f590f2c08d2',
@@ -1101,6 +1124,20 @@ export const STANDARD_OBJECTS = {
       },
       personListUniqueIndex: {
         universalIdentifier: 'e5497dc2-1d72-418c-a389-a0645ca0195a',
+      },
+    },
+    views: {
+      allMessageListMembers: {
+        universalIdentifier: 'd8c6138e-abed-4935-87a3-bcd4c872d544',
+        viewFields: {
+          person: {
+            universalIdentifier: '84d96db7-bb22-43d0-a70a-0dafd651f994',
+          },
+          list: { universalIdentifier: 'fabff3d1-2095-41c6-851c-6fae10cdef9f' },
+          createdAt: {
+            universalIdentifier: '5919a6ef-db4e-4484-adca-80f11fb1746f',
+          },
+        },
       },
     },
   },

@@ -220,6 +220,13 @@ export const buildMessageCampaignStandardFlatFieldMetadatas = ({
         defaultValue: "'DRAFT'",
         options: [
           {
+            id: '2ea5fb56-314d-4a33-bbcf-07b3955f2f27',
+            value: 'CANCELLED',
+            label: i18nLabel(msg`Cancelled`),
+            position: 5,
+            color: 'gray',
+          },
+          {
             id: '2bebe786-69e0-4673-8781-a85588b77c44',
             value: 'DRAFT',
             label: i18nLabel(msg`Draft`),
@@ -255,6 +262,31 @@ export const buildMessageCampaignStandardFlatFieldMetadatas = ({
             color: 'orange',
           },
         ],
+      },
+    }),
+    scheduledAt: createStandardFieldFlatMetadata({
+      ...base,
+      context: {
+        fieldName: 'scheduledAt',
+        type: FieldMetadataType.DATE_TIME,
+        label: i18nLabel(msg`Scheduled at`),
+        description: i18nLabel(msg`Scheduled campaign send time`),
+        icon: 'IconCalendarClock',
+        isNullable: true,
+        isUIEditable: false,
+      },
+    }),
+    scheduleVersion: createStandardFieldFlatMetadata({
+      ...base,
+      context: {
+        fieldName: 'scheduleVersion',
+        type: FieldMetadataType.UUID,
+        label: i18nLabel(msg`Schedule version`),
+        description: i18nLabel(msg`Identifies the current campaign schedule`),
+        icon: 'IconVersions',
+        isNullable: true,
+        isSystem: true,
+        isUIEditable: false,
       },
     }),
     sentAt: createStandardFieldFlatMetadata({

@@ -723,13 +723,45 @@ export const STANDARD_COMMAND_MENU_ITEMS = {
     engineComponentKey: EngineComponentKey.COMPOSE_CAMPAIGN,
     hotKeys: null,
   },
+  addCustomersToMessageList: {
+    universalIdentifier: 'dbcc9381-9246-44aa-9076-794f47e1050e',
+    label: '수신자 목록에 추가',
+    icon: 'IconUsersPlus',
+    isPinned: true,
+    position: 69,
+    shortLabel: '수신자 목록에 추가',
+    availabilityType: CommandMenuItemAvailabilityType.RECORD_SELECTION,
+    conditionalAvailabilityExpression:
+      'numberOfSelectedRecords >= 1 and not isSelectAll and objectPermissions.canReadObjectRecords',
+    availabilityObjectMetadataUniversalIdentifier:
+      STANDARD_OBJECTS.person.universalIdentifier,
+    frontComponentUniversalIdentifier: null,
+    engineComponentKey: EngineComponentKey.ADD_CUSTOMERS_TO_MESSAGE_LIST,
+    hotKeys: null,
+  },
+  editScheduledCampaign: {
+    universalIdentifier: '01a5a6fc-f7ea-4c7d-921f-8bd50998eeae',
+    label: '예약 변경 및 취소',
+    icon: 'IconCalendarClock',
+    isPinned: true,
+    position: 68,
+    shortLabel: '예약 변경',
+    availabilityType: CommandMenuItemAvailabilityType.RECORD_SELECTION,
+    conditionalAvailabilityExpression:
+      'arrayLength(selectedRecords) == 1 and not isSelectAll and everyEquals(selectedRecords, "status", "SCHEDULED") and featureFlags.IS_EMAIL_GROUP_ENABLED',
+    availabilityObjectMetadataUniversalIdentifier:
+      STANDARD_OBJECTS.messageCampaign.universalIdentifier,
+    frontComponentUniversalIdentifier: null,
+    engineComponentKey: EngineComponentKey.EDIT_SCHEDULED_CAMPAIGN,
+    hotKeys: null,
+  },
   composeCampaignPinned: {
     universalIdentifier: '7ad6f0c7-ac02-4062-b5cf-1f36e1664bc8',
-    label: 'Compose Campaign',
-    icon: 'IconSend',
+    label: 'Create Campaign',
+    icon: 'IconPlus',
     isPinned: true,
     position: 67,
-    shortLabel: 'Campaign',
+    shortLabel: 'Create Campaign',
     availabilityType: CommandMenuItemAvailabilityType.GLOBAL_OBJECT_CONTEXT,
     conditionalAvailabilityExpression:
       'pageType == "INDEX_PAGE" and featureFlags.IS_EMAIL_GROUP_ENABLED',

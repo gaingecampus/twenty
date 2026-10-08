@@ -376,6 +376,13 @@ export const buildMessageStandardFlatFieldMetadatas = ({
       isUIEditable: false,
       options: [
         {
+          id: 'ae71b61f-2e9c-48a3-8c75-e0bbd6614c58',
+          value: 'SENDING',
+          label: i18nLabel(msg`Sending`),
+          position: 6,
+          color: 'yellow',
+        },
+        {
           id: '6b189ac2-5054-45c0-a95b-25764e978d81',
           value: 'QUEUED',
           label: i18nLabel(msg`Queued`),
