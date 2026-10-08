@@ -7,6 +7,7 @@ import { getSubFlatEntityMapsByApplicationIdsOrThrow } from 'src/engine/metadata
 import { GlobalWorkspaceOrmManager } from 'src/engine/twenty-orm/global-workspace-datasource/global-workspace-orm.manager';
 import { WorkspaceCacheService } from 'src/engine/workspace-cache/services/workspace-cache.service';
 import { TWENTY_STANDARD_ALL_METADATA_NAME } from 'src/engine/workspace-manager/twenty-standard-application/constants/twenty-standard-all-metadata-name.constant';
+import { resolveStandardNavigationCommandMenuItemTargets } from 'src/engine/workspace-manager/twenty-standard-application/utils/command-menu-item/resolve-standard-navigation-command-menu-item-targets.util';
 import { computeTwentyStandardApplicationAllFlatEntityMaps } from 'src/engine/workspace-manager/twenty-standard-application/utils/twenty-standard-application-all-flat-entity-maps.constant';
 import { WorkspaceMigrationBuilderException } from 'src/engine/workspace-manager/workspace-migration/exceptions/workspace-migration-builder-exception';
 import { WorkspaceMigrationValidateBuildAndRunService } from 'src/engine/workspace-manager/workspace-migration/services/workspace-migration-validate-build-and-run-service';
@@ -58,6 +59,16 @@ export class TwentyStandardApplicationService {
       workspaceId,
       twentyStandardApplicationId: twentyStandardFlatApplication.id,
     });
+
+    toTwentyStandardAllFlatEntityMaps.flatCommandMenuItemMaps =
+      resolveStandardNavigationCommandMenuItemTargets({
+        commandMenuItemMaps:
+          toTwentyStandardAllFlatEntityMaps.flatCommandMenuItemMaps,
+        generatedObjectMetadataMaps:
+          toTwentyStandardAllFlatEntityMaps.flatObjectMetadataMaps,
+        workspaceObjectMetadataMaps:
+          fromTwentyStandardAllFlatEntityMaps.flatObjectMetadataMaps,
+      });
 
     const fromToAllFlatEntityMaps: FromToAllUniversalFlatEntityMaps = {};
 
