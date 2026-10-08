@@ -67,6 +67,7 @@ export const getStandardCommandMenuItemLabels = () => [
   msg`Compose Email`,
   msg`Compose`,
   msg`Compose Campaign`,
+  msg`Create Campaign`,
   msg`Campaign`,
   msg`Go to Settings`,
   msg`Settings`,

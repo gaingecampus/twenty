@@ -78,7 +78,8 @@ export const PinnedCommandMenuItemButtons = ({
     () =>
       pinnedCommandMenuItems.find(
         (item) =>
-          item.engineComponentKey === EngineComponentKey.CREATE_NEW_RECORD,
+          item.engineComponentKey === EngineComponentKey.CREATE_NEW_RECORD ||
+          item.engineComponentKey === EngineComponentKey.COMPOSE_CAMPAIGN,
       ),
     [pinnedCommandMenuItems],
   );
@@ -86,10 +87,9 @@ export const PinnedCommandMenuItemButtons = ({
   const overflowCandidatePinnedCommandMenuItems = useMemo(
     () =>
       pinnedCommandMenuItems.filter(
-        (item) =>
-          item.engineComponentKey !== EngineComponentKey.CREATE_NEW_RECORD,
+        (item) => item.id !== primaryPinnedCommandMenuItem?.id,
       ),
-    [pinnedCommandMenuItems],
+    [pinnedCommandMenuItems, primaryPinnedCommandMenuItem?.id],
   );
 
   const {

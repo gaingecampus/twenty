@@ -3746,7 +3746,7 @@ msgstr "채팅"
 #. js-lingui-id: h5C4B4
 #: src/modules/settings/emailing-domains/components/SettingsEmailingDomainVerifyButton.tsx
 msgid "Check verification"
-msgstr "확인 확인"
+msgstr "인증 상태 확인"
 
 #. js-lingui-id: AwAGI4
 #: src/modules/auth/sign-in-up/components/EmailVerificationSent.tsx
@@ -4550,7 +4550,7 @@ msgstr "동기화 없이 계속"
 #: src/pages/settings/email/SettingsWorkspaceNewUnsubscribeTopic.tsx
 #: src/pages/settings/email/SettingsWorkspaceUnsubscribeTopicDetail.tsx
 msgid "Control whether recipients can find and manage this topic."
-msgstr ""
+msgstr "수신자가 이 주제를 확인하고 수신 여부를 관리할 수 있도록 공개 여부를 설정합니다."
 
 #. js-lingui-id: +iFqZW
 #: src/modules/settings/roles/role-settings/components/SettingsRoleApplicability.tsx
@@ -7891,7 +7891,7 @@ msgstr ""
 #. js-lingui-id: ITWxKI
 #: src/pages/settings/email/SettingsWorkspaceNewUnsubscribeTopic.tsx
 msgid "Failed to create unsubscribe topic."
-msgstr ""
+msgstr "수신 거부 주제를 만들지 못했습니다."
 
 #. js-lingui-id: AXveCw
 #: src/pages/settings/email/SettingsWorkspaceEmailGroupChannelDetail.tsx
@@ -7921,7 +7921,7 @@ msgstr "도구를 삭제하지 못했습니다."
 #. js-lingui-id: HUBJsk
 #: src/pages/settings/email/SettingsWorkspaceUnsubscribeTopicDetail.tsx
 msgid "Failed to delete unsubscribe topic."
-msgstr ""
+msgstr "수신 거부 주제를 삭제하지 못했습니다."
 
 #. js-lingui-id: NUmmdc
 #: src/modules/command-menu-item/engine-command/record/single-record/dashboard/components/DuplicateDashboardSingleRecordCommand.tsx
@@ -8114,7 +8114,7 @@ msgstr ""
 #. js-lingui-id: 16Z+3L
 #: src/pages/settings/email/SettingsWorkspaceUnsubscribeTopicDetail.tsx
 msgid "Failed to update unsubscribe topic."
-msgstr ""
+msgstr "수신 거부 주제를 수정하지 못했습니다."
 
 #. js-lingui-id: 204Qo2
 #: src/modules/settings/billing/hooks/useCreditUpgradeAction.ts
@@ -10694,7 +10694,7 @@ msgstr "등재됨"
 #: src/pages/settings/email/SettingsWorkspaceNewUnsubscribeTopic.tsx
 #: src/pages/settings/email/SettingsWorkspaceUnsubscribeTopicDetail.tsx
 msgid "Listed on the unsubscribe page"
-msgstr ""
+msgstr "수신 거부 페이지에 표시"
 
 #. js-lingui-id: HhVDr2
 #: src/modules/settings/data-model/objects/forms/components/SettingsDataModelObjectAboutForm.tsx
@@ -11928,7 +11928,7 @@ msgstr "새 도구"
 #: src/pages/settings/email/SettingsWorkspaceNewUnsubscribeTopic.tsx
 #: src/pages/settings/email/SettingsWorkspaceNewUnsubscribeTopic.tsx
 msgid "New Unsubscribe Topic"
-msgstr ""
+msgstr "새 수신 거부 주제"
 
 #. js-lingui-id: U1DAok
 #: src/modules/settings/developers/components/SettingsDevelopersWebhookForm.tsx
@@ -11945,7 +11945,7 @@ msgstr "새로운 위젯"
 #. js-lingui-id: horr45
 #: src/pages/settings/email/SettingsWorkspaceNewUnsubscribeTopic.tsx
 msgid "Newsletters"
-msgstr ""
+msgstr "뉴스레터"
 
 #. js-lingui-id: hXzOVo
 #: src/modules/auth/sign-in-up/components/internal/SignInUpTwoFactorAuthenticationProvision.tsx
@@ -13293,7 +13293,7 @@ msgstr "선택 사항 — 비워 두면 IAM 역할을 사용합니다"
 #: src/pages/settings/email/SettingsWorkspaceNewUnsubscribeTopic.tsx
 #: src/pages/settings/email/SettingsWorkspaceUnsubscribeTopicDetail.tsx
 msgid "Optional context shown to recipients on the preferences page."
-msgstr ""
+msgstr "수신 설정 페이지에서 수신자에게 보여 줄 설명입니다. 선택 사항입니다."
 
 #. js-lingui-id: hY8F2i
 #: src/modules/settings/developers/components/SettingsDevelopersWebhookForm.tsx
@@ -13422,7 +13422,7 @@ msgstr "장애"
 #. js-lingui-id: nvADne
 #: src/pages/settings/email/SettingsWorkspaceEmailGroupChannelDetail.tsx
 msgid "Outbound mail from this channel is sent through this domain. It must be verified before email can be delivered."
-msgstr ""
+msgstr "이 이메일 채널은 해당 도메인을 통해 이메일을 발송합니다. 이메일을 보내려면 먼저 도메인 인증을 완료해야 합니다."
 
 #. js-lingui-id: gh06VD
 #: src/modules/ai/components/CodeExecutionDisplay.tsx
@@ -14223,7 +14223,7 @@ msgstr "공개 도메인"
 #: src/pages/settings/email/SettingsWorkspaceNewUnsubscribeTopic.tsx
 #: src/pages/settings/email/SettingsWorkspaceUnsubscribeTopicDetail.tsx
 msgid "Public topics appear on the recipient preferences page."
-msgstr ""
+msgstr "공개된 주제는 수신자의 수신 설정 페이지에 표시됩니다."
 
 #. js-lingui-id: guA9ot
 #: src/pages/settings/applications/tabs/SettingsApplicationFunctionDomainSection.tsx
@@ -16044,7 +16044,7 @@ msgstr ""
 #. js-lingui-id: ULtHaJ
 #: src/pages/settings/email/SettingsWorkspaceEmailGroupChannelDetail.tsx
 msgid "Sending domain"
-msgstr ""
+msgstr "발신 도메인"
 
 #. js-lingui-id: APPcP6
 #: src/modules/ai/constants/action-tool-status-labels.constant.ts
@@ -16692,7 +16692,7 @@ msgstr "소스"
 #. js-lingui-id: Pp9DbE
 #: src/pages/settings/email/SettingsWorkspaceEmailGroupChannelDetail.tsx
 msgid "Source address"
-msgstr "소스 주소"
+msgstr "원본 이메일 주소"
 
 #. js-lingui-id: 5f1fxa
 #: src/modules/settings/accounts/components/SettingsAccountsNewEmailGroupChannel.tsx
@@ -16805,7 +16805,7 @@ msgstr "귀하의 구독 시작"
 #. js-lingui-id: hTX65V
 #: src/modules/settings/emailing-domains/components/SettingsEmailingDomainVerifyButton.tsx
 msgid "Started verification process"
-msgstr "확인 과정 시작됨"
+msgstr "도메인 인증 확인을 시작했습니다."
 
 #. js-lingui-id: ETsH83
 #: src/modules/workflow/workflow-steps/workflow-actions/components/WorkflowEditActionCreateCalendarEvent.tsx
@@ -17507,7 +17507,7 @@ msgstr "도메인의 이름"
 #: src/pages/settings/email/SettingsWorkspaceNewUnsubscribeTopic.tsx
 #: src/pages/settings/email/SettingsWorkspaceUnsubscribeTopicDetail.tsx
 msgid "The name recipients see for this topic."
-msgstr ""
+msgstr "수신자에게 표시할 주제 이름입니다."
 
 #. js-lingui-id: L97sPr
 #: src/pages/not-found/NotFound.tsx
@@ -20576,3 +20576,63 @@ msgstr "복원됨"
 #: src/modules/page-layout/widgets/fields/components/FieldsConfigurationGroupDropdown.tsx
 msgid "Collapsed by default"
 msgstr "기본 닫힘"
+
+#. js-lingui-id: E4VMqv
+msgid "Edit scheduled campaign"
+msgstr "예약 캠페인 수정"
+
+#. js-lingui-id: Vw377q
+msgid "This campaign is no longer scheduled. Refresh the list."
+msgstr "예약 상태가 변경되었습니다. 목록을 새로 고침하세요."
+
+#. js-lingui-id: eea7Jm
+msgid "Campaign schedule cancelled"
+msgstr "캠페인 예약을 취소했습니다"
+
+#. js-lingui-id: DeHIUE
+msgid "Failed to cancel campaign schedule"
+msgstr "캠페인 예약 취소에 실패했습니다"
+
+#. js-lingui-id: Ww/GVZ
+msgid "Campaign scheduled successfully"
+msgstr "캠페인 예약을 저장했습니다"
+
+#. js-lingui-id: Zz1HrR
+msgid "Send time"
+msgstr "발송 시점"
+
+#. js-lingui-id: 0VjmKX
+msgid "Send immediately"
+msgstr "즉시 발송"
+
+#. js-lingui-id: 0AR2Jy
+msgid "Schedule send"
+msgstr "예약 발송"
+
+#. js-lingui-id: JizhXE
+msgid "Scheduled at"
+msgstr "예약 발송일"
+
+#. js-lingui-id: WLmeoY
+msgid "Time zone: {userTimezone}. Choose a time at least one minute from now."
+msgstr "시간대: {userTimezone}. 현재보다 최소 1분 이후로 지정하세요."
+
+#. js-lingui-id: hsTGk7
+msgid "Recipients are saved when scheduling. Unsubscribes are checked again before sending."
+msgstr "예약 시 대상 목록을 저장하며, 발송 직전에 수신 거부 여부를 다시 확인합니다."
+
+#. js-lingui-id: nLDzfU
+msgid "Cancel scheduled send"
+msgstr "예약 취소"
+
+#. js-lingui-id: N9p0Aj
+msgid "Save schedule changes"
+msgstr "예약 변경 저장"
+
+#. js-lingui-id: MGaW9O
+msgid "Schedule campaign"
+msgstr "캠페인 예약"
+
+#. js-lingui-id: oRJtCM
+msgid "Campaigns"
+msgstr "캠페인"

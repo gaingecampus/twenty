@@ -3,7 +3,7 @@ import { useQuery } from '@apollo/client/react';
 import { UnsubscribeTopicsDocument } from '~/generated-metadata/graphql';
 
 export const useUnsubscribeTopics = () => {
-  const { data, loading } = useQuery(UnsubscribeTopicsDocument);
+  const { data, loading, error } = useQuery(UnsubscribeTopicsDocument);
 
-  return { unsubscribeTopics: data?.unsubscribeTopics ?? [], loading };
+  return { unsubscribeTopics: data?.unsubscribeTopics ?? [], loading, error };
 };

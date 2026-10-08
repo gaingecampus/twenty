@@ -9989,3 +9989,27 @@ msgstr "작업공간이 새로운 데이터 모델로 업데이트되었습니�
 #: src/engine/workspace-manager/workspace-cleaner/services/cleaner.workspace-service.ts
 msgid "Your workspace is paused — reactivate to keep your data"
 msgstr ""
+
+#. js-lingui-id: JizhXE
+msgid "Scheduled at"
+msgstr "예약 발송일"
+
+#. js-lingui-id: G+z772
+msgid "Scheduled campaign send time"
+msgstr "캠페인 예약 발송 시각"
+
+#. js-lingui-id: CqVMc+
+msgid "Schedule version"
+msgstr "예약 버전"
+
+#. js-lingui-id: NEMpUX
+msgid "Identifies the current campaign schedule"
+msgstr "현재 캠페인 예약 식별자"
+
+#. js-lingui-id: vv7kpg
+msgid "Cancelled"
+msgstr "취소됨"
+
+#. js-lingui-id: 93PuJN
+msgid "Create Campaign"
+msgstr "캠페인 생성"
