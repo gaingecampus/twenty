@@ -10,6 +10,9 @@ import {
 } from '~/generated-metadata/graphql';
 
 type SendMessageCampaignParams = {
+  scheduledAt?: string;
+  campaignId?: string;
+  scheduleVersion?: string;
   listId: string;
   unsubscribeTopicId?: string;
   subject: string;
@@ -40,6 +43,12 @@ export const useSendMessageCampaign = () => {
           return false;
         }
 
+        if (params.scheduledAt) {
+          enqueueSuccessSnackBar({
+            message: t`Campaign scheduled successfully`,
+          });
+          return true;
+        }
         const { queuedCount, skipped } = queued;
         const skippedCount =
           skipped.noEmail + skipped.deduped + skipped.overCap;
