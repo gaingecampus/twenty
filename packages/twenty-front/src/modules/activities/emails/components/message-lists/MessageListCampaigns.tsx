@@ -9,7 +9,10 @@ import { TableHeader } from '@/ui/layout/table/components/TableHeader';
 import { TableCell } from '@/ui/layout/table/components/TableCell';
 import { styled } from '@linaria/react';
 import { t } from '@lingui/core/macro';
-import { Link } from 'react-router-dom';
+import { RecordChip } from '@/object-record/components/RecordChip';
+import { EmailDisplay } from '@/ui/field/display/components/EmailDisplay';
+import { Tag, type TagColor } from 'twenty-ui/data-display';
+import { themeCssVariables } from 'twenty-ui/theme-constants';
 import { Button } from 'twenty-ui/input';
 
 type Campaign = ObjectRecord & {
@@ -55,6 +58,15 @@ export const MessageListCampaigns = ({ listId }: { listId: string }) => {
     SENT_WITH_ERRORS: t`일부 발송 실패`,
     FAILED: t`실패`,
   };
+  const statusColors: Record<string, TagColor> = {
+    DRAFT: 'gray',
+    SCHEDULED: 'blue',
+    SENDING: 'yellow',
+    SENT: 'green',
+    CANCELLED: 'gray',
+    SENT_WITH_ERRORS: 'orange',
+    FAILED: 'red',
+  };
   return (
     <StyledSection aria-label={t`연결된 캠페인`}>
       <MessageListLinkCampaign
@@ -73,7 +85,7 @@ export const MessageListCampaigns = ({ listId }: { listId: string }) => {
       )}
       {records.length > 0 && (
         <Table>
-          <TableRow gridTemplateColumns="minmax(120px, 1fr) 90px minmax(130px, 1fr) minmax(150px, 1fr)">
+          <TableRow gridTemplateColumns="minmax(120px, 1fr) 100px minmax(130px, 1fr) minmax(150px, 1fr)">
             <TableHeader>{t`제목`}</TableHeader>
             <TableHeader>{t`상태`}</TableHeader>
             <TableHeader>{t`발신자`}</TableHeader>
@@ -82,18 +94,24 @@ export const MessageListCampaigns = ({ listId }: { listId: string }) => {
           {records.map((campaign) => (
             <TableRow
               key={campaign.id}
-              gridTemplateColumns="minmax(120px, 1fr) 90px minmax(130px, 1fr) minmax(150px, 1fr)"
+              gridTemplateColumns="minmax(120px, 1fr) 100px minmax(130px, 1fr) minmax(150px, 1fr)"
             >
-              <TableCell>
-                <Link to={`/object/messageCampaign/${campaign.id}`}>
-                  {campaign.subject || t`제목 없는 캠페인`}
-                </Link>
+              <TableCell minWidth="0" height={themeCssVariables.spacing[10]}>
+                <RecordChip
+                  objectNameSingular="messageCampaign"
+                  record={campaign}
+                />
               </TableCell>
-              <TableCell>
-                {statusLabels[campaign.status] ?? campaign.status}
+              <TableCell minWidth="0" height={themeCssVariables.spacing[10]}>
+                <Tag
+                  text={statusLabels[campaign.status] ?? campaign.status}
+                  color={statusColors[campaign.status] ?? 'gray'}
+                />
               </TableCell>
-              <TableCell>{campaign.fromAddress?.primaryEmail || '—'}</TableCell>
-              <TableCell>
+              <TableCell minWidth="0" height={themeCssVariables.spacing[10]}>
+                <EmailDisplay value={campaign.fromAddress?.primaryEmail} />
+              </TableCell>
+              <TableCell minWidth="0" height={themeCssVariables.spacing[10]}>
                 <DateTimeDisplay
                   value={campaign.sentAt ?? campaign.scheduledAt}
                 />

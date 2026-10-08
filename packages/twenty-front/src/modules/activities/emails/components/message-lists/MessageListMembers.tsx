@@ -6,7 +6,8 @@ import { Table } from '@/ui/layout/table/components/Table';
 import { TableRow } from '@/ui/layout/table/components/TableRow';
 import { TableHeader } from '@/ui/layout/table/components/TableHeader';
 import { TableCell } from '@/ui/layout/table/components/TableCell';
-import { Link } from 'react-router-dom';
+import { RecordChip } from '@/object-record/components/RecordChip';
+import { EmailDisplay } from '@/ui/field/display/components/EmailDisplay';
 import { MessageListAddCustomersModal } from '@/activities/emails/components/message-lists/MessageListAddCustomersModal';
 import { useDeleteOneRecord } from '@/object-record/hooks/useDeleteOneRecord';
 import { useFindManyRecords } from '@/object-record/hooks/useFindManyRecords';
@@ -20,35 +21,18 @@ import { Button } from 'twenty-ui/input';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 type MessageListMember = ObjectRecord & {
   personId: string;
-  person: {
-    name: { firstName: string; lastName: string };
-    emails: { primaryEmail: string };
-  } | null;
+  person:
+    | (ObjectRecord & {
+        name: { firstName: string; lastName: string };
+        emails: { primaryEmail: string };
+      })
+    | null;
 };
 
 const StyledSection = styled.section`
   overflow: auto;
   width: 100%;
 `;
-const StyledCustomerLink = styled(Link)`
-  color: ${themeCssVariables.font.color.primary};
-  overflow: hidden;
-  text-decoration: none;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-
-  &:hover {
-    color: ${themeCssVariables.color.blue};
-    text-decoration: underline;
-  }
-`;
-
-const StyledEmail = styled.span`
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-`;
-
 export const MessageListMembers = ({ listId }: { listId: string }) => {
   const [busy, setBusy] = useState(false);
   const { enqueueErrorSnackBar } = useSnackBar();
@@ -132,24 +116,20 @@ export const MessageListMembers = ({ listId }: { listId: string }) => {
             >
               <TableCell minWidth="0" height={themeCssVariables.spacing[10]}>
                 {member.person ? (
-                  <StyledCustomerLink to={`/object/person/${member.personId}`}>
-                    {[
-                      member.person?.name?.firstName,
-                      member.person?.name?.lastName,
-                    ]
-                      .filter(Boolean)
-                      .join(' ') || t`이름 없는 고객`}
-                  </StyledCustomerLink>
+                  <RecordChip
+                    objectNameSingular="person"
+                    record={member.person}
+                  />
                 ) : (
                   t`삭제되었거나 접근할 수 없는 고객`
                 )}
               </TableCell>
               <TableCell minWidth="0" height={themeCssVariables.spacing[10]}>
-                <StyledEmail
-                  title={member.person?.emails?.primaryEmail || undefined}
-                >
-                  {member.person?.emails?.primaryEmail || t`이메일 없음`}
-                </StyledEmail>
+                {member.person?.emails?.primaryEmail ? (
+                  <EmailDisplay value={member.person.emails.primaryEmail} />
+                ) : (
+                  t`이메일 없음`
+                )}
               </TableCell>
               <TableCell align="right" height={themeCssVariables.spacing[10]}>
                 {permissions.canSoftDeleteObjectRecords && (
