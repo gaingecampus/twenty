@@ -1,5 +1,7 @@
 // Auto-edited by generate:instance-command — do not edit manually
 
+import { AdoptCampaignSchedulingFieldsFastInstanceCommand } from 'src/database/commands/upgrade-version-command/2-26/2-26-instance-command-fast-1807500000000-adopt-campaign-scheduling-fields';
+
 import { AddMessageSendingStatusFastInstanceCommand } from 'src/database/commands/upgrade-version-command/2-25/2-25-instance-command-fast-1807400000000-add-message-sending-status';
 
 import { AddViewFieldGroupIdIndexOnViewFieldFastInstanceCommand } from 'src/database/commands/upgrade-version-command/1-21/1-21-instance-command-fast-1775129420309-add-view-field-group-id-index-on-view-field';
@@ -93,6 +95,7 @@ import { AddViewFieldGroupIsCollapsedFastInstanceCommand } from 'src/database/co
 
 export const INSTANCE_COMMANDS = [
   AddMessageSendingStatusFastInstanceCommand,
+  AdoptCampaignSchedulingFieldsFastInstanceCommand,
   AddViewFieldGroupIdIndexOnViewFieldFastInstanceCommand,
   MigrateMessagingCalendarToCoreFastInstanceCommand,
   AddEmailThreadWidgetTypeFastInstanceCommand,
