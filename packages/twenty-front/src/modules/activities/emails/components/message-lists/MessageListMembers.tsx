@@ -38,7 +38,6 @@ export const MessageListMembers = ({ listId }: { listId: string }) => {
   const { enqueueErrorSnackBar } = useSnackBar();
   const {
     records,
-    totalCount,
     loading,
     error,
     refetch,
@@ -75,7 +74,6 @@ export const MessageListMembers = ({ listId }: { listId: string }) => {
   return (
     <StyledSection>
       <StyledMessageListToolbar>
-        <span>{t`등록 고객 ${totalCount ?? 0}명`}</span>
         {permissions.canUpdateObjectRecords && (
           <Button
             title={t`고객 추가`}

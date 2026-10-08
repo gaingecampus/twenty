@@ -16,14 +16,13 @@ import { TableCell } from '@/ui/layout/table/components/TableCell';
 import { t } from '@lingui/core/macro';
 import { useState } from 'react';
 import { Button } from 'twenty-ui/input';
+import { IconLink } from 'twenty-ui/icon';
 
 export const MessageListLinkCampaign = ({
   listId,
   onLinked,
-  totalCount,
 }: {
   listId: string;
-  totalCount: number;
   onLinked: () => Promise<unknown>;
 }) => {
   const [open, setOpen] = useState(false);
@@ -100,13 +99,11 @@ export const MessageListLinkCampaign = ({
   return (
     <div>
       <StyledMessageListToolbar>
-        <span>
-          {t`연결된 캠페인`} · {totalCount}
-        </span>
         {permissions.canUpdateObjectRecords && (
           <Button
-            variant="primary"
-            accent="blue"
+            variant="secondary"
+            size="small"
+            Icon={IconLink}
             title={open ? t`닫기` : t`캠페인 연결`}
             onClick={() => setOpen(!open)}
             disabled={busy}

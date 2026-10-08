@@ -4,7 +4,7 @@ import { themeCssVariables } from 'twenty-ui/theme-constants';
 export const StyledMessageListToolbar = styled.div`
   align-items: flex-start;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   padding-bottom: ${themeCssVariables.spacing[3]};
 `;
 

@@ -27,28 +27,39 @@ const StyledSection = styled.section`
   width: 100%;
 `;
 
+const StyledCampaignIdentity = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${themeCssVariables.spacing[1]};
+  min-width: 0;
+  overflow: hidden;
+`;
+
+const StyledSender = styled.div`
+  color: ${themeCssVariables.font.color.tertiary};
+  font-size: ${themeCssVariables.font.size.sm};
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
+
+const CAMPAIGN_GRID_COLUMNS = 'minmax(160px, 1fr) 110px minmax(160px, 1fr)';
+
 export const MessageListCampaigns = ({ listId }: { listId: string }) => {
-  const {
-    records,
-    totalCount,
-    loading,
-    error,
-    hasNextPage,
-    fetchMoreRecords,
-    refetch,
-  } = useFindManyRecords<Campaign>({
-    objectNameSingular: 'messageCampaign',
-    filter: { listId: { eq: listId } },
-    recordGqlFields: {
-      id: true,
-      subject: true,
-      status: true,
-      fromAddress: true,
-      scheduledAt: true,
-      sentAt: true,
-    },
-    limit: 20,
-  });
+  const { records, loading, error, hasNextPage, fetchMoreRecords, refetch } =
+    useFindManyRecords<Campaign>({
+      objectNameSingular: 'messageCampaign',
+      filter: { listId: { eq: listId } },
+      recordGqlFields: {
+        id: true,
+        subject: true,
+        status: true,
+        fromAddress: true,
+        scheduledAt: true,
+        sentAt: true,
+      },
+      limit: 20,
+    });
   const statusLabels: Record<string, string> = {
     DRAFT: t`초안`,
     SCHEDULED: t`예약됨`,
@@ -69,11 +80,7 @@ export const MessageListCampaigns = ({ listId }: { listId: string }) => {
   };
   return (
     <StyledSection aria-label={t`연결된 캠페인`}>
-      <MessageListLinkCampaign
-        listId={listId}
-        onLinked={refetch}
-        totalCount={totalCount ?? 0}
-      />
+      <MessageListLinkCampaign listId={listId} onLinked={refetch} />
       {loading && <p>{t`불러오는 중…`}</p>}
       {error && <p role="alert">{t`캠페인을 불러오지 못했습니다.`}</p>}
       {!loading && !error && records.length === 0 && (
@@ -85,36 +92,41 @@ export const MessageListCampaigns = ({ listId }: { listId: string }) => {
       )}
       {records.length > 0 && (
         <Table>
-          <TableRow gridTemplateColumns="minmax(120px, 1fr) 100px minmax(130px, 1fr) minmax(150px, 1fr)">
-            <TableHeader>{t`제목`}</TableHeader>
+          <TableRow gridTemplateColumns={CAMPAIGN_GRID_COLUMNS}>
+            <TableHeader>{t`캠페인 / 발신자`}</TableHeader>
             <TableHeader>{t`상태`}</TableHeader>
-            <TableHeader>{t`발신자`}</TableHeader>
             <TableHeader>{t`예약 / 발송 시각`}</TableHeader>
           </TableRow>
           {records.map((campaign) => (
             <TableRow
               key={campaign.id}
-              gridTemplateColumns="minmax(120px, 1fr) 100px minmax(130px, 1fr) minmax(150px, 1fr)"
+              gridTemplateColumns={CAMPAIGN_GRID_COLUMNS}
             >
-              <TableCell minWidth="0" height={themeCssVariables.spacing[10]}>
-                <RecordChip
-                  objectNameSingular="messageCampaign"
-                  record={campaign}
-                />
+              <TableCell minWidth="0" height={themeCssVariables.spacing[14]}>
+                <StyledCampaignIdentity>
+                  <RecordChip
+                    objectNameSingular="messageCampaign"
+                    record={campaign}
+                  />
+                  <StyledSender>
+                    <EmailDisplay value={campaign.fromAddress?.primaryEmail} />
+                  </StyledSender>
+                </StyledCampaignIdentity>
               </TableCell>
-              <TableCell minWidth="0" height={themeCssVariables.spacing[10]}>
+              <TableCell minWidth="0" height={themeCssVariables.spacing[14]}>
                 <Tag
                   text={statusLabels[campaign.status] ?? campaign.status}
                   color={statusColors[campaign.status] ?? 'gray'}
                 />
               </TableCell>
-              <TableCell minWidth="0" height={themeCssVariables.spacing[10]}>
-                <EmailDisplay value={campaign.fromAddress?.primaryEmail} />
-              </TableCell>
-              <TableCell minWidth="0" height={themeCssVariables.spacing[10]}>
-                <DateTimeDisplay
-                  value={campaign.sentAt ?? campaign.scheduledAt}
-                />
+              <TableCell minWidth="0" height={themeCssVariables.spacing[14]}>
+                {campaign.sentAt || campaign.scheduledAt ? (
+                  <DateTimeDisplay
+                    value={campaign.sentAt ?? campaign.scheduledAt}
+                  />
+                ) : (
+                  '—'
+                )}
               </TableCell>
             </TableRow>
           ))}
