@@ -10012,4 +10012,4 @@ msgstr "취소됨"
 
 #. js-lingui-id: 93PuJN
 msgid "Create Campaign"
-msgstr "캠페인 생성"
+msgstr "새 캠페인"
