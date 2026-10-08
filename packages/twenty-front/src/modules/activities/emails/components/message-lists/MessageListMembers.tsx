@@ -1,4 +1,7 @@
-import { MessageListCampaigns } from '@/activities/emails/components/message-lists/MessageListCampaigns';
+import {
+  StyledMessageListToolbar,
+  StyledMessageListEmpty,
+} from '@/activities/emails/components/message-lists/MessageListSectionStyles';
 import { Table } from '@/ui/layout/table/components/Table';
 import { TableRow } from '@/ui/layout/table/components/TableRow';
 import { TableHeader } from '@/ui/layout/table/components/TableHeader';
@@ -27,21 +30,23 @@ const StyledSection = styled.section`
   overflow: auto;
   width: 100%;
 `;
-const StyledToolbar = styled.div`
-  align-items: center;
-  display: flex;
-  justify-content: space-between;
-  padding-bottom: ${themeCssVariables.spacing[3]};
+const StyledCustomerLink = styled(Link)`
+  color: ${themeCssVariables.font.color.primary};
+  overflow: hidden;
+  text-decoration: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  &:hover {
+    color: ${themeCssVariables.color.blue};
+    text-decoration: underline;
+  }
 `;
-const StyledHint = styled.p`
-  color: ${themeCssVariables.font.color.tertiary};
-  font-size: ${themeCssVariables.font.size.sm};
-  margin: 0 0 ${themeCssVariables.spacing[3]};
-`;
-const StyledEmpty = styled.div`
-  color: ${themeCssVariables.font.color.tertiary};
-  padding: ${themeCssVariables.spacing[6]};
-  text-align: center;
+
+const StyledEmail = styled.span`
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 `;
 
 export const MessageListMembers = ({ listId }: { listId: string }) => {
@@ -77,7 +82,7 @@ export const MessageListMembers = ({ listId }: { listId: string }) => {
       await refetch();
     } catch {
       enqueueErrorSnackBar({
-        message: t`수신자 목록을 변경하지 못했습니다. 다시 시도하세요.`,
+        message: t`세그먼트를 변경하지 못했습니다. 다시 시도하세요.`,
       });
     } finally {
       setBusy(false);
@@ -85,7 +90,7 @@ export const MessageListMembers = ({ listId }: { listId: string }) => {
   };
   return (
     <StyledSection>
-      <StyledToolbar>
+      <StyledMessageListToolbar>
         <span>{t`등록 고객 ${totalCount ?? 0}명`}</span>
         {permissions.canUpdateObjectRecords && (
           <Button
@@ -96,8 +101,7 @@ export const MessageListMembers = ({ listId }: { listId: string }) => {
             onClick={() => setAdding(true)}
           />
         )}
-      </StyledToolbar>
-      <StyledHint>{t`이메일이 없거나 수신을 거부한 고객은 캠페인 발송 시 제외됩니다.`}</StyledHint>
+      </StyledMessageListToolbar>
       {adding && (
         <MessageListAddCustomersModal
           initialListId={listId}
@@ -108,41 +112,51 @@ export const MessageListMembers = ({ listId }: { listId: string }) => {
       {loading && <p>{t`불러오는 중…`}</p>}
       {error && <p role="alert">{t`고객 목록을 불러오지 못했습니다.`}</p>}
       {!loading && !error && records.length === 0 && (
-        <StyledEmpty>{t`아직 등록된 고객이 없습니다. 고객 추가 버튼으로 여러 고객을 선택하세요.`}</StyledEmpty>
+        <StyledMessageListEmpty>
+          {t`아직 등록된 고객이 없습니다.`}
+          <br />
+          {t`고객 추가 버튼으로 여러 고객을 선택하세요.`}
+        </StyledMessageListEmpty>
       )}
       {records.length > 0 && (
         <Table>
-          <TableRow gridTemplateColumns="minmax(120px, 1fr) minmax(120px, 1fr) 110px">
+          <TableRow gridTemplateColumns="minmax(0, 1fr) minmax(0, 1.2fr) 72px">
             <TableHeader>{t`고객`}</TableHeader>
             <TableHeader>{t`이메일`}</TableHeader>
-            <TableHeader>{t`관리`}</TableHeader>
+            <TableHeader align="right">{t`관리`}</TableHeader>
           </TableRow>
           {records.map((member) => (
             <TableRow
               key={member.id}
-              gridTemplateColumns="minmax(120px, 1fr) minmax(120px, 1fr) 110px"
+              gridTemplateColumns="minmax(0, 1fr) minmax(0, 1.2fr) 72px"
             >
-              <TableCell>
+              <TableCell minWidth="0" height={themeCssVariables.spacing[10]}>
                 {member.person ? (
-                  <Link to={`/object/person/${member.personId}`}>
+                  <StyledCustomerLink to={`/object/person/${member.personId}`}>
                     {[
                       member.person?.name?.firstName,
                       member.person?.name?.lastName,
                     ]
                       .filter(Boolean)
                       .join(' ') || t`이름 없는 고객`}
-                  </Link>
+                  </StyledCustomerLink>
                 ) : (
                   t`삭제되었거나 접근할 수 없는 고객`
                 )}
               </TableCell>
-              <TableCell>
-                {member.person?.emails?.primaryEmail || t`이메일 없음`}
+              <TableCell minWidth="0" height={themeCssVariables.spacing[10]}>
+                <StyledEmail
+                  title={member.person?.emails?.primaryEmail || undefined}
+                >
+                  {member.person?.emails?.primaryEmail || t`이메일 없음`}
+                </StyledEmail>
               </TableCell>
-              <TableCell>
+              <TableCell align="right" height={themeCssVariables.spacing[10]}>
                 {permissions.canSoftDeleteObjectRecords && (
                   <Button
-                    title={t`목록에서 제외`}
+                    title={t`제외`}
+                    size="small"
+                    variant="tertiary"
                     disabled={busy}
                     onClick={() =>
                       runMutation(() => deleteOneRecord(member.id))
@@ -161,7 +175,6 @@ export const MessageListMembers = ({ listId }: { listId: string }) => {
           onClick={() => fetchMoreRecords()}
         />
       )}
-      <MessageListCampaigns listId={listId} />
     </StyledSection>
   );
 };

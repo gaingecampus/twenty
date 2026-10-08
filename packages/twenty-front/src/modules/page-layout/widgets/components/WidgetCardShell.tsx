@@ -1,3 +1,5 @@
+import { useObjectMetadataItems } from '@/object-metadata/hooks/useObjectMetadataItems';
+import { t } from '@lingui/core/macro';
 import { type PageLayoutWidget } from '@/page-layout/types/PageLayoutWidget';
 import { PageLayoutWidgetForbiddenDisplay } from '@/page-layout/widgets/components/PageLayoutWidgetForbiddenDisplay';
 import { PageLayoutWidgetInvalidConfigDisplay } from '@/page-layout/widgets/components/PageLayoutWidgetInvalidConfigDisplay';
@@ -14,7 +16,10 @@ import { type MouseEvent, useContext } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { IconLock } from 'twenty-ui/icon';
 import { ThemeContext } from 'twenty-ui/theme-constants';
-import { WidgetType } from '~/generated-metadata/graphql';
+import {
+  WidgetConfigurationType,
+  WidgetType,
+} from '~/generated-metadata/graphql';
 
 const StyledNoAccessContainer = styled.div`
   align-items: center;
@@ -66,6 +71,23 @@ export const WidgetCardShell = ({
   onMouseLeave,
 }: WidgetCardShellProps) => {
   const { theme } = useContext(ThemeContext);
+  const { objectMetadataItems } = useObjectMetadataItems();
+  const fieldMetadataId =
+    widget.configuration.configurationType === WidgetConfigurationType.FIELD &&
+    'fieldMetadataId' in widget.configuration
+      ? widget.configuration.fieldMetadataId
+      : undefined;
+  const isMessageListMembers =
+    fieldMetadataId !== undefined &&
+    objectMetadataItems.some(
+      (object) =>
+        object.nameSingular === 'messageList' &&
+        object.fields.some(
+          (field) =>
+            field.name === 'members' &&
+            (field.id === fieldMetadataId || field.name === fieldMetadataId),
+        ),
+    );
 
   const dataTestId =
     widget.type === WidgetType.FIELDS ? 'record-fields-widget' : widget.id;
@@ -95,7 +117,12 @@ export const WidgetCardShell = ({
             isResizing={isResizing}
             isReorderEnabled={isReorderEnabled}
             isDeletingWidgetEnabled={isDeletingWidgetEnabled}
-            title={widget.title}
+            title={isMessageListMembers ? t`세그먼트` : widget.title}
+            titleHelp={
+              isMessageListMembers
+                ? t`이메일이 없거나 수신을 거부한 고객은 캠페인 발송 시 제외됩니다.`
+                : undefined
+            }
             onRemove={onRemove}
             actions={actions}
             forbiddenDisplay={

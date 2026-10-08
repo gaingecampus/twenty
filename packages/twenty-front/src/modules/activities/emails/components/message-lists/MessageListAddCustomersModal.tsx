@@ -11,6 +11,7 @@ import { styled } from '@linaria/react';
 import { t } from '@lingui/core/macro';
 import { useEffect, useId, useState } from 'react';
 import { Button } from 'twenty-ui/input';
+import { ModalHeader, ModalContent, ModalFooter } from 'twenty-ui/surfaces';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 
 type Customer = ObjectRecord & {
@@ -37,12 +38,6 @@ const StyledListOption = styled.label`
   gap: ${themeCssVariables.spacing[2]};
   padding: ${themeCssVariables.spacing[2]};
 `;
-const StyledActions = styled.div`
-  display: flex;
-  gap: ${themeCssVariables.spacing[2]};
-  justify-content: flex-end;
-`;
-
 export const MessageListAddCustomersModal = ({
   initialListId,
   customerIds,
@@ -162,7 +157,7 @@ export const MessageListAddCustomersModal = ({
       }
       await onAdded?.();
       enqueueSuccessSnackBar({
-        message: t`고객 ${added}명을 목록에 추가했습니다.`,
+        message: t`고객 ${added}명을 세그먼트에 추가했습니다.`,
       });
       onClose();
     } catch {
@@ -179,6 +174,8 @@ export const MessageListAddCustomersModal = ({
     <ModalStatefulWrapper
       modalInstanceId={modalId}
       size="large"
+      padding="none"
+      gap={0}
       isClosable
       onClose={() => {
         if (!busy) onClose();
@@ -186,141 +183,143 @@ export const MessageListAddCustomersModal = ({
       shouldCloseModalOnClickOutsideOrEscape={!busy}
       renderInDocumentBody
     >
-      <h2>{t`수신자 목록에 고객 추가`}</h2>
-      {!initialListId && (
-        <section aria-label={t`추가할 수신자 목록`}>
-          <TextInput
-            placeholder={t`수신자 목록 검색`}
-            value={listSearch}
-            onChange={setListSearch}
-            disabled={busy}
-          />
-          <StyledScroll>
-            {lists.map((list) => (
-              <StyledListOption key={list.id}>
-                <input
-                  type="radio"
-                  name={`${modalId}-list`}
-                  checked={listId === list.id}
-                  onChange={() => setListId(list.id)}
-                  disabled={busy}
-                />
-                {list.name || t`제목 없는 목록`}
-              </StyledListOption>
-            ))}
-          </StyledScroll>
-          {loadingLists && <p>{t`수신자 목록을 불러오는 중입니다.`}</p>}
-          {listsError && (
-            <p role="alert">{t`수신자 목록을 불러오지 못했습니다.`}</p>
-          )}
-          {!loadingLists && !listsError && lists.length === 0 && (
-            <p>{t`선택할 수신자 목록이 없습니다.`}</p>
-          )}
-          {moreLists && (
-            <Button
-              title={t`목록 더 보기`}
-              onClick={() => fetchMoreLists()}
+      <ModalHeader hasBorderBottom>{t`세그먼트에 고객 추가`}</ModalHeader>
+      <ModalContent contentPadding={4} gap={3}>
+        {!initialListId && (
+          <section aria-label={t`추가할 세그먼트`}>
+            <TextInput
+              placeholder={t`세그먼트 검색`}
+              value={listSearch}
+              onChange={setListSearch}
               disabled={busy}
             />
-          )}
-        </section>
-      )}
-      {!customerIds && (
-        <TextInput
-          placeholder={t`고객 이름 또는 이메일 검색`}
-          value={search}
-          onChange={setSearch}
-          fullWidth
-          disabled={busy}
-        />
-      )}
-      <StyledScroll>
-        <StyledTable>
-          <thead>
-            <tr>
-              <th>
-                {!customerIds && (
+            <StyledScroll>
+              {lists.map((list) => (
+                <StyledListOption key={list.id}>
                   <input
-                    type="checkbox"
-                    aria-label={t`현재 표시된 고객 모두 선택`}
-                    disabled={busy || records.length === 0}
-                    checked={
-                      records.length > 0 &&
-                      records.every((person) => selected.has(person.id))
-                    }
-                    onChange={(event) => {
-                      const checked = event.target.checked;
-                      setSelected((previous) => {
-                        const next = new Map(previous);
-                        records.forEach((person) => {
-                          if (checked) next.set(person.id, person);
-                          else next.delete(person.id);
-                        });
-                        return next;
-                      });
-                    }}
+                    type="radio"
+                    name={`${modalId}-list`}
+                    checked={listId === list.id}
+                    onChange={() => setListId(list.id)}
+                    disabled={busy}
                   />
-                )}
-              </th>
-              <th>{t`고객`}</th>
-              <th>{t`이메일`}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {records.map((person) => (
-              <tr key={person.id}>
-                <td>
+                  {list.name || t`제목 없는 목록`}
+                </StyledListOption>
+              ))}
+            </StyledScroll>
+            {loadingLists && <p>{t`세그먼트를 불러오는 중입니다.`}</p>}
+            {listsError && (
+              <p role="alert">{t`세그먼트를 불러오지 못했습니다.`}</p>
+            )}
+            {!loadingLists && !listsError && lists.length === 0 && (
+              <p>{t`선택할 세그먼트가 없습니다.`}</p>
+            )}
+            {moreLists && (
+              <Button
+                title={t`목록 더 보기`}
+                onClick={() => fetchMoreLists()}
+                disabled={busy}
+              />
+            )}
+          </section>
+        )}
+        {!customerIds && (
+          <TextInput
+            placeholder={t`고객 이름 또는 이메일 검색`}
+            value={search}
+            onChange={setSearch}
+            fullWidth
+            disabled={busy}
+          />
+        )}
+        <StyledScroll>
+          <StyledTable>
+            <thead>
+              <tr>
+                <th>
                   {!customerIds && (
                     <input
                       type="checkbox"
-                      aria-label={[
-                        person.name?.firstName,
-                        person.name?.lastName,
-                      ]
-                        .filter(Boolean)
-                        .join(' ')}
-                      checked={selected.has(person.id)}
-                      disabled={busy}
-                      onChange={() => toggle(person)}
+                      aria-label={t`현재 표시된 고객 모두 선택`}
+                      disabled={busy || records.length === 0}
+                      checked={
+                        records.length > 0 &&
+                        records.every((person) => selected.has(person.id))
+                      }
+                      onChange={(event) => {
+                        const checked = event.target.checked;
+                        setSelected((previous) => {
+                          const next = new Map(previous);
+                          records.forEach((person) => {
+                            if (checked) next.set(person.id, person);
+                            else next.delete(person.id);
+                          });
+                          return next;
+                        });
+                      }}
                     />
                   )}
-                </td>
-                <td>
-                  {[person.name?.firstName, person.name?.lastName]
-                    .filter(Boolean)
-                    .join(' ')}
-                </td>
-                <td>{person.emails?.primaryEmail || t`이메일 없음`}</td>
+                </th>
+                <th>{t`고객`}</th>
+                <th>{t`이메일`}</th>
               </tr>
-            ))}
-          </tbody>
-        </StyledTable>
-      </StyledScroll>
-      {loading && <p>{t`불러오는 중…`}</p>}
-      {error && <p role="alert">{t`고객을 불러오지 못했습니다.`}</p>}
-      {!loading && !error && records.length === 0 && (
-        <p>{t`검색 결과가 없습니다.`}</p>
-      )}
-      {hasNextPage && (
-        <Button
-          title={t`고객 더 보기`}
-          disabled={loading || busy}
-          onClick={() => fetchMoreRecords()}
-        />
-      )}
-      <p>{t`선택 ${candidates.length}명 · 이미 포함 ${alreadyIncluded}명 · 새로 추가 ${additions.length}명 · 이메일 없음 ${missingEmail}명`}</p>
-      <p>{t`이미 포함된 고객은 건너뜁니다. 이메일이 없는 고객도 목록에는 저장되지만 발송할 때 제외됩니다.`}</p>
-      {checkError && (
-        <p role="alert">{t`기존 수신자를 확인하지 못했습니다.`}</p>
-      )}
-      {moreExisting && (
-        <Button
-          title={t`중복 확인 계속`}
-          disabled={checking}
-          onClick={() => fetchMoreExisting()}
-        />
-      )}
-      <StyledActions>
+            </thead>
+            <tbody>
+              {records.map((person) => (
+                <tr key={person.id}>
+                  <td>
+                    {!customerIds && (
+                      <input
+                        type="checkbox"
+                        aria-label={[
+                          person.name?.firstName,
+                          person.name?.lastName,
+                        ]
+                          .filter(Boolean)
+                          .join(' ')}
+                        checked={selected.has(person.id)}
+                        disabled={busy}
+                        onChange={() => toggle(person)}
+                      />
+                    )}
+                  </td>
+                  <td>
+                    {[person.name?.firstName, person.name?.lastName]
+                      .filter(Boolean)
+                      .join(' ')}
+                  </td>
+                  <td>{person.emails?.primaryEmail || t`이메일 없음`}</td>
+                </tr>
+              ))}
+            </tbody>
+          </StyledTable>
+        </StyledScroll>
+        {loading && <p>{t`불러오는 중…`}</p>}
+        {error && <p role="alert">{t`고객을 불러오지 못했습니다.`}</p>}
+        {!loading && !error && records.length === 0 && (
+          <p>{t`검색 결과가 없습니다.`}</p>
+        )}
+        {hasNextPage && (
+          <Button
+            title={t`고객 더 보기`}
+            disabled={loading || busy}
+            onClick={() => fetchMoreRecords()}
+          />
+        )}
+        <p>{t`선택 ${candidates.length}명 · 이미 포함 ${alreadyIncluded}명 · 새로 추가 ${additions.length}명 · 이메일 없음 ${missingEmail}명`}</p>
+        <p>{t`이미 포함된 고객은 건너뜁니다. 이메일이 없는 고객도 목록에는 저장되지만 발송할 때 제외됩니다.`}</p>
+        {checkError && (
+          <p role="alert">{t`기존 수신자를 확인하지 못했습니다.`}</p>
+        )}
+        {moreExisting && (
+          <Button
+            title={t`중복 확인 계속`}
+            disabled={checking}
+            onClick={() => fetchMoreExisting()}
+          />
+        )}
+      </ModalContent>
+      <ModalFooter>
         <Button title={t`취소`} disabled={busy} onClick={onClose} />
         <Button
           title={t`선택 고객 추가`}
@@ -340,7 +339,7 @@ export const MessageListAddCustomersModal = ({
           }
           onClick={confirm}
         />
-      </StyledActions>
+      </ModalFooter>
     </ModalStatefulWrapper>
   );
 };

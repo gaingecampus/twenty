@@ -1,3 +1,5 @@
+import { StyledMessageListEmpty } from '@/activities/emails/components/message-lists/MessageListSectionStyles';
+import { MessageListLinkCampaign } from '@/activities/emails/components/message-lists/MessageListLinkCampaign';
 import { DateTimeDisplay } from '@/ui/field/display/components/DateTimeDisplay';
 import { useFindManyRecords } from '@/object-record/hooks/useFindManyRecords';
 import { type ObjectRecord } from '@/object-record/types/ObjectRecord';
@@ -9,7 +11,6 @@ import { styled } from '@linaria/react';
 import { t } from '@lingui/core/macro';
 import { Link } from 'react-router-dom';
 import { Button } from 'twenty-ui/input';
-import { themeCssVariables } from 'twenty-ui/theme-constants';
 
 type Campaign = ObjectRecord & {
   subject: string | null;
@@ -19,26 +20,32 @@ type Campaign = ObjectRecord & {
   sentAt: string | null;
 };
 const StyledSection = styled.section`
-  border-top: 1px solid ${themeCssVariables.border.color.light};
-  margin-top: ${themeCssVariables.spacing[6]};
-  padding-top: ${themeCssVariables.spacing[4]};
+  overflow: auto;
+  width: 100%;
 `;
 
 export const MessageListCampaigns = ({ listId }: { listId: string }) => {
-  const { records, totalCount, loading, error, hasNextPage, fetchMoreRecords } =
-    useFindManyRecords<Campaign>({
-      objectNameSingular: 'messageCampaign',
-      filter: { listId: { eq: listId } },
-      recordGqlFields: {
-        id: true,
-        subject: true,
-        status: true,
-        fromAddress: true,
-        scheduledAt: true,
-        sentAt: true,
-      },
-      limit: 20,
-    });
+  const {
+    records,
+    totalCount,
+    loading,
+    error,
+    hasNextPage,
+    fetchMoreRecords,
+    refetch,
+  } = useFindManyRecords<Campaign>({
+    objectNameSingular: 'messageCampaign',
+    filter: { listId: { eq: listId } },
+    recordGqlFields: {
+      id: true,
+      subject: true,
+      status: true,
+      fromAddress: true,
+      scheduledAt: true,
+      sentAt: true,
+    },
+    limit: 20,
+  });
   const statusLabels: Record<string, string> = {
     DRAFT: t`초안`,
     SCHEDULED: t`예약됨`,
@@ -50,13 +57,19 @@ export const MessageListCampaigns = ({ listId }: { listId: string }) => {
   };
   return (
     <StyledSection aria-label={t`연결된 캠페인`}>
-      <h3>
-        {t`연결된 캠페인`} · {totalCount ?? 0}
-      </h3>
+      <MessageListLinkCampaign
+        listId={listId}
+        onLinked={refetch}
+        totalCount={totalCount ?? 0}
+      />
       {loading && <p>{t`불러오는 중…`}</p>}
       {error && <p role="alert">{t`캠페인을 불러오지 못했습니다.`}</p>}
       {!loading && !error && records.length === 0 && (
-        <p>{t`이 목록을 사용하는 캠페인이 없습니다.`}</p>
+        <StyledMessageListEmpty>
+          {t`아직 연결된 캠페인이 없습니다.`}
+          <br />
+          {t`캠페인 연결 버튼으로 초안을 선택하세요.`}
+        </StyledMessageListEmpty>
       )}
       {records.length > 0 && (
         <Table>

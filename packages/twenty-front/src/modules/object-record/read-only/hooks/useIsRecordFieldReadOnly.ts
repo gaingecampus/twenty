@@ -48,9 +48,13 @@ export const useIsRecordFieldReadOnly = ({
     objectMetadataItem,
   });
 
+  const isMessageListName =
+    objectMetadataItem.nameSingular === 'messageList' &&
+    fieldMetadataItem.name === 'name';
+
   return isRecordFieldReadOnly({
     isRecordReadOnly,
-    isSystemObject: objectMetadataItem.isSystem,
+    isSystemObject: objectMetadataItem.isSystem && !isMessageListName,
     isFieldFromStandardApplication:
       getIsMetadataItemFromStandardApplication(fieldMetadataItem),
     objectPermissions,

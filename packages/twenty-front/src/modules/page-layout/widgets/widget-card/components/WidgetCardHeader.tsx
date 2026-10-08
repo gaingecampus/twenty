@@ -4,9 +4,13 @@ import { type WidgetAction } from '@/page-layout/widgets/types/WidgetAction';
 import { useAtomComponentFamilyStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomComponentFamilyStateValue';
 import { styled } from '@linaria/react';
 import { t } from '@lingui/core/macro';
-import { type ReactNode, useContext } from 'react';
-import { IconTrash } from 'twenty-ui/icon';
-import { OverflowingTextWithTooltip } from 'twenty-ui/surfaces';
+import { type ReactNode, useContext, useId } from 'react';
+import { IconInfoCircle, IconTrash } from 'twenty-ui/icon';
+import {
+  AppTooltip,
+  TooltipDelay,
+  OverflowingTextWithTooltip,
+} from 'twenty-ui/surfaces';
 import { IconButton } from 'twenty-ui/input';
 
 import { type WidgetCardVariant } from '@/page-layout/widgets/types/WidgetCardVariant';
@@ -20,6 +24,7 @@ export type WidgetCardHeaderProps = {
   isInEditMode: boolean;
   isEmpty?: boolean;
   title: string;
+  titleHelp?: string;
   onRemove?: (e?: React.MouseEvent) => void;
   forbiddenDisplay?: ReactNode;
   actions?: WidgetAction[];
@@ -37,15 +42,28 @@ const StyledWidgetCardHeader = styled.div`
 `;
 
 const StyledTitleContainer = styled.div<{ variant: WidgetCardVariant }>`
+  align-items: center;
   color: ${themeCssVariables.font.color.primary};
+  display: flex;
   flex: 1;
   font-size: ${themeCssVariables.font.size.md};
   font-weight: ${themeCssVariables.font.weight.medium};
+  gap: ${themeCssVariables.spacing[1]};
   overflow: hidden;
   padding-inline: ${({ variant }) =>
     variant === 'side-column' ? '0' : themeCssVariables.spacing[1]};
 
   user-select: none;
+`;
+
+const StyledInfoButton = styled.button`
+  align-items: center;
+  background: transparent;
+  border: none;
+  color: ${themeCssVariables.font.color.tertiary};
+  cursor: help;
+  display: inline-flex;
+  padding: 0;
 `;
 
 const StyledRightContainer = styled.div`
@@ -76,12 +94,14 @@ export const WidgetCardHeader = ({
   isReorderEnabled = true,
   isDeletingWidgetEnabled = true,
   title,
+  titleHelp,
   onRemove,
   forbiddenDisplay,
   actions,
   className,
 }: WidgetCardHeaderProps) => {
   const { theme } = useContext(ThemeContext);
+  const helpId = `widget-help-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`;
   const widgetCardHovered = useAtomComponentFamilyStateValue(
     widgetCardHoveredComponentFamilyState,
     widgetId,
@@ -99,6 +119,22 @@ export const WidgetCardHeader = ({
       </AnimatePresence>
       <StyledTitleContainer variant={variant}>
         <OverflowingTextWithTooltip text={isEmpty ? t`Add Widget` : title} />
+        {titleHelp && !isEmpty && (
+          <>
+            <span id={helpId}>
+              <StyledInfoButton type="button" aria-label={`${title} 도움말`}>
+                <IconInfoCircle size={16} />
+              </StyledInfoButton>
+            </span>
+            <AppTooltip
+              anchorSelect={`#${helpId}`}
+              content={titleHelp}
+              place="top"
+              delay={TooltipDelay.shortDelay}
+              positionStrategy="fixed"
+            />
+          </>
+        )}
       </StyledTitleContainer>
       <StyledRightContainer>
         {isNonEmptyArray(actions) && (

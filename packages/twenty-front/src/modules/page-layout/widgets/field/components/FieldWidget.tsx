@@ -1,3 +1,4 @@
+import { MessageListCampaigns } from '@/activities/emails/components/message-lists/MessageListCampaigns';
 import { MessageListMembers } from '@/activities/emails/components/message-lists/MessageListMembers';
 import { useFieldMetadataItemById } from '@/object-metadata/hooks/useFieldMetadataItemById';
 import { useObjectMetadataItem } from '@/object-metadata/hooks/useObjectMetadataItem';
@@ -95,6 +96,13 @@ export const FieldWidget = ({ widget }: FieldWidgetProps) => {
     fieldMetadataItem.name === 'members'
   ) {
     return <MessageListMembers listId={targetRecord.id} />;
+  }
+
+  if (
+    objectMetadataItem.nameSingular === 'messageList' &&
+    fieldMetadataItem.name === 'campaigns'
+  ) {
+    return <MessageListCampaigns listId={targetRecord.id} />;
   }
 
   const fieldDefinition = formatFieldMetadataItemAsColumnDefinition({
