@@ -996,6 +996,32 @@ export const STANDARD_OBJECTS = {
         universalIdentifier: '975823ad-9b97-4f39-b2c7-fbd7d77f4bd1',
       },
     },
+    views: {
+      allMessageCampaigns: {
+        universalIdentifier: '3acb902d-db6c-4f8a-8aca-f179dc0cdbb9',
+        viewFields: {
+          subject: {
+            universalIdentifier: '76e7e126-2345-43c0-bd8e-08c786bdf999',
+          },
+          status: {
+            universalIdentifier: '47a79458-3fec-4aef-a5bc-5d87eac390af',
+          },
+          fromAddress: {
+            universalIdentifier: 'c05fcebd-c96e-406d-bdba-a0ae65f0a141',
+          },
+          list: { universalIdentifier: '86fbb96d-b688-4927-acea-f5f3b9caed0d' },
+          sentAt: {
+            universalIdentifier: '75a7a408-c47e-4853-8473-58b2cd5a3aa8',
+          },
+          createdBy: {
+            universalIdentifier: 'faff41bb-6cdf-4e60-86a0-12b0d2e09803',
+          },
+          createdAt: {
+            universalIdentifier: 'aabb37c4-11ca-43f5-a8d0-5244ce435ed0',
+          },
+        },
+      },
+    },
   },
   messageList: {
     universalIdentifier: '826561ea-4816-411c-baa0-eec5e6ca8866',
