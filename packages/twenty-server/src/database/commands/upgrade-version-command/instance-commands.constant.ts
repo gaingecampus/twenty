@@ -1,5 +1,7 @@
 // Auto-edited by generate:instance-command — do not edit manually
 
+import { AddMessageSendingStatusFastInstanceCommand } from 'src/database/commands/upgrade-version-command/2-25/2-25-instance-command-fast-1807400000000-add-message-sending-status';
+
 import { AddViewFieldGroupIdIndexOnViewFieldFastInstanceCommand } from 'src/database/commands/upgrade-version-command/1-21/1-21-instance-command-fast-1775129420309-add-view-field-group-id-index-on-view-field';
 import { MigrateMessagingCalendarToCoreFastInstanceCommand } from 'src/database/commands/upgrade-version-command/1-21/1-21-instance-command-fast-1775165049548-migrate-messaging-calendar-to-core';
 import { AddEmailThreadWidgetTypeFastInstanceCommand } from 'src/database/commands/upgrade-version-command/1-21/1-21-instance-command-fast-1775200000000-add-email-thread-widget-type';
@@ -90,6 +92,7 @@ import { AddWorkspaceUiThemeFastInstanceCommand } from 'src/database/commands/up
 import { AddViewFieldGroupIsCollapsedFastInstanceCommand } from 'src/database/commands/upgrade-version-command/2-24/2-24-instance-command-fast-1807300000000-add-view-field-group-is-collapsed';
 
 export const INSTANCE_COMMANDS = [
+  AddMessageSendingStatusFastInstanceCommand,
   AddViewFieldGroupIdIndexOnViewFieldFastInstanceCommand,
   MigrateMessagingCalendarToCoreFastInstanceCommand,
   AddEmailThreadWidgetTypeFastInstanceCommand,
