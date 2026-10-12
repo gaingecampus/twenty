@@ -3,7 +3,6 @@ import { Injectable } from '@nestjs/common';
 import { isNonEmptyString } from '@sniptt/guards';
 import { isDefined } from 'twenty-shared/utils';
 
-import { NodeEnvironment } from 'src/engine/core-modules/twenty-config/interfaces/node-environment.interface';
 import { SupportDriver } from 'src/engine/core-modules/twenty-config/interfaces/support.interface';
 
 import { MaintenanceModeService } from 'src/engine/core-modules/admin-panel/maintenance-mode.service';
@@ -245,10 +244,7 @@ export class ClientConfigService {
         'IS_ATTACHMENT_PREVIEW_ENABLED',
       ),
       analyticsEnabled: this.twentyConfigService.get('ANALYTICS_ENABLED'),
-      canManageFeatureFlags:
-        this.twentyConfigService.get('NODE_ENV') ===
-          NodeEnvironment.DEVELOPMENT ||
-        this.twentyConfigService.get('IS_BILLING_ENABLED'),
+      canManageFeatureFlags: true,
       publicFeatureFlags: PUBLIC_FEATURE_FLAGS,
       isMicrosoftMessagingEnabled: this.twentyConfigService.get(
         'MESSAGING_PROVIDER_MICROSOFT_ENABLED',

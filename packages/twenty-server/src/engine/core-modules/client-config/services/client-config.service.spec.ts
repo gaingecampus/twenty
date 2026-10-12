@@ -193,7 +193,7 @@ describe('ClientConfigService', () => {
       });
     });
 
-    it('should handle production environment correctly', async () => {
+    it('should allow feature flag management in production without billing', async () => {
       jest
         .spyOn(twentyConfigService, 'get')
         .mockImplementation((key: string) => {
@@ -205,7 +205,7 @@ describe('ClientConfigService', () => {
 
       const result = await service.getClientConfig();
 
-      expect(result.canManageFeatureFlags).toBe(false);
+      expect(result.canManageFeatureFlags).toBe(true);
       expect(result.aiModels).toEqual([]);
     });
 
