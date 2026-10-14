@@ -1,5 +1,6 @@
 /* @license Enterprise */
 
+import { useIsSelfHosted } from '@/client-config/hooks/useIsSelfHosted';
 import { Link } from 'react-router-dom';
 
 import { SettingsPath } from 'twenty-shared/types';
@@ -28,6 +29,7 @@ const StyledLinkContainer = styled.div<{ isDisabled: boolean }>`
 `;
 
 export const SettingsSSOIdentitiesProvidersListCard = () => {
+  const isSelfHosted = useIsSelfHosted();
   const currentWorkspace = useAtomStateValue(currentWorkspaceState);
 
   const { t } = useLingui();
@@ -42,7 +44,8 @@ export const SettingsSSOIdentitiesProvidersListCard = () => {
     error: ssoError,
   } = useQuery(GetSsoIdentityProvidersDocument, {
     fetchPolicy: 'network-only',
-    skip: currentWorkspace?.hasValidSignedEnterpriseKey === false,
+    skip:
+      !isSelfHosted && currentWorkspace?.hasValidSignedEnterpriseKey !== true,
   });
 
   useEffect(() => {
@@ -55,12 +58,17 @@ export const SettingsSSOIdentitiesProvidersListCard = () => {
 
   return loading || !SSOIdentitiesProviders.length ? (
     <StyledLinkContainer
-      isDisabled={currentWorkspace?.hasValidSignedEnterpriseKey !== true}
+      isDisabled={
+        !isSelfHosted && currentWorkspace?.hasValidSignedEnterpriseKey !== true
+      }
     >
       <Link to={getSettingsPath(SettingsPath.NewSSOIdentityProvider)}>
         <SettingsCard
           title={t`Add SSO Identity Provider`}
-          disabled={currentWorkspace?.hasValidSignedEnterpriseKey !== true}
+          disabled={
+            !isSelfHosted &&
+            currentWorkspace?.hasValidSignedEnterpriseKey !== true
+          }
           Icon={<IconKey />}
         />
       </Link>

@@ -1,3 +1,4 @@
+import { useIsSelfHosted } from '@/client-config/hooks/useIsSelfHosted';
 import { currentWorkspaceState } from '@/auth/states/currentWorkspaceState';
 import { billingState } from '@/client-config/states/billingState';
 import { isClickHouseConfiguredState } from '@/client-config/states/isClickHouseConfiguredState';
@@ -24,7 +25,10 @@ export const SettingsAiUsageTab = () => {
   const isBillingEnabled = billing?.isBillingEnabled ?? false;
   const isClickHouseConfigured = useAtomStateValue(isClickHouseConfiguredState);
 
+  const isSelfHosted = useIsSelfHosted();
+
   const hasEnterpriseAccess =
+    isSelfHosted ||
     isBillingEnabled ||
     currentWorkspace?.hasValidEnterpriseValidityToken === true;
 

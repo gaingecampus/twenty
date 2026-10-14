@@ -1,3 +1,4 @@
+import { useIsSelfHosted } from '@/client-config/hooks/useIsSelfHosted';
 import { useMemo, useState } from 'react';
 
 import { useMutation, useQuery } from '@apollo/client/react';
@@ -63,7 +64,10 @@ export const SettingsAdminAI = () => {
   const currentWorkspace = useAtomStateValue(currentWorkspaceState);
   const billing = useAtomStateValue(billingState);
   const isBillingEnabled = billing?.isBillingEnabled ?? false;
+  const isSelfHosted = useIsSelfHosted();
+
   const hasEnterpriseAccess =
+    isSelfHosted ||
     isBillingEnabled ||
     currentWorkspace?.hasValidEnterpriseValidityToken === true;
   const [usagePeriod, setUsagePeriod] = useState<PeriodPreset>('30d');

@@ -1,3 +1,4 @@
+import { useIsSelfHosted } from '@/client-config/hooks/useIsSelfHosted';
 import { styled } from '@linaria/react';
 import { useLingui } from '@lingui/react/macro';
 import { useDebouncedCallback } from 'use-debounce';
@@ -177,8 +178,10 @@ export const SettingsSecuritySettings = () => {
     !hasDirectAuthEnabled &&
     hasBypassProviderAvailable;
 
+  const isSelfHosted = useIsSelfHosted();
+
   const hasEnterpriseAccess =
-    currentWorkspace?.hasValidSignedEnterpriseKey === true;
+    isSelfHosted || currentWorkspace?.hasValidSignedEnterpriseKey === true;
   const isEventLogsEnabled = hasEnterpriseAccess && isClickHouseConfigured;
 
   return (
