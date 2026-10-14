@@ -30,6 +30,10 @@ export class EnterpriseKeyValidationCronJob {
     ENTERPRISE_KEY_VALIDATION_CRON_PATTERN,
   )
   async handle(): Promise<void> {
+    if (this.enterprisePlanService.isSelfHosted()) {
+      return;
+    }
+
     this.logger.log(
       'Starting enterprise validity token refresh and seat report...',
     );

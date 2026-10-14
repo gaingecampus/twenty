@@ -152,8 +152,14 @@ export class EnterprisePlanService implements OnModuleInit {
     return false;
   }
 
+  isSelfHosted(): boolean {
+    return this.twentyConfigService.get('IS_BILLING_ENABLED') === false;
+  }
+
+  // Legacy callers use this method for feature access, not license metadata.
+  // Self-hosted GAINGE keeps access independent of the subscription token.
   isValid(): boolean {
-    return this.hasValidEnterpriseValidityToken();
+    return this.isSelfHosted() || this.hasValidEnterpriseValidityToken();
   }
 
   isValidEnterpriseKeyFormat(key: string): boolean {

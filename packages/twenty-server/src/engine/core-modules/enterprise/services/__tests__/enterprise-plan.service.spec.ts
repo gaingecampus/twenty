@@ -334,6 +334,35 @@ describe('EnterprisePlanService', () => {
     });
   });
 
+  describe('self-hosted feature access', () => {
+    it('allows access without claiming a valid license when billing is disabled', async () => {
+      configGetMock.mockImplementation((key: string) =>
+        key === 'IS_BILLING_ENABLED' ? false : undefined,
+      );
+      appTokenFindOneMock.mockResolvedValue(null);
+      await service.onModuleInit();
+
+      expect(service.isValid()).toBe(true);
+      expect(service.hasValidSignedEnterpriseKey()).toBe(false);
+      expect(service.hasValidEnterpriseValidityToken()).toBe(false);
+      expect((await service.getLicenseInfo()).isValid).toBe(false);
+      expect(fetchMock).not.toHaveBeenCalled();
+    });
+
+    it('still requires a token when billing is enabled', () => {
+      configGetMock.mockImplementation((key: string) =>
+        key === 'IS_BILLING_ENABLED' ? true : undefined,
+      );
+      expect(service.isValid()).toBe(false);
+    });
+
+    it('does not infer self-hosted mode from missing configuration', () => {
+      configGetMock.mockReturnValue(undefined);
+      expect(service.isSelfHosted()).toBe(false);
+      expect(service.isValid()).toBe(false);
+    });
+  });
+
   describe('isValidEnterpriseKeyFormat', () => {
     it('should return true for valid JWT format', () => {
       mockCryptoVerify.mockReturnValue(true);
