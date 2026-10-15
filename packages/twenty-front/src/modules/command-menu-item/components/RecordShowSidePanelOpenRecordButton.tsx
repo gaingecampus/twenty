@@ -30,7 +30,7 @@ import { currentRecordSortsComponentState } from '@/object-record/record-sort/st
 import { recordIndexCurrentPageComponentState } from '@/object-record/record-index/states/recordIndexCurrentPageComponentState';
 import { isDefined } from 'twenty-shared/utils';
 import { Button } from 'twenty-ui/input';
-import { t } from '@lingui/core/macro';
+import { IconExternalLink } from 'twenty-ui/icon';
 import { getOsControlSymbol } from 'twenty-ui/utilities';
 import { useNavigateApp } from '~/hooks/useNavigateApp';
 
@@ -199,7 +199,8 @@ export const RecordShowSidePanelOpenRecordButton = ({
   return (
     <span title={`전체 페이지로 열기 (${getOsControlSymbol()}⏎)`}>
       <Button
-        title={t`Open`}
+        Icon={IconExternalLink}
+        title="전체로 열기"
         variant="secondary"
         size="small"
         onClick={handleOpenRecord}
