@@ -14,7 +14,7 @@ import { useRemoveFocusItemFromFocusStackById } from '@/ui/utilities/focus/hooks
 import { FocusComponentType } from '@/ui/utilities/focus/types/FocusComponentType';
 import { styled } from '@linaria/react';
 import { useLingui } from '@lingui/react/macro';
-import { useId, useState } from 'react';
+import { type ReactNode, useId, useState } from 'react';
 import { isDefined } from 'twenty-shared/utils';
 import { IconMaximize } from 'twenty-ui/icon';
 import { LightIconButton } from 'twenty-ui/input';
@@ -89,6 +89,7 @@ type FormAdvancedTextFieldInputProps = {
   minHeight: number;
   maxWidth: number;
   contentType?: AdvancedTextEditorContentType;
+  renderToolbar?: (insertText: (text: string) => void) => ReactNode;
 };
 
 export const FormAdvancedTextFieldInput = ({
@@ -107,6 +108,7 @@ export const FormAdvancedTextFieldInput = ({
   minHeight,
   maxWidth,
   contentType = 'json',
+  renderToolbar,
 }: FormAdvancedTextFieldInputProps) => {
   const instanceId = useId();
   const isMobile = useIsMobile();
@@ -171,6 +173,10 @@ export const FormAdvancedTextFieldInput = ({
     editor.commands.insertVariableTag(variableName);
   };
 
+  const insertText = (text: string) => {
+    editor?.chain().focus().insertContent({ type: 'text', text }).run();
+  };
+
   const defaultBreadcrumbs: BreadcrumbProps['links'] = [
     {
       children: t`Text Editor`,
@@ -189,6 +195,7 @@ export const FormAdvancedTextFieldInput = ({
     ? renderFullScreenModal(
         <div data-globally-prevent-click-outside="true">
           <StyledFullScreenEditorContainer>
+            {!readonly && renderToolbar?.(insertText)}
             <AdvancedTextEditor
               editor={editor}
               readonly={readonly}
@@ -212,6 +219,7 @@ export const FormAdvancedTextFieldInput = ({
           {label ? <InputLabel>{label}</InputLabel> : null}
 
           <StyledAdvancedTextFieldFieldContainer>
+            {!readonly && !isFullScreen && renderToolbar?.(insertText)}
             <StyledAdvancedTextFieldInnerContainer>
               {!isFullScreen && (
                 <AdvancedTextEditor

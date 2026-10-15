@@ -1,4 +1,5 @@
 import { CampaignTestEmail } from '@/activities/emails/components/CampaignTestEmail';
+import { CampaignBodyVariablePicker } from '@/activities/emails/components/CampaignBodyVariablePicker';
 import { EmailAttachmentsField } from '@/activities/emails/components/EmailAttachmentsField';
 import { useId } from 'react';
 import { IconExternalLink, IconInfoCircle } from 'twenty-ui/icon';
@@ -325,7 +326,11 @@ export const CampaignComposerFields = ({
           minHeight={240}
           maxWidth={600}
           contentType="html"
+          renderToolbar={(insertText) => (
+            <CampaignBodyVariablePicker onInsert={insertText} />
+          )}
         />
+        <StyledHint>{t`예: ${'{{fullName}}'}님, 안녕하세요. 단체 발송 시 각 고객의 정보로 바뀝니다. 값이 없으면 빈칸으로 표시됩니다. 위 메뉴의 변수만 지원하며 직접 입력할 수도 있습니다.`}</StyledHint>
       </StyledFieldGroup>
       <StyledFieldGroup>
         <StyledFieldLabel>{t`첨부 파일`}</StyledFieldLabel>
