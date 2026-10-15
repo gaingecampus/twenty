@@ -1,4 +1,6 @@
 import { type EmailAttachment } from 'twenty-shared/types';
+import { useEmailSignature } from '@/settings/accounts/hooks/useEmailSignature';
+import { appendEmailSignature } from '@/activities/emails/utils/appendEmailSignature';
 import { useRef, useState } from 'react';
 import {
   type CancelScheduledMessageCampaignMutation,
@@ -35,6 +37,20 @@ export const useCampaignComposerState = ({
   const [isUploading, setIsUploading] = useState(false);
   const [isTestSending, setIsTestSending] = useState(false);
   const [body, setBody] = useState(campaign?.bodyTemplate ?? '');
+  const {
+    signature,
+    loading: signatureLoading,
+    error: signatureError,
+  } = useEmailSignature();
+  // Scheduled campaigns already contain the signature saved at scheduling time.
+  const [includeSignature, setIncludeSignature] = useState(!campaign);
+  const bodyWithSignature = appendEmailSignature(
+    body,
+    signature,
+    includeSignature,
+  );
+  const signatureReady =
+    !includeSignature || (!signatureLoading && !signatureError);
 
   const { sendMessageCampaign, loading } = useSendMessageCampaign();
 
@@ -82,6 +98,7 @@ export const useCampaignComposerState = ({
     scheduleValid &&
     !isUploading &&
     !isTestSending &&
+    signatureReady &&
     !cancelling &&
     !loading;
 
@@ -103,7 +120,7 @@ export const useCampaignComposerState = ({
         listId,
         unsubscribeTopicId: unsubscribeTopicId ?? undefined,
         subject,
-        body,
+        body: bodyWithSignature,
         files,
         fromAddress: fromAddress.trim(),
       });
@@ -117,6 +134,13 @@ export const useCampaignComposerState = ({
   };
 
   return {
+    signature,
+    signatureLoading,
+    signatureError,
+    signatureReady,
+    includeSignature,
+    setIncludeSignature,
+    bodyWithSignature,
     files,
     setFiles,
     setIsUploading,

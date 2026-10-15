@@ -3,6 +3,7 @@ import { Args, Mutation, Parent, Query, ResolveField } from '@nestjs/graphql';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import crypto from 'crypto';
+import DOMPurify from 'dompurify';
 
 import { msg } from '@lingui/core/macro';
 import { GraphQLJSONObject } from 'graphql-type-json';
@@ -97,6 +98,46 @@ export class UserResolver {
     private readonly userWorkspaceService: UserWorkspaceService,
     private readonly globalWorkspaceOrmManager: GlobalWorkspaceOrmManager,
   ) {}
+
+  @Query(() => String)
+  @UseGuards(UserAuthGuard, WorkspaceAuthGuard, NoPermissionGuard)
+  async myEmailSignature(
+    @AuthUser() user: AuthContextUser,
+    @AuthWorkspace() workspace: WorkspaceEntity,
+  ): Promise<string> {
+    return (
+      (await this.userVarService.get({
+        userId: user.id,
+        workspaceId: workspace.id,
+        key: 'emailSignatureHtml',
+      })) ?? ''
+    );
+  }
+
+  @Mutation(() => String)
+  @UseGuards(UserAuthGuard, WorkspaceAuthGuard, NoPermissionGuard)
+  async saveMyEmailSignature(
+    @AuthUser() user: AuthContextUser,
+    @AuthWorkspace() workspace: WorkspaceEntity,
+    @Args('html', { type: () => String }) html: string,
+  ): Promise<string> {
+    if (html.length > 50000) {
+      throw new BadRequestException('서명은 50,000자 이하로 입력하세요.');
+    }
+    const { JSDOM } = await import('jsdom');
+    const window = new JSDOM('').window;
+    const sanitized = DOMPurify(window).sanitize(html, {
+      USE_PROFILES: { html: true },
+    });
+    window.close();
+    await this.userVarService.set({
+      userId: user.id,
+      workspaceId: workspace.id,
+      key: 'emailSignatureHtml',
+      value: sanitized,
+    });
+    return sanitized;
+  }
 
   private async getUserWorkspacePermissions({
     currentUserWorkspace,

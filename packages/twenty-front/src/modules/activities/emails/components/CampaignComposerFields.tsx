@@ -1,4 +1,5 @@
 import { CampaignTestEmail } from '@/activities/emails/components/CampaignTestEmail';
+import { EmailSignaturePreview } from '@/settings/accounts/components/EmailSignaturePreview';
 import { CampaignBodyVariablePicker } from '@/activities/emails/components/CampaignBodyVariablePicker';
 import { EmailAttachmentsField } from '@/activities/emails/components/EmailAttachmentsField';
 import { useId } from 'react';
@@ -340,6 +341,46 @@ export const CampaignComposerFields = ({
           onUploadingChange={campaignState.setIsUploading}
         />
         <StyledHint>{t`최대 20개, 총 25MB까지 첨부할 수 있습니다.`}</StyledHint>
+      </StyledFieldGroup>
+      <StyledFieldGroup>
+        <StyledFieldLabel>{t`이메일 서명`}</StyledFieldLabel>
+        <label>
+          <input
+            type="checkbox"
+            checked={campaignState.includeSignature}
+            onChange={(event) =>
+              campaignState.setIncludeSignature(event.target.checked)
+            }
+          />
+          {t`내 서명을 본문 아래에 포함`}
+        </label>
+        {campaignState.isEditing && (
+          <StyledHint>{t`예약된 본문에는 기존 서명이 포함되어 있을 수 있습니다. 중복 추가 전에 본문을 확인하세요.`}</StyledHint>
+        )}
+        {campaignState.signatureLoading ? (
+          <StyledHint>{t`서명을 불러오는 중입니다.`}</StyledHint>
+        ) : campaignState.signatureError ? (
+          <StyledHint role="alert">{t`서명을 불러오지 못했습니다. 새로 고침하거나 서명 포함을 해제하세요.`}</StyledHint>
+        ) : campaignState.includeSignature && campaignState.signature ? (
+          <EmailSignaturePreview html={campaignState.signature} />
+        ) : (
+          <StyledHint>{t`사용자 → 계정 → 이메일에서 내 HTML 서명을 등록할 수 있습니다.`}</StyledHint>
+        )}
+        <div>
+          <Button
+            title={t`이메일 서명 설정`}
+            size="small"
+            variant="secondary"
+            Icon={IconExternalLink}
+            onClick={() =>
+              window.open(
+                '/settings/accounts/emails',
+                '_blank',
+                'noopener,noreferrer',
+              )
+            }
+          />
+        </div>
       </StyledFieldGroup>
       <StyledFieldGroup>
         <StyledFieldLabel>{t`테스트 발송`}</StyledFieldLabel>

@@ -4,7 +4,15 @@ import { act, renderHook } from '@testing-library/react';
 import { useCampaignComposerState } from '@/activities/emails/hooks/useCampaignComposerState';
 import { useSendMessageCampaign } from '@/activities/emails/hooks/useSendMessageCampaign';
 
+let signatureMock = '';
 jest.mock('@/activities/emails/hooks/useSendMessageCampaign');
+jest.mock('@/settings/accounts/hooks/useEmailSignature', () => ({
+  useEmailSignature: () => ({
+    signature: signatureMock,
+    loading: false,
+    error: undefined,
+  }),
+}));
 jest.mock('@apollo/client/react', () => ({
   useMutation: () => [cancelScheduleMock, { loading: false }],
 }));
@@ -34,8 +42,19 @@ const fillSendableFields = (result: {
 };
 
 describe('useCampaignComposerState', () => {
+  it('includes the personal signature once and allows opting out', () => {
+    signatureMock = '<p>내 명함</p>';
+    const { result } = renderHook(() => useCampaignComposerState({}));
+    fillSendableFields(result);
+    expect(result.current.bodyWithSignature).toBe(
+      'Body<br><div data-email-signature="true"><p>내 명함</p></div>',
+    );
+    act(() => result.current.setIncludeSignature(false));
+    expect(result.current.bodyWithSignature).toBe('Body');
+  });
   beforeEach(() => {
     jest.clearAllMocks();
+    signatureMock = '';
     mockedUseSendMessageCampaign.mockReturnValue({
       sendMessageCampaign: sendMessageCampaignMock,
       loading: false,

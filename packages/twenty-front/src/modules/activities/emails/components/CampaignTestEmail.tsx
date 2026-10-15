@@ -43,6 +43,7 @@ export const CampaignTestEmail = ({
     !busy &&
     !!connectedAccountId &&
     emailValid &&
+    campaignState.signatureReady &&
     campaignState.subject.trim().length > 0 &&
     campaignState.body.trim().length > 0;
 
@@ -54,7 +55,7 @@ export const CampaignTestEmail = ({
         connectedAccountId,
         to: recipient,
         subject: campaignState.subject,
-        body: campaignState.body,
+        body: campaignState.bodyWithSignature,
         files: campaignState.files,
       });
     } finally {

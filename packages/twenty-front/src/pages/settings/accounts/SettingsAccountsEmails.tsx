@@ -1,5 +1,6 @@
 import { SettingsAccountsMessageChannelsContainer } from '@/settings/accounts/components/SettingsAccountsMessageChannelsContainer';
 import { SettingsNewAccountSection } from '@/settings/accounts/components/SettingsNewAccountSection';
+import { SettingsEmailSignature } from '@/settings/accounts/components/SettingsEmailSignature';
 import { SETTINGS_ACCOUNT_MESSAGE_CHANNELS_TAB_LIST_COMPONENT_ID } from '@/settings/accounts/constants/SettingsAccountMessageChannelsTabListComponentId';
 import { useMyMessageChannels } from '@/settings/accounts/hooks/useMyMessageChannels';
 import { SettingsPageContainer } from '@/settings/components/SettingsPageContainer';
@@ -67,7 +68,10 @@ export const SettingsAccountsEmails = () => {
         ) : undefined
       }
     >
-      <SettingsPageContainer>{renderContent()}</SettingsPageContainer>
+      <SettingsPageContainer>
+        {renderContent()}
+        <SettingsEmailSignature />
+      </SettingsPageContainer>
     </SettingsPageLayout>
   );
 };
