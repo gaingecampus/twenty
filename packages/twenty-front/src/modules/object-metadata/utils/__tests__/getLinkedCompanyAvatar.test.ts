@@ -18,6 +18,34 @@ const fields = [
 ] as FieldMetadataItem[];
 
 describe('linked company avatar', () => {
+  it('prefers the primary company relation regardless of metadata order', () => {
+    const duplicateFields = [
+      { ...fields[0], name: 'gyeyagGieob' },
+      { ...fields[0], id: 'primary-company', name: 'company' },
+    ];
+    expect(
+      buildIdentifierGqlFields({
+        fields: duplicateFields,
+        nameSingular: 'onboarding',
+        labelIdentifierFieldMetadataId: 'name',
+        imageIdentifierFieldMetadataId: null,
+      }),
+    ).toMatchObject({ company: { id: true, domainName: true } });
+    expect(
+      getAvatarUrl(
+        'onboarding',
+        {
+          id: 'contract',
+          __typename: 'Onboarding',
+          gyeyagGieob: null,
+          company: { domainName: { primaryLinkUrl: 'https://stripe.com' } },
+        },
+        undefined,
+        true,
+        duplicateFields,
+      ),
+    ).toBe(getLogoUrlFromDomainName('https://stripe.com'));
+  });
   it.each(['opportunity', 'onboarding', 'deposit'])(
     'uses the company favicon for %s with a customized relation name',
     (objectNameSingular) => {

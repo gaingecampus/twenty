@@ -9,10 +9,14 @@ export const getCompanyAvatarRelationField = (
     return undefined;
   }
 
-  return fields.find(
+  const companyFields = fields.filter(
     (field) =>
       field.relation?.targetObjectMetadata.nameSingular ===
         CoreObjectNameSingular.Company &&
       field.relation.type === RelationType.MANY_TO_ONE,
+  );
+
+  return (
+    companyFields.find((field) => field.name === 'company') ?? companyFields[0]
   );
 };
