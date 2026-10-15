@@ -1,3 +1,6 @@
+import { CampaignAttachmentsService } from 'src/modules/emailing/services/campaign-attachments.service';
+import { FileModule } from 'src/engine/core-modules/file/file.module';
+import { FileEntity } from 'src/engine/core-modules/file/entities/file.entity';
 import { MessagingSendManagerModule } from 'src/modules/messaging/message-outbound-manager/messaging-send-manager.module';
 import { ConnectedAccountMetadataModule } from 'src/engine/metadata-modules/connected-account/connected-account-metadata.module';
 import { CampaignConnectedAccountSenderService } from 'src/modules/emailing/services/campaign-connected-account-sender.service';
@@ -23,6 +26,7 @@ import { UnsubscribeTopicService } from 'src/modules/emailing/services/unsubscri
 
 @Module({
   imports: [
+    FileModule,
     EmailingDomainModule,
     ConnectedAccountMetadataModule,
     forwardRef(() => MessagingSendManagerModule),
@@ -30,6 +34,7 @@ import { UnsubscribeTopicService } from 'src/modules/emailing/services/unsubscri
     FeatureFlagModule,
     PermissionsModule,
     TypeOrmModule.forFeature([
+      FileEntity,
       MessageChannelEntity,
       EmailingDomainEntity,
       MessageSuppressionEntity,
@@ -38,6 +43,8 @@ import { UnsubscribeTopicService } from 'src/modules/emailing/services/unsubscri
   ],
   controllers: [UnsubscribeController],
   providers: [
+    CampaignAttachmentsService,
+    provideWorkspaceScopedRepository(FileEntity),
     CampaignConnectedAccountSenderService,
     MessageCampaignService,
     MessageSuppressionService,

@@ -1,3 +1,4 @@
+import { type EmailAttachment } from 'twenty-shared/types';
 import { useMutation } from '@apollo/client/react';
 import { useCallback } from 'react';
 
@@ -10,6 +11,7 @@ import {
 } from '~/generated-metadata/graphql';
 
 type SendMessageCampaignParams = {
+  files?: EmailAttachment[];
   scheduledAt?: string;
   campaignId?: string;
   scheduleVersion?: string;

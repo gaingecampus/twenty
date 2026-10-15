@@ -70,6 +70,7 @@ export class EmailingSendResolver {
       listId: input.listId,
       subject: input.subject,
       html: input.body,
+      files: input.files,
       fromAddress: input.fromAddress,
     });
   }

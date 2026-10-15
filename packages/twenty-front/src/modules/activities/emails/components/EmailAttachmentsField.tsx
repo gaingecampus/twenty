@@ -15,6 +15,7 @@ type EmailAttachmentsFieldProps = {
   files: EmailAttachment[];
   onChange: (files: EmailAttachment[]) => void;
   label?: string;
+  onUploadingChange?: (uploading: boolean) => void;
 };
 
 const StyledContainer = styled.div`
@@ -65,6 +66,7 @@ export const EmailAttachmentsField = ({
   files,
   label,
   onChange,
+  onUploadingChange,
 }: EmailAttachmentsFieldProps) => {
   const { theme } = useContext(ThemeContext);
   const { uploadEmailAttachment } = useUploadEmailAttachment();
@@ -77,6 +79,7 @@ export const EmailAttachmentsField = ({
     }
 
     setIsUploading(true);
+    onUploadingChange?.(true);
 
     try {
       const uploadedFiles = await Promise.all(
@@ -89,6 +92,7 @@ export const EmailAttachmentsField = ({
       }
     } finally {
       setIsUploading(false);
+      onUploadingChange?.(false);
     }
   };
 

@@ -276,6 +276,19 @@ export const buildMessageCampaignStandardFlatFieldMetadatas = ({
         isUIEditable: false,
       },
     }),
+    attachmentFiles: createStandardFieldFlatMetadata({
+      ...base,
+      context: {
+        fieldName: 'attachmentFiles',
+        type: FieldMetadataType.RAW_JSON,
+        label: i18nLabel(msg`첨부 파일`),
+        description: i18nLabel(msg`단체 발송에 첨부할 파일`),
+        icon: 'IconPaperclip',
+        isNullable: true,
+        isSystem: true,
+        isUIEditable: false,
+      },
+    }),
     scheduleVersion: createStandardFieldFlatMetadata({
       ...base,
       context: {

@@ -80,6 +80,7 @@ describe('useCampaignComposerState', () => {
   const existingCampaign: ScheduledCampaign = {
     id: 'campaign-1',
     __typename: 'MessageCampaign',
+    attachmentFiles: [{ id: 'file-1', name: 'guide.pdf' }],
     subject: 'Saved subject',
     bodyTemplate: '<p>Saved body</p>',
     fromAddress: { primaryEmail: 'sender@example.com' },
@@ -108,6 +109,7 @@ describe('useCampaignComposerState', () => {
         campaignId: 'campaign-1',
         scheduleVersion: 'revision-1',
         subject: 'Updated subject',
+        files: existingCampaign.attachmentFiles,
         scheduledAt: existingCampaign.scheduledAt,
       }),
     );
@@ -196,6 +198,7 @@ describe('useCampaignComposerState', () => {
       unsubscribeTopicId: 'topic-1',
       subject: 'Hello',
       body: 'Body',
+      files: [],
       fromAddress: 'sender@example.com',
     });
     expect(onSent).toHaveBeenCalledTimes(1);
@@ -241,5 +244,16 @@ describe('useCampaignComposerState', () => {
 
     expect(sendMessageCampaignMock).toHaveBeenCalled();
     expect(onSent).not.toHaveBeenCalled();
+  });
+  it('blocks sending while an attachment is uploading', () => {
+    const { result } = renderHook(() => useCampaignComposerState({}));
+    fillSendableFields(result);
+    act(() => {
+      result.current.setBody('Body');
+      result.current.setIsUploading(true);
+    });
+    expect(result.current.canSend).toBe(false);
+    act(() => result.current.setIsUploading(false));
+    expect(result.current.canSend).toBe(true);
   });
 });

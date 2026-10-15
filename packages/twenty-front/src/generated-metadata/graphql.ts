@@ -819,6 +819,11 @@ export type CalendarConfiguration = {
   configurationType: WidgetConfigurationType;
 };
 
+export type CampaignAttachmentInput = {
+  id: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+};
+
 export type CampaignAudiencePreviewDto = {
   __typename?: 'CampaignAudiencePreviewDTO';
   duplicateEmails: Scalars['Int']['output'];
@@ -5093,6 +5098,7 @@ export type SendInvitations = {
 };
 
 export type SendMessageCampaignInput = {
+  files?: InputMaybe<Array<CampaignAttachmentInput>>;
   body: Scalars['String']['input'];
   campaignId?: InputMaybe<Scalars['String']['input']>;
   fromAddress: Scalars['String']['input'];

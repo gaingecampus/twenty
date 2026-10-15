@@ -1,3 +1,4 @@
+import { CampaignAttachmentsService } from 'src/modules/emailing/services/campaign-attachments.service';
 import { CampaignConnectedAccountSenderService } from 'src/modules/emailing/services/campaign-connected-account-sender.service';
 import {
   BadRequestException,
@@ -56,10 +57,14 @@ import { MessageThreadWorkspaceEntity } from 'src/modules/messaging/common/stand
 import { MessageWorkspaceEntity } from 'src/modules/messaging/common/standard-objects/message.workspace-entity';
 import { createHtmlToTextConverter } from 'src/modules/messaging/message-import-manager/utils/create-html-to-text-converter.util';
 import { PersonWorkspaceEntity } from 'src/modules/person/standard-objects/person.workspace-entity';
-import { MessageParticipantRole } from 'twenty-shared/types';
+import {
+  type EmailAttachment,
+  MessageParticipantRole,
+} from 'twenty-shared/types';
 import { getDomainFromEmail } from 'src/utils/get-domain-from-email';
 
 type SendCampaignArgs = {
+  files?: EmailAttachment[];
   scheduledAt?: string;
   campaignId?: string;
   scheduleVersion?: string;
@@ -112,6 +117,7 @@ export class MessageCampaignService {
     private readonly messageChannelMetadataService: MessageChannelMetadataService,
     private readonly messageSuppressionService: MessageSuppressionService,
     private readonly connectedAccountSender: CampaignConnectedAccountSenderService,
+    private readonly campaignAttachments: CampaignAttachmentsService,
   ) {}
 
   private getUserRepository<T extends ObjectLiteral>(
@@ -194,6 +200,8 @@ export class MessageCampaignService {
         workspaceId,
       }));
 
+    await this.campaignAttachments.retain(workspaceId, args.files ?? []);
+
     return this.globalWorkspaceOrmManager.executeInWorkspaceContext(
       async () => {
         const normalized = normalizeCampaignRecipients(
@@ -218,6 +226,9 @@ export class MessageCampaignService {
             const content = {
               subject: args.subject,
               bodyTemplate: args.html,
+              ...(args.files !== undefined
+                ? { attachmentFiles: args.files }
+                : {}),
               fromAddress: {
                 primaryEmail: fromAddress,
                 additionalEmails: null,
@@ -516,6 +527,10 @@ export class MessageCampaignService {
 
         try {
           const content = {
+            attachments: await this.campaignAttachments.load(
+              workspaceId,
+              campaign.attachmentFiles ?? [],
+            ),
             from: fromAddress,
             to: [recipientEmail],
             subject,

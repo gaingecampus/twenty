@@ -15,6 +15,7 @@ export const EditScheduledCampaignCommand = () => {
       id: true,
       subject: true,
       bodyTemplate: true,
+      attachmentFiles: true,
       fromAddress: { primaryEmail: true },
       listId: true,
       unsubscribeTopicId: true,

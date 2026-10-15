@@ -1,3 +1,4 @@
+import { type EmailAttachment } from 'twenty-shared/types';
 import { useRef, useState } from 'react';
 import {
   type CancelScheduledMessageCampaignMutation,
@@ -28,6 +29,10 @@ export const useCampaignComposerState = ({
     campaign?.fromAddress?.primaryEmail ?? '',
   );
   const [subject, setSubject] = useState(campaign?.subject ?? '');
+  const [files, setFiles] = useState<EmailAttachment[]>(
+    campaign?.attachmentFiles ?? [],
+  );
+  const [isUploading, setIsUploading] = useState(false);
   const [body, setBody] = useState(campaign?.bodyTemplate ?? '');
 
   const { sendMessageCampaign, loading } = useSendMessageCampaign();
@@ -74,6 +79,7 @@ export const useCampaignComposerState = ({
     subject.trim().length > 0 &&
     body.trim().length > 0 &&
     scheduleValid &&
+    !isUploading &&
     !cancelling &&
     !loading;
 
@@ -96,6 +102,7 @@ export const useCampaignComposerState = ({
         unsubscribeTopicId: unsubscribeTopicId ?? undefined,
         subject,
         body,
+        files,
         fromAddress: fromAddress.trim(),
       });
 
@@ -108,6 +115,10 @@ export const useCampaignComposerState = ({
   };
 
   return {
+    files,
+    setFiles,
+    setIsUploading,
+    isUploading,
     isEditing: !!campaign,
     sendMode,
     setSendMode,

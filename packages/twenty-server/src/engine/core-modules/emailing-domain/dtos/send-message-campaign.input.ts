@@ -1,6 +1,10 @@
+import { Type } from 'class-transformer';
 import { Field, InputType } from '@nestjs/graphql';
 
 import {
+  IsArray,
+  ArrayMaxSize,
+  ValidateNested,
   IsEmail,
   IsISO8601,
   IsOptional,
@@ -11,7 +15,27 @@ import {
 } from 'class-validator';
 
 @InputType()
+export class CampaignAttachmentInput {
+  @Field(() => String)
+  @IsUUID('4')
+  id: string;
+
+  @Field(() => String)
+  @IsString()
+  @Length(1, 255)
+  name: string;
+}
+
+@InputType()
 export class SendMessageCampaignInput {
+  @Field(() => [CampaignAttachmentInput], { nullable: true })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(20)
+  @ValidateNested({ each: true })
+  @Type(() => CampaignAttachmentInput)
+  files?: CampaignAttachmentInput[];
+
   @Field(() => String, { nullable: true })
   @IsOptional()
   @IsISO8601({ strict: true })

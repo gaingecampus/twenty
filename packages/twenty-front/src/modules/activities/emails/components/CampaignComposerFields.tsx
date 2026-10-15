@@ -1,3 +1,4 @@
+import { EmailAttachmentsField } from '@/activities/emails/components/EmailAttachmentsField';
 import { useId } from 'react';
 import { IconExternalLink, IconInfoCircle } from 'twenty-ui/icon';
 import { AppTooltip, TooltipDelay } from 'twenty-ui/surfaces';
@@ -324,6 +325,15 @@ export const CampaignComposerFields = ({
           maxWidth={600}
           contentType="html"
         />
+      </StyledFieldGroup>
+      <StyledFieldGroup>
+        <StyledFieldLabel>{t`첨부 파일`}</StyledFieldLabel>
+        <EmailAttachmentsField
+          files={campaignState.files}
+          onChange={campaignState.setFiles}
+          onUploadingChange={campaignState.setIsUploading}
+        />
+        <StyledHint>{t`최대 20개, 총 25MB까지 첨부할 수 있습니다.`}</StyledHint>
       </StyledFieldGroup>
     </StyledFieldsContainer>
   );

@@ -73,6 +73,10 @@ describe('Campaign scheduling and delivery guards', () => {
     connectedSender as unknown as ConstructorParameters<
       typeof MessageCampaignService
     >[6],
+    {
+      retain: jest.fn(),
+      load: jest.fn().mockResolvedValue([]),
+    } as unknown as ConstructorParameters<typeof MessageCampaignService>[7],
   );
   const input = {
     workspaceId: 'workspace',

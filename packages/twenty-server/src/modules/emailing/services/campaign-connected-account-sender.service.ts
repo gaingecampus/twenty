@@ -134,6 +134,7 @@ export class CampaignConnectedAccountSenderService {
         to: [email],
         subject: content.subject,
         body: `${content.text}${buildUnsubscribeTextFooter(url.toString())}`,
+        attachments: content.attachments,
         html: `${content.html ?? ''}${buildUnsubscribeHtmlFooter(url.toString())}`,
       },
       account,

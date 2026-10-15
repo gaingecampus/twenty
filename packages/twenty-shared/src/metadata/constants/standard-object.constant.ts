@@ -975,6 +975,9 @@ export const STANDARD_OBJECTS = {
       scheduledAt: {
         universalIdentifier: '631b9334-b8b7-4548-bf67-0bd2f7e27ee8',
       },
+      attachmentFiles: {
+        universalIdentifier: '6bf5fc10-1311-4eba-a952-3d89b69de8c6',
+      },
       scheduleVersion: {
         universalIdentifier: '3d6e6c3b-4f4c-448a-9889-da6fd065d5fa',
       },

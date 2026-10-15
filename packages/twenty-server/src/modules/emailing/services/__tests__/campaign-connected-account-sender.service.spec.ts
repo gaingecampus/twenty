@@ -26,6 +26,13 @@ describe('Campaign connected account sender', () => {
     >),
   );
   const content = {
+    attachments: [
+      {
+        filename: 'guide.txt',
+        content: Buffer.from('guide'),
+        contentType: 'text/plain',
+      },
+    ],
     from: 'sender@example.com',
     to: ['recipient@example.com'],
     subject: 'Hello',
@@ -69,6 +76,7 @@ describe('Campaign connected account sender', () => {
       expect(outbound.sendMessage).toHaveBeenCalledWith(
         expect.objectContaining({
           to: content.to,
+          attachments: content.attachments,
           html: expect.stringContaining(
             'https://crm.example.com/emailing/unsubscribe?t=signed-token',
           ),
