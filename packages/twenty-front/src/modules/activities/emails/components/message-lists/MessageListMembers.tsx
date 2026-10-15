@@ -21,6 +21,12 @@ import { Button } from 'twenty-ui/input';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 type MessageListMember = ObjectRecord & {
   personId: string;
+  workspaceMember:
+    | (ObjectRecord & {
+        name: { firstName: string; lastName: string };
+        userEmail: string;
+      })
+    | null;
   person:
     | (ObjectRecord & {
         name: { firstName: string; lastName: string };
@@ -51,10 +57,13 @@ export const MessageListMembers = ({ listId }: { listId: string }) => {
       id: true,
       personId: true,
       person: { id: true, name: true, emails: true },
+      workspaceMember: { id: true, name: true, userEmail: true },
     },
   });
   const permissions = useObjectPermissionsForObject(objectMetadataItem.id);
-  const [adding, setAdding] = useState(false);
+  const [adding, setAdding] = useState<'person' | 'workspaceMember' | null>(
+    null,
+  );
   const { deleteOneRecord } = useDeleteOneRecord({
     objectNameSingular: 'messageListMember',
   });
@@ -80,30 +89,38 @@ export const MessageListMembers = ({ listId }: { listId: string }) => {
             variant="primary"
             accent="blue"
             disabled={busy}
-            onClick={() => setAdding(true)}
+            onClick={() => setAdding('person')}
+          />
+        )}
+        {permissions.canUpdateObjectRecords && (
+          <Button
+            title={t`워크스페이스 멤버 추가`}
+            disabled={busy}
+            onClick={() => setAdding('workspaceMember')}
           />
         )}
       </StyledMessageListToolbar>
       {adding && (
         <MessageListAddCustomersModal
           initialListId={listId}
-          onClose={() => setAdding(false)}
+          recipientType={adding}
+          onClose={() => setAdding(null)}
           onAdded={refetch}
         />
       )}
       {loading && <p>{t`불러오는 중…`}</p>}
-      {error && <p role="alert">{t`고객 목록을 불러오지 못했습니다.`}</p>}
+      {error && <p role="alert">{t`수신자 목록을 불러오지 못했습니다.`}</p>}
       {!loading && !error && records.length === 0 && (
         <StyledMessageListEmpty>
-          {t`아직 등록된 고객이 없습니다.`}
+          {t`아직 등록된 수신자가 없습니다.`}
           <br />
-          {t`고객 추가 버튼으로 여러 고객을 선택하세요.`}
+          {t`고객 또는 워크스페이스 멤버를 추가하세요.`}
         </StyledMessageListEmpty>
       )}
       {records.length > 0 && (
         <Table>
           <TableRow gridTemplateColumns="minmax(0, 1fr) minmax(0, 1.2fr) 72px">
-            <TableHeader>{t`고객`}</TableHeader>
+            <TableHeader>{t`수신자`}</TableHeader>
             <TableHeader>{t`이메일`}</TableHeader>
             <TableHeader align="right">{t`관리`}</TableHeader>
           </TableRow>
@@ -118,13 +135,25 @@ export const MessageListMembers = ({ listId }: { listId: string }) => {
                     objectNameSingular="person"
                     record={member.person}
                   />
+                ) : member.workspaceMember ? (
+                  <RecordChip
+                    objectNameSingular="workspaceMember"
+                    record={member.workspaceMember}
+                  />
                 ) : (
-                  t`삭제되었거나 접근할 수 없는 고객`
+                  t`삭제되었거나 접근할 수 없는 수신자`
                 )}
               </TableCell>
               <TableCell minWidth="0" height={themeCssVariables.spacing[10]}>
-                {member.person?.emails?.primaryEmail ? (
-                  <EmailDisplay value={member.person.emails.primaryEmail} />
+                {member.person?.emails?.primaryEmail ||
+                member.workspaceMember?.userEmail ? (
+                  <EmailDisplay
+                    value={
+                      member.person?.emails?.primaryEmail ||
+                      member.workspaceMember?.userEmail ||
+                      ''
+                    }
+                  />
                 ) : (
                   t`이메일 없음`
                 )}
@@ -148,7 +177,7 @@ export const MessageListMembers = ({ listId }: { listId: string }) => {
       )}
       {hasNextPage && (
         <Button
-          title={t`고객 더 보기`}
+          title={t`수신자 더 보기`}
           disabled={loading}
           onClick={() => fetchMoreRecords()}
         />

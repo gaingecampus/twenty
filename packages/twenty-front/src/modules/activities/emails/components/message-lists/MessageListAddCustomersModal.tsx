@@ -1,3 +1,6 @@
+import { getWorkspaceMemberRecipients } from '@/activities/emails/utils/getWorkspaceMemberRecipients';
+import { currentWorkspaceMemberState } from '@/auth/states/currentWorkspaceMemberState';
+import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 import { getMessageListAdditions } from '@/activities/emails/utils/getMessageListAdditions';
 import { useObjectPermissionsForObject } from '@/object-record/hooks/useObjectPermissionsForObject';
 import { useCreateManyRecords } from '@/object-record/hooks/useCreateManyRecords';
@@ -17,8 +20,9 @@ import { themeCssVariables } from 'twenty-ui/theme-constants';
 type Customer = ObjectRecord & {
   name: { firstName: string; lastName: string };
   emails: { primaryEmail: string };
+  userEmail?: string;
 };
-type Member = ObjectRecord & { personId: string };
+type Member = ObjectRecord & { personId: string; workspaceMemberId: string };
 const StyledTable = styled.table`
   border-collapse: collapse;
   font-size: ${themeCssVariables.font.size.sm};
@@ -95,15 +99,20 @@ const StyledHint = styled.p`
 `;
 export const MessageListAddCustomersModal = ({
   initialListId,
+  recipientType = 'person',
   customerIds,
   onClose,
   onAdded,
 }: {
   initialListId?: string;
+  recipientType?: 'person' | 'workspaceMember';
   customerIds?: string[];
   onClose: () => void;
   onAdded?: () => Promise<unknown>;
 }) => {
+  const currentWorkspaceMember = useAtomStateValue(currentWorkspaceMemberState);
+  const isWorkspaceMember = recipientType === 'workspaceMember';
+  const recipientIdField = isWorkspaceMember ? 'workspaceMemberId' : 'personId';
   const modalId = useId();
   const { openModal, closeModal } = useModal();
   useEffect(() => {
@@ -131,10 +140,33 @@ export const MessageListAddCustomersModal = ({
   const [selected, setSelected] = useState<Map<string, Customer>>(new Map());
   const [busy, setBusy] = useState(false);
   const { enqueueErrorSnackBar, enqueueSuccessSnackBar } = useSnackBar();
-  const { records, loading, error, hasNextPage, fetchMoreRecords } =
-    useFindManyRecords<Customer>({
-      objectNameSingular: 'person',
-      filter: customerIds
+  const {
+    records: rawRecords,
+    loading,
+    error,
+    hasNextPage,
+    fetchMoreRecords,
+  } = useFindManyRecords<Customer>({
+    objectNameSingular: recipientType,
+    skip: isWorkspaceMember && !currentWorkspaceMember?.id,
+    filter: isWorkspaceMember
+      ? {
+          and: [
+            { id: { neq: currentWorkspaceMember?.id ?? '' } },
+            ...(search.trim()
+              ? [
+                  {
+                    or: [
+                      { name: { firstName: { ilike: `%${search.trim()}%` } } },
+                      { name: { lastName: { ilike: `%${search.trim()}%` } } },
+                      { userEmail: { ilike: `%${search.trim()}%` } },
+                    ],
+                  },
+                ]
+              : []),
+          ],
+        }
+      : customerIds
         ? { id: { in: customerIds } }
         : search.trim()
           ? {
@@ -145,10 +177,15 @@ export const MessageListAddCustomersModal = ({
               ],
             }
           : undefined,
-      recordGqlFields: { id: true, name: true, emails: true },
-      limit: 50,
-      fetchPolicy: 'cache-and-network',
-    });
+    recordGqlFields: isWorkspaceMember
+      ? { id: true, name: true, userEmail: true }
+      : { id: true, name: true, emails: true },
+    limit: 50,
+    fetchPolicy: 'cache-and-network',
+  });
+  const records = isWorkspaceMember
+    ? getWorkspaceMemberRecipients(rawRecords, currentWorkspaceMember?.id)
+    : rawRecords;
   const candidates = customerIds ? records : Array.from(selected.values());
   const ids = candidates.map((person) => person.id);
   const {
@@ -162,10 +199,13 @@ export const MessageListAddCustomersModal = ({
   } = useFindManyRecords<Member>({
     objectNameSingular: 'messageListMember',
     filter: {
-      and: [{ listId: { eq: listId ?? '' } }, { personId: { in: ids } }],
+      and: [
+        { listId: { eq: listId ?? '' } },
+        { [recipientIdField]: { in: ids } },
+      ],
     },
     skip: !listId || ids.length === 0,
-    recordGqlFields: { id: true, personId: true },
+    recordGqlFields: { id: true, [recipientIdField]: true },
     limit: 200,
     fetchPolicy: 'network-only',
   });
@@ -174,7 +214,7 @@ export const MessageListAddCustomersModal = ({
   );
   const { additions, alreadyIncluded, missingEmail } = getMessageListAdditions(
     candidates,
-    existing.map((member) => member.personId),
+    existing.map((member) => member[recipientIdField]),
   );
   const { createManyRecords } = useCreateManyRecords({
     objectNameSingular: 'messageListMember',
@@ -205,14 +245,14 @@ export const MessageListAddCustomersModal = ({
         await createManyRecords({
           recordsToCreate: batch.map((person) => ({
             listId,
-            personId: person.id,
+            [recipientIdField]: person.id,
           })),
         });
         added += batch.length;
       }
       await onAdded?.();
       enqueueSuccessSnackBar({
-        message: t`고객 ${added}명을 수신자 목록에 추가했습니다.`,
+        message: t`수신자 ${added}명을 수신자 목록에 추가했습니다.`,
       });
       onClose();
     } catch {
@@ -239,7 +279,11 @@ export const MessageListAddCustomersModal = ({
       renderInDocumentBody
     >
       <ModalHeader hasBorderBottom>
-        <StyledHeaderTitle>{t`수신자 목록에 고객 추가`}</StyledHeaderTitle>
+        <StyledHeaderTitle>
+          {isWorkspaceMember
+            ? t`수신자 목록에 워크스페이스 멤버 추가`
+            : t`수신자 목록에 고객 추가`}
+        </StyledHeaderTitle>
       </ModalHeader>
       <ModalContent contentPadding={5} gap={4}>
         {!initialListId && (
@@ -284,11 +328,15 @@ export const MessageListAddCustomersModal = ({
             )}
           </StyledSection>
         )}
-        <StyledSection aria-label={t`추가할 고객`}>
-          <StyledTitle>{t`추가할 고객`}</StyledTitle>
+        <StyledSection aria-label={t`추가할 수신자`}>
+          <StyledTitle>
+            {isWorkspaceMember
+              ? t`워크스페이스 멤버 (본인 제외)`
+              : t`추가할 고객`}
+          </StyledTitle>
           {!customerIds && (
             <TextInput
-              placeholder={t`고객 이름 또는 이메일 검색`}
+              placeholder={t`이름 또는 이메일 검색`}
               value={search}
               onChange={setSearch}
               fullWidth
@@ -302,7 +350,7 @@ export const MessageListAddCustomersModal = ({
                   {!customerIds && (
                     <th data-selection>
                       <Checkbox
-                        aria-label={t`현재 표시된 고객 모두 선택`}
+                        aria-label={t`현재 표시된 수신자 모두 선택`}
                         disabled={busy || records.length === 0}
                         checked={
                           records.length > 0 &&
@@ -321,7 +369,7 @@ export const MessageListAddCustomersModal = ({
                       />
                     </th>
                   )}
-                  <th>{t`고객`}</th>
+                  <th>{t`이름`}</th>
                   <th>{t`이메일`}</th>
                 </tr>
               </thead>
@@ -355,20 +403,20 @@ export const MessageListAddCustomersModal = ({
             </StyledTable>
           </StyledScroll>
           {loading && <p>{t`불러오는 중…`}</p>}
-          {error && <p role="alert">{t`고객을 불러오지 못했습니다.`}</p>}
+          {error && <p role="alert">{t`수신자를 불러오지 못했습니다.`}</p>}
           {!loading && !error && records.length === 0 && (
             <p>{t`검색 결과가 없습니다.`}</p>
           )}
           {hasNextPage && (
             <Button
-              title={t`고객 더 보기`}
+              title={t`수신자 더 보기`}
               disabled={loading || busy}
               onClick={() => fetchMoreRecords()}
             />
           )}
         </StyledSection>
         <StyledSummary>{t`선택 ${candidates.length}명 · 이미 포함 ${alreadyIncluded}명 · 새로 추가 ${additions.length}명 · 이메일 없음 ${missingEmail}명`}</StyledSummary>
-        <StyledHint>{t`이미 포함된 고객은 건너뜁니다. 이메일이 없는 고객도 목록에는 저장되지만 발송할 때 제외됩니다.`}</StyledHint>
+        <StyledHint>{t`이미 포함된 수신자는 건너뜁니다. 이메일이 없는 수신자도 목록에는 저장되지만 발송할 때 제외됩니다.`}</StyledHint>
         {checkError && (
           <p role="alert">{t`기존 수신자를 확인하지 못했습니다.`}</p>
         )}
@@ -383,7 +431,7 @@ export const MessageListAddCustomersModal = ({
       <ModalFooter>
         <Button title={t`취소`} disabled={busy} onClick={onClose} />
         <Button
-          title={t`선택 고객 추가`}
+          title={t`선택 수신자 추가`}
           variant="primary"
           accent="blue"
           disabled={
