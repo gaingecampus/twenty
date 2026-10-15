@@ -95,6 +95,11 @@ const StyledThumb = styled.div`
   background: ${themeCssVariables.border.color.medium};
   border-radius: ${themeCssVariables.border.radius.sm};
   position: absolute;
+
+  ${StyledHorizontalTrack}:hover &,
+  ${StyledVerticalTrack}:hover & {
+    background: ${themeCssVariables.border.color.strong};
+  }
 `;
 
 type RecordTableScrollbarsProps = {
