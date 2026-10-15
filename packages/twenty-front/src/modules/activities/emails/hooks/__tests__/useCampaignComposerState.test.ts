@@ -88,8 +88,9 @@ describe('useCampaignComposerState', () => {
       result.current.setSendMode('scheduled');
       result.current.setScheduledAt(scheduledAt);
     });
+    act(() => result.current.handleSend());
     await act(async () => {
-      await result.current.handleSend();
+      await result.current.confirmSend();
     });
     expect(sendMessageCampaignMock).toHaveBeenCalledWith(
       expect.objectContaining({ scheduledAt }),
@@ -120,8 +121,9 @@ describe('useCampaignComposerState', () => {
     act(() => {
       result.current.setSubject('Updated subject');
     });
+    act(() => result.current.handleSend());
     await act(async () => {
-      await result.current.handleSend();
+      await result.current.confirmSend();
     });
     expect(sendMessageCampaignMock).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -155,10 +157,11 @@ describe('useCampaignComposerState', () => {
   it('prevents simultaneous submissions before loading state updates', async () => {
     const { result } = renderHook(() => useCampaignComposerState({}));
     fillSendableFields(result);
+    act(() => result.current.handleSend());
     await act(async () => {
       await Promise.all([
-        result.current.handleSend(),
-        result.current.handleSend(),
+        result.current.confirmSend(),
+        result.current.confirmSend(),
       ]);
     });
     expect(sendMessageCampaignMock).toHaveBeenCalledTimes(1);
@@ -205,8 +208,9 @@ describe('useCampaignComposerState', () => {
     });
     fillSendableFields(result);
 
+    act(() => result.current.handleSend());
     await act(async () => {
-      await result.current.handleSend();
+      await result.current.confirmSend();
     });
 
     expect(sendMessageCampaignMock).toHaveBeenCalledWith({
@@ -230,8 +234,9 @@ describe('useCampaignComposerState', () => {
 
     fillSendableFields(result);
 
+    act(() => result.current.handleSend());
     await act(async () => {
-      await result.current.handleSend();
+      await result.current.confirmSend();
     });
 
     expect(sendMessageCampaignMock).toHaveBeenCalledWith(
@@ -242,8 +247,9 @@ describe('useCampaignComposerState', () => {
   it('should not send when required fields are missing', async () => {
     const { result } = renderHook(() => useCampaignComposerState({}));
 
+    act(() => result.current.handleSend());
     await act(async () => {
-      await result.current.handleSend();
+      await result.current.confirmSend();
     });
 
     expect(sendMessageCampaignMock).not.toHaveBeenCalled();
@@ -257,13 +263,33 @@ describe('useCampaignComposerState', () => {
 
     fillSendableFields(result);
 
+    act(() => result.current.handleSend());
     await act(async () => {
-      await result.current.handleSend();
+      await result.current.confirmSend();
     });
 
     expect(sendMessageCampaignMock).toHaveBeenCalled();
     expect(onSent).not.toHaveBeenCalled();
   });
+  it('opens review without sending and preserves the draft when dismissed', async () => {
+    const { result } = renderHook(() => useCampaignComposerState({}));
+    fillSendableFields(result);
+    await act(async () => {
+      await result.current.confirmSend();
+    });
+    expect(sendMessageCampaignMock).not.toHaveBeenCalled();
+    act(() => result.current.handleSend());
+    expect(result.current.isReviewOpen).toBe(true);
+    expect(sendMessageCampaignMock).not.toHaveBeenCalled();
+    act(() => result.current.closeReview());
+    expect(result.current.isReviewOpen).toBe(false);
+    expect(result.current.subject).toBe('Hello');
+    await act(async () => {
+      await result.current.confirmSend();
+    });
+    expect(sendMessageCampaignMock).not.toHaveBeenCalled();
+  });
+
   it('blocks sending while an attachment is uploading', () => {
     const { result } = renderHook(() => useCampaignComposerState({}));
     fillSendableFields(result);

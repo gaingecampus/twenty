@@ -36,6 +36,7 @@ export const useCampaignComposerState = ({
   );
   const [isUploading, setIsUploading] = useState(false);
   const [isTestSending, setIsTestSending] = useState(false);
+  const [isReviewOpen, setIsReviewOpen] = useState(false);
   const [body, setBody] = useState(campaign?.bodyTemplate ?? '');
   const {
     signature,
@@ -105,8 +106,14 @@ export const useCampaignComposerState = ({
   // Synchronous submission lock; rendered loading state comes from the mutation.
   // oxlint-disable-next-line twenty/no-state-useref
   const submittingRef = useRef(false);
-  const handleSend = async () => {
-    if (listId === null || !canSend || submittingRef.current) {
+  const handleSend = () => {
+    if (canSend && !submittingRef.current) setIsReviewOpen(true);
+  };
+  const closeReview = () => {
+    if (!submittingRef.current) setIsReviewOpen(false);
+  };
+  const confirmSend = async () => {
+    if (!isReviewOpen || listId === null || !canSend || submittingRef.current) {
       return;
     }
 
@@ -126,6 +133,7 @@ export const useCampaignComposerState = ({
       });
 
       if (success) {
+        setIsReviewOpen(false);
         onSent?.();
       }
     } finally {
@@ -134,6 +142,9 @@ export const useCampaignComposerState = ({
   };
 
   return {
+    isReviewOpen,
+    closeReview,
+    confirmSend,
     signature,
     signatureLoading,
     signatureError,

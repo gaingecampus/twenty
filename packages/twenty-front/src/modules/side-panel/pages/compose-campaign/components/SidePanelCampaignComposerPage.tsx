@@ -1,3 +1,4 @@
+import { CampaignReviewModal } from '@/activities/emails/components/CampaignReviewModal';
 import { useAtomComponentStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomComponentStateValue';
 import { campaignToEditComponentState } from '@/side-panel/pages/compose-campaign/states/campaignToEditComponentState';
 import { CampaignComposerFields } from '@/activities/emails/components/CampaignComposerFields';
@@ -51,6 +52,9 @@ export const SidePanelCampaignComposerPage = () => {
 
   return (
     <StyledContainer>
+      {campaignState.isReviewOpen && (
+        <CampaignReviewModal campaignState={campaignState} />
+      )}
       <StyledContent>
         <CampaignComposerFields campaignState={campaignState} />
       </StyledContent>
