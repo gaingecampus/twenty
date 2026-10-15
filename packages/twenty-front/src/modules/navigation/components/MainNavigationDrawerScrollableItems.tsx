@@ -1,5 +1,10 @@
 import { StatusBoardNavigationItem } from '@/status-board/components/StatusBoardNavigationItem';
 import { MyFieldsNavigationItem } from '@/field-management/FieldManagement';
+import { NavigationMenuItemSection } from '@/navigation-menu-item/display/sections/components/NavigationMenuItemSection';
+import { useNavigationSection } from '@/ui/navigation/navigation-drawer/hooks/useNavigationSection';
+import { isNavigationDrawerExpandedState } from '@/ui/navigation/states/isNavigationDrawerExpanded';
+import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
+import { useLingui } from '@lingui/react/macro';
 import { NavigationDrawerOpenedSection } from '@/navigation-menu-item/display/sections/components/NavigationDrawerOpenedSection';
 import { NavigationDrawerWorkspaceSectionSkeletonLoader } from '@/object-metadata/components/NavigationDrawerWorkspaceSectionSkeletonLoader';
 import { TrashNavigationDrawerItem } from '@/trash/components/TrashNavigationDrawerItem';
@@ -32,15 +37,27 @@ const StyledScrollableItemsContainer = styled.div`
 `;
 
 export const MainNavigationDrawerScrollableItems = () => {
+  const { t } = useLingui();
+  const { isNavigationSectionOpen, toggleNavigationSection } =
+    useNavigationSection('CrmOverview');
+  const isNavigationDrawerExpanded = useAtomStateValue(
+    isNavigationDrawerExpandedState,
+  );
+
   return (
     <StyledScrollableItemsContainer>
       <NavigationDrawerOpenedSection />
       <Suspense fallback={<NavigationDrawerWorkspaceSectionSkeletonLoader />}>
         <FavoritesSectionDispatcher />
-        <div>
+        <NavigationMenuItemSection
+          title={t`현황 관리`}
+          isOpen={isNavigationSectionOpen}
+          onToggle={toggleNavigationSection}
+          forceExpanded={!isNavigationDrawerExpanded}
+        >
           <StatusBoardNavigationItem />
           <MyFieldsNavigationItem />
-        </div>
+        </NavigationMenuItemSection>
         <WorkspaceSectionDispatcher />
         <TrashNavigationDrawerItem />
       </Suspense>
