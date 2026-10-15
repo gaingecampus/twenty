@@ -8,15 +8,23 @@ import { FormMultiTextFieldInput } from '@/object-record/record-field/ui/form-ty
 import { FormTextFieldInput } from '@/object-record/record-field/ui/form-types/components/FormTextFieldInput';
 import { GET_MY_CONNECTED_ACCOUNTS } from '@/settings/accounts/graphql/queries/getMyConnectedAccounts';
 import { Select } from '@/ui/input/components/Select';
+import { InputLabel } from '@/ui/input/components/InputLabel';
 import { t } from '@lingui/core/macro';
 import { type SelectOption } from 'twenty-ui/input';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 
 const StyledFieldsContainer = styled.div`
+  --t-input-label-font-size: ${themeCssVariables.font.size.md};
+
   display: flex;
   flex-direction: column;
-  gap: ${themeCssVariables.spacing[1]};
-  padding: ${themeCssVariables.spacing[3]} ${themeCssVariables.spacing[2]};
+  gap: ${themeCssVariables.spacing[4]};
+  padding: ${themeCssVariables.spacing[4]};
+
+  ${InputLabel} {
+    color: ${themeCssVariables.font.color.secondary};
+    margin-bottom: ${themeCssVariables.spacing[2]};
+  }
 `;
 
 const StyledToRow = styled.div`
@@ -29,7 +37,7 @@ const StyledCcBccToggle = styled.button`
   all: unset;
   color: ${themeCssVariables.font.color.tertiary};
   cursor: pointer;
-  font-size: ${themeCssVariables.font.size.xs};
+  font-size: ${themeCssVariables.font.size.sm};
   position: absolute;
   right: 0;
   top: 0;
@@ -106,10 +114,11 @@ export const EmailComposerFields = ({
         placeholder={t`Subject`}
       />
       <FormAdvancedTextFieldInput
+        label={t`Body`}
         defaultValue=""
         onChange={composerState.setBody}
         placeholder={t`Type something or press "/" to see commands`}
-        minHeight={120}
+        minHeight={180}
         maxWidth={600}
         contentType="html"
       />

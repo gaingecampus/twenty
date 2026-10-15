@@ -1,6 +1,7 @@
 import { styled } from '@linaria/react';
 import { useLingui } from '@lingui/react/macro';
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
+import { useDropzone } from 'react-dropzone';
 import { type EmailAttachment } from 'twenty-shared/types';
 import { isDefined } from 'twenty-shared/utils';
 import { IconUpload } from 'twenty-ui/icon';
@@ -8,7 +9,6 @@ import { ThemeContext, themeCssVariables } from 'twenty-ui/theme-constants';
 
 import { useUploadEmailAttachment } from '@/activities/emails/hooks/useUploadEmailAttachment';
 import { AttachmentChip } from '@/file/components/AttachmentChip';
-import { useFileUpload } from '@/file-upload/hooks/useFileUpload';
 import { InputLabel } from '@/ui/input/components/InputLabel';
 
 type EmailAttachmentsFieldProps = {
@@ -22,20 +22,24 @@ const StyledContainer = styled.div`
   flex-direction: column;
 `;
 
-const StyledUploadArea = styled.div<{ hasFiles: boolean }>`
+const StyledUploadArea = styled.div`
   background-color: ${themeCssVariables.background.transparent.lighter};
-  border: 1px solid ${themeCssVariables.border.color.medium};
+  border: 1px dashed ${themeCssVariables.border.color.medium};
   border-radius: ${themeCssVariables.border.radius.sm};
+  cursor: pointer;
   display: flex;
   flex-direction: column;
+  gap: ${themeCssVariables.spacing[3]};
   justify-content: center;
-  min-height: ${({ hasFiles }) => (hasFiles ? 'auto' : '24px')};
-  padding-bottom: ${themeCssVariables.spacing[1]};
+  min-height: 88px;
+  padding-bottom: ${themeCssVariables.spacing[3]};
   padding-left: ${themeCssVariables.spacing[2]};
   padding-right: ${themeCssVariables.spacing[2]};
-  padding-top: ${themeCssVariables.spacing[1]};
+  padding-top: ${themeCssVariables.spacing[3]};
 
-  &:hover {
+  &:hover,
+  &:focus-visible,
+  &[data-drag-active='true'] {
     background-color: ${themeCssVariables.background.transparent.light};
     border-color: ${themeCssVariables.border.color.strong};
   }
@@ -64,27 +68,35 @@ export const EmailAttachmentsField = ({
 }: EmailAttachmentsFieldProps) => {
   const { theme } = useContext(ThemeContext);
   const { uploadEmailAttachment } = useUploadEmailAttachment();
-  const { openFileUpload } = useFileUpload();
+  const [isUploading, setIsUploading] = useState(false);
   const { t } = useLingui();
 
   const handleUploadFiles = async (filesToUpload: File[]) => {
-    const uploadedFiles = await Promise.all(
-      filesToUpload.map((file) => uploadEmailAttachment(file)),
-    );
+    if (isUploading || filesToUpload.length === 0) {
+      return;
+    }
 
-    const successfulUploads = uploadedFiles.filter(isDefined);
+    setIsUploading(true);
 
-    if (successfulUploads.length > 0) {
-      onChange([...files, ...successfulUploads]);
+    try {
+      const uploadedFiles = await Promise.all(
+        filesToUpload.map((file) => uploadEmailAttachment(file)),
+      );
+      const successfulUploads = uploadedFiles.filter(isDefined);
+
+      if (successfulUploads.length > 0) {
+        onChange([...files, ...successfulUploads]);
+      }
+    } finally {
+      setIsUploading(false);
     }
   };
 
-  const handleAddFileClick = () => {
-    openFileUpload({
-      multiple: true,
-      onUpload: handleUploadFiles,
-    });
-  };
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    multiple: true,
+    disabled: isUploading,
+    onDropAccepted: handleUploadFiles,
+  });
 
   const handleRemoveFile = (fileId: string) => {
     onChange(files.filter((file) => file.id !== fileId));
@@ -95,24 +107,34 @@ export const EmailAttachmentsField = ({
       {label ? <InputLabel>{label}</InputLabel> : null}
 
       <StyledUploadArea
-        hasFiles={files.length > 0}
-        onClick={handleAddFileClick}
+        // oxlint-disable-next-line react/jsx-props-no-spreading
+        {...getRootProps({ role: 'button', 'aria-label': t`Upload files` })}
+        aria-busy={isUploading}
+        aria-disabled={isUploading}
+        data-drag-active={isDragActive}
       >
-        {files.length > 0 ? (
+        <input
+          // oxlint-disable-next-line react/jsx-props-no-spreading
+          {...getInputProps()}
+        />
+        {files.length > 0 && (
           <StyledChipsContainer>
             {files.map((file) => (
               <AttachmentChip
                 key={file.id}
                 file={file}
+                readonly={isUploading}
                 onRemove={() => handleRemoveFile(file.id)}
               />
             ))}
           </StyledChipsContainer>
-        ) : (
-          <StyledUploadAreaLabel>
-            <IconUpload size={theme.icon.size.sm} />
-            <span>{t`Upload file`}</span>
-          </StyledUploadAreaLabel>
+        )}
+        <StyledUploadAreaLabel role="status">
+          <IconUpload size={theme.icon.size.sm} />
+          <span>{isUploading ? t`Uploading...` : t`Upload files`}</span>
+        </StyledUploadAreaLabel>
+        {!isUploading && (
+          <StyledUploadAreaLabel>{t`Drag and Drop Here`}</StyledUploadAreaLabel>
         )}
       </StyledUploadArea>
     </StyledContainer>
