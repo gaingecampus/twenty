@@ -7,6 +7,7 @@ import { Table } from '@/ui/layout/table/components/Table';
 import { TableRow } from '@/ui/layout/table/components/TableRow';
 import { TableHeader } from '@/ui/layout/table/components/TableHeader';
 import { TableCell } from '@/ui/layout/table/components/TableCell';
+import { RECORD_TABLE_ROW_HEIGHT } from '@/object-record/record-table/constants/RecordTableRowHeight';
 import { styled } from '@linaria/react';
 import { t } from '@lingui/core/macro';
 import { RecordChip } from '@/object-record/components/RecordChip';
@@ -27,23 +28,51 @@ const StyledSection = styled.section`
   width: 100%;
 `;
 
-const StyledCampaignIdentity = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${themeCssVariables.spacing[1]};
-  min-width: 0;
+const StyledCampaignTable = styled(Table)`
+  background: ${themeCssVariables.background.primary};
+  border: 1px solid ${themeCssVariables.border.color.light};
+  border-radius: ${themeCssVariables.border.radius.md};
+  box-sizing: border-box;
+  min-width: 700px;
   overflow: hidden;
+
+  > [data-table-row] {
+    border-radius: 0;
+  }
+
+  > [data-table-row]:not(:last-child) {
+    border-bottom: 1px solid ${themeCssVariables.border.color.light};
+  }
+
+  > [data-table-row] > :not(:last-child) {
+    border-right: 1px solid ${themeCssVariables.border.color.light};
+  }
+
+  > [data-table-row]:has([data-table-header])
+    + [data-table-row]:not(:has([data-table-header])),
+  > [data-table-row]:last-child:not(:has([data-table-header])) {
+    margin: 0;
+  }
 `;
 
-const StyledSender = styled.div`
-  color: ${themeCssVariables.font.color.tertiary};
-  font-size: ${themeCssVariables.font.size.sm};
+const StyledCampaignHeader = styled(TableHeader)`
+  border-bottom: none;
+  box-sizing: border-box;
+  height: ${RECORD_TABLE_ROW_HEIGHT}px;
+  padding: 0 ${themeCssVariables.spacing[3]};
+`;
+
+const StyledCampaignCell = styled(TableCell)`
+  box-sizing: border-box;
+  height: ${RECORD_TABLE_ROW_HEIGHT}px;
+  min-width: 0;
   overflow: hidden;
-  text-overflow: ellipsis;
+  padding: 0 ${themeCssVariables.spacing[3]};
   white-space: nowrap;
 `;
 
-const CAMPAIGN_GRID_COLUMNS = 'minmax(160px, 1fr) 110px minmax(160px, 1fr)';
+const CAMPAIGN_GRID_COLUMNS =
+  'minmax(160px, 1fr) minmax(180px, 1fr) 110px minmax(230px, 1fr)';
 
 export const MessageListCampaigns = ({ listId }: { listId: string }) => {
   const { records, loading, error, hasNextPage, fetchMoreRecords, refetch } =
@@ -79,47 +108,49 @@ export const MessageListCampaigns = ({ listId }: { listId: string }) => {
     FAILED: 'red',
   };
   return (
-    <StyledSection aria-label={t`연결된 캠페인`}>
+    <StyledSection aria-label={t`연결된 단체 발송`}>
       <MessageListLinkCampaign listId={listId} onLinked={refetch} />
       {loading && <p>{t`불러오는 중…`}</p>}
-      {error && <p role="alert">{t`캠페인을 불러오지 못했습니다.`}</p>}
+      {error && <p role="alert">{t`단체 발송을 불러오지 못했습니다.`}</p>}
       {!loading && !error && records.length === 0 && (
         <StyledMessageListEmpty>
-          {t`아직 연결된 캠페인이 없습니다.`}
+          {t`아직 연결된 단체 발송이 없습니다.`}
           <br />
-          {t`캠페인 연결 버튼으로 초안을 선택하세요.`}
+          {t`단체 발송 연결 버튼으로 초안을 선택하세요.`}
         </StyledMessageListEmpty>
       )}
       {records.length > 0 && (
-        <Table>
+        <StyledCampaignTable>
           <TableRow gridTemplateColumns={CAMPAIGN_GRID_COLUMNS}>
-            <TableHeader>{t`캠페인 / 발신자`}</TableHeader>
-            <TableHeader>{t`상태`}</TableHeader>
-            <TableHeader>{t`예약 / 발송 시각`}</TableHeader>
+            <StyledCampaignHeader>{t`단체 발송`}</StyledCampaignHeader>
+            <StyledCampaignHeader>{t`발신자`}</StyledCampaignHeader>
+            <StyledCampaignHeader>{t`상태`}</StyledCampaignHeader>
+            <StyledCampaignHeader>{t`예약 / 발송 시각`}</StyledCampaignHeader>
           </TableRow>
           {records.map((campaign) => (
             <TableRow
               key={campaign.id}
+              hoverBackgroundColor={
+                themeCssVariables.background.transparent.light
+              }
               gridTemplateColumns={CAMPAIGN_GRID_COLUMNS}
             >
-              <TableCell minWidth="0" height={themeCssVariables.spacing[14]}>
-                <StyledCampaignIdentity>
-                  <RecordChip
-                    objectNameSingular="messageCampaign"
-                    record={campaign}
-                  />
-                  <StyledSender>
-                    <EmailDisplay value={campaign.fromAddress?.primaryEmail} />
-                  </StyledSender>
-                </StyledCampaignIdentity>
-              </TableCell>
-              <TableCell minWidth="0" height={themeCssVariables.spacing[14]}>
+              <StyledCampaignCell>
+                <RecordChip
+                  objectNameSingular="messageCampaign"
+                  record={campaign}
+                />
+              </StyledCampaignCell>
+              <StyledCampaignCell>
+                <EmailDisplay value={campaign.fromAddress?.primaryEmail} />
+              </StyledCampaignCell>
+              <StyledCampaignCell>
                 <Tag
                   text={statusLabels[campaign.status] ?? campaign.status}
                   color={statusColors[campaign.status] ?? 'gray'}
                 />
-              </TableCell>
-              <TableCell minWidth="0" height={themeCssVariables.spacing[14]}>
+              </StyledCampaignCell>
+              <StyledCampaignCell>
                 {campaign.sentAt || campaign.scheduledAt ? (
                   <DateTimeDisplay
                     value={campaign.sentAt ?? campaign.scheduledAt}
@@ -127,14 +158,14 @@ export const MessageListCampaigns = ({ listId }: { listId: string }) => {
                 ) : (
                   '—'
                 )}
-              </TableCell>
+              </StyledCampaignCell>
             </TableRow>
           ))}
-        </Table>
+        </StyledCampaignTable>
       )}
       {hasNextPage && (
         <Button
-          title={t`캠페인 더 보기`}
+          title={t`단체 발송 더 보기`}
           onClick={() => fetchMoreRecords()}
           disabled={loading}
         />
