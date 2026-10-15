@@ -3,6 +3,7 @@ import { useLingui } from '@lingui/react/macro';
 import { SettingsPageContainer } from '@/settings/components/SettingsPageContainer';
 import { SettingsWorkspaceUnsubscribeTopicSection } from '@/settings/unsubscribe-topics/components/SettingsWorkspaceUnsubscribeTopicSection';
 import { SettingsWorkspaceEmailGroupSection } from '@/settings/workspace/components/SettingsWorkspaceEmailGroupSection';
+import { SettingsWorkspaceEmailGuide } from '@/settings/workspace/components/SettingsWorkspaceEmailGuide';
 import { SettingsPageLayout } from '@/settings/components/layout/SettingsPageLayout';
 import { useIsFeatureEnabled } from '@/workspace/hooks/useIsFeatureEnabled';
 import { FeatureFlagKey, SettingsPath } from 'twenty-shared/types';
@@ -30,6 +31,7 @@ export const SettingsWorkspaceEmail = () => {
       ]}
     >
       <SettingsPageContainer>
+        <SettingsWorkspaceEmailGuide />
         <SettingsWorkspaceEmailGroupSection />
         <SettingsWorkspaceUnsubscribeTopicSection />
       </SettingsPageContainer>

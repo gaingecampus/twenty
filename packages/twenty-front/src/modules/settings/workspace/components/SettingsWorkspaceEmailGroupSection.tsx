@@ -21,7 +21,7 @@ export const SettingsWorkspaceEmailGroupSection = () => {
   return (
     <SettingsTableListSection<MessageChannel>
       title={t`Email Channels`}
-      description={t`Shared addresses your workspace uses to send and receive email.`}
+      description={t`회사 메일을 CRM으로 전달받는 공유 주소입니다. 수신 환경과 자동 전달 설정을 마친 뒤 사용할 수 있습니다.`}
       items={emailGroupChannels}
       columns={[
         { label: t`Source`, Cell: SettingsWorkspaceEmailGroupSourceCell },
