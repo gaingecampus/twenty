@@ -45,6 +45,7 @@ const StyledAdvancedTextFieldInnerContainer = styled.div`
   display: flex;
   flex-grow: 1;
   overflow: auto;
+  position: relative;
   width: 100%;
 `;
 
