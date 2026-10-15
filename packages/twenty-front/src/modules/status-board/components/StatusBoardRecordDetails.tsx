@@ -63,25 +63,39 @@ export const StatusBoardContractDday = ({
 }: {
   record: ObjectRecord;
 }) => {
-  const progress = getStatusBoardContractProgress(
-    record.contractStartDate,
-    record.contractEndDate,
-  );
-  if (record.onboardingStatus === 'DONE' || progress === undefined) return null;
+  const isUpcoming = record.onboardingStatus === 'PRE';
+  const targetDate = isUpcoming
+    ? record.contractStartDate
+    : record.contractEndDate;
+  const remaining =
+    typeof targetDate === 'string'
+      ? differenceInCalendarDays(parseISO(targetDate.slice(0, 10)), new Date())
+      : undefined;
+  if (record.onboardingStatus === 'DONE') return null;
+  if (remaining === undefined || !Number.isFinite(remaining)) {
+    return (
+      <SelectDisplay
+        color="gray"
+        label={isUpcoming ? '시작일 미정' : '계약 종료일 미정'}
+      />
+    );
+  }
   return (
     <StyledStatusBoardRowCaption>
       <SelectDisplay
-        color={
-          progress.remaining < 0
-            ? 'red'
-            : progress.remaining <= 30
-              ? 'orange'
-              : 'gray'
-        }
+        color={remaining < 0 ? 'red' : remaining <= 30 ? 'orange' : 'gray'}
         label={
-          progress.remaining < 0
-            ? `${-progress.remaining}일 초과`
-            : `D-${progress.remaining}`
+          isUpcoming
+            ? remaining < 0
+              ? `시작 예정일 ${-remaining}일 경과`
+              : remaining === 0
+                ? '시작 D-day'
+                : `시작까지 D-${remaining}`
+            : remaining < 0
+              ? `계약 종료일 ${-remaining}일 경과`
+              : remaining === 0
+                ? '계약 종료 D-day'
+                : `계약 종료까지 D-${remaining}`
         }
       />
     </StyledStatusBoardRowCaption>
