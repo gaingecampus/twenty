@@ -220,7 +220,7 @@ export const buildMessageListStandardFlatFieldMetadatas = ({
       type: FieldMetadataType.RELATION,
       morphId: null,
       fieldName: 'campaigns',
-      label: i18nLabel(msg`Campaigns`),
+      label: i18nLabel(msg`단체 발송`),
       description: i18nLabel(msg`Campaigns sent to this list`),
       icon: 'IconSend',
       isUIEditable: false,

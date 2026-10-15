@@ -33,7 +33,7 @@ const MESSAGE_CAMPAIGN_PAGE_TABS = {
         universalIdentifier:
           STANDARD_PAGE_LAYOUT_UNIVERSAL_IDENTIFIERS.messageCampaignRecordPage
             .tabs.home.widgets.list.universalIdentifier,
-        title: '세그먼트',
+        title: '수신자 목록',
         type: WidgetType.FIELD,
         gridPosition: GRID_POSITIONS.FULL_WIDTH,
         position: VERTICAL_LIST_LAYOUT_POSITIONS.THIRD,

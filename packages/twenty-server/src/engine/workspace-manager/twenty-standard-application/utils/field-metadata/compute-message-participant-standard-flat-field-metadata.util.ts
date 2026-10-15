@@ -370,7 +370,7 @@ export const buildMessageParticipantStandardFlatFieldMetadatas = ({
       type: FieldMetadataType.RELATION,
       morphId: null,
       fieldName: 'messageCampaign',
-      label: i18nLabel(msg`Campaign`),
+      label: i18nLabel(msg`단체 발송`),
       description: i18nLabel(
         msg`The campaign this participant was a recipient of`,
       ),

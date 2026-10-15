@@ -1230,18 +1230,18 @@ msgstr "통화 녹음"
 #: src/engine/workspace-manager/twenty-standard-application/utils/field-metadata/compute-message-standard-flat-field-metadata.util.ts
 #: src/engine/workspace-manager/twenty-standard-application/utils/object-metadata/create-standard-flat-object-metadata.util.ts
 msgid "Campaign"
-msgstr "캠페인"
+msgstr "단체 발송"
 
 #. js-lingui-id: OzGe7D
 #: src/engine/workspace-manager/twenty-standard-application/utils/field-metadata/compute-message-campaign-standard-flat-field-metadata.util.ts
 msgid "Campaign lifecycle status"
-msgstr "캠페인 진행 상태"
+msgstr "단체 발송 진행 상태"
 
 #. js-lingui-id: oRJtCM
 #: src/engine/workspace-manager/twenty-standard-application/utils/field-metadata/compute-message-list-standard-flat-field-metadata.util.ts
 #: src/engine/workspace-manager/twenty-standard-application/utils/object-metadata/create-standard-flat-object-metadata.util.ts
 msgid "Campaigns"
-msgstr "캠페인"
+msgstr "단체 발송"
 
 #. js-lingui-id: mZkYVW
 #: src/engine/workspace-manager/twenty-standard-application/utils/field-metadata/compute-message-list-standard-flat-field-metadata.util.ts
@@ -1614,7 +1614,7 @@ msgstr "작성"
 #. js-lingui-id: jjRhGA
 #: src/engine/metadata-modules/command-menu-item/constants/standard-command-menu-item-labels.ts
 msgid "Compose Campaign"
-msgstr "캠페인 작성"
+msgstr "단체 발송 작성"
 
 #. js-lingui-id: avabab
 #: src/engine/metadata-modules/command-menu-item/constants/standard-command-menu-item-labels.ts
@@ -7174,7 +7174,7 @@ msgstr "이메일 보내기"
 #. js-lingui-id: +KBxqW
 #: src/engine/workspace-manager/twenty-standard-application/utils/field-metadata/compute-message-campaign-standard-flat-field-metadata.util.ts
 msgid "Sender address for the campaign"
-msgstr "캠페인 발신 이메일 주소"
+msgstr "단체 발송 발신 이메일 주소"
 
 #. js-lingui-id: 9bG48P
 #: src/engine/workspace-manager/twenty-standard-application/utils/field-metadata/compute-message-campaign-standard-flat-field-metadata.util.ts
@@ -7931,7 +7931,7 @@ msgstr ""
 #. js-lingui-id: tyc/Ir
 #: src/engine/workspace-manager/twenty-standard-application/utils/field-metadata/compute-message-campaign-standard-flat-field-metadata.util.ts
 msgid "The list this campaign was sent to"
-msgstr "이 캠페인을 발송한 수신자 목록"
+msgstr "이 단체 발송을 발송한 수신자 목록"
 
 #. js-lingui-id: kdTB4e
 #: src/engine/core-modules/application/connection-provider/connection-provider.exception.ts
@@ -8025,7 +8025,7 @@ msgstr "단수와 복수 이름은 객체에 대해 동일할 수 없습니다"
 #. js-lingui-id: RCS0+I
 #: src/engine/workspace-manager/twenty-standard-application/utils/field-metadata/compute-message-campaign-standard-flat-field-metadata.util.ts
 msgid "The unsubscribe topic this campaign was sent under"
-msgstr "이 캠페인에 적용된 수신 거부 주제"
+msgstr "이 단체 발송에 적용된 수신 거부 주제"
 
 #. js-lingui-id: 9bYo5E
 #: src/modules/connected-account-sync-webhooks/connected-account-sync-webhook.exception.ts
@@ -9293,7 +9293,7 @@ msgstr "Twenty에 오신 것을 환영합니다: 이메일을 확인해 주세�
 #. js-lingui-id: nCHI/F
 #: src/engine/workspace-manager/twenty-standard-application/utils/field-metadata/compute-message-campaign-standard-flat-field-metadata.util.ts
 msgid "When the campaign finished sending"
-msgstr "캠페인 발송이 완료된 시각"
+msgstr "단체 발송이 완료된 시각"
 
 #. js-lingui-id: zB3LrE
 #: src/engine/workspace-manager/twenty-standard-application/utils/field-metadata/compute-attachment-standard-flat-field-metadata.util.ts
@@ -9996,7 +9996,7 @@ msgstr "예약 발송일"
 
 #. js-lingui-id: G+z772
 msgid "Scheduled campaign send time"
-msgstr "캠페인 예약 발송 시각"
+msgstr "단체 발송 예약 발송 시각"
 
 #. js-lingui-id: CqVMc+
 msgid "Schedule version"
@@ -10004,7 +10004,7 @@ msgstr "예약 버전"
 
 #. js-lingui-id: NEMpUX
 msgid "Identifies the current campaign schedule"
-msgstr "현재 캠페인 예약 식별자"
+msgstr "현재 단체 발송 예약 식별자"
 
 #. js-lingui-id: vv7kpg
 msgid "Cancelled"
@@ -10012,4 +10012,4 @@ msgstr "취소됨"
 
 #. js-lingui-id: 93PuJN
 msgid "Create Campaign"
-msgstr "새 캠페인"
+msgstr "새 단체 발송"
