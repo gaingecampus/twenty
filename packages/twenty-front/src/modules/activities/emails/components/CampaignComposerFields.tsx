@@ -1,3 +1,4 @@
+import { CampaignTestEmail } from '@/activities/emails/components/CampaignTestEmail';
 import { EmailAttachmentsField } from '@/activities/emails/components/EmailAttachmentsField';
 import { useId } from 'react';
 import { IconExternalLink, IconInfoCircle } from 'twenty-ui/icon';
@@ -334,6 +335,18 @@ export const CampaignComposerFields = ({
           onUploadingChange={campaignState.setIsUploading}
         />
         <StyledHint>{t`최대 20개, 총 25MB까지 첨부할 수 있습니다.`}</StyledHint>
+      </StyledFieldGroup>
+      <StyledFieldGroup>
+        <StyledFieldLabel>{t`테스트 발송`}</StyledFieldLabel>
+        <CampaignTestEmail
+          campaignState={campaignState}
+          connectedAccountId={
+            getConfiguredEmailChannels(channels).find(
+              (channel) =>
+                channel.connectedAccount?.handle === campaignState.fromAddress,
+            )?.connectedAccountId
+          }
+        />
       </StyledFieldGroup>
     </StyledFieldsContainer>
   );

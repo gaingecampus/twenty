@@ -33,6 +33,7 @@ export const useCampaignComposerState = ({
     campaign?.attachmentFiles ?? [],
   );
   const [isUploading, setIsUploading] = useState(false);
+  const [isTestSending, setIsTestSending] = useState(false);
   const [body, setBody] = useState(campaign?.bodyTemplate ?? '');
 
   const { sendMessageCampaign, loading } = useSendMessageCampaign();
@@ -80,6 +81,7 @@ export const useCampaignComposerState = ({
     body.trim().length > 0 &&
     scheduleValid &&
     !isUploading &&
+    !isTestSending &&
     !cancelling &&
     !loading;
 
@@ -119,6 +121,8 @@ export const useCampaignComposerState = ({
     setFiles,
     setIsUploading,
     isUploading,
+    isTestSending,
+    setIsTestSending,
     isEditing: !!campaign,
     sendMode,
     setSendMode,
