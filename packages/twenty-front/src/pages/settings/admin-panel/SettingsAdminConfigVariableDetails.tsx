@@ -58,9 +58,7 @@ export const SettingsAdminConfigVariableDetails = () => {
   const { handleUpdateVariable, handleDeleteVariable } =
     useConfigVariableActions(variable?.name ?? '');
 
-  const [value, setValue] = useState<ConfigVariableValue>(
-    variable?.value ?? null,
-  );
+  const [value, setValue] = useState<ConfigVariableValue>(null);
 
   if (loading === true || isDefined(variable) === false) {
     return <SettingsSkeletonLoader />;
@@ -77,13 +75,15 @@ export const SettingsAdminConfigVariableDetails = () => {
     !isEnvOnly && hasValueChanged && hasMeaningfulValue(value);
 
   const onSave = async () => {
-    await handleUpdateVariable(value, isFromDatabase);
+    try {
+      await handleUpdateVariable(value, isFromDatabase);
+    } finally {
+      setValue(null);
+    }
   };
 
   const onEdit = () => {
-    if (variable.isSensitive) {
-      setValue('');
-    }
+    setValue(variable.isSensitive ? '' : variable.value);
   };
 
   const canOpenCancelModal = isFromDatabase && !hasValueChanged;
@@ -123,7 +123,7 @@ export const SettingsAdminConfigVariableDetails = () => {
         input={
           <ConfigVariableValueInput
             variable={variable}
-            value={value}
+            value={isEditing ? value : variable.value}
             onChange={setValue}
             disabled={isEnvOnly || !isEditing}
           />

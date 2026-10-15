@@ -37,6 +37,7 @@ type ConfigVariableDatabaseInputProps = {
   options?: ConfigVariableOptions;
   disabled?: boolean;
   placeholder?: string;
+  isSensitive?: boolean;
 };
 
 export const ConfigVariableDatabaseInput = ({
@@ -47,6 +48,7 @@ export const ConfigVariableDatabaseInput = ({
   options,
   disabled,
   placeholder,
+  isSensitive = false,
 }: ConfigVariableDatabaseInputProps) => {
   const selectOptions =
     options && Array.isArray(options)
@@ -204,6 +206,8 @@ export const ConfigVariableDatabaseInput = ({
           onChange={(text) => onChange(text)}
           disabled={disabled}
           placeholder={placeholder || t`Enter value`}
+          type={isSensitive ? 'password' : 'text'}
+          autoComplete={isSensitive ? 'new-password' : 'off'}
           fullWidth
         />
       );

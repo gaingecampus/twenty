@@ -79,6 +79,10 @@ export const SettingsAdminConfigVariables = () => {
     [configVariables],
   );
 
+  const salesVariables = allVariables.filter((variable) =>
+    variable.name.startsWith('GAINGE_SALES_'),
+  );
+
   const filteredVariables = useMemo(() => {
     const isSearching = search.trim().length > 0;
     const hasSelectedSpecificGroup = configVariableGroupFilter !== 'all';
@@ -166,6 +170,15 @@ export const SettingsAdminConfigVariables = () => {
 
   return (
     <>
+      {salesVariables.length > 0 && (
+        <Section>
+          <H2Title
+            title="가캠 매출 연동"
+            description="각 항목을 눌러 수정 후 저장하세요. MCP 주소(/api/mcp 포함), sales:read 토큰, 허용 워크스페이스 ID와 조회 가능한 구성원 ID(쉼표 구분)를 모두 설정하면 대시보드에 사업부별 매출이 표시됩니다. 토큰은 암호화 저장되며 서버에서만 사용됩니다."
+          />
+          <SettingsAdminConfigVariablesTable variables={salesVariables} />
+        </Section>
+      )}
       <Section>
         <H2Title title={t`Config Variables`} />
 

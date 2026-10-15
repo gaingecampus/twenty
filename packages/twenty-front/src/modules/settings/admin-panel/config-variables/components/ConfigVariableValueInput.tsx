@@ -38,6 +38,7 @@ export const ConfigVariableValueInput = ({
           value={value}
           onChange={onChange}
           type={variable.type}
+          isSensitive={variable.isSensitive}
           options={variable.options}
           disabled={disabled}
           placeholder={
