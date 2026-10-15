@@ -1,3 +1,5 @@
+import { MailboxService } from 'src/engine/metadata-modules/message-channel/mailbox.service';
+import { MailboxResolver } from 'src/engine/metadata-modules/message-channel/resolvers/mailbox.resolver';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
@@ -24,6 +26,8 @@ import { MessagingImportManagerModule } from 'src/modules/messaging/message-impo
   providers: [
     MessageChannelMetadataService,
     MessageChannelResolver,
+    MailboxService,
+    MailboxResolver,
     MessageChannelGraphqlApiExceptionInterceptor,
   ],
   exports: [MessageChannelMetadataService],

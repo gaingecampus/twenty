@@ -56,6 +56,12 @@ const MyFieldsPage = lazy(() =>
   })),
 );
 
+const MailboxPage = lazy(() =>
+  import('@/mailbox/components/MailboxPage').then((module) => ({
+    default: module.MailboxPage,
+  })),
+);
+
 const StatusBoardPage = lazy(() =>
   import('~/pages/status-board/StatusBoardPage').then((module) => ({
     default: module.StatusBoardPage,
@@ -326,6 +332,14 @@ export const useCreateAppRouter = (
               element={
                 <LazyRoute>
                   <FieldVisitDetailPage />
+                </LazyRoute>
+              }
+            />
+            <Route
+              path="/mailbox"
+              element={
+                <LazyRoute>
+                  <MailboxPage />
                 </LazyRoute>
               }
             />

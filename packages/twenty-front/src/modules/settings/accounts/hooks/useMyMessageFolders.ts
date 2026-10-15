@@ -5,7 +5,7 @@ import { useApolloClient, useQuery } from '@apollo/client/react';
 export const useMyMessageFolders = (messageChannelId?: string) => {
   const apolloClient = useApolloClient();
 
-  const { data, loading } = useQuery<{
+  const { data, loading, error } = useQuery<{
     myMessageFolders: MessageFolder[];
   }>(GET_MY_MESSAGE_FOLDERS, {
     client: apolloClient,
@@ -15,5 +15,6 @@ export const useMyMessageFolders = (messageChannelId?: string) => {
   return {
     messageFolders: data?.myMessageFolders ?? [],
     loading,
+    error,
   };
 };
