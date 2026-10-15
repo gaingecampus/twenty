@@ -1,8 +1,10 @@
 import { MailboxService } from 'src/engine/metadata-modules/message-channel/mailbox.service';
+import { STANDARD_ROLE } from 'src/engine/workspace-manager/twenty-standard-application/constants/standard-role.constant';
 
 describe('MailboxService', () => {
   const channels = { findOne: jest.fn(), find: jest.fn() };
-  const folders = { findOne: jest.fn() };
+  const folders = { findOne: jest.fn(), find: jest.fn() };
+  const userRoles = { getRolesByUserWorkspaces: jest.fn() };
   const accounts = { getUserConnectedAccountIds: jest.fn() };
   const messages = { find: jest.fn() };
   const orm = {
@@ -14,6 +16,7 @@ describe('MailboxService', () => {
     folders as unknown as ConstructorParameters<typeof MailboxService>[1],
     accounts as unknown as ConstructorParameters<typeof MailboxService>[2],
     orm as unknown as ConstructorParameters<typeof MailboxService>[3],
+    userRoles as unknown as ConstructorParameters<typeof MailboxService>[4],
   );
   const input = {
     workspaceId: 'workspace',
@@ -23,6 +26,7 @@ describe('MailboxService', () => {
   };
   beforeEach(() => {
     jest.clearAllMocks();
+    userRoles.getRolesByUserWorkspaces.mockResolvedValue(new Map());
     channels.findOne.mockResolvedValue({
       type: 'EMAIL',
       connectedAccountId: 'mine',
@@ -30,6 +34,69 @@ describe('MailboxService', () => {
     accounts.getUserConnectedAccountIds.mockResolvedValue(['mine']);
     folders.findOne.mockResolvedValue({ id: 'folder' });
     messages.find.mockResolvedValue([]);
+    folders.find.mockResolvedValue([]);
+  });
+
+  const makeAdmin = () => {
+    userRoles.getRolesByUserWorkspaces.mockResolvedValue(
+      new Map([
+        [
+          'me',
+          [{ universalIdentifier: STANDARD_ROLE.admin.universalIdentifier }],
+        ],
+      ]),
+    );
+  };
+
+  it('lists all email channels in the current workspace for administrators', async () => {
+    makeAdmin();
+    channels.find.mockResolvedValue([{ id: 'other-channel' }]);
+    await expect(service.findChannels('workspace', 'me')).resolves.toEqual([
+      { id: 'other-channel' },
+    ]);
+    expect(channels.find).toHaveBeenCalledWith({
+      where: { workspaceId: 'workspace', type: 'EMAIL' },
+      order: { handle: 'ASC', id: 'ASC' },
+    });
+    expect(accounts.getUserConnectedAccountIds).not.toHaveBeenCalled();
+  });
+
+  it('allows an administrator to read another account and its folders', async () => {
+    makeAdmin();
+    channels.findOne.mockResolvedValue({
+      type: 'EMAIL',
+      connectedAccountId: 'other',
+    });
+    await service.findMessages(input);
+    await service.findFolders('workspace', 'me', 'channel');
+    expect(messages.find).toHaveBeenCalled();
+    expect(folders.find).toHaveBeenCalledWith({
+      where: { workspaceId: 'workspace', messageChannelId: 'channel' },
+      order: { name: 'ASC', id: 'ASC' },
+    });
+    expect(channels.findOne).toHaveBeenCalledWith({
+      where: { id: 'channel', workspaceId: 'workspace' },
+    });
+  });
+
+  it('does not grant another workspace administrator access', async () => {
+    makeAdmin();
+    channels.findOne.mockResolvedValue(null);
+    await expect(service.findMessages(input)).rejects.toThrow(
+      'Mailbox access denied',
+    );
+    expect(messages.find).not.toHaveBeenCalled();
+  });
+
+  it('keeps other users folders private for ordinary members', async () => {
+    channels.findOne.mockResolvedValue({
+      type: 'EMAIL',
+      connectedAccountId: 'other',
+    });
+    await expect(
+      service.findFolders('workspace', 'me', 'channel'),
+    ).rejects.toThrow('Mailbox access denied');
+    expect(folders.find).not.toHaveBeenCalled();
   });
   it.each([
     null,

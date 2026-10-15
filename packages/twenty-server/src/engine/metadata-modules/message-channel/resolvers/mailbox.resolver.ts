@@ -1,4 +1,5 @@
 import { MessageChannelDTO } from 'src/engine/metadata-modules/message-channel/dtos/message-channel.dto';
+import { MessageFolderDTO } from 'src/engine/metadata-modules/message-folder/dtos/message-folder.dto';
 import { UseGuards } from '@nestjs/common';
 import { Args, Int, Query } from '@nestjs/graphql';
 
@@ -16,6 +17,15 @@ import { MailboxService } from 'src/engine/metadata-modules/message-channel/mail
 @UseGuards(WorkspaceAuthGuard, NoPermissionGuard)
 export class MailboxResolver {
   constructor(private readonly mailbox: MailboxService) {}
+
+  @Query(() => [MessageFolderDTO])
+  myMailboxFolders(
+    @AuthWorkspace() workspace: WorkspaceEntity,
+    @AuthUserWorkspaceId() userWorkspaceId: string,
+    @Args('channelId', { type: () => UUIDScalarType }) channelId: string,
+  ) {
+    return this.mailbox.findFolders(workspace.id, userWorkspaceId, channelId);
+  }
 
   @Query(() => [MessageChannelDTO])
   myPersonalMailboxChannels(

@@ -1,6 +1,7 @@
 import { MailboxService } from 'src/engine/metadata-modules/message-channel/mailbox.service';
 import { MailboxResolver } from 'src/engine/metadata-modules/message-channel/resolvers/mailbox.resolver';
 import { Module } from '@nestjs/common';
+import { UserRoleModule } from 'src/engine/metadata-modules/user-role/user-role.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { EmailingDomainModule } from 'src/engine/core-modules/emailing-domain/emailing-domain.module';
@@ -16,6 +17,7 @@ import { MessagingImportManagerModule } from 'src/modules/messaging/message-impo
 
 @Module({
   imports: [
+    UserRoleModule,
     TypeOrmModule.forFeature([MessageChannelEntity, MessageFolderEntity]),
     PermissionsModule,
     ConnectedAccountMetadataModule,
