@@ -38,6 +38,10 @@ exports[`generateDepthRecordGqlFieldsFromObject should generate depth one record
     },
   },
   "opportunities": {
+    "company": {
+      "domainName": true,
+      "id": true,
+    },
     "id": true,
     "name": true,
   },

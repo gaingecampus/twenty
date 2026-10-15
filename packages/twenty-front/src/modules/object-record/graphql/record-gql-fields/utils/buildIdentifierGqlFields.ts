@@ -1,6 +1,7 @@
 import { RelationType } from '~/generated-metadata/graphql';
 import { type EnrichedObjectMetadataItem } from '@/object-metadata/types/EnrichedObjectMetadataItem';
 import { getImageIdentifierFieldMetadataItem } from '@/object-metadata/utils/getImageIdentifierFieldMetadataItem';
+import { getCompanyAvatarRelationField } from '@/object-metadata/utils/getCompanyAvatarRelationField';
 import { getLabelIdentifierFieldMetadataItem } from '@/object-metadata/utils/getLabelIdentifierFieldMetadataItem';
 import { type RecordGqlFields } from '@/object-record/graphql/record-gql-fields/types/RecordGqlFields';
 import { isDefined } from 'twenty-shared/utils';
@@ -18,6 +19,10 @@ export const buildIdentifierGqlFields = (
     getLabelIdentifierFieldMetadataItem(objectMetadata);
   const imageIdentifierField =
     getImageIdentifierFieldMetadataItem(objectMetadata);
+  const companyAvatarRelationField = getCompanyAvatarRelationField(
+    objectMetadata.nameSingular,
+    objectMetadata.fields,
+  );
 
   const linkedMemberField = ['member', 'teamMember'].includes(
     objectMetadata.nameSingular,
@@ -32,6 +37,9 @@ export const buildIdentifierGqlFields = (
 
   return {
     id: true,
+    ...(isDefined(companyAvatarRelationField) && {
+      [companyAvatarRelationField.name]: { id: true, domainName: true },
+    }),
     ...(linkedMemberField && { [`${linkedMemberField.name}Id`]: true }),
     ...(isDefined(labelIdentifierField) && {
       [labelIdentifierField.name]: true,

@@ -4,6 +4,7 @@ import { getImageIdentifierFieldMetadataItem } from '@/object-metadata/utils/get
 import { getLabelIdentifierFieldMetadataItem } from '@/object-metadata/utils/getLabelIdentifierFieldMetadataItem';
 import { hasObjectMetadataItemPositionField } from '@/object-metadata/utils/hasObjectMetadataItemPositionField';
 import { generateActivityTargetGqlFields } from '@/object-record/graphql/record-gql-fields/utils/generateActivityTargetGqlFields';
+import { buildIdentifierGqlFields } from '@/object-record/graphql/record-gql-fields/utils/buildIdentifierGqlFields';
 import { CoreObjectNameSingular } from 'twenty-shared/types';
 
 import { generateDepthRecordGqlFieldsFromFields } from '@/object-record/graphql/record-gql-fields/utils/generateDepthRecordGqlFieldsFromFields';
@@ -82,6 +83,7 @@ export const useRelevantRecordsGqlFields = ({
     objectMetadataItem.nameSingular === CoreObjectNameSingular.Task;
 
   return {
+    ...buildIdentifierGqlFields(objectMetadataItem),
     id: true,
     ...(isDefined(labelIdentifierFieldMetadataItem)
       ? { [labelIdentifierFieldMetadataItem.name]: true }

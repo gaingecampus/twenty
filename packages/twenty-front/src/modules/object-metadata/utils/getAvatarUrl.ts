@@ -2,6 +2,7 @@ import { type Company } from '@/companies/types/Company';
 import { CoreObjectNameSingular } from 'twenty-shared/types';
 import { type FieldMetadataItem } from '@/object-metadata/types/FieldMetadataItem';
 import { getCompanyDomainName } from '@/object-metadata/utils/getCompanyDomainName';
+import { getCompanyAvatarRelationField } from '@/object-metadata/utils/getCompanyAvatarRelationField';
 import { type ObjectRecord } from '@/object-record/types/ObjectRecord';
 import { getLogoUrlFromDomainName, isDefined } from 'twenty-shared/utils';
 import { getImageIdentifierFieldValue } from './getImageIdentifierFieldValue';
@@ -14,6 +15,22 @@ export const getAvatarUrl = (
   fields: FieldMetadataItem[] = [],
   workspaceMembers: { id: string; avatarUrl?: string | null }[] = [],
 ) => {
+  const companyAvatarRelationField = getCompanyAvatarRelationField(
+    objectNameSingular,
+    fields,
+  );
+  const linkedCompany = isDefined(companyAvatarRelationField)
+    ? record[companyAvatarRelationField.name]
+    : undefined;
+
+  if (allowRequestsToTwentyIcons === true && isDefined(linkedCompany)) {
+    const domainName = getCompanyDomainName(linkedCompany as Company);
+
+    if (domainName) {
+      return getLogoUrlFromDomainName(domainName);
+    }
+  }
+
   if (objectNameSingular === 'member' || objectNameSingular === 'teamMember') {
     const linkedMemberField = fields.find(
       (field) =>
