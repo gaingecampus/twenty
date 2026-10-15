@@ -15,6 +15,17 @@ const StyledFilters = styled.div`
   gap: ${themeCssVariables.spacing[2]};
 `;
 
+const StyledTypeButton = styled(StyledHeaderDropdownButton)`
+  --t-toolbar-chip-active-bg: var(--t-color-blue);
+  --t-toolbar-chip-border: 1px solid var(--t-color-blue);
+
+  color: var(--t-color-blue);
+
+  &[aria-pressed='true'] {
+    color: var(--t-font-color-inverted);
+  }
+`;
+
 type FieldContractTypeFiltersProps = {
   metadata: ReturnType<typeof useFieldManagementMetadata>;
   value: ContractTypeFilter;
@@ -51,8 +62,12 @@ export const FieldContractTypeFilters = ({
       : []),
   ];
   return (
-    <StyledFilters role="group" aria-label="계약 유형 필터">
-      <StyledHeaderDropdownButton
+    <StyledFilters
+      data-contract-type-filters
+      role="group"
+      aria-label="계약 유형 필터"
+    >
+      <StyledTypeButton
         type="button"
         isActive={value === null}
         isUnfolded={value === null}
@@ -60,9 +75,9 @@ export const FieldContractTypeFilters = ({
         onClick={() => onChange(null)}
       >
         전체
-      </StyledHeaderDropdownButton>
+      </StyledTypeButton>
       {options.map(({ label, filter }) => (
-        <StyledHeaderDropdownButton
+        <StyledTypeButton
           key={`${filter.field}-${filter.value}`}
           type="button"
           isActive={isContractTypeFilterSelected(value, filter)}
@@ -71,7 +86,7 @@ export const FieldContractTypeFilters = ({
           onClick={() => onChange(toggleContractTypeFilter(value, filter))}
         >
           {label}
-        </StyledHeaderDropdownButton>
+        </StyledTypeButton>
       ))}
     </StyledFilters>
   );

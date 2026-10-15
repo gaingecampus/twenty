@@ -46,7 +46,8 @@ export const StyledFieldPanel = styled.div`
     button[data-goal-edit-overlay],
     button[data-dashboard-tab],
     [data-contract-pagination] button,
-    [data-contract-list-controls] button
+    [data-contract-list-controls] button,
+    [data-contract-type-filters] button
   ),
   a {
     font: inherit;
@@ -59,7 +60,8 @@ export const StyledFieldPanel = styled.div`
     button[data-goal-edit-overlay],
     button[data-dashboard-tab],
     [data-contract-pagination] button,
-    [data-contract-list-controls] button
+    [data-contract-list-controls] button,
+    [data-contract-type-filters] button
   ) {
     background: ${theme.background.secondary};
     border: 1px solid ${theme.border.color.medium};
@@ -76,7 +78,8 @@ export const StyledFieldPanel = styled.div`
       button[data-goal-edit-overlay],
       button[data-dashboard-tab],
       [data-contract-pagination] button,
-      [data-contract-list-controls] button
+      [data-contract-list-controls] button,
+      [data-contract-type-filters] button
     )[aria-pressed='true'] {
     background: ${theme.background.tertiary};
     font-weight: 600;
@@ -89,7 +92,8 @@ export const StyledFieldPanel = styled.div`
       button[data-goal-edit-overlay],
       button[data-dashboard-tab],
       [data-contract-pagination] button,
-      [data-contract-list-controls] button
+      [data-contract-list-controls] button,
+      [data-contract-type-filters] button
     ):disabled {
     cursor: not-allowed;
     opacity: 0.5;
@@ -341,7 +345,8 @@ export const StyledFieldPanel = styled.div`
       button[data-goal-edit-overlay],
       button[data-dashboard-tab],
       [data-contract-pagination] button,
-      [data-contract-list-controls] button
+      [data-contract-list-controls] button,
+      [data-contract-type-filters] button
     ) {
       align-items: center;
       display: inline-flex;
@@ -359,7 +364,8 @@ export const StyledFieldPanel = styled.div`
         button[data-goal-edit-overlay],
         button[data-dashboard-tab],
         [data-contract-pagination] button,
-        [data-contract-list-controls] button
+        [data-contract-list-controls] button,
+        [data-contract-type-filters] button
       ):hover {
       background: ${theme.background.tertiary};
     }
@@ -371,7 +377,8 @@ export const StyledFieldPanel = styled.div`
         button[data-goal-edit-overlay],
         button[data-dashboard-tab],
         [data-contract-pagination] button,
-        [data-contract-list-controls] button
+        [data-contract-list-controls] button,
+        [data-contract-type-filters] button
       ):focus-visible,
     summary:focus-visible,
     a:focus-visible {
@@ -983,7 +990,8 @@ export const StyledFieldPanel = styled.div`
       button[data-goal-edit-overlay],
       button[data-dashboard-tab],
       [data-contract-pagination] button,
-      [data-contract-list-controls] button
+      [data-contract-list-controls] button,
+      [data-contract-type-filters] button
     ) {
       border-color: transparent;
       border-radius: 8px;
@@ -997,7 +1005,8 @@ export const StyledFieldPanel = styled.div`
         button[data-goal-edit-overlay],
         button[data-dashboard-tab],
         [data-contract-pagination] button,
-        [data-contract-list-controls] button
+        [data-contract-list-controls] button,
+        [data-contract-type-filters] button
       )[data-primary] {
       background: ${theme.color.blue};
       color: white;
@@ -1010,7 +1019,8 @@ export const StyledFieldPanel = styled.div`
         button[data-goal-edit-overlay],
         button[data-dashboard-tab],
         [data-contract-pagination] button,
-        [data-contract-list-controls] button
+        [data-contract-list-controls] button,
+        [data-contract-type-filters] button
       )[data-primary]:hover {
       filter: brightness(0.94);
     }
@@ -1022,7 +1032,8 @@ export const StyledFieldPanel = styled.div`
         button[data-goal-edit-overlay],
         button[data-dashboard-tab],
         [data-contract-pagination] button,
-        [data-contract-list-controls] button
+        [data-contract-list-controls] button,
+        [data-contract-type-filters] button
       )[aria-pressed='true'] {
       background: ${theme.background.tertiary};
     }
