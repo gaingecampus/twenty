@@ -1,3 +1,5 @@
+import { FileIcon } from '@/file/components/FileIcon';
+import { getFileCategoryFromExtension } from '@/object-record/record-field/ui/utils/getFileCategoryFromExtension';
 import { FieldLoadingState } from './FieldLoadingState';
 import { StyledFieldEmptyState } from './FieldEmptyState';
 import { useState } from 'react';
@@ -58,6 +60,11 @@ export const FieldAttachmentGallery = ({
       )}
       {documents.map((file) => (
         <div data-file-row key={file.id}>
+          <FileIcon
+            fileCategory={getFileCategoryFromExtension(
+              file.name.match(/\.([^.]+)$/)?.[1],
+            )}
+          />
           <div data-file-name>
             {file.name}
             <small>{formatFieldFileSize(file.size)}</small>
