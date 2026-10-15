@@ -77,7 +77,7 @@ const FieldManagementPageBody = ({
             {(
               [
                 ['DONE', '종료 계약'],
-                ['ACTIVE', '현재 계약'],
+                ['ACTIVE', '현재 계약 (온보딩)'],
                 ['PRE', '진행 전 계약'],
               ] as const
             ).map(([value, label]) => (

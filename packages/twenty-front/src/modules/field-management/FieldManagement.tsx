@@ -1,3 +1,8 @@
+import { FieldContractTypeFilters } from './FieldContractTypeFilters';
+import {
+  matchesContractTypeFilter,
+  type ContractTypeFilter,
+} from './contractTypeFilter';
 import { FieldContractKind } from './FieldContractKind';
 import { refreshFieldSummary } from './fieldSummaryRequest';
 import { FieldContractSummary } from './FieldContractSummary';
@@ -213,6 +218,10 @@ const FieldManagementLoaded = ({
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('ACTIVE');
   const [contractPageSize, setContractPageSize] = useState(10);
+  const [contractTypeFilter, setContractTypeFilter] = useState<ContractTypeFilter>({
+    field: 'onboardingType',
+    value: 'CONSULTING',
+  });
   const [contractSort, setContractSort] =
     useState<FieldContractSort>('default');
   const [needsOnly, setNeedsOnly] = useState(false);
@@ -248,13 +257,18 @@ const FieldManagementLoaded = ({
               scope.memberIds.some((id) => assigned(c, id, data.links, true))
             : assigned(c, myMemberId, data.links, includeLead),
   );
-  const preCount = scopedContracts.filter(
+  const typeFilteredContracts = scopedContracts.filter(
+    (contract) =>
+      !scope.contractList ||
+      matchesContractTypeFilter(contract, contractTypeFilter),
+  );
+  const preCount = typeFilteredContracts.filter(
     (c) => c.onboardingStatus === 'PRE',
   ).length;
-  const activeCount = scopedContracts.filter(
+  const activeCount = typeFilteredContracts.filter(
     (c) => c.onboardingStatus === 'ACTIVE',
   ).length;
-  const doneCount = scopedContracts.filter(
+  const doneCount = typeFilteredContracts.filter(
     (c) => c.onboardingStatus === 'DONE',
   ).length;
   const countsReady = !data.loading && !data.error;
@@ -265,7 +279,7 @@ const FieldManagementLoaded = ({
         : undefined,
     );
   }, [onContractCountsChange, countsReady, preCount, activeCount, doneCount]);
-  const contracts = [...scopedContracts]
+  const contracts = [...typeFilteredContracts]
     .sort(
       (a, b) =>
         Number(b.onboardingStatus === 'ACTIVE') -
@@ -321,6 +335,7 @@ const FieldManagementLoaded = ({
     return 0;
   });
   const contractPageKey = JSON.stringify([
+    contractTypeFilter,
     contractFilter,
     contractPageSize,
     contractSort,
@@ -811,6 +826,13 @@ const FieldManagementLoaded = ({
       )}
       {scope.contractList && contractListHeader}
       {scope.contractList && (
+        <FieldContractTypeFilters
+          metadata={metadata}
+          value={contractTypeFilter}
+          onChange={setContractTypeFilter}
+        />
+      )}
+      {scope.contractList && (
         <FieldContractListControls
           search={search}
           onSearchChange={setSearch}
@@ -839,8 +861,9 @@ const FieldManagementLoaded = ({
               <span>
                 표시할 계약이 없습니다.
                 <br />
-                기업에 연결된 계약을 등록하면 목표와 현장 기록을 관리할 수
-                있습니다.
+                {scope.contractList
+                  ? '계약 유형이나 검색 조건을 변경해 보세요.'
+                  : '기업에 연결된 계약을 등록하면 목표와 현장 기록을 관리할 수 있습니다.'}
               </span>
             </StyledFieldEmptyState>
           ) : (
