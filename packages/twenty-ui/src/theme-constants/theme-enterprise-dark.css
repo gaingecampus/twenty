@@ -244,7 +244,7 @@ html.dark[data-ui-theme='enterprise'] {
   --t-toolbar-chip-bg: #1c1f2a;
   --t-toolbar-chip-border: 1px solid #2a2f3c;
   --t-toolbar-chip-hover-bg: #2a2f3c;
-  --t-toolbar-chip-active-bg: rgb(46 91 255 / 0.2);
+  --t-toolbar-chip-active-bg: var(--t-background-transparent-blue);
   --t-toolbar-chip-font-size: 13px;
   --t-toolbar-chip-font-weight: 500;
   --t-toolbar-chip-gap: 8px;

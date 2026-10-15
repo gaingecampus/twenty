@@ -325,7 +325,7 @@ html.light[data-ui-theme='enterprise'] {
   --t-toolbar-chip-bg: #ffffff;
   --t-toolbar-chip-border: 1px solid #dde1ea;
   --t-toolbar-chip-hover-bg: #f8f8fb;
-  --t-toolbar-chip-active-bg: #eef2ff;
+  --t-toolbar-chip-active-bg: var(--t-background-transparent-blue);
   --t-toolbar-chip-font-size: 13px;
   --t-toolbar-chip-font-weight: 500;
   --t-toolbar-chip-gap: 8px;

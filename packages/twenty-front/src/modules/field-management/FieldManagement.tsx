@@ -2,6 +2,7 @@ import { FieldVisitTextSection } from './FieldVisitTextSection';
 import { FieldContractTypeFilters } from './FieldContractTypeFilters';
 import {
   matchesContractTypeFilter,
+  DEFAULT_CONTRACT_TYPE_FILTERS,
   type ContractTypeFilter,
 } from './contractTypeFilter';
 import { FieldContractKind } from './FieldContractKind';
@@ -219,10 +220,9 @@ const FieldManagementLoaded = ({
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('ACTIVE');
   const [contractPageSize, setContractPageSize] = useState(10);
-  const [contractTypeFilter, setContractTypeFilter] = useState<ContractTypeFilter>({
-    field: 'onboardingType',
-    value: 'CONSULTING',
-  });
+  const [contractTypeFilter, setContractTypeFilter] = useState<ContractTypeFilter>(
+    DEFAULT_CONTRACT_TYPE_FILTERS,
+  );
   const [contractSort, setContractSort] =
     useState<FieldContractSort>('default');
   const [needsOnly, setNeedsOnly] = useState(false);
@@ -818,13 +818,6 @@ const FieldManagementLoaded = ({
       )}
       {scope.contractList && contractListHeader}
       {scope.contractList && (
-        <FieldContractTypeFilters
-          metadata={metadata}
-          value={contractTypeFilter}
-          onChange={setContractTypeFilter}
-        />
-      )}
-      {scope.contractList && (
         <FieldContractListControls
           search={search}
           onSearchChange={setSearch}
@@ -834,6 +827,13 @@ const FieldManagementLoaded = ({
           sort={contractSort}
           onPageSizeChange={setContractPageSize}
           onSortChange={setContractSort}
+        />
+      )}
+      {scope.contractList && (
+        <FieldContractTypeFilters
+          metadata={metadata}
+          value={contractTypeFilter}
+          onChange={setContractTypeFilter}
         />
       )}
       <StyledFieldRecordSection

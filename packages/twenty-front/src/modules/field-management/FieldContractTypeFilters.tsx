@@ -1,6 +1,19 @@
-import { type ContractTypeFilter } from './contractTypeFilter';
-import { StyledMyFieldFilters } from './myFieldsStyled';
+import {
+  type ContractTypeFilter,
+  isContractTypeFilterSelected,
+  toggleContractTypeFilter,
+} from './contractTypeFilter';
+import { styled } from '@linaria/react';
+import { themeCssVariables } from 'twenty-ui/theme-constants';
+import { StyledHeaderDropdownButton } from '@/ui/layout/dropdown/components/StyledHeaderDropdownButton';
+
 import { type useFieldManagementMetadata } from './useFieldManagementData';
+
+const StyledFilters = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: ${themeCssVariables.spacing[2]};
+`;
 
 type FieldContractTypeFiltersProps = {
   metadata: ReturnType<typeof useFieldManagementMetadata>;
@@ -38,28 +51,28 @@ export const FieldContractTypeFilters = ({
       : []),
   ];
   return (
-    <StyledMyFieldFilters role="group" aria-label="계약 유형 필터">
-      <div>
-        <button
+    <StyledFilters role="group" aria-label="계약 유형 필터">
+      <StyledHeaderDropdownButton
+        type="button"
+        isActive={value === null}
+        isUnfolded={value === null}
+        aria-pressed={value === null}
+        onClick={() => onChange(null)}
+      >
+        전체
+      </StyledHeaderDropdownButton>
+      {options.map(({ label, filter }) => (
+        <StyledHeaderDropdownButton
+          key={`${filter.field}-${filter.value}`}
           type="button"
-          aria-pressed={value === null}
-          onClick={() => onChange(null)}
+          isActive={isContractTypeFilterSelected(value, filter)}
+          isUnfolded={isContractTypeFilterSelected(value, filter)}
+          aria-pressed={isContractTypeFilterSelected(value, filter)}
+          onClick={() => onChange(toggleContractTypeFilter(value, filter))}
         >
-          전체
-        </button>
-        {options.map(({ label, filter }) => (
-          <button
-            key={`${filter.field}-${filter.value}`}
-            type="button"
-            aria-pressed={
-              value?.field === filter.field && value.value === filter.value
-            }
-            onClick={() => onChange(filter)}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
-    </StyledMyFieldFilters>
+          {label}
+        </StyledHeaderDropdownButton>
+      ))}
+    </StyledFilters>
   );
 };
