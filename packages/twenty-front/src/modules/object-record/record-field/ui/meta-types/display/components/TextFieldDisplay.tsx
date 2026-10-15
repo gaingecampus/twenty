@@ -1,6 +1,10 @@
 import { useTextFieldDisplay } from '@/object-record/record-field/ui/meta-types/hooks/useTextFieldDisplay';
 import { isFieldText } from '@/object-record/record-field/ui/types/guards/isFieldText';
 import { TextDisplay } from '@/ui/field/display/components/TextDisplay';
+import {
+  formatOnboardingMonth,
+  isOnboardingMonthField,
+} from '@/field-management/onboardingMonth';
 
 export const TextFieldDisplay = () => {
   const { fieldValue, fieldDefinition, displayedMaxRows } =
@@ -15,6 +19,13 @@ export const TextFieldDisplay = () => {
     : displayedMaxRowsFromSettings;
 
   return (
-    <TextDisplay text={fieldValue} displayedMaxRows={displayMaxRowCalculated} />
+    <TextDisplay
+      text={
+        isOnboardingMonthField(fieldDefinition.metadata)
+          ? formatOnboardingMonth(fieldValue)
+          : fieldValue
+      }
+      displayedMaxRows={displayMaxRowCalculated}
+    />
   );
 };

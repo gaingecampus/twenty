@@ -1,4 +1,6 @@
 import { TextAreaInput } from '@/ui/field/input/components/TextAreaInput';
+import { isOnboardingMonthField } from '@/field-management/onboardingMonth';
+import { OnboardingMonthFieldInput } from '@/field-management/OnboardingMonthFieldInput';
 
 import { useTextField } from '@/object-record/record-field/ui/meta-types/hooks/useTextField';
 
@@ -50,6 +52,15 @@ export const TextFieldInput = () => {
   const handleChange = (newText: string) => {
     setDraftValue(turnIntoUndefinedIfWhitespacesOnly(newText));
   };
+
+  if (isOnboardingMonthField(fieldDefinition.metadata)) {
+    return (
+      <OnboardingMonthFieldInput
+        value={draftValue ?? ''}
+        onChange={handleChange}
+      />
+    );
+  }
 
   return (
     <FieldInputContainer>

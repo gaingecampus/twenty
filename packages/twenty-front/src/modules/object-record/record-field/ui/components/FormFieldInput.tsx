@@ -20,6 +20,8 @@ import { FormRelationToOneFieldInput } from '@/object-record/record-field/ui/for
 import { FormRichTextFieldInput } from '@/object-record/record-field/ui/form-types/components/FormRichTextFieldInput';
 import { FormSelectFieldInput } from '@/object-record/record-field/ui/form-types/components/FormSelectFieldInput';
 import { FormTextFieldInput } from '@/object-record/record-field/ui/form-types/components/FormTextFieldInput';
+import { isOnboardingMonthField } from '@/field-management/onboardingMonth';
+import { OnboardingMonthPicker } from '@/field-management/OnboardingMonthPicker';
 import { FormUuidFieldInput } from '@/object-record/record-field/ui/form-types/components/FormUuidFieldInput';
 import { type VariablePickerComponent } from '@/object-record/record-field/ui/form-types/types/VariablePickerComponent';
 import { type FieldDefinition } from '@/object-record/record-field/ui/types/FieldDefinition';
@@ -104,6 +106,15 @@ export const FormFieldInput = ({
       VariablePicker={VariablePicker}
       readonly={readonly}
     />
+  ) : isFieldText(field) && isOnboardingMonthField(field.metadata) ? (
+    <div>
+      <div>{field.label}</div>
+      <OnboardingMonthPicker
+        value={typeof defaultValue === 'string' ? defaultValue : ''}
+        onChange={onChange}
+        readonly={readonly}
+      />
+    </div>
   ) : isFieldText(field) ? (
     <FormTextFieldInput
       label={field.label}
