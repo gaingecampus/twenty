@@ -117,10 +117,10 @@ export const WidgetCardShell = ({
             isResizing={isResizing}
             isReorderEnabled={isReorderEnabled}
             isDeletingWidgetEnabled={isDeletingWidgetEnabled}
-            title={isMessageListMembers ? t`세그먼트` : widget.title}
+            title={isMessageListMembers ? t`수신자 목록` : widget.title}
             titleHelp={
               isMessageListMembers
-                ? t`이메일이 없거나 수신을 거부한 고객은 캠페인 발송 시 제외됩니다.`
+                ? t`이메일이 없거나 수신을 거부한 고객은 단체 발송 시 제외됩니다.`
                 : undefined
             }
             onRemove={onRemove}

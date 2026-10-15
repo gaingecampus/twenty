@@ -65,7 +65,7 @@ export const MessageListMembers = ({ listId }: { listId: string }) => {
       await refetch();
     } catch {
       enqueueErrorSnackBar({
-        message: t`세그먼트를 변경하지 못했습니다. 다시 시도하세요.`,
+        message: t`수신자 목록을 변경하지 못했습니다. 다시 시도하세요.`,
       });
     } finally {
       setBusy(false);

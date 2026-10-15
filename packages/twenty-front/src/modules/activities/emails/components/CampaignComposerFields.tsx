@@ -135,7 +135,7 @@ export const CampaignComposerFields = ({
   const handleCreateList = async (searchInput?: string) => {
     const listName = searchInput?.trim() ?? '';
     if (!listName) {
-      enqueueErrorSnackBar({ message: t`세그먼트 이름을 먼저 입력하세요.` });
+      enqueueErrorSnackBar({ message: t`수신자 목록 이름을 먼저 입력하세요.` });
       return;
     }
     const createdList = await createMessageList({ name: listName });
@@ -204,7 +204,7 @@ export const CampaignComposerFields = ({
         help={
           senderOptions.length === 0
             ? t`선택 가능한 이메일 발신 계정이 없습니다. 이메일 설정에서 계정을 연결하고 접근 권한을 확인하세요.`
-            : t`이 캠페인을 보낼 연동 이메일 계정을 선택하세요.`
+            : t`이 단체 발송을 보낼 연동 이메일 계정을 선택하세요.`
         }
       />
       <Select
@@ -237,11 +237,11 @@ export const CampaignComposerFields = ({
         </StyledHint>
       )}
       <CampaignFieldLabel
-        label={t`세그먼트`}
+        label={t`수신자 목록`}
         help={
           isDefined(audiencePreview)
             ? buildAudienceHint(audiencePreview)
-            : t`발송할 고객이 포함된 세그먼트를 선택하세요.`
+            : t`발송할 고객이 포함된 수신자 목록을 선택하세요.`
         }
       />
       <FormSingleRecordPicker
@@ -252,7 +252,7 @@ export const CampaignComposerFields = ({
       />
       <StyledHint>
         <a href="/objects/messageLists" target="_blank" rel="noreferrer">
-          {t`세그먼트 관리·포함된 고객 확인 (새 탭)`}
+          {t`수신자 목록 관리·포함된 고객 확인 (새 탭)`}
         </a>
       </StyledHint>
       <CampaignFieldLabel

@@ -3451,12 +3451,12 @@ msgstr "국가 번호"
 #. js-lingui-id: 06mPlO
 #: src/modules/activities/emails/hooks/useSendMessageCampaign.ts
 msgid "Campaign queued to {queuedCount} recipient(s)"
-msgstr "{queuedCount}명에게 보낼 캠페인을 발송 대기열에 등록했습니다"
+msgstr "{queuedCount}명에게 보낼 단체 발송을 발송 대기열에 등록했습니다"
 
 #. js-lingui-id: 6nG/xd
 #: src/modules/activities/emails/hooks/useSendMessageCampaign.ts
 msgid "Campaign queued to {queuedCount} recipient(s), {skippedCount} skipped"
-msgstr "{queuedCount}명에게 보낼 캠페인을 발송 대기열에 등록했습니다 ({skippedCount}명 제외)"
+msgstr "{queuedCount}명에게 보낼 단체 발송을 발송 대기열에 등록했습니다 ({skippedCount}명 제외)"
 
 #. js-lingui-id: msssZq
 #: src/modules/settings/data-model/objects/forms/components/SettingsDataModelObjectAboutForm.tsx
@@ -8030,7 +8030,7 @@ msgstr "워크스페이스 지침을 저장하지 못했습니다"
 #: src/modules/activities/emails/hooks/useSendMessageCampaign.ts
 #: src/modules/activities/emails/hooks/useSendMessageCampaign.ts
 msgid "Failed to send campaign"
-msgstr "캠페인 발송에 실패했습니다"
+msgstr "단체 발송에 실패했습니다"
 
 #. js-lingui-id: Lo/GQ5
 #: src/modules/activities/emails/hooks/useSendEmail.ts
@@ -11754,7 +11754,7 @@ msgstr "새 승인된 액세스 도메인"
 #. js-lingui-id: yGfI61
 #: src/modules/side-panel/hooks/useOpenCampaignComposerInSidePanel.ts
 msgid "New Campaign"
-msgstr "새 캠페인"
+msgstr "새 단체 발송"
 
 #. js-lingui-id: hIQkLb
 #: src/modules/ai/components/AiChatThreadsList.tsx
@@ -16018,7 +16018,7 @@ msgstr "팀에 초대 이메일 보내기"
 #. js-lingui-id: WRLt0i
 #: src/modules/side-panel/pages/compose-campaign/components/SidePanelCampaignComposerPage.tsx
 msgid "Send campaign"
-msgstr "캠페인 발송"
+msgstr "단체 발송"
 
 #. js-lingui-id: 65dxv8
 #: src/modules/workflow/workflow-run/observability/WorkflowRunStepLogsEmailDetail.tsx
@@ -20579,7 +20579,7 @@ msgstr "기본 닫힘"
 
 #. js-lingui-id: E4VMqv
 msgid "Edit scheduled campaign"
-msgstr "예약 캠페인 수정"
+msgstr "예약 단체 발송 수정"
 
 #. js-lingui-id: Vw377q
 msgid "This campaign is no longer scheduled. Refresh the list."
@@ -20587,15 +20587,15 @@ msgstr "예약 상태가 변경되었습니다. 목록을 새로 고침하세요
 
 #. js-lingui-id: eea7Jm
 msgid "Campaign schedule cancelled"
-msgstr "캠페인 예약을 취소했습니다"
+msgstr "단체 발송 예약을 취소했습니다"
 
 #. js-lingui-id: DeHIUE
 msgid "Failed to cancel campaign schedule"
-msgstr "캠페인 예약 취소에 실패했습니다"
+msgstr "단체 발송 예약 취소에 실패했습니다"
 
 #. js-lingui-id: Ww/GVZ
 msgid "Campaign scheduled successfully"
-msgstr "캠페인 예약을 저장했습니다"
+msgstr "단체 발송 예약을 저장했습니다"
 
 #. js-lingui-id: Zz1HrR
 msgid "Send time"
@@ -20631,11 +20631,11 @@ msgstr "예약 변경 저장"
 
 #. js-lingui-id: MGaW9O
 msgid "Schedule campaign"
-msgstr "캠페인 예약"
+msgstr "단체 발송 예약"
 
 #. js-lingui-id: oRJtCM
 msgid "Campaigns"
-msgstr "캠페인"
+msgstr "단체 발송"
 
 #. js-lingui-id: 5UPtxC
 #: src/modules/object-record/record-index/hooks/useGuardRecordIndexInlineEdit.ts

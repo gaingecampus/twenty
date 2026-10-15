@@ -25,6 +25,19 @@ describe('getCommandMenuItemLabel', () => {
     expect(getCommandMenuItemLabel('Go to 구성원')).toBe('구성원(으)로 이동');
   });
 
+  it.each([
+    ['Create Campaign', '새 단체 발송'],
+    ['새 캠페인', '새 단체 발송'],
+    ['Compose Campaign', '단체 발송 작성'],
+    ['캠페인 작성', '단체 발송 작성'],
+    ['Campaign', '단체 발송'],
+    ['캠페인', '단체 발송'],
+  ])('normalizes legacy button label %s', (label, expected) => {
+    i18n.load('ko-KR', koMessages);
+    i18n.activate('ko-KR');
+    expect(getCommandMenuItemLabel(label)).toBe(expected);
+  });
+
   it('should not rewrite Go to Settings command labels', () => {
     i18n.load('ko-KR', koMessages);
     i18n.activate('ko-KR');

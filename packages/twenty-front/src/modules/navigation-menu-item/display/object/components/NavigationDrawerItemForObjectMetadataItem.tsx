@@ -141,7 +141,7 @@ export const NavigationDrawerItemForObjectMetadataItem = ({
       : !isRecord &&
           objectMetadataItem.nameSingular === 'messageList' &&
           ['Lists', '목록', '수신자 목록'].includes(primaryLabel)
-        ? t`세그먼트`
+        ? t`수신자 목록`
         : primaryLabel;
 
   const label = needsInaccessibleRecordPlaceholder

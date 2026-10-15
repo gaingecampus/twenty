@@ -157,7 +157,7 @@ export const MessageListAddCustomersModal = ({
       }
       await onAdded?.();
       enqueueSuccessSnackBar({
-        message: t`고객 ${added}명을 세그먼트에 추가했습니다.`,
+        message: t`고객 ${added}명을 수신자 목록에 추가했습니다.`,
       });
       onClose();
     } catch {
@@ -183,12 +183,12 @@ export const MessageListAddCustomersModal = ({
       shouldCloseModalOnClickOutsideOrEscape={!busy}
       renderInDocumentBody
     >
-      <ModalHeader hasBorderBottom>{t`세그먼트에 고객 추가`}</ModalHeader>
+      <ModalHeader hasBorderBottom>{t`수신자 목록에 고객 추가`}</ModalHeader>
       <ModalContent contentPadding={4} gap={3}>
         {!initialListId && (
-          <section aria-label={t`추가할 세그먼트`}>
+          <section aria-label={t`추가할 수신자 목록`}>
             <TextInput
-              placeholder={t`세그먼트 검색`}
+              placeholder={t`수신자 목록 검색`}
               value={listSearch}
               onChange={setListSearch}
               disabled={busy}
@@ -207,12 +207,12 @@ export const MessageListAddCustomersModal = ({
                 </StyledListOption>
               ))}
             </StyledScroll>
-            {loadingLists && <p>{t`세그먼트를 불러오는 중입니다.`}</p>}
+            {loadingLists && <p>{t`수신자 목록을 불러오는 중입니다.`}</p>}
             {listsError && (
-              <p role="alert">{t`세그먼트를 불러오지 못했습니다.`}</p>
+              <p role="alert">{t`수신자 목록을 불러오지 못했습니다.`}</p>
             )}
             {!loadingLists && !listsError && lists.length === 0 && (
-              <p>{t`선택할 세그먼트가 없습니다.`}</p>
+              <p>{t`선택할 수신자 목록이 없습니다.`}</p>
             )}
             {moreLists && (
               <Button
