@@ -47,7 +47,7 @@ export const SidePanelTopBarRightCornerIcon = () => {
     <StyledIconButtonContainer>
       <IconButton
         Icon={IconEdit}
-        size="medium"
+        size="small"
         variant="tertiary"
         onClick={() => switchToNewChat()}
         ariaLabel={t`New conversation`}
