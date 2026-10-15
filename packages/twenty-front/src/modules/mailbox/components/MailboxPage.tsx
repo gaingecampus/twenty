@@ -1,6 +1,6 @@
 import { useMailboxChannels } from '@/mailbox/hooks/useMailboxChannels';
 import { useMailboxMessages } from '@/mailbox/hooks/useMailboxMessages';
-import { useMyMessageFolders } from '@/settings/accounts/hooks/useMyMessageFolders';
+import { useMailboxFolders } from '@/mailbox/hooks/useMailboxFolders';
 import { PageContainer } from '@/ui/layout/page/components/PageContainer';
 import { styled } from '@linaria/react';
 import { useState } from 'react';
@@ -148,7 +148,7 @@ const MailboxContent = ({ channelId }: { channelId: string }) => {
     messageFolders,
     loading: foldersLoading,
     error: foldersError,
-  } = useMyMessageFolders(channelId);
+  } = useMailboxFolders(channelId);
   const [folderId, setFolderId] = useState<string | null>(null);
   const [page, setPage] = useState(0);
   const [messageId, setMessageId] = useState<string | null>(null);
@@ -187,7 +187,7 @@ const MailboxContent = ({ channelId }: { channelId: string }) => {
             key={item.id}
             aria-current={folderId === item.id}
             onClick={() => selectFolder(item.id)}
-            title={item.name}
+            title={item.name ?? '이름 없는 폴더'}
           >
             <IconFolder size={16} />
             <span>{item.name || '이름 없는 폴더'}</span>

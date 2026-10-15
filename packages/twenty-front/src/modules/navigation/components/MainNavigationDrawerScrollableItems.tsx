@@ -1,4 +1,3 @@
-import { MailboxNavigationItem } from '@/mailbox/components/MailboxNavigationItem';
 import { StatusBoardNavigationItem } from '@/status-board/components/StatusBoardNavigationItem';
 import { MyFieldsNavigationItem } from '@/field-management/FieldManagement';
 import { NavigationMenuItemSection } from '@/navigation-menu-item/display/sections/components/NavigationMenuItemSection';
@@ -59,7 +58,6 @@ export const MainNavigationDrawerScrollableItems = () => {
           <StatusBoardNavigationItem />
           <MyFieldsNavigationItem />
         </NavigationMenuItemSection>
-        <MailboxNavigationItem />
         <WorkspaceSectionDispatcher />
         <TrashNavigationDrawerItem />
       </Suspense>

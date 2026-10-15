@@ -1,4 +1,5 @@
 import { styled } from '@linaria/react';
+import { MailboxNavigationItem } from '@/mailbox/components/MailboxNavigationItem';
 import React, { lazy, Suspense, useContext } from 'react';
 import { isDefined } from 'twenty-shared/utils';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
@@ -139,6 +140,7 @@ export const WorkspaceSectionContainer = ({
         </StyledWorkspaceSectionContentGapOffset>
       )}
     >
+      <MailboxNavigationItem />
       {isLayoutCustomizationModeEnabled ? (
         <Suspense
           fallback={
