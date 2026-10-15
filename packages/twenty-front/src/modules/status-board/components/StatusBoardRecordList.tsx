@@ -1,3 +1,5 @@
+import { useStatusBoardAllRecords } from '@/status-board/hooks/useStatusBoardAllRecords';
+import { getStatusBoardRecordMemberIds } from '@/status-board/utils/getStatusBoardRecordMemberIds';
 import { type DashboardTone } from '@/ui/layout/dashboard/components/dashboardStyled';
 import { createPortal } from 'react-dom';
 import { RecordPaginationBar } from '@/object-record/record-index/components/RecordIndexPaginationBar';
@@ -46,7 +48,13 @@ import { getAppPath } from 'twenty-shared/utils';
 
 export type StatusBoardRecordMembers = {
   objectNameSingular: string;
-  memberIdsByRecordId: Record<string, string[]>;
+  memberIdsByRecordId?: Partial<Record<string, string[]>>;
+  directFieldNames?: string[];
+  sharedRelation?: {
+    objectNameSingular: string;
+    sourceKey: string;
+    targetKey: string;
+  };
 };
 
 type StatusBoardRecordListProps = {
@@ -148,6 +156,13 @@ export const StatusBoardRecordRowContent = ({
             <StyledStatusBoardRowCaption>{caption}</StyledStatusBoardRowCaption>
           )}
         </StyledStatusBoardRowBody>
+        {members !== undefined && memberObjectNameSingular !== undefined && (
+          <StatusBoardConsultantAvatars
+            showNames
+            members={members}
+            objectNameSingular={memberObjectNameSingular}
+          />
+        )}
         {objectNameSingular === 'company' ? (
           <StatusBoardCompanyActivity companyId={record.id} />
         ) : (
@@ -202,13 +217,35 @@ export const StatusBoardRecordList = ({
     recordMembers?.objectNameSingular ?? objectNameSingular;
   const { objectMetadataItem: memberObjectMetadataItem } =
     useObjectMetadataItem({ objectNameSingular: memberObjectNameSingular });
-  const memberIds = [
-    ...new Set(
-      records.flatMap(
-        (record) => recordMembers?.memberIdsByRecordId[record.id] ?? [],
-      ),
-    ),
-  ];
+  const sharedRelation = recordMembers?.sharedRelation;
+  const { records: sharedLinks } = useStatusBoardAllRecords({
+    objectNameSingular:
+      sharedRelation?.objectNameSingular ?? objectNameSingular,
+    skip: !sharedRelation || records.length === 0,
+    filter: sharedRelation
+      ? {
+          [sharedRelation.sourceKey]: {
+            in: records.map((record) => record.id),
+          },
+        }
+      : undefined,
+    limit: 200,
+    recordGqlFields: sharedRelation
+      ? {
+          id: true,
+          [sharedRelation.sourceKey]: true,
+          [sharedRelation.targetKey]: true,
+        }
+      : { id: true },
+  });
+  const memberIdsByRecordId = getStatusBoardRecordMemberIds({
+    records,
+    directFieldNames: recordMembers?.directFieldNames ?? [],
+    existing: recordMembers?.memberIdsByRecordId,
+    sharedLinks,
+    sharedRelation,
+  });
+  const memberIds = [...new Set(Object.values(memberIdsByRecordId).flat())];
   const { records: memberRecords } = useStatusBoardFindManyRecords({
     objectNameSingular: memberObjectNameSingular,
     filter: { id: { in: memberIds } },
@@ -221,7 +258,7 @@ export const StatusBoardRecordList = ({
     skip: memberIds.length === 0,
   });
   const getRecordMembers = (recordId: string) => {
-    const ids = recordMembers?.memberIdsByRecordId[recordId];
+    const ids = memberIdsByRecordId[recordId];
     return ids?.flatMap((id) => {
       const member = memberRecords.find((candidate) => candidate.id === id);
       return member ? [member] : [];

@@ -7,7 +7,7 @@ import {
 } from '@/ui/layout/dashboard/components/dashboardStyled';
 import { StatusBoardOnboardingKpi } from '@/status-board/components/StatusBoardOnboardingKpi';
 import { type StatusBoardSheetState } from '@/status-board/components/StatusBoardSheet';
-import { StatusBoardLinkedCountKpi } from '@/status-board/components/StatusBoardLinkedCountKpi';
+import { StatusBoardAssignedCountKpi } from '@/status-board/components/StatusBoardAssignedCountKpi';
 
 import { STATUS_BOARD_FIELD } from '@/status-board/constants/StatusBoardFieldNames';
 import {
@@ -39,7 +39,7 @@ export const StatusBoardNowSection = ({
       ? undefined
       : buildStatusBoardOpenOpportunityFilter({
           opportunityObjectMetadataItem,
-          memberIds,
+          memberIds: undefined,
         });
   const endingFilter =
     onboardingObjectMetadataItem === undefined ||
@@ -50,7 +50,7 @@ export const StatusBoardNowSection = ({
       ? undefined
       : buildStatusBoardEndingOnboardingFilter({
           onboardingObjectMetadataItem,
-          memberIds,
+          memberIds: undefined,
           monthStartDate,
           monthEndDate,
         });
@@ -71,9 +71,12 @@ export const StatusBoardNowSection = ({
       </StyledDashboardSectionHeader>
       <StyledDashboardKpiGrid columns={5}>
         {opportunityObjectMetadataItem !== undefined && (
-          <StatusBoardLinkedCountKpi
+          <StatusBoardAssignedCountKpi
             onOpenSheet={onOpenSheet}
             objectMetadataItem={opportunityObjectMetadataItem}
+            memberIds={memberIds}
+            memberFieldNames={['assignee', 'assigneeId']}
+            sharedFieldName="gongdongDamdangja"
             filter={openFilter}
             label="온고잉 리드수"
             tone="blue"
@@ -107,9 +110,17 @@ export const StatusBoardNowSection = ({
         )}
         {onboardingObjectMetadataItem !== undefined &&
           endingFilter !== undefined && (
-            <StatusBoardLinkedCountKpi
+            <StatusBoardAssignedCountKpi
               onOpenSheet={onOpenSheet}
               objectMetadataItem={onboardingObjectMetadataItem}
+              memberIds={memberIds}
+              memberFieldNames={[
+                'leadConsultant',
+                'leadConsultantId',
+                'executionConsultant',
+                'executionConsultantId',
+              ]}
+              sharedFieldName="gongdongSilhaengKeonseolteonteu"
               filter={endingFilter}
               label="이번 달 종료"
               tone="orange"

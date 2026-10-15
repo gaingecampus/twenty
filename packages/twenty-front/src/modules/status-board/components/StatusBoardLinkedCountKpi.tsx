@@ -15,9 +15,11 @@ export const StatusBoardLinkedCountKpi = ({
   tone,
   withSum,
   onOpenSheet,
+  recordMembers,
 }: {
   objectMetadataItem: EnrichedObjectMetadataItem;
   filter?: RecordGqlOperationFilter;
+  recordMembers?: StatusBoardSheetState['recordMembers'];
   label: string;
   tone?: DashboardTone;
   withSum?: boolean;
@@ -36,6 +38,7 @@ export const StatusBoardLinkedCountKpi = ({
       objectNameSingular={objectMetadataItem.nameSingular}
       onClick={() =>
         onOpenSheet({
+          recordMembers,
           title: label,
           kpiLabel: label,
           tone,
