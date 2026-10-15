@@ -1,5 +1,6 @@
 import { AppMenuItem } from '@/applications/components/AppMenuItem';
 import { useIsThirdPartyApplication } from '@/applications/hooks/useIsThirdPartyApplication';
+import { isDestructiveCommandMenuItem } from '@/command-menu-item/utils/groupCommandMenuItemsByPurpose';
 import { CommandMenuContext } from '@/command-menu-item/contexts/CommandMenuContext';
 import { CommandListItemLoader } from '@/command-menu-item/display/components/CommandListItemLoader';
 import { interpolateCommandMenuItemFields } from '@/command-menu-item/display/utils/interpolateCommandMenuItemFields';
@@ -19,10 +20,7 @@ import { assertUnreachable, isDefined } from 'twenty-shared/utils';
 import { useIcons } from 'twenty-ui/icon';
 import { Loader } from 'twenty-ui/feedback';
 import { MenuItem } from 'twenty-ui/navigation';
-import {
-  EngineComponentKey,
-  type CommandMenuItemFieldsFragment,
-} from '~/generated-metadata/graphql';
+import { type CommandMenuItemFieldsFragment } from '~/generated-metadata/graphql';
 
 const StyledPreviewWrapper = styled.div`
   cursor: not-allowed;
@@ -153,11 +151,7 @@ const CommandMenuItemSelectableRenderer = ({
     return (
       <SelectableListItem itemId={item.id} onEnter={onItemClick}>
         <CommandMenuItem
-          accent={
-            item.engineComponentKey === EngineComponentKey.DELETE_RECORDS
-              ? 'danger'
-              : 'default'
-          }
+          accent={isDestructiveCommandMenuItem(item) ? 'danger' : 'default'}
           id={item.id}
           Icon={Icon}
           label={getCommandMenuItemLabel(label)}
@@ -173,11 +167,7 @@ const CommandMenuItemSelectableRenderer = ({
   return (
     <SelectableListItem itemId={item.id} onEnter={onItemClick}>
       <MenuItem
-        accent={
-          item.engineComponentKey === EngineComponentKey.DELETE_RECORDS
-            ? 'danger'
-            : 'default'
-        }
+        accent={isDestructiveCommandMenuItem(item) ? 'danger' : 'default'}
         focused={isSelectedItemId}
         LeftIcon={Icon}
         onClick={onItemClick}
