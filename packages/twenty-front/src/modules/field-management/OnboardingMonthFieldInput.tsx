@@ -22,6 +22,7 @@ export const OnboardingMonthFieldInput = ({
     inputValue: value,
     focusId: instanceId,
     onEscape: () => events.onEscape?.({ newValue: value, skipPersist: true }),
+    onEnter: () => (events.onSubmit ?? events.onEnter)?.({ newValue: value }),
     onTab: () => events.onTab?.({ newValue: value }),
     onShiftTab: () => events.onShiftTab?.({ newValue: value }),
     onClickOutside: (event) =>
@@ -31,10 +32,10 @@ export const OnboardingMonthFieldInput = ({
     <div ref={ref}>
       <OnboardingMonthPicker
         value={value}
-        onChange={(newValue) => {
-          onChange(newValue);
-          (events.onSubmit ?? events.onEnter)?.({ newValue });
-        }}
+        onChange={onChange}
+        onConfirm={() =>
+          (events.onSubmit ?? events.onEnter)?.({ newValue: value })
+        }
       />
     </div>
   );
