@@ -896,7 +896,8 @@ export const StyledFieldPanel = styled.div`
       line-height: 1.5;
       margin: 0;
     }
-    [data-contract-status] {
+    [data-contract-status],
+    [data-contract-kind] {
       background: ${theme.background.tertiary};
       border-radius: 4px;
       color: ${theme.font.color.secondary};

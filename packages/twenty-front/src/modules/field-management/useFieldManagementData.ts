@@ -20,6 +20,7 @@ export const useFieldManagementMetadata = () => {
   };
 };
 export const useFieldManagementData = () => {
+  const metadata = useFieldManagementMetadata();
   const contracts = useAll({
     objectNameSingular: 'onboarding',
     recordGqlFields: {
@@ -27,6 +28,15 @@ export const useFieldManagementData = () => {
       name: true,
       company: { id: true, name: true },
       onboardingStatus: true,
+      ...Object.fromEntries(
+        ['onboardingType', 'visitCadence']
+          .filter((name) =>
+            metadata.contract?.readableFields.some(
+              (field) => field.name === name,
+            ),
+          )
+          .map((name) => [name, true]),
+      ),
       contractStartDate: true,
       contractEndDate: true,
       executionConsultantId: true,

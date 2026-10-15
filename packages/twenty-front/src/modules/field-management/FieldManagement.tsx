@@ -1,3 +1,4 @@
+import { FieldContractKind } from './FieldContractKind';
 import { refreshFieldSummary } from './fieldSummaryRequest';
 import { FieldContractSummary } from './FieldContractSummary';
 import { FieldVisitHeading } from './FieldVisitHeading';
@@ -926,6 +927,7 @@ const FieldManagementLoaded = ({
                                 ? '계약 종료'
                                 : '상태 미등록'}
                         </span>
+                        <FieldContractKind contract={c} />
                         {contractDateLabel(c.contractStartDate) ||
                           '시작일 미정'}{' '}
                         -{' '}
