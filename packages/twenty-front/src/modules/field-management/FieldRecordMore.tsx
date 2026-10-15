@@ -7,19 +7,20 @@ const StyledMore = styled.details`
   summary {
     align-items: center;
     background: transparent;
-    border-radius: 8px;
+    border-radius: var(--t-border-radius-sm, 6px);
+    box-sizing: border-box;
     cursor: pointer;
     display: flex;
-    height: 36px;
+    height: var(--t-control-height-md, 32px);
     justify-content: center;
     list-style: none;
-    width: 36px;
+    width: var(--t-control-height-md, 32px);
   }
   summary::-webkit-details-marker {
     display: none;
   }
   summary:hover {
-    background: ${theme.background.tertiary};
+    background: var(--t-icon-button-hover-bg, ${theme.background.tertiary});
   }
   > div {
     background: ${theme.background.primary};
