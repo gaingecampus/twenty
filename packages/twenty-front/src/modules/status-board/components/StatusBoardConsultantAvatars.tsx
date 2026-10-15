@@ -41,7 +41,7 @@ export const StatusBoardConsultantAvatars = ({
   return (
     <Container aria-label={members.map(getStatusBoardRecordLabel).join(', ')}>
       {members.map((member) => (
-        <StyledMember key={member.id} title={getStatusBoardRecordLabel(member)}>
+        <StyledMember key={member.id}>
           <StatusBoardRecordAvatar
             record={member}
             objectNameSingular={objectNameSingular}
