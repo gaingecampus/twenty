@@ -180,7 +180,7 @@ export const SettingsWorkspaceMembersTeamTab = () => {
       <H2Title
         title={
           isDefined(membersCount)
-            ? t`Manage Members · ${membersCount}`
+            ? `${t`Manage Members`} · ${membersCount}`
             : t`Manage Members`
         }
         description={t`Manage the members of your workspace here`}
