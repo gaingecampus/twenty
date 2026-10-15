@@ -153,6 +153,11 @@ const CommandMenuItemSelectableRenderer = ({
     return (
       <SelectableListItem itemId={item.id} onEnter={onItemClick}>
         <CommandMenuItem
+          accent={
+            item.engineComponentKey === EngineComponentKey.DELETE_RECORDS
+              ? 'danger'
+              : 'default'
+          }
           id={item.id}
           Icon={Icon}
           label={getCommandMenuItemLabel(label)}

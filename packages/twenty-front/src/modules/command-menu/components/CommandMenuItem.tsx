@@ -1,5 +1,5 @@
 import { isNonEmptyString } from '@sniptt/guards';
-import { type ReactNode } from 'react';
+import { type ComponentProps, type ReactNode } from 'react';
 import { IconArrowUpRight, type IconComponent } from 'twenty-ui/icon';
 import { MenuItem } from 'twenty-ui/navigation';
 
@@ -10,6 +10,7 @@ import { type Nullable } from 'twenty-shared/types';
 import { isDefined } from 'twenty-shared/utils';
 
 export type CommandMenuItemProps = {
+  accent?: ComponentProps<typeof MenuItem>['accent'];
   label: string;
   description?: string;
   to?: string;
@@ -26,6 +27,7 @@ export type CommandMenuItemProps = {
 };
 
 export const CommandMenuItem = ({
+  accent = 'default',
   label,
   description,
   contextualTextPosition = 'left',
@@ -53,6 +55,7 @@ export const CommandMenuItem = ({
 
   return (
     <MenuItem
+      accent={accent}
       withIconContainer={!isDefined(LeftComponent)}
       LeftIcon={isDefined(LeftComponent) ? undefined : Icon}
       LeftComponent={LeftComponent}
