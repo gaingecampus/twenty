@@ -10,7 +10,7 @@ import { useModal } from '@/ui/layout/modal/hooks/useModal';
 import { styled } from '@linaria/react';
 import { t } from '@lingui/core/macro';
 import { useEffect, useId, useState } from 'react';
-import { Button } from 'twenty-ui/input';
+import { Button, Checkbox, Radio } from 'twenty-ui/input';
 import { ModalHeader, ModalContent, ModalFooter } from 'twenty-ui/surfaces';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 
@@ -21,22 +21,77 @@ type Customer = ObjectRecord & {
 type Member = ObjectRecord & { personId: string };
 const StyledTable = styled.table`
   border-collapse: collapse;
+  font-size: ${themeCssVariables.font.size.sm};
+  table-layout: fixed;
   width: 100%;
   th,
   td {
-    border-bottom: 1px solid ${themeCssVariables.border.color.medium};
-    padding: ${themeCssVariables.spacing[2]};
+    border-bottom: 1px solid ${themeCssVariables.border.color.light};
+    overflow-wrap: anywhere;
+    padding: ${themeCssVariables.spacing[3]};
     text-align: left;
+  }
+  th {
+    background: ${themeCssVariables.background.secondary};
+    color: ${themeCssVariables.font.color.secondary};
+    font-weight: ${themeCssVariables.font.weight.medium};
+  }
+  th[data-selection],
+  td[data-selection] {
+    width: 20px;
+  }
+  tbody tr:last-child td {
+    border-bottom: none;
   }
 `;
 const StyledScroll = styled.div`
-  max-height: 360px;
+  border: 1px solid ${themeCssVariables.border.color.light};
+  border-radius: ${themeCssVariables.border.radius.sm};
+  max-height: 240px;
   overflow: auto;
 `;
-const StyledListOption = styled.label`
+const StyledListOption = styled.div`
+  border-bottom: 1px solid ${themeCssVariables.border.color.light};
+  padding: ${themeCssVariables.spacing[3]};
+  &:last-child {
+    border-bottom: none;
+  }
+  &:hover,
+  &[data-selected='true'] {
+    background: ${themeCssVariables.background.secondary};
+  }
+  label {
+    cursor: pointer;
+    flex: 1;
+  }
+`;
+const StyledSection = styled.section`
   display: flex;
-  gap: ${themeCssVariables.spacing[2]};
-  padding: ${themeCssVariables.spacing[2]};
+  flex-direction: column;
+  gap: ${themeCssVariables.spacing[3]};
+`;
+const StyledTitle = styled.h3`
+  color: ${themeCssVariables.font.color.primary};
+  font-size: ${themeCssVariables.font.size.sm};
+  font-weight: ${themeCssVariables.font.weight.medium};
+  margin: 0;
+`;
+const StyledHeaderTitle = styled.h2`
+  font-size: ${themeCssVariables.font.size.md};
+  font-weight: ${themeCssVariables.font.weight.semiBold};
+  margin: 0;
+`;
+const StyledSummary = styled.div`
+  background: ${themeCssVariables.background.secondary};
+  border-radius: ${themeCssVariables.border.radius.sm};
+  font-size: ${themeCssVariables.font.size.sm};
+  padding: ${themeCssVariables.spacing[3]};
+`;
+const StyledHint = styled.p`
+  color: ${themeCssVariables.font.color.secondary};
+  font-size: ${themeCssVariables.font.size.sm};
+  line-height: 1.6;
+  margin: 0;
 `;
 export const MessageListAddCustomersModal = ({
   initialListId,
@@ -183,27 +238,33 @@ export const MessageListAddCustomersModal = ({
       shouldCloseModalOnClickOutsideOrEscape={!busy}
       renderInDocumentBody
     >
-      <ModalHeader hasBorderBottom>{t`수신자 목록에 고객 추가`}</ModalHeader>
-      <ModalContent contentPadding={4} gap={3}>
+      <ModalHeader hasBorderBottom>
+        <StyledHeaderTitle>{t`수신자 목록에 고객 추가`}</StyledHeaderTitle>
+      </ModalHeader>
+      <ModalContent contentPadding={5} gap={4}>
         {!initialListId && (
-          <section aria-label={t`추가할 수신자 목록`}>
+          <StyledSection aria-label={t`추가할 수신자 목록`}>
+            <StyledTitle>{t`추가할 수신자 목록`}</StyledTitle>
             <TextInput
               placeholder={t`수신자 목록 검색`}
+              fullWidth
               value={listSearch}
               onChange={setListSearch}
               disabled={busy}
             />
             <StyledScroll>
               {lists.map((list) => (
-                <StyledListOption key={list.id}>
-                  <input
-                    type="radio"
+                <StyledListOption
+                  key={list.id}
+                  data-selected={listId === list.id}
+                >
+                  <Radio
+                    label={list.name || t`제목 없는 목록`}
                     name={`${modalId}-list`}
                     checked={listId === list.id}
-                    onChange={() => setListId(list.id)}
+                    onCheckedChange={() => setListId(list.id)}
                     disabled={busy}
                   />
-                  {list.name || t`제목 없는 목록`}
                 </StyledListOption>
               ))}
             </StyledScroll>
@@ -221,93 +282,93 @@ export const MessageListAddCustomersModal = ({
                 disabled={busy}
               />
             )}
-          </section>
+          </StyledSection>
         )}
-        {!customerIds && (
-          <TextInput
-            placeholder={t`고객 이름 또는 이메일 검색`}
-            value={search}
-            onChange={setSearch}
-            fullWidth
-            disabled={busy}
-          />
-        )}
-        <StyledScroll>
-          <StyledTable>
-            <thead>
-              <tr>
-                <th>
+        <StyledSection aria-label={t`추가할 고객`}>
+          <StyledTitle>{t`추가할 고객`}</StyledTitle>
+          {!customerIds && (
+            <TextInput
+              placeholder={t`고객 이름 또는 이메일 검색`}
+              value={search}
+              onChange={setSearch}
+              fullWidth
+              disabled={busy}
+            />
+          )}
+          <StyledScroll>
+            <StyledTable>
+              <thead>
+                <tr>
                   {!customerIds && (
-                    <input
-                      type="checkbox"
-                      aria-label={t`현재 표시된 고객 모두 선택`}
-                      disabled={busy || records.length === 0}
-                      checked={
-                        records.length > 0 &&
-                        records.every((person) => selected.has(person.id))
-                      }
-                      onChange={(event) => {
-                        const checked = event.target.checked;
-                        setSelected((previous) => {
-                          const next = new Map(previous);
-                          records.forEach((person) => {
-                            if (checked) next.set(person.id, person);
-                            else next.delete(person.id);
+                    <th data-selection>
+                      <Checkbox
+                        aria-label={t`현재 표시된 고객 모두 선택`}
+                        disabled={busy || records.length === 0}
+                        checked={
+                          records.length > 0 &&
+                          records.every((person) => selected.has(person.id))
+                        }
+                        onCheckedChange={(checked) => {
+                          setSelected((previous) => {
+                            const next = new Map(previous);
+                            records.forEach((person) => {
+                              if (checked) next.set(person.id, person);
+                              else next.delete(person.id);
+                            });
+                            return next;
                           });
-                          return next;
-                        });
-                      }}
-                    />
-                  )}
-                </th>
-                <th>{t`고객`}</th>
-                <th>{t`이메일`}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {records.map((person) => (
-                <tr key={person.id}>
-                  <td>
-                    {!customerIds && (
-                      <input
-                        type="checkbox"
-                        aria-label={[
-                          person.name?.firstName,
-                          person.name?.lastName,
-                        ]
-                          .filter(Boolean)
-                          .join(' ')}
-                        checked={selected.has(person.id)}
-                        disabled={busy}
-                        onChange={() => toggle(person)}
+                        }}
                       />
-                    )}
-                  </td>
-                  <td>
-                    {[person.name?.firstName, person.name?.lastName]
-                      .filter(Boolean)
-                      .join(' ')}
-                  </td>
-                  <td>{person.emails?.primaryEmail || t`이메일 없음`}</td>
+                    </th>
+                  )}
+                  <th>{t`고객`}</th>
+                  <th>{t`이메일`}</th>
                 </tr>
-              ))}
-            </tbody>
-          </StyledTable>
-        </StyledScroll>
-        {loading && <p>{t`불러오는 중…`}</p>}
-        {error && <p role="alert">{t`고객을 불러오지 못했습니다.`}</p>}
-        {!loading && !error && records.length === 0 && (
-          <p>{t`검색 결과가 없습니다.`}</p>
-        )}
-        {hasNextPage && (
-          <Button
-            title={t`고객 더 보기`}
-            disabled={loading || busy}
-            onClick={() => fetchMoreRecords()}
-          />
-        )}
-        <p>{t`선택 ${candidates.length}명 · 이미 포함 ${alreadyIncluded}명 · 새로 추가 ${additions.length}명 · 이메일 없음 ${missingEmail}명`}</p>
-        <p>{t`이미 포함된 고객은 건너뜁니다. 이메일이 없는 고객도 목록에는 저장되지만 발송할 때 제외됩니다.`}</p>
+              </thead>
+              <tbody>
+                {records.map((person) => (
+                  <tr key={person.id}>
+                    {!customerIds && (
+                      <td data-selection>
+                        <Checkbox
+                          aria-label={[
+                            person.name?.firstName,
+                            person.name?.lastName,
+                          ]
+                            .filter(Boolean)
+                            .join(' ')}
+                          checked={selected.has(person.id)}
+                          disabled={busy}
+                          onCheckedChange={() => toggle(person)}
+                        />
+                      </td>
+                    )}
+                    <td>
+                      {[person.name?.firstName, person.name?.lastName]
+                        .filter(Boolean)
+                        .join(' ')}
+                    </td>
+                    <td>{person.emails?.primaryEmail || t`이메일 없음`}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </StyledTable>
+          </StyledScroll>
+          {loading && <p>{t`불러오는 중…`}</p>}
+          {error && <p role="alert">{t`고객을 불러오지 못했습니다.`}</p>}
+          {!loading && !error && records.length === 0 && (
+            <p>{t`검색 결과가 없습니다.`}</p>
+          )}
+          {hasNextPage && (
+            <Button
+              title={t`고객 더 보기`}
+              disabled={loading || busy}
+              onClick={() => fetchMoreRecords()}
+            />
+          )}
+        </StyledSection>
+        <StyledSummary>{t`선택 ${candidates.length}명 · 이미 포함 ${alreadyIncluded}명 · 새로 추가 ${additions.length}명 · 이메일 없음 ${missingEmail}명`}</StyledSummary>
+        <StyledHint>{t`이미 포함된 고객은 건너뜁니다. 이메일이 없는 고객도 목록에는 저장되지만 발송할 때 제외됩니다.`}</StyledHint>
         {checkError && (
           <p role="alert">{t`기존 수신자를 확인하지 못했습니다.`}</p>
         )}
