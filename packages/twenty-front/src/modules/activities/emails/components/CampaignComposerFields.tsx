@@ -16,7 +16,7 @@ import { FormTextFieldInput } from '@/object-record/record-field/ui/form-types/c
 import { useMyMessageChannels } from '@/settings/accounts/hooks/useMyMessageChannels';
 import { Select } from '@/ui/input/components/Select';
 import { t } from '@lingui/core/macro';
-import { MessageChannelType } from 'twenty-shared/types';
+import { getConfiguredEmailChannels } from '@/settings/accounts/utils/getConfiguredEmailChannels';
 import { isDefined } from 'twenty-shared/utils';
 import { type SelectOption } from 'twenty-ui/input';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
@@ -150,8 +150,9 @@ export const CampaignComposerFields = ({
     unsubscribeTopicId: campaignState.unsubscribeTopicId,
   });
 
-  const senderOptions: SelectOption<string>[] = channels
-    .filter((channel) => channel.type === MessageChannelType.EMAIL)
+  const senderOptions: SelectOption<string>[] = getConfiguredEmailChannels(
+    channels,
+  )
     .map((channel) => channel.connectedAccount?.handle)
     .filter(isDefined)
     .filter((handle, index, handles) => handles.indexOf(handle) === index)
@@ -203,15 +204,15 @@ export const CampaignComposerFields = ({
         label={t`From`}
         help={
           senderOptions.length === 0
-            ? t`선택 가능한 이메일 발신 계정이 없습니다. 이메일 설정에서 계정을 연결하고 접근 권한을 확인하세요.`
-            : t`이 단체 발송을 보낼 연동 이메일 계정을 선택하세요.`
+            ? t`사용자 > 계정 > 이메일에서 발신할 이메일 계정을 연결하세요. 워크스페이스 이메일 채널은 여기에 표시되지 않습니다.`
+            : t`사용자 > 계정 > 이메일에서 연결을 완료한 이메일 계정만 선택할 수 있습니다.`
         }
       />
       <Select
         dropdownId="campaign-composer-from-account"
         dropdownWidthAuto
         callToActionButton={{
-          text: t`발신 계정 설정 열기 (새 탭)`,
+          text: t`계정 > 이메일 설정 열기 (새 탭)`,
           onClick: () =>
             window.open(
               '/settings/accounts/emails',
@@ -232,7 +233,7 @@ export const CampaignComposerFields = ({
             : channelsError
               ? t`발신 계정을 불러오지 못했습니다. 페이지를 새로 고침해 다시 시도하세요.`
               : senderOptions.length === 0
-                ? t`선택 가능한 이메일 발신 계정이 없습니다. 이메일 설정에서 계정을 연결하고 접근 권한을 확인하세요.`
+                ? t`사용자 > 계정 > 이메일에서 발신할 이메일 계정을 연결하세요. 워크스페이스 이메일 채널은 여기에 표시되지 않습니다.`
                 : null}
         </StyledHint>
       )}

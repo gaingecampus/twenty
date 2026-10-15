@@ -7,12 +7,8 @@ import { SettingsSectionSkeletonLoader } from '@/settings/components/SettingsSec
 import { SettingsPageLayout } from '@/settings/components/layout/SettingsPageLayout';
 import { SettingsTabBar } from '@/settings/components/layout/SettingsTabBar';
 import { useLingui } from '@lingui/react/macro';
-import { useMemo } from 'react';
-import {
-  MessageChannelSyncStage,
-  MessageChannelType,
-  SettingsPath,
-} from 'twenty-shared/types';
+import { SettingsPath } from 'twenty-shared/types';
+import { getConfiguredEmailChannels } from '@/settings/accounts/utils/getConfiguredEmailChannels';
 import { getSettingsPath } from 'twenty-shared/utils';
 import { Section } from 'twenty-ui/layout';
 
@@ -21,16 +17,7 @@ export const SettingsAccountsEmails = () => {
 
   const { channels: allMessageChannels, loading } = useMyMessageChannels();
 
-  const messageChannels = useMemo(
-    () =>
-      allMessageChannels.filter(
-        (channel) =>
-          channel.isSyncEnabled &&
-          channel.syncStage !== MessageChannelSyncStage.PENDING_CONFIGURATION &&
-          channel.type !== MessageChannelType.EMAIL_GROUP,
-      ),
-    [allMessageChannels],
-  );
+  const messageChannels = getConfiguredEmailChannels(allMessageChannels);
 
   const tabs = messageChannels.map((messageChannel) => ({
     id: messageChannel.id,
