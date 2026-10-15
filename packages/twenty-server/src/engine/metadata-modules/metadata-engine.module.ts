@@ -1,4 +1,6 @@
 import { Module } from '@nestjs/common';
+
+import { GaingeSalesModule } from 'src/modules/gainge-sales/gainge-sales.module';
 import { APP_FILTER } from '@nestjs/core';
 
 import { AiAgentMonitorModule } from 'src/engine/metadata-modules/ai/ai-agent-monitor/ai-agent-monitor.module';
@@ -34,6 +36,7 @@ import { WorkspaceMetadataVersionModule } from 'src/engine/metadata-modules/work
 
 @Module({
   imports: [
+    GaingeSalesModule,
     FieldMetadataModule,
     FrontComponentModule,
     ManyToManyRelationModule,

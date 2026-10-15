@@ -62,6 +62,47 @@ import {
 export class ConfigVariables {
   @ConfigVariablesMetadata({
     group: ConfigVariablesGroup.ADVANCED_SETTINGS,
+    type: ConfigVariableType.STRING,
+    isSensitive: false,
+    description: 'HTTPS endpoint of the Campus sales MCP (including /api/mcp)',
+  })
+  @IsOptional()
+  @IsString()
+  GAINGE_SALES_MCP_URL?: string;
+
+  @ConfigVariablesMetadata({
+    group: ConfigVariablesGroup.ADVANCED_SETTINGS,
+    type: ConfigVariableType.STRING,
+    isSensitive: true,
+    description: 'Server-only Campus MCP token with sales:read scope',
+  })
+  @IsOptional()
+  @IsString()
+  GAINGE_SALES_MCP_TOKEN?: string;
+
+  @ConfigVariablesMetadata({
+    group: ConfigVariablesGroup.ADVANCED_SETTINGS,
+    type: ConfigVariableType.STRING,
+    isSensitive: false,
+    description: 'Workspace allowed to view Campus sales',
+  })
+  @IsOptional()
+  @IsString()
+  GAINGE_SALES_WORKSPACE_ID?: string;
+
+  @ConfigVariablesMetadata({
+    group: ConfigVariablesGroup.ADVANCED_SETTINGS,
+    type: ConfigVariableType.STRING,
+    isSensitive: false,
+    description:
+      'Comma-separated workspace member IDs allowed to view company-wide Campus sales',
+  })
+  @IsOptional()
+  @IsString()
+  GAINGE_SALES_MEMBER_IDS?: string;
+
+  @ConfigVariablesMetadata({
+    group: ConfigVariablesGroup.ADVANCED_SETTINGS,
     description: 'Enable or disable password authentication for users',
     type: ConfigVariableType.BOOLEAN,
   })
