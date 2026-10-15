@@ -29,9 +29,10 @@ const StyledCloseRow = styled.div`
   display: flex;
   gap: 12px;
   justify-content: space-between;
-  padding-bottom: var(--t-gallery-gap, 16px);
+  margin: -24px -24px 0;
+  padding: 24px 24px var(--t-gallery-gap, 16px);
   position: sticky;
-  top: 0;
+  top: -24px;
   z-index: 1;
 `;
 
