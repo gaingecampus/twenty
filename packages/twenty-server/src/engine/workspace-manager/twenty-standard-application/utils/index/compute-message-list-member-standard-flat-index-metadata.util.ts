@@ -42,4 +42,18 @@ export const buildMessageListMemberStandardFlatIndexMetadatas = ({
     twentyStandardApplicationId,
     now,
   }),
+  workspaceMemberListUniqueIndex: createStandardIndexFlatMetadata({
+    objectName,
+    workspaceId,
+    context: {
+      indexName: 'workspaceMemberListUniqueIndex',
+      relatedFieldNames: ['workspaceMember', 'list'],
+      isUnique: true,
+      indexWhereClause: '"deletedAt" IS NULL',
+    },
+    standardObjectMetadataRelatedEntityIds,
+    dependencyFlatEntityMaps,
+    twentyStandardApplicationId,
+    now,
+  }),
 });

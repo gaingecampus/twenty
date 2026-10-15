@@ -1094,6 +1094,9 @@ export const STANDARD_OBJECTS = {
   messageListMember: {
     universalIdentifier: '27773d24-8ce3-40f8-aa6c-1f590f2c08d2',
     fields: {
+      workspaceMember: {
+        universalIdentifier: 'f436ef4c-e442-4a0d-bc2a-3d94b9d61dbc',
+      },
       id: { universalIdentifier: '606769a6-1783-4c2b-9e44-1d8389647f7c' },
       createdAt: {
         universalIdentifier: '7ae090b9-a48f-435c-aa89-9882f17950a1',
@@ -1122,6 +1125,9 @@ export const STANDARD_OBJECTS = {
       },
     },
     indexes: {
+      workspaceMemberListUniqueIndex: {
+        universalIdentifier: '0482ea41-cab4-4b4f-9133-d201308533b7',
+      },
       listIdIndex: {
         universalIdentifier: '61188470-6dcb-4b2a-b1a9-baeb688bccae',
       },
@@ -3001,6 +3007,9 @@ export const STANDARD_OBJECTS = {
   workspaceMember: {
     universalIdentifier: '20202020-3319-4234-a34c-82d5c0e881a6',
     fields: {
+      listMemberships: {
+        universalIdentifier: '113e27d5-5e7b-46fc-8c20-fbafa38558be',
+      },
       id: { universalIdentifier: '20202020-fb1a-41b1-8ab1-efabcdefabcd' },
       createdAt: {
         universalIdentifier: '20202020-fb1b-41b2-9bb2-fabcdefabcde',

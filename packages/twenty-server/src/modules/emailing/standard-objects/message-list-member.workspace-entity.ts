@@ -7,6 +7,7 @@ export class MessageListMemberWorkspaceEntity extends BaseWorkspaceEntity {
   list: EntityRelation<MessageListWorkspaceEntity>;
   listId: string;
   person: EntityRelation<PersonWorkspaceEntity>;
-  personId: string;
+  personId: string | null;
+  workspaceMemberId: string | null;
   searchVector: string;
 }

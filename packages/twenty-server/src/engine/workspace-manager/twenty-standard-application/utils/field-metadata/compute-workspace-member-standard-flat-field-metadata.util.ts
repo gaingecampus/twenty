@@ -32,6 +32,29 @@ export const buildWorkspaceMemberStandardFlatFieldMetadatas = ({
   AllStandardObjectFieldName<'workspaceMember'>,
   FlatFieldMetadata
 > => ({
+  listMemberships: createStandardRelationFieldFlatMetadata({
+    objectName,
+    workspaceId,
+    context: {
+      type: FieldMetadataType.RELATION,
+      morphId: null,
+      fieldName: 'listMemberships',
+      label: i18nLabel(msg`Lists`),
+      description: i18nLabel(msg`Lists the contact belongs to`),
+      icon: 'IconUsersGroup',
+      isUIEditable: true,
+      isNullable: true,
+      targetObjectName: 'messageListMember',
+      targetFieldName: 'workspaceMember',
+      settings: {
+        relationType: RelationType.ONE_TO_MANY,
+      },
+    },
+    standardObjectMetadataRelatedEntityIds,
+    dependencyFlatEntityMaps,
+    twentyStandardApplicationId,
+    now,
+  }),
   id: createStandardFieldFlatMetadata({
     objectName,
     workspaceId,
