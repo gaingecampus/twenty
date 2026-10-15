@@ -1,3 +1,9 @@
+import {
+  CampaignRelatedRecords,
+  CampaignRecipientList,
+} from '@/activities/emails/components/CampaignRelatedRecords';
+import { CampaignAttachmentsDisplay } from '@/activities/emails/components/CampaignAttachmentsDisplay';
+import { CampaignBodyDisplay } from '@/activities/emails/components/CampaignBodyDisplay';
 import { MessageListCampaigns } from '@/activities/emails/components/message-lists/MessageListCampaigns';
 import { MessageListMembers } from '@/activities/emails/components/message-lists/MessageListMembers';
 import { useFieldMetadataItemById } from '@/object-metadata/hooks/useFieldMetadataItemById';
@@ -103,6 +109,29 @@ export const FieldWidget = ({ widget }: FieldWidgetProps) => {
     fieldMetadataItem.name === 'campaigns'
   ) {
     return <MessageListCampaigns listId={targetRecord.id} />;
+  }
+
+  if (objectMetadataItem.nameSingular === 'messageCampaign') {
+    if (fieldMetadataItem.name === 'list') {
+      return <CampaignRecipientList campaignId={targetRecord.id} />;
+    }
+    if (
+      fieldMetadataItem.name === 'recipients' ||
+      fieldMetadataItem.name === 'messages'
+    ) {
+      return (
+        <CampaignRelatedRecords
+          campaignId={targetRecord.id}
+          kind={fieldMetadataItem.name}
+        />
+      );
+    }
+    if (fieldMetadataItem.name === 'bodyTemplate') {
+      return <CampaignBodyDisplay value={record} />;
+    }
+    if (fieldMetadataItem.name === 'attachmentFiles') {
+      return <CampaignAttachmentsDisplay value={record} />;
+    }
   }
 
   const fieldDefinition = formatFieldMetadataItemAsColumnDefinition({

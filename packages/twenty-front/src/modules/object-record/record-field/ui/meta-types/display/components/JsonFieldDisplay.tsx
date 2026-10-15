@@ -1,3 +1,4 @@
+import { CampaignAttachmentsDisplay } from '@/activities/emails/components/CampaignAttachmentsDisplay';
 import { useJsonFieldDisplay } from '@/object-record/record-field/ui/meta-types/hooks/useJsonFieldDisplay';
 import { JsonDisplay } from '@/ui/field/display/components/JsonDisplay';
 import { ExpandedFieldDisplay } from '@/ui/layout/expandable-list/components/ExpandedFieldDisplay';
@@ -10,7 +11,8 @@ import { useCopyToClipboard } from '~/hooks/useCopyToClipboard';
 export const JsonFieldDisplay = () => {
   const { copyToClipboard } = useCopyToClipboard();
 
-  const { fieldValue, maxWidth, isRecordFieldReadOnly } = useJsonFieldDisplay();
+  const { fieldValue, maxWidth, isRecordFieldReadOnly, fieldDefinition } =
+    useJsonFieldDisplay();
 
   const [isJsonTreeViewOpen, setIsJsonTreeViewOpen] = useState(false);
   const anchorRef = useRef<HTMLDivElement>(null);
@@ -24,6 +26,13 @@ export const JsonFieldDisplay = () => {
   const handleClickOutside = () => {
     setIsJsonTreeViewOpen(false);
   };
+
+  if (
+    fieldDefinition.metadata.objectMetadataNameSingular === 'messageCampaign' &&
+    fieldDefinition.metadata.fieldName === 'attachmentFiles'
+  ) {
+    return <CampaignAttachmentsDisplay value={fieldValue} />;
+  }
 
   if (!isDefined(fieldValue)) {
     return <></>;
