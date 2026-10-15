@@ -1273,13 +1273,22 @@ export const StyledFieldVisitDetail = styled(StyledFieldCard)`
     flex-direction: column;
     gap: 8px;
   }
-  [data-detail-body] h3 {
+  [data-detail-body] > section > h3 {
     font-size: 16px;
     margin: 0;
   }
-  [data-detail-body] p {
-    font-size: 15px;
+  [data-detail-body] .markdown-section {
+    font-size: ${theme.font.size.md};
     line-height: 1.8;
+    margin: 0;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  [data-detail-body] .markdown-section > div,
+  [data-detail-body] .markdown-section blockquote > div,
+  [data-detail-body] .markdown-section p,
+  [data-detail-body] .markdown-section li {
+    white-space: pre-wrap;
   }
   [data-detail-actions] {
     align-items: center;

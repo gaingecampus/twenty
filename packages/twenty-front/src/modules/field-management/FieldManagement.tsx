@@ -1,3 +1,4 @@
+import { FieldVisitTextSection } from './FieldVisitTextSection';
 import { FieldContractTypeFilters } from './FieldContractTypeFilters';
 import {
   matchesContractTypeFilter,
@@ -647,21 +648,12 @@ const FieldManagementLoaded = ({
           {renderContractDetail(c, true)}
         </StyledFieldPanel>
         <div data-detail-body>
-          <section>
-            <h3>수행 내용</h3>
-            <p>{text(v.activities) || '아직 작성된 내용이 없습니다.'}</p>
-          </section>
+          <FieldVisitTextSection title="수행 내용" text={text(v.activities)} />
           {text(v.decisions).trim() && (
-            <section>
-              <h3>주요 결정</h3>
-              <p>{text(v.decisions)}</p>
-            </section>
+            <FieldVisitTextSection title="주요 결정" text={text(v.decisions)} />
           )}
           {text(v.nextActions).trim() && (
-            <section>
-              <h3>다음 할 일</h3>
-              <p>{text(v.nextActions)}</p>
-            </section>
+            <FieldVisitTextSection title="다음 할 일" text={text(v.nextActions)} />
           )}
         </div>
         <FieldVisitAttachments visitId={v.id} />

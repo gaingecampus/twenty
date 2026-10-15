@@ -129,7 +129,7 @@ const StyledTable = styled.div`
     transition: background 0.12s;
   }
   [data-record-row]:hover {
-    background: ${theme.background.secondary};
+    background: var(--t-control-hover-bg, ${theme.background.secondary});
   }
   [data-record-row]:focus-visible {
     outline: 2px solid ${theme.border.color.blue};
