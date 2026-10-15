@@ -47,3 +47,31 @@ describe('normalizeCampaignRecipients', () => {
     });
   });
 });
+
+it('retains workspace member identity and deduplicates shared customer emails', () => {
+  const { recipients, skipped } = normalizeCampaignRecipients(
+    [
+      { personId: 'person', email: 'same@example.com' },
+      {
+        personId: null,
+        workspaceMemberId: 'duplicate',
+        email: ' SAME@example.com ',
+      },
+      {
+        personId: null,
+        workspaceMemberId: 'member',
+        email: ' MEMBER@example.com ',
+      },
+    ],
+    100,
+  );
+  expect(recipients).toEqual([
+    { personId: 'person', email: 'same@example.com' },
+    {
+      personId: null,
+      workspaceMemberId: 'member',
+      email: 'member@example.com',
+    },
+  ]);
+  expect(skipped.deduped).toBe(1);
+});

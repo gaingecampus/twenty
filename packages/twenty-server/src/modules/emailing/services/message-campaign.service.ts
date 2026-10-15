@@ -1,3 +1,4 @@
+import { WorkspaceMemberWorkspaceEntity } from 'src/modules/workspace-member/standard-objects/workspace-member.workspace-entity';
 import { CampaignAttachmentsService } from 'src/modules/emailing/services/campaign-attachments.service';
 import { CampaignConnectedAccountSenderService } from 'src/modules/emailing/services/campaign-connected-account-sender.service';
 import {
@@ -380,7 +381,7 @@ export class MessageCampaignService {
       for (const recipient of recipients) {
         const messageId = this.campaignMessageId(
           campaignId,
-          recipient.personId,
+          recipient.workspaceMemberId ?? recipient.personId ?? recipient.email,
         );
 
         if (!recipientsByMessageId.has(messageId)) {
@@ -427,6 +428,7 @@ export class MessageCampaignService {
             campaignId,
             messageId: recipient.messageId,
             personId: recipient.personId,
+            workspaceMemberId: recipient.workspaceMemberId,
             recipientEmail: recipient.email,
             emailingDomainId,
             connectedAccountId,
@@ -446,6 +448,7 @@ export class MessageCampaignService {
       campaignId,
       messageId,
       personId,
+      workspaceMemberId,
       recipientEmail,
       emailingDomainId,
       connectedAccountId,
@@ -487,11 +490,31 @@ export class MessageCampaignService {
         PersonWorkspaceEntity,
       );
 
-      const person = await personRepository.findOne({
-        where: { id: personId },
-      });
+      const person = personId
+        ? await personRepository.findOne({ where: { id: personId } })
+        : null;
+      const workspaceMember = workspaceMemberId
+        ? await (
+            await this.getSystemRepository(
+              workspaceId,
+              WorkspaceMemberWorkspaceEntity,
+            )
+          ).findOne({ where: { id: workspaceMemberId } })
+        : null;
 
-      const variables = this.buildTemplateVariables(person);
+      const variables = workspaceMember
+        ? {
+            firstName: workspaceMember.name?.firstName ?? '',
+            lastName: workspaceMember.name?.lastName ?? '',
+            fullName: [
+              workspaceMember.name?.firstName,
+              workspaceMember.name?.lastName,
+            ]
+              .filter(Boolean)
+              .join(' '),
+            email: workspaceMember.userEmail ?? recipientEmail,
+          }
+        : this.buildTemplateVariables(person);
       const subject = renderCampaignTemplate(
         campaign.subject ?? '',
         variables,
@@ -746,6 +769,7 @@ export class MessageCampaignService {
               handle: row.recipient.email,
               displayName: row.recipient.email,
               personId: row.recipient.personId,
+              workspaceMemberId: row.recipient.workspaceMemberId,
               messageCampaignId: campaignId,
             },
           ]),
@@ -880,10 +904,29 @@ export class MessageCampaignService {
       where: { listId },
     });
 
-    return this.loadRecipientsByPersonIds(
+    const people = await this.loadRecipientsByPersonIds(
       workspaceId,
-      members.map((member) => member.personId),
+      members.flatMap((member) => (member.personId ? [member.personId] : [])),
     );
+    const memberIds = members.flatMap((member) =>
+      member.workspaceMemberId ? [member.workspaceMemberId] : [],
+    );
+    if (memberIds.length === 0) return people;
+    const repository = await this.getUserRepository(
+      workspaceId,
+      WorkspaceMemberWorkspaceEntity,
+    );
+    const workspaceMembers = await repository.find({
+      where: { id: In(memberIds) },
+    });
+    return [
+      ...people,
+      ...workspaceMembers.map((member) => ({
+        personId: null,
+        workspaceMemberId: member.id,
+        email: member.userEmail,
+      })),
+    ];
   }
 
   private async loadRecipientsByPersonIds(

@@ -36,7 +36,7 @@ export const normalizeCampaignRecipients = (
       continue;
     }
 
-    recipients.push({ email: normalizedEmail, personId: candidate.personId });
+    recipients.push({ ...candidate, email: normalizedEmail });
   }
 
   return { recipients, skipped };

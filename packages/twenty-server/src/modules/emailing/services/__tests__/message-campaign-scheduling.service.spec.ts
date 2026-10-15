@@ -1,3 +1,4 @@
+import { WorkspaceMemberWorkspaceEntity } from 'src/modules/workspace-member/standard-objects/workspace-member.workspace-entity';
 import { getWorkspaceContext } from 'src/engine/twenty-orm/storage/orm-workspace-context.storage';
 import {
   BadRequestException,
@@ -37,6 +38,7 @@ describe('Campaign scheduling and delivery guards', () => {
     count: jest.fn(),
   };
   const associations = { update: jest.fn(), insert: jest.fn() };
+  const workspaceMembers = { find: jest.fn(), findOne: jest.fn() };
   const people = { find: jest.fn(), findOne: jest.fn() };
   const members = { find: jest.fn() };
   const domains = { findOne: jest.fn() };
@@ -53,6 +55,7 @@ describe('Campaign scheduling and delivery guards', () => {
       if (entity === MessageCampaignWorkspaceEntity) return campaign;
       if (entity === MessageWorkspaceEntity) return messages;
       if (entity === MessageListMemberWorkspaceEntity) return members;
+      if (entity === WorkspaceMemberWorkspaceEntity) return workspaceMembers;
       if (entity === PersonWorkspaceEntity) return people;
       return associations;
     }),
@@ -169,6 +172,56 @@ describe('Campaign scheduling and delivery guards', () => {
     });
   });
   afterEach(() => jest.restoreAllMocks());
+
+  it('resolves workspace members without creating customer records', async () => {
+    members.find.mockResolvedValue([
+      { personId: null, workspaceMemberId: 'member' },
+    ]);
+    workspaceMembers.find.mockResolvedValue([
+      { id: 'member', userEmail: 'member@example.com' },
+    ]);
+    const result = await service['resolveRecipientsFromList'](
+      'workspace',
+      'list',
+    );
+    expect(result).toEqual([
+      {
+        personId: null,
+        workspaceMemberId: 'member',
+        email: 'member@example.com',
+      },
+    ]);
+    expect(people.find).not.toHaveBeenCalled();
+  });
+
+  it('personalizes delivery with workspace member name and email', async () => {
+    workspaceMembers.findOne.mockResolvedValue({
+      name: { firstName: 'Hana', lastName: 'Park' },
+      userEmail: 'member@example.com',
+    });
+    campaign.findOne.mockResolvedValue({
+      id: 'campaign',
+      status: 'SENDING',
+      subject: '{{fullName}}',
+      bodyTemplate: '<p>{{email}}</p>',
+      fromAddress: { primaryEmail: 'sender@example.com' },
+    });
+    await service.processSendJob({
+      ...sendJob,
+      personId: null,
+      workspaceMemberId: 'member',
+      recipientEmail: 'member@example.com',
+    });
+    expect(people.findOne).not.toHaveBeenCalled();
+    expect(sender.sendEmail).toHaveBeenCalledWith(
+      'workspace',
+      'domain',
+      expect.objectContaining({
+        subject: 'Hana Park',
+        html: '<p>member@example.com</p>',
+      }),
+    );
+  });
 
   it('pins the connected sender without requiring a SES domain', async () => {
     connectedSender.resolveChannel.mockResolvedValue({
