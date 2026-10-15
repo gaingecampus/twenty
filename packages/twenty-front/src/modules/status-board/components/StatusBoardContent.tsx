@@ -1,3 +1,4 @@
+import { StatusBoardSalesSection } from '@/status-board/components/StatusBoardSalesSection';
 import {
   StyledDashboardScroll,
   StyledDashboardMuted,
@@ -138,6 +139,7 @@ const StatusBoardContentBody = ({
             onClearSelectedGroupIds={filters.clearSelectedGroupIds}
             onClearSelectedMemberIds={filters.clearSelectedMemberIds}
           />
+          {!dummy.enabled && <StatusBoardSalesSection />}
           {isGroupUnavailable ? (
             <StatusBoardEmptyState
               title="그룹별 현황을 아직 확인할 수 없어요"
