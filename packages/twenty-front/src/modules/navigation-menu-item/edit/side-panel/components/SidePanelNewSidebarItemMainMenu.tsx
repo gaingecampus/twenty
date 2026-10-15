@@ -1,4 +1,5 @@
 import { useLingui } from '@lingui/react/macro';
+import { styled } from '@linaria/react';
 import { NavigationMenuItemType } from 'twenty-shared/types';
 import { isDefined } from 'twenty-shared/utils';
 import { Avatar, TintedIconTile } from 'twenty-ui/data-display';
@@ -22,6 +23,10 @@ import { SidePanelItemWithAddToNavigationDrag } from '@/side-panel/components/Si
 import { SidePanelList } from '@/side-panel/components/SidePanelList';
 import { SelectableListItem } from '@/ui/layout/selectable-list/components/SelectableListItem';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
+
+const StyledRecordAvatar = styled(Avatar)`
+  --t-avatar-size-sm: calc(${themeCssVariables.icon.size.md} * 1px);
+`;
 
 type SidePanelNewSidebarItemMainMenuProps = {
   onSelectObject: () => void;
@@ -102,7 +107,8 @@ export const SidePanelNewSidebarItemMainMenu = ({
               >
                 <CommandMenuItem
                   Icon={() => (
-                    <Avatar
+                    <StyledRecordAvatar
+                      size="sm"
                       placeholder="L"
                       type="rounded"
                       backgroundColor={themeCssVariables.color.green4}

@@ -20641,3 +20641,6 @@ msgstr "단체 발송"
 #: src/modules/object-record/record-index/hooks/useGuardRecordIndexInlineEdit.ts
 msgid "Turn on Edit to change this field."
 msgstr "이 필드를 수정하려면 편집 모드를 켜세요."
+
+msgid "Separator"
+msgstr "구분선"
