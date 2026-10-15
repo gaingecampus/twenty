@@ -20636,3 +20636,8 @@ msgstr "캠페인 예약"
 #. js-lingui-id: oRJtCM
 msgid "Campaigns"
 msgstr "캠페인"
+
+#. js-lingui-id: 5UPtxC
+#: src/modules/object-record/record-index/hooks/useGuardRecordIndexInlineEdit.ts
+msgid "Turn on Edit to change this field."
+msgstr "이 필드를 수정하려면 편집 모드를 켜세요."
