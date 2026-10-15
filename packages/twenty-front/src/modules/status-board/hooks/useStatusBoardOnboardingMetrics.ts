@@ -16,9 +16,11 @@ import { FieldMetadataType } from 'twenty-shared/types';
 export const useStatusBoardOnboardingMetrics = ({
   objectMetadataItem,
   memberIds,
+  status = 'ACTIVE',
 }: {
   objectMetadataItem: EnrichedObjectMetadataItem;
   memberIds?: string[];
+  status?: 'ACTIVE' | 'PRE';
 }) => {
   const { objectMetadataItems } = useObjectMetadataItems();
   const executionField = objectMetadataItem.readableFields.find(
@@ -59,6 +61,7 @@ export const useStatusBoardOnboardingMetrics = ({
     filter: buildStatusBoardActiveOnboardingFilter({
       onboardingObjectMetadataItem: objectMetadataItem,
       memberIds: undefined,
+      status,
     }),
     limit: 200,
     recordGqlFields: {
@@ -129,6 +132,19 @@ export const useStatusBoardOnboardingMetrics = ({
     companyMetrics,
     projectMetrics,
     assignments,
+    scopedContractIds: contracts.records
+      .filter(
+        (record) =>
+          memberIds === undefined ||
+          [
+            getStatusBoardRelationId(record.leadConsultantId),
+            getStatusBoardRelationId(record[executionIdField]),
+            ...assignments
+              .filter((assignment) => assignment.onboardingId === record.id)
+              .map((assignment) => assignment.memberId),
+          ].some((id) => id !== undefined && memberIds.includes(id)),
+      )
+      .map((record) => record.id),
     loading: contracts.loading || links.loading,
     error: contracts.error ?? links.error ?? configurationError,
   };

@@ -110,16 +110,18 @@ export const buildStatusBoardOpenOpportunityFilter = ({
 export const buildStatusBoardActiveOnboardingFilter = ({
   onboardingObjectMetadataItem,
   memberIds,
+  status = 'ACTIVE',
 }: {
   onboardingObjectMetadataItem: EnrichedObjectMetadataItem;
   memberIds: string[] | undefined;
+  status?: 'ACTIVE' | 'PRE';
 }): RecordGqlOperationFilter | undefined => {
   return andStatusBoardFilters([
     hasStatusBoardField(
       onboardingObjectMetadataItem,
       STATUS_BOARD_FIELD.onboardingStatus,
     )
-      ? { [STATUS_BOARD_FIELD.onboardingStatus]: { eq: 'ACTIVE' } }
+      ? { [STATUS_BOARD_FIELD.onboardingStatus]: { eq: status } }
       : undefined,
     buildStatusBoardMemberFilter({
       objectMetadataItem: onboardingObjectMetadataItem,

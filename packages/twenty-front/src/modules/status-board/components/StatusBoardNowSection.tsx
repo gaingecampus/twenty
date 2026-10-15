@@ -1,3 +1,4 @@
+import { StatusBoardUpcomingOnboardingKpi } from '@/status-board/components/StatusBoardUpcomingOnboardingKpi';
 import {
   StyledDashboardKpiGrid,
   StyledDashboardSection,
@@ -65,10 +66,10 @@ export const StatusBoardNowSection = ({
     <StyledDashboardSection>
       <StyledDashboardSectionHeader>
         <StyledDashboardSectionTitle>
-          진행 중인 온보딩 현황
+          온보딩 진행·예정 현황
         </StyledDashboardSectionTitle>
       </StyledDashboardSectionHeader>
-      <StyledDashboardKpiGrid columns={4}>
+      <StyledDashboardKpiGrid columns={5}>
         {opportunityObjectMetadataItem !== undefined && (
           <StatusBoardLinkedCountKpi
             onOpenSheet={onOpenSheet}
@@ -93,6 +94,17 @@ export const StatusBoardNowSection = ({
             memberIds={memberIds}
           />
         )}
+        {onboardingObjectMetadataItem !== undefined &&
+          hasStatusBoardField(
+            onboardingObjectMetadataItem,
+            STATUS_BOARD_FIELD.onboardingStatus,
+          ) && (
+            <StatusBoardUpcomingOnboardingKpi
+              objectMetadataItem={onboardingObjectMetadataItem}
+              memberIds={memberIds}
+              onOpenSheet={onOpenSheet}
+            />
+          )}
         {onboardingObjectMetadataItem !== undefined &&
           endingFilter !== undefined && (
             <StatusBoardLinkedCountKpi
