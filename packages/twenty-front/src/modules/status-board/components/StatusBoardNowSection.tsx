@@ -79,6 +79,17 @@ export const StatusBoardNowSection = ({
             tone="blue"
           />
         )}
+        {onboardingObjectMetadataItem !== undefined &&
+          hasStatusBoardField(
+            onboardingObjectMetadataItem,
+            STATUS_BOARD_FIELD.onboardingStatus,
+          ) && (
+            <StatusBoardUpcomingOnboardingKpi
+              objectMetadataItem={onboardingObjectMetadataItem}
+              memberIds={memberIds}
+              onOpenSheet={onOpenSheet}
+            />
+          )}
         {onboardingObjectMetadataItem !== undefined && (
           <StatusBoardOnboardingKpi
             onOpenSheet={onOpenSheet}
@@ -94,17 +105,6 @@ export const StatusBoardNowSection = ({
             memberIds={memberIds}
           />
         )}
-        {onboardingObjectMetadataItem !== undefined &&
-          hasStatusBoardField(
-            onboardingObjectMetadataItem,
-            STATUS_BOARD_FIELD.onboardingStatus,
-          ) && (
-            <StatusBoardUpcomingOnboardingKpi
-              objectMetadataItem={onboardingObjectMetadataItem}
-              memberIds={memberIds}
-              onOpenSheet={onOpenSheet}
-            />
-          )}
         {onboardingObjectMetadataItem !== undefined &&
           endingFilter !== undefined && (
             <StatusBoardLinkedCountKpi
