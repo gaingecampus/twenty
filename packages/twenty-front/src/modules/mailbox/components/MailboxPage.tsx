@@ -22,11 +22,11 @@ const StyledHeader = styled.header`
   }
   select {
     background: ${themeCssVariables.background.primary};
-    color: ${themeCssVariables.font.color.primary};
     border: 1px solid ${themeCssVariables.border.color.medium};
     border-radius: ${themeCssVariables.border.radius.sm};
-    padding: ${themeCssVariables.spacing[2]};
+    color: ${themeCssVariables.font.color.primary};
     max-width: 100%;
+    padding: ${themeCssVariables.spacing[2]};
   }
 `;
 const StyledMailbox = styled.div`
@@ -41,13 +41,13 @@ const StyledMailbox = styled.div`
 `;
 const StyledPane = styled.section`
   border-right: 1px solid ${themeCssVariables.border.color.light};
-  overflow: auto;
   min-width: 0;
+  overflow: auto;
 `;
 const StyledDetail = styled.article`
-  padding: ${themeCssVariables.spacing[6]};
   overflow: auto;
   overflow-wrap: anywhere;
+  padding: ${themeCssVariables.spacing[6]};
   h2 {
     font-size: ${themeCssVariables.font.size.lg};
     margin-top: 0;
@@ -75,8 +75,8 @@ const StyledItem = styled.button`
   color: ${themeCssVariables.font.color.primary};
   cursor: pointer;
   display: flex;
-  gap: ${themeCssVariables.spacing[2]};
   font: inherit;
+  gap: ${themeCssVariables.spacing[2]};
   padding: ${themeCssVariables.spacing[3]};
   text-align: left;
   width: 100%;
@@ -115,22 +115,22 @@ const StyledMessageSummary = styled.div`
   }
 `;
 const StyledNotice = styled.div`
-  padding: ${themeCssVariables.spacing[4]};
   color: ${themeCssVariables.font.color.secondary};
   font-size: ${themeCssVariables.font.size.sm};
+  padding: ${themeCssVariables.spacing[4]};
 `;
 const StyledBody = styled.div`
   border-top: 1px solid ${themeCssVariables.border.color.light};
+  line-height: 1.7;
   margin-top: ${themeCssVariables.spacing[5]};
   padding-top: ${themeCssVariables.spacing[5]};
-  line-height: 1.7;
   white-space: pre-wrap;
 `;
 const StyledPagination = styled.div`
   display: flex;
+  gap: ${themeCssVariables.spacing[2]};
   justify-content: space-between;
   padding: ${themeCssVariables.spacing[3]};
-  gap: ${themeCssVariables.spacing[2]};
 `;
 const StyledLayout = styled.div`
   background: ${themeCssVariables.background.primary};
@@ -314,7 +314,7 @@ export const MailboxPage = () => {
   const { channels, loading, error } = useMailboxChannels();
   const [selectedId, setSelectedId] = useState('');
   const channel =
-    channels.find((item) => item.id === selectedId) ?? channels[0];
+    channels.find((item) => item.id === selectedId) ?? channels.at(0);
   return (
     <PageContainer>
       <StyledLayout>
