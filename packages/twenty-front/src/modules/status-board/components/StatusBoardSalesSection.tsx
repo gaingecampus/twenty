@@ -1,6 +1,6 @@
 import { useQuery } from '@apollo/client/react';
 import { styled } from '@linaria/react';
-import { useState } from 'react';
+import { useId, useState } from 'react';
 
 import {
   GAINGE_MONTHLY_SALES,
@@ -18,7 +18,12 @@ import {
   StyledDashboardSectionTitle,
   StyledDashboardMuted,
 } from '@/ui/layout/dashboard/components/dashboardStyled';
-import { IconChevronLeft, IconChevronRight } from 'twenty-ui/icon';
+import {
+  IconChevronLeft,
+  IconChevronRight,
+  IconInfoCircle,
+} from 'twenty-ui/icon';
+import { AppTooltip } from 'twenty-ui/surfaces';
 import { Button } from 'twenty-ui/input';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 
@@ -60,6 +65,9 @@ const STATUS_MESSAGES = {
 } as const;
 
 export const StatusBoardSalesSection = () => {
+  const infoId = useId();
+  const description =
+    '가캠의 PG·인앱·정기결제 매출을 사업부별로 표시합니다. 환불액 반영·VAT 제외 기준이며 CRM 입금액은 합산하지 않습니다. 상단 그룹·구성원 필터는 적용되지 않습니다. 조회 결과는 최대 1분간 유지됩니다.';
   const currentMonth = new Intl.DateTimeFormat('sv-SE', {
     timeZone: 'Asia/Seoul',
     year: 'numeric',
@@ -99,6 +107,23 @@ export const StatusBoardSalesSection = () => {
       <StyledDashboardSectionHeader>
         <StyledDashboardSectionTitle>
           월 누적 매출 · 사업부별
+          <span
+            data-sales-info={infoId}
+            tabIndex={0}
+            aria-label={`매출 집계 기준: ${description}`}
+            style={{
+              display: 'inline-flex',
+              marginLeft: 6,
+              verticalAlign: 'middle',
+              color: themeCssVariables.font.color.tertiary,
+            }}
+          >
+            <IconInfoCircle size={16} aria-hidden />
+          </span>
+          <AppTooltip
+            anchorSelect={`[data-sales-info="${infoId}"]`}
+            content={description}
+          />
         </StyledDashboardSectionTitle>
         <StyledStatusBoardPeriodControls>
           <StyledStatusBoardPeriodNav>
@@ -134,9 +159,6 @@ export const StatusBoardSalesSection = () => {
           />
         </StyledStatusBoardPeriodControls>
       </StyledDashboardSectionHeader>
-      <StyledDashboardMuted>
-        가캠 전사 매출 · VAT 제외 · 상단 그룹·구성원 필터 미적용
-      </StyledDashboardMuted>
       {isReady ? (
         <>
           <StyledAmounts>
@@ -158,10 +180,6 @@ export const StatusBoardSalesSection = () => {
                   timeZone: 'Asia/Seoul',
                 })
               : '—'}
-          </StyledDashboardMuted>
-          <StyledDashboardMuted>
-            PG·인앱 결제 기준이며 CRM 입금액은 합산하지 않습니다. 조회 결과는
-            최대 1분간 유지됩니다.
           </StyledDashboardMuted>
         </>
       ) : (

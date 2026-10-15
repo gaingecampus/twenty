@@ -59,7 +59,9 @@ it('shows full won amounts, zero departments and a separate company-wide scope',
   render(<StatusBoardSalesSection />);
   expect(screen.getAllByText('1,234,567원')).toHaveLength(2);
   expect(screen.getByText('0원')).toBeInTheDocument();
-  expect(screen.getByText(/상단 그룹·구성원 필터 미적용/)).toBeInTheDocument();
+  expect(
+    screen.getByLabelText(/매출 집계 기준:.*상단 그룹·구성원 필터/),
+  ).toBeInTheDocument();
 });
 it('does not display a previous month response when switching month', () => {
   mockQuery.mockReturnValue({
