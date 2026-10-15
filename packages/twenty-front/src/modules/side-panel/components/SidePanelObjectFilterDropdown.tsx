@@ -29,7 +29,7 @@ export const SidePanelObjectFilterDropdown = ({
           Icon={IconFilter}
           variant="tertiary"
           accent={isFilterActive ? 'blue' : 'default'}
-          size="medium"
+          size="small"
           ariaLabel={t`Filter by object type`}
         />
       }
