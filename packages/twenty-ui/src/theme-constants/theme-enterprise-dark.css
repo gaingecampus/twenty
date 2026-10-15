@@ -80,7 +80,7 @@ html.dark[data-ui-theme='enterprise'] {
   --t-border-color-blue: #1e3266;
   --t-border-color-transparent-strong: rgb(77 115 255 / 0.35);
   --t-border-radius-xs: 6px;
-  --t-border-radius-sm: 6px;
+  --t-border-radius-sm: 8px;
   --t-border-radius-md: 8px;
   --t-border-radius-xl: 16px;
   --t-page-card-top-left-radius: 0px;
@@ -164,7 +164,7 @@ html.dark[data-ui-theme='enterprise'] {
   --t-nav-item-active-color: #9db0ff;
   --t-nav-item-active-icon-stroke: 2.25;
   --t-nav-breadcrumb-active-color: var(--t-nav-item-active-color);
-  --t-control-hover-bg: #353b4a;
+  --t-control-hover-bg: #262b36;
   --t-nav-item-hover-bg: #2a2f3c;
   --t-nav-item-active-indicator: none;
   --t-nav-icon-size: 18;

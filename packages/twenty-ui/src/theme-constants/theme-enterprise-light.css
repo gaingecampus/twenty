@@ -157,7 +157,7 @@ html.light[data-ui-theme='enterprise'] {
   --t-border-color-blue: #c5d2ff;
   --t-border-color-transparent-strong: rgb(46 91 255 / 0.28);
   --t-border-radius-xs: 6px;
-  --t-border-radius-sm: 6px;
+  --t-border-radius-sm: 8px;
   --t-border-radius-md: 8px;
   --t-border-radius-xl: 16px;
   --t-page-card-top-left-radius: 0px;
@@ -241,7 +241,7 @@ html.light[data-ui-theme='enterprise'] {
   --t-nav-item-active-color: #2e5bff;
   --t-nav-item-active-icon-stroke: 2.25;
   --t-nav-breadcrumb-active-color: var(--t-nav-item-active-color);
-  --t-control-hover-bg: #e4e7ee;
+  --t-control-hover-bg: #f5f6f9;
   --t-nav-item-hover-bg: #f5f6f9;
   --t-nav-item-active-indicator: none;
   --t-nav-icon-size: 18;
