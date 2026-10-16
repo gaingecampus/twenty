@@ -30,7 +30,7 @@ export const SettingsEmailSignature = () => {
     <Section>
       <H2Title
         title="내 이메일 서명"
-        description="이 워크스페이스에서 내가 작성하는 새 단체 발송에 사용하는 명함입니다. 이름·직책·연락처·로고가 들어간 HTML을 등록하세요. 다른 회원의 서명과 별도로 저장됩니다."
+        description="이 워크스페이스에서 내가 작성하는 새 심방콜 발송에 사용하는 명함입니다. 이름·직책·연락처·로고가 들어간 HTML을 등록하세요. 다른 회원의 서명과 별도로 저장됩니다."
       />
       {error ? (
         <p role="alert">

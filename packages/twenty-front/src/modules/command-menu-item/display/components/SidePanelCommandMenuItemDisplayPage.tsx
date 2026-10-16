@@ -166,7 +166,7 @@ export const SidePanelCommandMenuItemDisplayPage = () => {
             const label = path
               ? settingLabels[path]
               : item.engineComponentKey === EngineComponentKey.COMPOSE_CAMPAIGN
-                ? t`단체 발송 작성`
+                ? t`심방콜 발송 작성`
                 : undefined;
             return (
               <CommandMenuItemRenderer

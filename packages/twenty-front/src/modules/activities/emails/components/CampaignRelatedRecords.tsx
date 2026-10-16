@@ -56,15 +56,15 @@ export const CampaignRecipientList = ({
     recordGqlFields: { id: true, list: { id: true, name: true } },
   });
   return (
-    <StyledSection aria-label="연결된 수신자 목록">
+    <StyledSection aria-label="연결된 동반 고객 목록">
       {loading ? (
         '불러오는 중…'
       ) : error ? (
-        <p role="alert">수신자 목록을 불러오지 못했습니다.</p>
+        <p role="alert">동반 고객 목록을 불러오지 못했습니다.</p>
       ) : record?.list ? (
         <RecordChip objectNameSingular="messageList" record={record.list} />
       ) : (
-        '연결된 수신자 목록이 없습니다.'
+        '연결된 동반 고객 목록이 없습니다.'
       )}
     </StyledSection>
   );

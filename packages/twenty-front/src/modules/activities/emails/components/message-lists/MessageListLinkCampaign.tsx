@@ -79,7 +79,7 @@ export const MessageListLinkCampaign = ({
       );
       if (!result.data?.[responseField]?.length) {
         enqueueErrorSnackBar({
-          message: t`단체 발송 상태가 변경되었습니다. 연결 가능한 초안을 다시 선택하세요.`,
+          message: t`심방콜 발송 상태가 변경되었습니다. 연결 가능한 초안을 다시 선택하세요.`,
         });
         await refetch();
         return;
@@ -89,7 +89,7 @@ export const MessageListLinkCampaign = ({
       setOpen(false);
     } catch {
       enqueueErrorSnackBar({
-        message: t`단체 발송을 연결하지 못했습니다. 다시 시도하세요.`,
+        message: t`심방콜 발송을 연결하지 못했습니다. 다시 시도하세요.`,
       });
     } finally {
       setBusy(false);
@@ -104,7 +104,7 @@ export const MessageListLinkCampaign = ({
             variant="secondary"
             size="small"
             Icon={IconLink}
-            title={open ? t`닫기` : t`단체 발송 연결`}
+            title={open ? t`닫기` : t`심방콜 발송 연결`}
             onClick={() => setOpen(!open)}
             disabled={busy}
           />
@@ -112,16 +112,16 @@ export const MessageListLinkCampaign = ({
       </StyledMessageListToolbar>
       {open && (
         <>
-          <p>{t`수신자 목록이 지정되지 않은 초안 단체 발송을 연결할 수 있습니다.`}</p>
+          <p>{t`동반 고객 목록이 지정되지 않은 초안 심방콜 발송을 연결할 수 있습니다.`}</p>
           <TextInput
             value={search}
             onChange={setSearch}
-            placeholder={t`단체 발송 검색`}
+            placeholder={t`심방콜 발송 검색`}
           />
           {loading && <p>{t`불러오는 중…`}</p>}
-          {error && <p role="alert">{t`단체 발송을 불러오지 못했습니다.`}</p>}
+          {error && <p role="alert">{t`심방콜 발송을 불러오지 못했습니다.`}</p>}
           {!loading && !error && records.length === 0 && (
-            <StyledMessageListEmpty>{t`연결 가능한 초안 단체 발송이 없습니다.`}</StyledMessageListEmpty>
+            <StyledMessageListEmpty>{t`연결 가능한 초안 심방콜 발송이 없습니다.`}</StyledMessageListEmpty>
           )}
           <Table>
             {records.map((campaign) => (
@@ -130,7 +130,7 @@ export const MessageListLinkCampaign = ({
                 gridTemplateColumns="minmax(120px, 1fr) 90px"
               >
                 <TableCell>
-                  {campaign.subject || t`제목 없는 단체 발송`}
+                  {campaign.subject || t`제목 없는 심방콜 발송`}
                 </TableCell>
                 <TableCell>
                   <Button
@@ -144,7 +144,7 @@ export const MessageListLinkCampaign = ({
           </Table>
           {hasNextPage && (
             <Button
-              title={t`단체 발송 더 보기`}
+              title={t`심방콜 발송 더 보기`}
               disabled={loading || busy}
               onClick={() => fetchMoreRecords()}
             />

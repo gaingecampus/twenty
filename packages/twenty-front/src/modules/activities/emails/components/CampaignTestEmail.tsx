@@ -65,7 +65,7 @@ export const CampaignTestEmail = ({
 
   return (
     <StyledContainer>
-      <StyledHint>{t`입력한 주소 한 곳에만 현재 내용과 첨부파일을 즉시 보냅니다. 제목에 [테스트]가 붙으며, 수신자 목록 발송이나 예약 저장은 실행되지 않습니다.`}</StyledHint>
+      <StyledHint>{t`입력한 주소 한 곳에만 현재 내용과 첨부파일을 즉시 보냅니다. 제목에 [테스트]가 붙으며, 동반 고객 목록 발송이나 예약 저장은 실행되지 않습니다.`}</StyledHint>
       <TextInput
         label={t`테스트 이메일 주소`}
         placeholder="name@example.com"

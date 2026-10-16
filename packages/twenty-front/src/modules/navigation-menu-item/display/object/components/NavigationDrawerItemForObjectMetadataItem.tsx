@@ -136,12 +136,18 @@ export const NavigationDrawerItemForObjectMetadataItem = ({
   const localizedPrimaryLabel =
     !isRecord &&
     objectMetadataItem.nameSingular === 'messageCampaign' &&
-    primaryLabel === 'Campaigns'
-      ? t`Campaigns`
+    ['Campaigns', '단체 발송', '심방콜 발송'].includes(primaryLabel)
+      ? t`심방콜 발송`
       : !isRecord &&
           objectMetadataItem.nameSingular === 'messageList' &&
-          ['Lists', '목록', '수신자 목록'].includes(primaryLabel)
-        ? t`수신자 목록`
+          [
+            'Lists',
+            '목록',
+            '수신자 목록',
+            '심방콜 목록',
+            '동반 고객 목록',
+          ].includes(primaryLabel)
+        ? t`동반 고객 목록`
         : primaryLabel;
 
   const label = needsInaccessibleRecordPlaceholder

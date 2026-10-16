@@ -76,14 +76,14 @@ export const CampaignReviewModal = ({
       shouldCloseModalOnClickOutsideOrEscape={!busy}
       renderInDocumentBody
     >
-      <ModalHeader hasBorderBottom>단체 발송 최종 검토</ModalHeader>
+      <ModalHeader hasBorderBottom>심방콜 발송 최종 검토</ModalHeader>
       <ModalContent contentPadding={5} gap={4}>
         <StyledDetails>
           <dt>보내는 사람</dt>
           <dd>{campaignState.fromAddress.trim()}</dd>
-          <dt>수신자 목록</dt>
+          <dt>동반 고객 목록</dt>
           <dd>
-            {list?.name || '선택한 수신자 목록'}
+            {list?.name || '선택한 동반 고객 목록'}
             {audience &&
               ` · 발송 가능 ${audience.sendable}명 / 전체 ${audience.totalMembers}명`}
           </dd>
@@ -115,7 +115,7 @@ export const CampaignReviewModal = ({
         <StyledHint>
           {scheduled
             ? '확인하면 이 내용으로 예약을 저장합니다. 수신 거부 여부는 발송 시 다시 확인합니다.'
-            : '확인하면 선택한 수신자 목록으로 발송을 시작합니다. 발송 후에는 취소할 수 없습니다.'}
+            : '확인하면 선택한 동반 고객 목록으로 발송을 시작합니다. 발송 후에는 취소할 수 없습니다.'}
         </StyledHint>
       </ModalContent>
       <ModalFooter>

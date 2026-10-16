@@ -108,21 +108,21 @@ export const MessageListCampaigns = ({ listId }: { listId: string }) => {
     FAILED: 'red',
   };
   return (
-    <StyledSection aria-label={t`연결된 단체 발송`}>
+    <StyledSection aria-label={t`연결된 심방콜 발송`}>
       <MessageListLinkCampaign listId={listId} onLinked={refetch} />
       {loading && <p>{t`불러오는 중…`}</p>}
-      {error && <p role="alert">{t`단체 발송을 불러오지 못했습니다.`}</p>}
+      {error && <p role="alert">{t`심방콜 발송을 불러오지 못했습니다.`}</p>}
       {!loading && !error && records.length === 0 && (
         <StyledMessageListEmpty>
-          {t`아직 연결된 단체 발송이 없습니다.`}
+          {t`아직 연결된 심방콜 발송이 없습니다.`}
           <br />
-          {t`단체 발송 연결 버튼으로 초안을 선택하세요.`}
+          {t`심방콜 발송 연결 버튼으로 초안을 선택하세요.`}
         </StyledMessageListEmpty>
       )}
       {records.length > 0 && (
         <StyledCampaignTable>
           <TableRow gridTemplateColumns={CAMPAIGN_GRID_COLUMNS}>
-            <StyledCampaignHeader>{t`단체 발송`}</StyledCampaignHeader>
+            <StyledCampaignHeader>{t`심방콜 발송`}</StyledCampaignHeader>
             <StyledCampaignHeader>{t`발신자`}</StyledCampaignHeader>
             <StyledCampaignHeader>{t`상태`}</StyledCampaignHeader>
             <StyledCampaignHeader>{t`예약 / 발송 시각`}</StyledCampaignHeader>
@@ -165,7 +165,7 @@ export const MessageListCampaigns = ({ listId }: { listId: string }) => {
       )}
       {hasNextPage && (
         <Button
-          title={t`단체 발송 더 보기`}
+          title={t`심방콜 발송 더 보기`}
           onClick={() => fetchMoreRecords()}
           disabled={loading}
         />

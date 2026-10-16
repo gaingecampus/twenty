@@ -146,7 +146,7 @@ export const CampaignComposerFields = ({
   const handleCreateList = async (searchInput?: string) => {
     const listName = searchInput?.trim() ?? '';
     if (!listName) {
-      enqueueErrorSnackBar({ message: t`수신자 목록 이름을 먼저 입력하세요.` });
+      enqueueErrorSnackBar({ message: t`동반 고객 목록 이름을 먼저 입력하세요.` });
       return;
     }
     const createdList = await createMessageList({ name: listName });
@@ -252,11 +252,11 @@ export const CampaignComposerFields = ({
       </StyledFieldGroup>
       <StyledFieldGroup>
         <CampaignFieldLabel
-          label={t`수신자 목록`}
+          label={t`동반 고객 목록`}
           help={
             isDefined(audiencePreview)
               ? buildAudienceHint(audiencePreview)
-              : t`발송할 고객이 포함된 수신자 목록을 선택하세요.`
+              : t`발송할 고객이 포함된 동반 고객 목록을 선택하세요.`
           }
         />
         <FormSingleRecordPicker
@@ -267,7 +267,7 @@ export const CampaignComposerFields = ({
         />
         <div>
           <Button
-            title={t`수신자 목록 관리·고객 확인`}
+            title={t`동반 고객 목록 관리·고객 확인`}
             Icon={IconExternalLink}
             variant="secondary"
             size="small"
@@ -331,7 +331,7 @@ export const CampaignComposerFields = ({
             <CampaignBodyVariablePicker onInsert={insertText} />
           )}
         />
-        <StyledHint>{t`예: ${'{{fullName}}'}님, 안녕하세요. 단체 발송 시 각 고객의 정보로 바뀝니다. 값이 없으면 빈칸으로 표시됩니다. 위 메뉴의 변수만 지원하며 직접 입력할 수도 있습니다.`}</StyledHint>
+        <StyledHint>{t`예: ${'{{fullName}}'}님, 안녕하세요. 심방콜 발송 시 각 고객의 정보로 바뀝니다. 값이 없으면 빈칸으로 표시됩니다. 위 메뉴의 변수만 지원하며 직접 입력할 수도 있습니다.`}</StyledHint>
       </StyledFieldGroup>
       <StyledFieldGroup>
         <StyledFieldLabel>{t`첨부 파일`}</StyledFieldLabel>

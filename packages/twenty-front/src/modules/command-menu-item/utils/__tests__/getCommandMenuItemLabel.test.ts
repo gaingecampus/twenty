@@ -26,12 +26,15 @@ describe('getCommandMenuItemLabel', () => {
   });
 
   it.each([
-    ['Create Campaign', '새 단체 발송'],
-    ['새 캠페인', '새 단체 발송'],
-    ['Compose Campaign', '단체 발송 작성'],
-    ['캠페인 작성', '단체 발송 작성'],
-    ['Campaign', '단체 발송'],
-    ['캠페인', '단체 발송'],
+    ['새 단체 발송', '새 심방콜 발송'],
+    ['단체 발송 작성', '심방콜 발송 작성'],
+    ['단체 발송', '심방콜 발송'],
+    ['Create Campaign', '새 심방콜 발송'],
+    ['새 캠페인', '새 심방콜 발송'],
+    ['Compose Campaign', '심방콜 발송 작성'],
+    ['캠페인 작성', '심방콜 발송 작성'],
+    ['Campaign', '심방콜 발송'],
+    ['캠페인', '심방콜 발송'],
   ])('normalizes legacy button label %s', (label, expected) => {
     i18n.load('ko-KR', koMessages);
     i18n.activate('ko-KR');

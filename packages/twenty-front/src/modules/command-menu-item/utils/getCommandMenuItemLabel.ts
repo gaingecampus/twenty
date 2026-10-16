@@ -10,12 +10,15 @@ const GO_TO_SETTINGS_SUFFIX = ' Settings';
 // Prefill/custom-app labels that are not resolved via standard-app i18n on the server
 const KNOWN_SEEDED_COMMAND_MENU_LABELS: Record<string, MessageDescriptor> = {
   'Quick Lead': msg`Quick Lead`,
-  'Create Campaign': msg`새 단체 발송`,
-  '새 캠페인': msg`새 단체 발송`,
-  'Compose Campaign': msg`단체 발송 작성`,
-  '캠페인 작성': msg`단체 발송 작성`,
-  Campaign: msg`단체 발송`,
-  캠페인: msg`단체 발송`,
+  'Create Campaign': msg`새 심방콜 발송`,
+  '새 단체 발송': msg`새 심방콜 발송`,
+  '단체 발송 작성': msg`심방콜 발송 작성`,
+  '단체 발송': msg`심방콜 발송`,
+  '새 캠페인': msg`새 심방콜 발송`,
+  'Compose Campaign': msg`심방콜 발송 작성`,
+  '캠페인 작성': msg`심방콜 발송 작성`,
+  Campaign: msg`심방콜 발송`,
+  캠페인: msg`심방콜 발송`,
 };
 
 export const getCommandMenuItemLabel = (

@@ -46,7 +46,7 @@ export const SettingsWorkspaceUnsubscribeTopicSection = () => {
   return (
     <SettingsTableListSection<UnsubscribeTopic>
       title={t`Unsubscribe Topics`}
-      description={t`수신자가 단체 발송을 주제별로 거부할 수 있도록 관리합니다. IMAP·SMTP 계정으로 발송할 때도 사용할 수 있으며, 위 이메일 채널 등록은 필요하지 않습니다.`}
+      description={t`수신자가 심방콜 발송을 주제별로 거부할 수 있도록 관리합니다. IMAP·SMTP 계정으로 발송할 때도 사용할 수 있으며, 위 이메일 채널 등록은 필요하지 않습니다.`}
       headerAdornment={
         <Button
           title={t`Preview`}
