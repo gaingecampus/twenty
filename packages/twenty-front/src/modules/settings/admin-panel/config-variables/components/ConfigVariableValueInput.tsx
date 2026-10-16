@@ -1,6 +1,7 @@
 import { useLingui } from '@lingui/react/macro';
 
 import { isConfigVariablesInDbEnabledState } from '@/client-config/states/isConfigVariablesInDbEnabledState';
+import { Select } from '@/ui/input/components/Select';
 import { TextInput } from '@/ui/input/components/TextInput';
 import { styled } from '@linaria/react';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
@@ -29,6 +30,25 @@ export const ConfigVariableValueInput = ({
   const isConfigVariablesInDbEnabled = useAtomStateValue(
     isConfigVariablesInDbEnabledState,
   );
+
+  if (variable.name === 'GAINGE_SALES_ALLOW_ALL_MEMBERS') {
+    return (
+      <Select
+        label="전사 매출 조회 범위"
+        value={value === true ? 'all' : 'selected'}
+        onChange={(selection: string) => onChange(selection === 'all')}
+        disabled={
+          disabled || variable.isEnvOnly || !isConfigVariablesInDbEnabled
+        }
+        options={[
+          { value: 'selected', label: '지정 멤버만 허용' },
+          { value: 'all', label: '전체 멤버 허용' },
+        ]}
+        dropdownId="gainge-sales-access-mode"
+        fullWidth
+      />
+    );
+  }
 
   return (
     <StyledValueContainer>

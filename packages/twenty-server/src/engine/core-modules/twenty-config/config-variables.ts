@@ -2,6 +2,7 @@ import { Logger } from '@nestjs/common';
 
 import { plainToClass } from 'class-transformer';
 import {
+  IsBoolean,
   IsDateString,
   IsDefined,
   IsEnum,
@@ -100,6 +101,17 @@ export class ConfigVariables {
   @IsOptional()
   @IsString()
   GAINGE_SALES_MEMBER_IDS?: string;
+
+  @ConfigVariablesMetadata({
+    group: ConfigVariablesGroup.ADVANCED_SETTINGS,
+    type: ConfigVariableType.BOOLEAN,
+    isSensitive: false,
+    description:
+      '전사 매출 조회 범위: 전체 멤버 허용 또는 지정 멤버만 허용. 전체 허용은 설정된 워크스페이스에만 적용됩니다.',
+  })
+  @IsOptional()
+  @IsBoolean()
+  GAINGE_SALES_ALLOW_ALL_MEMBERS = false;
 
   @ConfigVariablesMetadata({
     group: ConfigVariablesGroup.ADVANCED_SETTINGS,

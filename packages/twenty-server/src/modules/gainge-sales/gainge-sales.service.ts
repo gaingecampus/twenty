@@ -48,6 +48,8 @@ export class GaingeSalesService {
     const url = this.config.get('GAINGE_SALES_MCP_URL');
     const token = this.config.get('GAINGE_SALES_MCP_TOKEN');
     const allowedWorkspace = this.config.get('GAINGE_SALES_WORKSPACE_ID');
+    const allowAllMembers =
+      this.config.get('GAINGE_SALES_ALLOW_ALL_MEMBERS') === true;
     const allowedMembers =
       this.config
         .get('GAINGE_SALES_MEMBER_IDS')
@@ -59,6 +61,7 @@ export class GaingeSalesService {
       token,
       allowedWorkspace,
       allowedMembers,
+      allowAllMembers,
     ]);
 
     // Drop cached data immediately when credentials or access scope change.
@@ -68,12 +71,11 @@ export class GaingeSalesService {
       this.configuration = configuration;
     }
 
-    if (!url || !token || !allowedWorkspace || !allowedMembers.length)
-      return empty('NOT_CONFIGURED');
+    if (!url || !token || !allowedWorkspace) return empty('NOT_CONFIGURED');
     if (
       workspaceId !== allowedWorkspace ||
       !memberId ||
-      !allowedMembers.includes(memberId)
+      (!allowAllMembers && !allowedMembers.includes(memberId))
     )
       return empty('FORBIDDEN');
 

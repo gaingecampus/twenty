@@ -1,9 +1,12 @@
-jest.mock('src/engine/core-modules/twenty-config/twenty-config.service', () => ({ TwentyConfigService: class {} }));
+jest.mock(
+  'src/engine/core-modules/twenty-config/twenty-config.service',
+  () => ({ TwentyConfigService: class {} }),
+);
 import { TwentyConfigService } from 'src/engine/core-modules/twenty-config/twenty-config.service';
 import { GaingeSalesService } from '../gainge-sales.service';
 
 const originalFetch = global.fetch;
-let settings: Record<string, string>;
+let settings: Record<string, string | boolean>;
 let service: GaingeSalesService;
 let fetchMock: jest.Mock;
 const month = '2026-09';
@@ -150,4 +153,45 @@ it('recovers after temporary upstream errors', async () => {
   expect(
     (await service.getMonthlySales('workspace', 'member', month)).status,
   ).toBe('READY');
+});
+
+it('allows any authenticated member in the configured workspace when all-members access is enabled', async () => {
+  settings.GAINGE_SALES_ALLOW_ALL_MEMBERS = true;
+  delete settings.GAINGE_SALES_MEMBER_IDS;
+  succeed();
+  expect(
+    (await service.getMonthlySales('workspace', 'another-member', month))
+      .status,
+  ).toBe('READY');
+});
+it.each([
+  ['other-workspace', 'member'],
+  ['workspace', undefined],
+])(
+  'never bypasses workspace isolation or member authentication in all-members mode',
+  async (workspace, member) => {
+    settings.GAINGE_SALES_ALLOW_ALL_MEMBERS = true;
+    expect(
+      (await service.getMonthlySales(workspace!, member, month)).status,
+    ).toBe('FORBIDDEN');
+    expect(fetchMock).not.toHaveBeenCalled();
+  },
+);
+it('denies everyone when designated-member mode has an empty list', async () => {
+  settings.GAINGE_SALES_MEMBER_IDS = '';
+  expect(
+    (await service.getMonthlySales('workspace', 'member', month)).status,
+  ).toBe('FORBIDDEN');
+  expect(fetchMock).not.toHaveBeenCalled();
+});
+it('revokes cached access when switching back to designated members', async () => {
+  settings.GAINGE_SALES_ALLOW_ALL_MEMBERS = true;
+  succeed();
+  await service.getMonthlySales('workspace', 'another-member', month);
+  settings.GAINGE_SALES_ALLOW_ALL_MEMBERS = false;
+  expect(
+    (await service.getMonthlySales('workspace', 'another-member', month))
+      .status,
+  ).toBe('FORBIDDEN');
+  expect(fetchMock).toHaveBeenCalledTimes(3);
 });

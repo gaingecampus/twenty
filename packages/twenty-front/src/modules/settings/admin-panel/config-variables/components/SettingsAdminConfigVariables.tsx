@@ -174,7 +174,7 @@ export const SettingsAdminConfigVariables = () => {
         <Section>
           <H2Title
             title="가캠 매출 연동"
-            description="각 항목을 눌러 수정 후 저장하세요. MCP 주소(/api/mcp 포함), sales:read 토큰, 허용 워크스페이스 ID와 조회 가능한 구성원 ID(쉼표 구분)를 모두 설정하면 대시보드에 사업부별 매출이 표시됩니다. 토큰은 암호화 저장되며 서버에서만 사용됩니다."
+            description="각 항목을 눌러 수정 후 저장하세요. MCP 주소(/api/mcp 포함), sales:read 토큰, 허용 워크스페이스 ID를 설정하고 전사 매출 조회 범위를 선택하세요. 기본값은 지정 멤버만 허용이며, 조회 가능한 구성원 ID를 쉼표로 구분해 입력합니다. 전체 멤버 허용을 선택하면 해당 워크스페이스의 모든 멤버에게 대시보드에 사업부별 매출이 표시됩니다. 토큰은 암호화 저장되며 서버에서만 사용됩니다."
           />
           <SettingsAdminConfigVariablesTable variables={salesVariables} />
         </Section>

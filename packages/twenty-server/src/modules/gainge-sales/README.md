@@ -6,7 +6,7 @@ CRM 대시보드의 `월 누적 매출 · 사업부별` 영역은 가캠 MCP의
 
 ## 서버 설정
 
-Admin Panel → Config Variables 또는 서버 환경변수에 아래 네 값을 등록한다.
+Admin Panel → Config Variables 또는 서버 환경변수에 아래 연동 값과 조회 범위를 설정한다.
 프론트 환경변수에 토큰을 넣지 않는다. 이 모듈은 토큰을 발급하지 않는다.
 
 | 변수 | 값 |
@@ -14,10 +14,12 @@ Admin Panel → Config Variables 또는 서버 환경변수에 아래 네 값을
 | `GAINGE_SALES_MCP_URL` | 가캠 HTTPS 주소 + `/api/mcp` |
 | `GAINGE_SALES_MCP_TOKEN` | 서버용 `sales:read` 토큰 (민감 설정으로 마스킹) |
 | `GAINGE_SALES_WORKSPACE_ID` | 매출을 조회할 CRM workspace UUID |
+| `GAINGE_SALES_ALLOW_ALL_MEMBERS` | 기본 false: 지정 멤버만 허용. true: 설정된 워크스페이스의 모든 로그인 멤버 허용 |
 | `GAINGE_SALES_MEMBER_IDS` | 조회 허용 workspaceMember UUID를 쉼표로 구분 |
 
 허용 멤버는 CRM의 teamMember/고객 ID가 아니라 로그인 사용자 workspaceMember ID다.
-비어 있으면 연결 대기로 표시한다. 다른 워크스페이스, 허용되지 않은 멤버와
+지정 멤버 모드에서 목록이 비어 있으면 모든 멤버의 조회를 거부한다.
+전체 멤버 모드에서는 지정 목록을 유지하되 적용하지 않는다. 다른 워크스페이스, 허용되지 않은 멤버와
 멤버가 없는 API key 요청에는 금액을 반환하지 않는다. 허용 범위와 토큰은
 매 요청마다 확인하며 설정 변경 시 캐시를 비운다.
 
