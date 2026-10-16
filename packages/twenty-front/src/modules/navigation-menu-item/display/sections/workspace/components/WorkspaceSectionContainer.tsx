@@ -1,3 +1,5 @@
+import { useLingui } from '@lingui/react/macro';
+import { isNavigationDrawerExpandedState } from '@/ui/navigation/states/isNavigationDrawerExpanded';
 import { styled } from '@linaria/react';
 import { MailboxNavigationItem } from '@/mailbox/components/MailboxNavigationItem';
 import React, { lazy, Suspense, useContext } from 'react';
@@ -59,6 +61,14 @@ export const WorkspaceSectionContainer = ({
   );
   const { toggleNavigationSection, isNavigationSectionOpen } =
     useNavigationSection('Workspace');
+  const { t } = useLingui();
+  const {
+    toggleNavigationSection: toggleCommunicationSection,
+    isNavigationSectionOpen: isCommunicationSectionOpen,
+  } = useNavigationSection('CustomerCommunication');
+  const isNavigationDrawerExpanded = useAtomStateValue(
+    isNavigationDrawerExpandedState,
+  );
   const views = useAtomStateValue(viewsSelector);
 
   const objectMetadataItems = useAtomStateValue(objectMetadataItemsSelector);
@@ -90,7 +100,23 @@ export const WorkspaceSectionContainer = ({
       folderChildrenById,
     });
 
-  const filteredItems = filteredTopLevelItems;
+  const communicationItems = filteredTopLevelItems.filter((item) => {
+    if (item.type !== 'OBJECT' && item.type !== 'VIEW') return false;
+    const object = getObjectMetadataForNavigationMenuItem(
+      item,
+      objectMetadataItems,
+      views,
+    );
+    return ['messageList', 'messageCampaign'].includes(
+      object?.nameSingular ?? '',
+    );
+  });
+  const communicationItemIds = new Set(
+    communicationItems.map((item) => item.id),
+  );
+  const filteredItems = filteredTopLevelItems.filter(
+    (item) => !communicationItemIds.has(item.id),
+  );
 
   const workspaceOrphanItemsForSection = isLayoutCustomizationModeEnabled
     ? flatItems
@@ -127,45 +153,63 @@ export const WorkspaceSectionContainer = ({
   }
 
   return (
-    <NavigationMenuItemSection
-      title={sectionTitle}
-      isOpen={isNavigationSectionOpen}
-      onToggle={() => toggleNavigationSection()}
-      rightIcon={rightIcon}
-      alwaysShowRightIcon={isLayoutCustomizationModeEnabled}
-      forceExpanded={isAddToNavigationDropTargetVisible}
-      contentWrapper={(children) => (
-        <StyledWorkspaceSectionContentGapOffset data-nav-section="workspace">
-          {children}
-        </StyledWorkspaceSectionContentGapOffset>
-      )}
-    >
-      <MailboxNavigationItem />
-      {isLayoutCustomizationModeEnabled ? (
-        <Suspense
-          fallback={
-            <WorkspaceSectionListEditModeFallback
-              filteredItems={workspaceOrphanItemsForSection}
-              folderChildrenById={folderChildrenById}
-              onActiveObjectMetadataItemClick={onActiveObjectMetadataItemClick}
-            />
-          }
-        >
-          <LazyWorkspaceSectionListDndKit
-            filteredItems={workspaceOrphanItemsForSection}
-            getEditModeProps={getEditModeProps}
-            folderChildrenById={folderChildrenById}
-            onNavigationMenuItemClick={onNavigationMenuItemClick}
+    <>
+      <NavigationMenuItemSection
+        title={t`고객 소통`}
+        isOpen={isCommunicationSectionOpen}
+        onToggle={toggleCommunicationSection}
+        forceExpanded={!isNavigationDrawerExpanded}
+      >
+        <MailboxNavigationItem />
+        {!isLayoutCustomizationModeEnabled && (
+          <WorkspaceSectionListReadOnly
+            filteredItems={communicationItems}
+            folderChildrenById={filteredFolderChildrenById}
             onActiveObjectMetadataItemClick={onActiveObjectMetadataItemClick}
           />
-        </Suspense>
-      ) : (
-        <WorkspaceSectionListReadOnly
-          filteredItems={filteredItems}
-          folderChildrenById={filteredFolderChildrenById}
-          onActiveObjectMetadataItemClick={onActiveObjectMetadataItemClick}
-        />
-      )}
-    </NavigationMenuItemSection>
+        )}
+      </NavigationMenuItemSection>
+      <NavigationMenuItemSection
+        title={sectionTitle}
+        isOpen={isNavigationSectionOpen}
+        onToggle={() => toggleNavigationSection()}
+        rightIcon={rightIcon}
+        alwaysShowRightIcon={isLayoutCustomizationModeEnabled}
+        forceExpanded={isAddToNavigationDropTargetVisible}
+        contentWrapper={(children) => (
+          <StyledWorkspaceSectionContentGapOffset data-nav-section="workspace">
+            {children}
+          </StyledWorkspaceSectionContentGapOffset>
+        )}
+      >
+        {isLayoutCustomizationModeEnabled ? (
+          <Suspense
+            fallback={
+              <WorkspaceSectionListEditModeFallback
+                filteredItems={workspaceOrphanItemsForSection}
+                folderChildrenById={folderChildrenById}
+                onActiveObjectMetadataItemClick={
+                  onActiveObjectMetadataItemClick
+                }
+              />
+            }
+          >
+            <LazyWorkspaceSectionListDndKit
+              filteredItems={workspaceOrphanItemsForSection}
+              getEditModeProps={getEditModeProps}
+              folderChildrenById={folderChildrenById}
+              onNavigationMenuItemClick={onNavigationMenuItemClick}
+              onActiveObjectMetadataItemClick={onActiveObjectMetadataItemClick}
+            />
+          </Suspense>
+        ) : (
+          <WorkspaceSectionListReadOnly
+            filteredItems={filteredItems}
+            folderChildrenById={filteredFolderChildrenById}
+            onActiveObjectMetadataItemClick={onActiveObjectMetadataItemClick}
+          />
+        )}
+      </NavigationMenuItemSection>
+    </>
   );
 };
