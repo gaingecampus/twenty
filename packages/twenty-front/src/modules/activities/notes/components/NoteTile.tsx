@@ -21,21 +21,16 @@ import { RecordFieldsScopeContextProvider } from '@/object-record/record-field-l
 import { FieldContextProvider } from '@/object-record/record-field/ui/components/FieldContextProvider';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 
-const StyledCard = styled.div<{
-  isSingleNote: boolean;
-  hasImages: boolean;
-  isExpanded: boolean;
-}>`
+const StyledCard = styled.article`
   align-items: flex-start;
   background: ${themeCssVariables.background.secondary};
   border: 1px solid ${themeCssVariables.border.color.medium};
   border-radius: ${themeCssVariables.border.radius.md};
   display: flex;
   flex-direction: column;
-  height: ${({ hasImages, isExpanded }) =>
-    hasImages || isExpanded ? 'auto' : '300px'};
   justify-content: space-between;
-  min-height: 300px;
+  min-height: 220px;
+  min-width: 0;
   width: 100%;
 `;
 
@@ -134,13 +129,7 @@ const StyledFooterRelations = styled.div`
   min-width: 0;
 `;
 
-export const NoteTile = ({
-  note,
-  isSingleNote,
-}: {
-  note: Note;
-  isSingleNote: boolean;
-}) => {
+export const NoteTile = ({ note }: { note: Note }) => {
   const { openRecordInSidePanel } = useOpenRecordInSidePanel();
 
   const { localeCatalog } = useAtomStateValue(dateLocaleState);
@@ -181,11 +170,7 @@ export const NoteTile = ({
   );
 
   return (
-    <StyledCard
-      isSingleNote={isSingleNote}
-      hasImages={images.length > 0}
-      isExpanded={isExpanded}
-    >
+    <StyledCard aria-label={note.title?.trim() || t`제목 없는 노트`}>
       <StyledCardDetailsContainer
         onClick={() =>
           openRecordInSidePanel({
@@ -195,7 +180,9 @@ export const NoteTile = ({
         }
       >
         <StyledNoteHeader>
-          <StyledNoteTitle>{note.title ?? t`Task Title`}</StyledNoteTitle>
+          <StyledNoteTitle>
+            {note.title?.trim() || t`제목 없는 노트`}
+          </StyledNoteTitle>
           <StyledNoteMetadata>
             {note.createdBy && (
               <>
@@ -218,7 +205,7 @@ export const NoteTile = ({
         </StyledNoteHeader>
         <NoteImagePreview images={images} />
         <StyledCardContent ref={bodyRef} isExpanded={isExpanded}>
-          {body}
+          {body || t`작성된 내용이 없습니다.`}
         </StyledCardContent>
         {(isOverflowing || isExpanded) && (
           <StyledReadMore

@@ -19,7 +19,7 @@ const StyledContainer = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 8px 24px;
+  padding: ${themeCssVariables.spacing[2]} ${themeCssVariables.spacing[4]};
 `;
 
 const StyledTitleBar = styled.h3`
@@ -42,10 +42,10 @@ const StyledCount = styled.span`
 `;
 
 const StyledNoteContainer = styled.div`
+  align-items: start;
   display: grid;
   gap: ${themeCssVariables.spacing[4]};
-  grid-auto-rows: 1fr;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
   width: 100%;
 `;
 
@@ -66,11 +66,7 @@ export const NoteList = ({
         </StyledTitleBar>
         <StyledNoteContainer>
           {notes.map((note) => (
-            <NoteTile
-              key={note.id}
-              note={note}
-              isSingleNote={notes.length === 1}
-            />
+            <NoteTile key={note.id} note={note} />
           ))}
         </StyledNoteContainer>
       </StyledContainer>

@@ -33,7 +33,7 @@ export const NotesCard = () => {
     useNotes(targetRecord);
 
   const handleLastRowVisible = async () => {
-    if (hasNextPage) {
+    if (hasNextPage && !loading) {
       await fetchMoreNotes();
     }
   };
@@ -89,7 +89,7 @@ export const NotesCard = () => {
   return (
     <StyledNotesContainer>
       <NoteList
-        title={t`All`}
+        title={t`노트 갤러리`}
         notes={notes}
         totalCount={totalCountNotes}
         button={
@@ -108,10 +108,24 @@ export const NotesCard = () => {
           )
         }
       />
-      <CustomResolverFetchMoreLoader
-        loading={loading}
-        onLastRowVisible={handleLastRowVisible}
-      />
+      {hasNextPage && (
+        <>
+          <CustomResolverFetchMoreLoader
+            loading={loading}
+            onLastRowVisible={handleLastRowVisible}
+          />
+          <Button
+            title={
+              loading
+                ? t`불러오는 중…`
+                : t`노트 더 보기 (${notes.length}/${totalCountNotes})`
+            }
+            variant="secondary"
+            disabled={loading}
+            onClick={handleLastRowVisible}
+          />
+        </>
+      )}
     </StyledNotesContainer>
   );
 };
