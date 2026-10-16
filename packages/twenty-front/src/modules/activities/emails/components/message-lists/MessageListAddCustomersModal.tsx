@@ -1,3 +1,5 @@
+import { allowRequestsToTwentyIconsState } from '@/client-config/states/allowRequestsToTwentyIcons';
+import { getLogoUrlFromDomainName } from 'twenty-shared/utils';
 import { getWorkspaceMemberRecipients } from '@/activities/emails/utils/getWorkspaceMemberRecipients';
 import { currentWorkspaceMemberState } from '@/auth/states/currentWorkspaceMemberState';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
@@ -13,14 +15,25 @@ import { useModal } from '@/ui/layout/modal/hooks/useModal';
 import { styled } from '@linaria/react';
 import { t } from '@lingui/core/macro';
 import { useEffect, useId, useState } from 'react';
+import { Avatar } from 'twenty-ui/data-display';
+import { getAbsoluteImageUrl } from '~/utils/image/getAbsoluteImageUrl';
+import { IconInfoCircle, IconX } from 'twenty-ui/icon';
 import { Button, Checkbox, Radio } from 'twenty-ui/input';
-import { ModalHeader, ModalContent, ModalFooter } from 'twenty-ui/surfaces';
+import { AppTooltip, ModalHeader, ModalFooter } from 'twenty-ui/surfaces';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 
 type Customer = ObjectRecord & {
   name: { firstName: string; lastName: string };
   emails: { primaryEmail: string };
   userEmail?: string;
+  avatarUrl?: string;
+  avatarFile?: { url: string }[];
+  jobTitle?: string;
+  company?: {
+    id: string;
+    name: string;
+    domainName?: { primaryLinkUrl?: string };
+  } | null;
 };
 type Member = ObjectRecord & { personId: string; workspaceMemberId: string };
 const StyledTable = styled.table`
@@ -39,6 +52,9 @@ const StyledTable = styled.table`
     background: ${themeCssVariables.background.secondary};
     color: ${themeCssVariables.font.color.secondary};
     font-weight: ${themeCssVariables.font.weight.medium};
+    position: sticky;
+    top: 0;
+    z-index: 1;
   }
   th[data-selection],
   td[data-selection] {
@@ -50,19 +66,54 @@ const StyledTable = styled.table`
 `;
 const StyledScroll = styled.div`
   border: 1px solid ${themeCssVariables.border.color.light};
-  border-radius: ${themeCssVariables.border.radius.sm};
-  max-height: 240px;
+  border-radius: ${themeCssVariables.border.radius.md};
+  flex-shrink: 0;
+  max-height: 200px;
   overflow: auto;
+  overscroll-behavior: contain;
+`;
+const StyledCustomerProfile = styled.div`
+  align-items: center;
+  display: flex;
+  gap: ${themeCssVariables.spacing[2]};
+
+  > :first-child {
+    flex-shrink: 0;
+  }
+`;
+const StyledCustomerDetails = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: ${themeCssVariables.spacing[1]} ${themeCssVariables.spacing[2]};
+  min-width: 0;
+`;
+const StyledCustomerContext = styled.span`
+  align-items: center;
+  color: ${themeCssVariables.font.color.secondary};
+  display: inline-flex;
+  flex-wrap: wrap;
+  font-size: ${themeCssVariables.font.size.sm};
+  gap: ${themeCssVariables.spacing[1]};
 `;
 const StyledListOption = styled.div`
+  align-items: center;
   border-bottom: 1px solid ${themeCssVariables.border.color.light};
+  display: flex;
+  gap: ${themeCssVariables.spacing[2]};
   padding: ${themeCssVariables.spacing[3]};
+  > :last-child {
+    flex: 1;
+    min-width: 0;
+  }
   &:last-child {
     border-bottom: none;
   }
-  &:hover,
-  &[data-selected='true'] {
+  &:hover {
     background: ${themeCssVariables.background.secondary};
+  }
+  &[data-selected='true'] {
+    background: ${themeCssVariables.color.transparent.blue2};
+    box-shadow: inset 3px 0 ${themeCssVariables.color.blue};
   }
   label {
     cursor: pointer;
@@ -70,9 +121,14 @@ const StyledListOption = styled.div`
   }
 `;
 const StyledSection = styled.section`
+  background: ${themeCssVariables.background.primary};
+  border: 1px solid ${themeCssVariables.border.color.light};
+  border-radius: ${themeCssVariables.border.radius.md};
   display: flex;
   flex-direction: column;
+  flex-shrink: 0;
   gap: ${themeCssVariables.spacing[3]};
+  padding: ${themeCssVariables.spacing[4]};
 `;
 const StyledTitle = styled.h3`
   color: ${themeCssVariables.font.color.primary};
@@ -85,11 +141,56 @@ const StyledHeaderTitle = styled.h2`
   font-weight: ${themeCssVariables.font.weight.semiBold};
   margin: 0;
 `;
-const StyledSummary = styled.div`
+const StyledHeader = styled.div`
+  align-items: center;
+  display: flex;
+  gap: ${themeCssVariables.spacing[3]};
+  justify-content: space-between;
+  width: 100%;
+`;
+const StyledBody = styled.div`
   background: ${themeCssVariables.background.secondary};
-  border-radius: ${themeCssVariables.border.radius.sm};
-  font-size: ${themeCssVariables.font.size.sm};
+  display: flex;
+  flex-direction: column;
+  gap: ${themeCssVariables.spacing[4]};
+  max-height: calc(85dvh - 180px);
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: ${themeCssVariables.spacing[5]};
+`;
+const StyledSummary = styled.dl`
+  display: grid;
+  gap: ${themeCssVariables.spacing[2]};
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 0;
+  @media (max-width: 480px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+`;
+const StyledMetric = styled.div`
+  background: ${themeCssVariables.background.primary};
+  border-radius: ${themeCssVariables.border.radius.md};
   padding: ${themeCssVariables.spacing[3]};
+  dt {
+    color: ${themeCssVariables.font.color.secondary};
+    font-size: ${themeCssVariables.font.size.sm};
+    margin-bottom: ${themeCssVariables.spacing[2]};
+  }
+  dd {
+    font-size: ${themeCssVariables.font.size.xl};
+    font-weight: ${themeCssVariables.font.weight.semiBold};
+    margin: 0;
+  }
+  &[data-accent='blue'] dd {
+    color: ${themeCssVariables.color.blue};
+  }
+`;
+const StyledInfo = styled.span`
+  align-items: center;
+  color: ${themeCssVariables.font.color.secondary};
+  display: inline-flex;
+  gap: ${themeCssVariables.spacing[2]};
 `;
 const StyledHint = styled.p`
   color: ${themeCssVariables.font.color.secondary};
@@ -110,6 +211,9 @@ export const MessageListAddCustomersModal = ({
   onClose: () => void;
   onAdded?: () => Promise<unknown>;
 }) => {
+  const allowRequestsToTwentyIcons = useAtomStateValue(
+    allowRequestsToTwentyIconsState,
+  );
   const currentWorkspaceMember = useAtomStateValue(currentWorkspaceMemberState);
   const isWorkspaceMember = recipientType === 'workspaceMember';
   const recipientIdField = isWorkspaceMember ? 'workspaceMemberId' : 'personId';
@@ -178,8 +282,15 @@ export const MessageListAddCustomersModal = ({
             }
           : undefined,
     recordGqlFields: isWorkspaceMember
-      ? { id: true, name: true, userEmail: true }
-      : { id: true, name: true, emails: true },
+      ? { id: true, name: true, userEmail: true, avatarUrl: true }
+      : {
+          id: true,
+          name: true,
+          emails: true,
+          avatarFile: true,
+          jobTitle: true,
+          company: { id: true, name: true, domainName: true },
+        },
     limit: 50,
     fetchPolicy: 'cache-and-network',
   });
@@ -252,7 +363,7 @@ export const MessageListAddCustomersModal = ({
       }
       await onAdded?.();
       enqueueSuccessSnackBar({
-        message: t`수신자 ${added}명을 수신자 목록에 추가했습니다.`,
+        message: t`수신자 ${added}명을 동반 고객 목록에 추가했습니다.`,
       });
       onClose();
     } catch {
@@ -278,19 +389,60 @@ export const MessageListAddCustomersModal = ({
       shouldCloseModalOnClickOutsideOrEscape={!busy}
       renderInDocumentBody
     >
-      <ModalHeader hasBorderBottom>
-        <StyledHeaderTitle>
-          {isWorkspaceMember
-            ? t`수신자 목록에 워크스페이스 멤버 추가`
-            : t`수신자 목록에 고객 추가`}
-        </StyledHeaderTitle>
+      <ModalHeader hasBorderBottom autoHeight>
+        <StyledHeader>
+          <StyledHeaderTitle>
+            {isWorkspaceMember
+              ? t`동반 고객 목록에 워크스페이스 멤버 추가`
+              : t`동반 고객 목록에 고객 추가`}
+          </StyledHeaderTitle>
+          <Button
+            Icon={IconX}
+            ariaLabel={t`닫기`}
+            variant="tertiary"
+            disabled={busy}
+            onClick={onClose}
+          />
+        </StyledHeader>
       </ModalHeader>
-      <ModalContent contentPadding={5} gap={4}>
+      <StyledBody>
+        <StyledSummary aria-label={t`수신자 추가 요약`} aria-live="polite">
+          <StyledMetric>
+            <dt>{t`선택한 수신자`}</dt>
+            <dd>
+              {candidates.length}
+              {t`명`}
+            </dd>
+          </StyledMetric>
+          <StyledMetric>
+            <dt>{t`이미 포함`}</dt>
+            <dd>
+              {listId && !checking && !moreExisting && !checkError
+                ? `${alreadyIncluded}명`
+                : '—'}
+            </dd>
+          </StyledMetric>
+          <StyledMetric data-accent="blue">
+            <dt>{t`추가 예정`}</dt>
+            <dd>
+              {listId && !checking && !moreExisting && !checkError
+                ? `${additions.length}명`
+                : '—'}
+            </dd>
+          </StyledMetric>
+          <StyledMetric>
+            <dt>{t`이메일 없음`}</dt>
+            <dd>
+              {missingEmail}
+              {t`명`}
+            </dd>
+          </StyledMetric>
+        </StyledSummary>
         {!initialListId && (
-          <StyledSection aria-label={t`추가할 수신자 목록`}>
-            <StyledTitle>{t`추가할 수신자 목록`}</StyledTitle>
+          <StyledSection aria-label={t`추가할 동반 고객 목록`}>
+            <StyledTitle>{t`동반 고객 목록 선택`}</StyledTitle>
             <TextInput
-              placeholder={t`수신자 목록 검색`}
+              placeholder={t`동반 고객 목록 검색`}
               fullWidth
               value={listSearch}
               onChange={setListSearch}
@@ -302,6 +454,12 @@ export const MessageListAddCustomersModal = ({
                   key={list.id}
                   data-selected={listId === list.id}
                 >
+                  <Avatar
+                    placeholder={list.name || t`제목 없는 목록`}
+                    placeholderColorSeed={list.id}
+                    type="squared"
+                    size="md"
+                  />
                   <Radio
                     label={list.name || t`제목 없는 목록`}
                     name={`${modalId}-list`}
@@ -312,12 +470,12 @@ export const MessageListAddCustomersModal = ({
                 </StyledListOption>
               ))}
             </StyledScroll>
-            {loadingLists && <p>{t`수신자 목록을 불러오는 중입니다.`}</p>}
+            {loadingLists && <p>{t`동반 고객 목록을 불러오는 중입니다.`}</p>}
             {listsError && (
-              <p role="alert">{t`수신자 목록을 불러오지 못했습니다.`}</p>
+              <p role="alert">{t`동반 고객 목록을 불러오지 못했습니다.`}</p>
             )}
             {!loadingLists && !listsError && lists.length === 0 && (
-              <p>{t`선택할 수신자 목록이 없습니다.`}</p>
+              <p>{t`선택할 동반 고객 목록이 없습니다.`}</p>
             )}
             {moreLists && (
               <Button
@@ -392,9 +550,61 @@ export const MessageListAddCustomersModal = ({
                       </td>
                     )}
                     <td>
-                      {[person.name?.firstName, person.name?.lastName]
-                        .filter(Boolean)
-                        .join(' ')}
+                      <StyledCustomerProfile>
+                        <Avatar
+                          avatarUrl={getAbsoluteImageUrl(
+                            isWorkspaceMember
+                              ? person.avatarUrl
+                              : person.avatarFile?.[0]?.url,
+                          )}
+                          placeholder={[
+                            person.name?.firstName,
+                            person.name?.lastName,
+                          ]
+                            .filter(Boolean)
+                            .join(' ')}
+                          placeholderColorSeed={person.id}
+                          type="rounded"
+                          size="md"
+                        />
+                        <StyledCustomerDetails>
+                          <span>
+                            {[person.name?.firstName, person.name?.lastName]
+                              .filter(Boolean)
+                              .join(' ') || t`이름 없음`}
+                          </span>
+                          {!isWorkspaceMember &&
+                            (person.company?.name || person.jobTitle) && (
+                              <StyledCustomerContext>
+                                {person.company?.name && (
+                                  <>
+                                    <Avatar
+                                      avatarUrl={
+                                        allowRequestsToTwentyIcons &&
+                                        person.company.domainName
+                                          ?.primaryLinkUrl
+                                          ? getLogoUrlFromDomainName(
+                                              person.company.domainName
+                                                .primaryLinkUrl,
+                                            )
+                                          : undefined
+                                      }
+                                      placeholder={person.company.name}
+                                      placeholderColorSeed={person.company.id}
+                                      type="squared"
+                                      size="sm"
+                                    />
+                                    <span>{person.company.name}</span>
+                                  </>
+                                )}
+                                {person.company?.name &&
+                                  person.jobTitle &&
+                                  ' · '}
+                                {person.jobTitle}
+                              </StyledCustomerContext>
+                            )}
+                        </StyledCustomerDetails>
+                      </StyledCustomerProfile>
                     </td>
                     <td>{person.emails?.primaryEmail || t`이메일 없음`}</td>
                   </tr>
@@ -415,8 +625,20 @@ export const MessageListAddCustomersModal = ({
             />
           )}
         </StyledSection>
-        <StyledSummary>{t`선택 ${candidates.length}명 · 이미 포함 ${alreadyIncluded}명 · 새로 추가 ${additions.length}명 · 이메일 없음 ${missingEmail}명`}</StyledSummary>
-        <StyledHint>{t`이미 포함된 수신자는 건너뜁니다. 이메일이 없는 수신자도 목록에는 저장되지만 발송할 때 제외됩니다.`}</StyledHint>
+        <StyledHint>
+          <StyledInfo
+            tabIndex={0}
+            data-recipient-info={modalId}
+            aria-label={t`수신자 추가 안내: 중복 수신자는 건너뛰며 이메일 없는 수신자는 발송 시 제외됩니다.`}
+          >
+            <IconInfoCircle size={16} aria-hidden />
+            {t`중복 수신자는 자동으로 제외됩니다.`}
+          </StyledInfo>
+          <AppTooltip
+            anchorSelect={`[data-recipient-info="${modalId}"]`}
+            content={t`이미 포함된 수신자는 건너뜁니다. 이메일이 없는 수신자도 목록에는 저장되지만 발송할 때 제외됩니다.`}
+          />
+        </StyledHint>
         {checkError && (
           <p role="alert">{t`기존 수신자를 확인하지 못했습니다.`}</p>
         )}
@@ -427,11 +649,21 @@ export const MessageListAddCustomersModal = ({
             onClick={() => fetchMoreExisting()}
           />
         )}
-      </ModalContent>
-      <ModalFooter>
+      </StyledBody>
+      <ModalFooter autoHeight>
         <Button title={t`취소`} disabled={busy} onClick={onClose} />
         <Button
-          title={t`선택 수신자 추가`}
+          title={
+            busy
+              ? t`추가 중…`
+              : listId &&
+                  !checking &&
+                  !moreExisting &&
+                  !checkError &&
+                  additions.length > 0
+                ? t`${additions.length}명 추가`
+                : t`수신자 추가`
+          }
           variant="primary"
           accent="blue"
           disabled={
