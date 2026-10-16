@@ -33,7 +33,7 @@ const MESSAGE_LIST_PAGE_TABS = {
         universalIdentifier:
           STANDARD_PAGE_LAYOUT_UNIVERSAL_IDENTIFIERS.messageListRecordPage.tabs
             .home.widgets.campaigns.universalIdentifier,
-        title: '연결된 단체 발송',
+        title: '연결된 심방콜 발송',
         type: WidgetType.FIELD,
         gridPosition: GRID_POSITIONS.FULL_WIDTH,
         position: VERTICAL_LIST_LAYOUT_POSITIONS.SECOND,
@@ -44,7 +44,7 @@ const MESSAGE_LIST_PAGE_TABS = {
         universalIdentifier:
           STANDARD_PAGE_LAYOUT_UNIVERSAL_IDENTIFIERS.messageListRecordPage.tabs
             .home.widgets.members.universalIdentifier,
-        title: '수신자 목록',
+        title: '동반 고객 목록',
         type: WidgetType.FIELD,
         gridPosition: GRID_POSITIONS.FULL_WIDTH,
         position: VERTICAL_LIST_LAYOUT_POSITIONS.THIRD,

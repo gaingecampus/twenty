@@ -725,11 +725,11 @@ export const STANDARD_COMMAND_MENU_ITEMS = {
   },
   addCustomersToMessageList: {
     universalIdentifier: 'dbcc9381-9246-44aa-9076-794f47e1050e',
-    label: '수신자 목록에 추가',
+    label: '동반 고객 목록에 추가',
     icon: 'IconUsersPlus',
     isPinned: true,
     position: 69,
-    shortLabel: '수신자 목록에 추가',
+    shortLabel: '동반 고객 목록에 추가',
     availabilityType: CommandMenuItemAvailabilityType.RECORD_SELECTION,
     conditionalAvailabilityExpression:
       'numberOfSelectedRecords >= 1 and not isSelectAll and objectPermissions.canReadObjectRecords',
