@@ -66,7 +66,9 @@ export const SidePanelSearchRecordsPage = () => {
                 <CommandMenuItem
                   id={item.id}
                   label={item.label}
-                  description={item.objectLabel}
+                  description={[item.objectLabel, item.customerContext]
+                    .filter(Boolean)
+                    .join(' · ')}
                   onClick={handleClick}
                   LeftComponent={
                     <Avatar
