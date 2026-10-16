@@ -23,4 +23,12 @@ export class GaingeSalesResolver {
   ): Promise<GaingeSalesReportDTO> {
     return this.salesService.getMonthlySales(workspace.id, memberId, month);
   }
+  @Query(() => GaingeSalesReportDTO)
+  async gaingeSalesTimeline(
+    @AuthWorkspace() workspace: WorkspaceEntity,
+    @AuthWorkspaceMemberId() memberId: string | undefined,
+    @Args('month', { type: () => String }) month: string,
+  ): Promise<GaingeSalesReportDTO> {
+    return this.salesService.getSalesTimeline(workspace.id, memberId, month);
+  }
 }

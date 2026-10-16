@@ -12,6 +12,9 @@ import {
 
 const CACHE_TTL_MS = 60_000;
 const REQUEST_TIMEOUT_MS = 15_000;
+const FAILURE_CACHE_TTL_MS = 15_000;
+const TIMELINE_TIMEOUT_MS = 25_000;
+const MAX_ACTIVE_REPORTS = 6;
 const MAX_RESPONSE_BYTES = 1_000_000;
 
 @Injectable()
@@ -22,6 +25,17 @@ export class GaingeSalesService {
   >();
   private pending = new Map<string, Promise<GaingeSalesReportDTO>>();
   private configuration = '';
+  private activeReports = 0;
+  private timelineActive = false;
+
+  private cacheReport(key: string, report: GaingeSalesReportDTO, ttl: number) {
+    if (this.cache.size >= 24 && !this.cache.has(key)) {
+      const oldestKey = this.cache.keys().next().value;
+
+      if (oldestKey) this.cache.delete(oldestKey);
+    }
+    this.cache.set(key, { expiresAt: Date.now() + ttl, report });
+  }
 
   constructor(private readonly config: TwentyConfigService) {}
 
@@ -89,10 +103,12 @@ export class GaingeSalesService {
 
     const request = this.fetchReport(url, token, month, range)
       .then((report) => {
-        if (configuration === this.configuration && report.status === 'READY') {
-          if (this.cache.size >= 24) this.cache.clear();
-          this.cache.set(key, { expiresAt: Date.now() + CACHE_TTL_MS, report });
-        }
+        if (configuration !== this.configuration) return empty('UNAVAILABLE');
+        this.cacheReport(
+          key,
+          report,
+          report.status === 'READY' ? CACHE_TTL_MS : FAILURE_CACHE_TTL_MS,
+        );
 
         return report;
       })
@@ -105,14 +121,127 @@ export class GaingeSalesService {
     return request;
   }
 
+  async getSalesTimeline(
+    workspaceId: string,
+    memberId: string | undefined,
+    month: string,
+  ): Promise<GaingeSalesReportDTO> {
+    // Check access on every request, including cache hits.
+    const monthly = await this.getMonthlySales(workspaceId, memberId, month);
+
+    if (monthly.status !== 'READY') return monthly;
+    const configuration = this.configuration;
+    const key = `timeline:${workspaceId}:${monthly.startDate}:${monthly.endDate}`;
+    const cached = this.cache.get(key);
+
+    if (
+      cached &&
+      cached.expiresAt > Date.now() &&
+      (cached.report.status !== 'READY' ||
+        (cached.report.total === monthly.total &&
+          JSON.stringify(cached.report.departments) ===
+            JSON.stringify(monthly.departments)))
+    )
+      return cached.report;
+    const pending = this.pending.get(key);
+
+    if (pending) return pending;
+    if (this.timelineActive)
+      return { status: 'UNAVAILABLE', month, departments: [] };
+    this.timelineActive = true;
+    const url = this.config.get('GAINGE_SALES_MCP_URL')!;
+    const token = this.config.get('GAINGE_SALES_MCP_TOKEN')!;
+    const request = (async (): Promise<GaingeSalesReportDTO> => {
+      const dayCount = Number(monthly.endDate!.slice(-2));
+      const days: NonNullable<GaingeSalesReportDTO['days']> = [];
+      let nextDay = 1;
+      let failed = false;
+      const deadline = Date.now() + TIMELINE_TIMEOUT_MS;
+
+      // At most three requests at once; never publish an incomplete curve.
+      await Promise.all(
+        Array.from({ length: Math.min(3, dayCount) }, async () => {
+          while (!failed && nextDay <= dayCount) {
+            const day = nextDay++;
+            const date = `${month}-${String(day).padStart(2, '0')}`;
+
+            if (
+              Date.now() >= deadline ||
+              configuration !== this.configuration
+            ) {
+              failed = true;
+              break;
+            }
+            const report =
+              day === dayCount
+                ? monthly
+                : await this.fetchReport(
+                    url,
+                    token,
+                    month,
+                    {
+                      startDate: monthly.startDate!,
+                      endDate: date,
+                    },
+                    Math.min(
+                      REQUEST_TIMEOUT_MS,
+                      Math.max(1, deadline - Date.now()),
+                    ),
+                  );
+
+            if (report.status !== 'READY' || report.total === undefined) {
+              failed = true;
+              break;
+            }
+            days.push({
+              date,
+              total: report.total,
+              departments: report.departments,
+            });
+          }
+        }),
+      );
+
+      if (
+        configuration !== this.configuration ||
+        failed ||
+        days.length !== dayCount
+      ) {
+        const failure = { status: 'UNAVAILABLE', month, departments: [] };
+
+        if (configuration === this.configuration)
+          this.cacheReport(key, failure, FAILURE_CACHE_TTL_MS);
+        return failure;
+      }
+      const report = {
+        ...monthly,
+        days: days.sort((a, b) => a.date.localeCompare(b.date)),
+      };
+
+      this.cacheReport(key, report, 300_000);
+      return report;
+    })().finally(() => {
+      this.timelineActive = false;
+      if (this.pending.get(key) === request) this.pending.delete(key);
+    });
+
+    this.pending.set(key, request);
+    return request;
+  }
+
   private async fetchReport(
     url: string,
     token: string,
     month: string,
     range: { startDate: string; endDate: string },
+    timeoutMs = REQUEST_TIMEOUT_MS,
   ): Promise<GaingeSalesReportDTO> {
+    if (this.activeReports >= MAX_ACTIVE_REPORTS) {
+      return { status: 'UNAVAILABLE', month, departments: [] };
+    }
+    this.activeReports += 1;
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+    const timeout = setTimeout(() => controller.abort(), timeoutMs);
     const empty = (status: string): GaingeSalesReportDTO => ({
       status,
       month,
@@ -248,6 +377,7 @@ export class GaingeSalesService {
       );
     } finally {
       clearTimeout(timeout);
+      this.activeReports -= 1;
     }
   }
 }

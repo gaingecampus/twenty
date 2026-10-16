@@ -144,15 +144,21 @@ it('rejects a result for a different period', async () => {
     (await service.getMonthlySales('workspace', 'member', month)).status,
   ).toBe('UNAVAILABLE');
 });
-it('recovers after temporary upstream errors', async () => {
+it('recovers after the temporary failure cooldown expires', async () => {
   fetchMock.mockRejectedValueOnce(new Error('network'));
   expect(
     (await service.getMonthlySales('workspace', 'member', month)).status,
   ).toBe('UNAVAILABLE');
-  succeed();
-  expect(
-    (await service.getMonthlySales('workspace', 'member', month)).status,
-  ).toBe('READY');
+  const clock = jest.spyOn(Date, 'now').mockReturnValue(Date.now() + 15_001);
+
+  try {
+    succeed();
+    expect(
+      (await service.getMonthlySales('workspace', 'member', month)).status,
+    ).toBe('READY');
+  } finally {
+    clock.mockRestore();
+  }
 });
 
 it('allows any authenticated member in the configured workspace when all-members access is enabled', async () => {
@@ -194,4 +200,149 @@ it('revokes cached access when switching back to designated members', async () =
       .status,
   ).toBe('FORBIDDEN');
   expect(fetchMock).toHaveBeenCalledTimes(3);
+});
+
+const succeedTimeline = (failDay?: string) => {
+  fetchMock.mockImplementation(async (_url: string, init: RequestInit) => {
+    const body = JSON.parse(String(init.body));
+    if (body.method === 'initialize')
+      return json(1, { protocolVersion: '2025-03-26' });
+    if (body.method === 'notifications/initialized')
+      return new Response(null, { status: 202 });
+    const range = body.params.arguments;
+    if (range.endDate === failDay) return new Response(null, { status: 503 });
+    return json(2, { structuredContent: { ...report, ...range } });
+  });
+};
+
+it('returns ordered inclusive daily cumulative ranges and shares cached timeline requests', async () => {
+  succeedTimeline();
+  const [first, second] = await Promise.all([
+    service.getSalesTimeline('workspace', 'member', month),
+    service.getSalesTimeline('workspace', 'member', month),
+  ]);
+  expect(first.status).toBe('READY');
+  expect(first.days).toHaveLength(30);
+  expect(first.days?.[0]).toMatchObject({ date: '2026-09-01', total: 100 });
+  expect(first.days?.[29]).toMatchObject({
+    date: '2026-09-30',
+    total: first.total,
+  });
+  expect(second).toEqual(first);
+  const ranges = fetchMock.mock.calls
+    .map(([, init]) => JSON.parse(init.body))
+    .filter((body) => body.method === 'tools/call')
+    .map((body) => body.params.arguments);
+  expect(ranges).toHaveLength(30);
+  expect(ranges.every((range) => range.startDate === '2026-09-01')).toBe(true);
+  const calls = fetchMock.mock.calls.length;
+  expect(await service.getSalesTimeline('workspace', 'member', month)).toEqual(
+    first,
+  );
+  expect(fetchMock).toHaveBeenCalledTimes(calls);
+  settings.GAINGE_SALES_MEMBER_IDS = 'someone-else';
+  expect(
+    (await service.getSalesTimeline('workspace', 'member', month)).status,
+  ).toBe('FORBIDDEN');
+  expect(fetchMock).toHaveBeenCalledTimes(calls);
+});
+
+it('does not return a partial or fabricated graph when a day fails; monthly figures survive', async () => {
+  succeedTimeline('2026-09-02');
+  const result = await service.getSalesTimeline('workspace', 'member', month);
+  expect(result).toEqual({ status: 'UNAVAILABLE', month, departments: [] });
+  expect(
+    (await service.getMonthlySales('workspace', 'member', month)).total,
+  ).toBe(100);
+});
+
+it('caps upstream concurrency across different months without an unbounded queue', async () => {
+  succeedTimeline();
+  const respond = fetchMock.getMockImplementation()!;
+  let release!: () => void;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  fetchMock.mockImplementation(async (...args: unknown[]) => {
+    await gate;
+    return respond(...args);
+  });
+  const requests = Array.from({ length: 8 }, (_, index) =>
+    service.getMonthlySales(
+      'workspace',
+      'member',
+      `2025-${String(index + 1).padStart(2, '0')}`,
+    ),
+  );
+  expect(fetchMock).toHaveBeenCalledTimes(6);
+  release();
+  const reports = await Promise.all(requests);
+  expect(reports.filter((item) => item.status === 'READY')).toHaveLength(6);
+  expect(reports.filter((item) => item.status === 'UNAVAILABLE')).toHaveLength(
+    2,
+  );
+});
+
+it('cools down failed timeline retries while retaining monthly totals', async () => {
+  succeedTimeline('2026-09-02');
+  await service.getSalesTimeline('workspace', 'member', month);
+  const calls = fetchMock.mock.calls.length;
+  const retry = await service.getSalesTimeline('workspace', 'member', month);
+  expect(retry.status).toBe('UNAVAILABLE');
+  expect(fetchMock).toHaveBeenCalledTimes(calls);
+  expect(
+    (await service.getMonthlySales('workspace', 'member', month)).status,
+  ).toBe('READY');
+});
+
+it('allows only one distinct timeline fan-out per process', async () => {
+  succeedTimeline();
+  await service.getMonthlySales('workspace', 'member', month);
+  await service.getMonthlySales('workspace', 'member', '2026-08');
+  const respond = fetchMock.getMockImplementation()!;
+  let release!: () => void;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  fetchMock.mockImplementation(async (...args: unknown[]) => {
+    await gate;
+    return respond(...args);
+  });
+  const first = service.getSalesTimeline('workspace', 'member', month);
+  const second = await service.getSalesTimeline(
+    'workspace',
+    'member',
+    '2026-08',
+  );
+  expect(second.status).toBe('UNAVAILABLE');
+  release();
+  expect((await first).status).toBe('READY');
+  expect(
+    (await service.getSalesTimeline('workspace', 'member', '2026-08')).status,
+  ).toBe('READY');
+});
+
+it('aborts stalled upstream requests and suppresses immediate retries', async () => {
+  jest.useFakeTimers();
+  try {
+    fetchMock.mockImplementation(
+      (_url: string, init: RequestInit) =>
+        new Promise((_resolve, reject) => {
+          init.signal?.addEventListener(
+            'abort',
+            () => reject(new Error('aborted')),
+            { once: true },
+          );
+        }),
+    );
+    const request = service.getMonthlySales('workspace', 'member', month);
+    await jest.advanceTimersByTimeAsync(15_000);
+    expect((await request).status).toBe('UNAVAILABLE');
+    expect(
+      (await service.getMonthlySales('workspace', 'member', month)).status,
+    ).toBe('UNAVAILABLE');
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  } finally {
+    jest.useRealTimers();
+  }
 });

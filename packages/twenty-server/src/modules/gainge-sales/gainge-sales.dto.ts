@@ -10,9 +10,24 @@ export class GaingeSalesDepartmentDTO {
 }
 
 @ObjectType()
+export class GaingeSalesDayDTO {
+  @Field(() => String)
+  date: string;
+
+  @Field(() => Float)
+  total: number;
+
+  @Field(() => [GaingeSalesDepartmentDTO])
+  departments: GaingeSalesDepartmentDTO[];
+}
+
+@ObjectType()
 export class GaingeSalesReportDTO {
   @Field(() => String)
   status: string;
+
+  @Field(() => [GaingeSalesDayDTO], { nullable: true })
+  days?: GaingeSalesDayDTO[];
 
   @Field(() => String)
   month: string;
