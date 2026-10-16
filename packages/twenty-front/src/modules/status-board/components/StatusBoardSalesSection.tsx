@@ -1,3 +1,4 @@
+import { StatusBoardSalesChart } from '@/status-board/components/StatusBoardSalesChart';
 import { useQuery } from '@apollo/client/react';
 import { styled } from '@linaria/react';
 import { useId, useState } from 'react';
@@ -66,8 +67,9 @@ const STATUS_MESSAGES = {
 
 export const StatusBoardSalesSection = () => {
   const infoId = useId();
+  const [chartVersion, setChartVersion] = useState(0);
   const description =
-    '가캠의 PG·인앱·정기결제 매출을 사업부별로 표시합니다. 환불액 반영·VAT 제외 기준이며 CRM 입금액은 합산하지 않습니다. 상단 그룹·구성원 필터는 적용되지 않습니다. 조회 결과는 최대 1분간 유지됩니다.';
+    '가캠의 PG·인앱·정기결제 매출을 사업부별로 표시합니다. 환불액 반영·VAT 제외 기준이며 CRM 입금액은 합산하지 않습니다. 상단 그룹·구성원 필터는 적용되지 않습니다. 조회 결과 중 합계는 최대 1분, 일별 그래프는 최대 5분간 유지됩니다. 범례로 사업부를 선택하고 그래프에서 날짜별 금액과 전체 대비 비중을 확인할 수 있습니다.';
   const currentMonth = new Intl.DateTimeFormat('sv-SE', {
     timeZone: 'Asia/Seoul',
     year: 'numeric',
@@ -106,7 +108,7 @@ export const StatusBoardSalesSection = () => {
     <StyledDashboardSection aria-label="가캠 사업부별 매출">
       <StyledDashboardSectionHeader>
         <StyledDashboardSectionTitle>
-          월 누적 매출 · 사업부별
+          가캠 월 누적 매출 · 사업부별
           <span
             data-sales-info={infoId}
             tabIndex={0}
@@ -154,6 +156,7 @@ export const StatusBoardSalesSection = () => {
             variant="secondary"
             disabled={loading}
             onClick={() => {
+              setChartVersion((value) => value + 1);
               void refetch().catch(() => undefined);
             }}
           />
@@ -161,6 +164,10 @@ export const StatusBoardSalesSection = () => {
       </StyledDashboardSectionHeader>
       {isReady ? (
         <>
+          <StatusBoardSalesChart
+            key={`${selectedMonth}-${chartVersion}`}
+            month={selectedMonth}
+          />
           <StyledAmounts>
             {[
               { label: '전체 매출', amount: report.total! },

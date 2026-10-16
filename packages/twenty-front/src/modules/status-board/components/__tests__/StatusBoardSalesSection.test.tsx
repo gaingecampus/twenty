@@ -1,3 +1,6 @@
+jest.mock('@/status-board/components/StatusBoardSalesChart', () => ({
+  StatusBoardSalesChart: () => null,
+}));
 import { fireEvent, render, screen } from '@testing-library/react';
 
 import { StatusBoardSalesSection } from '@/status-board/components/StatusBoardSalesSection';

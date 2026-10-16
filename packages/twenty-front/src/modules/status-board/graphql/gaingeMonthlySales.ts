@@ -33,3 +33,30 @@ export const GAINGE_MONTHLY_SALES = gql`
     }
   }
 `;
+
+export type GaingeSalesTimeline = GaingeMonthlySales & {
+  days:
+    | {
+        date: string;
+        total: number;
+        departments: { label: string; amount: number }[];
+      }[]
+    | null;
+};
+
+export const GAINGE_SALES_TIMELINE = gql`
+  query GaingeSalesTimeline($month: String!) {
+    gaingeSalesTimeline(month: $month) {
+      status
+      month
+      days {
+        date
+        total
+        departments {
+          label
+          amount
+        }
+      }
+    }
+  }
+`;
