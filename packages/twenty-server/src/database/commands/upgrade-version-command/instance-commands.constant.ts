@@ -92,6 +92,7 @@ import { AddNavigationMenuItemSeparatorFastInstanceCommand } from 'src/database/
 import { AddPageLayoutFiltersFastInstanceCommand } from 'src/database/commands/upgrade-version-command/2-19/2-19-instance-command-fast-1802000000005-add-page-layout-filters';
 import { AddWorkspaceUiThemeFastInstanceCommand } from 'src/database/commands/upgrade-version-command/2-19/2-19-instance-command-fast-1802000000006-add-workspace-ui-theme';
 import { AddViewFieldGroupIsCollapsedFastInstanceCommand } from 'src/database/commands/upgrade-version-command/2-24/2-24-instance-command-fast-1807300000000-add-view-field-group-is-collapsed';
+import { AddSmsDispatchFastInstanceCommand } from 'src/database/commands/upgrade-version-command/2-28/2-28-instance-command-fast-1792195337774-add-sms-dispatch';
 
 export const INSTANCE_COMMANDS = [
   AddMessageSendingStatusFastInstanceCommand,
@@ -184,4 +185,5 @@ export const INSTANCE_COMMANDS = [
   AddPageLayoutFiltersFastInstanceCommand,
   AddWorkspaceUiThemeFastInstanceCommand,
   AddViewFieldGroupIsCollapsedFastInstanceCommand,
+  AddSmsDispatchFastInstanceCommand,
 ];
