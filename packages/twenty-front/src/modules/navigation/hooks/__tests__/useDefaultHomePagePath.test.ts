@@ -197,7 +197,7 @@ describe('useDefaultHomePagePath', () => {
       expect(result.current.defaultHomePagePath).toEqual(AppPath.SignInUp);
     });
   });
-  it('should redirect to the first object of the navigation menu', async () => {
+  it('should open the consulting quality page instead of the first menu object', async () => {
     const { result } = renderHooks({
       withCurrentUser: true,
       withExistingView: false,
@@ -208,10 +208,10 @@ describe('useDefaultHomePagePath', () => {
     });
 
     await waitFor(() => {
-      expect(result.current.defaultHomePagePath).toEqual('/objects/people');
+      expect(result.current.defaultHomePagePath).toEqual('/consulting-quality');
     });
   });
-  it('should honor display order over a lower-positioned item nested in a folder', async () => {
+  it('should open the consulting quality page regardless of folder ordering', async () => {
     const { result } = renderHooks({
       withCurrentUser: true,
       withExistingView: false,
@@ -223,10 +223,10 @@ describe('useDefaultHomePagePath', () => {
     });
 
     await waitFor(() => {
-      expect(result.current.defaultHomePagePath).toEqual('/objects/people');
+      expect(result.current.defaultHomePagePath).toEqual('/consulting-quality');
     });
   });
-  it('should redirect to a PAGE_LAYOUT navigation menu item as homepage', async () => {
+  it('should open the consulting quality page instead of a custom page', async () => {
     const { result } = renderHooks({
       withCurrentUser: true,
       withExistingView: false,
@@ -237,10 +237,10 @@ describe('useDefaultHomePagePath', () => {
     });
 
     await waitFor(() => {
-      expect(result.current.defaultHomePagePath).toEqual('/page/page-layout-1');
+      expect(result.current.defaultHomePagePath).toEqual('/consulting-quality');
     });
   });
-  it('should skip a LINK navigation menu item and use the next valid item', async () => {
+  it('should open the consulting quality page regardless of external menu links', async () => {
     const { result } = renderHooks({
       withCurrentUser: true,
       withExistingView: false,
@@ -251,10 +251,10 @@ describe('useDefaultHomePagePath', () => {
     });
 
     await waitFor(() => {
-      expect(result.current.defaultHomePagePath).toEqual('/objects/people');
+      expect(result.current.defaultHomePagePath).toEqual('/consulting-quality');
     });
   });
-  it('should honor the view of a VIEW navigation menu item', async () => {
+  it('should open the consulting quality page instead of a menu view', async () => {
     const { result } = renderHooks({
       withCurrentUser: true,
       withExistingView: true,
@@ -262,12 +262,10 @@ describe('useDefaultHomePagePath', () => {
     });
 
     await waitFor(() => {
-      expect(result.current.defaultHomePagePath).toEqual(
-        '/objects/companies?viewId=viewId',
-      );
+      expect(result.current.defaultHomePagePath).toEqual('/consulting-quality');
     });
   });
-  it('should fall back to the first readable object when the menu has no object item', async () => {
+  it('should open the consulting quality page with an empty navigation menu', async () => {
     const { result } = renderHooks({
       withCurrentUser: true,
       withExistingView: false,
@@ -275,7 +273,7 @@ describe('useDefaultHomePagePath', () => {
     });
 
     await waitFor(() => {
-      expect(result.current.defaultHomePagePath).toEqual('/objects/companies');
+      expect(result.current.defaultHomePagePath).toEqual('/consulting-quality');
     });
   });
   it('should redirect to profile settings when there is no readable object', async () => {
@@ -306,7 +304,7 @@ describe('useDefaultHomePagePath', () => {
       expect(result.current.defaultHomePagePath).toEqual(AppPath.Index);
     });
   });
-  it('should defer to AppPath.Index when navigation menu items are not loaded yet', async () => {
+  it('should open the consulting quality page without waiting for navigation menu items', async () => {
     const { result } = renderHooks({
       withCurrentUser: true,
       withExistingView: false,
@@ -315,7 +313,7 @@ describe('useDefaultHomePagePath', () => {
     });
 
     await waitFor(() => {
-      expect(result.current.defaultHomePagePath).toEqual(AppPath.Index);
+      expect(result.current.defaultHomePagePath).toEqual('/consulting-quality');
     });
   });
 });
