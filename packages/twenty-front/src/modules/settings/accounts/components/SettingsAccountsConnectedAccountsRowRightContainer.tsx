@@ -31,7 +31,7 @@ export const SettingsAccountsConnectedAccountsRowRightContainer = ({
   if (isArchived) {
     return (
       <StyledRowRightContainer>
-        <Status color="gray" text={t`Archived`} weight="medium" />
+        <Status color="gray" text="연결 해제" weight="medium" />
         <SettingsAccountsRowDropdownMenu account={account} />
       </StyledRowRightContainer>
     );

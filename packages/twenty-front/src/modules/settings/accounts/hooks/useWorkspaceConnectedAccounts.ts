@@ -23,12 +23,13 @@ export type WorkspaceConnectedAccount = {
 };
 
 export const useWorkspaceConnectedAccounts = () => {
-  const { data, loading } = useQuery<{
+  const { data, loading, refetch } = useQuery<{
     workspaceConnectedAccounts: WorkspaceConnectedAccount[];
   }>(GET_WORKSPACE_CONNECTED_ACCOUNTS);
 
   return {
     accounts: data?.workspaceConnectedAccounts ?? [],
     loading,
+    refetch,
   };
 };

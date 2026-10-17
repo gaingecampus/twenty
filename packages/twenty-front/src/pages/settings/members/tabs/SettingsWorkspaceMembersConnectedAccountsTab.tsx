@@ -1,3 +1,4 @@
+import { SettingsWorkspaceConnectedAccountActions } from '@/settings/accounts/components/SettingsWorkspaceConnectedAccountActions';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 import { styled } from '@linaria/react';
 import { Trans, useLingui } from '@lingui/react/macro';
@@ -101,7 +102,7 @@ const StyledEllipsisText = styled.div`
 
 // Owner | Email | Provider | Imported | Last synced | Visibility | Status
 const TABLE_GRID_COLUMNS =
-  'minmax(120px, 0.9fr) minmax(160px, 1.4fr) 96px 72px 110px 88px 100px';
+  'minmax(120px, 0.9fr) minmax(160px, 1.4fr) 96px 72px 110px 88px 100px 140px';
 
 const formatOwnerName = ({
   ownerFirstName,
@@ -132,7 +133,7 @@ export const SettingsWorkspaceMembersConnectedAccountsTab = () => {
   const { theme } = useContext(ThemeContext);
   const navigateApp = useNavigateApp();
   const { localeCatalog } = useAtomStateValue(dateLocaleState);
-  const { accounts, loading } = useWorkspaceConnectedAccounts();
+  const { accounts, loading, refetch } = useWorkspaceConnectedAccounts();
 
   const formatLastSyncedAt = (syncedAt: string | null): string => {
     if (!isNonEmptyString(syncedAt)) {
@@ -193,7 +194,7 @@ export const SettingsWorkspaceMembersConnectedAccountsTab = () => {
     color: 'red' | 'orange' | 'turquoise' | 'gray';
   } => {
     if (archivedAt !== null) {
-      return { label: t`Archived`, color: 'gray' };
+      return { label: '연결 해제', color: 'gray' };
     }
 
     if (authFailedAt !== null) {
@@ -222,19 +223,18 @@ export const SettingsWorkspaceMembersConnectedAccountsTab = () => {
     <Section>
       <H2Title
         title={t`Connected accounts`}
-        description={t`Email accounts linked by workspace members. Click a row to see imported messages.`}
+        description="연결 중인 계정과 연결 해제 이력을 확인합니다. 연결 해제 시 기존 메일·일정은 기본적으로 보존되며, 관리자가 해제된 계정의 보존 데이터만 별도로 삭제할 수 있습니다."
       />
       {loading ? null : accounts.length === 0 ? (
         <StyledEmptyState>
-          <IconAt
-            size={theme.icon.size.lg}
-            color={theme.font.color.tertiary}
-          />
+          <IconAt size={theme.icon.size.lg} color={theme.font.color.tertiary} />
           <StyledEmptyStateTitle>
             <Trans>No connected accounts yet.</Trans>
           </StyledEmptyStateTitle>
           <StyledEmptyStateDescription>
-            <Trans>When a member connects an email account, it will appear here.</Trans>
+            <Trans>
+              When a member connects an email account, it will appear here.
+            </Trans>
           </StyledEmptyStateDescription>
         </StyledEmptyState>
       ) : (
@@ -251,18 +251,15 @@ export const SettingsWorkspaceMembersConnectedAccountsTab = () => {
                 <TableHeader>
                   <Trans>Provider</Trans>
                 </TableHeader>
-                <TableHeader align="right">
-                  <Trans>Imported</Trans>
-                </TableHeader>
-                <TableHeader>
-                  <Trans>Last synced</Trans>
-                </TableHeader>
+                <TableHeader align="right">보존 메일</TableHeader>
+                <TableHeader>마지막 동기화</TableHeader>
                 <TableHeader>
                   <Trans>Visibility</Trans>
                 </TableHeader>
                 <TableHeader>
                   <Trans>Status</Trans>
                 </TableHeader>
+                <TableHeader>관리</TableHeader>
               </TableRow>
               <StyledTableRows>
                 {accounts.map((account) => {
@@ -365,7 +362,17 @@ export const SettingsWorkspaceMembersConnectedAccountsTab = () => {
                         whiteSpace="nowrap"
                         minWidth="0"
                       >
-                        <Status color={status.color} text={status.label} />
+                        <span
+                          title={`최초 연결: ${new Date(account.createdAt).toLocaleString()}${account.archivedAt ? ` · 연결 해제: ${new Date(account.archivedAt).toLocaleString()}` : ''}`}
+                        >
+                          <Status color={status.color} text={status.label} />
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <SettingsWorkspaceConnectedAccountActions
+                          account={account}
+                          onUpdated={refetch}
+                        />
                       </TableCell>
                     </TableRow>
                   );

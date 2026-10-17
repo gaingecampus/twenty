@@ -121,7 +121,7 @@ export const SettingsAccountsRowDropdownMenu = ({
                   closeDropdown(dropdownId);
                 }}
               />
-              {account.authFailedAt && (
+              {(account.authFailedAt || account.archivedAt) && (
                 <MenuItem
                   LeftIcon={IconRefresh}
                   text={t`Reconnect`}
@@ -134,7 +134,7 @@ export const SettingsAccountsRowDropdownMenu = ({
               <MenuItem
                 accent="danger"
                 LeftIcon={IconTrash}
-                text={t`Remove account`}
+                text="연결 해제"
                 onClick={() => {
                   closeDropdown(dropdownId);
                   openModal(deleteAccountModalId);
@@ -146,15 +146,15 @@ export const SettingsAccountsRowDropdownMenu = ({
       />
       <ConfirmationModal
         modalInstanceId={deleteAccountModalId}
-        title={t`Data deletion`}
+        title="계정 연결 해제"
         subtitle={
           <Trans>
-            All emails and events linked to this account ({accountHandle}) will
-            be deleted
+            {accountHandle}의 동기화와 발송을 중지합니다. 기존 메일과 일정은
+            삭제하지 않고 보존하며, 관리자 설정에서 별도로 삭제할 수 있습니다.
           </Trans>
         }
         onConfirmClick={deleteAccount}
-        confirmButtonText={t`Delete account`}
+        confirmButtonText="연결 해제"
       />
     </>
   );
