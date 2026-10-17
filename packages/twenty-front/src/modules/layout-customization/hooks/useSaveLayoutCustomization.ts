@@ -94,6 +94,15 @@ export const useSaveLayoutCustomization = () => {
           continue;
         }
 
+        await createPendingFieldsWidgetViews(pageLayoutId);
+        await createPendingRecordTableWidgetViews(pageLayoutId);
+
+        const preparedDraft = store.get(
+          pageLayoutDraftComponentState.atomFamily({
+            instanceId: pageLayoutId,
+          }),
+        );
+
         const overlayFilters = store.get(
           pageLayoutDashboardFiltersOverlayComponentState.atomFamily({
             instanceId: pageLayoutId,
@@ -112,8 +121,8 @@ export const useSaveLayoutCustomization = () => {
         };
 
         const draftWithFilters: DraftPageLayout = {
-          ...draft,
-          filters: overlayFilters ?? draft.filters ?? null,
+          ...preparedDraft,
+          filters: overlayFilters ?? preparedDraft.filters ?? null,
         };
 
         const isPageLayoutStructureDirty = !isDeeplyEqual(
@@ -121,13 +130,9 @@ export const useSaveLayoutCustomization = () => {
           persistedAsDraft,
         );
 
-        await createPendingFieldsWidgetViews(pageLayoutId);
-        await createPendingRecordTableWidgetViews(pageLayoutId);
-
         if (isPageLayoutStructureDirty) {
-          const updateInput = convertPageLayoutDraftToUpdateInput(
-            draftWithFilters,
-          );
+          const updateInput =
+            convertPageLayoutDraftToUpdateInput(draftWithFilters);
           const result = await updatePageLayoutWithTabsAndWidgets(
             pageLayoutId,
             updateInput,
