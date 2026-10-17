@@ -65,6 +65,46 @@ export class ConfigVariables {
     group: ConfigVariablesGroup.ADVANCED_SETTINGS,
     type: ConfigVariableType.STRING,
     isSensitive: false,
+    description: '일반 뿌리오 연동 계정',
+  })
+  @IsOptional()
+  @IsString()
+  PPURIO_ACCOUNT?: string;
+
+  @ConfigVariablesMetadata({
+    group: ConfigVariablesGroup.ADVANCED_SETTINGS,
+    type: ConfigVariableType.STRING,
+    isSensitive: true,
+    description: '일반 뿌리오 연동 인증키 (서버 전용)',
+  })
+  @IsOptional()
+  @IsString()
+  PPURIO_API_KEY?: string;
+
+  @ConfigVariablesMetadata({
+    group: ConfigVariablesGroup.ADVANCED_SETTINGS,
+    type: ConfigVariableType.STRING,
+    isSensitive: false,
+    description: '뿌리오 사전 등록 발신번호 (숫자만)',
+  })
+  @IsOptional()
+  @IsString()
+  PPURIO_FROM_NUMBER?: string;
+
+  @ConfigVariablesMetadata({
+    group: ConfigVariablesGroup.ADVANCED_SETTINGS,
+    type: ConfigVariableType.STRING,
+    isSensitive: false,
+    description: '문자 발송을 허용할 워크스페이스 ID',
+  })
+  @IsOptional()
+  @IsString()
+  PPURIO_WORKSPACE_ID?: string;
+
+  @ConfigVariablesMetadata({
+    group: ConfigVariablesGroup.ADVANCED_SETTINGS,
+    type: ConfigVariableType.STRING,
+    isSensitive: false,
     description: 'HTTPS endpoint of the Campus sales MCP (including /api/mcp)',
   })
   @IsOptional()

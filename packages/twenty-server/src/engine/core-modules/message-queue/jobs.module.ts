@@ -1,3 +1,5 @@
+import { SmsModule } from 'src/engine/core-modules/sms/sms.module';
+import { SendSmsJob } from 'src/engine/core-modules/sms/send-sms.job';
 import { Module } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -87,6 +89,7 @@ import { WorkflowModule } from 'src/modules/workflow/workflow.module';
     LogicFunctionModule,
     EnterpriseModule,
     EmailingModule,
+    SmsModule,
     PreInstalledAppsModule,
     BillingReminderModule,
   ],
@@ -97,6 +100,7 @@ import { WorkflowModule } from 'src/modules/workflow/workflow.module';
     EmailSenderJob,
     SendCampaignEmailJob,
     MaterializeCampaignJob,
+    SendSmsJob,
     UpdateSubscriptionQuantityJob,
     HandleWorkspaceMemberDeletedJob,
     CleanWorkspaceDeletionWarningUserVarsJob,

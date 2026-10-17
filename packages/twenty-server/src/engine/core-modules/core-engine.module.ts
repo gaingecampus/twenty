@@ -1,3 +1,4 @@
+import { SmsModule } from 'src/engine/core-modules/sms/sms.module';
 import { Module } from '@nestjs/common';
 import { APP_FILTER, HttpAdapterHost } from '@nestjs/core';
 import { EventEmitterModule } from '@nestjs/event-emitter';
@@ -117,6 +118,7 @@ import { FileModule } from './file/file.module';
     ApprovedAccessDomainModule,
     EmailingDomainModule,
     EmailingModule,
+    SmsModule,
     PublicDomainModule,
     CloudflareModule,
     DnsManagerModule,
