@@ -1,3 +1,6 @@
+import { themeCssVariables } from 'twenty-ui/theme-constants';
+import { useState } from 'react';
+import { SmsCampaignComposer } from '@/activities/emails/components/SmsCampaignComposer';
 import { CampaignReviewModal } from '@/activities/emails/components/CampaignReviewModal';
 import { useAtomComponentStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomComponentStateValue';
 import { campaignToEditComponentState } from '@/side-panel/pages/compose-campaign/states/campaignToEditComponentState';
@@ -29,7 +32,7 @@ const StyledContent = styled.div`
   overflow-y: auto;
 `;
 
-export const SidePanelCampaignComposerPage = () => {
+const EmailCampaignComposer = () => {
   const { goBackFromSidePanel } = useSidePanelHistory();
   const sidePanelHeaderActionsElement = useAtomStateValue(
     sidePanelHeaderActionsElementState,
@@ -89,6 +92,47 @@ export const SidePanelCampaignComposerPage = () => {
           </>,
           sidePanelHeaderActionsElement,
         )}
+    </StyledContainer>
+  );
+};
+
+const StyledChannelTabs = styled.div`
+  display: flex;
+  flex-shrink: 0;
+  gap: ${themeCssVariables.spacing[2]};
+  padding: ${themeCssVariables.spacing[3]} ${themeCssVariables.spacing[4]};
+`;
+
+export const SidePanelCampaignComposerPage = () => {
+  const [channel, setChannel] = useState<'email' | 'sms'>('email');
+  const campaignToEdit = useAtomComponentStateValue(
+    campaignToEditComponentState,
+  );
+  return (
+    <StyledContainer>
+      {!campaignToEdit && (
+        <StyledChannelTabs role="group" aria-label="발송 채널">
+          <Button
+            title="이메일"
+            variant={channel === 'email' ? 'primary' : 'secondary'}
+            accent={channel === 'email' ? 'blue' : 'default'}
+            onClick={() => setChannel('email')}
+          />
+          <Button
+            title="문자 · 뿌리오"
+            variant={channel === 'sms' ? 'primary' : 'secondary'}
+            accent={channel === 'sms' ? 'blue' : 'default'}
+            onClick={() => setChannel('sms')}
+          />
+        </StyledChannelTabs>
+      )}
+      {channel === 'sms' && !campaignToEdit ? (
+        <StyledContent>
+          <SmsCampaignComposer />
+        </StyledContent>
+      ) : (
+        <EmailCampaignComposer />
+      )}
     </StyledContainer>
   );
 };
