@@ -129,6 +129,7 @@ export class ImapSmtpCalDavAPIService {
           userWorkspaceId,
           workspaceId,
           authFailedAt: null,
+          archivedAt: null,
         });
 
         if (shouldCreateMessageChannel) {

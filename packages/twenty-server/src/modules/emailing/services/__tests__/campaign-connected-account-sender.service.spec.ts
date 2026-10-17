@@ -59,6 +59,29 @@ describe('Campaign connected account sender', () => {
     });
   });
 
+  it('rejects sending from an account disconnected after scheduling', async () => {
+    accounts.verifyOwnership.mockResolvedValue({
+      ...account,
+      archivedAt: new Date(),
+    });
+    await expect(
+      service.send('workspace', 'owner', 'account', content),
+    ).rejects.toThrow();
+    expect(outbound.sendMessage).not.toHaveBeenCalled();
+  });
+
+  it('does not fall back to another sender when the selected account is disconnected', async () => {
+    channels.find.mockResolvedValue([
+      {
+        connectedAccountId: account.id,
+        connectedAccount: { ...account, archivedAt: new Date() },
+      },
+    ]);
+    await expect(
+      service.resolveChannel('workspace', 'owner', content.from),
+    ).rejects.toThrow('연결 해제된 발신 계정');
+  });
+
   it.each([
     ConnectedAccountProvider.GOOGLE,
     ConnectedAccountProvider.MICROSOFT,

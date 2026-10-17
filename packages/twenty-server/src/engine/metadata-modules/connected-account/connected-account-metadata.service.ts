@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
+import { ConnectedAccountProvider } from 'twenty-shared/types';
 import { isDefined } from 'twenty-shared/utils';
 import { In, IsNull, Repository } from 'typeorm';
 
@@ -347,6 +348,119 @@ export class ConnectedAccountMetadataService {
     }
   }
 
+  async disconnect({ id, workspaceId }: { id: string; workspaceId: string }) {
+    return this.repository.manager.transaction(async (manager) => {
+      const account = await manager.findOneOrFail(ConnectedAccountEntity, {
+        where: { id, workspaceId },
+        lock: { mode: 'pessimistic_write' },
+      });
+      if (
+        ![
+          ConnectedAccountProvider.GOOGLE,
+          ConnectedAccountProvider.MICROSOFT,
+          ConnectedAccountProvider.IMAP_SMTP_CALDAV,
+        ].includes(account.provider)
+      ) {
+        throw new ConnectedAccountException(
+          'Not an email account',
+          ConnectedAccountExceptionCode.INVALID_CONNECTED_ACCOUNT_INPUT,
+        );
+      }
+      await manager.update(
+        ConnectedAccountEntity,
+        { id, workspaceId },
+        {
+          archivedAt: account.archivedAt ?? new Date(),
+          accessToken: null,
+          refreshToken: null,
+          connectionParameters: null,
+        },
+      );
+      await manager.update(
+        MessageChannelEntity,
+        { connectedAccountId: id, workspaceId },
+        { isSyncEnabled: false },
+      );
+      await manager.update(
+        CalendarChannelEntity,
+        { connectedAccountId: id, workspaceId },
+        { isSyncEnabled: false },
+      );
+      return manager.findOneOrFail(ConnectedAccountEntity, {
+        where: { id, workspaceId },
+      });
+    });
+  }
+
+  async purgeDisconnectedData({
+    id,
+    workspaceId,
+  }: {
+    id: string;
+    workspaceId: string;
+  }) {
+    const channels = await this.repository.manager.transaction(
+      async (manager) => {
+        const account = await manager.findOneOrFail(ConnectedAccountEntity, {
+          where: { id, workspaceId },
+          lock: { mode: 'pessimistic_write' },
+        });
+        if (
+          !account.archivedAt ||
+          ![
+            ConnectedAccountProvider.GOOGLE,
+            ConnectedAccountProvider.MICROSOFT,
+            ConnectedAccountProvider.IMAP_SMTP_CALDAV,
+          ].includes(account.provider)
+        ) {
+          throw new ConnectedAccountException(
+            'Disconnect the account before deleting data',
+            ConnectedAccountExceptionCode.INVALID_CONNECTED_ACCOUNT_INPUT,
+          );
+        }
+        const messages = await manager.find(MessageChannelEntity, {
+          where: { connectedAccountId: id, workspaceId },
+          select: { id: true },
+        });
+        const calendars = await manager.find(CalendarChannelEntity, {
+          where: { connectedAccountId: id, workspaceId },
+          select: { id: true },
+        });
+        await manager.delete(MessageChannelEntity, {
+          connectedAccountId: id,
+          workspaceId,
+        });
+        await manager.delete(CalendarChannelEntity, {
+          connectedAccountId: id,
+          workspaceId,
+        });
+        // Keep the account row as connection history, without credentials.
+        return { messages, calendars, account };
+      },
+    );
+    this.workspaceEventEmitter.emitCustomBatchEvent<MessageChannelDeletedEvent>(
+      MESSAGE_CHANNEL_DELETED_EVENT,
+      channels.messages.map((channel) => ({ messageChannelId: channel.id })),
+      workspaceId,
+    );
+    this.workspaceEventEmitter.emitCustomBatchEvent<CalendarChannelDeletedEvent>(
+      CALENDAR_CHANNEL_DELETED_EVENT,
+      channels.calendars.map((channel) => ({ calendarChannelId: channel.id })),
+      workspaceId,
+    );
+    this.workspaceEventEmitter.emitCustomBatchEvent<ConnectedAccountDeletedEvent>(
+      CONNECTED_ACCOUNT_DELETED_EVENT,
+      [
+        {
+          connectedAccountId: id,
+          userWorkspaceId: channels.account.userWorkspaceId,
+        },
+      ],
+      workspaceId,
+    );
+    return channels.account;
+  }
+
   async delete({
     id,
     workspaceId,
@@ -357,6 +471,16 @@ export class ConnectedAccountMetadataService {
     const connectedAccount = await this.repository.findOneOrFail({
       where: { id, workspaceId },
     });
+
+    if (
+      [
+        ConnectedAccountProvider.GOOGLE,
+        ConnectedAccountProvider.MICROSOFT,
+        ConnectedAccountProvider.IMAP_SMTP_CALDAV,
+      ].includes(connectedAccount.provider)
+    ) {
+      return this.disconnect({ id, workspaceId });
+    }
 
     const [messageChannels, calendarChannels] = await Promise.all([
       this.messageChannelRepository.find({

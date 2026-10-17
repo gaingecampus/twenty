@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 
 import { ConnectedAccountProvider } from 'twenty-shared/types';
 import { assertUnreachable } from 'twenty-shared/utils';
@@ -24,6 +24,11 @@ export class MessagingMessageOutboundService {
     sendMessageInput: SendMessageInput,
     connectedAccount: ConnectedAccountEntity,
   ): Promise<SendMessageResult> {
+    if (connectedAccount.archivedAt) {
+      throw new BadRequestException(
+        '연결 해제된 이메일 계정입니다. 다시 연결해 주세요.',
+      );
+    }
     switch (connectedAccount.provider) {
       case ConnectedAccountProvider.GOOGLE:
         return this.gmailMessageOutboundService.sendMessage(
@@ -63,6 +68,11 @@ export class MessagingMessageOutboundService {
     sendMessageInput: SendMessageInput,
     connectedAccount: ConnectedAccountEntity,
   ): Promise<void> {
+    if (connectedAccount.archivedAt) {
+      throw new BadRequestException(
+        '연결 해제된 이메일 계정입니다. 다시 연결해 주세요.',
+      );
+    }
     switch (connectedAccount.provider) {
       case ConnectedAccountProvider.GOOGLE:
         return this.gmailMessageOutboundService.createDraft(

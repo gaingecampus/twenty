@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 
 import { ConnectedAccountProvider } from 'twenty-shared/types';
 import { assertUnreachable, isDefined } from 'twenty-shared/utils';
-import { Repository } from 'typeorm';
+import { IsNull, Repository } from 'typeorm';
 
 import { AppOAuthRefreshAccessTokenService } from 'src/engine/core-modules/application/connection-provider/refresh/services/app-oauth-refresh-tokens.service';
 import { type EncryptedString } from 'src/engine/core-modules/secret-encryption/branded-strings/encrypted-string.type';
@@ -56,6 +56,12 @@ export class ConnectedAccountRefreshTokensService {
     connectedAccount: ConnectedAccountEntity,
     workspaceId: string,
   ): Promise<ConnectedAccountTokens> {
+    if (connectedAccount.archivedAt) {
+      throw new ConnectedAccountRefreshAccessTokenException(
+        'Account is disconnected',
+        ConnectedAccountRefreshAccessTokenExceptionCode.REFRESH_TOKEN_NOT_FOUND,
+      );
+    }
     const isAccessTokenValid =
       await this.isAccessTokenStillValid(connectedAccount);
 
@@ -130,14 +136,22 @@ export class ConnectedAccountRefreshTokensService {
       workspaceId,
     });
 
-    await this.connectedAccountRepository.update(
-      { id: connectedAccount.id, workspaceId },
+    // A refresh already in flight must not restore credentials after disconnect.
+    const result = await this.connectedAccountRepository.update(
+      { id: connectedAccount.id, workspaceId, archivedAt: IsNull() },
       {
         accessToken: encryptedAccessToken,
         refreshToken: reEncryptedRefreshToken,
         lastCredentialsRefreshedAt: new Date(),
       },
     );
+
+    if (result.affected === 0) {
+      throw new ConnectedAccountRefreshAccessTokenException(
+        'Account was disconnected during token refresh',
+        ConnectedAccountRefreshAccessTokenExceptionCode.REFRESH_TOKEN_NOT_FOUND,
+      );
+    }
 
     return {
       accessToken: encryptedAccessToken,

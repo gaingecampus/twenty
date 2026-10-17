@@ -1,3 +1,4 @@
+import { IsNull } from 'typeorm';
 import { Test, type TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 
@@ -109,7 +110,7 @@ describe('ConnectedAccountRefreshTokensService', () => {
         {
           provide: getRepositoryToken(ConnectedAccountEntity),
           useValue: {
-            update: jest.fn(),
+            update: jest.fn().mockResolvedValue({ affected: 1 }),
           },
         },
         {
@@ -140,6 +141,43 @@ describe('ConnectedAccountRefreshTokensService', () => {
   });
 
   describe('resolveTokens', () => {
+    it('rejects a disconnected account even when its cached token is still valid', async () => {
+      await expect(
+        service.resolveTokens(
+          {
+            id: mockConnectedAccountId,
+            provider: ConnectedAccountProvider.GOOGLE,
+            archivedAt: new Date(),
+            lastCredentialsRefreshedAt: new Date(),
+          } as ConnectedAccountEntity,
+          mockWorkspaceId,
+        ),
+      ).rejects.toThrow('Account is disconnected');
+      expect(connectedAccountRepository.update).not.toHaveBeenCalled();
+    });
+
+    it('does not return refreshed credentials if disconnect won the race', async () => {
+      jest
+        .spyOn(googleAPIRefreshAccessTokenService, 'refreshTokens')
+        .mockResolvedValue({
+          accessToken: mockNewAccessTokenPlaintext,
+          refreshToken: mockRefreshTokenPlaintext,
+        });
+      connectedAccountRepository.update.mockResolvedValueOnce({ affected: 0 });
+      await expect(
+        service.resolveTokens(
+          {
+            id: mockConnectedAccountId,
+            provider: ConnectedAccountProvider.GOOGLE,
+            accessToken: mockEncryptedAccessToken,
+            refreshToken: mockEncryptedRefreshToken,
+            lastCredentialsRefreshedAt: new Date(0),
+          } as ConnectedAccountEntity,
+          mockWorkspaceId,
+        ),
+      ).rejects.toThrow('disconnected during token refresh');
+    });
+
     it('should reuse the cached encrypted tokens as-is when valid, skipping decrypt and the refresh call entirely', async () => {
       const connectedAccount = {
         id: mockConnectedAccountId,
@@ -201,7 +239,11 @@ describe('ConnectedAccountRefreshTokensService', () => {
         microsoftAPIRefreshAccessTokenService.refreshTokens,
       ).toHaveBeenCalledWith(mockRefreshTokenPlaintext);
       expect(connectedAccountRepository.update).toHaveBeenCalledWith(
-        { id: mockConnectedAccountId, workspaceId: mockWorkspaceId },
+        {
+          id: mockConnectedAccountId,
+          workspaceId: mockWorkspaceId,
+          archivedAt: IsNull(),
+        },
         expect.objectContaining({
           accessToken: expectedEncryptedNewAccessToken,
           refreshToken: expectedEncryptedNewRefreshToken,
@@ -244,7 +286,11 @@ describe('ConnectedAccountRefreshTokensService', () => {
         googleAPIRefreshAccessTokenService.refreshTokens,
       ).toHaveBeenCalledWith(mockRefreshTokenPlaintext);
       expect(connectedAccountRepository.update).toHaveBeenCalledWith(
-        { id: mockConnectedAccountId, workspaceId: mockWorkspaceId },
+        {
+          id: mockConnectedAccountId,
+          workspaceId: mockWorkspaceId,
+          archivedAt: IsNull(),
+        },
         expect.objectContaining({
           accessToken: expectedEncryptedNewAccessToken,
           refreshToken: expectedEncryptedNewRefreshToken,
@@ -288,7 +334,11 @@ describe('ConnectedAccountRefreshTokensService', () => {
         microsoftAPIRefreshAccessTokenService.refreshTokens,
       ).toHaveBeenCalledWith(mockRefreshTokenPlaintext);
       expect(connectedAccountRepository.update).toHaveBeenCalledWith(
-        { id: mockConnectedAccountId, workspaceId: mockWorkspaceId },
+        {
+          id: mockConnectedAccountId,
+          workspaceId: mockWorkspaceId,
+          archivedAt: IsNull(),
+        },
         expect.objectContaining({
           accessToken: expectedEncryptedNewAccessToken,
           refreshToken: expectedEncryptedNewRefreshToken,

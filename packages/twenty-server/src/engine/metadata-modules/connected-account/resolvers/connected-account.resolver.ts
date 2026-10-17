@@ -52,6 +52,34 @@ export class ConnectedAccountResolver {
   }
 
   @Mutation(() => ConnectedAccountPublicDTO)
+  @UseGuards(SettingsPermissionGuard(PermissionFlagType.WORKSPACE_MEMBERS))
+  async disconnectWorkspaceEmailAccount(
+    @Args('id', { type: () => UUIDScalarType }) id: string,
+    @AuthWorkspace() workspace: WorkspaceEntity,
+  ): Promise<ConnectedAccountPublicDTO> {
+    return buildPublicConnectedAccount(
+      await this.connectedAccountMetadataService.disconnect({
+        id,
+        workspaceId: workspace.id,
+      }),
+    );
+  }
+
+  @Mutation(() => ConnectedAccountPublicDTO)
+  @UseGuards(SettingsPermissionGuard(PermissionFlagType.WORKSPACE_MEMBERS))
+  async purgeDisconnectedEmailAccountData(
+    @Args('id', { type: () => UUIDScalarType }) id: string,
+    @AuthWorkspace() workspace: WorkspaceEntity,
+  ): Promise<ConnectedAccountPublicDTO> {
+    return buildPublicConnectedAccount(
+      await this.connectedAccountMetadataService.purgeDisconnectedData({
+        id,
+        workspaceId: workspace.id,
+      }),
+    );
+  }
+
+  @Mutation(() => ConnectedAccountPublicDTO)
   @UseGuards(NoPermissionGuard)
   async deleteConnectedAccount(
     @Args('id', { type: () => UUIDScalarType }) id: string,

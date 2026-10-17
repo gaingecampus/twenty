@@ -73,6 +73,11 @@ export class CampaignConnectedAccountSenderService {
         throw new ForbiddenException('이 발신 계정을 사용할 권한이 없습니다.');
       return null;
     }
+    if (channel.connectedAccount.archivedAt) {
+      throw new BadRequestException(
+        '연결 해제된 발신 계정입니다. 다시 연결해 주세요.',
+      );
+    }
     await this.accounts.verifyOwnership({
       id: channel.connectedAccountId,
       workspaceId,
@@ -93,6 +98,7 @@ export class CampaignConnectedAccountSenderService {
       userWorkspaceId,
     });
     if (
+      account.archivedAt ||
       !PROVIDERS.includes(account.provider) ||
       account.handle !== content.from
     ) {
