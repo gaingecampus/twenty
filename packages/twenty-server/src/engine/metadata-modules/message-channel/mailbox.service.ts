@@ -79,16 +79,26 @@ export class MailboxService {
   }
 
   async findChannels(workspaceId: string, userWorkspaceId: string) {
-    if (await this.isWorkspaceAdmin(workspaceId, userWorkspaceId)) {
-      return this.channels.find({
-        where: { workspaceId, type: MessageChannelType.EMAIL },
-        order: { handle: 'ASC', id: 'ASC' },
-      });
-    }
     const accountIds = await this.accounts.getUserConnectedAccountIds({
       userWorkspaceId,
       workspaceId,
     });
+
+    if (await this.isWorkspaceAdmin(workspaceId, userWorkspaceId)) {
+      const channels = await this.channels.find({
+        where: { workspaceId, type: MessageChannelType.EMAIL },
+        order: { handle: 'ASC', id: 'ASC' },
+      });
+
+      const ownAccountIds = new Set(accountIds);
+
+      // Keep the address ordering within each ownership group.
+      return channels.sort(
+        (left, right) =>
+          Number(ownAccountIds.has(right.connectedAccountId)) -
+          Number(ownAccountIds.has(left.connectedAccountId)),
+      );
+    }
     if (!accountIds.length) return [];
     return this.channels.find({
       where: {
@@ -96,6 +106,7 @@ export class MailboxService {
         connectedAccountId: In(accountIds),
         type: MessageChannelType.EMAIL,
       },
+      order: { handle: 'ASC', id: 'ASC' },
     });
   }
 

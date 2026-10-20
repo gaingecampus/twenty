@@ -1,6 +1,9 @@
 import { useMailboxChannels } from '@/mailbox/hooks/useMailboxChannels';
 import { useMailboxMessages } from '@/mailbox/hooks/useMailboxMessages';
 import { useMailboxFolders } from '@/mailbox/hooks/useMailboxFolders';
+import { PageCardHeader } from '@/ui/layout/page/components/PageCardHeader';
+import { PageCardLayout } from '@/ui/layout/page/components/PageCardLayout';
+import { PageTitle } from '@/ui/utilities/page-title/components/PageTitle';
 import { PageContainer } from '@/ui/layout/page/components/PageContainer';
 import { styled } from '@linaria/react';
 import { useState } from 'react';
@@ -132,12 +135,14 @@ const StyledPagination = styled.div`
   justify-content: space-between;
   padding: ${themeCssVariables.spacing[3]};
 `;
-const StyledLayout = styled.div`
+const StyledAccountSelect = styled.select`
   background: ${themeCssVariables.background.primary};
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  min-height: 0;
+  border: 1px solid ${themeCssVariables.border.color.medium};
+  border-radius: ${themeCssVariables.border.radius.sm};
+  color: ${themeCssVariables.font.color.primary};
+  max-width: 100%;
+  min-width: 0;
+  padding: ${themeCssVariables.spacing[2]};
 `;
 
 const formatDate = (value: string | null) =>
@@ -317,24 +322,30 @@ export const MailboxPage = () => {
     channels.find((item) => item.id === selectedId) ?? channels.at(0);
   return (
     <PageContainer>
-      <StyledLayout>
-        <StyledHeader>
-          <IconMail size={20} />
-          <h1>이메일</h1>
-          {channel && (
-            <select
-              aria-label="이메일 계정"
-              value={channel.id}
-              onChange={(event) => setSelectedId(event.target.value)}
-            >
-              {channels.map((item) => (
-                <option key={item.id} value={item.id}>
-                  {item.handle}
-                </option>
-              ))}
-            </select>
-          )}
-        </StyledHeader>
+      <PageTitle title="메일함" />
+      <PageCardLayout
+        header={
+          <PageCardHeader
+            title="메일함"
+            icon={<IconMail size={24} />}
+            actionButton={
+              channel && (
+                <StyledAccountSelect
+                  aria-label="이메일 계정"
+                  value={channel.id}
+                  onChange={(event) => setSelectedId(event.target.value)}
+                >
+                  {channels.map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {item.handle}
+                    </option>
+                  ))}
+                </StyledAccountSelect>
+              )
+            }
+          />
+        }
+      >
         {error ? (
           <StyledNotice role="alert">
             이메일 계정을 불러오지 못했습니다. 새로 고침해 주세요.
@@ -364,7 +375,7 @@ export const MailboxPage = () => {
             <MailboxContent key={channel.id} channelId={channel.id} />
           </>
         )}
-      </StyledLayout>
+      </PageCardLayout>
     </PageContainer>
   );
 };

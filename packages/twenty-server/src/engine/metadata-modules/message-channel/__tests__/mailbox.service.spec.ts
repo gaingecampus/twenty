@@ -58,7 +58,36 @@ describe('MailboxService', () => {
       where: { workspaceId: 'workspace', type: 'EMAIL' },
       order: { handle: 'ASC', id: 'ASC' },
     });
-    expect(accounts.getUserConnectedAccountIds).not.toHaveBeenCalled();
+    expect(accounts.getUserConnectedAccountIds).toHaveBeenCalledWith({
+      workspaceId: 'workspace',
+      userWorkspaceId: 'me',
+    });
+  });
+
+  it('prioritizes the administrators own accounts while retaining other accounts', async () => {
+    makeAdmin();
+    const other = { id: 'a', connectedAccountId: 'other' };
+    const ownFirst = { id: 'b', connectedAccountId: 'mine' };
+    const ownSecond = { id: 'c', connectedAccountId: 'mine' };
+    channels.find.mockResolvedValue([other, ownFirst, ownSecond]);
+
+    expect(await service.findChannels('workspace', 'me')).toEqual([
+      ownFirst,
+      ownSecond,
+      other,
+    ]);
+  });
+
+  it('retains the address order for administrators without a connected account', async () => {
+    makeAdmin();
+    accounts.getUserConnectedAccountIds.mockResolvedValue([]);
+    const available = [
+      { id: 'a', connectedAccountId: 'other-a' },
+      { id: 'b', connectedAccountId: 'other-b' },
+    ];
+    channels.find.mockResolvedValue(available);
+
+    expect(await service.findChannels('workspace', 'me')).toEqual(available);
   });
 
   it('allows an administrator to read another account and its folders', async () => {

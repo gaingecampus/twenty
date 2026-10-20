@@ -6,7 +6,7 @@ export const MailboxNavigationItem = () => {
   const { pathname } = useLocation();
   return (
     <NavigationDrawerItem
-      label="이메일"
+      label="메일함"
       Icon={IconMail}
       to="/mailbox"
       active={pathname === '/mailbox'}
