@@ -25,6 +25,10 @@ Cursor의 `.cursor/hooks.json` 실행 여부에 의존하지 않고 아래 규�
 
 ## 기존 규칙의 진입점
 
+- 모든 신규 화면·UI 수정은 엔터프라이즈 디자인을 기준으로 합니다.
+  `.cursor/rules/003-fork-enterprise-theme.mdc`의 공통 컴포넌트·검증 기준을
+  적용하고, 페이지별로 별도 디자인을 만들지 않습니다.
+
 - 포크 정책이 필요하면 `GAINGE_CONTEXT.md`를 읽습니다.
 - 실행·배포·환경 작업은 `GAINGE_RUNBOOK.md`를 우선 읽습니다.
 - 테마·패딩·폰트·색·radius·`--t-*` 변경 전

@@ -85,7 +85,6 @@ const mockWorkspace = {
   enabledAiModelIds: [],
   useRecommendedModels: true,
   isInternalMessagesImportEnabled: false,
-  uiTheme: 'default',
   workspaceCustomApplication: CUSTOM_WORKSPACE_APPLICATION_MOCK,
   workspaceCustomApplicationId: CUSTOM_WORKSPACE_APPLICATION_MOCK.id,
   installedApplications: [],

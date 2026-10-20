@@ -1,4 +1,3 @@
-import { currentWorkspaceState } from '@/auth/states/currentWorkspaceState';
 import { useNavigationDrawerExpanded } from '@/navigation/hooks/useNavigationDrawerExpanded';
 import { NavigationDrawerAnimatedCollapseWrapper } from '@/ui/navigation/navigation-drawer/components/NavigationDrawerAnimatedCollapseWrapper';
 import { NavigationDrawerItemBreadcrumb } from '@/ui/navigation/navigation-drawer/components/NavigationDrawerItemBreadcrumb';
@@ -6,15 +5,13 @@ import { useNavigationDrawerTooltip } from '@/ui/navigation/navigation-drawer/ho
 import { type NavigationDrawerSubItemState } from '@/ui/navigation/navigation-drawer/types/NavigationDrawerSubItemState';
 import { isNavigationDrawerExpandedState } from '@/ui/navigation/states/isNavigationDrawerExpanded';
 import { useIsMobile } from '@/ui/utilities/responsive/hooks/useIsMobile';
-import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 import { useSetAtomState } from '@/ui/utilities/state/jotai/hooks/useSetAtomState';
 import { styled } from '@linaria/react';
 import { t } from '@lingui/core/macro';
-import { isNonEmptyString } from '@sniptt/guards';
 import { type JSX, type ReactNode, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { isDefined } from 'twenty-shared/utils';
-import { Pill, TintedIconTile } from 'twenty-ui/data-display';
+import { Pill } from 'twenty-ui/data-display';
 import { type IconComponent, type TablerIconsProps } from 'twenty-ui/icon';
 import {
   AppTooltip,
@@ -281,17 +278,6 @@ const StyledIcon = styled.div<{ isNavigationDrawerExpanded: boolean }>`
   }
 `;
 
-const StyledIconBackgroundTile = styled.div`
-  align-items: center;
-  background-color: ${themeCssVariables.grayScale.gray3};
-  border-radius: ${themeCssVariables.border.radius.md};
-  display: flex;
-  flex-shrink: 0;
-  height: var(--t-nav-icon-tile-size, ${themeCssVariables.spacing[6]});
-  justify-content: center;
-  width: var(--t-nav-icon-tile-size, ${themeCssVariables.spacing[6]});
-`;
-
 const StyledRightOptionsContainer = styled.div`
   align-items: center;
   border-radius: var(
@@ -365,8 +351,6 @@ export const NavigationDrawerItem = ({
   secondaryLabel,
   indentationLevel = DEFAULT_INDENTATION_LEVEL,
   Icon,
-  iconColor,
-  withIconBackground = false,
   to,
   onClick,
   active,
@@ -382,8 +366,6 @@ export const NavigationDrawerItem = ({
   variant = 'default',
 }: NavigationDrawerItemProps) => {
   const { theme } = useContext(ThemeContext);
-  const currentWorkspace = useAtomStateValue(currentWorkspaceState);
-  const hideIconTile = currentWorkspace?.uiTheme === 'enterprise';
   const isMobile = useIsMobile();
   const isExpanded = useNavigationDrawerExpanded();
   const setIsNavigationDrawerExpanded = useSetAtomState(
@@ -466,44 +448,25 @@ export const NavigationDrawerItem = ({
             <NavigationDrawerItemBreadcrumb state={subItemState} />
           )}
 
-          {Icon &&
-            (isNonEmptyString(iconColor) && !hideIconTile ? (
-              <StyledIcon isNavigationDrawerExpanded={isExpanded}>
-                <TintedIconTile Icon={Icon} color={iconColor} />
-              </StyledIcon>
-            ) : withIconBackground && !hideIconTile ? (
-              <StyledIcon isNavigationDrawerExpanded={isExpanded}>
-                <StyledIconBackgroundTile>
-                  <Icon
-                    size={theme.icon.size.md}
-                    stroke={theme.icon.stroke.md}
-                    color={
-                      showBreadcrumb && !isExpanded
-                        ? theme.font.color.light
-                        : 'currentColor'
-                    }
-                  />
-                </StyledIconBackgroundTile>
-              </StyledIcon>
-            ) : (
-              <StyledIcon
-                data-plain-icon="true"
-                isNavigationDrawerExpanded={isExpanded}
-              >
-                <Icon
-                  style={{
-                    minWidth: theme.icon.size.md,
-                  }}
-                  size={theme.icon.size.md}
-                  stroke={theme.icon.stroke.md}
-                  color={
-                    showBreadcrumb && !isExpanded
-                      ? theme.font.color.light
-                      : 'currentColor'
-                  }
-                />
-              </StyledIcon>
-            ))}
+          {Icon && (
+            <StyledIcon
+              data-plain-icon="true"
+              isNavigationDrawerExpanded={isExpanded}
+            >
+              <Icon
+                style={{
+                  minWidth: theme.icon.size.md,
+                }}
+                size={theme.icon.size.md}
+                stroke={theme.icon.stroke.md}
+                color={
+                  showBreadcrumb && !isExpanded
+                    ? theme.font.color.light
+                    : 'currentColor'
+                }
+              />
+            </StyledIcon>
+          )}
 
           {isExpanded && (
             <StyledLabelParent isNavigationDrawerExpanded={isExpanded}>

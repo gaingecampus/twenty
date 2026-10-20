@@ -11,7 +11,7 @@ import { DeleteWorkspace } from '@/settings/profile/components/DeleteWorkspace';
 import { useHasPermissionFlag } from '@/settings/roles/hooks/useHasPermissionFlag';
 import { SettingsSecuritySettings } from '@/settings/security/components/SettingsSecuritySettings';
 import { NameField } from '@/settings/workspace/components/NameField';
-import { SettingsWorkspaceUiThemePicker } from '@/settings/workspace/components/SettingsWorkspaceUiThemePicker';
+import { SettingsWorkspaceTheme } from '@/settings/workspace/components/SettingsWorkspaceTheme';
 import { WorkspaceLogoUploader } from '@/settings/workspace/components/WorkspaceLogoUploader';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 import { IconHistory, IconKey, IconSettings } from 'twenty-ui/icon';
@@ -66,7 +66,7 @@ export const SettingsGeneral = () => {
           <H2Title title={t`Name`} description={t`Name of your workspace`} />
           <NameField />
         </Section>
-        <SettingsWorkspaceUiThemePicker />
+        <SettingsWorkspaceTheme />
         {isMultiWorkspaceEnabled && (
           <Section>
             <H2Title

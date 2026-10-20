@@ -275,10 +275,6 @@ export class WorkspaceEntity {
   @Column({ default: false })
   isInternalMessagesImportEnabled: boolean;
 
-  @Field()
-  @Column({ type: 'varchar', default: 'default' })
-  uiTheme: string;
-
   @Field(() => [String], { nullable: true })
   @Column({
     type: 'varchar',

@@ -99,12 +99,9 @@ const applyColorSchemeClass = (colorScheme: 'light' | 'dark') => {
   root.classList.toggle('light', colorScheme === 'light');
 };
 
-const applyUiThemeAttribute = (
-  element: HTMLElement | null,
-  uiTheme: string,
-) => {
+const applyUiThemeAttribute = (element: HTMLElement | null) => {
   if (!element?.setAttribute) return;
-  element.setAttribute('data-ui-theme', uiTheme);
+  element.setAttribute('data-ui-theme', 'enterprise');
 };
 
 export const ThemeContext = createContext<ThemeContextType>({
@@ -115,14 +112,12 @@ export const ThemeContext = createContext<ThemeContextType>({
 export const ThemeProvider = ({
   children,
   colorScheme,
-  uiTheme = 'default',
   applyToRoot = true,
   overrides,
   className,
 }: {
   children: React.ReactNode;
   colorScheme: 'light' | 'dark';
-  uiTheme?: string;
   applyToRoot?: boolean;
   overrides?: ThemeOverrides;
   className?: string;
@@ -134,7 +129,7 @@ export const ThemeProvider = ({
   const [theme, setTheme] = useState<ThemeType>(() => {
     if (applyToRoot) {
       applyColorSchemeClass(colorScheme);
-      applyUiThemeAttribute(document.documentElement, uiTheme);
+      applyUiThemeAttribute(document.documentElement);
     }
     return computeThemeFromCss();
   });
@@ -147,11 +142,11 @@ export const ThemeProvider = ({
   useLayoutEffect(() => {
     if (applyToRoot) {
       applyColorSchemeClass(colorScheme);
-      applyUiThemeAttribute(document.documentElement, uiTheme);
+      applyUiThemeAttribute(document.documentElement);
     }
 
     if (isScoped) {
-      applyUiThemeAttribute(wrapperRef.current, uiTheme);
+      applyUiThemeAttribute(wrapperRef.current);
     }
 
     setTheme(
@@ -160,7 +155,7 @@ export const ThemeProvider = ({
       ),
     );
     setScopeContainer(isScoped ? wrapperRef.current : null);
-  }, [colorScheme, uiTheme, applyToRoot, isScoped, overridesKey]);
+  }, [colorScheme, applyToRoot, isScoped, overridesKey]);
 
   const contextValue = { theme, colorScheme };
 
@@ -180,7 +175,7 @@ export const ThemeProvider = ({
         <div
           ref={wrapperRef}
           className={clsx(applyToRoot ? undefined : colorScheme, className)}
-          data-ui-theme={uiTheme}
+          data-ui-theme="enterprise"
           style={{ display: 'contents', ...overridesStyle }}
         >
           {children}
