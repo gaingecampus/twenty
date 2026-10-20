@@ -1,0 +1,10 @@
+{
+  "tool": "built-in image_gen",
+  "issue": "AX-1302",
+  "transparent_background": true,
+  "prompts": {
+    "personal-tasks.png": "Use case: stylized-concept. Asset type: small CRM dashboard illustration. A single cheerful soft 3D clay checklist clipboard with two mint check marks and a small golden pencil, blue clipboard rim. Rounded chunky forms, soft studio light, subtle dimensional shading, clean premium playful Korean consumer-app aesthetic. Centered isolated object fills 80% of square canvas, readable at 64px. No letters, no logos, no watermark. Transparent background.",
+    "personal-contracts.png": "Use case: stylized-concept. Asset type: small CRM dashboard illustration. A single friendly soft 3D clay contract document with folded corner, mint blue binder clip and a golden round approval seal with check mark. Rounded chunky forms, soft studio light, subtle dimensional shading, clean premium playful Korean consumer-app aesthetic. Centered isolated object fills 80% of square canvas, readable at 64px. No letters, logos or watermark. Transparent background.",
+    "personal-visits.png": "Use case: stylized-concept. Asset type: small CRM dashboard illustration. A single friendly soft 3D clay field-notes notebook in peach orange with a small blue camera resting against it. Rounded chunky forms, soft studio light, subtle dimensional shading, clean premium playful Korean consumer-app aesthetic. Centered isolated object fills 80% of square canvas, readable at 64px. No letters, logos or watermark. Transparent background."
+  }
+}
