@@ -177,7 +177,16 @@ const StatusBoardContentBody = ({
               onOpenSheet={setSheet}
             />
           )}
-          {!dummy.enabled && <StatusBoardSalesSection />}
+          {!dummy.enabled && (
+            <StatusBoardSalesSection
+              depositProps={{
+                depositObjectMetadataItem: metadata.deposit,
+                memberIds,
+                selectedGroupIds: filters.selectedGroupIds,
+                isGroupUnavailable,
+              }}
+            />
+          )}
           {!isGroupUnavailable && (
             <>
               <StatusBoardCumulativeSection

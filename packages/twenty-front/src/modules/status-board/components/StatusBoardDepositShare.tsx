@@ -1,3 +1,4 @@
+import { StatusBoardSalesSkeleton } from '@/status-board/components/StatusBoardSalesSkeleton';
 import { styled } from '@linaria/react';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 import { type RecordGqlOperationFilter } from 'twenty-shared/types';
@@ -65,10 +66,14 @@ export const StatusBoardDepositShare = ({
   paidFilter,
   dueFilter,
   dateBasis,
+  gaingeAmount,
+  gaingeLoading = false,
 }: {
   paidFilter?: RecordGqlOperationFilter;
   dueFilter?: RecordGqlOperationFilter;
   dateBasis: string;
+  gaingeAmount?: number | null;
+  gaingeLoading?: boolean;
 }) => {
   const paid = useStatusBoardSum({
     objectNameSingular: 'deposit',
@@ -95,14 +100,33 @@ export const StatusBoardDepositShare = ({
       : invalid
         ? '금액을 확인해야 비중을 표시할 수 있어요'
         : '선택한 기간에 집계된 입금 금액이 없어요';
+  if (loading) return <StatusBoardSalesSkeleton chart={false} />;
   return (
     <StyledShare
       aria-busy={loading}
       aria-label={`입금 요약 · ${dateBasis} 기준`}
     >
+      {gaingeAmount !== undefined && (
+        <StyledTotal>
+          <span>전체 합계</span>
+          <strong>
+            {loading ||
+            gaingeLoading ||
+            error ||
+            invalid ||
+            gaingeAmount === null
+              ? '—'
+              : `${(gaingeAmount + total / 1_000_000).toLocaleString('ko-KR')}원`}
+          </strong>
+        </StyledTotal>
+      )}
       <StyledHeader>
         <StyledTotal>
-          <span>총 발행 매출</span>
+          <span>
+            {gaingeAmount !== undefined
+              ? '입금 · 총 발행 매출'
+              : '총 발행 매출'}
+          </span>
           <strong>
             {loading || error || invalid
               ? '—'
@@ -115,6 +139,18 @@ export const StatusBoardDepositShare = ({
           </span>
         )}
       </StyledHeader>
+      {gaingeAmount !== undefined && (
+        <StyledHeader>
+          <span>가캠 매출</span>
+          <span>
+            {gaingeAmount === null
+              ? gaingeLoading
+                ? '불러오는 중…'
+                : '조회 불가'
+              : `${gaingeAmount.toLocaleString('ko-KR')}원`}
+          </span>
+        </StyledHeader>
+      )}
       {hasShare && (
         <>
           <StyledTrack

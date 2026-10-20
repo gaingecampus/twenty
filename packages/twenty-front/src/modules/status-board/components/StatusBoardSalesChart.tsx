@@ -1,3 +1,4 @@
+import { StatusBoardSalesSkeleton } from '@/status-board/components/StatusBoardSalesSkeleton';
 import { useQuery } from '@apollo/client/react';
 import { styled } from '@linaria/react';
 import { ResponsiveLine } from '@nivo/line';
@@ -65,12 +66,7 @@ export const StatusBoardSalesChart = ({ month }: { month: string }) => {
   });
   const report = data?.gaingeSalesTimeline;
 
-  if (loading)
-    return (
-      <StyledDashboardMuted role="status">
-        일별 누적 그래프를 불러오는 중입니다…
-      </StyledDashboardMuted>
-    );
+  if (loading) return <StatusBoardSalesSkeleton />;
   if (error || report?.status !== 'READY' || !report.days?.length) {
     return (
       <StyledDashboardMuted role="status">

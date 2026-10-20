@@ -5,7 +5,6 @@ import {
   StyledDashboardSectionTitle,
 } from '@/ui/layout/dashboard/components/dashboardStyled';
 import { StatusBoardLinkedCountKpi } from '@/status-board/components/StatusBoardLinkedCountKpi';
-import { StatusBoardDepositShare } from '@/status-board/components/StatusBoardDepositShare';
 import { IconChevronLeft, IconChevronRight } from 'twenty-ui/icon';
 import { StatusBoardCountKpi } from '@/status-board/components/StatusBoardCountKpi';
 import {
@@ -26,7 +25,6 @@ import {
   buildStatusBoardMemberFilter,
   buildStatusBoardOverdueDepositFilter,
   buildStatusBoardPaidDepositFilter,
-  buildStatusBoardPeriodDepositFilter,
   buildStatusBoardUnpaidPeriodDepositFilter,
 } from '@/status-board/utils/buildStatusBoardSectionFilters';
 import { hasStatusBoardField } from '@/status-board/utils/hasStatusBoardField';
@@ -94,16 +92,6 @@ export const StatusBoardPeriodSection = ({
           startDate: periodRange.startDate,
           endDate: periodRange.endDate,
         });
-  const issuedFilter = depositObjectMetadataItem
-    ? buildStatusBoardPeriodDepositFilter({
-        depositObjectMetadataItem,
-        memberIds,
-        selectedGroupIds,
-        startDate: periodRange.startDate,
-        endDate: periodRange.endDate,
-        dateField: STATUS_BOARD_FIELD.issueDate,
-      })
-    : undefined;
   const opportunityFilter =
     opportunityObjectMetadataItem === undefined
       ? undefined
@@ -324,34 +312,6 @@ export const StatusBoardPeriodSection = ({
           />
         )}
       </StyledDashboardKpiGrid>
-      {depositObjectMetadataItem &&
-        hasStatusBoardField(
-          depositObjectMetadataItem,
-          STATUS_BOARD_FIELD.amount,
-        ) &&
-        hasStatusBoardField(
-          depositObjectMetadataItem,
-          STATUS_BOARD_FIELD.depositStatus,
-        ) && (
-          <StatusBoardDepositShare
-            paidFilter={andStatusBoardFilters([
-              issuedFilter,
-              { depositStatus: { eq: 'PAID' } },
-            ])}
-            dueFilter={andStatusBoardFilters([
-              issuedFilter,
-              { depositStatus: { neq: 'PAID' } },
-            ])}
-            dateBasis={
-              hasStatusBoardField(
-                depositObjectMetadataItem,
-                STATUS_BOARD_FIELD.issueDate,
-              )
-                ? '발행일'
-                : '등록일'
-            }
-          />
-        )}
     </StyledDashboardSection>
   );
 };

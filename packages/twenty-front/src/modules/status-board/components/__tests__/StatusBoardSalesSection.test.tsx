@@ -118,3 +118,45 @@ it('allows retry after an API failure', () => {
   fireEvent.click(screen.getByRole('button', { name: '매출 새로고침' }));
   expect(mockRefetch).toHaveBeenCalledTimes(1);
 });
+
+it('switches to issued deposits without requesting Gainge revenue and keeps the selected month', () => {
+  render(
+    <StatusBoardSalesSection
+      depositProps={{ selectedGroupIds: [], isGroupUnavailable: true }}
+    />,
+  );
+  expect(screen.getByRole('button', { name: '전체' })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  );
+  fireEvent.click(screen.getByRole('button', { name: '입금' }));
+  expect(screen.getByRole('status')).toHaveTextContent('선택한 그룹');
+  expect(mockQuery.mock.calls.at(-1)[1].skip).toBe(true);
+  fireEvent.click(screen.getByRole('button', { name: '이전 매출 월' }));
+  expect(mockQuery.mock.calls.at(-1)[1].variables.month).toBe('2026-09');
+  fireEvent.click(screen.getByRole('button', { name: '가캠' }));
+  expect(mockQuery.mock.calls.at(-1)[1].skip).toBe(false);
+  expect(mockQuery.mock.calls.at(-1)[1].variables.month).toBe('2026-09');
+});
+
+it('shows a loading skeleton without stale amounts or an error message', () => {
+  mockQuery.mockReturnValue({
+    loading: true,
+    refetch: mockRefetch,
+    data: {
+      gaingeMonthlySales: {
+        status: 'READY',
+        month: '2026-10',
+        total: 1234567,
+        departments: [],
+      },
+    },
+  });
+  render(<StatusBoardSalesSection />);
+  expect(screen.getByRole('status')).toHaveAttribute('aria-busy', 'true');
+  expect(screen.getByRole('status')).toHaveAccessibleName(
+    '매출 정보를 불러오는 중입니다',
+  );
+  expect(screen.queryByText('1,234,567원')).not.toBeInTheDocument();
+  expect(screen.queryByText(/조회 대기 또는 오류/)).not.toBeInTheDocument();
+});
