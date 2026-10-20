@@ -10,6 +10,7 @@ export const StatusBoardNavigationItem = () => {
     <>
       <NavigationDrawerItem
         label="개인 대시보드"
+        badgeLabel="준비중"
         Icon={IconUser}
         to="/personal-dashboard"
         active={pathname === '/personal-dashboard'}

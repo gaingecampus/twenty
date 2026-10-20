@@ -41,6 +41,7 @@ export type NavigationDrawerItemModifier =
 export type NavigationDrawerItemProps = {
   className?: string;
   label: string;
+  badgeLabel?: string;
   secondaryLabel?: string;
   indentationLevel?: NavigationDrawerItemIndentationLevel;
   subItemState?: NavigationDrawerSubItemState;
@@ -348,6 +349,7 @@ const StyledRightOptionsVisbility = styled.div`
 export const NavigationDrawerItem = ({
   className,
   label,
+  badgeLabel,
   secondaryLabel,
   indentationLevel = DEFAULT_INDENTATION_LEVEL,
   Icon,
@@ -490,6 +492,8 @@ export const NavigationDrawerItem = ({
           )}
 
           {showStyledSpacer && isExpanded && <StyledSpacer />}
+
+          {badgeLabel && isExpanded && <Pill label={badgeLabel} />}
 
           {isSoon && isExpanded && <Pill label={t`Soon`} />}
 
