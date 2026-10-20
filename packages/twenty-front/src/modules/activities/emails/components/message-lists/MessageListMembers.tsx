@@ -1,11 +1,4 @@
-import {
-  StyledMessageListToolbar,
-  StyledMessageListEmpty,
-} from '@/activities/emails/components/message-lists/MessageListSectionStyles';
-import { Table } from '@/ui/layout/table/components/Table';
-import { TableRow } from '@/ui/layout/table/components/TableRow';
-import { TableHeader } from '@/ui/layout/table/components/TableHeader';
-import { TableCell } from '@/ui/layout/table/components/TableCell';
+import { StyledMessageListEmpty } from '@/activities/emails/components/message-lists/MessageListSectionStyles';
 import { RecordChip } from '@/object-record/components/RecordChip';
 import { EmailDisplay } from '@/ui/field/display/components/EmailDisplay';
 import { MessageListAddCustomersModal } from '@/activities/emails/components/message-lists/MessageListAddCustomersModal';
@@ -31,19 +24,82 @@ type MessageListMember = ObjectRecord & {
     | (ObjectRecord & {
         name: { firstName: string; lastName: string };
         emails: { primaryEmail: string };
+        jobTitle?: string;
+        company?: { id: string; name: string } | null;
       })
     | null;
 };
 
 const StyledSection = styled.section`
-  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: ${themeCssVariables.spacing[4]};
+  min-width: 0;
   width: 100%;
+`;
+const StyledWelcome = styled.div`
+  align-items: center;
+  background: ${themeCssVariables.background.secondary};
+  border-radius: ${themeCssVariables.border.radius.md};
+  display: flex;
+  gap: ${themeCssVariables.spacing[4]};
+  padding: ${themeCssVariables.spacing[4]};
+`;
+const StyledIllustration = styled.img`
+  flex-shrink: 0;
+  height: 80px;
+  object-fit: contain;
+  width: 80px;
+`;
+const StyledHeading = styled.h3`
+  color: ${themeCssVariables.font.color.primary};
+  font-size: ${themeCssVariables.font.size.lg};
+  margin: 0 0 ${themeCssVariables.spacing[2]};
+`;
+const StyledDescription = styled.p`
+  color: ${themeCssVariables.font.color.secondary};
+  line-height: 1.6;
+  margin: 0;
+`;
+const StyledActions = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: ${themeCssVariables.spacing[2]};
+`;
+const StyledMembers = styled.ul`
+  display: flex;
+  flex-direction: column;
+  gap: ${themeCssVariables.spacing[2]};
+  list-style: none;
+  margin: 0;
+  padding: 0;
+`;
+const StyledMember = styled.li`
+  align-items: center;
+  border: 1px solid ${themeCssVariables.border.color.light};
+  border-radius: ${themeCssVariables.border.radius.md};
+  display: flex;
+  gap: ${themeCssVariables.spacing[3]};
+  padding: ${themeCssVariables.spacing[4]};
+`;
+const StyledIdentity = styled.div`
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: ${themeCssVariables.spacing[2]};
+  min-width: 0;
+  overflow-wrap: anywhere;
+`;
+const StyledMetadata = styled.span`
+  color: ${themeCssVariables.font.color.secondary};
+  font-size: ${themeCssVariables.font.size.sm};
 `;
 export const MessageListMembers = ({ listId }: { listId: string }) => {
   const [busy, setBusy] = useState(false);
   const { enqueueErrorSnackBar } = useSnackBar();
   const {
     records,
+    totalCount,
     loading,
     error,
     refetch,
@@ -56,7 +112,13 @@ export const MessageListMembers = ({ listId }: { listId: string }) => {
     recordGqlFields: {
       id: true,
       personId: true,
-      person: { id: true, name: true, emails: true },
+      person: {
+        id: true,
+        name: true,
+        emails: true,
+        jobTitle: true,
+        company: { id: true, name: true },
+      },
       workspaceMember: { id: true, name: true, userEmail: true },
     },
   });
@@ -82,7 +144,26 @@ export const MessageListMembers = ({ listId }: { listId: string }) => {
   };
   return (
     <StyledSection>
-      <StyledMessageListToolbar>
+      <StyledWelcome>
+        <StyledIllustration
+          src="/images/gainge/customer-book.png"
+          alt=""
+          width={80}
+          height={80}
+        />
+        <div>
+          <StyledHeading>{t`함께할 고객을 모아보세요`}</StyledHeading>
+          <StyledDescription>{t`고객을 추가하고, 심방콜로 안부를 전해보세요.`}</StyledDescription>
+          {!loading && !error && (
+            <StyledDescription>
+              {t`등록된 수신자`} {totalCount ?? records.length}
+              {hasNextPage && totalCount == null ? '+' : ''}
+              {t`명`}
+            </StyledDescription>
+          )}
+        </div>
+      </StyledWelcome>
+      <StyledActions>
         {permissions.canUpdateObjectRecords && (
           <Button
             title={t`고객 추가`}
@@ -99,7 +180,7 @@ export const MessageListMembers = ({ listId }: { listId: string }) => {
             onClick={() => setAdding('workspaceMember')}
           />
         )}
-      </StyledMessageListToolbar>
+      </StyledActions>
       {adding && (
         <MessageListAddCustomersModal
           initialListId={listId}
@@ -118,18 +199,10 @@ export const MessageListMembers = ({ listId }: { listId: string }) => {
         </StyledMessageListEmpty>
       )}
       {records.length > 0 && (
-        <Table>
-          <TableRow gridTemplateColumns="minmax(0, 1fr) minmax(0, 1.2fr) 72px">
-            <TableHeader>{t`수신자`}</TableHeader>
-            <TableHeader>{t`이메일`}</TableHeader>
-            <TableHeader align="right">{t`관리`}</TableHeader>
-          </TableRow>
+        <StyledMembers aria-label={t`등록된 수신자`}>
           {records.map((member) => (
-            <TableRow
-              key={member.id}
-              gridTemplateColumns="minmax(0, 1fr) minmax(0, 1.2fr) 72px"
-            >
-              <TableCell minWidth="0" height={themeCssVariables.spacing[10]}>
+            <StyledMember key={member.id}>
+              <StyledIdentity>
                 {member.person ? (
                   <RecordChip
                     objectNameSingular="person"
@@ -143,8 +216,15 @@ export const MessageListMembers = ({ listId }: { listId: string }) => {
                 ) : (
                   t`삭제되었거나 접근할 수 없는 수신자`
                 )}
-              </TableCell>
-              <TableCell minWidth="0" height={themeCssVariables.spacing[10]}>
+                <StyledMetadata>
+                  {member.person
+                    ? [member.person.company?.name, member.person.jobTitle]
+                        .filter(Boolean)
+                        .join(' · ') || t`고객`
+                    : member.workspaceMember
+                      ? t`워크스페이스 멤버`
+                      : ''}
+                </StyledMetadata>
                 {member.person?.emails?.primaryEmail ||
                 member.workspaceMember?.userEmail ? (
                   <EmailDisplay
@@ -155,25 +235,21 @@ export const MessageListMembers = ({ listId }: { listId: string }) => {
                     }
                   />
                 ) : (
-                  t`이메일 없음`
+                  <StyledMetadata>{t`이메일 미등록 · 이메일 발송 시 제외됩니다`}</StyledMetadata>
                 )}
-              </TableCell>
-              <TableCell align="right" height={themeCssVariables.spacing[10]}>
-                {permissions.canSoftDeleteObjectRecords && (
-                  <Button
-                    title={t`제외`}
-                    size="small"
-                    variant="tertiary"
-                    disabled={busy}
-                    onClick={() =>
-                      runMutation(() => deleteOneRecord(member.id))
-                    }
-                  />
-                )}
-              </TableCell>
-            </TableRow>
+              </StyledIdentity>
+              {permissions.canSoftDeleteObjectRecords && (
+                <Button
+                  title={t`제외`}
+                  size="small"
+                  variant="tertiary"
+                  disabled={busy}
+                  onClick={() => runMutation(() => deleteOneRecord(member.id))}
+                />
+              )}
+            </StyledMember>
           ))}
-        </Table>
+        </StyledMembers>
       )}
       {hasNextPage && (
         <Button

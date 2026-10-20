@@ -1,3 +1,4 @@
+import { WidgetHeaderActionContext } from '@/page-layout/widgets/widget-card/contexts/WidgetHeaderActionContext';
 import { useObjectMetadataItems } from '@/object-metadata/hooks/useObjectMetadataItems';
 import { t } from '@lingui/core/macro';
 import { type PageLayoutWidget } from '@/page-layout/types/PageLayoutWidget';
@@ -12,7 +13,7 @@ import { WidgetCard } from '@/page-layout/widgets/widget-card/components/WidgetC
 import { WidgetCardContent } from '@/page-layout/widgets/widget-card/components/WidgetCardContent';
 import { WidgetCardHeader } from '@/page-layout/widgets/widget-card/components/WidgetCardHeader';
 import { styled } from '@linaria/react';
-import { type MouseEvent, useContext } from 'react';
+import { type MouseEvent, useContext, useState } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { IconLock } from 'twenty-ui/icon';
 import { ThemeContext } from 'twenty-ui/theme-constants';
@@ -71,6 +72,8 @@ export const WidgetCardShell = ({
   onMouseLeave,
 }: WidgetCardShellProps) => {
   const { theme } = useContext(ThemeContext);
+  const [headerActionTarget, setHeaderActionTarget] =
+    useState<HTMLDivElement | null>(null);
   const { objectMetadataItems } = useObjectMetadataItems();
   const fieldMetadataId =
     widget.configuration.configurationType === WidgetConfigurationType.FIELD &&
@@ -111,6 +114,7 @@ export const WidgetCardShell = ({
       >
         {showHeader && (
           <WidgetCardHeader
+            actionSlotRef={setHeaderActionTarget}
             widgetId={widget.id}
             variant={variant}
             isInEditMode={isEditable}
@@ -153,7 +157,11 @@ export const WidgetCardShell = ({
                 widget.objectMetadataId,
               ]}
             >
-              <WidgetContentRenderer widget={widget} />
+              <WidgetHeaderActionContext.Provider
+                value={showHeader ? headerActionTarget : null}
+              >
+                <WidgetContentRenderer widget={widget} />
+              </WidgetHeaderActionContext.Provider>
             </ErrorBoundary>
           ) : (
             <StyledNoAccessContainer>

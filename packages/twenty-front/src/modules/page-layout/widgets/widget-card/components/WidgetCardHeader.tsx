@@ -4,7 +4,7 @@ import { type WidgetAction } from '@/page-layout/widgets/types/WidgetAction';
 import { useAtomComponentFamilyStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomComponentFamilyStateValue';
 import { styled } from '@linaria/react';
 import { t } from '@lingui/core/macro';
-import { type ReactNode, useContext, useId } from 'react';
+import { type ReactNode, type Ref, useContext, useId } from 'react';
 import { IconInfoCircle, IconTrash } from 'twenty-ui/icon';
 import {
   AppTooltip,
@@ -25,6 +25,7 @@ export type WidgetCardHeaderProps = {
   isEmpty?: boolean;
   title: string;
   titleHelp?: string;
+  actionSlotRef?: Ref<HTMLDivElement>;
   onRemove?: (e?: React.MouseEvent) => void;
   forbiddenDisplay?: ReactNode;
   actions?: WidgetAction[];
@@ -38,7 +39,7 @@ const StyledWidgetCardHeader = styled.div`
   align-items: center;
   display: flex;
   flex-shrink: 0;
-  height: ${themeCssVariables.spacing[6]};
+  min-height: ${themeCssVariables.spacing[6]};
 `;
 
 const StyledTitleContainer = styled.div<{ variant: WidgetCardVariant }>`
@@ -95,6 +96,7 @@ export const WidgetCardHeader = ({
   isDeletingWidgetEnabled = true,
   title,
   titleHelp,
+  actionSlotRef,
   onRemove,
   forbiddenDisplay,
   actions,
@@ -137,6 +139,7 @@ export const WidgetCardHeader = ({
         )}
       </StyledTitleContainer>
       <StyledRightContainer>
+        {actionSlotRef && <div ref={actionSlotRef} />}
         {isNonEmptyArray(actions) && (
           <StyledActionsContainer>
             {actions.map((action) => (

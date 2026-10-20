@@ -14,7 +14,9 @@ import { Table } from '@/ui/layout/table/components/Table';
 import { TableRow } from '@/ui/layout/table/components/TableRow';
 import { TableCell } from '@/ui/layout/table/components/TableCell';
 import { t } from '@lingui/core/macro';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { WidgetHeaderActionContext } from '@/page-layout/widgets/widget-card/contexts/WidgetHeaderActionContext';
 import { Button } from 'twenty-ui/input';
 import { IconLink } from 'twenty-ui/icon';
 
@@ -25,6 +27,7 @@ export const MessageListLinkCampaign = ({
   listId: string;
   onLinked: () => Promise<unknown>;
 }) => {
+  const headerActionTarget = useContext(WidgetHeaderActionContext);
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [busy, setBusy] = useState(false);
@@ -96,20 +99,24 @@ export const MessageListLinkCampaign = ({
     }
   };
 
+  const trigger = permissions.canUpdateObjectRecords ? (
+    <Button
+      variant="secondary"
+      size="small"
+      Icon={IconLink}
+      title={open ? t`닫기` : t`심방콜 발송 연결`}
+      onClick={() => setOpen(!open)}
+      disabled={busy}
+    />
+  ) : null;
+
   return (
     <div>
-      <StyledMessageListToolbar>
-        {permissions.canUpdateObjectRecords && (
-          <Button
-            variant="secondary"
-            size="small"
-            Icon={IconLink}
-            title={open ? t`닫기` : t`심방콜 발송 연결`}
-            onClick={() => setOpen(!open)}
-            disabled={busy}
-          />
-        )}
-      </StyledMessageListToolbar>
+      {headerActionTarget ? (
+        createPortal(trigger, headerActionTarget)
+      ) : (
+        <StyledMessageListToolbar>{trigger}</StyledMessageListToolbar>
+      )}
       {open && (
         <>
           <p>{t`동반 고객 목록이 지정되지 않은 초안 심방콜 발송을 연결할 수 있습니다.`}</p>
