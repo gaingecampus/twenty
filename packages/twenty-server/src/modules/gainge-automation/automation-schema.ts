@@ -158,7 +158,7 @@ BEGIN
   RETURN NEW;
 END;$assign$;
 DROP TRIGGER IF EXISTS gainge_assign_owner ON ${ns}.${table(t.table)};
-CREATE TRIGGER gainge_assign_owner BEFORE INSERT OR UPDATE ON ${ns}.${table(t.table)} FOR EACH ROW EXECUTE FUNCTION ${ns}.gainge_assign_${t.table}();`
+CREATE TRIGGER gainge_assign_owner BEFORE ${t.table === 'company' ? 'INSERT' : 'INSERT OR UPDATE'} ON ${ns}.${table(t.table)} FOR EACH ROW EXECUTE FUNCTION ${ns}.gainge_assign_${t.table}();`
     : `DROP TRIGGER IF EXISTS gainge_assign_owner ON ${ns}.${table(t.table)};
 DROP FUNCTION IF EXISTS ${ns}.gainge_assign_${t.table}();`
 }
