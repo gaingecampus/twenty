@@ -20,13 +20,12 @@ export const CampaignBodyVariablePicker = ({
     <StyledVariablePicker>
       <Select
         dropdownId={`campaign-body-variable-${id}`}
-        selectSizeVariant="small"
         dropdownWidth={260}
         value=""
-        emptyOption={{ label: t`본문에 변수 넣기`, value: '' }}
+        emptyOption={{ label: t`고객 정보 넣기`, value: '' }}
         options={[
-          { label: t`고객 이름` + ' · {{fullName}}', value: 'fullName' },
-          { label: t`이메일` + ' · {{email}}', value: 'email' },
+          { label: t`고객 이름`, value: 'fullName' },
+          { label: t`이메일`, value: 'email' },
         ]}
         onChange={(value) => {
           if (value) onInsert(`{{${value}}}`);

@@ -301,4 +301,18 @@ describe('useCampaignComposerState', () => {
     act(() => result.current.setIsUploading(false));
     expect(result.current.canSend).toBe(true);
   });
+  it('blocks final sending while a review test email is in progress', async () => {
+    const { result } = renderHook(() => useCampaignComposerState({}));
+    fillSendableFields(result);
+    act(() => result.current.handleSend());
+    act(() => result.current.setIsTestSending(true));
+    expect(result.current.canSend).toBe(false);
+    await act(async () => {
+      await result.current.confirmSend();
+    });
+    expect(sendMessageCampaignMock).not.toHaveBeenCalled();
+    expect(result.current.isReviewOpen).toBe(true);
+    act(() => result.current.setIsTestSending(false));
+    expect(result.current.canSend).toBe(true);
+  });
 });

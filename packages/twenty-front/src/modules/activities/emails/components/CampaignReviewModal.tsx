@@ -1,3 +1,6 @@
+import { CampaignTestEmail } from '@/activities/emails/components/CampaignTestEmail';
+import { useMyMessageChannels } from '@/settings/accounts/hooks/useMyMessageChannels';
+import { getConfiguredEmailChannels } from '@/settings/accounts/utils/getConfiguredEmailChannels';
 import { type useCampaignComposerState } from '@/activities/emails/hooks/useCampaignComposerState';
 import { useCampaignAudiencePreview } from '@/activities/emails/hooks/useCampaignAudiencePreview';
 import { useFindOneRecord } from '@/object-record/hooks/useFindOneRecord';
@@ -7,34 +10,70 @@ import { useModal } from '@/ui/layout/modal/hooks/useModal';
 import { styled } from '@linaria/react';
 import { useEffect, useId } from 'react';
 import { Button } from 'twenty-ui/input';
-import { ModalContent, ModalFooter, ModalHeader } from 'twenty-ui/surfaces';
+import { IconInfoCircle } from 'twenty-ui/icon';
+import {
+  AppTooltip,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+} from 'twenty-ui/surfaces';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 
 const StyledDetails = styled.dl`
-  display: grid;
+  display: flex;
+  flex-direction: column;
   font-size: ${themeCssVariables.font.size.sm};
-  gap: ${themeCssVariables.spacing[3]};
-  grid-template-columns: 100px minmax(0, 1fr);
+  gap: ${themeCssVariables.spacing[2]};
   margin: 0;
   dt {
     color: ${themeCssVariables.font.color.secondary};
+    flex: 0 0 64px;
   }
   dd {
     margin: 0;
+    min-width: 0;
     overflow-wrap: anywhere;
   }
 `;
-const StyledPreview = styled.iframe`
-  border: 1px solid ${themeCssVariables.border.color.light};
+const StyledDetailRow = styled.div`
+  display: flex;
+  gap: ${themeCssVariables.spacing[3]};
+`;
+const StyledMessage = styled.div`
+  background: ${themeCssVariables.background.secondary};
   border-radius: ${themeCssVariables.border.radius.sm};
+  display: flex;
+  flex-direction: column;
+  gap: ${themeCssVariables.spacing[3]};
+  padding: ${themeCssVariables.spacing[4]};
+`;
+const StyledSubject = styled.div`
+  align-items: center;
+  display: flex;
+  font-size: ${themeCssVariables.font.size.md};
+  font-weight: ${themeCssVariables.font.weight.medium};
+  gap: ${themeCssVariables.spacing[2]};
+  justify-content: space-between;
+  overflow-wrap: anywhere;
+`;
+const StyledHelp = styled.button`
+  background: transparent;
+  border: none;
+  color: ${themeCssVariables.font.color.tertiary};
+  cursor: help;
+  display: flex;
+  flex-shrink: 0;
+  padding: 0;
+`;
+const StyledPreview = styled.iframe`
+  border: none;
   box-sizing: border-box;
-  height: 260px;
+  height: 200px;
   width: 100%;
 `;
 const StyledHint = styled.p`
   color: ${themeCssVariables.font.color.secondary};
   font-size: ${themeCssVariables.font.size.sm};
-  line-height: 1.6;
   margin: 0;
 `;
 
@@ -44,6 +83,7 @@ export const CampaignReviewModal = ({
   campaignState: ReturnType<typeof useCampaignComposerState>;
 }) => {
   const modalId = useId();
+  const helpId = `campaign-review-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`;
   const { openModal, closeModal } = useModal();
   useEffect(() => {
     openModal(modalId);
@@ -58,13 +98,18 @@ export const CampaignReviewModal = ({
     listId: campaignState.listId,
     unsubscribeTopicId: campaignState.unsubscribeTopicId,
   });
+  const { channels } = useMyMessageChannels();
+  const connectedAccountId = getConfiguredEmailChannels(channels).find(
+    (channel) => channel.connectedAccount?.handle === campaignState.fromAddress,
+  )?.connectedAccountId;
   const scheduled = campaignState.sendMode === 'scheduled';
-  const busy = campaignState.loading || campaignState.cancelling;
+  const submitting = campaignState.loading || campaignState.cancelling;
+  const busy = submitting || campaignState.isTestSending;
   const confirmLabel = campaignState.isEditing
-    ? '확인 후 예약 변경 저장'
+    ? '예약 변경'
     : scheduled
-      ? '확인 후 예약 발송'
-      : '확인 후 발송';
+      ? '예약 발송'
+      : '발송하기';
   return (
     <ModalStatefulWrapper
       modalInstanceId={modalId}
@@ -72,61 +117,82 @@ export const CampaignReviewModal = ({
       padding="none"
       gap={0}
       isClosable
-      onClose={campaignState.closeReview}
+      onClose={() => {
+        if (!busy) campaignState.closeReview();
+      }}
       shouldCloseModalOnClickOutsideOrEscape={!busy}
       renderInDocumentBody
     >
-      <ModalHeader hasBorderBottom>심방콜 발송 최종 검토</ModalHeader>
+      <ModalHeader>발송 전 검토</ModalHeader>
       <ModalContent contentPadding={5} gap={4}>
         <StyledDetails>
-          <dt>보내는 사람</dt>
-          <dd>{campaignState.fromAddress.trim()}</dd>
-          <dt>동반 고객 목록</dt>
-          <dd>
-            {list?.name || '선택한 동반 고객 목록'}
-            {audience &&
-              ` · 발송 가능 ${audience.sendable}명 / 전체 ${audience.totalMembers}명`}
-          </dd>
-          <dt>발송 시점</dt>
-          <dd>
-            {scheduled && campaignState.scheduledAt
-              ? `${new Date(campaignState.scheduledAt).toLocaleString('ko-KR')} (${Intl.DateTimeFormat().resolvedOptions().timeZone})`
-              : '즉시 발송'}
-          </dd>
-          <dt>제목</dt>
-          <dd>{campaignState.subject}</dd>
-          <dt>첨부 파일</dt>
-          <dd>
-            {campaignState.files.length
-              ? campaignState.files.map((file) => file.name).join(', ')
-              : '없음'}
-          </dd>
+          <StyledDetailRow>
+            <dt>보내는 사람</dt>
+            <dd>{campaignState.fromAddress.trim()}</dd>
+          </StyledDetailRow>
+          <StyledDetailRow>
+            <dt>받는 고객</dt>
+            <dd>
+              {list?.name || '선택한 고객 목록'}
+              {audience
+                ? ` · ${audience.sendable}명 / 전체 ${audience.totalMembers}명`
+                : ' · 인원 확인 중'}
+            </dd>
+          </StyledDetailRow>
+          <StyledDetailRow>
+            <dt>발송 시점</dt>
+            <dd>
+              {scheduled && campaignState.scheduledAt
+                ? `${new Date(campaignState.scheduledAt).toLocaleString('ko-KR', { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: '2-digit' })} (${Intl.DateTimeFormat().resolvedOptions().timeZone})`
+                : '즉시 발송'}
+            </dd>
+          </StyledDetailRow>
+          {campaignState.files.length > 0 && (
+            <StyledDetailRow>
+              <dt>첨부</dt>
+              <dd>{campaignState.files.map((file) => file.name).join(', ')}</dd>
+            </StyledDetailRow>
+          )}
         </StyledDetails>
-        <StyledPreview
-          title="발송할 이메일 본문 미리보기"
-          sandbox=""
-          referrerPolicy="no-referrer"
-          srcDoc={`<!doctype html><html><head><meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; style-src 'unsafe-inline';"><style>body{font:14px sans-serif;overflow-wrap:anywhere;}img{max-width:100%;}</style></head><body>${campaignState.bodyWithSignature}</body></html>`}
+        <StyledMessage>
+          <StyledSubject>
+            {campaignState.subject}
+            <StyledHelp id={helpId} type="button" aria-label="미리보기 도움말">
+              <IconInfoCircle size={16} />
+            </StyledHelp>
+          </StyledSubject>
+          <AppTooltip
+            anchorSelect={`#${helpId}`}
+            content="선택한 서명이 포함됩니다. 고객 정보는 실제 발송 시 바뀌며, 외부 이미지는 미리보기에서 숨깁니다."
+            positionStrategy="fixed"
+            place="top"
+          />
+          <StyledPreview
+            title="발송할 이메일 본문 미리보기"
+            sandbox=""
+            referrerPolicy="no-referrer"
+            srcDoc={`<!doctype html><html><head><meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; style-src 'unsafe-inline';"><style>body{font:14px sans-serif;overflow-wrap:anywhere;margin:0;}img{max-width:100%;}</style></head><body>${campaignState.bodyWithSignature}</body></html>`}
+          />
+        </StyledMessage>
+        <CampaignTestEmail
+          campaignState={campaignState}
+          connectedAccountId={connectedAccountId}
         />
         <StyledHint>
-          본문에는 선택한 서명이 포함됩니다. 변수는 실제 발송 시 고객별 정보로
-          바뀝니다. 외부 이미지는 이 미리보기에서 표시하지 않습니다.
-        </StyledHint>
-        <StyledHint>
           {scheduled
-            ? '확인하면 이 내용으로 예약을 저장합니다. 수신 거부 여부는 발송 시 다시 확인합니다.'
-            : '확인하면 선택한 동반 고객 목록으로 발송을 시작합니다. 발송 후에는 취소할 수 없습니다.'}
+            ? '예약 시각에 수신 거부 여부를 다시 확인합니다.'
+            : '발송 후에는 취소할 수 없어요.'}
         </StyledHint>
       </ModalContent>
-      <ModalFooter>
+      <ModalFooter autoHeight>
         <Button
-          title="돌아가서 수정"
+          title="수정"
           variant="secondary"
           disabled={busy}
           onClick={campaignState.closeReview}
         />
         <Button
-          title={busy ? '처리 중…' : confirmLabel}
+          title={submitting ? '처리 중…' : confirmLabel}
           variant="primary"
           accent="blue"
           disabled={!campaignState.canSend}

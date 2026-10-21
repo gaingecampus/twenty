@@ -12,6 +12,28 @@ const StyledForm = styled.div`
   flex-direction: column;
   gap: ${themeCssVariables.spacing[4]};
   padding: ${themeCssVariables.spacing[4]};
+  section {
+    display: flex;
+    flex-direction: column;
+    gap: ${themeCssVariables.spacing[3]};
+  }
+  p,
+  pre {
+    margin: 0;
+  }
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: ${themeCssVariables.spacing[2]};
+  }
+  label:has(input[type='checkbox']) {
+    flex-direction: row;
+    align-items: center;
+  }
+  small {
+    color: ${themeCssVariables.font.color.secondary};
+    line-height: 1.5;
+  }
   input,
   textarea {
     background: ${themeCssVariables.background.primary};
@@ -20,8 +42,13 @@ const StyledForm = styled.div`
     box-sizing: border-box;
     color: inherit;
     font: inherit;
+    font-size: ${themeCssVariables.font.size.md};
     padding: ${themeCssVariables.spacing[3]};
     width: 100%;
+  }
+  input:not([type='checkbox']) {
+    height: var(--t-input-height, ${themeCssVariables.spacing[8]});
+    padding: 0 var(--t-input-padding-x, ${themeCssVariables.spacing[2]});
   }
   textarea {
     min-height: 160px;
@@ -38,8 +65,10 @@ const StyledForm = styled.div`
 `;
 const StyledCard = styled.section`
   background: ${themeCssVariables.background.secondary};
-  border: 1px solid ${themeCssVariables.border.color.light};
   border-radius: ${themeCssVariables.border.radius.md};
+  display: flex;
+  flex-direction: column;
+  gap: ${themeCssVariables.spacing[3]};
   padding: ${themeCssVariables.spacing[4]};
 `;
 const PREVIEW = gql`
@@ -168,8 +197,7 @@ export const SmsCampaignComposer = () => {
   };
   return (
     <StyledForm>
-      <h3>문자 단체 발송 · 뿌리오</h3>
-      <label>동반 고객 목록</label>
+      <label>받는 고객</label>
       <FormSingleRecordPicker
         objectNameSingulars={['messageList']}
         defaultValue={listId}
@@ -181,7 +209,7 @@ export const SmsCampaignComposer = () => {
         }}
       />
       <label>
-        발송 제목
+        제목
         <input
           aria-label="문자 발송 제목"
           maxLength={30}
@@ -210,11 +238,11 @@ export const SmsCampaignComposer = () => {
         {bytes.toLocaleString()} / 2,000바이트 ·{' '}
         {bytes <= 90 ? 'SMS 단문' : 'LMS 장문'}
       </div>
-      <small>
-        이름: {'{{fullName}}'} · 연결 기업: {'{{companyName}}'}. 개인화 후
-        길이로 SMS/LMS를 구분합니다. 한글은 안전한 발송을 위해 UTF-8 바이트로
-        계산합니다.
-      </small>
+      <section>
+        <small>
+          이름 {'{{fullName}}'} · 기업 {'{{companyName}}'}
+        </small>
+      </section>
       <label>
         <input
           type="checkbox"
@@ -225,7 +253,7 @@ export const SmsCampaignComposer = () => {
             setAdvertising(event.target.checked);
           }}
         />{' '}
-        광고 문자 (광고 수신거부 적용)
+        광고 문자
       </label>
       {advertising && (
         <small>
@@ -233,13 +261,11 @@ export const SmsCampaignComposer = () => {
           넣어주세요.
         </small>
       )}
-      <small>
-        등록된 고객의 대표 휴대전화번호로 발송합니다. 번호가 없는 멤버·고객과
-        중복 번호는 제외합니다. 요금은 뿌리오 계정의 SMS/LMS 단가에 따라
-        부과됩니다.
-      </small>
+      <section>
+        <small>번호 없음·중복 제외 · 뿌리오 요금 적용</small>
+      </section>
       <Button
-        title="수신 대상·내용 미리보기"
+        title="발송 전 검토"
         onClick={review}
         disabled={
           busy ||
@@ -276,33 +302,37 @@ export const SmsCampaignComposer = () => {
           문자 발송 요청을 저장했습니다. 아래 접수 내역을 새로고침해 확인하세요.
         </div>
       )}
-      <h3>내 문자 접수 내역</h3>
-      <Button title="접수 내역 새로고침" onClick={() => void refetch()} />
-      <small>
-        접수 완료는 최종 도착을 뜻하지 않습니다. 최종 결과·잔액 부족·수신거부는{' '}
-        <a
-          href="https://www.ppurio.com/result/message"
-          target="_blank"
-          rel="noreferrer"
-        >
-          뿌리오 발송 결과
-        </a>
-        와 연동 사용내역에서 확인하세요. 확인 필요 건은 재발송 전에 확인하세요.
-      </small>
-      {historyError && <div role="alert">{historyError.message}</div>}
-      {data?.smsDispatchHistory.map((row) => (
-        <StyledCard key={row.id}>
-          <strong>{row.subject}</strong>
-          <p>{new Date(row.createdAt).toLocaleString('ko-KR')}</p>
-          <p>
-            대기 {row.queued} · 접수 완료 {row.accepted} · 실패 {row.failed} ·
-            처리 중/확인 필요 {row.unknown}
-          </p>
-          {row.errors.map((message) => (
-            <p key={message}>{message}</p>
-          ))}
-        </StyledCard>
-      ))}
+      <section>
+        <strong>최근 발송 내역</strong>
+        <Button title="접수 내역 새로고침" onClick={() => void refetch()} />
+        <small>
+          접수 완료는 최종 도착을 뜻하지 않습니다. 최종 결과·잔액
+          부족·수신거부는{' '}
+          <a
+            href="https://www.ppurio.com/result/message"
+            target="_blank"
+            rel="noreferrer"
+          >
+            뿌리오 발송 결과
+          </a>
+          와 연동 사용내역에서 확인하세요. 확인 필요 건은 재발송 전에
+          확인하세요.
+        </small>
+        {historyError && <div role="alert">{historyError.message}</div>}
+        {data?.smsDispatchHistory.map((row) => (
+          <StyledCard key={row.id}>
+            <strong>{row.subject}</strong>
+            <p>{new Date(row.createdAt).toLocaleString('ko-KR')}</p>
+            <p>
+              대기 {row.queued} · 접수 완료 {row.accepted} · 실패 {row.failed} ·
+              처리 중/확인 필요 {row.unknown}
+            </p>
+            {row.errors.map((message) => (
+              <p key={message}>{message}</p>
+            ))}
+          </StyledCard>
+        ))}
+      </section>
     </StyledForm>
   );
 };

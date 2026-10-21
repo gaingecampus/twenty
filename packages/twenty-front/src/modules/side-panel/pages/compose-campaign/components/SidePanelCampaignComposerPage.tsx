@@ -15,20 +15,22 @@ import { isDefined } from 'twenty-shared/utils';
 import { useHotkeysOnFocusedElement } from '@/ui/utilities/hotkey/hooks/useHotkeysOnFocusedElement';
 import { styled } from '@linaria/react';
 import { t } from '@lingui/core/macro';
-import { IconSend } from 'twenty-ui/icon';
-import { Button } from 'twenty-ui/input';
+import { IconMail, IconMessage, IconSend } from 'twenty-ui/icon';
+import { Button, TabButton } from 'twenty-ui/input';
 import { getOsControlSymbol } from 'twenty-ui/utilities';
 
 const StyledContainer = styled.div`
   display: flex;
+  flex: 1;
   flex-direction: column;
-  height: 100%;
+  min-height: 0;
 `;
 
 const StyledContent = styled.div`
   display: flex;
   flex: 1;
   flex-direction: column;
+  min-height: 0;
   overflow-y: auto;
 `;
 
@@ -78,11 +80,7 @@ const EmailCampaignComposer = () => {
               variant="primary"
               accent="blue"
               title={
-                campaignState.isEditing
-                  ? t`Save schedule changes`
-                  : campaignState.sendMode === 'scheduled'
-                    ? t`Schedule campaign`
-                    : t`Send campaign`
+                campaignState.isEditing ? t`예약 변경 검토` : t`발송 전 검토`
               }
               Icon={IconSend}
               hotkeys={[getOsControlSymbol(), '⏎']}
@@ -112,16 +110,20 @@ export const SidePanelCampaignComposerPage = () => {
     <StyledContainer>
       {!campaignToEdit && (
         <StyledChannelTabs role="group" aria-label="발송 채널">
-          <Button
+          <TabButton
+            id="campaign-channel-email"
             title="이메일"
-            variant={channel === 'email' ? 'primary' : 'secondary'}
-            accent={channel === 'email' ? 'blue' : 'default'}
+            LeftIcon={IconMail}
+            contentSize="md"
+            active={channel === 'email'}
             onClick={() => setChannel('email')}
           />
-          <Button
-            title="문자 · 뿌리오"
-            variant={channel === 'sms' ? 'primary' : 'secondary'}
-            accent={channel === 'sms' ? 'blue' : 'default'}
+          <TabButton
+            id="campaign-channel-sms"
+            title="문자"
+            LeftIcon={IconMessage}
+            contentSize="md"
+            active={channel === 'sms'}
             onClick={() => setChannel('sms')}
           />
         </StyledChannelTabs>

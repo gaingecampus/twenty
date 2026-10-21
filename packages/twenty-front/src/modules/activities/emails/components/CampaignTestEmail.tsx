@@ -3,10 +3,11 @@ import { useSendCampaignTestEmail } from '@/activities/emails/hooks/useSendCampa
 import { TextInput } from '@/ui/input/components/TextInput';
 import { styled } from '@linaria/react';
 import { useLingui } from '@lingui/react/macro';
-import { useState } from 'react';
+import { useId, useState } from 'react';
+import { AppTooltip } from 'twenty-ui/surfaces';
 import { z } from 'zod';
 import { Callout } from 'twenty-ui/feedback';
-import { IconSend } from 'twenty-ui/icon';
+import { IconInfoCircle, IconSend } from 'twenty-ui/icon';
 import { Button } from 'twenty-ui/input';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 
@@ -16,10 +17,25 @@ const StyledContainer = styled.div`
   gap: ${themeCssVariables.spacing[2]};
 `;
 
-const StyledHint = styled.div`
+const StyledRow = styled.div`
+  align-items: flex-start;
+  display: flex;
+  flex-wrap: wrap;
+  gap: ${themeCssVariables.spacing[2]};
+`;
+const StyledInput = styled.div`
+  flex: 1;
+  min-width: 180px;
+`;
+const StyledHelp = styled.button`
+  align-items: center;
+  background: transparent;
+  border: none;
   color: ${themeCssVariables.font.color.tertiary};
-  font-size: ${themeCssVariables.font.size.sm};
-  line-height: 1.5;
+  cursor: help;
+  display: flex;
+  height: var(--t-input-height, 32px);
+  padding: 0;
 `;
 
 export const CampaignTestEmail = ({
@@ -30,6 +46,7 @@ export const CampaignTestEmail = ({
   connectedAccountId?: string;
 }) => {
   const { t } = useLingui();
+  const helpId = `test-email-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`;
   const [recipient, setRecipient] = useState('');
   const { sendTest, loading, result } = useSendCampaignTestEmail();
   const emailValid = z.email().safeParse(recipient.trim()).success;
@@ -65,53 +82,51 @@ export const CampaignTestEmail = ({
 
   return (
     <StyledContainer>
-      <StyledHint>{t`입력한 주소 한 곳에만 현재 내용과 첨부파일을 즉시 보냅니다. 제목에 [테스트]가 붙으며, 동반 고객 목록 발송이나 예약 저장은 실행되지 않습니다.`}</StyledHint>
-      <TextInput
-        label={t`테스트 이메일 주소`}
-        placeholder="name@example.com"
-        type="email"
-        fullWidth
-        value={recipient}
-        onChange={setRecipient}
-        disabled={busy}
-        error={
-          recipient.length > 0 && !emailValid
-            ? t`이메일 주소 한 개를 입력하세요.`
-            : undefined
-        }
-      />
-      <div>
-        <Button
-          title={loading ? t`테스트 발송 중…` : t`테스트 발송`}
-          Icon={IconSend}
-          variant="secondary"
-          size="small"
-          disabled={!canTest}
-          onClick={handleSend}
+      <StyledRow>
+        <StyledInput>
+          <TextInput
+            aria-label="테스트 이메일 주소"
+            placeholder="테스트 받을 이메일"
+            type="email"
+            fullWidth
+            value={recipient}
+            onChange={setRecipient}
+            disabled={busy}
+            error={
+              recipient.length > 0 && !emailValid
+                ? t`이메일 주소 한 개를 입력하세요.`
+                : undefined
+            }
+          />
+        </StyledInput>
+        <div>
+          <Button
+            title={loading ? t`테스트 발송 중…` : t`테스트 발송`}
+            Icon={IconSend}
+            variant="secondary"
+            size="medium"
+            disabled={!canTest}
+            onClick={handleSend}
+          />
+        </div>
+        <StyledHelp id={helpId} type="button" aria-label="테스트 발송 도움말">
+          <IconInfoCircle size={16} />
+        </StyledHelp>
+        <AppTooltip
+          anchorSelect={`#${helpId}`}
+          content="발신 계정·제목·본문·받을 주소를 입력하면 테스트할 수 있습니다. 입력한 주소로만 즉시 발송되며, 고객 정보 변수는 그대로 표시됩니다."
+          positionStrategy="fixed"
+          place="top"
         />
-      </div>
-      {!connectedAccountId && (
-        <StyledHint>{t`먼저 보내는 사람에서 연결된 이메일 계정을 선택하세요.`}</StyledHint>
-      )}
-      {(campaignState.subject.trim().length === 0 ||
-        campaignState.body.trim().length === 0) && (
-        <StyledHint>{t`제목과 본문을 입력하면 테스트할 수 있습니다.`}</StyledHint>
-      )}
-      {/\{\{/.test(campaignState.subject + campaignState.body) && (
-        <StyledHint>{t`테스트에서는 개인화 변수를 고객 정보로 치환하지 않고 입력한 그대로 보냅니다.`}</StyledHint>
-      )}
+      </StyledRow>
       {result && (
         <div role={result.success ? 'status' : 'alert'}>
           <Callout
             variant={result.success ? 'info' : 'warning'}
-            title={
-              result.success
-                ? t`테스트 발송 요청이 접수되었습니다`
-                : t`테스트 발송 실패`
-            }
+            title={result.success ? t`테스트 발송 접수` : t`테스트 발송 실패`}
             description={
               result.success
-                ? t`${result.recipient} · [테스트] ${result.subject} — 메일 서버가 발송 요청을 접수했습니다. 받은편지함과 스팸함에서 내용을 확인하세요. 수신함 도착을 보장하는 결과는 아닙니다.`
+                ? t`${result.recipient} · 받은편지함·스팸함을 확인해 주세요.`
                 : t`${result.recipient} — ${result.error ?? ''}`
             }
           />

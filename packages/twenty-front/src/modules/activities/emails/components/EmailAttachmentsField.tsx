@@ -25,14 +25,13 @@ const StyledContainer = styled.div`
 
 const StyledUploadArea = styled.div`
   background-color: ${themeCssVariables.background.transparent.lighter};
-  border: 1px dashed ${themeCssVariables.border.color.medium};
   border-radius: ${themeCssVariables.border.radius.sm};
   cursor: pointer;
   display: flex;
   flex-direction: column;
   gap: ${themeCssVariables.spacing[3]};
   justify-content: center;
-  min-height: 88px;
+  min-height: var(--t-input-height, 32px);
   padding-bottom: ${themeCssVariables.spacing[3]};
   padding-left: ${themeCssVariables.spacing[2]};
   padding-right: ${themeCssVariables.spacing[2]};
@@ -42,7 +41,7 @@ const StyledUploadArea = styled.div`
   &:focus-visible,
   &[data-drag-active='true'] {
     background-color: ${themeCssVariables.background.transparent.light};
-    border-color: ${themeCssVariables.border.color.strong};
+    outline: 2px solid ${themeCssVariables.border.color.strong};
   }
 `;
 
@@ -137,9 +136,6 @@ export const EmailAttachmentsField = ({
           <IconUpload size={theme.icon.size.sm} />
           <span>{isUploading ? t`Uploading...` : t`Upload files`}</span>
         </StyledUploadAreaLabel>
-        {!isUploading && (
-          <StyledUploadAreaLabel>{t`Drag and Drop Here`}</StyledUploadAreaLabel>
-        )}
       </StyledUploadArea>
     </StyledContainer>
   );
