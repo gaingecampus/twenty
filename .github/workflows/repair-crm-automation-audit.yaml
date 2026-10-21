@@ -11,6 +11,9 @@ on:
           - plan
           - apply
           - verify
+          - onboarding-plan
+          - onboarding-apply
+          - onboarding-verify
 permissions:
   contents: read
   id-token: write
@@ -47,7 +50,7 @@ jobs:
           test "$(jq -r .Status <<<"$result")" = Success
 
       - name: Plan, apply or verify inquiry timing migration
-        if: inputs.operation != 'audit'
+        if: inputs.operation == 'plan' || inputs.operation == 'apply' || inputs.operation == 'verify'
         shell: bash
         env:
           MIGRATION_MODE: ${{ inputs.operation }}
@@ -57,6 +60,21 @@ jobs:
           sql_b64="$(base64 -w 0 packages/twenty-server/scripts/opportunity-stage-timing/stage-timing-v2.sql)"
           parameters="$(jq -n --arg script "$script_b64" --arg sql "$sql_b64" --arg mode "$MIGRATION_MODE" '{commands:["set -eu", "container=$(docker ps -q --filter label=com.docker.compose.project=twenty-ec2 --filter label=com.docker.compose.service=server)", "test -n \"$container\"", "printf %s " + ($script | @sh) + " | base64 -d | docker exec -i -e GAINGE_TIMING_WORKSPACE_ID=5cd16cee-0d32-4404-93b9-e707e01ada9d -e GAINGE_TIMING_MODE=" + ($mode | @sh) + " -e GAINGE_TIMING_SQL_B64=" + ($sql | @sh) + " \"$container\" node"]}')"
           command_id="$(aws ssm send-command --instance-ids "$EC2_INSTANCE_ID" --document-name AWS-RunShellScript --comment 'GAINGE inquiry timing migration' --parameters "$parameters" --query Command.CommandId --output text)"
+          aws ssm wait command-executed --command-id "$command_id" --instance-id "$EC2_INSTANCE_ID" || true
+          result="$(aws ssm get-command-invocation --command-id "$command_id" --instance-id "$EC2_INSTANCE_ID" --query '{Status:Status,Output:StandardOutputContent,Error:StandardErrorContent}' --output json)"
+          echo "$result"
+          test "$(jq -r .Status <<<"$result")" = Success
+
+      - name: Stop only the 21 approved historical onboarding runs
+        if: startsWith(inputs.operation, 'onboarding-')
+        shell: bash
+        env:
+          CLEANUP_OPERATION: ${{ inputs.operation }}
+        run: |
+          set -euo pipefail
+          script_b64="$(base64 -w 0 packages/twenty-server/scripts/gainge-automation/stop-approved-onboarding-runs.cjs)"
+          parameters="$(jq -n --arg script "$script_b64" --arg mode "${CLEANUP_OPERATION#onboarding-}" '{commands:["set -eu", "container=$(docker ps -q --filter label=com.docker.compose.project=twenty-ec2 --filter label=com.docker.compose.service=server)", "test -n \"$container\"", "printf %s " + ($script | @sh) + " | base64 -d | docker exec -i -e GAINGE_ONBOARDING_CLEANUP_MODE=" + ($mode | @sh) + " \"$container\" node"]}')"
+          command_id="$(aws ssm send-command --instance-ids "$EC2_INSTANCE_ID" --document-name AWS-RunShellScript --comment 'AX-1310 approved historical onboarding cleanup' --parameters "$parameters" --query Command.CommandId --output text)"
           aws ssm wait command-executed --command-id "$command_id" --instance-id "$EC2_INSTANCE_ID" || true
           result="$(aws ssm get-command-invocation --command-id "$command_id" --instance-id "$EC2_INSTANCE_ID" --query '{Status:Status,Output:StandardOutputContent,Error:StandardErrorContent}' --output json)"
           echo "$result"
