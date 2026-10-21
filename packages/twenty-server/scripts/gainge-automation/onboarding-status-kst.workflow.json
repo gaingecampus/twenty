@@ -1,7 +1,7 @@
 {
   "id": "e39d757b-e2ba-44b9-88f8-9310cd118fa8",
   "name": "v3",
-  "status": "DRAFT",
+  "status": "ACTIVE",
   "trigger": {
     "name": "한국 시간 매시 정각 (자정 포함)",
     "type": "CRON",
