@@ -11,6 +11,7 @@ export const MailboxNavigationItem = () => {
       rightOptions={
         <MenuFavoriteButton label="메일함" path="/mailbox" icon="IconMail" />
       }
+      hideBadgeOnCompact
       badgeLabel="준비중"
       Icon={IconMail}
       to="/mailbox"

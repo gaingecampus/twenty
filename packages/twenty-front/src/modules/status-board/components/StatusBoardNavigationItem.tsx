@@ -29,6 +29,7 @@ export const StatusBoardNavigationItem = () => {
             icon="IconUser"
           />
         }
+        hideBadgeOnCompact
         badgeLabel="준비중"
         Icon={IconUser}
         to="/personal-dashboard"

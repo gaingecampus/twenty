@@ -42,6 +42,7 @@ export type NavigationDrawerItemProps = {
   className?: string;
   label: string;
   badgeLabel?: string;
+  hideBadgeOnCompact?: boolean;
   secondaryLabel?: string;
   indentationLevel?: NavigationDrawerItemIndentationLevel;
   subItemState?: NavigationDrawerSubItemState;
@@ -234,8 +235,24 @@ const StyledKeyBoardShortcut = styled.span`
 `;
 
 const StyledNavigationDrawerItemContainer = styled.div`
+  container-name: navigation-item;
+  container-type: inline-size;
   display: flex;
   width: 100%;
+`;
+
+const StyledBadge = styled.span<{ hideOnCompact: boolean }>`
+  display: inline-flex;
+  flex-shrink: 0;
+  white-space: nowrap;
+
+  @media (max-width: 1024px) {
+    display: ${({ hideOnCompact }) => (hideOnCompact ? 'none' : 'inline-flex')};
+  }
+
+  @container navigation-item (max-width: 240px) {
+    display: ${({ hideOnCompact }) => (hideOnCompact ? 'none' : 'inline-flex')};
+  }
 `;
 
 const StyledSpacer = styled.span`
@@ -350,6 +367,7 @@ export const NavigationDrawerItem = ({
   className,
   label,
   badgeLabel,
+  hideBadgeOnCompact = false,
   secondaryLabel,
   indentationLevel = DEFAULT_INDENTATION_LEVEL,
   Icon,
@@ -493,9 +511,17 @@ export const NavigationDrawerItem = ({
 
           {showStyledSpacer && isExpanded && <StyledSpacer />}
 
-          {badgeLabel && isExpanded && <Pill label={badgeLabel} />}
+          {badgeLabel && isExpanded && (
+            <StyledBadge hideOnCompact={hideBadgeOnCompact}>
+              <Pill label={badgeLabel} />
+            </StyledBadge>
+          )}
 
-          {isSoon && isExpanded && <Pill label={t`Soon`} />}
+          {isSoon && isExpanded && (
+            <StyledBadge hideOnCompact>
+              <Pill label={t`Soon`} />
+            </StyledBadge>
+          )}
 
           {isNew && isExpanded && <Pill label={t`New`} />}
 
