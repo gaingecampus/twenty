@@ -1,7 +1,6 @@
 import { isDefined } from 'twenty-shared/utils';
 
-import type { ObjectRecordEvent } from 'twenty-shared/database-events';
-
+import { type WebhookRecordEvent } from 'src/engine/metadata-modules/webhook/types/webhook-record-event.type';
 import { removeSecretFromWebhookRecord } from 'src/utils/remove-secret-from-webhook-record';
 
 export const transformEventToWebhookEvent = ({
@@ -9,7 +8,7 @@ export const transformEventToWebhookEvent = ({
   event,
 }: {
   eventName: string;
-  event: ObjectRecordEvent;
+  event: WebhookRecordEvent;
 }) => {
   const [nameSingular, _] = eventName.split('.');
 

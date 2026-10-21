@@ -15,6 +15,7 @@ import {
 } from 'src/engine/core-modules/logic-function/logic-function-trigger/jobs/logic-function-trigger.job';
 import { WorkspaceCacheService } from 'src/engine/workspace-cache/services/workspace-cache.service';
 import { WorkspaceEventBatch } from 'src/engine/workspace-event-emitter/types/workspace-event-batch.type';
+import { matchesDatabaseEvent } from 'src/engine/workspace-event-emitter/utils/matches-database-event.util';
 
 const DATABASE_EVENT_JOBS_CHUNK_SIZE = 20;
 
@@ -84,15 +85,6 @@ export class CallDatabaseEventTriggerJobsJob {
     workspaceEventBatch: WorkspaceEventBatch<ObjectRecordEvent>;
     eventName: string;
   }) {
-    const [nameSingular, operation] = workspaceEventBatch.name.split('.');
-
-    const validEventNames = [
-      `${nameSingular}.${operation}`,
-      `*.${operation}`,
-      `${nameSingular}.*`,
-      '*.*',
-    ];
-
-    return validEventNames.includes(eventName);
+    return matchesDatabaseEvent(workspaceEventBatch.name, eventName);
   }
 }

@@ -1,6 +1,9 @@
 export const QUEUE_RETENTION = {
-  completedMaxAge: 14400, // 4 hours (4*3600s)
-  completedMaxCount: 1000,
-  failedMaxAge: 604800, // 7 days (7*24*3600s)
-  failedMaxCount: 1000,
+  completedMaxAge: 900,
+  completedMaxCount: 100,
+  failedMaxAge: 86400,
+  failedMaxCount: 100,
+  largePayloadBytes: 128 * 1024,
+  largeFailedMaxAge: 3600,
+  largeFailedMaxCount: 10,
 };

@@ -3,8 +3,6 @@ import { Logger } from '@nestjs/common';
 import chunk from 'lodash.chunk';
 import { isDefined } from 'twenty-shared/utils';
 
-import type { ObjectRecordEvent } from 'twenty-shared/database-events';
-
 import { InjectMessageQueue } from 'src/engine/core-modules/message-queue/decorators/message-queue.decorator';
 import { Process } from 'src/engine/core-modules/message-queue/decorators/process.decorator';
 import { Processor } from 'src/engine/core-modules/message-queue/decorators/processor.decorator';
@@ -12,9 +10,11 @@ import { MessageQueue } from 'src/engine/core-modules/message-queue/message-queu
 import { MessageQueueService } from 'src/engine/core-modules/message-queue/services/message-queue.service';
 import { CallWebhookJob } from 'src/engine/metadata-modules/webhook/jobs/call-webhook.job';
 import { type CallWebhookJobData } from 'src/engine/metadata-modules/webhook/types/webhook-job-data.type';
+import { type WebhookRecordEvent } from 'src/engine/metadata-modules/webhook/types/webhook-record-event.type';
 import { transformEventBatchToWebhookEvents } from 'src/engine/metadata-modules/webhook/utils/transform-event-batch-to-webhook-events';
 import { WorkspaceCacheService } from 'src/engine/workspace-cache/services/workspace-cache.service';
-import { WorkspaceEventBatch } from 'src/engine/workspace-event-emitter/types/workspace-event-batch.type';
+import { type WorkspaceEventBatchForWebhook } from 'src/engine/metadata-modules/webhook/types/workspace-event-batch-for-webhook.type';
+import { matchesDatabaseEvent } from 'src/engine/workspace-event-emitter/utils/matches-database-event.util';
 
 const WEBHOOK_JOBS_CHUNK_SIZE = 20;
 
@@ -29,21 +29,12 @@ export class CallWebhookJobsJob {
 
   @Process(CallWebhookJobsJob.name)
   async handle(
-    workspaceEventBatch: WorkspaceEventBatch<ObjectRecordEvent>,
+    workspaceEventBatch: WorkspaceEventBatchForWebhook<WebhookRecordEvent>,
   ): Promise<void> {
     // If you change that function, double check it does not break Zapier
     // trigger in packages/twenty-zapier/src/triggers/trigger_record.ts
     // Also change the openApi schema for webhooks
     // packages/twenty-server/src/engine/core-modules/open-api/utils/computeWebhooks.utils.ts
-
-    const [nameSingular, operation] = workspaceEventBatch.name.split('.');
-
-    const operationsToMatch = [
-      `${nameSingular}.${operation}`,
-      `*.${operation}`,
-      `${nameSingular}.*`,
-      '*.*',
-    ];
 
     const { flatWebhookMaps } = await this.workspaceCacheService.getOrRecompute(
       workspaceEventBatch.workspaceId,
@@ -53,8 +44,8 @@ export class CallWebhookJobsJob {
     const webhooks = Object.values(flatWebhookMaps.byUniversalIdentifier)
       .filter(isDefined)
       .filter((webhook) =>
-        operationsToMatch.some((operationToMatch) =>
-          webhook.operations.includes(operationToMatch),
+        webhook.operations.some((operation) =>
+          matchesDatabaseEvent(workspaceEventBatch.name, operation),
         ),
       );
 
