@@ -1,3 +1,4 @@
+import { AdminPanelDatabaseStorageService } from 'src/engine/core-modules/admin-panel/services/admin-panel-database-storage.service';
 import { AdminPanelBackupService } from 'src/engine/core-modules/admin-panel/services/admin-panel-backup.service';
 import { Module } from '@nestjs/common';
 import { TerminusModule } from '@nestjs/terminus';
@@ -89,6 +90,7 @@ import { provideWorkspaceScopedRepository } from 'src/engine/twenty-orm/workspac
   providers: [
     AdminPanelResolver,
     AdminPanelBackupService,
+    AdminPanelDatabaseStorageService,
     AdminPanelApplicationRegistrationResolver,
     AdminPanelUserLookupService,
     AdminPanelServerAdminService,

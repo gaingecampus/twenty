@@ -1,3 +1,4 @@
+import { AdminPanelDatabaseStorageService } from 'src/engine/core-modules/admin-panel/services/admin-panel-database-storage.service';
 import { HealthIndicatorService } from '@nestjs/terminus';
 import { Test, type TestingModule } from '@nestjs/testing';
 import { getDataSourceToken } from '@nestjs/typeorm';
@@ -32,6 +33,12 @@ describe('DatabaseHealthIndicator', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         DatabaseHealthIndicator,
+        {
+          provide: AdminPanelDatabaseStorageService,
+          useValue: {
+            getMetrics: jest.fn().mockResolvedValue({ status: 'unavailable' }),
+          },
+        },
         {
           provide: getDataSourceToken(),
           useValue: dataSource,

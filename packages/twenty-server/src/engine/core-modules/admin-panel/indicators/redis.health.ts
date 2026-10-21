@@ -62,6 +62,8 @@ export class RedisHealthIndicator {
         },
         memory: {
           used: memoryData.used_memory_human,
+          usedBytes: parseInt(memoryData.used_memory),
+          limitBytes: parseInt(memoryData.maxmemory),
           peak: memoryData.used_memory_peak_human,
           fragmentation: parseFloat(memoryData.mem_fragmentation_ratio),
         },

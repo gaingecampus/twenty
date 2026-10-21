@@ -1,3 +1,4 @@
+import { AdminPanelDatabaseStorageService } from 'src/engine/core-modules/admin-panel/services/admin-panel-database-storage.service';
 import { Injectable } from '@nestjs/common';
 import {
   type HealthIndicatorResult,
@@ -20,10 +21,12 @@ export class DatabaseHealthIndicator {
     @InjectDataSource()
     private readonly dataSource: DataSource,
     private readonly healthIndicatorService: HealthIndicatorService,
+    private readonly databaseStorage: AdminPanelDatabaseStorageService,
   ) {}
 
   async isHealthy(): Promise<HealthIndicatorResult> {
     const indicator = this.healthIndicatorService.check('database');
+    const storage = this.databaseStorage.getMetrics();
 
     try {
       const [
@@ -57,7 +60,7 @@ export class DatabaseHealthIndicator {
           `),
           this.dataSource.query(`
             SELECT 
-              sum(heap_blks_hit) * 100.0 / (sum(heap_blks_hit) + sum(heap_blks_read)) as ratio 
+              sum(heap_blks_hit) * 100.0 / NULLIF(sum(heap_blks_hit) + sum(heap_blks_read), 0) as ratio
             FROM pg_statio_user_tables
           `),
           this.dataSource.query(
@@ -89,6 +92,7 @@ export class DatabaseHealthIndicator {
           ),
         },
         databaseSize: databaseSize.size,
+        storage: await storage,
         performance: {
           cacheHitRatio: isDefined(cacheHitRatio.ratio)
             ? Math.round(parseFloat(cacheHitRatio.ratio)) + '%'

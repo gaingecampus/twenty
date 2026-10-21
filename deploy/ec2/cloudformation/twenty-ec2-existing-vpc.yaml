@@ -469,6 +469,14 @@ Resources:
                 Resource: !GetAtt FilesBucket.Arn
               - Effect: Allow
                 Action:
+                  - rds:DescribeDBInstances
+                Resource: !Sub 'arn:${AWS::Partition}:rds:${AWS::Region}:${AWS::AccountId}:db:${ProjectName}-${Environment}-db'
+              - Effect: Allow
+                Action:
+                  - cloudwatch:GetMetricStatistics
+                Resource: '*'
+              - Effect: Allow
+                Action:
                   - cloudformation:SignalResource
                 Resource: !Sub 'arn:${AWS::Partition}:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/${AWS::StackName}/*'
       Tags:

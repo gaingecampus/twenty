@@ -72,7 +72,7 @@ describe('RedisHealthIndicator', () => {
     mockRedis.info
       .mockResolvedValueOnce('redis_version:7.0.0\r\n')
       .mockResolvedValueOnce(
-        'used_memory_human:1.2G\r\nused_memory_peak_human:1.5G\r\nmem_fragmentation_ratio:1.5\r\n',
+        'used_memory:1200000000\r\nmaxmemory:2000000000\r\nused_memory_human:1.2G\r\nused_memory_peak_human:1.5G\r\nmem_fragmentation_ratio:1.5\r\n',
       )
       .mockResolvedValueOnce('connected_clients:5\r\n')
       .mockResolvedValueOnce(
@@ -87,6 +87,8 @@ describe('RedisHealthIndicator', () => {
     expect(result.redis.details.system.timestamp).toBeDefined();
     expect(result.redis.details.memory).toEqual({
       used: '1.2G',
+      usedBytes: 1200000000,
+      limitBytes: 2000000000,
       peak: '1.5G',
       fragmentation: 1.5,
     });
@@ -131,7 +133,7 @@ describe('RedisHealthIndicator', () => {
     mockRedis.info
       .mockResolvedValueOnce('redis_version:7.0.0\r\n')
       .mockResolvedValueOnce(
-        'used_memory_human:1.2G\r\nused_memory_peak_human:1.5G\r\nmem_fragmentation_ratio:1.5\r\n',
+        'used_memory:1200000000\r\nmaxmemory:2000000000\r\nused_memory_human:1.2G\r\nused_memory_peak_human:1.5G\r\nmem_fragmentation_ratio:1.5\r\n',
       )
       .mockResolvedValueOnce('connected_clients:5\r\n')
       .mockResolvedValueOnce(

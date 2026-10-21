@@ -113,6 +113,46 @@ Frontend: http://localhost:3001
 Backend:  http://localhost:3000
 ```
 
+## 관리자 패널의 시스템 지표와 DB 볼륨
+
+`설정 → 관리자 패널 → 시스템 지표`에서 DB·Redis·API 프로세스 지표를 조회합니다.
+일반 지표는 15초마다, 저장 볼륨은 1분마다 수집합니다. 숨겨진 브라우저 탭에서는
+자동 조회를 건너뜁니다. 일시정지와 수동 새로고침을 지원하며 수동 새로고침도
+볼륨의 1분 캐시를 사용합니다.
+
+- **DB 데이터 사용량**: 연결된 데이터베이스의 테이블·인덱스 등 사용량입니다.
+  다른 데이터베이스, WAL, 파일시스템 예약 공간을 포함한 볼륨 전체 사용량과 다릅니다.
+- **저장 볼륨 전체 / 여유**: 데이터 디렉터리가 사용하는 저장소의 전체·가용 용량입니다.
+  큰 용량은 GiB(1,024³ bytes), 작은 용량은 MiB로 표시합니다.
+- **로컬 Docker**: 개발 모드의 localhost DB에 한해 `twenty-dev-db-1`의 공개 포트가
+  연결 설정과 일치하는지 확인하고 `/var/lib/postgresql/data`의 파일시스템 용량을 읽습니다.
+  Docker 공유 디스크 수치이며 DB 전용 할당량이 아닙니다. 다른 로컬 DB 구성은 조회 불가로 표시합니다.
+- **운영 RDS PostgreSQL**: DB 연결 URL의 표준 RDS 엔드포인트에서 인스턴스와 리전을
+  식별하고 실제 엔드포인트·포트를 검증합니다. 전체 용량은 `DescribeDBInstances`의
+  현재 `AllocatedStorage`, 여유 용량은 CloudWatch `FreeStorageSpace`의 최근 1분 평균입니다.
+  5분보다 오래된 CloudWatch 샘플은 채택하지 않으며 실제 볼륨 측정 시각을 표시합니다.
+  RDS Proxy·커스텀 DNS·Aurora 및 그 밖의 원격 PostgreSQL은 현재 자동 조회 대상이 아닙니다.
+- 조회 권한·Docker 접근이 없거나 조회가 지연되면 볼륨은 `—`와 안내 문구로 표시합니다.
+  볼륨 수집 실패 때문에 정상 DB를 장애로 판정하지 않습니다.
+
+운영 앱의 EC2 역할에 `rds:DescribeDBInstances`(해당 DB ARN)와
+`cloudwatch:GetMetricStatistics` 조회 권한이 필요합니다. CloudFormation 템플릿에
+포함되어 있으므로 **기존 환경은 앱 배포와 별도로 스택/역할 업데이트가 필요**합니다.
+Docker 소켓을 운영 앱 컨테이너에 연결할 필요는 없습니다.
+
+공식 기준: [RDS 할당 용량](https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_DBInstance.html),
+[CloudWatch RDS 지표](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/rds-metrics.html).
+
+### 서버 스토리지 지표 (AX-1313)
+
+시스템 지표의 서버 스토리지는 API 프로세스의 실행 경로(`process.cwd()`)가 위치한
+파일시스템을 15초 갱신 요청마다 조회합니다. 전체·사용·애플리케이션이 사용할 수 있는
+여유 용량·사용률·측정 경로를 표시합니다. 사용량은 파일시스템 전체 기준이며
+다른 앱과 공유할 수 있습니다. 관리자 예약 공간 때문에 전체에서 사용량을 뺀 값과
+표시 여유 공간이 다를 수 있습니다. Docker에서는 컨테이너에서 보이는 실행 경로의
+파일시스템을 측정하며, S3 버킷 사용량이나 별도로 마운트된 업로드 볼륨은 포함하지 않습니다.
+조회 실패 시 용량은 미확인으로 표시하고 API 메모리·CPU 지표는 유지합니다.
+
 ## 개별로 실행하고 싶을 때
 
 프론트만 실행:
