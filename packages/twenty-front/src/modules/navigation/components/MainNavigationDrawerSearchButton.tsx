@@ -10,12 +10,12 @@ import { useIsMobile } from 'twenty-ui/utilities';
 import { AiChatThreadFilterDropdown } from '@/ai/components/AiChatThreadFilterDropdown';
 import { AI_CHAT_THREAD_ACTIONS_SURFACE } from '@/ai/constants/AiChatThreadActionsSurface';
 import { agentChatThreadSearchQueryState } from '@/ai/states/agentChatThreadSearchQueryState';
+import { useNavigationDrawerExpanded } from '@/navigation/hooks/useNavigationDrawerExpanded';
 import { useOpenRecordsSearchPageInSidePanel } from '@/side-panel/hooks/useOpenRecordsSearchPageInSidePanel';
 import { isSidePanelOpenedState } from '@/side-panel/states/isSidePanelOpenedState';
 import { sidePanelPageState } from '@/side-panel/states/sidePanelPageState';
 import { SearchInput } from '@/ui/input/components/SearchInput';
 import { NAVIGATION_DRAWER_SEARCH_CLICK_OUTSIDE_ID } from '@/ui/navigation/navigation-drawer/constants/NavigationDrawerSearchClickOutsideId';
-import { isNavigationDrawerExpandedState } from '@/ui/navigation/states/isNavigationDrawerExpanded';
 import { navigationDrawerActiveTabState } from '@/ui/navigation/states/navigationDrawerActiveTabState';
 import { NAVIGATION_DRAWER_TABS } from '@/ui/navigation/states/navigationDrawerTabs';
 import { useAtomState } from '@/ui/utilities/state/jotai/hooks/useAtomState';
@@ -30,10 +30,7 @@ const StyledCollapsedSearchButton = styled.button`
   );
   border: 1px solid
     var(--t-search-border-color, ${themeCssVariables.border.color.medium});
-  border-radius: var(
-    --t-search-radius,
-    ${themeCssVariables.border.radius.sm}
-  );
+  border-radius: var(--t-search-radius, ${themeCssVariables.border.radius.sm});
   box-sizing: border-box;
   color: ${themeCssVariables.font.color.light};
   cursor: pointer;
@@ -97,9 +94,7 @@ const StyledSearchTrigger = styled.div`
 export const MainNavigationDrawerSearchButton = () => {
   const { theme } = useContext(ThemeContext);
   const isMobile = useIsMobile();
-  const isNavigationDrawerExpanded = useAtomStateValue(
-    isNavigationDrawerExpandedState,
-  );
+  const isNavigationDrawerExpanded = useNavigationDrawerExpanded();
   const navigationDrawerActiveTab = useAtomStateValue(
     navigationDrawerActiveTabState,
   );

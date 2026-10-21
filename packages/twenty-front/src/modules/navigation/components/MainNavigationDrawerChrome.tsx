@@ -5,8 +5,7 @@ import { themeCssVariables } from 'twenty-ui/theme-constants';
 import { MainNavigationDrawerNewChatButton } from '@/navigation/components/MainNavigationDrawerNewChatButton';
 import { MainNavigationDrawerSearchButton } from '@/navigation/components/MainNavigationDrawerSearchButton';
 import { MainNavigationDrawerTabsRow } from '@/navigation/components/MainNavigationDrawerTabsRow';
-import { isNavigationDrawerExpandedState } from '@/ui/navigation/states/isNavigationDrawerExpanded';
-import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
+import { useNavigationDrawerExpanded } from '@/navigation/hooks/useNavigationDrawerExpanded';
 
 const StyledChromeStack = styled.div`
   display: flex;
@@ -47,9 +46,7 @@ export const MainNavigationDrawerChrome = ({
   NavigationMenuTabActiveIcon,
   navigationMenuTabLabel,
 }: MainNavigationDrawerChromeProps) => {
-  const isNavigationDrawerExpanded = useAtomStateValue(
-    isNavigationDrawerExpandedState,
-  );
+  const isNavigationDrawerExpanded = useNavigationDrawerExpanded();
 
   return (
     <StyledChromeStack>
