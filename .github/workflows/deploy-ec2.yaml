@@ -29,6 +29,10 @@ on:
         default: true
         type: boolean
 
+concurrency:
+  group: deploy-ec2-${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'staging' }}
+  cancel-in-progress: false
+
 defaults:
   run:
     shell: bash --noprofile --norc -euo pipefail {0}
@@ -140,6 +144,7 @@ jobs:
             sleep 10
           done
 
+          release_dir="${EC2_APP_DIR}/releases/${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
           compose_file_b64="$(base64 -w 0 deploy/ec2/docker-compose.prod.yml)"
           env_example_b64=""
           if [ -f deploy/ec2/docker-compose.env.example ]; then
@@ -148,12 +153,17 @@ jobs:
           bootstrap_script_b64="$(base64 -w 0 deploy/ec2/scripts/bootstrap-ec2.sh)"
           build_script_b64="$(base64 -w 0 deploy/ec2/scripts/build-and-push.sh)"
           deploy_script_b64="$(base64 -w 0 deploy/ec2/scripts/deploy-on-ec2.sh)"
+          release_script_b64="$(base64 -w 0 deploy/ec2/scripts/deploy-release.sh)"
+          preflight_script_b64="$(base64 -w 0 deploy/ec2/scripts/check-deployment-dependencies.cjs)"
           upgrade_script_b64="$(base64 -w 0 deploy/ec2/scripts/run-upgrade.sh)"
           backup_script_b64="$(base64 -w 0 deploy/ec2/scripts/backup-database.py)"
           backup_installer_b64="$(base64 -w 0 deploy/ec2/scripts/install-database-backup.sh)"
 
           commands_json="$(jq -n \
             --arg appDir "${EC2_APP_DIR}" \
+            --arg releaseDir "${release_dir}" \
+            --arg releaseScriptB64 "${release_script_b64}" \
+            --arg preflightScriptB64 "${preflight_script_b64}" \
             --arg imageUri "${IMAGE_URI}" \
             --arg composeFileB64 "${compose_file_b64}" \
             --arg envExampleB64 "${env_example_b64}" \
@@ -166,8 +176,9 @@ jobs:
             '{
               commands: ([
                 "set -euo pipefail",
-                "mkdir -p " + ($appDir | @sh) + "/scripts",
-                "cd " + ($appDir | @sh),
+                "umask 077",
+                "mkdir -p " + ($releaseDir | @sh) + "/scripts",
+                "cd " + ($releaseDir | @sh),
                 "printf %s " + ($composeFileB64 | @sh) + " | base64 -d > docker-compose.prod.yml"
               ]
               + (
@@ -186,14 +197,11 @@ jobs:
                 "printf %s " + ($upgradeScriptB64 | @sh) + " | base64 -d > scripts/run-upgrade.sh",
                 "printf %s " + ($backupScriptB64 | @sh) + " | base64 -d > scripts/backup-database.py",
                 "printf %s " + ($backupInstallerB64 | @sh) + " | base64 -d > scripts/install-database-backup.sh",
+                "printf %s " + ($releaseScriptB64 | @sh) + " | base64 -d > scripts/deploy-release.sh",
+                "printf %s " + ($preflightScriptB64 | @sh) + " | base64 -d > scripts/check-deployment-dependencies.cjs",
                 "chmod +x scripts/*.sh",
                 "EC2_APP_DIR=" + ($appDir | @sh) + " bash scripts/bootstrap-ec2.sh",
-                "if [ ! -f docker-compose.env ]; then echo Missing docker-compose.env in " + ($appDir | @sh) + " >&2; exit 1; fi",
-                "tmp_file=$(mktemp)",
-                "awk -v image=" + ($imageUri | @sh) + " '\''BEGIN { updated = 0 } /^TWENTY_IMAGE=/ { print \"TWENTY_IMAGE=\" image; updated = 1; next } { print } END { if (updated == 0) print \"TWENTY_IMAGE=\" image }'\'' docker-compose.env > \"$tmp_file\"",
-                "mv \"$tmp_file\" docker-compose.env",
-                "bash scripts/run-upgrade.sh",
-                "bash scripts/deploy-on-ec2.sh"
+                "LIVE_DEPLOY_DIR=" + ($appDir | @sh) + " TWENTY_IMAGE=" + ($imageUri | @sh) + " bash scripts/deploy-release.sh"
               ])
             }')"
 

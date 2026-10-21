@@ -26,6 +26,20 @@ cd /opt/twenty/deploy/ec2
 
 배포가 무중단인지, 배포 중 MCP·Redis 큐·REST/GraphQL이 어떻게 동작하는지는 [DEPLOYMENT_AND_APIS.md](DEPLOYMENT_AND_APIS.md)를 참고하세요.
 
+## 자동 배포 실패 시 복구 파일
+
+새 자동 배포는 `releases/<run-id>-<attempt>` 안에서 `deploy-release.sh`를 실행합니다. 각 릴리스의 `previous.env`, `previous-compose.yml`과 `twenty-rollback:<run-id>-<attempt>` 이미지가 복구용입니다. 이 env 파일에는 비밀값이 있으므로 내용을 로그나 채팅에 출력하지 마세요.
+
+Redis 사전 점검 또는 upgrade 실패는 서버 교체 전에 중단합니다. 서버 교체 후 실패는 이전 릴리스 복구를 시도합니다. `ROLLBACK FAILED`가 나오면 해당 릴리스 경로의 파일로 직접 복구 상태를 확인해야 합니다. DB 변경은 되돌리지 않으므로 [호환성 기준](DEPLOYMENT_AND_APIS.md#실패-격리와-호환성-ax-1311)을 함께 확인하세요.
+
+실제 의존성 점검:
+
+```bash
+curl --fail --max-time 5 http://127.0.0.1:3000/healthz/ready
+```
+
+`/healthz` 200만으로 DB·Redis와 CRM 조회가 정상이라고 판단하지 않습니다. 이전 이미지에는 `/healthz/ready`가 없을 수 있습니다.
+
 ## docker compose 사용 시 주의
 
 `docker-compose.prod.yml`은 `docker-compose.env`의 값(`TWENTY_IMAGE`, `PG_DATABASE_URL` 등)을 읽습니다.  

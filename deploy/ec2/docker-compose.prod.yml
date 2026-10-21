@@ -31,7 +31,7 @@ services:
       STORAGE_S3_PRESIGNED_URL_BASE: ${STORAGE_S3_PRESIGNED_URL_BASE:-}
       STORAGE_S3_PRESIGNED_URL_EXPIRES_IN: ${STORAGE_S3_PRESIGNED_URL_EXPIRES_IN:-900}
     healthcheck:
-      test: curl --fail http://localhost:3000/healthz
+      test: curl --fail --max-time 4 http://localhost:3000/healthz/ready
       interval: 5s
       timeout: 5s
       retries: 30

@@ -37,7 +37,8 @@ TWENTY_IMAGE="${TWENTY_IMAGE:-$(read_env_value TWENTY_IMAGE)}"
 AWS_REGION="${AWS_REGION:-$(read_env_value AWS_REGION)}"
 TWENTY_HOST_PORT="${TWENTY_HOST_PORT:-$(read_env_value TWENTY_HOST_PORT)}"
 TWENTY_HOST_PORT="${TWENTY_HOST_PORT:-3000}"
-HEALTH_URL="${HEALTH_URL:-http://127.0.0.1:${TWENTY_HOST_PORT}/healthz}"
+HEALTH_PATH="${HEALTH_PATH:-/healthz/ready}"
+HEALTH_URL="${HEALTH_URL:-http://127.0.0.1:${TWENTY_HOST_PORT}${HEALTH_PATH}}"
 
 : "${TWENTY_IMAGE:?Set TWENTY_IMAGE in ${ENV_FILE}}"
 
@@ -46,7 +47,7 @@ cleanup_docker_disk_usage() {
   docker system df || true
 
   docker container prune --force
-  docker image prune --all --force
+  docker image prune --force
   docker builder prune --all --force
 
   echo "Docker disk usage after cleanup:"
@@ -54,15 +55,14 @@ cleanup_docker_disk_usage() {
   df -h /
 }
 
-if [ -n "${AWS_REGION:-}" ]; then
-  ECR_REGISTRY="${TWENTY_IMAGE%%/*}"
-  aws ecr get-login-password --region "${AWS_REGION}" |
-    docker login --username AWS --password-stdin "${ECR_REGISTRY}"
-fi
-
 if docker image inspect "${TWENTY_IMAGE}" >/dev/null 2>&1; then
   echo "Docker image already exists locally: ${TWENTY_IMAGE}"
 else
+  if [ -n "${AWS_REGION:-}" ]; then
+    ECR_REGISTRY="${TWENTY_IMAGE%%/*}"
+    aws ecr get-login-password --region "${AWS_REGION}" |
+      docker login --username AWS --password-stdin "${ECR_REGISTRY}"
+  fi
   cleanup_docker_disk_usage
   docker compose --env-file "${ENV_FILE}" -f "${COMPOSE_FILE}" pull
 fi
@@ -70,9 +70,16 @@ fi
 docker compose --env-file "${ENV_FILE}" -f "${COMPOSE_FILE}" up -d --remove-orphans
 
 for attempt in $(seq 1 60); do
-  status="$(curl -s -o /dev/null -w '%{http_code}' "${HEALTH_URL}" || true)"
+  status="$(curl --connect-timeout 2 --max-time 5 -s -o /dev/null -w '%{http_code}' "${HEALTH_URL}" || true)"
 
   if [ "${status}" = "200" ]; then
+    worker_id="$(docker compose --env-file "${ENV_FILE}" -f "${COMPOSE_FILE}" ps -q worker)"
+    worker_status="$(docker inspect --format '{{.State.Status}}' "${worker_id}" 2>/dev/null || true)"
+    if [ "${worker_status}" != running ]; then
+      echo 'Worker is not running yet' >&2
+      sleep 5
+      continue
+    fi
     echo "Twenty is healthy at ${HEALTH_URL}"
     exit 0
   fi

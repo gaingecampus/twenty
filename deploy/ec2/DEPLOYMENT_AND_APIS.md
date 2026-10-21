@@ -21,9 +21,11 @@ CloudFront → ALB → EC2 (단일 인스턴스)
 ```text
 이미지 빌드 → ECR push
 → SSM으로 EC2에 스크립트 전달
-→ run-upgrade.sh   (DB migrate, upgrade, sync, cron 등록)
+→ deploy-release.sh (배포 잠금, 실제 실행 이미지·설정 보존)
+→ run-upgrade.sh (Redis 사전 점검 → DB migrate, upgrade, sync, cron 등록)
 → deploy-on-ec2.sh (docker compose up -d)
-→ /healthz 200 확인
+→ /healthz/ready + worker 실행 확인
+→ 성공 시 설정 승격 / 기동 실패 시 이전 릴리스 복구
 ```
 
 관련 파일:
@@ -31,9 +33,45 @@ CloudFront → ALB → EC2 (단일 인스턴스)
 | 파일 | 역할 |
 |------|------|
 | `.github/workflows/deploy-ec2.yaml` | Actions 워크플로우 |
+| `deploy/ec2/scripts/deploy-release.sh` | 후보 설정 격리, 이전 이미지 보존, 실패 시 복구 |
 | `deploy/ec2/scripts/run-upgrade.sh` | DB·메타데이터 upgrade (one-off 컨테이너) |
 | `deploy/ec2/scripts/deploy-on-ec2.sh` | 이미지 pull, `compose up -d`, 헬스체크 |
 | `deploy/ec2/docker-compose.prod.yml` | server + worker 정의 |
+
+---
+
+## 실패 격리와 호환성 (AX-1311)
+
+- 후보 파일은 `releases/<run-id>-<attempt>`에 저장합니다. 라이브 env·compose는 준비 단계에서 덮어쓰지 않습니다. 같은 환경의 Actions 실행은 대기시키며, EC2의 `flock`으로 같은 인스턴스의 동시 배포도 차단합니다.
+- DB 변경 전에 후보 이미지로 Redis 연결·쓰기·읽기·메모리 비율을 검사합니다. `used_memory / maxmemory >= 80%`면 중단합니다. `maxmemory=0`이면 비율 검사만 생략합니다. 사전 점검은 완료 이력이나 CRM 데이터를 자동 삭제하지 않습니다.
+- 현재 컨테이너의 실제 이미지 ID에 로컬 rollback 태그를 붙입니다. 사용하지 않는 모든 이미지를 삭제하던 `image prune --all`을 제거해 복구 이미지를 보존합니다.
+- 업그레이드 실패 시 기존 컨테이너와 설정을 유지합니다. 컨테이너 교체 후 readiness·worker 확인 실패 시 이전 compose·env·이미지로 복구하고 배포 자체는 실패로 보고합니다. 복구마저 실패하면 `ROLLBACK FAILED`와 복구 파일 경로를 출력합니다.
+- `/healthz`는 프로세스 생존만 검사합니다. `/healthz/ready`는 TypeORM이 매핑한 workspace 컬럼 조회와 Redis 쓰기·읽기를 확인합니다. readiness에는 내부 오류·접속 정보를 노출하지 않습니다. 이전 이미지로 복구할 때는 해당 버전의 원래 compose 헬스체크를 보존하고, readiness가 없는 이전 버전에서만 `/healthz`를 사용합니다.
+
+**DB 변경은 자동으로 되돌리지 않습니다.** 운영 중 이전 이미지가 계속 DB를 읽으므로 마이그레이션은 이전 버전과 호환되어야 합니다. 컬럼 삭제·이름 변경은 먼저 두 버전이 공존 가능한 확장 단계를 배포한 뒤, 이전 이미지 사용과 복구 기간이 끝난 후 별도 배포에서 수행합니다. `uiTheme`은 2.29 미실행 환경에서 삭제하지 않고, 이미 삭제된 환경은 2.30에서 기본값 `enterprise`로 컬럼을 복원합니다. 삭제된 과거 테마 값까지 복구하는 것은 아닙니다.
+
+기존 ALB `HealthCheckPath` 파라미터는 이 코드 배포로 변경되지 않습니다. 새 배포의 성공 판단은 로컬 `/healthz/ready`가 담당합니다. 오래된 rollback 이미지·릴리스 폴더는 복구 기간 종료를 확인한 뒤 운영자가 정리해야 합니다.
+
+이 조치는 실패 시 장기 중단을 줄이지만, 단일 인스턴스의 컨테이너 교체 공백이나 임의의 비호환 DB 변경까지 무중단으로 만드는 것은 아닙니다.
+
+## Redis 완료 작업 보관
+
+| 대상 | 완료 | 최종 실패 |
+|------|------|----------|
+| webhook / trigger / entity-events-to-db 큐 | 즉시 제거 | 최대 10건·1시간 |
+| JSON 128KiB 이상 작업 (UTF-8 기준) | 즉시 제거 | 최대 10건·1시간 |
+| 그 외 작업 | 최대 100건·15분 | 최대 100건·24시간 |
+
+재시도 횟수와 대기·실행 작업은 유지합니다. BullMQ의 age/count 정리는 완료·실패 전환 때 수행되는 지연 정리이며 TTL 타이머가 아닙니다. 기존에 enqueue된 작업의 옵션은 소급 변경되지 않습니다. 혼합 크기 큐에서 count 기준은 각 작업의 완료·실패 시 적용되므로 총 바이트의 하드 제한은 아닙니다. 처리 대기 작업의 지속 증가도 별도 관찰해야 합니다.
+
+구독자가 없는 레코드 이벤트는 webhook·trigger 큐에 적재하지 않습니다. 웹훅은 실제 전송하는 최신 record와 updatedFields만 남기고 before/diff 중복을 제거합니다. 트리거의 before/after/diff 계약과 DB에 저장된 워크플로 실행 이력은 보존합니다.
+
+검증 명령:
+
+```bash
+python3 -m unittest discover -s deploy/ec2/scripts -p test_deploy_release.py
+node --test deploy/ec2/scripts/check-deployment-dependencies.test.cjs
+```
 
 ---
 

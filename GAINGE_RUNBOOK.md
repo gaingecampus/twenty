@@ -172,10 +172,12 @@ gainge 브랜치에 push
 -> Docker image 빌드
 -> AWS ECR에 image push
 -> EC2에 SSM으로 배포 명령 실행
--> run-upgrade.sh (DB migrate, upgrade, 표준 메타데이터 sync, cron 등록)
--> docker compose pull
+-> releases/<run-id>-<attempt>에 후보 파일 보관 (기존 설정 유지)
+-> deploy-release.sh (배포 잠금, 실행 중 이미지·설정 보존)
+-> run-upgrade.sh (Redis 사전 점검 → DB migrate, upgrade, sync, cron)
 -> docker compose up -d
--> /healthz 확인
+-> /healthz/ready (DB 컬럼 조회 + 캐시 쓰기·읽기), worker 실행 확인
+-> 성공 시 설정 승격 / 기동 실패 시 이전 이미지·설정 복구
 ```
 
 EC2 접속 후 컨테이너 확인, 로그, 수동 upgrade, 재시작 등 **원격 운영 명령**은 아래 문서를 참고하세요.

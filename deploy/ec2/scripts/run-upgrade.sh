@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+umask 077
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DEPLOY_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
@@ -78,7 +79,7 @@ cleanup_docker_disk_usage() {
   docker system df || true
 
   docker container prune --force
-  docker image prune --all --force
+  docker image prune --force
   docker builder prune --all --force
 
   echo "Docker disk usage after cleanup:"
@@ -116,6 +117,12 @@ elif ! docker image inspect "${TWENTY_IMAGE}" >/dev/null 2>&1; then
   echo "Set PULL_IMAGE=true with a pushed image URI, or run the deploy workflow first." >&2
   exit 1
 fi
+
+docker run --rm -i \
+  --env-file "${ENV_FILE}" \
+  --entrypoint node \
+  "${TWENTY_IMAGE}" - \
+  < "${SCRIPT_DIR}/check-deployment-dependencies.cjs"
 
 docker run --rm \
   --env-file "${ENV_FILE}" \
