@@ -1,0 +1,350 @@
+{
+  "id": "e39d757b-e2ba-44b9-88f8-9310cd118fa8",
+  "name": "v3",
+  "status": "DRAFT",
+  "trigger": {
+    "name": "한국 시간 매시 정각 (자정 포함)",
+    "type": "CRON",
+    "position": {
+      "x": 0,
+      "y": 0
+    },
+    "settings": {
+      "type": "CUSTOM",
+      "pattern": "0 * * * *",
+      "outputSchema": {}
+    },
+    "nextStepIds": [
+      "491e215e-8e21-4078-a0d2-a5c027e3c045"
+    ]
+  },
+  "steps": [
+    {
+      "id": "491e215e-8e21-4078-a0d2-a5c027e3c045",
+      "name": "한국 날짜 기준 종료 대상 계약 조회",
+      "type": "FIND_RECORDS",
+      "valid": true,
+      "position": {
+        "x": 0,
+        "y": 264
+      },
+      "settings": {
+        "input": {
+          "limit": 200,
+          "filter": {
+            "recordFilters": [
+              {
+                "id": "8c215109-3ba5-46fc-ad85-d413a51b95b7",
+                "type": "SELECT",
+                "value": "[\"PRE\",\"ACTIVE\"]",
+                "operand": "IS",
+                "fieldMetadataId": "cd814568-03f3-4594-8767-41568a7af3d9",
+                "recordFilterGroupId": "a1111111-1111-4111-8111-111111111111",
+                "positionInRecordFilterGroup": 0
+              },
+              {
+                "id": "b1111111-1111-4111-8111-111111111111",
+                "type": "DATE",
+                "value": "",
+                "operand": "IS_IN_PAST",
+                "fieldMetadataId": "32a08431-c6b6-4985-b3a3-07e4d15717ec",
+                "recordFilterGroupId": "a2222222-2222-4222-8222-222222222222",
+                "positionInRecordFilterGroup": 0
+              },
+              {
+                "id": "b2222222-2222-4222-8222-222222222222",
+                "type": "DATE",
+                "value": "PAST_1_DAY;;Asia/Seoul;;",
+                "operand": "IS_RELATIVE",
+                "fieldMetadataId": "32a08431-c6b6-4985-b3a3-07e4d15717ec",
+                "recordFilterGroupId": "a2222222-2222-4222-8222-222222222222",
+                "positionInRecordFilterGroup": 1
+              },
+              {
+                "id": "b3333333-3333-4333-8333-333333333333",
+                "type": "DATE",
+                "value": "THIS_1_DAY;;Asia/Seoul;;",
+                "operand": "IS_RELATIVE",
+                "fieldMetadataId": "32a08431-c6b6-4985-b3a3-07e4d15717ec",
+                "recordFilterGroupId": "a2222222-2222-4222-8222-222222222222",
+                "positionInRecordFilterGroup": 2
+              }
+            ],
+            "recordFilterGroups": [
+              {
+                "id": "a1111111-1111-4111-8111-111111111111",
+                "logicalOperator": "AND"
+              },
+              {
+                "id": "a2222222-2222-4222-8222-222222222222",
+                "logicalOperator": "OR",
+                "parentRecordFilterGroupId": "a1111111-1111-4111-8111-111111111111",
+                "positionInRecordFilterGroup": 1
+              }
+            ]
+          },
+          "orderBy": {
+            "gqlOperationOrderBy": [
+              {
+                "contractEndDate": "AscNullsLast"
+              }
+            ]
+          },
+          "objectName": "onboarding"
+        },
+        "outputSchema": {},
+        "errorHandlingOptions": {
+          "retryOnFailure": {
+            "value": true
+          },
+          "continueOnFailure": {
+            "value": false
+          }
+        }
+      },
+      "nextStepIds": [
+        "9758cc1d-955e-4a20-ae3d-4031fa6780e9"
+      ]
+    },
+    {
+      "id": "9758cc1d-955e-4a20-ae3d-4031fa6780e9",
+      "name": "계약별 상태 변경",
+      "type": "ITERATOR",
+      "valid": true,
+      "position": {
+        "x": 0,
+        "y": 396
+      },
+      "settings": {
+        "input": {
+          "items": "{{491e215e-8e21-4078-a0d2-a5c027e3c045.all}}",
+          "initialLoopStepIds": [
+            "1594b29a-01f8-427b-9c53-bb0bc41e4d26"
+          ],
+          "shouldContinueOnIterationFailure": false
+        },
+        "outputSchema": {},
+        "errorHandlingOptions": {
+          "retryOnFailure": {
+            "value": true
+          },
+          "continueOnFailure": {
+            "value": false
+          }
+        }
+      },
+      "nextStepIds": [
+        "dbe53c1a-7657-4548-991e-5a64dd370ab0"
+      ]
+    },
+    {
+      "id": "1594b29a-01f8-427b-9c53-bb0bc41e4d26",
+      "name": "온보딩 종료로 변경",
+      "type": "UPDATE_RECORD",
+      "valid": true,
+      "position": {
+        "x": 0,
+        "y": 528
+      },
+      "settings": {
+        "input": {
+          "objectName": "onboarding",
+          "objectRecord": {
+            "onboardingStatus": "DONE"
+          },
+          "fieldsToUpdate": [
+            "onboardingStatus"
+          ],
+          "objectRecordId": "{{9758cc1d-955e-4a20-ae3d-4031fa6780e9.currentItem.id}}"
+        },
+        "outputSchema": {},
+        "errorHandlingOptions": {
+          "retryOnFailure": {
+            "value": true
+          },
+          "continueOnFailure": {
+            "value": false
+          }
+        }
+      },
+      "nextStepIds": [
+        "9758cc1d-955e-4a20-ae3d-4031fa6780e9"
+      ]
+    },
+    {
+      "id": "dbe53c1a-7657-4548-991e-5a64dd370ab0",
+      "name": "한국 날짜 기준 시작 대상 계약 조회",
+      "type": "FIND_RECORDS",
+      "valid": true,
+      "position": {
+        "x": 0,
+        "y": 264
+      },
+      "settings": {
+        "input": {
+          "limit": 200,
+          "filter": {
+            "recordFilters": [
+              {
+                "id": "8c215109-3ba5-46fc-ad85-d413a51b95b7",
+                "type": "SELECT",
+                "value": "[\"PRE\"]",
+                "operand": "IS",
+                "fieldMetadataId": "cd814568-03f3-4594-8767-41568a7af3d9",
+                "recordFilterGroupId": "a1111111-1111-4111-8111-111111111111",
+                "positionInRecordFilterGroup": 0
+              },
+              {
+                "id": "b1111111-1111-4111-8111-111111111111",
+                "type": "DATE",
+                "value": "",
+                "operand": "IS_IN_PAST",
+                "fieldMetadataId": "f0f43958-1bb4-4649-a71a-6ca865a05610",
+                "recordFilterGroupId": "a2222222-2222-4222-8222-222222222222",
+                "positionInRecordFilterGroup": 0
+              },
+              {
+                "id": "b2222222-2222-4222-8222-222222222222",
+                "type": "DATE",
+                "value": "PAST_1_DAY;;Asia/Seoul;;",
+                "operand": "IS_RELATIVE",
+                "fieldMetadataId": "f0f43958-1bb4-4649-a71a-6ca865a05610",
+                "recordFilterGroupId": "a2222222-2222-4222-8222-222222222222",
+                "positionInRecordFilterGroup": 1
+              },
+              {
+                "id": "b3333333-3333-4333-8333-333333333333",
+                "type": "DATE",
+                "value": "THIS_1_DAY;;Asia/Seoul;;",
+                "operand": "IS_RELATIVE",
+                "fieldMetadataId": "f0f43958-1bb4-4649-a71a-6ca865a05610",
+                "recordFilterGroupId": "a2222222-2222-4222-8222-222222222222",
+                "positionInRecordFilterGroup": 2
+              },
+              {
+                "id": "b4444444-4444-4444-8444-444444444444",
+                "type": "DATE",
+                "value": "NEXT_36500_DAY;;Asia/Seoul;;",
+                "operand": "IS_RELATIVE",
+                "fieldMetadataId": "32a08431-c6b6-4985-b3a3-07e4d15717ec",
+                "recordFilterGroupId": "a3333333-3333-4333-8333-333333333333",
+                "positionInRecordFilterGroup": 0
+              },
+              {
+                "id": "b5555555-5555-4555-8555-555555555555",
+                "type": "DATE",
+                "value": "",
+                "operand": "IS_EMPTY",
+                "fieldMetadataId": "32a08431-c6b6-4985-b3a3-07e4d15717ec",
+                "recordFilterGroupId": "a3333333-3333-4333-8333-333333333333",
+                "positionInRecordFilterGroup": 1
+              }
+            ],
+            "recordFilterGroups": [
+              {
+                "id": "a1111111-1111-4111-8111-111111111111",
+                "logicalOperator": "AND"
+              },
+              {
+                "id": "a2222222-2222-4222-8222-222222222222",
+                "logicalOperator": "OR",
+                "parentRecordFilterGroupId": "a1111111-1111-4111-8111-111111111111",
+                "positionInRecordFilterGroup": 1
+              },
+              {
+                "id": "a3333333-3333-4333-8333-333333333333",
+                "logicalOperator": "OR",
+                "parentRecordFilterGroupId": "a1111111-1111-4111-8111-111111111111",
+                "positionInRecordFilterGroup": 2
+              }
+            ]
+          },
+          "orderBy": {
+            "gqlOperationOrderBy": [
+              {
+                "contractEndDate": "AscNullsLast"
+              }
+            ]
+          },
+          "objectName": "onboarding"
+        },
+        "outputSchema": {},
+        "errorHandlingOptions": {
+          "retryOnFailure": {
+            "value": true
+          },
+          "continueOnFailure": {
+            "value": false
+          }
+        }
+      },
+      "nextStepIds": [
+        "739d3fe8-5b38-4c60-952c-d79ae1549a0b"
+      ]
+    },
+    {
+      "id": "739d3fe8-5b38-4c60-952c-d79ae1549a0b",
+      "name": "시작 대상 계약별 처리",
+      "type": "ITERATOR",
+      "valid": true,
+      "position": {
+        "x": 0,
+        "y": 396
+      },
+      "settings": {
+        "input": {
+          "items": "{{dbe53c1a-7657-4548-991e-5a64dd370ab0.all}}",
+          "initialLoopStepIds": [
+            "2b6d50bd-012b-4e60-a833-e983417e3b94"
+          ],
+          "shouldContinueOnIterationFailure": false
+        },
+        "outputSchema": {},
+        "errorHandlingOptions": {
+          "retryOnFailure": {
+            "value": true
+          },
+          "continueOnFailure": {
+            "value": false
+          }
+        }
+      },
+      "nextStepIds": []
+    },
+    {
+      "id": "2b6d50bd-012b-4e60-a833-e983417e3b94",
+      "name": "온보딩 중으로 변경",
+      "type": "UPDATE_RECORD",
+      "valid": true,
+      "position": {
+        "x": 0,
+        "y": 528
+      },
+      "settings": {
+        "input": {
+          "objectName": "onboarding",
+          "objectRecord": {
+            "onboardingStatus": "ACTIVE"
+          },
+          "fieldsToUpdate": [
+            "onboardingStatus"
+          ],
+          "objectRecordId": "{{739d3fe8-5b38-4c60-952c-d79ae1549a0b.currentItem.id}}"
+        },
+        "outputSchema": {},
+        "errorHandlingOptions": {
+          "retryOnFailure": {
+            "value": true
+          },
+          "continueOnFailure": {
+            "value": false
+          }
+        }
+      },
+      "nextStepIds": [
+        "739d3fe8-5b38-4c60-952c-d79ae1549a0b"
+      ]
+    }
+  ],
+  "workflowId": "c1f51133-b3b1-4045-b18b-539168be3eb5"
+}
