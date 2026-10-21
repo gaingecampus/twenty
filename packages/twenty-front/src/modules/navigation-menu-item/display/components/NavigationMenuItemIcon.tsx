@@ -11,6 +11,7 @@ import { type NavigationMenuItem } from '~/generated-metadata/graphql';
 
 import { getNavigationMenuItemColor } from '@/navigation-menu-item/common/utils/getNavigationMenuItemColor';
 import { recordIdentifierToObjectRecordIdentifier } from '@/navigation-menu-item/common/utils/recordIdentifierToObjectRecordIdentifier';
+import { getLinkNavigationMenuItemComputedLink } from '@/navigation-menu-item/display/link/utils/getLinkNavigationMenuItemComputedLink';
 import { LinkIconWithLinkOverlay } from '@/navigation-menu-item/display/link/components/LinkIconWithLinkOverlay';
 import { getNavigationMenuItemObjectNameSingular } from '@/navigation-menu-item/display/object/utils/getNavigationMenuItemObjectNameSingular';
 import { getNavigationMenuItemComputedLink } from '@/navigation-menu-item/display/utils/getNavigationMenuItemComputedLink';
@@ -97,6 +98,14 @@ export const NavigationMenuItemIcon = ({
   }
 
   if (navigationMenuItem.type === NavigationMenuItemType.LINK) {
+    const internalLink = getLinkNavigationMenuItemComputedLink(
+      navigationMenuItem,
+      window.location.origin,
+    );
+    if (internalLink.startsWith('/') && navigationMenuItem.icon) {
+      const MenuIcon = getIcon(navigationMenuItem.icon);
+      return <MenuIcon size={themeCssVariables.icon.size.md} />;
+    }
     const computedLink = getNavigationMenuItemComputedLink({
       item: navigationMenuItem,
       objectMetadataItems,

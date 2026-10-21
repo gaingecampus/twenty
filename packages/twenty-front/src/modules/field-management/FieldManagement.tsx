@@ -1,3 +1,4 @@
+import { MenuFavoriteButton } from '@/navigation-menu-item/display/components/MenuFavoriteButton';
 import { FieldVisitTextSection } from './FieldVisitTextSection';
 import { FieldContractTypeFilters } from './FieldContractTypeFilters';
 import {
@@ -111,6 +112,13 @@ export const MyFieldsNavigationItem = () => {
   return (
     <NavigationDrawerItem
       label="컨설팅 품질 관리"
+      rightOptions={
+        <MenuFavoriteButton
+          label="컨설팅 품질 관리"
+          path="/consulting-quality"
+          icon="IconMap"
+        />
+      }
       Icon={IconMap}
       to="/consulting-quality"
       active={location.pathname === '/consulting-quality'}
@@ -220,9 +228,8 @@ const FieldManagementLoaded = ({
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('ACTIVE');
   const [contractPageSize, setContractPageSize] = useState(10);
-  const [contractTypeFilter, setContractTypeFilter] = useState<ContractTypeFilter>(
-    DEFAULT_CONTRACT_TYPE_FILTERS,
-  );
+  const [contractTypeFilter, setContractTypeFilter] =
+    useState<ContractTypeFilter>(DEFAULT_CONTRACT_TYPE_FILTERS);
   const [contractSort, setContractSort] =
     useState<FieldContractSort>('default');
   const [needsOnly, setNeedsOnly] = useState(false);
@@ -653,7 +660,10 @@ const FieldManagementLoaded = ({
             <FieldVisitTextSection title="주요 결정" text={text(v.decisions)} />
           )}
           {text(v.nextActions).trim() && (
-            <FieldVisitTextSection title="다음 할 일" text={text(v.nextActions)} />
+            <FieldVisitTextSection
+              title="다음 할 일"
+              text={text(v.nextActions)}
+            />
           )}
         </div>
         <FieldVisitAttachments visitId={v.id} />

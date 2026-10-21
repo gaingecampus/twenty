@@ -1,3 +1,4 @@
+import { MenuFavoriteButton } from '@/navigation-menu-item/display/components/MenuFavoriteButton';
 import { t } from '@lingui/core/macro';
 import { isNonEmptyString } from '@sniptt/guards';
 import { Fragment, type ReactNode, useContext } from 'react';
@@ -233,7 +234,15 @@ export const NavigationDrawerItemForObjectMetadataItem = ({
             />
           </Fragment>
         ) : (
-          rightOptions
+          (rightOptions ??
+          (!isRecord && !isLayoutCustomizationModeEnabled && !isDragging && (
+            <MenuFavoriteButton
+              label={label}
+              path={navigationPath}
+              objectMetadataId={objectMetadataItem.id}
+              viewId={isViewWithResolvedView ? view?.id : undefined}
+            />
+          )))
         )
       }
     />
