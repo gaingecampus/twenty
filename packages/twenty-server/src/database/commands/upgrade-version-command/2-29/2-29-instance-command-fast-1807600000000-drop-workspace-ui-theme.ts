@@ -6,8 +6,10 @@ import { type FastInstanceCommand } from 'src/engine/core-modules/upgrade/interf
 @RegisteredInstanceCommand('2.29.0', 1807600000000)
 export class DropWorkspaceUiThemeFastInstanceCommand implements FastInstanceCommand {
   public async up(queryRunner: QueryRunner): Promise<void> {
+    // Keep the registration for migration history, but retain the column while
+    // pre-2.29 servers can still be running during an upgrade or rollback.
     await queryRunner.query(
-      'ALTER TABLE "core"."workspace" DROP COLUMN IF EXISTS "uiTheme"',
+      `ALTER TABLE "core"."workspace" ADD COLUMN IF NOT EXISTS "uiTheme" character varying NOT NULL DEFAULT 'enterprise'`,
     );
   }
 

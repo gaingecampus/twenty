@@ -1,3 +1,4 @@
+import { RestoreWorkspaceUiThemeCompatibilityFastInstanceCommand } from 'src/database/commands/upgrade-version-command/2-30/2-30-instance-command-fast-1807700000000-restore-workspace-ui-theme-compatibility';
 import { DropWorkspaceUiThemeFastInstanceCommand } from 'src/database/commands/upgrade-version-command/2-29/2-29-instance-command-fast-1807600000000-drop-workspace-ui-theme';
 // Auto-edited by generate:instance-command — do not edit manually
 
@@ -96,6 +97,7 @@ import { AddViewFieldGroupIsCollapsedFastInstanceCommand } from 'src/database/co
 import { AddSmsDispatchFastInstanceCommand } from 'src/database/commands/upgrade-version-command/2-28/2-28-instance-command-fast-1792195337774-add-sms-dispatch';
 
 export const INSTANCE_COMMANDS = [
+  RestoreWorkspaceUiThemeCompatibilityFastInstanceCommand,
   DropWorkspaceUiThemeFastInstanceCommand,
   AddMessageSendingStatusFastInstanceCommand,
   AdoptCampaignSchedulingFieldsFastInstanceCommand,
