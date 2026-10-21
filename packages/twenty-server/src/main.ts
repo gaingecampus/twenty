@@ -1,3 +1,4 @@
+import { SystemAlertsService } from 'src/engine/core-modules/admin-panel/system-alerts/system-alerts.service';
 import { NestFactory } from '@nestjs/core';
 import { type NestExpressApplication } from '@nestjs/platform-express';
 
@@ -106,6 +107,7 @@ const bootstrap = async () => {
   generateFrontConfig();
 
   await app.listen(twentyConfigService.get('NODE_PORT'));
+  app.get(SystemAlertsService).start();
 };
 
 void bootstrap();

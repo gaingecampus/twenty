@@ -37,7 +37,10 @@ export class WorkerHealthIndicator {
         });
       }
 
-      return indicator.down(workerStatus.error);
+      return indicator.down({
+        message: workerStatus.error,
+        queues: workerStatus.queues,
+      });
     } catch (error) {
       const errorMessage =
         error.message === HEALTH_ERROR_MESSAGES.WORKER_TIMEOUT
@@ -112,6 +115,26 @@ export class WorkerHealthIndicator {
         };
       }
 
+      const [waiting, active] = await Promise.all([
+        queue.getWaitingCount(),
+        queue.getActiveCount(),
+      ]);
+      // Optional idle queues need no worker, but stranded work must be visible.
+      if (waiting + active > 0) {
+        return {
+          queueName,
+          workers: 0,
+          status: 'down',
+          metrics: {
+            waiting,
+            active,
+            delayed: 0,
+            failed: 0,
+            completed: 0,
+            failureRate: 0,
+          },
+        };
+      }
       return null;
     } catch (error) {
       this.logger.error(
@@ -137,27 +160,37 @@ export class WorkerHealthIndicator {
     const queues = Object.values(MessageQueue);
     const queueStatuses: WorkerQueueHealth[] = [];
 
-    for (const queueName of queues) {
-      try {
-        const queueDetails = await this.getQueueDetails(queueName);
-
-        if (queueDetails) {
-          queueStatuses.push(queueDetails);
-        }
-      } catch (error) {
+    const results = await Promise.allSettled(
+      queues.map((queueName) => this.getQueueDetails(queueName)),
+    );
+    let failedChecks = 0;
+    results.forEach((result, index) => {
+      if (result.status === 'fulfilled') {
+        if (result.value) queueStatuses.push(result.value);
+      } else {
+        failedChecks += 1;
         this.logger.error(
-          `Error checking worker for queue ${queueName}: ${error.message}`,
+          `Error checking worker for queue ${queues[index]}: ${result.reason?.message}`,
         );
       }
-    }
+    });
 
     const hasActiveWorkers = queueStatuses.some((q) => q.workers > 0);
 
     return {
-      status: hasActiveWorkers ? 'up' : 'down',
-      error: hasActiveWorkers
-        ? undefined
-        : HEALTH_ERROR_MESSAGES.NO_ACTIVE_WORKERS,
+      status:
+        hasActiveWorkers &&
+        failedChecks === 0 &&
+        queueStatuses.every((queue) => queue.status === 'up')
+          ? 'up'
+          : 'down',
+      error: !hasActiveWorkers
+        ? HEALTH_ERROR_MESSAGES.NO_ACTIVE_WORKERS
+        : failedChecks > 0
+          ? HEALTH_ERROR_MESSAGES.WORKER_CHECK_FAILED
+          : queueStatuses.some((queue) => queue.status === 'down')
+            ? 'Worker queue failure or unprocessed work detected'
+            : undefined,
       queues: queueStatuses,
     };
   }

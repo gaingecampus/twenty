@@ -1,3 +1,4 @@
+import { SystemAlertsService } from 'src/engine/core-modules/admin-panel/system-alerts/system-alerts.service';
 import { AdminPanelDatabaseStorageService } from 'src/engine/core-modules/admin-panel/services/admin-panel-database-storage.service';
 import { AdminPanelBackupService } from 'src/engine/core-modules/admin-panel/services/admin-panel-backup.service';
 import { Module } from '@nestjs/common';
@@ -90,6 +91,7 @@ import { provideWorkspaceScopedRepository } from 'src/engine/twenty-orm/workspac
   providers: [
     AdminPanelResolver,
     AdminPanelBackupService,
+    SystemAlertsService,
     AdminPanelDatabaseStorageService,
     AdminPanelApplicationRegistrationResolver,
     AdminPanelUserLookupService,
@@ -113,6 +115,7 @@ import { provideWorkspaceScopedRepository } from 'src/engine/twenty-orm/workspac
     provideWorkspaceScopedRepository(BillingCustomerEntity),
   ],
   exports: [
+    SystemAlertsService,
     AdminPanelUserLookupService,
     AdminPanelStatisticsService,
     AdminPanelChatService,

@@ -5,6 +5,7 @@
   "private": true,
   "license": "AGPL-3.0",
   "scripts": {
+    "alerts:monitor": "node --env-file-if-exists=.env scripts/system-alerts/monitor.cjs",
     "nx": "NX_DEFAULT_PROJECT=twenty-server node ../../node_modules/nx/bin/nx.js",
     "start:prod": "node dist/main",
     "command:prod": "node dist/command/command",

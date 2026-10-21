@@ -70,14 +70,16 @@ yarn start
 ```bash
 npx concurrently --kill-others \
   'npx nx run-many -t start -p twenty-server twenty-front' \
-  'npx wait-on tcp:3000 && npx nx run twenty-server:worker'
+  'npx wait-on tcp:3000 && npx nx run twenty-server:worker' \
+  'yarn workspace twenty-server alerts:monitor'
 ```
 
-즉 한 번에 아래 세 가지가 실행됩니다.
+즉 한 번에 아래 네 가지가 실행됩니다.
 
 - `twenty-front`: 프론트 앱
 - `twenty-server`: 백엔드 API 서버
 - `twenty-server:worker`: 백그라운드 큐 워커
+- `twenty-server alerts:monitor`: API와 독립적인 장애 이메일 감시 프로세스
 
 주의할 점은 `yarn start`가 PostgreSQL과 Redis를 직접 띄우지는 않는다는 것입니다. PostgreSQL과 Redis는 setup script 또는 Docker/로컬 서비스로 먼저 준비되어 있어야 합니다.
 
@@ -152,6 +154,7 @@ Docker 소켓을 운영 앱 컨테이너에 연결할 필요는 없습니다.
 표시 여유 공간이 다를 수 있습니다. Docker에서는 컨테이너에서 보이는 실행 경로의
 파일시스템을 측정하며, S3 버킷 사용량이나 별도로 마운트된 업로드 볼륨은 포함하지 않습니다.
 조회 실패 시 용량은 미확인으로 표시하고 API 메모리·CPU 지표는 유지합니다.
+디스크 여유 10% 이하 및 수집 실패는 기존 장애 이메일 알림의 점검 대상입니다.
 
 ## 개별로 실행하고 싶을 때
 
@@ -483,3 +486,44 @@ bash packages/twenty-utils/setup-dev-env.sh
 yarn start
 npx nx command-no-deps twenty-server -- cron:register:all
 ```
+
+## 장애 이메일 알림 (AX-1315)
+
+설정 > 관리자 패널 > 시스템 지표에서 수신자를 최대 20명까지 등록하고 저장합니다.
+감시 프로세스와 SMTP 설정이 준비되면 테스트 메일을 요청한 뒤 알림을 켭니다.
+발송 결과의 **SMTP 접수**는 메일 서버가 접수했다는 뜻이며 최종 수신함 도착을 보장하지는 않습니다.
+이메일 주소는 각각 발송하여 다른 수신자에게 주소 목록을 노출하지 않습니다.
+
+로컬은 `yarn start`에 감시 프로세스가 포함됩니다. 이미 실행 중인 앱에 추가할 때는
+`yarn workspace twenty-server alerts:monitor`를 실행합니다.
+감시 프로세스는 `packages/twenty-server/.env`의 `SYSTEM_ALERT_SMTP_HOST`,
+`SYSTEM_ALERT_SMTP_PORT`(기본 587), `SYSTEM_ALERT_SMTP_USER`,
+`SYSTEM_ALERT_SMTP_PASSWORD`, `SYSTEM_ALERT_FROM_ADDRESS`를 사용합니다.
+로컬에서는 기존 `EMAIL_SMTP_*`, `EMAIL_FROM_ADDRESS` 환경 변수도 대체값으로 사용합니다.
+DB에만 저장한 이메일 설정은 감시 프로세스가 읽지 않습니다. 비밀 값은 Git에 커밋하지 않습니다.
+465 포트는 TLS, 나머지는 STARTTLS 필수이며 인증서 검증을 끄지 않습니다.
+
+운영 Compose에는 같은 이미지의 `system-alert-monitor` 서비스가 추가됩니다.
+API 서비스와 감시 서비스가 `system-alerts` 영속 볼륨을 공유하고 동일한 UID로 실행합니다.
+SMTP 값은 운영 env 파일에 설정한 후 감시 서비스를 재생성합니다.
+감시 서비스는 API의 healthy 상태나 DB·Redis 기동에 의존하지 않으며 Redis 큐로 메일을 보내지 않습니다.
+Docker 이미지 갱신과 Compose 적용이 모두 필요합니다. 설정·발송 이력은 이 볼륨을 보존해야 유지됩니다.
+단일 EC2 배포 기준이며 여러 호스트의 API로 확장할 때는 공유 설정 저장소와 외부 감시로 전환해야 합니다.
+
+API가 1분마다 지표 스냅샷을 기록하고 감시 프로세스가 1분마다 독립 점검합니다.
+연속 2회 이상 감지하면 장애 메일, 연속 2회 정상 확인 후 복구 메일을 보냅니다.
+장애가 지속되는 동안 같은 수신자에게 반복 발송하지 않으며 실패한 수신자는 재시도합니다.
+새 수신자는 진행 중인 장애를 다음 점검에서 통지받습니다.
+SMTP 접수 직후 발송 이력 기록 전에 강제 종료되면 재시도 메일이 중복될 수 있습니다.
+테스트 메일 요청은 1분 간격이며 10분 내에 처리하지 못한 요청은 만료됩니다.
+
+점검 항목: API 준비 상태, PostgreSQL·Redis·워커 상태, DB 연결 사용률 90% 이상,
+DB·서버 실행 디스크 여유 10% 이하, Redis `maxmemory` 대비 사용률 90% 이상,
+API CPU 90% 이상(1코어 기준), DB 볼륨 수집 실패 및 150초 이상 오래된 지표.
+Redis 한도가 0이면 무제한 설정으로 취급하고 비율 경고를 계산하지 않습니다.
+지표가 사라진 것을 복구로 판단하지 않습니다. 선택적 빈 큐는 워커가 없어도 허용하지만,
+대기·실행 중인 작업이 있는데 워커가 없거나 큐 점검에 실패하면 장애로 판단합니다.
+
+API 전체가 멈춰도 감시 컨테이너와 SMTP가 살아 있으면 알림을 보낼 수 있습니다.
+EC2 전체 중단, 호스트 네트워크 장애, SMTP 장애까지 감시하려면 다른 호스트의 외부 모니터링이 필요합니다.
+현재 기능은 그러한 외부 서비스의 설치·알림을 대체하지 않습니다.

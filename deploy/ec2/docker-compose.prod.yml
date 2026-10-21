@@ -30,6 +30,8 @@ services:
       STORAGE_S3_PRESIGNED_URL_ENABLED: ${STORAGE_S3_PRESIGNED_URL_ENABLED:-true}
       STORAGE_S3_PRESIGNED_URL_BASE: ${STORAGE_S3_PRESIGNED_URL_BASE:-}
       STORAGE_S3_PRESIGNED_URL_EXPIRES_IN: ${STORAGE_S3_PRESIGNED_URL_EXPIRES_IN:-900}
+    volumes:
+      - system-alerts:/app/packages/twenty-server/.local-storage/system-alerts
     healthcheck:
       test: curl --fail --max-time 4 http://localhost:3000/healthz/ready
       interval: 5s
@@ -68,3 +70,21 @@ services:
       server:
         condition: service_healthy
     restart: always
+
+  system-alert-monitor:
+    image: ${TWENTY_IMAGE}
+    entrypoint: ['node', 'scripts/system-alerts/monitor.cjs']
+    environment:
+      SYSTEM_ALERT_API_URL: http://server:3000/healthz/ready
+      SERVER_URL: ${SERVER_URL}
+      SYSTEM_ALERT_SMTP_HOST: ${SYSTEM_ALERT_SMTP_HOST:-}
+      SYSTEM_ALERT_SMTP_PORT: ${SYSTEM_ALERT_SMTP_PORT:-587}
+      SYSTEM_ALERT_SMTP_USER: ${SYSTEM_ALERT_SMTP_USER:-}
+      SYSTEM_ALERT_SMTP_PASSWORD: ${SYSTEM_ALERT_SMTP_PASSWORD:-}
+      SYSTEM_ALERT_FROM_ADDRESS: ${SYSTEM_ALERT_FROM_ADDRESS:-}
+    volumes:
+      - system-alerts:/app/packages/twenty-server/.local-storage/system-alerts
+    restart: always
+
+volumes:
+  system-alerts:

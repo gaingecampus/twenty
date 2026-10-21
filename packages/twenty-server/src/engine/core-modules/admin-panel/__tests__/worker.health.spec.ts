@@ -44,7 +44,11 @@ describe('WorkerHealthIndicator', () => {
           worker: { status: 'up', ...data },
         })),
         down: jest.fn().mockImplementation((error) => ({
-          worker: { status: 'down', error },
+          worker: {
+            status: 'down',
+            error: typeof error === 'object' ? error.message : error,
+            ...(typeof error === 'object' ? error : {}),
+          },
         })),
       }),
     } as any;
@@ -133,6 +137,27 @@ describe('WorkerHealthIndicator', () => {
     jest.useRealTimers();
   });
 
+  it('reports stranded work even when other queues have workers', async () => {
+    mockQueueInstance.getWorkers
+      .mockResolvedValue([{ id: 'worker' }])
+      .mockResolvedValueOnce([]);
+    mockQueueInstance.getWaitingCount.mockResolvedValue(3);
+    const result = await service.isHealthy();
+    expect(result.worker.status).toBe('down');
+    expect(
+      result.worker.queues.some(
+        (queue: { workers: number }) => queue.workers === 0,
+      ),
+    ).toBe(true);
+  });
+
+  it('reports incomplete queue checks instead of a healthy aggregate', async () => {
+    mockQueueInstance.getWorkers
+      .mockResolvedValue([{ id: 'worker' }])
+      .mockRejectedValueOnce(new Error('unreachable'));
+    expect((await service.isHealthy()).worker.status).toBe('down');
+  });
+
   it('should check all message queues', async () => {
     mockQueueInstance.getWorkers.mockResolvedValue([{ id: 'worker1' }]);
 
@@ -161,7 +186,7 @@ describe('WorkerHealthIndicator', () => {
 
     const result = await service.isHealthy();
 
-    expect(result.worker.status).toBe('up');
+    expect(result.worker.status).toBe('down');
     expect('queues' in result.worker).toBe(true);
     if ('queues' in result.worker) {
       expect(result.worker.queues[0].status).toBe('down');

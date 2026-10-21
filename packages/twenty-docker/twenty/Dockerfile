@@ -115,6 +115,7 @@ COPY --chown=1000 --from=twenty-server-build /app/node_modules /app/node_modules
 COPY --chown=1000 --from=twenty-server-build /app/packages/twenty-server/package.json /app/packages/twenty-server/
 COPY --chown=1000 --from=twenty-server-build /app/packages/twenty-server/dist /app/packages/twenty-server/dist
 COPY --chown=1000 --from=twenty-server-build /app/packages/twenty-server/patches /app/packages/twenty-server/patches
+COPY --chown=1000 --from=twenty-server-build /app/packages/twenty-server/scripts/system-alerts /app/packages/twenty-server/scripts/system-alerts
 
 # Workspace packages (dist + package.json; node_modules symlinks resolve to these)
 COPY --chown=1000 --from=twenty-server-build /app/packages/twenty-shared/package.json /app/packages/twenty-shared/
@@ -145,8 +146,8 @@ RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx
       /usr/local/include/node && \
     find /app/node_modules -type d -name example -prune -exec rm -rf {} +
 
-RUN mkdir -p /app/.local-storage /app/packages/twenty-server/.local-storage && \
-    chown 1000:1000 /app/.local-storage /app/packages/twenty-server/.local-storage
+RUN mkdir -p /app/.local-storage /app/packages/twenty-server/.local-storage/system-alerts && \
+    chown 1000:1000 /app/.local-storage /app/packages/twenty-server/.local-storage /app/packages/twenty-server/.local-storage/system-alerts
 
 USER 1000
 

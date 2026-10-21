@@ -135,7 +135,7 @@ export class AdminPanelHealthService {
           id: `${indicatorId}-${queue.queueName}`,
           queueName: queue.queueName,
           status:
-            queue.workers > 0
+            queue.workers > 0 && queue.status === 'up'
               ? AdminPanelHealthServiceStatus.OPERATIONAL
               : AdminPanelHealthServiceStatus.OUTAGE,
         })),

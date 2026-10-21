@@ -1,3 +1,8 @@
+import { SystemAlertsService } from 'src/engine/core-modules/admin-panel/system-alerts/system-alerts.service';
+import {
+  SystemAlertSettingsDTO,
+  UpdateSystemAlertSettingsInput,
+} from 'src/engine/core-modules/admin-panel/system-alerts/system-alert-settings.dto';
 import { DatabaseBackupHistoryDTO } from 'src/engine/core-modules/admin-panel/dtos/database-backup-history.dto';
 import { AdminPanelBackupService } from 'src/engine/core-modules/admin-panel/services/admin-panel-backup.service';
 import { UseFilters, UseGuards, UsePipes } from '@nestjs/common';
@@ -119,6 +124,7 @@ import { SetMaintenanceModeInput } from './dtos/set-maintenance-mode.input';
 )
 export class AdminPanelResolver {
   constructor(
+    private readonly systemAlertsService: SystemAlertsService,
     private readonly adminBackupService: AdminPanelBackupService,
     private readonly adminUserLookupService: AdminPanelUserLookupService,
     private readonly adminServerAdminService: AdminPanelServerAdminService,
@@ -148,6 +154,26 @@ export class AdminPanelResolver {
     @InjectMessageQueue(MessageQueue.workspaceQueue)
     private readonly workspaceQueueService: MessageQueueService,
   ) {}
+
+  @UseGuards(AdminPanelGuard, NoImpersonationGuard)
+  @Query(() => SystemAlertSettingsDTO)
+  async systemAlertSettings(): Promise<SystemAlertSettingsDTO> {
+    return this.systemAlertsService.getSettings();
+  }
+
+  @UseGuards(AdminPanelGuard, NoImpersonationGuard)
+  @Mutation(() => SystemAlertSettingsDTO)
+  async updateSystemAlertSettings(
+    @Args('input') input: UpdateSystemAlertSettingsInput,
+  ): Promise<SystemAlertSettingsDTO> {
+    return this.systemAlertsService.updateSettings(input);
+  }
+
+  @UseGuards(AdminPanelGuard, NoImpersonationGuard)
+  @Mutation(() => Boolean)
+  async sendSystemAlertTest(): Promise<boolean> {
+    return this.systemAlertsService.requestTest();
+  }
 
   @UseGuards(AdminPanelGuard, NoImpersonationGuard)
   @Query(() => DatabaseBackupHistoryDTO)
