@@ -28,14 +28,14 @@ import { ThemeContext, themeCssVariables } from 'twenty-ui/theme-constants';
 const StyledFormSelectContainerWrapper = styled.div<{ readonly?: boolean }>`
   cursor: ${({ readonly }) => (readonly ? 'default' : 'pointer')};
   display: flex;
-  height: 32px;
+  height: var(--t-input-height, ${themeCssVariables.spacing[8]});
   min-width: 0;
   width: 100%;
 `;
 
 const StyledIconButton = styled.div`
   display: flex;
-  padding-right: ${themeCssVariables.spacing[2]};
+  padding-right: var(--t-input-padding-x, ${themeCssVariables.spacing[2]});
 `;
 
 const StyledDropdownContainer = styled.div`

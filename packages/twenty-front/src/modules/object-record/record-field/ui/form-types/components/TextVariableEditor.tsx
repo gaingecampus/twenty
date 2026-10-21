@@ -27,6 +27,7 @@ const StyledEditor = styled.div<{
         : themeCssVariables.font.color.primary};
     display: flex;
     font-family: ${themeCssVariables.font.family};
+    font-size: ${themeCssVariables.font.size.md};
     font-weight: ${themeCssVariables.font.weight.regular};
     &::-webkit-scrollbar {
       display: none;
@@ -34,7 +35,8 @@ const StyledEditor = styled.div<{
     height: ${({ multiline }) => (multiline ? 'auto' : '100%')};
     overflow-x: auto;
     overflow-y: hidden;
-    padding: ${themeCssVariables.spacing[1]} ${themeCssVariables.spacing[2]};
+    padding: ${themeCssVariables.spacing[1]}
+      var(--t-input-padding-x, ${themeCssVariables.spacing[2]});
     scrollbar-width: none;
     white-space: ${({ multiline }) => (multiline ? 'pre' : 'nowrap')};
 

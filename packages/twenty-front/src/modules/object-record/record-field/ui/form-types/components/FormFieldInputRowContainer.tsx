@@ -1,4 +1,5 @@
 import { styled } from '@linaria/react';
+import { themeCssVariables } from 'twenty-ui/theme-constants';
 
 export const LINE_HEIGHT = 24;
 
@@ -8,7 +9,10 @@ const StyledFormFieldInputRowContainer = styled.div<{
 }>`
   display: flex;
   flex-direction: row;
-  height: ${({ multiline }) => (multiline ? 'auto' : '32px')};
+  height: ${({ multiline }) =>
+    multiline
+      ? 'auto'
+      : `var(--t-input-height, ${themeCssVariables.spacing[8]})`};
 
   line-height: ${({ multiline }) =>
     multiline ? `${LINE_HEIGHT}px` : 'normal'};
