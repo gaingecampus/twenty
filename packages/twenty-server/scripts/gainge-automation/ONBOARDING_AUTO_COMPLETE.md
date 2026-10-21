@@ -9,7 +9,10 @@
 - `validate_workflow` 오류 0개. 독립 날짜 조회 2개의 이전 단계 변수 미사용 경고만 존재한다.
 - 운영 재실행 #43 (`921bd6ef-a33d-4110-b996-7bf6704b653c`)은 2026-10-21 14:39:07~14:39:18 KST에 `COMPLETED`. 두 조회와 반복 단계가 모두 정상 종료했고, 남은 시작 대상의 상태 변경도 성공했다. 종료 대상이 없어서 종료 변경 단계의 `NOT_STARTED`는 정상이다.
 - 실행 후 시작일·종료일 조건에 해당하는 미처리 계약을 각각 조회하여 0건을 확인했다. Redis 조회 및 새 실행은 정상 동작했으나 인프라 설정을 변경하거나 메모리 원인의 영구 해결을 확인한 것은 아니다.
-- 과거 고아 실행 이력은 별도 정리가 남아 있다. #42와 이전 v2의 5건에 중지를 요청했으며, 현재 이 워크플로의 과거 이력은 RUNNING 14건·STOPPING 7건이다. 추가 중지 요청은 자동 승인 검토에서 명시적 범위 승인이 필요하다고 거부되어 사용자 승인을 기다린다. 새 v3의 완료 검증과 과거 이력 정리를 혼동하지 않는다.
+- 사용자 승인 후 과거 실행 21건(RUNNING 14건·STOPPING 7건)을 2026-10-21 14:48:27 KST에 모두 STOPPED로 정리했다. 운영 CRM 재조회에서 STOPPED 21건, RUNNING 0건, STOPPING 0건을 확인했다. 성공한 단계 출력과 계약 데이터는 변경하지 않았으며, 실행 이력은 삭제하지 않았다.
+- 정리 도구: `stop-approved-onboarding-runs.cjs`. 승인된 ID 21개·워크플로·버전·과거 시작 시각을 고정 검증하고, 실행 중인 비반복 단계가 있으면 전체 트랜잭션을 중단한다. 새 실행은 대상에 포함하지 않는다. 기존 운영 유지보수 GitHub Actions의 onboarding-plan/apply/verify로 실행한다.
+- 검증: 정리 도구 단위 테스트 3개, JS/YAML/셸 구문 검사 통과. 서버 lint:diff-with-main은 변경 밖 기존 오류 5개·경고 1개, typecheck는 기존 TypeScript 오류 58개로 실패했다. 이번 변경은 운영 정리용 CJS와 Actions이며 서버 TypeScript를 수정하지 않았다.
+- 운영 실행 기록: [사전 검증](https://github.com/gaingecampus/twenty/actions/runs/39551530639), [적용](https://github.com/gaingecampus/twenty/actions/runs/39551612471), [사후 검증](https://github.com/gaingecampus/twenty/actions/runs/39551672688).
 
 ## 이전 기록: 2026-10-21 수정 초안 — 당시 활성화 보류 (AX-1310)
 
