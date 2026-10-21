@@ -242,6 +242,9 @@ const StyledNavigationDrawerItemContainer = styled.div`
 `;
 
 const StyledBadge = styled.span<{ hideOnCompact: boolean }>`
+  --t-background-transparent-light: var(--t-tag-background-orange);
+  --t-font-color-light: var(--t-tag-text-orange);
+
   display: inline-flex;
   flex-shrink: 0;
   white-space: nowrap;
