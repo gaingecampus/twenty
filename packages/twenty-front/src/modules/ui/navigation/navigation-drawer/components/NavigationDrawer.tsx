@@ -70,10 +70,7 @@ const StyledContainer = styled.div<{
   gap: var(--t-nav-drawer-gap, ${themeCssVariables.spacing[3]});
   height: 100%;
   padding: var(--t-nav-drawer-padding, ${themeCssVariables.spacing[2]})
-    var(
-      --t-nav-drawer-padding-right,
-      var(--t-nav-drawer-padding-x, 0)
-    )
+    var(--t-nav-drawer-padding-right, var(--t-nav-drawer-padding-x, 0))
     ${themeCssVariables.spacing[4]}
     var(
       --t-nav-drawer-padding-x,
@@ -99,8 +96,9 @@ export const NavigationDrawer = ({
   const isSettingsDrawer = useIsSettingsDrawer();
   const isExpanded = useNavigationDrawerExpanded();
 
-  const [isNavigationDrawerExpanded, setIsNavigationDrawerExpanded] =
-    useAtomState(isNavigationDrawerExpandedState);
+  const setIsNavigationDrawerExpanded = useSetAtomState(
+    isNavigationDrawerExpandedState,
+  );
   const [navigationDrawerWidth, setNavigationDrawerWidth] = useAtomState(
     navigationDrawerWidthState,
   );
@@ -112,6 +110,9 @@ export const NavigationDrawer = ({
   );
 
   const handleCollapse = () => {
+    // Settings stays expanded on desktop; an edge click must not change main navigation.
+    if (isSettingsDrawer) return;
+
     setIsNavigationDrawerExpanded(false);
     setNavigationDrawerActiveTab(NAVIGATION_DRAWER_TABS.NAVIGATION_MENU);
     setIsResizing(false);
@@ -148,7 +149,7 @@ export const NavigationDrawer = ({
           {children}
         </StyledContainer>
 
-        {isNavigationDrawerExpanded && !isMobile && !isSettingsDrawer && (
+        {isExpanded && !isMobile && (
           <ResizablePanelEdge
             side="right"
             constraints={NAVIGATION_DRAWER_CONSTRAINTS}
