@@ -3125,7 +3125,7 @@ msgstr "이전"
 #: src/modules/settings/admin-panel/health-status/components/SettingsAdminWorkspacesStatusSummaryCard.tsx
 #: src/modules/settings/admin-panel/utils/getUpgradeHealthStatusBadge.ts
 msgid "Behind"
-msgstr "뒤에"
+msgstr "업데이트 필요"
 
 #. js-lingui-id: KYr9vA
 #: src/pages/settings/ai/components/SettingsAiModelsTab.tsx
@@ -9643,7 +9643,7 @@ msgstr "색인"
 #: src/pages/settings/admin-panel/SettingsAdminInferredVersion.tsx
 #: src/pages/settings/admin-panel/SettingsAdminInferredVersion.tsx
 msgid "Inferred version"
-msgstr "추론된 버전"
+msgstr "추정 버전"
 
 #. js-lingui-id: CE+M2e
 #: src/modules/ui/feedback/snack-bar-manager/components/SnackBar.tsx
