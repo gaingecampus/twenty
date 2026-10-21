@@ -1,3 +1,8 @@
+import {
+  AnimatedPlaceholder,
+  AnimatedPlaceholderEmptyTitle,
+  AnimatedPlaceholderEmptyTextContainer,
+} from 'twenty-ui/feedback';
 import { PersonalDashboardGrowth } from '@/personal-dashboard/components/PersonalDashboardGrowth';
 import { type EnrichedObjectMetadataItem } from '@/object-metadata/types/EnrichedObjectMetadataItem';
 import { RecordChip } from '@/object-record/components/RecordChip';
@@ -21,9 +26,9 @@ const StyledIllustratedHeader = styled.div`
 `;
 const StyledIllustration = styled.img`
   flex-shrink: 0;
-  height: 72px;
+  height: 40px;
   object-fit: contain;
-  width: 72px;
+  width: 40px;
 `;
 const StyledHeadingCopy = styled.div`
   display: flex;
@@ -32,11 +37,17 @@ const StyledHeadingCopy = styled.div`
   min-width: 0;
 `;
 
+const StyledEmpty = styled.div`
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: ${themeCssVariables.spacing[4]};
+  padding: ${themeCssVariables.spacing[6]} ${themeCssVariables.spacing[2]};
+  text-align: center;
+`;
 const StyledRows = styled.ul`
   list-style: none;
   margin: 0;
-  max-height: 280px;
-  overflow: auto;
   padding: 0;
 `;
 const StyledRow = styled.li`
@@ -88,7 +99,9 @@ export const PersonalDashboardList = ({
         )}
         <StyledHeadingCopy>
           <StyledDashboardSectionTitle>{title}</StyledDashboardSectionTitle>
-          <StyledDashboardMuted>{description}</StyledDashboardMuted>
+          {description && (
+            <StyledDashboardMuted>{description}</StyledDashboardMuted>
+          )}
         </StyledHeadingCopy>
       </StyledIllustratedHeader>
     </StyledDashboardSectionHeader>
@@ -159,7 +172,7 @@ const PersonalDashboardRecords = ({
   });
   return (
     <>
-      {!error && (
+      {!error && (loading || records.length > 0) && (
         <StyledDashboardMuted>
           {loading ? '불러오는 중…' : `전체 ${totalCount ?? records.length}건`}
         </StyledDashboardMuted>
@@ -186,6 +199,11 @@ const PersonalDashboardRecords = ({
               />
               {typeof record[dateField] === 'string' && (
                 <StyledDashboardMuted>
+                  {dateField === 'dueAt'
+                    ? '마감일 · '
+                    : dateField === 'visitDate'
+                      ? '현장 날짜 · '
+                      : '등록일 · '}
                   {new Date(record[dateField]).toLocaleDateString('ko-KR', {
                     timeZone: 'Asia/Seoul',
                   })}
@@ -196,11 +214,18 @@ const PersonalDashboardRecords = ({
         </StyledRows>
       )}
       {!loading && !error && records.length === 0 && (
-        <StyledDashboardMuted>
-          {metadata.nameSingular === 'task'
-            ? '남은 할 일이 없어요! 잠시 숨을 돌려도 좋아요.'
-            : '아직 기록이 없어요. 첫 활동을 기다리고 있어요.'}
-        </StyledDashboardMuted>
+        <StyledEmpty>
+          <AnimatedPlaceholder
+            type={metadata.nameSingular === 'task' ? 'noTask' : 'noRecord'}
+          />
+          <AnimatedPlaceholderEmptyTextContainer role="status">
+            <AnimatedPlaceholderEmptyTitle>
+              {metadata.nameSingular === 'task'
+                ? '남은 할 일이 없어요'
+                : '아직 기록이 없어요'}
+            </AnimatedPlaceholderEmptyTitle>
+          </AnimatedPlaceholderEmptyTextContainer>
+        </StyledEmpty>
       )}
       {hasNextPage && !error && (
         <Button

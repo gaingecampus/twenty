@@ -59,9 +59,7 @@ it('preserves the signed-in owner filter and bounds the initial query', () => {
       orderBy: [{ dueAt: 'AscNullsLast' }],
     }),
   );
-  expect(
-    screen.getByText('남은 할 일이 없어요! 잠시 숨을 돌려도 좋아요.'),
-  ).toBeInTheDocument();
+  expect(screen.getByText('남은 할 일이 없어요')).toBeInTheDocument();
 });
 it('shows request errors instead of an empty result', () => {
   mockFind.mockReturnValue({
@@ -78,7 +76,5 @@ it('shows request errors instead of an empty result', () => {
     />,
   );
   expect(screen.getByRole('alert')).toHaveTextContent('불러오지 못했습니다');
-  expect(
-    screen.queryByText('남은 할 일이 없어요! 잠시 숨을 돌려도 좋아요.'),
-  ).not.toBeInTheDocument();
+  expect(screen.queryByText('남은 할 일이 없어요')).not.toBeInTheDocument();
 });

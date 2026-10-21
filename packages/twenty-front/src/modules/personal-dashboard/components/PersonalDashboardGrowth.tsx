@@ -84,16 +84,12 @@ export const PersonalDashboardGrowth = ({
     typeof previousCount === 'number';
   return (
     <StyledComparison aria-label={`${label} 지난달 대비`}>
-      <StyledDashboardMuted>{label}</StyledDashboardMuted>
       {ready ? (
         <StyledNumbers>
           <StyledBadge>
             지난달 대비{' '}
             {formatPersonalDashboardGrowth(currentCount, previousCount)}
           </StyledBadge>
-          <span>
-            이번 달 {currentCount}건 · 지난달 {previousCount}건
-          </span>
         </StyledNumbers>
       ) : (
         <StyledDashboardMuted role="status">
@@ -111,7 +107,7 @@ export const PersonalDashboardGrowth = ({
       </span>
       <AppTooltip
         anchorSelect={`[data-personal-growth-info="${tooltipId}"]`}
-        content={`${label}: 이번 달 ${range.currentStart}~${range.currentEnd}, 지난달 ${range.previousStart}~${range.previousEnd} (한국 시간). 현재 담당 기준이며 (이번 달−지난달)÷지난달×100으로 계산합니다. 지난달 0건이면 신규 발생으로 표시합니다.`}
+        content={`${ready ? `이번 달 ${currentCount}건 · 지난달 ${previousCount}건. ` : ''}${label}: 이번 달 ${range.currentStart}~${range.currentEnd}, 지난달 ${range.previousStart}~${range.previousEnd} (한국 시간). 현재 담당 기준이며 (이번 달−지난달)÷지난달×100으로 계산합니다. 지난달 0건이면 신규 발생으로 표시합니다.`}
       />
     </StyledComparison>
   );

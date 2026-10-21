@@ -1,4 +1,5 @@
-import { PersonalDashboardToday } from '@/personal-dashboard/components/PersonalDashboardToday';
+import { Avatar } from 'twenty-ui/data-display';
+import { getAbsoluteImageUrl } from '~/utils/image/getAbsoluteImageUrl';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 import {
   currentWorkspaceMemberState,
@@ -24,13 +25,20 @@ import {
   StyledDashboardMuted,
 } from '@/ui/layout/dashboard/components/dashboardStyled';
 import { SidePanelToggleButton } from '@/side-panel/components/SidePanelToggleButton';
-import { IconUser } from 'twenty-ui/icon';
+import { IconUser, IconUsers, IconFileText, IconNotes } from 'twenty-ui/icon';
 import { styled } from '@linaria/react';
 import { type EnrichedObjectMetadataItem } from '@/object-metadata/types/EnrichedObjectMetadataItem';
 
+const StyledPersonalScroll = styled(StyledDashboardScroll)`
+  section {
+    border: 1px solid ${themeCssVariables.border.color.light};
+    border-radius: ${themeCssVariables.border.radius.md};
+  }
+`;
 const StyledGrid = styled.div`
+  align-items: start;
   display: grid;
-  gap: 16px;
+  gap: ${themeCssVariables.spacing[4]};
   grid-template-columns: repeat(2, minmax(0, 1fr));
   > section {
     min-width: 0;
@@ -39,29 +47,54 @@ const StyledGrid = styled.div`
     grid-template-columns: minmax(0, 1fr);
   }
 `;
+const StyledWelcome = styled.div`
+  align-items: center;
+  display: flex;
+  gap: ${themeCssVariables.spacing[4]};
+  min-width: 0;
+  @container (max-width: 360px) {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  > div:last-child {
+    display: flex;
+    flex-direction: column;
+    gap: ${themeCssVariables.spacing[2]};
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+`;
 const StyledShortcuts = styled.nav`
   display: grid;
   gap: ${themeCssVariables.spacing[3]};
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: ${themeCssVariables.spacing[4]};
+  @container (max-width: 560px) {
+    grid-template-columns: minmax(0, 1fr);
+  }
 `;
 const StyledShortcut = styled.a`
   align-items: center;
-  background: ${themeCssVariables.background.primary};
-  border-radius: ${themeCssVariables.border.radius.xl};
+  background: ${themeCssVariables.background.secondary};
+  border: 1px solid ${themeCssVariables.border.color.light};
+  border-radius: ${themeCssVariables.border.radius.sm};
   color: ${themeCssVariables.font.color.primary};
   display: flex;
-  flex-direction: column;
   gap: ${themeCssVariables.spacing[2]};
-  padding: ${themeCssVariables.spacing[4]} ${themeCssVariables.spacing[2]};
+  justify-content: flex-start;
+  padding: ${themeCssVariables.spacing[3]};
   text-decoration: none;
   &:hover,
   &:focus-visible {
     background: ${themeCssVariables.background.tertiary};
   }
-  img {
-    height: 64px;
-    object-fit: contain;
-    width: 64px;
+  @container (max-width: 360px) {
+    flex-direction: column;
+    text-align: center;
+  }
+  strong {
+    display: block;
+    font-weight: ${themeCssVariables.font.weight.semiBold};
   }
 `;
 export const PersonalDashboardPage = () => {
@@ -76,80 +109,86 @@ export const PersonalDashboardPage = () => {
       nameSingular,
     });
   const member = resolve('teamMember');
+  const displayName = account
+    ? [account.name.firstName, account.name.lastName].filter(Boolean).join(' ')
+    : '';
+  const dashboardTitle = `${displayName.trim() || '내'} 대시보드`;
+  const todayLabel = new Intl.DateTimeFormat('ko-KR', {
+    month: 'long',
+    day: 'numeric',
+    weekday: 'long',
+    timeZone: 'Asia/Seoul',
+  }).format(new Date());
   return (
     <PageContainer>
-      <PageTitle title="개인 대시보드" />
+      <PageTitle title={dashboardTitle} />
       <PageCardLayout
         header={
           <PageCardHeader
-            title="개인 대시보드"
+            title={dashboardTitle}
             icon={<IconUser size={24} />}
             actionButton={<SidePanelToggleButton />}
           />
         }
       >
-        <StyledDashboardScroll>
+        <StyledPersonalScroll>
           <StyledDashboardSection>
-            <StyledDashboardSectionTitle>
-              {account
-                ? `${account.name.firstName} ${account.name.lastName}`.trim()
-                : ''}
-              님, 오늘도 반가워요 👋
-            </StyledDashboardSectionTitle>
-            <StyledDashboardMuted>
-              오늘 챙길 일부터 하나씩, 함께 시작해요.
-            </StyledDashboardMuted>
+            <StyledWelcome>
+              <Avatar
+                avatarUrl={getAbsoluteImageUrl(account?.avatarUrl)}
+                placeholder={displayName || '내 프로필'}
+                placeholderColorSeed={account?.id}
+                type="rounded"
+                size="lg"
+              />
+              <div>
+                <StyledDashboardMuted>
+                  {todayLabel} · 나의 업무
+                </StyledDashboardMuted>
+                <StyledDashboardSectionTitle>
+                  {displayName
+                    ? `${displayName}님, 오늘도 반가워요`
+                    : '오늘도 반가워요'}
+                </StyledDashboardSectionTitle>
+              </div>
+            </StyledWelcome>
+            {account && (
+              <StyledShortcuts aria-label="내 업무 바로가기">
+                {[
+                  { id: 'person', label: '담당 고객', Icon: IconUsers },
+                  {
+                    id: 'onboarding',
+                    label: '계약',
+                    Icon: IconFileText,
+                  },
+                  { id: 'fieldVisit', label: '현장 기록', Icon: IconNotes },
+                ]
+                  .filter(({ id }) => !!resolve(id))
+                  .map(({ id, label, Icon }) => (
+                    <StyledShortcut key={id} href={`#personal-${id}`}>
+                      <Icon size={18} aria-hidden />
+                      <span>{label}</span>
+                    </StyledShortcut>
+                  ))}
+              </StyledShortcuts>
+            )}
           </StyledDashboardSection>
           {account ? (
             <>
-              <StyledShortcuts aria-label="내 업무 바로가기">
-                {[
-                  ['task', '내 할 일', 'personal-tasks.png'],
-                  ['person', '담당 고객', 'customer-book.png'],
-                  ['onboarding', '계약', 'personal-contracts.png'],
-                  ['fieldVisit', '현장 기록', 'personal-visits.png'],
-                ].map(([id, label, image]) => (
-                  <StyledShortcut key={id} href={`#personal-${id}`}>
-                    <img
-                      src={`/images/gainge/${image}`}
-                      alt=""
-                      width={64}
-                      height={64}
-                    />
-                    <span>{label}</span>
-                  </StyledShortcut>
-                ))}
-              </StyledShortcuts>
-              {hasStatusBoardField(resolve('task'), 'assignee') &&
-                hasStatusBoardField(resolve('task'), 'status') &&
-                hasStatusBoardField(resolve('task'), 'dueAt') && (
-                  <PersonalDashboardToday accountId={account.id} />
-                )}
               <PersonalDashboardList
-                title="내 할 일"
-                growth={{
-                  label: '새로 등록한 내 할 일',
-                  dateField: 'createdAt',
-                  filter: { assigneeId: { eq: account.id } },
-                }}
-                imageSrc="/images/gainge/personal-tasks.png"
-                description="완료하지 않은 할 일 · 마감일순"
-                metadata={resolve('task')}
-                dateField="dueAt"
+                title="최근 현장 기록"
+                growth={{ label: '작성한 현장 기록', dateField: 'createdAt' }}
+                description=""
+                metadata={resolve('fieldVisit')}
+                dateField="visitDate"
                 filter={
-                  hasStatusBoardField(resolve('task'), 'assignee') &&
-                  hasStatusBoardField(resolve('task'), 'status')
-                    ? {
-                        and: [
-                          { assigneeId: { eq: account.id } },
-                          { status: { neq: 'DONE' } },
-                        ],
-                      }
+                  hasStatusBoardField(resolve('fieldVisit'), 'createdBy')
+                    ? { createdBy: { workspaceMemberId: { eq: account.id } } }
                     : undefined
                 }
               />
               <StyledDashboardSectionTitle>
-                이번 달 내 활동
+                내 담당 현황
               </StyledDashboardSectionTitle>
               <StyledGrid>
                 {member &&
@@ -178,26 +217,13 @@ export const PersonalDashboardPage = () => {
                   </StyledDashboardSection>
                 )}
               </StyledGrid>
-              <PersonalDashboardList
-                title="최근 현장 기록"
-                growth={{ label: '작성한 현장 기록', dateField: 'createdAt' }}
-                imageSrc="/images/gainge/personal-visits.png"
-                description="내가 작성한 기록 · 현장 날짜순"
-                metadata={resolve('fieldVisit')}
-                dateField="visitDate"
-                filter={
-                  hasStatusBoardField(resolve('fieldVisit'), 'createdBy')
-                    ? { createdBy: { workspaceMemberId: { eq: account.id } } }
-                    : undefined
-                }
-              />
             </>
           ) : (
             <StyledDashboardMuted role="status">
               로그인 계정을 확인하는 중입니다.
             </StyledDashboardMuted>
           )}
-        </StyledDashboardScroll>
+        </StyledPersonalScroll>
       </PageCardLayout>
     </PageContainer>
   );
@@ -237,8 +263,7 @@ const PersonalAssignedSections = ({
       <PersonalDashboardList
         title="담당 고객"
         growth={{ label: '신규 등록된 담당 고객', dateField: 'createdAt' }}
-        imageSrc="/images/gainge/customer-book.png"
-        description="내가 담당하는 고객 · 최근 등록순"
+        description=""
         metadata={person}
         unavailable={unavailable}
         filter={
@@ -269,8 +294,7 @@ const PersonalAssignedSections = ({
               }) ?? { id: { is: 'NULL' } })
             : undefined,
         }}
-        imageSrc="/images/gainge/personal-contracts.png"
-        description="리드·실행 담당 계약 · 최근 등록순"
+        description=""
         metadata={onboarding}
         unavailable={unavailable}
         filter={
