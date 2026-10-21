@@ -20,6 +20,13 @@ import { GET_ADMIN_WORKSPACE_CHAT_THREADS } from '@/settings/admin-panel/graphql
 import { WORKSPACE_LOOKUP_ADMIN_PANEL } from '@/settings/admin-panel/graphql/queries/workspaceLookupAdminPanel';
 import { useAdminUpdateFeatureFlag } from '@/settings/admin-panel/hooks/useAdminUpdateFeatureFlag';
 import { useHandleImpersonate } from '@/settings/admin-panel/hooks/useHandleImpersonate';
+import { getAdminFeatureFlagMetadata } from '@/settings/admin-panel/utils/getAdminFeatureFlagMetadata';
+import {
+  StyledSettingsCardDescription,
+  StyledSettingsCardTextContainer,
+  StyledSettingsCardThirdLine,
+  StyledSettingsCardTitle,
+} from '@/settings/components/SettingsOptions/SettingsCardContentBase';
 import { SettingsPageContainer } from '@/settings/components/SettingsPageContainer';
 import { SettingsSkeletonLoader } from '@/settings/components/SettingsSkeletonLoader';
 import { useSnackBar } from '@/ui/feedback/snack-bar-manager/hooks/useSnackBar';
@@ -70,6 +77,26 @@ const WORKSPACE_DETAIL_TAB_IDS = {
 const StyledMemberNameCell = styled(TableCell)`
   --t-avatar-font-size-md: 11px;
   --t-avatar-size-md: 24px;
+`;
+
+const StyledFeatureFlagTableBody = styled(TableBody)`
+  gap: ${themeCssVariables.spacing[4]};
+`;
+
+const StyledFeatureFlagDetails = styled(StyledSettingsCardTextContainer)`
+  display: flex;
+  flex-direction: column;
+  gap: ${themeCssVariables.spacing[1]};
+  overflow-wrap: anywhere;
+  word-break: keep-all;
+`;
+
+const StyledFeatureFlagTitle = styled(StyledSettingsCardTitle)`
+  margin: 0;
+`;
+
+const StyledFeatureFlagKey = styled(StyledSettingsCardThirdLine)`
+  margin: 0;
 `;
 
 export const SettingsAdminWorkspaceDetail = () => {
@@ -339,15 +366,16 @@ export const SettingsAdminWorkspaceDetail = () => {
                 description={t`Manage feature flags for this workspace`}
               />
               <Table>
-                <TableBody>
+                <StyledFeatureFlagTableBody>
                   <TableRow
-                    gridAutoColumns="1fr 100px"
-                    mobileGridAutoColumns="1fr 80px"
+                    gridAutoColumns="minmax(0, 1fr) 100px"
+                    mobileGridAutoColumns="minmax(0, 1fr) 80px"
                   >
                     <TableHeader>{t`Feature Flag`}</TableHeader>
                     <TableHeader align="right">{t`Status`}</TableHeader>
                   </TableRow>
                   {workspace.featureFlags?.map((flag) => {
+                    const metadata = getAdminFeatureFlagMetadata(flag.key);
                     const currentWorkspaceValue =
                       currentWorkspace?.id === workspaceId
                         ? currentWorkspace?.featureFlags?.find(
@@ -357,14 +385,27 @@ export const SettingsAdminWorkspaceDetail = () => {
                     const displayedValue = currentWorkspaceValue ?? flag.value;
                     return (
                       <TableRow
-                        gridAutoColumns="1fr 100px"
-                        mobileGridAutoColumns="1fr 80px"
+                        gridAutoColumns="minmax(0, 1fr) 100px"
+                        mobileGridAutoColumns="minmax(0, 1fr) 80px"
                         key={flag.key}
                       >
-                        <TableCell>{flag.key}</TableCell>
-                        <TableCell align="right">
+                        <TableCell height="auto" minWidth="0">
+                          <StyledFeatureFlagDetails>
+                            <StyledFeatureFlagTitle>
+                              {metadata.label}
+                            </StyledFeatureFlagTitle>
+                            <StyledSettingsCardDescription>
+                              {metadata.description}
+                            </StyledSettingsCardDescription>
+                            <StyledFeatureFlagKey>
+                              {flag.key}
+                            </StyledFeatureFlagKey>
+                          </StyledFeatureFlagDetails>
+                        </TableCell>
+                        <TableCell align="right" height="auto">
                           {isDefined(flag.key) && (
                             <Toggle
+                              aria-label={metadata.label}
                               value={displayedValue}
                               onChange={(newValue) =>
                                 handleFeatureFlagUpdate(flag.key!, newValue)
@@ -375,7 +416,7 @@ export const SettingsAdminWorkspaceDetail = () => {
                       </TableRow>
                     );
                   })}
-                </TableBody>
+                </StyledFeatureFlagTableBody>
               </Table>
             </Section>
           )}
