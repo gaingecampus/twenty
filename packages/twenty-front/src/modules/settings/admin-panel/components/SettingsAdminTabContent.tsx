@@ -6,6 +6,7 @@ import { SettingsAdminConfigVariables } from '@/settings/admin-panel/config-vari
 import { SETTINGS_ADMIN_TABS } from '@/settings/admin-panel/constants/SettingsAdminTabs';
 import { SETTINGS_ADMIN_TABS_ID } from '@/settings/admin-panel/constants/SettingsAdminTabsId';
 import { SettingsAdminHealthStatus } from '@/settings/admin-panel/health-status/components/SettingsAdminHealthStatus';
+import { SettingsAdminSystemMetrics } from '@/settings/admin-panel/health-status/components/SettingsAdminSystemMetrics';
 import { activeTabIdComponentState } from '@/ui/layout/tab-list/states/activeTabIdComponentState';
 import { useAtomComponentStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomComponentStateValue';
 
@@ -16,6 +17,8 @@ export const SettingsAdminTabContent = () => {
   );
 
   switch (activeTabId) {
+    case SETTINGS_ADMIN_TABS.SYSTEM_METRICS:
+      return <SettingsAdminSystemMetrics />;
     case SETTINGS_ADMIN_TABS.AUTOMATIONS:
       return <SettingsAdminAutomations />;
     case SETTINGS_ADMIN_TABS.GENERAL:

@@ -51,6 +51,12 @@ export const SettingsAdminContent = () => {
       disabled: !canAccessFullAdminPanel,
     },
     {
+      id: SETTINGS_ADMIN_TABS.SYSTEM_METRICS,
+      title: t`시스템 지표`,
+      Icon: IconHeart,
+      disabled: !canAccessFullAdminPanel,
+    },
+    {
       id: SETTINGS_ADMIN_TABS.AUTOMATIONS,
       title: t`자동화·배치`,
       Icon: IconClock,
