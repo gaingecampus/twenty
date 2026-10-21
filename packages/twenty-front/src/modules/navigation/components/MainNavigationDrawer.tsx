@@ -1,3 +1,4 @@
+import { NavigationDrawerProfile } from '@/navigation/components/NavigationDrawerProfile';
 import { currentWorkspaceState } from '@/auth/states/currentWorkspaceState';
 import { MainNavigationDrawerNavigationContent } from '@/navigation/components/MainNavigationDrawerNavigationContent';
 import { MainNavigationDrawerChrome } from '@/navigation/components/MainNavigationDrawerChrome';
@@ -38,6 +39,9 @@ export const MainNavigationDrawer = ({ className }: { className?: string }) => {
           navigationContent={<MainNavigationDrawerNavigationContent />}
         />
       </NavigationDrawerScrollableContent>
+      <NavigationDrawerFixedContent>
+        <NavigationDrawerProfile />
+      </NavigationDrawerFixedContent>
     </NavigationDrawer>
   );
 };
