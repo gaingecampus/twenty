@@ -29,12 +29,17 @@ const StyledTitle = styled.div`
   padding: 0 ${themeCssVariables.spacing[2]};
 `;
 
-const StyledSuggestedPromptButtonContainer = styled.div`
-  align-self: flex-start;
+const StyledPrompts = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: ${themeCssVariables.spacing[2]};
 `;
 
-const pickRandom = <T,>(items: T[]): T =>
-  items[Math.floor(Math.random() * items.length)];
+const StyledHint = styled.div`
+  color: ${themeCssVariables.font.color.secondary};
+  font-size: ${themeCssVariables.font.size.sm};
+  padding: 0 ${themeCssVariables.spacing[2]};
+`;
 
 type AiChatSuggestedPromptsProps = {
   editor: Editor | null;
@@ -47,8 +52,7 @@ export const AiChatSuggestedPrompts = ({
   const setAgentChatInput = useSetAtomState(agentChatInputState);
 
   const handleClick = (prompt: SuggestedPrompt) => {
-    const picked = pickRandom(prompt.prefillPrompts);
-    const text = resolveMessage(picked);
+    const text = resolveMessage(prompt.prefillPrompt);
 
     setAgentChatInput(text);
     editor?.commands.setContent({
@@ -60,17 +64,19 @@ export const AiChatSuggestedPrompts = ({
 
   return (
     <StyledContainer>
-      <StyledTitle>{t`What can I help you with?`}</StyledTitle>
-      {DEFAULT_SUGGESTED_PROMPTS.map((prompt) => (
-        <StyledSuggestedPromptButtonContainer key={prompt.id}>
+      <StyledTitle>{t`CRM 업무, 빠르게 시작하기`}</StyledTitle>
+      <StyledHint>{t`선택한 내용을 수정한 뒤 보내세요.`}</StyledHint>
+      <StyledPrompts>
+        {DEFAULT_SUGGESTED_PROMPTS.map((prompt) => (
           <LightButton
+            key={prompt.id}
             Icon={prompt.Icon}
             title={resolveMessage(prompt.label)}
             accent="secondary"
             onClick={() => handleClick(prompt)}
           />
-        </StyledSuggestedPromptButtonContainer>
-      ))}
+        ))}
+      </StyledPrompts>
     </StyledContainer>
   );
 };
