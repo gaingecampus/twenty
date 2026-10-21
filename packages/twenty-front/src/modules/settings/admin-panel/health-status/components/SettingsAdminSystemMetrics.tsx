@@ -1,3 +1,4 @@
+import { SettingsAdminSystemAlerts } from '@/settings/admin-panel/health-status/components/SettingsAdminSystemAlerts';
 import { currentUserState } from '@/auth/states/currentUserState';
 import { useIndicatorMetrics } from '@/settings/admin-panel/health-status/hooks/useIndicatorMetrics';
 import {
@@ -229,6 +230,7 @@ export const SettingsAdminSystemMetrics = () => {
 
   return (
     <StyledContainer>
+      <SettingsAdminSystemAlerts />
       <StyledDashboardSectionHeader>
         <StyledDashboardMuted>
           {polling
