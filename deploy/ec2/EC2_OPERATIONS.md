@@ -28,6 +28,48 @@ cd /opt/twenty/deploy/ec2
 
 ## 자동 배포 실패 시 복구 파일
 
+### ECR manifest 조회 403 (AX-1317)
+
+`docker push`가 `HEAD .../manifests/sha256:...: 403 Forbidden`으로 실패하면
+GitHub Environment `AWS_ROLE_ARN` 역할의 ECR 권한을 확인합니다.
+이미지 업로드에도 manifest 확인용 `ecr:BatchGetImage`가 필요합니다.
+권한은 해당 ECR repository ARN으로 제한합니다.
+공식 기준: [AWS ECR 이미지 push 권한](https://docs.aws.amazon.com/AmazonECR/latest/userguide/image-push-iam.html).
+
+CloudFormation 템플릿의 `GitHubActionsRole` → `BuildAndDeploy`에 이 권한이
+포함되어 있습니다. 앱 코드 push만으로 기존 IAM 역할이 바뀌지는 않습니다.
+관리자 권한으로 CloudFormation 변경 집합을 검토해 역할에 반영하거나,
+긴급 복구 시 기존 정책을 교체하지 않고 다음 추가 인라인 정책을 연결합니다.
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "ecr:BatchGetImage",
+      "Resource": "arn:aws:ecr:REGION:ACCOUNT_ID:repository/REPOSITORY_NAME"
+    }
+  ]
+}
+```
+
+위 placeholder를 실제 GitHub Environment 대상 값으로 바꿔
+`ecr-manifest-read.json`으로 저장한 뒤 관리자 세션에서 실행합니다.
+
+```bash
+aws iam put-role-policy \
+  --role-name <AWS_ROLE_ARN의-역할-이름> \
+  --policy-name EcrManifestRead \
+  --policy-document file://ecr-manifest-read.json
+```
+
+권한 반영 후 실패한 `Deploy EC2` 작업을 재실행하고 ECR push, EC2 배포,
+`/healthz/ready`를 확인합니다. 나중에 CloudFormation의 `BuildAndDeploy` 정책에
+동일한 권한이 반영되었음을 확인한 후 임시 `EcrManifestRead` 정책을 제거합니다.
+
+### EC2 배포 복구 파일
+
 새 자동 배포는 `releases/<run-id>-<attempt>` 안에서 `deploy-release.sh`를 실행합니다. 각 릴리스의 `previous.env`, `previous-compose.yml`과 `twenty-rollback:<run-id>-<attempt>` 이미지가 복구용입니다. 이 env 파일에는 비밀값이 있으므로 내용을 로그나 채팅에 출력하지 마세요.
 
 Redis 사전 점검 또는 upgrade 실패는 서버 교체 전에 중단합니다. 서버 교체 후 실패는 이전 릴리스 복구를 시도합니다. `ROLLBACK FAILED`가 나오면 해당 릴리스 경로의 파일로 직접 복구 상태를 확인해야 합니다. DB 변경은 되돌리지 않으므로 [호환성 기준](DEPLOYMENT_AND_APIS.md#실패-격리와-호환성-ax-1311)을 함께 확인하세요.
