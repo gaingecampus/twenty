@@ -3,7 +3,8 @@ import { RecordChip } from '@/object-record/components/RecordChip';
 import { EmailDisplay } from '@/ui/field/display/components/EmailDisplay';
 import { MessageListAddCustomersModal } from '@/activities/emails/components/message-lists/MessageListAddCustomersModal';
 import { useDeleteOneRecord } from '@/object-record/hooks/useDeleteOneRecord';
-import { useFindManyRecords } from '@/object-record/hooks/useFindManyRecords';
+import { useMessageListRecordPage } from '@/activities/emails/hooks/useMessageListRecordPage';
+import { RecordPaginationBar } from '@/object-record/record-index/components/RecordIndexPaginationBar';
 import { useObjectPermissionsForObject } from '@/object-record/hooks/useObjectPermissionsForObject';
 import { type ObjectRecord } from '@/object-record/types/ObjectRecord';
 import { useSnackBar } from '@/ui/feedback/snack-bar-manager/hooks/useSnackBar';
@@ -37,25 +38,6 @@ const StyledSection = styled.section`
   min-width: 0;
   width: 100%;
 `;
-const StyledWelcome = styled.div`
-  align-items: center;
-  background: ${themeCssVariables.background.secondary};
-  border-radius: ${themeCssVariables.border.radius.md};
-  display: flex;
-  gap: ${themeCssVariables.spacing[4]};
-  padding: ${themeCssVariables.spacing[4]};
-`;
-const StyledIllustration = styled.img`
-  flex-shrink: 0;
-  height: 80px;
-  object-fit: contain;
-  width: 80px;
-`;
-const StyledHeading = styled.h3`
-  color: ${themeCssVariables.font.color.primary};
-  font-size: ${themeCssVariables.font.size.lg};
-  margin: 0 0 ${themeCssVariables.spacing[2]};
-`;
 const StyledDescription = styled.p`
   color: ${themeCssVariables.font.color.secondary};
   line-height: 1.6;
@@ -76,16 +58,16 @@ const StyledMembers = styled.ul`
 `;
 const StyledMember = styled.li`
   align-items: center;
-  border: 1px solid ${themeCssVariables.border.color.light};
-  border-radius: ${themeCssVariables.border.radius.md};
   display: flex;
   gap: ${themeCssVariables.spacing[3]};
-  padding: ${themeCssVariables.spacing[4]};
+  padding: ${themeCssVariables.spacing[2]} 0;
 `;
 const StyledIdentity = styled.div`
+  align-items: center;
   display: flex;
   flex: 1;
-  flex-direction: column;
+  flex-direction: row;
+  flex-wrap: wrap;
   gap: ${themeCssVariables.spacing[2]};
   min-width: 0;
   overflow-wrap: anywhere;
@@ -94,34 +76,34 @@ const StyledMetadata = styled.span`
   color: ${themeCssVariables.font.color.secondary};
   font-size: ${themeCssVariables.font.size.sm};
 `;
-export const MessageListMembers = ({ listId }: { listId: string }) => {
+export const MessageListMembers = ({ listId }: { listId: string }) => (
+  <MessageListMembersPage key={listId} listId={listId} />
+);
+
+const MessageListMembersPage = ({ listId }: { listId: string }) => {
+  const [page, setPage] = useState(0);
+  const pageSize = 50;
   const [busy, setBusy] = useState(false);
   const { enqueueErrorSnackBar } = useSnackBar();
-  const {
-    records,
-    totalCount,
-    loading,
-    error,
-    refetch,
-    hasNextPage,
-    fetchMoreRecords,
-    objectMetadataItem,
-  } = useFindManyRecords<MessageListMember>({
-    objectNameSingular: 'messageListMember',
-    filter: { listId: { eq: listId } },
-    recordGqlFields: {
-      id: true,
-      personId: true,
-      person: {
+  const { records, totalCount, loading, error, refetch, objectMetadataItem } =
+    useMessageListRecordPage<MessageListMember>({
+      page,
+      pageSize,
+      objectNameSingular: 'messageListMember',
+      filter: { listId: { eq: listId } },
+      recordGqlFields: {
         id: true,
-        name: true,
-        emails: true,
-        jobTitle: true,
-        company: { id: true, name: true },
+        personId: true,
+        person: {
+          id: true,
+          name: true,
+          emails: true,
+          jobTitle: true,
+          company: { id: true, name: true },
+        },
+        workspaceMember: { id: true, name: true, userEmail: true },
       },
-      workspaceMember: { id: true, name: true, userEmail: true },
-    },
-  });
+    });
   const permissions = useObjectPermissionsForObject(objectMetadataItem.id);
   const [adding, setAdding] = useState<'person' | 'workspaceMember' | null>(
     null,
@@ -133,7 +115,8 @@ export const MessageListMembers = ({ listId }: { listId: string }) => {
     setBusy(true);
     try {
       await action();
-      await refetch();
+      if (page > 0 && records.length === 1) setPage(page - 1);
+      else await refetch();
     } catch {
       enqueueErrorSnackBar({
         message: t`동반 고객 목록을 변경하지 못했습니다. 다시 시도하세요.`,
@@ -144,25 +127,9 @@ export const MessageListMembers = ({ listId }: { listId: string }) => {
   };
   return (
     <StyledSection>
-      <StyledWelcome>
-        <StyledIllustration
-          src="/images/gainge/customer-book.png"
-          alt=""
-          width={80}
-          height={80}
-        />
-        <div>
-          <StyledHeading>{t`함께할 고객을 모아보세요`}</StyledHeading>
-          <StyledDescription>{t`고객을 추가하고, 심방콜로 안부를 전해보세요.`}</StyledDescription>
-          {!loading && !error && (
-            <StyledDescription>
-              {t`등록된 수신자`} {totalCount ?? records.length}
-              {hasNextPage && totalCount == null ? '+' : ''}
-              {t`명`}
-            </StyledDescription>
-          )}
-        </div>
-      </StyledWelcome>
+      {!loading && !error && (
+        <StyledDescription>{t`등록된 수신자 ${totalCount}명`}</StyledDescription>
+      )}
       <StyledActions>
         {permissions.canUpdateObjectRecords && (
           <Button
@@ -186,7 +153,10 @@ export const MessageListMembers = ({ listId }: { listId: string }) => {
           initialListId={listId}
           recipientType={adding}
           onClose={() => setAdding(null)}
-          onAdded={refetch}
+          onAdded={async () => {
+            if (page !== 0) setPage(0);
+            else await refetch();
+          }}
         />
       )}
       {loading && <p>{t`불러오는 중…`}</p>}
@@ -251,11 +221,14 @@ export const MessageListMembers = ({ listId }: { listId: string }) => {
           ))}
         </StyledMembers>
       )}
-      {hasNextPage && (
-        <Button
-          title={t`수신자 더 보기`}
-          disabled={loading}
-          onClick={() => fetchMoreRecords()}
+      {!error && (
+        <RecordPaginationBar
+          currentPage={page + 1}
+          pageSize={pageSize}
+          totalCount={totalCount}
+          onPageChange={(nextPage) => {
+            if (!loading && !busy) setPage(nextPage - 1);
+          }}
         />
       )}
     </StyledSection>

@@ -1,3 +1,5 @@
+import { useMessageListRecordPage } from '@/activities/emails/hooks/useMessageListRecordPage';
+import { RecordPaginationBar } from '@/object-record/record-index/components/RecordIndexPaginationBar';
 import {
   AnimatedPlaceholder,
   AnimatedPlaceholderEmptyTitle,
@@ -11,7 +13,10 @@ import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomState
 import { getMessageListAdditions } from '@/activities/emails/utils/getMessageListAdditions';
 import { useObjectPermissionsForObject } from '@/object-record/hooks/useObjectPermissionsForObject';
 import { useCreateManyRecords } from '@/object-record/hooks/useCreateManyRecords';
-import { useFindManyRecords } from '@/object-record/hooks/useFindManyRecords';
+import {
+  useFindManyRecords,
+  type UseFindManyRecordsParams,
+} from '@/object-record/hooks/useFindManyRecords';
 import { type ObjectRecord } from '@/object-record/types/ObjectRecord';
 import { useSnackBar } from '@/ui/feedback/snack-bar-manager/hooks/useSnackBar';
 import { TextInput } from '@/ui/input/components/TextInput';
@@ -239,6 +244,9 @@ export const MessageListAddCustomersModal = ({
   }, [openModal, closeModal, modalId]);
   const [listId, setListId] = useState<string | null>(initialListId ?? null);
   const [search, setSearch] = useState('');
+  const [page, setPage] = useState(0);
+  const pageSize = 50;
+  const [addedCount, setAddedCount] = useState(0);
   const [selectedOnly, setSelectedOnly] = useState(false);
   const [listSearch, setListSearch] = useState('');
   const {
@@ -260,13 +268,7 @@ export const MessageListAddCustomersModal = ({
   const [selected, setSelected] = useState<Map<string, Customer>>(new Map());
   const [busy, setBusy] = useState(false);
   const { enqueueErrorSnackBar, enqueueSuccessSnackBar } = useSnackBar();
-  const {
-    records: rawRecords,
-    loading,
-    error,
-    hasNextPage,
-    fetchMoreRecords,
-  } = useFindManyRecords<Customer>({
+  const recipientQuery = {
     objectNameSingular: recipientType,
     skip: isWorkspaceMember && !currentWorkspaceMember?.id,
     filter: isWorkspaceMember
@@ -309,14 +311,36 @@ export const MessageListAddCustomersModal = ({
         },
     limit: 50,
     fetchPolicy: 'cache-and-network',
+  } satisfies UseFindManyRecordsParams<Customer>;
+  const allSelectedRecipients = useFindManyRecords<Customer>({
+    ...recipientQuery,
+    skip: recipientQuery.skip || !customerIds,
   });
+  const recipientPage = useMessageListRecordPage<Customer>({
+    ...recipientQuery,
+    page,
+    pageSize,
+    skip: recipientQuery.skip || Boolean(customerIds) || selectedOnly,
+  });
+  const {
+    records: rawRecords,
+    loading,
+    error,
+  } = customerIds ? allSelectedRecipients : recipientPage;
+  const { hasNextPage, fetchMoreRecords } = allSelectedRecipients;
   const records = isWorkspaceMember
     ? getWorkspaceMemberRecipients(rawRecords, currentWorkspaceMember?.id)
     : rawRecords;
   const [preparationError, setPreparationError] = useState(false);
   const [pendingPage, setPendingPage] = useState(false);
   const candidates = customerIds ? records : Array.from(selected.values());
-  const visibleRecords = !customerIds && selectedOnly ? candidates : records;
+  const visiblePage = selectedOnly
+    ? Math.min(page, Math.max(0, Math.ceil(candidates.length / pageSize) - 1))
+    : page;
+  const visibleRecords =
+    !customerIds && selectedOnly
+      ? candidates.slice(visiblePage * pageSize, (visiblePage + 1) * pageSize)
+      : records;
   const ids = candidates.map((person) => person.id);
   const {
     objectMetadataItem: memberMetadata,
@@ -402,6 +426,7 @@ export const MessageListAddCustomersModal = ({
     )
       return;
     setBusy(true);
+    setAddedCount(0);
     let added = 0;
     try {
       for (let offset = 0; offset < additions.length; offset += 100) {
@@ -413,6 +438,7 @@ export const MessageListAddCustomersModal = ({
           })),
         });
         added += batch.length;
+        setAddedCount(added);
       }
       await onAdded?.();
       enqueueSuccessSnackBar({
@@ -526,7 +552,10 @@ export const MessageListAddCustomersModal = ({
                 size="small"
                 variant="tertiary"
                 disabled={busy}
-                onClick={() => setSelected(new Map())}
+                onClick={() => {
+                  setSelected(new Map());
+                  setPage(0);
+                }}
               />
             )}
           </StyledSectionHeader>
@@ -537,6 +566,7 @@ export const MessageListAddCustomersModal = ({
                 value={search}
                 onChange={(value) => {
                   setSelectedOnly(false);
+                  setPage(0);
                   setSearch(value);
                 }}
                 fullWidth
@@ -547,7 +577,10 @@ export const MessageListAddCustomersModal = ({
                 size="small"
                 variant={selectedOnly ? 'secondary' : 'tertiary'}
                 disabled={busy}
-                onClick={() => setSelectedOnly(!selectedOnly)}
+                onClick={() => {
+                  setPage(0);
+                  setSelectedOnly(!selectedOnly);
+                }}
               />
             </StyledToolbar>
           )}
@@ -695,11 +728,16 @@ export const MessageListAddCustomersModal = ({
               </AnimatedPlaceholderEmptyTextContainer>
             </StyledEmpty>
           )}
-          {hasNextPage && !customerIds && !selectedOnly && (
-            <Button
-              title={t`수신자 더 보기`}
-              disabled={loading || busy}
-              onClick={() => fetchMoreRecords()}
+          {!customerIds && !error && (
+            <RecordPaginationBar
+              currentPage={visiblePage + 1}
+              pageSize={pageSize}
+              totalCount={
+                selectedOnly ? candidates.length : recipientPage.totalCount
+              }
+              onPageChange={(nextPage) => {
+                if (!loading && !busy) setPage(nextPage - 1);
+              }}
             />
           )}
         </StyledSection>
@@ -750,7 +788,7 @@ export const MessageListAddCustomersModal = ({
         <Button
           title={
             busy
-              ? t`추가 중…`
+              ? t`${addedCount} / ${additions.length}명 추가 중…`
               : listId &&
                   !checking &&
                   !moreExisting &&

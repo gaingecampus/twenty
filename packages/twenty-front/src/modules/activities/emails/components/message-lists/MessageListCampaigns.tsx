@@ -1,7 +1,9 @@
 import { StyledMessageListEmpty } from '@/activities/emails/components/message-lists/MessageListSectionStyles';
 import { MessageListLinkCampaign } from '@/activities/emails/components/message-lists/MessageListLinkCampaign';
 import { DateTimeDisplay } from '@/ui/field/display/components/DateTimeDisplay';
-import { useFindManyRecords } from '@/object-record/hooks/useFindManyRecords';
+import { useMessageListRecordPage } from '@/activities/emails/hooks/useMessageListRecordPage';
+import { RecordPaginationBar } from '@/object-record/record-index/components/RecordIndexPaginationBar';
+import { useState } from 'react';
 import { type ObjectRecord } from '@/object-record/types/ObjectRecord';
 import { Table } from '@/ui/layout/table/components/Table';
 import { TableRow } from '@/ui/layout/table/components/TableRow';
@@ -14,7 +16,6 @@ import { RecordChip } from '@/object-record/components/RecordChip';
 import { EmailDisplay } from '@/ui/field/display/components/EmailDisplay';
 import { Tag, type TagColor } from 'twenty-ui/data-display';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
-import { Button } from 'twenty-ui/input';
 
 type Campaign = ObjectRecord & {
   subject: string | null;
@@ -74,9 +75,17 @@ const StyledCampaignCell = styled(TableCell)`
 const CAMPAIGN_GRID_COLUMNS =
   'minmax(160px, 1fr) minmax(180px, 1fr) 110px minmax(230px, 1fr)';
 
-export const MessageListCampaigns = ({ listId }: { listId: string }) => {
-  const { records, loading, error, hasNextPage, fetchMoreRecords, refetch } =
-    useFindManyRecords<Campaign>({
+export const MessageListCampaigns = ({ listId }: { listId: string }) => (
+  <MessageListCampaignsPage key={listId} listId={listId} />
+);
+
+const MessageListCampaignsPage = ({ listId }: { listId: string }) => {
+  const [page, setPage] = useState(0);
+  const pageSize = 20;
+  const { records, totalCount, loading, error, refetch } =
+    useMessageListRecordPage<Campaign>({
+      page,
+      pageSize,
       objectNameSingular: 'messageCampaign',
       filter: { listId: { eq: listId } },
       recordGqlFields: {
@@ -87,7 +96,6 @@ export const MessageListCampaigns = ({ listId }: { listId: string }) => {
         scheduledAt: true,
         sentAt: true,
       },
-      limit: 20,
     });
   const statusLabels: Record<string, string> = {
     DRAFT: t`초안`,
@@ -109,7 +117,13 @@ export const MessageListCampaigns = ({ listId }: { listId: string }) => {
   };
   return (
     <StyledSection aria-label={t`연결된 심방콜 발송`}>
-      <MessageListLinkCampaign listId={listId} onLinked={refetch} />
+      <MessageListLinkCampaign
+        listId={listId}
+        onLinked={async () => {
+          if (page !== 0) setPage(0);
+          else await refetch();
+        }}
+      />
       {loading && <p>{t`불러오는 중…`}</p>}
       {error && <p role="alert">{t`심방콜 발송을 불러오지 못했습니다.`}</p>}
       {!loading && !error && records.length === 0 && (
@@ -163,11 +177,14 @@ export const MessageListCampaigns = ({ listId }: { listId: string }) => {
           ))}
         </StyledCampaignTable>
       )}
-      {hasNextPage && (
-        <Button
-          title={t`심방콜 발송 더 보기`}
-          onClick={() => fetchMoreRecords()}
-          disabled={loading}
+      {!error && (
+        <RecordPaginationBar
+          currentPage={page + 1}
+          pageSize={pageSize}
+          totalCount={totalCount}
+          onPageChange={(nextPage) => {
+            if (!loading) setPage(nextPage - 1);
+          }}
         />
       )}
     </StyledSection>
