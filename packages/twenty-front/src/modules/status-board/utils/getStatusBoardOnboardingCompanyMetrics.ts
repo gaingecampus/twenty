@@ -7,14 +7,15 @@ export const getStatusBoardOnboardingCompanyMetrics = ({
   records,
   assignments,
   memberIds,
-  onboardingTypes,
-  excludeTypes = false,
+  contractTypeFilter,
 }: {
   records: ObjectRecord[];
   assignments: { onboardingId: string; memberId: string }[];
   memberIds?: string[];
-  onboardingTypes: readonly string[];
-  excludeTypes?: boolean;
+  contractTypeFilter: {
+    field: 'onboardingType' | 'visitCadence';
+    values: readonly string[];
+  };
 }) => {
   const coMembersByContract = new Map<string, string[]>();
   for (const assignment of assignments) {
@@ -27,12 +28,10 @@ export const getStatusBoardOnboardingCompanyMetrics = ({
   const memberIdsByOnboardingId: Partial<Record<string, string[]>> = {};
   let totalCount = 0;
   for (const record of records) {
+    const contractType = record[contractTypeFilter.field];
     if (
-      typeof record.onboardingType !== 'string' ||
-      record.onboardingType.length === 0 ||
-      (excludeTypes
-        ? onboardingTypes.includes(record.onboardingType)
-        : !onboardingTypes.includes(record.onboardingType))
+      typeof contractType !== 'string' ||
+      !contractTypeFilter.values.includes(contractType)
     )
       continue;
     // Lead first, then execution, then co-consultants, for display order.

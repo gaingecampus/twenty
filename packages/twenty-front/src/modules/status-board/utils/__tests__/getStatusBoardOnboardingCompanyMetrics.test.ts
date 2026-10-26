@@ -29,7 +29,10 @@ describe('getStatusBoardOnboardingCompanyMetrics', () => {
       getStatusBoardOnboardingCompanyMetrics({
         records,
         assignments,
-        onboardingTypes,
+        contractTypeFilter: {
+          field: 'onboardingType',
+          values: onboardingTypes,
+        },
       }),
     ).toEqual({
       totalCount: 4,
@@ -47,7 +50,10 @@ describe('getStatusBoardOnboardingCompanyMetrics', () => {
         records,
         assignments,
         memberIds: ['co'],
-        onboardingTypes,
+        contractTypeFilter: {
+          field: 'onboardingType',
+          values: onboardingTypes,
+        },
       }),
     ).toEqual({
       totalCount: 1,
@@ -58,47 +64,94 @@ describe('getStatusBoardOnboardingCompanyMetrics', () => {
 });
 
 describe('project onboarding metrics', () => {
-  it('counts other contract types, deduplicates roles and applies the member filter', () => {
+  const contractTypeFilter = {
+    field: 'visitCadence',
+    values: ['PROJECT'],
+  } as const;
+
+  it('counts only project cadence contracts and preserves distinct consultant counts', () => {
     const result = getStatusBoardOnboardingCompanyMetrics({
       records: [
         {
           id: 'project',
           __typename: 'Onboarding',
           onboardingType: 'HEADHUNTING',
+          visitCadence: 'PROJECT',
           leadConsultantId: 'a',
           executionConsultantId: 'a',
         },
-        {
-          id: 'consulting',
+        ...[
+          'CONSULTING',
+          'COACHING',
+          'HEADHUNTING',
+          'ONE_TIME',
+          'SOFTWARE_DEVELOPMENT',
+        ].map((onboardingType) => ({
+          id: onboardingType,
           __typename: 'Onboarding',
-          onboardingType: 'CONSULTING',
+          onboardingType,
+          visitCadence: 'LECTURE',
           leadConsultantId: 'a',
-        },
-        {
-          id: 'coaching',
-          __typename: 'Onboarding',
-          onboardingType: 'COACHING',
-          leadConsultantId: 'a',
-        },
-        {
-          id: 'unknown',
-          __typename: 'Onboarding',
-          onboardingType: null,
-          leadConsultantId: 'a',
-        },
+        })),
       ],
       assignments: [
         { onboardingId: 'project', memberId: 'b' },
         { onboardingId: 'project', memberId: 'c' },
       ],
       memberIds: ['a', 'b'],
-      onboardingTypes: ['CONSULTING', 'COACHING'],
-      excludeTypes: true,
+      contractTypeFilter,
     });
     expect(result.totalCount).toBe(2);
     expect(result.personCountByOnboardingId).toEqual({ project: 2 });
     expect(result.memberIdsByOnboardingId).toEqual({
       project: ['a', 'b', 'c'],
     });
+  });
+
+  it.each(['CONSULTING', 'COACHING', 'HEADHUNTING', null])(
+    'includes project cadence regardless of contract type %s',
+    (onboardingType) => {
+      const result = getStatusBoardOnboardingCompanyMetrics({
+        records: [
+          {
+            id: 'project',
+            __typename: 'Onboarding',
+            onboardingType,
+            visitCadence: 'PROJECT',
+            executionConsultantId: 'member',
+          },
+        ],
+        assignments: [],
+        contractTypeFilter,
+      });
+      expect(result.personCountByOnboardingId).toEqual({ project: 1 });
+    },
+  );
+
+  it.each([
+    'WEEKLY',
+    'BIWEEKLY',
+    'MONTHLY',
+    'LECTURE',
+    'ADVISORY',
+    '',
+    null,
+    undefined,
+  ])('excludes non-project or missing cadence %s', (visitCadence) => {
+    const result = getStatusBoardOnboardingCompanyMetrics({
+      records: [
+        {
+          id: 'other',
+          __typename: 'Onboarding',
+          onboardingType: 'HEADHUNTING',
+          visitCadence,
+          executionConsultantId: 'member',
+        },
+      ],
+      assignments: [],
+      contractTypeFilter,
+    });
+    expect(result.totalCount).toBe(0);
+    expect(result.personCountByOnboardingId).toEqual({});
   });
 });

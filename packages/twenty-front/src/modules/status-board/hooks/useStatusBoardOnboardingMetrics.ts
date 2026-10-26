@@ -82,6 +82,11 @@ export const useStatusBoardOnboardingMetrics = ({
       )
         ? { onboardingType: true }
         : {}),
+      ...(objectMetadataItem.readableFields.some(
+        (field) => field.name === 'visitCadence',
+      )
+        ? { visitCadence: true }
+        : {}),
     },
   });
   const links = useStatusBoardAllRecords({
@@ -114,14 +119,16 @@ export const useStatusBoardOnboardingMetrics = ({
     records: contracts.records,
     assignments,
     memberIds,
-    onboardingTypes: STATUS_BOARD_ONBOARDING_COMPANY_TYPES,
+    contractTypeFilter: {
+      field: 'onboardingType',
+      values: STATUS_BOARD_ONBOARDING_COMPANY_TYPES,
+    },
   });
   const projectMetrics = getStatusBoardOnboardingCompanyMetrics({
     records: contracts.records,
     assignments,
     memberIds,
-    onboardingTypes: STATUS_BOARD_ONBOARDING_COMPANY_TYPES,
-    excludeTypes: true,
+    contractTypeFilter: { field: 'visitCadence', values: ['PROJECT'] },
   });
   const configurationError =
     coField && (!sourceKey || !targetKey || !canReadAssignments)

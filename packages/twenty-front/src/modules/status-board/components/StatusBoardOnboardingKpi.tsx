@@ -46,7 +46,7 @@ export const StatusBoardOnboardingKpi = ({
       subtitle={error ? '불러오지 못했어요' : undefined}
       description={
         variant === 'project'
-          ? '컨설팅·코칭 외 계약의 리드·실행·공동 인원 합계'
+          ? '방문 주기가 프로젝트형인 온보딩 중 계약의 리드·실행·공동 인원 합계'
           : '컨설팅·코칭 계약의 리드·실행·공동 인원 합계'
       }
       loading={loading}
