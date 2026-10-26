@@ -1,4 +1,8 @@
 import {
+  matchesContractTypeFilter,
+  type ContractTypeFilter,
+} from '@/field-management/contractTypeFilter';
+import {
   StyledDashboardMuted,
   StyledDashboardSectionHeader,
   StyledDashboardSectionTitle,
@@ -55,6 +59,7 @@ import { AppPath } from 'twenty-shared/types';
 import { getAppPath } from 'twenty-shared/utils';
 
 type StatusBoardWeekSectionProps = {
+  contractTypeFilter?: ContractTypeFilter;
   onboardingObjectMetadataItem: EnrichedObjectMetadataItem | undefined;
   memberObjectMetadataItem: EnrichedObjectMetadataItem | undefined;
   members: ObjectRecord[];
@@ -66,6 +71,7 @@ export const StatusBoardWeekSection = ({
   memberObjectMetadataItem,
   members,
   memberIds,
+  contractTypeFilter = null,
 }: StatusBoardWeekSectionProps) => {
   if (
     onboardingObjectMetadataItem === undefined ||
@@ -83,6 +89,7 @@ export const StatusBoardWeekSection = ({
       memberObjectMetadataItem={memberObjectMetadataItem}
       members={members}
       memberIds={memberIds}
+      contractTypeFilter={contractTypeFilter}
     />
   );
 };
@@ -92,11 +99,13 @@ const StatusBoardWeekSectionLoaded = ({
   memberObjectMetadataItem,
   members,
   memberIds,
+  contractTypeFilter = null,
 }: {
   onboardingObjectMetadataItem: EnrichedObjectMetadataItem;
   memberObjectMetadataItem: EnrichedObjectMetadataItem | undefined;
   members: ObjectRecord[];
   memberIds: string[] | undefined;
+  contractTypeFilter: ContractTypeFilter;
 }) => {
   const { openRecordInSidePanel } = useOpenRecordInSidePanel();
   const { groups } = useStatusBoardDummyData();
@@ -123,6 +132,7 @@ const StatusBoardWeekSectionLoaded = ({
       objectMetadataItem: onboardingObjectMetadataItem,
       fieldNames: [
         'plannedSessionCount',
+        'onboardingType',
         STATUS_BOARD_FIELD.name,
         STATUS_BOARD_FIELD.company,
         STATUS_BOARD_FIELD.visitDays,
@@ -134,6 +144,10 @@ const StatusBoardWeekSectionLoaded = ({
       ],
     }),
   });
+
+  const filteredRecords = records.filter((record) =>
+    matchesContractTypeFilter(record, contractTypeFilter),
+  );
 
   const { objectMetadataItems } = useObjectMetadataItems();
   const visitMetadata = objectMetadataItems.find(
@@ -152,9 +166,9 @@ const StatusBoardWeekSectionLoaded = ({
   const sessionVisits = useStatusBoardAllRecords({
     objectNameSingular:
       visitMetadata?.nameSingular ?? onboardingObjectMetadataItem.nameSingular,
-    skip: !canReadProgress || records.length === 0,
+    skip: !canReadProgress || filteredRecords.length === 0,
     filter: {
-      contractId: { in: records.map((record) => record.id) },
+      contractId: { in: filteredRecords.map((record) => record.id) },
       recordStatus: { eq: 'SUBMITTED' },
     },
     limit: 200,
@@ -173,7 +187,7 @@ const StatusBoardWeekSectionLoaded = ({
 
   const memberRows = [...members]
     .map((member) => {
-      const memberOnboardings = records.filter(
+      const memberOnboardings = filteredRecords.filter(
         (onboarding) =>
           (memberIds === undefined || memberIds.includes(member.id)) &&
           isStatusBoardOnboardingOwnedByMember({
@@ -202,7 +216,7 @@ const StatusBoardWeekSectionLoaded = ({
       row.memberOnboardings.map((record) => record.id),
     ),
   );
-  const undatedCount = records.filter(
+  const undatedCount = filteredRecords.filter(
     (onboarding) =>
       visibleContractIds.has(onboarding.id) &&
       !projectMemberIds[onboarding.id] &&

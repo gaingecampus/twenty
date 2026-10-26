@@ -7,7 +7,7 @@ import { styled } from '@linaria/react';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 import { StyledHeaderDropdownButton } from '@/ui/layout/dropdown/components/StyledHeaderDropdownButton';
 
-import { type useFieldManagementMetadata } from './useFieldManagementData';
+import { type EnrichedObjectMetadataItem } from '@/object-metadata/types/EnrichedObjectMetadataItem';
 
 const StyledFilters = styled.div`
   display: flex;
@@ -27,21 +27,21 @@ const StyledTypeButton = styled(StyledHeaderDropdownButton)`
 `;
 
 type FieldContractTypeFiltersProps = {
-  metadata: ReturnType<typeof useFieldManagementMetadata>;
+  contractMetadataItem: EnrichedObjectMetadataItem | undefined;
   value: ContractTypeFilter;
   onChange: (value: ContractTypeFilter) => void;
 };
 
 export const FieldContractTypeFilters = ({
-  metadata,
+  contractMetadataItem,
   value,
   onChange,
 }: FieldContractTypeFiltersProps) => {
   const typeOptions =
-    metadata.contract?.readableFields.find(
+    contractMetadataItem?.readableFields.find(
       (field) => field.name === 'onboardingType',
     )?.options ?? [];
-  const projectOption = metadata.contract?.readableFields
+  const projectOption = contractMetadataItem?.readableFields
     .find((field) => field.name === 'visitCadence')
     ?.options?.find((option) => option.value === 'PROJECT');
   const options = [

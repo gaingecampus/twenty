@@ -1,6 +1,5 @@
 import { MenuFavoriteButton } from '@/navigation-menu-item/display/components/MenuFavoriteButton';
 import { FieldVisitTextSection } from './FieldVisitTextSection';
-import { FieldContractTypeFilters } from './FieldContractTypeFilters';
 import {
   matchesContractTypeFilter,
   DEFAULT_CONTRACT_TYPE_FILTERS,
@@ -100,6 +99,7 @@ type Scope = {
   company?: string;
   dashboard?: boolean;
   contractList?: boolean;
+  contractTypeFilter?: ContractTypeFilter;
   contractStatus?: 'PRE' | 'ACTIVE' | 'DONE';
   memberIds?: string[];
   start?: string;
@@ -228,8 +228,7 @@ const FieldManagementLoaded = ({
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('ACTIVE');
   const [contractPageSize, setContractPageSize] = useState(10);
-  const [contractTypeFilter, setContractTypeFilter] =
-    useState<ContractTypeFilter>(DEFAULT_CONTRACT_TYPE_FILTERS);
+  const { contractTypeFilter = DEFAULT_CONTRACT_TYPE_FILTERS } = scope;
   const [contractSort, setContractSort] =
     useState<FieldContractSort>('default');
   const [needsOnly, setNeedsOnly] = useState(false);
@@ -699,7 +698,7 @@ const FieldManagementLoaded = ({
       {summaryContainer &&
         createPortal(
           <FieldAttentionSummary
-            contracts={scopedContracts}
+            contracts={typeFilteredContracts}
             visits={data.visits}
             loading={data.loading}
             error={false}
@@ -837,13 +836,6 @@ const FieldManagementLoaded = ({
           sort={contractSort}
           onPageSizeChange={setContractPageSize}
           onSortChange={setContractSort}
-        />
-      )}
-      {scope.contractList && (
-        <FieldContractTypeFilters
-          metadata={metadata}
-          value={contractTypeFilter}
-          onChange={setContractTypeFilter}
         />
       )}
       <StyledFieldRecordSection

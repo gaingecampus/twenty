@@ -1,3 +1,8 @@
+import { FieldContractTypeFilters } from './FieldContractTypeFilters';
+import {
+  DEFAULT_CONTRACT_TYPE_FILTERS,
+  type ContractTypeFilter,
+} from './contractTypeFilter';
 import { StatusBoardWeekSection } from '@/status-board/components/StatusBoardWeekSection';
 import { DashboardCountTab } from '@/ui/layout/dashboard/components/DashboardCountTab';
 import {
@@ -35,6 +40,8 @@ const FieldManagementPageBody = ({
 }: {
   metadata: ReturnType<typeof useStatusBoardMetadata>;
 }) => {
+  const [contractTypeFilter, setContractTypeFilter] =
+    useState<ContractTypeFilter>(DEFAULT_CONTRACT_TYPE_FILTERS);
   const [contractStatus, setContractStatus] = useState<
     'PRE' | 'ACTIVE' | 'DONE'
   >('ACTIVE');
@@ -60,13 +67,20 @@ const FieldManagementPageBody = ({
         onToggleMemberId={filters.toggleMemberId}
         onClearSelectedGroupIds={filters.clearSelectedGroupIds}
         onClearSelectedMemberIds={filters.clearSelectedMemberIds}
-      />
+      >
+        <FieldContractTypeFilters
+          contractMetadataItem={metadata.onboarding}
+          value={contractTypeFilter}
+          onChange={setContractTypeFilter}
+        />
+      </StatusBoardFilterBar>
       <div ref={setSummaryContainer} />
       <StatusBoardWeekSection
         memberObjectMetadataItem={metadata.member}
         onboardingObjectMetadataItem={metadata.onboarding}
         members={visibleMembers}
         memberIds={memberIds}
+        contractTypeFilter={contractTypeFilter}
       />
       <FieldManagement
         contractListHeader={
@@ -91,7 +105,12 @@ const FieldManagementPageBody = ({
             ))}
           </StyledDashboardContractTabs>
         }
-        scope={{ contractList: true, memberIds, contractStatus }}
+        scope={{
+          contractList: true,
+          memberIds,
+          contractStatus,
+          contractTypeFilter,
+        }}
         onContractCountsChange={setContractCounts}
         summaryContainer={summaryContainer}
       />

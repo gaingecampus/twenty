@@ -6,7 +6,7 @@ import {
 } from '@/ui/layout/dashboard/components/dashboardStyled';
 import { IconX } from 'twenty-ui/icon';
 import { FieldContractAssignees } from '@/field-management/FieldContractAssignees';
-import { useEffect, useRef, useState } from 'react';
+import { type ReactNode, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { getStatusBoardMemberGroupId } from '@/status-board/utils/getStatusBoardMemberGroupId';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
@@ -33,6 +33,7 @@ const StyledMemberOptions = styled.div`
 `;
 
 type StatusBoardFilterBarProps = {
+  children?: ReactNode;
   groupObjectMetadataItem: EnrichedObjectMetadataItem | undefined;
   memberObjectMetadataItem: EnrichedObjectMetadataItem | undefined;
   members: ObjectRecord[];
@@ -45,6 +46,7 @@ type StatusBoardFilterBarProps = {
 };
 
 export const StatusBoardFilterBar = ({
+  children,
   groupObjectMetadataItem,
   memberObjectMetadataItem,
   members,
@@ -122,6 +124,7 @@ export const StatusBoardFilterBar = ({
           )}
         </>
       )}
+      {children}
     </StyledDashboardToolbar>
   );
 };
