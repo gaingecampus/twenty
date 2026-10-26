@@ -40,7 +40,8 @@ defaults:
 jobs:
   deploy:
     timeout-minutes: 60
-    runs-on: ubuntu-latest
+    # Keep the OS release stable; ubuntu-latest can migrate between releases.
+    runs-on: ubuntu-24.04
     environment: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'staging' }}
     env:
       AWS_REGION: ${{ vars.AWS_REGION }}
@@ -51,6 +52,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      - name: Show deployment tool versions
+        run: |
+          docker version
+          docker buildx version
+          aws --version
 
       - name: Validate deployment inputs
         env:

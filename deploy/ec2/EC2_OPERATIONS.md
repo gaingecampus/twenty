@@ -30,6 +30,13 @@ cd /opt/twenty/deploy/ec2
 
 ### ECR manifest 조회 403 (AX-1317)
 
+2026-10-21 staging 성공 실행은 Ubuntu 24.04 / Docker 28.0.4,
+2026-10-26 실패 실행은 Ubuntu 26.04 / Docker 29.4.2였습니다.
+두 실행은 동일한 staging 역할과 업로드 스크립트를 사용했습니다.
+`ubuntu-latest`의 OS 전환이 배포에 바로 적용되지 않도록 실행 환경을
+`ubuntu-24.04`로 고정하고 Docker·Buildx·AWS CLI 버전을 로그에 남깁니다.
+이 설정도 도구의 모든 버전을 고정하지는 않으므로 아래 IAM 권한 보완은 유지합니다.
+
 `docker push`가 `HEAD .../manifests/sha256:...: 403 Forbidden`으로 실패하면
 GitHub Environment `AWS_ROLE_ARN` 역할의 ECR 권한을 확인합니다.
 이미지 업로드에도 manifest 확인용 `ecr:BatchGetImage`가 필요합니다.
