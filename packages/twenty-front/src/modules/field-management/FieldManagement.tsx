@@ -37,6 +37,7 @@ import { useSnackBar } from '@/ui/feedback/snack-bar-manager/hooks/useSnackBar';
 import { getContractSessionProgress } from './getContractSessionProgress';
 import { StyledFieldEmptyState } from './FieldEmptyState';
 import { StatusBoardRecordRowContent } from '@/status-board/components/StatusBoardRecordList';
+import { getStatusBoardRecordMemberIds } from '@/status-board/utils/getStatusBoardRecordMemberIds';
 import { FieldSortModal } from './FieldSortModal';
 import { FieldRecordMore } from './FieldRecordMore';
 import { FieldContractLabel } from './FieldContractLabel';
@@ -698,6 +699,19 @@ const FieldManagementLoaded = ({
       {summaryContainer &&
         createPortal(
           <FieldAttentionSummary
+            objectMetadataItem={metadata.contract!}
+            recordMembers={{
+              objectNameSingular: metadata.member!.nameSingular,
+              memberIdsByRecordId: getStatusBoardRecordMemberIds({
+                records: typeFilteredContracts,
+                directFieldNames: ['leadConsultantId', 'executionConsultantId'],
+                sharedLinks: data.links,
+                sharedRelation: {
+                  sourceKey: 'gyeyagId',
+                  targetKey: 'guseongweonId',
+                },
+              }),
+            }}
             contracts={typeFilteredContracts}
             visits={data.visits}
             loading={data.loading}

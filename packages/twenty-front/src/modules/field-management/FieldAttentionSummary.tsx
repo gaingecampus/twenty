@@ -10,6 +10,9 @@ import { statusBoardDetailsState } from '@/status-board/states/statusBoardDetail
 import { useSetAtomState } from '@/ui/utilities/state/jotai/hooks/useSetAtomState';
 import { useStatusBoardDummyData } from '@/status-board/contexts/StatusBoardDummyDataContext';
 import { DashboardKpiCard } from '@/ui/layout/dashboard/components/DashboardKpiCard';
+import { type EnrichedObjectMetadataItem } from '@/object-metadata/types/EnrichedObjectMetadataItem';
+import { type StatusBoardRecordMembers } from '@/status-board/components/StatusBoardRecordList';
+import { buildStatusBoardRecordGqlFields } from '@/status-board/utils/buildStatusBoardRecordGqlFields';
 
 import { getFieldAttentionContracts } from './getFieldAttentionContracts';
 
@@ -18,11 +21,15 @@ export const FieldAttentionSummary = ({
   visits,
   loading,
   error,
+  objectMetadataItem,
+  recordMembers,
 }: {
   contracts: ObjectRecord[];
   visits: ObjectRecord[];
   loading: boolean;
   error: boolean;
+  objectMetadataItem: EnrichedObjectMetadataItem;
+  recordMembers: StatusBoardRecordMembers;
 }) => {
   const dummy = useStatusBoardDummyData();
   const setStatusBoardDetails = useSetAtomState(statusBoardDetailsState);
@@ -72,13 +79,17 @@ export const FieldAttentionSummary = ({
                       dummy,
                       sheet: {
                         title: label,
-                        objectNameSingular: 'onboarding',
+                        objectNameSingular: objectMetadataItem.nameSingular,
                         filter: {
                           id: {
                             in: groups[key].map((contract) => contract.id),
                           },
                         },
-                        recordGqlFields: { id: true, name: true },
+                        recordGqlFields: buildStatusBoardRecordGqlFields({
+                          objectMetadataItem,
+                          fieldNames: ['name', 'company'],
+                        }),
+                        recordMembers,
                       },
                     });
                     navigateSidePanel({
