@@ -18,6 +18,7 @@ export const useStatusBoardMetadata = () => {
       });
 
     return {
+      cashFlowSnapshot: resolve('cashFlowSnapshot'),
       opportunity: resolve(STATUS_BOARD_OBJECT_NAME_SINGULAR.opportunity),
       company: resolve(STATUS_BOARD_OBJECT_NAME_SINGULAR.company),
       person: resolve(STATUS_BOARD_OBJECT_NAME_SINGULAR.person),

@@ -1,3 +1,4 @@
+import { StatusBoardCashFlowSection } from '@/status-board/components/StatusBoardCashFlowSection';
 import { StatusBoardSalesSection } from '@/status-board/components/StatusBoardSalesSection';
 import {
   StyledDashboardScroll,
@@ -177,6 +178,7 @@ const StatusBoardContentBody = ({
               onOpenSheet={setSheet}
             />
           )}
+          {!dummy.enabled && <StatusBoardCashFlowSection />}
           {!dummy.enabled && (
             <StatusBoardSalesSection
               depositProps={{
