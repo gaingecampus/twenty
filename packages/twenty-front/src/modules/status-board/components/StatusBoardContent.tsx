@@ -178,7 +178,9 @@ const StatusBoardContentBody = ({
               onOpenSheet={setSheet}
             />
           )}
-          {!dummy.enabled && <StatusBoardCashFlowSection />}
+          {!dummy.enabled && (
+            <StatusBoardCashFlowSection onOpenSheet={setSheet} />
+          )}
           {!dummy.enabled && (
             <StatusBoardSalesSection
               depositProps={{
