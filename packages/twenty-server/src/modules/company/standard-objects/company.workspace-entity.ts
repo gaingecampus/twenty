@@ -23,6 +23,8 @@ export class CompanyWorkspaceEntity {
 
   // Company-specific fields
   name: string | null;
+  avatarEmoji: string | null;
+  avatarColor: string | null;
   domainName: LinksMetadata;
   linkedinLink: LinksMetadata | null;
   annualRevenue: CurrencyMetadata | null;

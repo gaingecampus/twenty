@@ -736,6 +736,12 @@ export const STANDARD_OBJECTS = {
         universalIdentifier: '20202020-c05d-4064-9d64-4b5c6d7e8f9a',
       },
       name: { universalIdentifier: '20202020-4d99-4e2e-a84c-4a27837b1ece' },
+      avatarEmoji: {
+        universalIdentifier: 'ada1fb50-4dfb-4432-9f5d-9cc505892011',
+      },
+      avatarColor: {
+        universalIdentifier: '55118518-afa6-4aee-8314-6e7de114b11a',
+      },
       domainName: {
         universalIdentifier: '20202020-0c28-43d8-8ba5-3659924d3489',
       },
