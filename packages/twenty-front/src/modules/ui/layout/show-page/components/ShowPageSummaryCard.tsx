@@ -29,6 +29,7 @@ type ShowPageSummaryCardProps = {
   date: string;
   id?: string;
   logoOrAvatar?: string;
+  isCompanyLogo?: boolean;
   icon?: IconComponent;
   iconColor?: string;
   onUploadPicture?: (file: File) => void;
@@ -81,6 +82,7 @@ const StyledTitle = styled.div<{ isMobile: boolean }>`
 const StyledAvatarWrapper = styled.div<{
   isAvatarEditable: boolean;
   hasIcon: boolean;
+  isCompanyLogo: boolean;
 }>`
   background-color: ${({ hasIcon }) =>
     hasIcon ? themeCssVariables.background.transparent.light : 'unset'};
@@ -88,6 +90,14 @@ const StyledAvatarWrapper = styled.div<{
   cursor: ${({ isAvatarEditable }) =>
     isAvatarEditable ? 'pointer' : 'default'};
   flex-shrink: 0;
+
+  img {
+    box-sizing: border-box;
+    object-fit: ${({ isCompanyLogo }) => (isCompanyLogo ? 'contain' : 'cover')};
+    object-position: center;
+    padding: ${({ isCompanyLogo }) =>
+      isCompanyLogo ? themeCssVariables.spacing[2] : '0'};
+  }
 `;
 
 const StyledFileInput = styled.input`
@@ -125,6 +135,7 @@ export const ShowPageSummaryCard = ({
   date,
   id,
   logoOrAvatar,
+  isCompanyLogo = false,
   icon,
   iconColor,
   onUploadPicture,
@@ -160,6 +171,7 @@ export const ShowPageSummaryCard = ({
         <StyledAvatarWrapper
           isAvatarEditable={isDefined(onUploadPicture)}
           hasIcon={isDefined(icon)}
+          isCompanyLogo={isCompanyLogo}
         >
           <Avatar
             avatarUrl={getAbsoluteImageUrl(logoOrAvatar)}

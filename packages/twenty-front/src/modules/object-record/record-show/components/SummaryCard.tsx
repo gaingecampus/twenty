@@ -96,6 +96,7 @@ export const SummaryCard = ({
       isMobile={isMobile}
       id={objectRecordId}
       logoOrAvatar={recordIdentifier?.avatarUrl ?? ''}
+      isCompanyLogo={objectNameSingular === CoreObjectNameSingular.Company}
       avatarPlaceholder={recordIdentifier?.name ?? ''}
       date={recordCreatedAt ?? ''}
       loading={recordLoading || !isDefined(recordCreatedAt)}
