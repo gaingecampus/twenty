@@ -65,29 +65,29 @@ describe('formatNumber', () => {
       expect(formatNumber(999, { abbreviate: true })).toEqual('999');
     });
 
-    it('should abbreviate thousands with default decimals (0)', () => {
-      expect(formatNumber(1234, { abbreviate: true })).toEqual('1k');
+    it('keeps thousands in full with separators', () => {
+      expect(formatNumber(1234, { abbreviate: true })).toEqual('1,234');
     });
 
-    it('should abbreviate thousands with provided decimals', () => {
+    it('keeps thousands in full when precision is supplied', () => {
       expect(formatNumber(1234, { abbreviate: true, decimals: 2 })).toEqual(
-        '1.23k',
+        '1,234',
       );
       expect(formatNumber(1234, { abbreviate: true, decimals: 1 })).toEqual(
-        '1.2k',
+        '1,234',
       );
     });
 
-    it('should abbreviate millions', () => {
+    it('uses 만 for millions', () => {
       expect(formatNumber(1234567, { abbreviate: true, decimals: 2 })).toEqual(
-        '1.23M',
+        '123.46만',
       );
     });
 
-    it('should abbreviate billions', () => {
+    it('uses 억 for billions', () => {
       expect(
         formatNumber(1500000000, { abbreviate: true, decimals: 1 }),
-      ).toEqual('1.5B');
+      ).toEqual('15억');
     });
 
     it('should use locale/format for decimal separator when abbreviating', () => {
@@ -97,7 +97,7 @@ describe('formatNumber', () => {
           decimals: 2,
           format: NumberFormat.SPACES_AND_COMMA,
         }),
-      ).toEqual('1,23M');
+      ).toEqual('123,46만');
 
       expect(
         formatNumber(1234567, {
@@ -105,7 +105,7 @@ describe('formatNumber', () => {
           decimals: 2,
           format: NumberFormat.DOTS_AND_COMMA,
         }),
-      ).toEqual('1,23M');
+      ).toEqual('123,46만');
 
       expect(
         formatNumber(1234567, {
@@ -113,12 +113,12 @@ describe('formatNumber', () => {
           decimals: 2,
           format: NumberFormat.COMMAS_AND_DOT,
         }),
-      ).toEqual('1.23M');
+      ).toEqual('123.46만');
     });
 
     it('should preserve sign for negative values', () => {
       expect(formatNumber(-1500, { abbreviate: true, decimals: 1 })).toEqual(
-        '-1.5k',
+        '-1,500',
       );
     });
   });

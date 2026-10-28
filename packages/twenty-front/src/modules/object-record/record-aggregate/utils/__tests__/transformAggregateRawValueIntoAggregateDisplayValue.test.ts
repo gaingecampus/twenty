@@ -151,7 +151,7 @@ describe('transformAggregateRawValueIntoAggregateDisplayValue', () => {
         localeCatalog: enUS,
         timeZone: 'UTC',
       }),
-    ).toBe('230.4k');
+    ).toBe('23만');
   });
 
   it('should return correct number formatted value', () => {
@@ -220,7 +220,7 @@ describe('transformAggregateRawValueIntoAggregateDisplayValue', () => {
         timeZone: 'UTC',
         chartNumberFormat: ChartNumberFormat.SHORT,
       }),
-    ).toBe('230.4k');
+    ).toBe('23만');
   });
 
   it('should return short number formatted value with SHORT number format', () => {
@@ -235,7 +235,7 @@ describe('transformAggregateRawValueIntoAggregateDisplayValue', () => {
         timeZone: 'UTC',
         chartNumberFormat: ChartNumberFormat.SHORT,
       }),
-    ).toBe('100m');
+    ).toBe('1억');
   });
 
   it('should return full number formatted value with FULL number format', () => {

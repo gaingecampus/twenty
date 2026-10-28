@@ -1,6 +1,6 @@
 import { NumberFormat } from '@/localization/constants/NumberFormat';
 import { detectNumberFormat } from '@/localization/utils/detection/detectNumberFormat';
-import { isDefined } from 'twenty-shared/utils';
+import { formatToShortNumber, isDefined } from 'twenty-shared/utils';
 
 export const DEFAULT_DECIMAL_VALUE = 0;
 
@@ -13,7 +13,7 @@ const FORMAT_LOCALE_MAP = {
 
 export type FormatNumberOptions = {
   decimals?: number;
-  abbreviate?: boolean; // use k, M, B suffixes for large numbers
+  abbreviate?: boolean; // use Korean 만, 억, 조, 경 units for large numbers
   locale?: string;
   format?: NumberFormat;
 };
@@ -58,29 +58,7 @@ export const formatNumber = (
   const locale = getLocaleForFormat(options.format);
 
   if (options.abbreviate) {
-    const abs = Math.abs(value);
-    let suffix = '';
-    let divisor = 1;
-
-    if (abs >= 1e9) {
-      suffix = 'B';
-      divisor = 1e9;
-    } else if (abs >= 1e6) {
-      suffix = 'M';
-      divisor = 1e6;
-    } else if (abs >= 1e3) {
-      suffix = 'k';
-      divisor = 1e3;
-    }
-
-    if (divisor !== 1) {
-      const base = value / divisor;
-      const formatted = base.toLocaleString(locale, {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: options.decimals,
-      });
-      return formatted + suffix;
-    }
+    return formatToShortNumber(value, { decimals: options.decimals, locale });
   }
 
   return value.toLocaleString(locale, {

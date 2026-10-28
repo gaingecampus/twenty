@@ -64,16 +64,16 @@ describe('formatGraphValue', () => {
   });
 
   describe('shortNumber display type', () => {
-    it('should format large numbers with K suffix', () => {
+    it('keeps thousands in full', () => {
       const result = formatGraphValue(1500, { displayType: 'shortNumber' });
 
-      expect(result).toBeDefined();
+      expect(result).toBe('1,500');
     });
 
-    it('should format very large numbers with M suffix', () => {
+    it('uses Korean units for millions', () => {
       const result = formatGraphValue(1500000, { displayType: 'shortNumber' });
 
-      expect(result).toBeDefined();
+      expect(result).toBe('150만');
     });
 
     it('should apply prefix to short numbers', () => {

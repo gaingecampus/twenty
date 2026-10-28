@@ -295,7 +295,7 @@ describe('formatDimensionValue', () => {
         firstDayOfTheWeek,
       });
 
-      expect(result).toBe('1.5k');
+      expect(result).toBe('1,500');
     });
 
     it('should handle string number value', () => {
@@ -306,7 +306,7 @@ describe('formatDimensionValue', () => {
         firstDayOfTheWeek,
       });
 
-      expect(result).toBe('2k');
+      expect(result).toBe('2,000');
     });
 
     it('should return string for NaN value', () => {
@@ -345,7 +345,7 @@ describe('formatDimensionValue', () => {
         firstDayOfTheWeek,
       });
 
-      expect(result).toBe('1.5k');
+      expect(result).toBe('1,500');
     });
 
     it('should return currency code as-is for currencyCode subfield', () => {
