@@ -1,3 +1,4 @@
+import { RecordIndexFullscreenButton } from '@/object-record/record-index/components/RecordIndexFullscreenButton';
 import { type ReactNode } from 'react';
 
 import { ObjectSortDropdownButton } from '@/object-record/object-sort-dropdown/components/ObjectSortDropdownButton';
@@ -47,6 +48,7 @@ export const ViewBar = ({
       <TopBar
         className={className}
         leftComponent={<ViewPickerDropdown isReadOnly />}
+        rightComponent={<RecordIndexFullscreenButton />}
       />
     );
   }
@@ -77,6 +79,7 @@ export const ViewBar = ({
             </ObjectFilterDropdownComponentInstanceContext.Provider>
             <ObjectSortDropdownButton />
             {optionsDropdownButton}
+            <RecordIndexFullscreenButton />
           </>
         }
         bottomComponent={

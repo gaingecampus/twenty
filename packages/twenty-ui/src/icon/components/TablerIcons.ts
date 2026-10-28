@@ -281,6 +281,7 @@ export {
   IconMathMin,
   IconMathXy,
   IconMaximize,
+  IconMinimize,
   IconMessage,
   IconMessageCirclePlus,
   IconMinus,

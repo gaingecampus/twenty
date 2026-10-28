@@ -1,3 +1,4 @@
+import { useRecordIndexFullscreen } from '@/ui/layout/fullscreen/hooks/useRecordIndexFullscreen';
 import { RecordIndexCommandMenu } from '@/command-menu-item/components/RecordIndexCommandMenu';
 import { MAIN_CONTEXT_STORE_INSTANCE_ID } from '@/context-store/constants/MainContextStoreInstanceId';
 import { contextStoreCurrentViewIdComponentState } from '@/context-store/states/contextStoreCurrentViewIdComponentState';
@@ -50,6 +51,7 @@ const StyledTitleWithDescription = styled.div`
 `;
 
 export const RecordIndexPageHeader = () => {
+  const { isRecordIndexFullscreen } = useRecordIndexFullscreen();
   const { findObjectMetadataItemByNamePlural } =
     useFilteredObjectMetadataItems();
 
@@ -116,6 +118,7 @@ export const RecordIndexPageHeader = () => {
   return (
     <StyledResponsiveHeaderContainer>
       <PageCardHeader
+        contentOnly={isRecordIndexFullscreen}
         icon={
           <RecordIndexPageHeaderIcon objectMetadataItem={objectMetadataItem} />
         }

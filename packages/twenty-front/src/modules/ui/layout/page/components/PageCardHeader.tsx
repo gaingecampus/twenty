@@ -21,6 +21,7 @@ type PageCardHeaderProps = {
   actionButton?: ReactNode;
   centerContent?: ReactNode;
   centerTitle?: boolean;
+  contentOnly?: boolean;
   titleColor?: string;
 };
 
@@ -90,6 +91,22 @@ const StyledHeader = styled.div<{ headerLayout: HeaderLayout }>`
       justify-content: flex-start;
       justify-self: stretch;
       width: 100%;
+    }
+  }
+  &[data-content-only='true'] {
+    border-bottom: none;
+    grid-template-columns: minmax(0, 1fr);
+
+    > [data-header-part='left'],
+    > [data-header-part='actions'] {
+      display: none;
+    }
+
+    > [data-header-part='center'] {
+      grid-column: 1;
+      grid-row: 1;
+      justify-content: flex-start;
+      justify-self: stretch;
     }
   }
 `;
@@ -168,6 +185,7 @@ export const PageCardHeader = ({
   actionButton,
   centerContent,
   centerTitle = false,
+  contentOnly = false,
   titleColor,
 }: PageCardHeaderProps) => {
   const isMobile = useIsMobile();
@@ -194,7 +212,7 @@ export const PageCardHeader = ({
   );
 
   return (
-    <StyledHeader headerLayout={headerLayout}>
+    <StyledHeader headerLayout={headerLayout} data-content-only={contentOnly}>
       <StyledLeft data-header-part="left">
         {!isNavigationDrawerExpanded && (
           <NavigationDrawerCollapseButton direction="right" />

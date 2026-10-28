@@ -141,7 +141,9 @@ export const DefaultLayout = () => {
                 )}
               </PageDragDropProvider>
             </StyledPageContainer>
-            {isMobile && !showAuthModal && <MobileNavigationBar />}
+            {isMobile && !showAuthModal && !useShowFullScreen && (
+              <MobileNavigationBar />
+            )}
           </AppErrorBoundary>
         </StyledLayout>
       </FileUploadProvider>
