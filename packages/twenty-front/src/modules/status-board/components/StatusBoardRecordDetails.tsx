@@ -144,9 +144,19 @@ export const StatusBoardRecordDetails = ({
           ? `잔액 ${formatMoney(record.balance)}`
           : formatMoney(record.outstandingAmount)}
         <StyledStatusBoardRowCaption>
-          {isBank
-            ? `입금 ${formatMoney(record.incomingAmount)} · 출금 ${formatMoney(record.outgoingAmount)}`
-            : record.inclusionStatus}
+          {isBank ? (
+            <>
+              <span style={{ color: themeCssVariables.color.green }}>
+                입금 {formatMoney(record.incomingAmount)}
+              </span>
+              {' · '}
+              <span style={{ color: themeCssVariables.color.red }}>
+                출금 {formatMoney(record.outgoingAmount)}
+              </span>
+            </>
+          ) : (
+            record.inclusionStatus
+          )}
         </StyledStatusBoardRowCaption>
       </StyledStatusBoardRowAside>
     );

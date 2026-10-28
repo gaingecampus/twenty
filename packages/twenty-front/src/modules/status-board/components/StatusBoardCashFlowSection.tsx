@@ -31,7 +31,11 @@ import { isDefined } from 'twenty-shared/utils';
 
 const StyledFormula = styled(StyledDashboardKpiGrid)`
   align-items: center;
-  grid-template-columns: minmax(0, 1fr) repeat(3, 32px minmax(0, 1fr));
+  grid-template-columns: minmax(0, max-content) repeat(
+      3,
+      32px minmax(0, max-content)
+    );
+  justify-content: space-between;
 
   @container (max-width: 720px) {
     grid-template-columns: 32px minmax(0, 1fr);
@@ -244,7 +248,16 @@ const CashFlowValues = ({
             getIcon('IconEqual'),
           ][index];
           const isExpense = label === '지출대기액';
-          const tone = label === '이번달 가용액' ? 'blue' : undefined;
+          const tone =
+            label === '잔액' || label === '입금예정액'
+              ? 'green'
+              : isExpense
+                ? 'red'
+                : label === '이번달 가용액'
+                  ? amount !== null && amount < 0
+                    ? 'red'
+                    : 'blue'
+                  : undefined;
           const needsSnapshot = !isExpense;
           const needsExpenses = isExpense || label === '이번달 가용액';
           const isUnavailable =
