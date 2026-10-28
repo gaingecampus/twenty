@@ -23,6 +23,7 @@ import {
 import { getAbsoluteImageUrl } from '~/utils/image/getAbsoluteImageUrl';
 
 type ShowPageSummaryCardProps = {
+  avatar?: ReactNode;
   avatarPlaceholder: string;
   avatarType: AvatarType;
   date: string;
@@ -118,6 +119,7 @@ const StyledShowPageSummaryCardSkeletonLoader = () => {
 };
 
 export const ShowPageSummaryCard = ({
+  avatar,
   avatarPlaceholder,
   avatarType,
   date,
@@ -154,26 +156,28 @@ export const ShowPageSummaryCard = ({
 
   return (
     <StyledShowPageSummaryCard isMobile={isMobile}>
-      <StyledAvatarWrapper
-        isAvatarEditable={isDefined(onUploadPicture)}
-        hasIcon={isDefined(icon)}
-      >
-        <Avatar
-          avatarUrl={getAbsoluteImageUrl(logoOrAvatar)}
-          onClick={onUploadPicture ? handleAvatarClick : undefined}
-          size="xl"
-          placeholderColorSeed={id}
-          placeholder={avatarPlaceholder}
-          type={icon ? 'icon' : avatarType}
-          Icon={icon}
-          iconColor={iconColor}
-        />
-        <StyledFileInput
-          ref={inputFileRef}
-          onChange={onFileChange}
-          type="file"
-        />
-      </StyledAvatarWrapper>
+      {avatar ?? (
+        <StyledAvatarWrapper
+          isAvatarEditable={isDefined(onUploadPicture)}
+          hasIcon={isDefined(icon)}
+        >
+          <Avatar
+            avatarUrl={getAbsoluteImageUrl(logoOrAvatar)}
+            onClick={onUploadPicture ? handleAvatarClick : undefined}
+            size="xl"
+            placeholderColorSeed={id}
+            placeholder={avatarPlaceholder}
+            type={icon ? 'icon' : avatarType}
+            Icon={icon}
+            iconColor={iconColor}
+          />
+          <StyledFileInput
+            ref={inputFileRef}
+            onChange={onFileChange}
+            type="file"
+          />
+        </StyledAvatarWrapper>
+      )}
       <StyledInfoContainer isMobile={isMobile}>
         <StyledTitle isMobile={isMobile}>{title}</StyledTitle>
         {beautifiedCreatedAt && (

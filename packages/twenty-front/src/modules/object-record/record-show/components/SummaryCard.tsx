@@ -1,3 +1,4 @@
+import { MessageListAvatarPicker } from '@/object-record/record-show/components/MessageListAvatarPicker';
 import { allowRequestsToTwentyIconsState } from '@/client-config/states/allowRequestsToTwentyIcons';
 import { useLabelIdentifierFieldMetadataItem } from '@/object-metadata/hooks/useLabelIdentifierFieldMetadataItem';
 import { useObjectMetadataItem } from '@/object-metadata/hooks/useObjectMetadataItem';
@@ -78,6 +79,20 @@ export const SummaryCard = ({
 
   return (
     <ShowPageSummaryCard
+      avatar={
+        objectNameSingular === 'messageList' &&
+        objectMetadataItem.fields.some(
+          (field) => field.name === 'avatarEmoji',
+        ) &&
+        objectMetadataItem.fields.some(
+          (field) => field.name === 'avatarColor',
+        ) ? (
+          <MessageListAvatarPicker
+            recordId={objectRecordId}
+            name={recordIdentifier?.name ?? ''}
+          />
+        ) : undefined
+      }
       isMobile={isMobile}
       id={objectRecordId}
       logoOrAvatar={recordIdentifier?.avatarUrl ?? ''}
