@@ -1,3 +1,5 @@
+import { AddSendbeeProviderFastInstanceCommand } from 'src/database/commands/upgrade-version-command/2-30/2-30-instance-command-fast-1807800000001-add-sendbee-provider';
+import { AddCouponDispatchFastInstanceCommand } from 'src/database/commands/upgrade-version-command/2-30/2-30-instance-command-fast-1807800000000-add-coupon-dispatch';
 import { RestoreWorkspaceUiThemeCompatibilityFastInstanceCommand } from 'src/database/commands/upgrade-version-command/2-30/2-30-instance-command-fast-1807700000000-restore-workspace-ui-theme-compatibility';
 import { DropWorkspaceUiThemeFastInstanceCommand } from 'src/database/commands/upgrade-version-command/2-29/2-29-instance-command-fast-1807600000000-drop-workspace-ui-theme';
 // Auto-edited by generate:instance-command — do not edit manually
@@ -97,6 +99,8 @@ import { AddViewFieldGroupIsCollapsedFastInstanceCommand } from 'src/database/co
 import { AddSmsDispatchFastInstanceCommand } from 'src/database/commands/upgrade-version-command/2-28/2-28-instance-command-fast-1792195337774-add-sms-dispatch';
 
 export const INSTANCE_COMMANDS = [
+  AddCouponDispatchFastInstanceCommand,
+  AddSendbeeProviderFastInstanceCommand,
   RestoreWorkspaceUiThemeCompatibilityFastInstanceCommand,
   DropWorkspaceUiThemeFastInstanceCommand,
   AddMessageSendingStatusFastInstanceCommand,
