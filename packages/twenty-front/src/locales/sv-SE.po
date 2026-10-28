@@ -3313,7 +3313,7 @@ msgstr "av {author}"
 #. js-lingui-id: 8Pfllj
 #: src/modules/auth/sign-in-up/components/FooterNote.tsx
 msgid "By using Twenty, you agree to the"
-msgstr "Genom att använda Twenty godkänner du"
+msgstr "Genom att använda 가인지 CRM godkänner du"
 
 #. js-lingui-id: Yx41df
 #: src/modules/auth/sign-in-up/components/FooterNote.tsx
@@ -3754,7 +3754,7 @@ msgstr ""
 #: src/modules/settings/billing/hooks/useHandleCheckoutSession.ts
 #: src/modules/settings/billing/hooks/useHandleCheckoutSession.ts
 msgid "Checkout session error. Please retry or contact Twenty team"
-msgstr "Fel under betalningssession. Försök igen eller kontakta Twenty-teamet"
+msgstr "Fel under betalningssession. Försök igen eller kontakta 가인지 CRM-teamet"
 
 #. js-lingui-id: SviKkE
 #: src/pages/settings/profile/appearance/components/LocalePicker.tsx
@@ -7468,7 +7468,7 @@ msgstr "Fel vid avbrytning av planbyte."
 #. js-lingui-id: QmR+2U
 #: src/modules/settings/billing/hooks/useEndSubscriptionTrialPeriod.ts
 msgid "Error while ending trial period. Please contact Twenty team."
-msgstr "Fel vid avslutning av provperioden. Vänligen kontakta Twenty-teamet."
+msgstr "Fel vid avslutning av provperioden. Vänligen kontakta 가인지 CRM-teamet."
 
 #. js-lingui-id: 5g78zo
 #: src/pages/settings/members/SettingsWorkspaceMember.tsx
@@ -13491,7 +13491,7 @@ msgstr ""
 #. js-lingui-id: NRvxzv
 #: src/pages/not-found/NotFound.tsx
 msgid "Page Not Found | Twenty"
-msgstr "Sidan kunde inte hittas | Twenty"
+msgstr "Sidan kunde inte hittas | 가인지 CRM"
 
 #. js-lingui-id: sF+Xp9
 #: src/modules/settings/event-logs/components/EventLogTableSelector.tsx
@@ -17129,7 +17129,7 @@ msgstr "Synkronisera med Outlook"
 #. js-lingui-id: +9x4tK
 #: src/pages/onboarding/SyncEmails.tsx
 msgid "Sync your Emails and Calendar with Twenty. Choose your privacy settings."
-msgstr "Synkronisera din e-post och kalender med Twenty. Välj dina sekretessinställningar."
+msgstr "Synkronisera din e-post och kalender med 가인지 CRM. Välj dina sekretessinställningar."
 
 #. js-lingui-id: N2FcBE
 #: src/modules/settings/accounts/components/SettingsAccountsConnectedAccountsRowRightContainer.tsx
@@ -18312,7 +18312,7 @@ msgstr "Turkos"
 #. js-lingui-id: JnaRPe
 #: src/modules/spreadsheet-import/steps/components/MatchColumnsStep/components/ColumnGrid.tsx
 msgid "Twenty fields"
-msgstr "Twenty-fält"
+msgstr "가인지 CRM-fält"
 
 #. js-lingui-id: YIjS4q
 #: src/modules/ai/components/SettingsAgentModelCapabilities.tsx
@@ -19714,7 +19714,7 @@ msgstr ""
 #: src/pages/auth/SignInUp.tsx
 #: src/pages/auth/SignInUpV2.tsx
 msgid "Welcome to Twenty"
-msgstr "Välkommen till Twenty"
+msgstr "Välkommen till 가인지 CRM"
 
 #. js-lingui-id: t8ZvkC
 #: src/pages/auth/SignInUp.tsx

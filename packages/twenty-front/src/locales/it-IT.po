@@ -3313,7 +3313,7 @@ msgstr "di {author}"
 #. js-lingui-id: 8Pfllj
 #: src/modules/auth/sign-in-up/components/FooterNote.tsx
 msgid "By using Twenty, you agree to the"
-msgstr "Utilizzando Twenty, accetti la"
+msgstr "Utilizzando 가인지 CRM, accetti la"
 
 #. js-lingui-id: Yx41df
 #: src/modules/auth/sign-in-up/components/FooterNote.tsx
@@ -3754,7 +3754,7 @@ msgstr ""
 #: src/modules/settings/billing/hooks/useHandleCheckoutSession.ts
 #: src/modules/settings/billing/hooks/useHandleCheckoutSession.ts
 msgid "Checkout session error. Please retry or contact Twenty team"
-msgstr "Errore nella sessione di pagamento. Riprova o contatta il team di Twenty"
+msgstr "Errore nella sessione di pagamento. Riprova o contatta il team di 가인지 CRM"
 
 #. js-lingui-id: SviKkE
 #: src/pages/settings/profile/appearance/components/LocalePicker.tsx
@@ -7468,7 +7468,7 @@ msgstr "Errore durante l'annullamento del cambio di piano."
 #. js-lingui-id: QmR+2U
 #: src/modules/settings/billing/hooks/useEndSubscriptionTrialPeriod.ts
 msgid "Error while ending trial period. Please contact Twenty team."
-msgstr "Errore durante la conclusione del periodo di prova. Si prega di contattare il team di Twenty."
+msgstr "Errore durante la conclusione del periodo di prova. Si prega di contattare il team di 가인지 CRM."
 
 #. js-lingui-id: 5g78zo
 #: src/pages/settings/members/SettingsWorkspaceMember.tsx
@@ -13489,7 +13489,7 @@ msgstr ""
 #. js-lingui-id: NRvxzv
 #: src/pages/not-found/NotFound.tsx
 msgid "Page Not Found | Twenty"
-msgstr "Pagina non trovata | Twenty"
+msgstr "Pagina non trovata | 가인지 CRM"
 
 #. js-lingui-id: sF+Xp9
 #: src/modules/settings/event-logs/components/EventLogTableSelector.tsx
@@ -17123,7 +17123,7 @@ msgstr "Sincronizza con Outlook"
 #. js-lingui-id: +9x4tK
 #: src/pages/onboarding/SyncEmails.tsx
 msgid "Sync your Emails and Calendar with Twenty. Choose your privacy settings."
-msgstr "Sincronizza le tue email e il calendario con Twenty. Scegli le tue impostazioni sulla privacy."
+msgstr "Sincronizza le tue email e il calendario con 가인지 CRM. Scegli le tue impostazioni sulla privacy."
 
 #. js-lingui-id: N2FcBE
 #: src/modules/settings/accounts/components/SettingsAccountsConnectedAccountsRowRightContainer.tsx
@@ -18306,7 +18306,7 @@ msgstr "Turchese"
 #. js-lingui-id: JnaRPe
 #: src/modules/spreadsheet-import/steps/components/MatchColumnsStep/components/ColumnGrid.tsx
 msgid "Twenty fields"
-msgstr "Campi di Twenty"
+msgstr "Campi di 가인지 CRM"
 
 #. js-lingui-id: YIjS4q
 #: src/modules/ai/components/SettingsAgentModelCapabilities.tsx
@@ -19708,7 +19708,7 @@ msgstr ""
 #: src/pages/auth/SignInUp.tsx
 #: src/pages/auth/SignInUpV2.tsx
 msgid "Welcome to Twenty"
-msgstr "Benvenuto in Twenty"
+msgstr "Benvenuto in 가인지 CRM"
 
 #. js-lingui-id: t8ZvkC
 #: src/pages/auth/SignInUp.tsx

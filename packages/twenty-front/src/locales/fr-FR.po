@@ -3313,7 +3313,7 @@ msgstr "par {author}"
 #. js-lingui-id: 8Pfllj
 #: src/modules/auth/sign-in-up/components/FooterNote.tsx
 msgid "By using Twenty, you agree to the"
-msgstr "En utilisant Twenty, vous acceptez les"
+msgstr "En utilisant 가인지 CRM, vous acceptez les"
 
 #. js-lingui-id: Yx41df
 #: src/modules/auth/sign-in-up/components/FooterNote.tsx
@@ -3754,7 +3754,7 @@ msgstr ""
 #: src/modules/settings/billing/hooks/useHandleCheckoutSession.ts
 #: src/modules/settings/billing/hooks/useHandleCheckoutSession.ts
 msgid "Checkout session error. Please retry or contact Twenty team"
-msgstr "Erreur de session de paiement. Veuillez réessayer ou contacter l'équipe Twenty"
+msgstr "Erreur de session de paiement. Veuillez réessayer ou contacter l'équipe 가인지 CRM"
 
 #. js-lingui-id: SviKkE
 #: src/pages/settings/profile/appearance/components/LocalePicker.tsx
@@ -7468,7 +7468,7 @@ msgstr "Erreur lors de l'annulation du changement de plan."
 #. js-lingui-id: QmR+2U
 #: src/modules/settings/billing/hooks/useEndSubscriptionTrialPeriod.ts
 msgid "Error while ending trial period. Please contact Twenty team."
-msgstr "Erreur lors de la fin de la période d'essai. Veuillez contacter l'équipe Twenty."
+msgstr "Erreur lors de la fin de la période d'essai. Veuillez contacter l'équipe 가인지 CRM."
 
 #. js-lingui-id: 5g78zo
 #: src/pages/settings/members/SettingsWorkspaceMember.tsx
@@ -13489,7 +13489,7 @@ msgstr ""
 #. js-lingui-id: NRvxzv
 #: src/pages/not-found/NotFound.tsx
 msgid "Page Not Found | Twenty"
-msgstr "Page non trouvée | Twenty"
+msgstr "Page non trouvée | 가인지 CRM"
 
 #. js-lingui-id: sF+Xp9
 #: src/modules/settings/event-logs/components/EventLogTableSelector.tsx
@@ -17123,7 +17123,7 @@ msgstr "Synchroniser avec Outlook"
 #. js-lingui-id: +9x4tK
 #: src/pages/onboarding/SyncEmails.tsx
 msgid "Sync your Emails and Calendar with Twenty. Choose your privacy settings."
-msgstr "Synchronisez vos e-mails et votre calendrier avec Twenty. Choisissez vos paramètres de confidentialité."
+msgstr "Synchronisez vos e-mails et votre calendrier avec 가인지 CRM. Choisissez vos paramètres de confidentialité."
 
 #. js-lingui-id: N2FcBE
 #: src/modules/settings/accounts/components/SettingsAccountsConnectedAccountsRowRightContainer.tsx
@@ -18306,7 +18306,7 @@ msgstr "Turquoise"
 #. js-lingui-id: JnaRPe
 #: src/modules/spreadsheet-import/steps/components/MatchColumnsStep/components/ColumnGrid.tsx
 msgid "Twenty fields"
-msgstr "Champs Twenty"
+msgstr "Champs 가인지 CRM"
 
 #. js-lingui-id: YIjS4q
 #: src/modules/ai/components/SettingsAgentModelCapabilities.tsx
@@ -19708,7 +19708,7 @@ msgstr ""
 #: src/pages/auth/SignInUp.tsx
 #: src/pages/auth/SignInUpV2.tsx
 msgid "Welcome to Twenty"
-msgstr "Bienvenue sur Twenty"
+msgstr "Bienvenue sur 가인지 CRM"
 
 #. js-lingui-id: t8ZvkC
 #: src/pages/auth/SignInUp.tsx

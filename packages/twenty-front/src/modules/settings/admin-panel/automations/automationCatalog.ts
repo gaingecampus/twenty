@@ -100,7 +100,7 @@ export const AUTOMATION_CATALOG = [
   {
     id: 'MARKETPLACE_CATALOG_SYNC_CRON_PATTERN',
     name: '마켓플레이스 목록 동기화',
-    origin: 'Twenty 기본',
+    origin: '가인지 CRM 기본',
     category: '시스템',
     schedule: '0 * * * *',
     description:
@@ -111,7 +111,7 @@ export const AUTOMATION_CATALOG = [
   {
     id: 'STALE_REGISTRATION_CLEANUP_CRON_PATTERN',
     name: '만료된 앱 등록 정리',
-    origin: 'Twenty 기본',
+    origin: '가인지 CRM 기본',
     category: '시스템',
     schedule: '30 2 * * *',
     description:
@@ -122,7 +122,7 @@ export const AUTOMATION_CATALOG = [
   {
     id: 'APPLICATION_VERSION_CHECK_CRON_PATTERN',
     name: '앱 버전 확인',
-    origin: 'Twenty 기본',
+    origin: '가인지 CRM 기본',
     category: '시스템',
     schedule: '0 */6 * * *',
     description:
@@ -133,7 +133,7 @@ export const AUTOMATION_CATALOG = [
   {
     id: 'BILLING_REMINDER_CRON_PATTERN',
     name: '결제 알림',
-    origin: 'Twenty 기본',
+    origin: '가인지 CRM 기본',
     category: '시스템',
     schedule: '0 8 * * *',
     description:
@@ -144,7 +144,7 @@ export const AUTOMATION_CATALOG = [
   {
     id: 'CODE_INTERPRETER_SESSION_CLEANUP_CRON_PATTERN',
     name: '코드 실행 세션 정리',
-    origin: 'Twenty 기본',
+    origin: '가인지 CRM 기본',
     category: '시스템',
     schedule: '0 * * * *',
     description:
@@ -155,7 +155,7 @@ export const AUTOMATION_CATALOG = [
   {
     id: 'ENTERPRISE_KEY_VALIDATION_CRON_PATTERN',
     name: '엔터프라이즈 키 검증',
-    origin: 'Twenty 기본',
+    origin: '가인지 CRM 기본',
     category: '시스템',
     schedule: '0 4 * * *',
     description:
@@ -166,7 +166,7 @@ export const AUTOMATION_CATALOG = [
   {
     id: 'EVENT_LOG_CLEANUP_CRON_PATTERN',
     name: '이벤트 로그 정리',
-    origin: 'Twenty 기본',
+    origin: '가인지 CRM 기본',
     category: '시스템',
     schedule: '0 3 * * *',
     description:
@@ -177,7 +177,7 @@ export const AUTOMATION_CATALOG = [
   {
     id: 'ROTATE_SIGNING_KEYS_CRON_PATTERN',
     name: '서명 키 순환',
-    origin: 'Twenty 기본',
+    origin: '가인지 CRM 기본',
     category: '시스템',
     schedule: '15 3 * * *',
     description:
@@ -188,7 +188,7 @@ export const AUTOMATION_CATALOG = [
   {
     id: 'CRON_TRIGGER_CRON_PATTERN',
     name: '예약 로직 함수 확인',
-    origin: 'Twenty 기본',
+    origin: '가인지 CRM 기본',
     category: '시스템',
     schedule: '* * * * *',
     description:
@@ -199,7 +199,7 @@ export const AUTOMATION_CATALOG = [
   {
     id: 'CHECK_PUBLIC_DOMAINS_VALID_RECORDS_CRON_PATTERN',
     name: '공개 도메인 DNS 점검',
-    origin: 'Twenty 기본',
+    origin: '가인지 CRM 기본',
     category: '시스템',
     schedule: '0 * * * *',
     description:
@@ -210,7 +210,7 @@ export const AUTOMATION_CATALOG = [
   {
     id: 'CONFIG_VARIABLES_REFRESH_CRON_INTERVAL',
     name: '설정값 새로고침',
-    origin: 'Twenty 기본',
+    origin: '가인지 CRM 기본',
     category: '시스템',
     schedule: '*/15 * * * * *',
     description:
@@ -221,7 +221,7 @@ export const AUTOMATION_CATALOG = [
   {
     id: 'CHECK_CUSTOM_DOMAIN_VALID_RECORDS_CRON_PATTERN',
     name: '사용자 도메인 DNS 점검',
-    origin: 'Twenty 기본',
+    origin: '가인지 CRM 기본',
     category: '시스템',
     schedule: '0 * * * *',
     description:
@@ -232,7 +232,7 @@ export const AUTOMATION_CATALOG = [
   {
     id: 'TRASH_CLEANUP_CRON_PATTERN',
     name: '휴지통 정리',
-    origin: 'Twenty 기본',
+    origin: '가인지 CRM 기본',
     category: '시스템',
     schedule: '10 0 * * *',
     description:
@@ -243,7 +243,7 @@ export const AUTOMATION_CATALOG = [
   {
     id: 'CALENDAR_EVENT_LIST_FETCH_CRON_PATTERN',
     name: '캘린더 이벤트 목록 수집',
-    origin: 'Twenty 기본',
+    origin: '가인지 CRM 기본',
     category: '시스템',
     schedule: '*/5 * * * *',
     description:
@@ -254,7 +254,7 @@ export const AUTOMATION_CATALOG = [
   {
     id: 'CALENDAR_EVENTS_IMPORT_CRON_PATTERN',
     name: '캘린더 이벤트 가져오기',
-    origin: 'Twenty 기본',
+    origin: '가인지 CRM 기본',
     category: '시스템',
     schedule: '*/1 * * * *',
     description:
@@ -265,7 +265,7 @@ export const AUTOMATION_CATALOG = [
   {
     id: 'CALENDAR_ONGOING_STALE_CRON_PATTERN',
     name: '정체된 캘린더 동기화 처리',
-    origin: 'Twenty 기본',
+    origin: '가인지 CRM 기본',
     category: '시스템',
     schedule: '0 * * * *',
     description:
@@ -276,7 +276,7 @@ export const AUTOMATION_CATALOG = [
   {
     id: 'CALENDAR_RELAUNCH_FAILED_CALENDAR_CHANNELS_CRON_PATTERN',
     name: '실패한 캘린더 동기화 재시도',
-    origin: 'Twenty 기본',
+    origin: '가인지 CRM 기본',
     category: '시스템',
     schedule: '*/30 * * * *',
     description:
@@ -287,7 +287,7 @@ export const AUTOMATION_CATALOG = [
   {
     id: 'WEBHOOK_SUBSCRIPTION_RENEWAL_CRON_PATTERN',
     name: '웹훅 구독 갱신',
-    origin: 'Twenty 기본',
+    origin: '가인지 CRM 기본',
     category: '시스템',
     schedule: '0 * * * *',
     description:
@@ -298,7 +298,7 @@ export const AUTOMATION_CATALOG = [
   {
     id: 'MESSAGING_MESSAGE_LIST_FETCH_CRON_PATTERN',
     name: '메일 목록 수집',
-    origin: 'Twenty 기본',
+    origin: '가인지 CRM 기본',
     category: '시스템',
     schedule: '2-59/5 * * * *',
     description:
@@ -309,7 +309,7 @@ export const AUTOMATION_CATALOG = [
   {
     id: 'MESSAGING_MESSAGES_IMPORT_CRON_PATTERN',
     name: '메일 가져오기',
-    origin: 'Twenty 기본',
+    origin: '가인지 CRM 기본',
     category: '시스템',
     schedule: '*/1 * * * *',
     description:
@@ -320,7 +320,7 @@ export const AUTOMATION_CATALOG = [
   {
     id: 'MESSAGING_ONGOING_STALE_CRON_PATTERN',
     name: '정체된 메일 동기화 처리',
-    origin: 'Twenty 기본',
+    origin: '가인지 CRM 기본',
     category: '시스템',
     schedule: '0 * * * *',
     description:
@@ -331,7 +331,7 @@ export const AUTOMATION_CATALOG = [
   {
     id: 'MESSAGING_RELAUNCH_FAILED_MESSAGE_CHANNELS_CRON_PATTERN',
     name: '실패한 메일 동기화 재시도',
-    origin: 'Twenty 기본',
+    origin: '가인지 CRM 기본',
     category: '시스템',
     schedule: '*/30 * * * *',
     description:
@@ -342,7 +342,7 @@ export const AUTOMATION_CATALOG = [
   {
     id: 'MESSAGING_MESSAGE_CHANNEL_SYNC_STATUS_MONITORING_CRON_PATTERN',
     name: '메일 동기화 상태 점검',
-    origin: 'Twenty 기본',
+    origin: '가인지 CRM 기본',
     category: '시스템',
     schedule: '2/10 * * * *',
     description:
@@ -353,7 +353,7 @@ export const AUTOMATION_CATALOG = [
   {
     id: 'CLEAN_WORKFLOW_RUN_CRON_PATTERN',
     name: '워크플로 실행 기록 정리',
-    origin: 'Twenty 기본',
+    origin: '가인지 CRM 기본',
     category: '시스템',
     schedule: '0 */3 * * *',
     description:
@@ -364,7 +364,7 @@ export const AUTOMATION_CATALOG = [
   {
     id: 'WORKFLOW_HANDLE_STALED_RUNS_CRON_PATTERN',
     name: '정체된 워크플로 처리',
-    origin: 'Twenty 기본',
+    origin: '가인지 CRM 기본',
     category: '시스템',
     schedule: '*/10 * * * *',
     description:
@@ -375,7 +375,7 @@ export const AUTOMATION_CATALOG = [
   {
     id: 'WORKFLOW_RUN_ENQUEUE_CRON_PATTERN',
     name: '대기 워크플로 실행 요청',
-    origin: 'Twenty 기본',
+    origin: '가인지 CRM 기본',
     category: '시스템',
     schedule: '* * * * *',
     description:
@@ -386,7 +386,7 @@ export const AUTOMATION_CATALOG = [
   {
     id: 'WORKFLOW_CRON_TRIGGER_CRON_PATTERN',
     name: '예약 워크플로 확인',
-    origin: 'Twenty 기본',
+    origin: '가인지 CRM 기본',
     category: '시스템',
     schedule: '* * * * *',
     description:

@@ -3326,7 +3326,7 @@ msgstr "제작: {author}"
 #. js-lingui-id: 8Pfllj
 #: src/modules/auth/sign-in-up/components/FooterNote.tsx
 msgid "By using Twenty, you agree to the"
-msgstr "Twenty를 사용함으로써 귀하는 다음에 동의합니다"
+msgstr "가인지 CRM을 사용함으로써 귀하는 다음에 동의합니다"
 
 #. js-lingui-id: Yx41df
 #: src/modules/auth/sign-in-up/components/FooterNote.tsx
@@ -3767,7 +3767,7 @@ msgstr ""
 #: src/modules/settings/billing/hooks/useHandleCheckoutSession.ts
 #: src/modules/settings/billing/hooks/useHandleCheckoutSession.ts
 msgid "Checkout session error. Please retry or contact Twenty team"
-msgstr "결제 세션 오류입니다. 다시 시도하거나 Twenty 팀에 문의하십시오"
+msgstr "결제 세션 오류입니다. 다시 시도하거나 가인지 CRM 팀에 문의하십시오"
 
 #. js-lingui-id: SviKkE
 #: src/pages/settings/profile/appearance/components/LocalePicker.tsx
@@ -7489,7 +7489,7 @@ msgstr "플랜 전환 취소 중 오류 발생."
 #. js-lingui-id: QmR+2U
 #: src/modules/settings/billing/hooks/useEndSubscriptionTrialPeriod.ts
 msgid "Error while ending trial period. Please contact Twenty team."
-msgstr "시험 기간 종료 중 오류가 발생했습니다. Twenty 팀에 문의하세요."
+msgstr "시험 기간 종료 중 오류가 발생했습니다. 가인지 CRM 팀에 문의하세요."
 
 #. js-lingui-id: 5g78zo
 #: src/pages/settings/members/SettingsWorkspaceMember.tsx
@@ -9205,7 +9205,7 @@ msgstr "시스템 색인 숨기기"
 #. js-lingui-id: 1ETc0T
 #: src/pages/settings/community/SettingsCommunity.tsx
 msgid "Hire a partner to help you implement and customize Twenty."
-msgstr "Twenty를 구현하고 사용자 정의하는 데 도움을 줄 파트너를 고용하세요."
+msgstr "가인지 CRM을 구현하고 사용자 정의하는 데 도움을 줄 파트너를 고용하세요."
 
 #. js-lingui-id: i0qMbr
 #: src/modules/navigation/components/MainNavigationDrawerTabsRow.tsx
@@ -13525,7 +13525,7 @@ msgstr "페이지 이름"
 #. js-lingui-id: NRvxzv
 #: src/pages/not-found/NotFound.tsx
 msgid "Page Not Found | Twenty"
-msgstr "페이지를 찾을 수 없음 | Twenty"
+msgstr "페이지를 찾을 수 없음 | 가인지 CRM"
 
 #. js-lingui-id: sF+Xp9
 #: src/modules/settings/event-logs/components/EventLogTableSelector.tsx
@@ -17164,7 +17164,7 @@ msgstr "Outlook과 동기화"
 #. js-lingui-id: +9x4tK
 #: src/pages/onboarding/SyncEmails.tsx
 msgid "Sync your Emails and Calendar with Twenty. Choose your privacy settings."
-msgstr "이메일과 캘린더를 Twenty와 동기화하세요. 개인정보 설정을 선택하세요."
+msgstr "이메일과 캘린더를 가인지 CRM과 동기화하세요. 개인정보 설정을 선택하세요."
 
 #. js-lingui-id: N2FcBE
 #: src/modules/settings/accounts/components/SettingsAccountsConnectedAccountsRowRightContainer.tsx
@@ -17425,7 +17425,7 @@ msgid ""
 "```\n"
 "\n"
 "See the [Getting Started guide](https://twenty.com/developers/extend/apps/getting-started) for the full walkthrough, and [Building Apps](https://twenty.com/developers/extend/apps/building) for the `defineApplication` / `defineEntity` APIs."
-msgstr "모든 Twenty 작업공간이 실행되는 기본 데이터 모델입니다.\n\n#### \\\"토대\\\"의 의미\n\n모든 Twenty 작업공간은 이 개체 세트로 시작됩니다. 관계, 활동, 보고 등 CRM의 형태를 정의합니다. 마켓플레이스 앱, AI 에이전트, 맞춤 개체를 포함한 다른 모든 항목이 여기에 연결됩니다.\n\n#### 포함된 개체\n- **고객 및 기업**: 연락처 및 계정 기록\n- **문의**: 영업 파이프라인\n- **노트 및 할 일**: 활동 및 후속 조치\n- **워크플로 및 대시보드**: 자동화 및 보고\n\n이 앱을 제거하면 나머지 20개는 중단될 것이 없습니다.\n\n#### 나만의 앱을 빌드하세요\n\n자신만의 개체, 필드, 논리 함수 또는 AI 기술로 Twenty를 확장하세요. 하나의 명령으로 새 앱을 스캐폴드합니다:\n\n```bash\nnpx create-twenty-app@latest my-twenty-app\n```\n\n그런 다음 폴더 내부:\n\n```bash\ncd my-twenty-app\narn 20 dev\n```\n\n[시작하기]를 참조하세요. 전체 연습은 가이드](https://twenty.com/developers/extend/apps/getting-started), `defineApplication` / `defineEntity` API는 [앱 빌드](https://twenty.com/developers/extend/apps/building)를 참조하세요."
+msgstr "모든 가인지 CRM 작업공간이 실행되는 기본 데이터 모델입니다.\n\n#### \\\"토대\\\"의 의미\n\n모든 가인지 CRM 작업공간은 이 개체 세트로 시작됩니다. 관계, 활동, 보고 등 CRM의 형태를 정의합니다. 마켓플레이스 앱, AI 에이전트, 맞춤 개체를 포함한 다른 모든 항목이 여기에 연결됩니다.\n\n#### 포함된 개체\n- **고객 및 기업**: 연락처 및 계정 기록\n- **문의**: 영업 파이프라인\n- **노트 및 할 일**: 활동 및 후속 조치\n- **워크플로 및 대시보드**: 자동화 및 보고\n\n이 앱을 제거하면 나머지 20개는 중단될 것이 없습니다.\n\n#### 나만의 앱을 빌드하세요\n\n자신만의 개체, 필드, 논리 함수 또는 AI 기술로 가인지 CRM을 확장하세요. 하나의 명령으로 새 앱을 스캐폴드합니다:\n\n```bash\nnpx create-twenty-app@latest my-twenty-app\n```\n\n그런 다음 폴더 내부:\n\n```bash\ncd my-twenty-app\narn 20 dev\n```\n\n[시작하기]를 참조하세요. 전체 연습은 가이드](https://twenty.com/developers/extend/apps/getting-started), `defineApplication` / `defineEntity` API는 [앱 빌드](https://twenty.com/developers/extend/apps/building)를 참조하세요."
 
 #. js-lingui-id: /kfzmx
 #: src/pages/settings/legal/SettingsLegalDpa.tsx
@@ -18345,7 +18345,7 @@ msgstr "터콰이즈"
 #. js-lingui-id: JnaRPe
 #: src/modules/spreadsheet-import/steps/components/MatchColumnsStep/components/ColumnGrid.tsx
 msgid "Twenty fields"
-msgstr "Twenty 필드"
+msgstr "가인지 CRM 필드"
 
 #. js-lingui-id: YIjS4q
 #: src/modules/ai/components/SettingsAgentModelCapabilities.tsx
@@ -19752,7 +19752,7 @@ msgstr "무게"
 #: src/pages/auth/SignInUp.tsx
 #: src/pages/auth/SignInUpV2.tsx
 msgid "Welcome to Twenty"
-msgstr "Twenty에 오신 것을 환영합니다"
+msgstr "가인지 CRM에 오신 것을 환영합니다"
 
 #. js-lingui-id: t8ZvkC
 #: src/pages/auth/SignInUp.tsx
@@ -20540,7 +20540,7 @@ msgstr "이 워크스페이스의 모든 구성원에게 적용됩니다. 라이
 
 #: src/modules/settings/workspace/components/SettingsWorkspaceUiThemePicker.tsx
 msgid "The current Twenty look"
-msgstr "Twenty의 기본 디자인"
+msgstr "가인지 CRM의 기본 디자인"
 
 #: src/modules/settings/workspace/components/SettingsWorkspaceUiThemePicker.tsx
 msgid "Pretendard, royal-blue navigation, rounded toolbar chips"

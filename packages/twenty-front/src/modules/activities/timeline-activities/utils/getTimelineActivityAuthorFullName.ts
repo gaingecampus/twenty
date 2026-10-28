@@ -1,3 +1,4 @@
+import { APP_DISPLAY_NAME } from '@/branding/constants/AppDisplayName';
 import { type TimelineActivity } from '@/activities/timeline-activities/types/TimelineActivity';
 import { type CurrentWorkspaceMember } from '@/auth/states/currentWorkspaceMemberState';
 import { isDefined } from 'twenty-shared/utils';
@@ -12,5 +13,5 @@ export const getTimelineActivityAuthorFullName = (
       ? currentUserLabel
       : `${event.workspaceMember?.name.firstName} ${event.workspaceMember?.name.lastName}`;
   }
-  return 'Twenty';
+  return APP_DISPLAY_NAME;
 };

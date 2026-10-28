@@ -9,7 +9,7 @@ import { Section } from 'twenty-ui/layout';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 import { H2Title } from 'twenty-ui/typography';
 
-const ORIGIN_FILTERS = ['GAINGE 직접 개발', 'Twenty 기본', '전체'] as const;
+const ORIGIN_FILTERS = ['GAINGE 직접 개발', '가인지 CRM 기본', '전체'] as const;
 
 const StyledFilters = styled.div`
   display: flex;

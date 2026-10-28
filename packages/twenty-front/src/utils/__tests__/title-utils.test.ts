@@ -49,7 +49,7 @@ describe('title-utils', () => {
     expect(getPageTitleFromPath('/settings/general')).toBe(
       'General - Settings',
     );
-    expect(getPageTitleFromPath('/')).toBe('Twenty');
-    expect(getPageTitleFromPath('/random')).toBe('Twenty');
+    expect(getPageTitleFromPath('/')).toBe('가인지 CRM');
+    expect(getPageTitleFromPath('/random')).toBe('가인지 CRM');
   });
 });

@@ -3313,7 +3313,7 @@ msgstr "tekijä: {author}"
 #. js-lingui-id: 8Pfllj
 #: src/modules/auth/sign-in-up/components/FooterNote.tsx
 msgid "By using Twenty, you agree to the"
-msgstr "Twenty:tä käyttäessäsi hyväksyt"
+msgstr "가인지 CRM:tä käyttäessäsi hyväksyt"
 
 #. js-lingui-id: Yx41df
 #: src/modules/auth/sign-in-up/components/FooterNote.tsx
@@ -3754,7 +3754,7 @@ msgstr ""
 #: src/modules/settings/billing/hooks/useHandleCheckoutSession.ts
 #: src/modules/settings/billing/hooks/useHandleCheckoutSession.ts
 msgid "Checkout session error. Please retry or contact Twenty team"
-msgstr "Tarkista istunnovirhe. Yritä uudelleen tai ota yhteyttä Twenty-tiimiin"
+msgstr "Tarkista istunnovirhe. Yritä uudelleen tai ota yhteyttä 가인지 CRM-tiimiin"
 
 #. js-lingui-id: SviKkE
 #: src/pages/settings/profile/appearance/components/LocalePicker.tsx
@@ -7468,7 +7468,7 @@ msgstr "Virhe suunnitelman peruutuksessa."
 #. js-lingui-id: QmR+2U
 #: src/modules/settings/billing/hooks/useEndSubscriptionTrialPeriod.ts
 msgid "Error while ending trial period. Please contact Twenty team."
-msgstr "Virhe kokeilujakson päättämisessä. Ota yhteyttä Twenty -tiimiin."
+msgstr "Virhe kokeilujakson päättämisessä. Ota yhteyttä 가인지 CRM -tiimiin."
 
 #. js-lingui-id: 5g78zo
 #: src/pages/settings/members/SettingsWorkspaceMember.tsx
@@ -13489,7 +13489,7 @@ msgstr ""
 #. js-lingui-id: NRvxzv
 #: src/pages/not-found/NotFound.tsx
 msgid "Page Not Found | Twenty"
-msgstr "Sivua ei löydy | Twenty"
+msgstr "Sivua ei löydy | 가인지 CRM"
 
 #. js-lingui-id: sF+Xp9
 #: src/modules/settings/event-logs/components/EventLogTableSelector.tsx
@@ -17123,7 +17123,7 @@ msgstr "Synkronoi Outlookin kanssa"
 #. js-lingui-id: +9x4tK
 #: src/pages/onboarding/SyncEmails.tsx
 msgid "Sync your Emails and Calendar with Twenty. Choose your privacy settings."
-msgstr "Synkronoi sähköpostisi ja kalenterisi Twentyyn. Valitse tietosuoja-asetuksesi."
+msgstr "Synkronoi sähköpostisi ja kalenterisi 가인지 CRMyn. Valitse tietosuoja-asetuksesi."
 
 #. js-lingui-id: N2FcBE
 #: src/modules/settings/accounts/components/SettingsAccountsConnectedAccountsRowRightContainer.tsx
@@ -18304,7 +18304,7 @@ msgstr "Turkoosi"
 #. js-lingui-id: JnaRPe
 #: src/modules/spreadsheet-import/steps/components/MatchColumnsStep/components/ColumnGrid.tsx
 msgid "Twenty fields"
-msgstr "Twenty-kentät"
+msgstr "가인지 CRM-kentät"
 
 #. js-lingui-id: YIjS4q
 #: src/modules/ai/components/SettingsAgentModelCapabilities.tsx
@@ -19706,7 +19706,7 @@ msgstr ""
 #: src/pages/auth/SignInUp.tsx
 #: src/pages/auth/SignInUpV2.tsx
 msgid "Welcome to Twenty"
-msgstr "Tervetuloa Twentyyn"
+msgstr "Tervetuloa 가인지 CRMyn"
 
 #. js-lingui-id: t8ZvkC
 #: src/pages/auth/SignInUp.tsx
