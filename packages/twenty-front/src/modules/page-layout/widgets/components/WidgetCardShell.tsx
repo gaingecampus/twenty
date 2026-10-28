@@ -17,7 +17,7 @@ import { styled } from '@linaria/react';
 import { type MouseEvent, useContext, useState } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { IconLock } from 'twenty-ui/icon';
-import { ThemeContext, themeCssVariables } from 'twenty-ui/theme-constants';
+import { ThemeContext } from 'twenty-ui/theme-constants';
 import {
   WidgetConfigurationType,
   WidgetType,
@@ -31,11 +31,9 @@ const StyledNoAccessContainer = styled.div`
 
 const StyledWidgetCard = styled(WidgetCard)`
   &.message-list-section {
-    background: ${themeCssVariables.background.tertiary};
+    background: transparent;
     border: none;
-    border-radius: ${themeCssVariables.border.radius.md};
-    gap: ${themeCssVariables.spacing[2]};
-    padding: ${themeCssVariables.spacing[4]};
+    border-radius: 0;
   }
 `;
 

@@ -25,10 +25,6 @@ const StyledVerticalListContainer = styled.div<{
     variant === 'side-column' ? 0 : themeCssVariables.spacing[2]};
   padding: ${({ variant }) =>
     variant === 'side-column' ? 0 : themeCssVariables.spacing[2]};
-
-  &:has(> div > .message-list-section) {
-    gap: ${themeCssVariables.spacing[6]};
-  }
 `;
 
 type PageLayoutVerticalListViewerProps = {
