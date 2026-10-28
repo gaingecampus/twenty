@@ -30,8 +30,12 @@ export const StyledPageInfoTextContainer = styled.div`
 
 export const StyledPageInfoTitleContainer = styled.div`
   color: ${themeCssVariables.font.color.primary};
-  font-size: ${themeCssVariables.font.size.md};
-  font-weight: ${themeCssVariables.font.weight.semiBold};
+  font-size: var(--t-page-title-font-size, ${themeCssVariables.font.size.md});
+  font-weight: var(
+    --t-page-title-font-weight,
+    ${themeCssVariables.font.weight.semiBold}
+  );
+  letter-spacing: var(--t-heading-letter-spacing, 0);
   max-width: 150px;
   min-width: 0;
   padding-inline: ${themeCssVariables.spacing[1]};
