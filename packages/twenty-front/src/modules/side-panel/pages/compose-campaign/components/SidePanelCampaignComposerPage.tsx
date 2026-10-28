@@ -1,6 +1,7 @@
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 import { useState } from 'react';
 import { SmsCampaignComposer } from '@/activities/emails/components/SmsCampaignComposer';
+import { CouponCampaignComposer } from '@/activities/emails/components/coupon/CouponCampaignComposer';
 import { CampaignReviewModal } from '@/activities/emails/components/CampaignReviewModal';
 import { useAtomComponentStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomComponentStateValue';
 import { campaignToEditComponentState } from '@/side-panel/pages/compose-campaign/states/campaignToEditComponentState';
@@ -102,7 +103,7 @@ const StyledChannelTabs = styled.div`
 `;
 
 export const SidePanelCampaignComposerPage = () => {
-  const [channel, setChannel] = useState<'email' | 'sms'>('email');
+  const [channel, setChannel] = useState<'email' | 'sms' | 'coupon'>('email');
   const campaignToEdit = useAtomComponentStateValue(
     campaignToEditComponentState,
   );
@@ -126,9 +127,21 @@ export const SidePanelCampaignComposerPage = () => {
             active={channel === 'sms'}
             onClick={() => setChannel('sms')}
           />
+          <TabButton
+            id="campaign-channel-coupon"
+            title="카카오 쿠폰"
+            LeftIcon={IconSend}
+            contentSize="md"
+            active={channel === 'coupon'}
+            onClick={() => setChannel('coupon')}
+          />
         </StyledChannelTabs>
       )}
-      {channel === 'sms' && !campaignToEdit ? (
+      {channel === 'coupon' && !campaignToEdit ? (
+        <StyledContent>
+          <CouponCampaignComposer />
+        </StyledContent>
+      ) : channel === 'sms' && !campaignToEdit ? (
         <StyledContent>
           <SmsCampaignComposer />
         </StyledContent>
