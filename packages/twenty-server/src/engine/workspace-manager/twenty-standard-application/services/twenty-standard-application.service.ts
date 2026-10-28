@@ -110,6 +110,12 @@ export class TwentyStandardApplicationService {
               twentyStandardFlatApplication.universalIdentifier,
           },
           fromToAllFlatEntityMaps,
+          // Standard widgets may reference workspace-owned tabs through overrides.
+          // Keep the full workspace as validation context; only standard entities
+          // in fromToAllFlatEntityMaps are candidates for migration actions.
+          dependencyAllFlatEntityMaps: structuredClone(
+            fromTwentyStandardAllFlatEntityMaps,
+          ),
           workspaceId,
           additionalCacheDataMaps: {
             featureFlagsMap,
