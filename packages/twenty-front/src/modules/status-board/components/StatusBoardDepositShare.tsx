@@ -1,3 +1,8 @@
+import {
+  StyledDashboardKpiGrid,
+  StyledDashboardKpiLabel,
+  StyledDashboardKpiValue,
+} from '@/ui/layout/dashboard/components/dashboardStyled';
 import { StatusBoardSalesSkeleton } from '@/status-board/components/StatusBoardSalesSkeleton';
 import { styled } from '@linaria/react';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
@@ -5,12 +10,9 @@ import { type RecordGqlOperationFilter } from 'twenty-shared/types';
 import { useStatusBoardSum } from '@/status-board/hooks/useStatusBoardSum';
 
 const StyledShare = styled.div`
-  border-top: 1px solid ${themeCssVariables.border.color.light};
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  margin: 0 16px;
-  padding: 16px 0 0;
+  gap: ${themeCssVariables.spacing[4]};
 `;
 const StyledHeader = styled.div`
   align-items: baseline;
@@ -18,22 +20,19 @@ const StyledHeader = styled.div`
   display: flex;
   flex-wrap: wrap;
   font-size: 13px;
-  gap: 6px 16px;
+  gap: ${themeCssVariables.spacing[2]} ${themeCssVariables.spacing[4]};
   justify-content: space-between;
 `;
-const StyledTotal = styled.div`
-  align-items: baseline;
+const StyledMetricLabel = styled(StyledDashboardKpiLabel)`
+  align-self: flex-start;
+`;
+const StyledMetric = styled.div`
   display: flex;
-  flex-wrap: wrap;
-  font-size: var(--t-font-size-lg, 16px);
-  gap: 12px;
-
-  strong {
-    color: ${themeCssVariables.font.color.primary};
-    font-size: 18px;
-    font-variant-numeric: tabular-nums;
-    font-weight: ${themeCssVariables.font.weight.semiBold};
-  }
+  flex-direction: column;
+  gap: ${themeCssVariables.spacing[2]};
+  min-width: 0;
+  overflow-wrap: anywhere;
+  padding: ${themeCssVariables.spacing[4]};
 `;
 const StyledTrack = styled.div`
   background: ${themeCssVariables.background.tertiary};
@@ -106,51 +105,40 @@ export const StatusBoardDepositShare = ({
       aria-busy={loading}
       aria-label={`입금 요약 · ${dateBasis} 기준`}
     >
-      {gaingeAmount !== undefined && (
-        <StyledTotal>
-          <span>전체 합계</span>
-          <strong>
-            {loading ||
-            gaingeLoading ||
-            error ||
-            invalid ||
-            gaingeAmount === null
-              ? '—'
-              : `${(gaingeAmount + total / 1_000_000).toLocaleString('ko-KR')}원`}
-          </strong>
-        </StyledTotal>
-      )}
-      <StyledHeader>
-        <StyledTotal>
-          <span>
+      <StyledDashboardKpiGrid columns={gaingeAmount !== undefined ? 3 : 1}>
+        {gaingeAmount !== undefined && (
+          <StyledMetric>
+            <StyledMetricLabel>전체 합계</StyledMetricLabel>
+            <StyledDashboardKpiValue tone="blue">
+              {gaingeLoading || error || invalid || gaingeAmount === null
+                ? '—'
+                : `${(gaingeAmount + total / 1_000_000).toLocaleString('ko-KR')}원`}
+            </StyledDashboardKpiValue>
+          </StyledMetric>
+        )}
+        <StyledMetric>
+          <StyledMetricLabel>
             {gaingeAmount !== undefined
               ? '입금 · 총 발행 매출'
               : '총 발행 매출'}
-          </span>
-          <strong>
-            {loading || error || invalid
+          </StyledMetricLabel>
+          <StyledDashboardKpiValue>
+            {error || invalid
               ? '—'
               : `${(total / 1_000_000).toLocaleString('ko-KR')}원`}
-          </strong>
-        </StyledTotal>
-        {hasShare && (
-          <span>
-            미입금·예정 {(dueAmount / 1_000_000).toLocaleString('ko-KR')}원
-          </span>
+          </StyledDashboardKpiValue>
+        </StyledMetric>
+        {gaingeAmount !== undefined && (
+          <StyledMetric>
+            <StyledMetricLabel>가캠 매출</StyledMetricLabel>
+            <StyledDashboardKpiValue>
+              {gaingeLoading || gaingeAmount === null
+                ? '—'
+                : `${gaingeAmount.toLocaleString('ko-KR')}원`}
+            </StyledDashboardKpiValue>
+          </StyledMetric>
         )}
-      </StyledHeader>
-      {gaingeAmount !== undefined && (
-        <StyledHeader>
-          <span>가캠 매출</span>
-          <span>
-            {gaingeAmount === null
-              ? gaingeLoading
-                ? '불러오는 중…'
-                : '조회 불가'
-              : `${gaingeAmount.toLocaleString('ko-KR')}원`}
-          </span>
-        </StyledHeader>
-      )}
+      </StyledDashboardKpiGrid>
       {hasShare && (
         <>
           <StyledTrack
@@ -162,7 +150,10 @@ export const StatusBoardDepositShare = ({
           </StyledTrack>
           <StyledHeader>
             <StyledLegend paid>입금 완료 {paidPercent}%</StyledLegend>
-            <StyledLegend paid={false}>미입금·예정 {duePercent}%</StyledLegend>
+            <StyledLegend paid={false}>
+              미입금·예정 {duePercent}% ·{' '}
+              {(dueAmount / 1_000_000).toLocaleString('ko-KR')}원
+            </StyledLegend>
           </StyledHeader>
         </>
       )}

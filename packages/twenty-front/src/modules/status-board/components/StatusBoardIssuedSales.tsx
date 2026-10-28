@@ -71,24 +71,18 @@ export const StatusBoardIssuedSales = ({
     ? '발행일'
     : '등록일';
   return (
-    <>
-      <StatusBoardDepositShare
-        paidFilter={andStatusBoardFilters([
-          issuedFilter,
-          { depositStatus: { eq: 'PAID' } },
-        ])}
-        dueFilter={andStatusBoardFilters([
-          issuedFilter,
-          { depositStatus: { neq: 'PAID' } },
-        ])}
-        dateBasis={dateBasis}
-        gaingeAmount={gaingeAmount}
-        gaingeLoading={gaingeLoading}
-      />
-      <StyledDashboardMuted>
-        집계 기간 {startDate} ~ {endDate} · {dateBasis} 기준 · 상단 그룹·구성원
-        필터 적용
-      </StyledDashboardMuted>
-    </>
+    <StatusBoardDepositShare
+      paidFilter={andStatusBoardFilters([
+        issuedFilter,
+        { depositStatus: { eq: 'PAID' } },
+      ])}
+      dueFilter={andStatusBoardFilters([
+        issuedFilter,
+        { depositStatus: { neq: 'PAID' } },
+      ])}
+      dateBasis={dateBasis}
+      gaingeAmount={gaingeAmount}
+      gaingeLoading={gaingeLoading}
+    />
   );
 };

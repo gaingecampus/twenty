@@ -30,9 +30,10 @@ import {
   IconChevronLeft,
   IconChevronRight,
   IconInfoCircle,
+  IconRefresh,
 } from 'twenty-ui/icon';
 import { AppTooltip } from 'twenty-ui/surfaces';
-import { Button } from 'twenty-ui/input';
+import { IconButton } from 'twenty-ui/input';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 
 const StyledAmounts = styled.dl`
@@ -64,12 +65,17 @@ const StyledAmounts = styled.dl`
   }
 `;
 
+const StyledRefreshButton = styled(IconButton)`
+  height: var(--t-input-height);
+  min-width: var(--t-input-height);
+`;
+
 const STATUS_MESSAGES = {
   NOT_CONFIGURED: '연결 대기 · 가캠 매출 조회 연결을 준비하고 있습니다.',
   FORBIDDEN: '전사 매출 조회 권한이 없습니다. 관리자에게 권한을 요청해 주세요.',
   AUTH_ERROR:
     '매출 조회 인증이 만료되었거나 권한이 없습니다. 관리자에게 연결 확인을 요청해 주세요.',
-  UNAVAILABLE: '매출 정보를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.',
+  UNAVAILABLE: '가캠 매출 조회 실패 · 새로고침해 주세요.',
 } as const;
 
 export const StatusBoardSalesSection = ({
@@ -81,6 +87,7 @@ export const StatusBoardSalesSection = ({
     depositProps ? 'all' : 'gainge',
   );
   const infoId = useId();
+  const refreshId = useId();
   const [chartVersion, setChartVersion] = useState(0);
   const description =
     source === 'all'
@@ -103,6 +110,12 @@ export const StatusBoardSalesSection = ({
     notifyOnNetworkStatusChange: true,
   });
   const report = data?.gaingeMonthlySales;
+  const reportDescription =
+    source !== 'deposit' &&
+    report?.status === 'READY' &&
+    report.month === selectedMonth
+      ? ` 집계 기간 ${report.startDate} ~ ${report.endDate} (한국 시간). 마지막 조회: ${report.fetchedAt ? new Date(report.fetchedAt).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' }) : '—'}.`
+      : '';
   const isReady =
     !loading &&
     !error &&
@@ -143,7 +156,7 @@ export const StatusBoardSalesSection = ({
           <span
             data-sales-info={infoId}
             tabIndex={0}
-            aria-label={`매출 집계 기준: ${description}`}
+            aria-label={`매출 집계 기준: ${description}${reportDescription}`}
             style={{
               display: 'inline-flex',
               marginLeft: 6,
@@ -155,7 +168,7 @@ export const StatusBoardSalesSection = ({
           </span>
           <AppTooltip
             anchorSelect={`[data-sales-info="${infoId}"]`}
-            content={description}
+            content={`${description}${reportDescription}`}
           />
         </StyledDashboardSectionTitle>
         <StyledStatusBoardPeriodControls>
@@ -181,17 +194,23 @@ export const StatusBoardSalesSection = ({
             </StyledStatusBoardPeriodNavButton>
           </StyledStatusBoardPeriodNav>
           {source !== 'deposit' && (
-            <Button
-              title={source === 'all' ? '가캠 새로고침' : '새로고침'}
-              ariaLabel="매출 새로고침"
-              size="small"
-              variant="secondary"
-              disabled={loading}
-              onClick={() => {
-                setChartVersion((value) => value + 1);
-                void refetch().catch(() => undefined);
-              }}
-            />
+            <span data-sales-refresh={refreshId}>
+              <StyledRefreshButton
+                Icon={IconRefresh}
+                ariaLabel="매출 새로고침"
+                size="medium"
+                variant="secondary"
+                disabled={loading}
+                onClick={() => {
+                  setChartVersion((value) => value + 1);
+                  void refetch().catch(() => undefined);
+                }}
+              />
+              <AppTooltip
+                anchorSelect={`[data-sales-refresh="${refreshId}"]`}
+                content="매출 새로고침"
+              />
+            </span>
           )}
         </StyledStatusBoardPeriodControls>
       </StyledDashboardSectionHeader>
@@ -250,15 +269,6 @@ export const StatusBoardSalesSection = ({
                 </div>
               ))}
             </StyledAmounts>
-            <StyledDashboardMuted>
-              집계 기간 {report.startDate} ~ {report.endDate} (한국 시간) ·
-              마지막 조회{' '}
-              {report.fetchedAt
-                ? new Date(report.fetchedAt).toLocaleString('ko-KR', {
-                    timeZone: 'Asia/Seoul',
-                  })
-                : '—'}
-            </StyledDashboardMuted>
           </>
         ) : loading ? (
           <StatusBoardSalesSkeleton />
