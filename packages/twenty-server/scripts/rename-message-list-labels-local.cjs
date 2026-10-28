@@ -21,13 +21,17 @@ async function main() {
         `UPDATE core."${table}"
          SET "standardOverrides" = replace("standardOverrides"::text, $1, $2)::jsonb
          WHERE "standardOverrides"::text LIKE $3`,
-        ['수신자 목록', '동반 고객 목록', '%수신자 목록%'],
+        ['수신자 목록', '고객 분류', '%수신자 목록%'],
+      );
+      const currentListResult = await client.query(
+        `UPDATE core."${table}" SET "standardOverrides"=replace("standardOverrides"::text,$1,$2)::jsonb WHERE "standardOverrides"::text LIKE $3`,
+        ['동반 고객 목록', '고객 분류', '%동반 고객 목록%'],
       );
       const previousListResult = await client.query(
         `UPDATE core."${table}"
          SET "standardOverrides" = replace("standardOverrides"::text, $1, $2)::jsonb
          WHERE "standardOverrides"::text LIKE $3`,
-        ['심방콜 목록', '동반 고객 목록', '%심방콜 목록%'],
+        ['심방콜 목록', '고객 분류', '%심방콜 목록%'],
       );
       const campaignResult = await client.query(
         `UPDATE core."${table}"
@@ -36,7 +40,7 @@ async function main() {
         ['단체 발송', '심방콜 발송', '%단체 발송%'],
       );
       console.log(
-        `${table}: ${result.rowCount + previousListResult.rowCount + campaignResult.rowCount} display overrides updated`,
+        `${table}: ${result.rowCount + currentListResult.rowCount + previousListResult.rowCount + campaignResult.rowCount} display overrides updated`,
       );
     }
     await client.query('COMMIT');

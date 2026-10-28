@@ -141,7 +141,7 @@ msgstr "이 이름의 함수가 이미 존재합니다."
 #. js-lingui-id: 4OYsP0
 #: src/engine/workspace-manager/twenty-standard-application/utils/object-metadata/create-standard-flat-object-metadata.util.ts
 msgid "A hand-picked audience of people"
-msgstr "직접 고른 동반 고객 목록"
+msgstr "직접 고른 고객 분류"
 
 #. js-lingui-id: TF/ZV2
 #: src/engine/core-modules/billing/reminders/services/billing-reminder.service.ts
@@ -7931,7 +7931,7 @@ msgstr ""
 #. js-lingui-id: tyc/Ir
 #: src/engine/workspace-manager/twenty-standard-application/utils/field-metadata/compute-message-campaign-standard-flat-field-metadata.util.ts
 msgid "The list this campaign was sent to"
-msgstr "이 심방콜 발송을 발송한 동반 고객 목록"
+msgstr "이 심방콜 발송을 발송한 고객 분류"
 
 #. js-lingui-id: kdTB4e
 #: src/engine/core-modules/application/connection-provider/connection-provider.exception.ts

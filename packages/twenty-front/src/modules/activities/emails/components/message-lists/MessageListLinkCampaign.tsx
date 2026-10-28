@@ -119,7 +119,7 @@ export const MessageListLinkCampaign = ({
       )}
       {open && (
         <>
-          <p>{t`동반 고객 목록이 지정되지 않은 초안 심방콜 발송을 연결할 수 있습니다.`}</p>
+          <p>{t`고객 분류가 지정되지 않은 초안 심방콜 발송을 연결할 수 있습니다.`}</p>
           <TextInput
             value={search}
             onChange={setSearch}

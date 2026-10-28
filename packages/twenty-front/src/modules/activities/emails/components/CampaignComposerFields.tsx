@@ -176,7 +176,7 @@ export const CampaignComposerFields = ({
     const listName = searchInput?.trim() ?? '';
     if (!listName) {
       enqueueErrorSnackBar({
-        message: t`동반 고객 목록 이름을 먼저 입력하세요.`,
+        message: t`고객 분류 이름을 먼저 입력하세요.`,
       });
       return;
     }
@@ -265,7 +265,7 @@ export const CampaignComposerFields = ({
             help={
               isDefined(audiencePreview)
                 ? buildAudienceHint(audiencePreview)
-                : t`발송할 고객이 포함된 동반 고객 목록을 선택하세요.`
+                : t`발송할 고객이 포함된 고객 분류를 선택하세요.`
             }
           />
           <Button

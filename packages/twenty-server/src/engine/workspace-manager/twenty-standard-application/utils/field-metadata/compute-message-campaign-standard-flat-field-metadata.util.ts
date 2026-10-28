@@ -335,7 +335,7 @@ export const buildMessageCampaignStandardFlatFieldMetadatas = ({
         type: FieldMetadataType.RELATION,
         morphId: null,
         fieldName: 'list',
-        label: i18nLabel(msg`동반 고객 목록`),
+        label: i18nLabel(msg`고객 분류`),
         description: i18nLabel(msg`The list this campaign was sent to`),
         icon: 'IconUsersGroup',
         isNullable: true,

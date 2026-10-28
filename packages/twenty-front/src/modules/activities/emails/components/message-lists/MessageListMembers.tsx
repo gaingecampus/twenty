@@ -113,7 +113,7 @@ const MessageListMembersPage = ({ listId }: { listId: string }) => {
       else await refetch();
     } catch {
       enqueueErrorSnackBar({
-        message: t`동반 고객 목록을 변경하지 못했습니다. 다시 시도하세요.`,
+        message: t`고객 분류를 변경하지 못했습니다. 다시 시도하세요.`,
       });
     } finally {
       setBusy(false);
@@ -162,7 +162,7 @@ const MessageListMembersPage = ({ listId }: { listId: string }) => {
         />
       )}
       {loading && <p>{t`불러오는 중…`}</p>}
-      {error && <p role="alert">{t`동반 고객 목록을 불러오지 못했습니다.`}</p>}
+      {error && <p role="alert">{t`고객 분류를 불러오지 못했습니다.`}</p>}
       {!loading && !error && records.length === 0 && (
         <StyledMessageListEmpty>
           {t`아직 등록된 수신자가 없습니다.`}

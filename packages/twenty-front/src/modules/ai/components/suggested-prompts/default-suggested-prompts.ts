@@ -35,7 +35,7 @@ export const DEFAULT_SUGGESTED_PROMPTS: SuggestedPrompt[] = [
     id: 'outreach-draft',
     label: msg`심방콜 문구 작성`,
     Icon: IconMessage,
-    prefillPrompt: msg`[동반 고객 목록 또는 고객명]에게 보낼 [이메일 또는 문자] 초안을 작성해 주세요. 목적은 [안부 / 미팅 후속 / 안내]이며 전달할 내용은 [내용]입니다. 최근 상담 맥락을 참고하고 확인되지 않은 사실은 넣지 마세요. 실제 발송하지 말고 문구만 보여주세요.`,
+    prefillPrompt: msg`[고객 분류 또는 고객명]에게 보낼 [이메일 또는 문자] 초안을 작성해 주세요. 목적은 [안부 / 미팅 후속 / 안내]이며 전달할 내용은 [내용]입니다. 최근 상담 맥락을 참고하고 확인되지 않은 사실은 넣지 마세요. 실제 발송하지 말고 문구만 보여주세요.`,
   },
   {
     id: 'field-notes',

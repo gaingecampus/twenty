@@ -141,7 +141,7 @@ export const WidgetCardShell = ({
             isResizing={isResizing}
             isReorderEnabled={isReorderEnabled}
             isDeletingWidgetEnabled={isDeletingWidgetEnabled}
-            title={isMessageListMembers ? t`동반 고객 목록` : widget.title}
+            title={isMessageListMembers ? t`고객 분류` : widget.title}
             titleHelp={
               isMessageListMembers
                 ? t`이메일이 없거나 수신을 거부한 고객은 심방콜 발송 시 제외됩니다.`

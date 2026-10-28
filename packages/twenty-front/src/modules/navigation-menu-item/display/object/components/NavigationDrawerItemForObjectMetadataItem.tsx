@@ -147,8 +147,9 @@ export const NavigationDrawerItemForObjectMetadataItem = ({
             '수신자 목록',
             '심방콜 목록',
             '동반 고객 목록',
+            '고객 분류',
           ].includes(primaryLabel)
-        ? t`동반 고객 목록`
+        ? t`고객 분류`
         : primaryLabel;
 
   const label = needsInaccessibleRecordPlaceholder
