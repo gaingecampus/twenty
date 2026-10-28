@@ -1,3 +1,4 @@
+import { type SendbeeConfig } from '../coupon/sendbee.types';
 import { Logger } from '@nestjs/common';
 
 import { plainToClass } from 'class-transformer';
@@ -61,6 +62,16 @@ import {
 } from 'src/engine/metadata-modules/ai/ai-models/utils/load-default-model-preferences.util';
 
 export class ConfigVariables {
+  @ConfigVariablesMetadata({
+    group: ConfigVariablesGroup.ADVANCED_SETTINGS,
+    type: ConfigVariableType.JSON,
+    isSensitive: true,
+    description:
+      '센드비 API 계정·암호화·발송 설정 (서버 전용). docs/sendbee-integration.md 참조',
+  })
+  @IsOptional()
+  SENDBEE_CONFIG: SendbeeConfig = {};
+
   @ConfigVariablesMetadata({
     group: ConfigVariablesGroup.ADVANCED_SETTINGS,
     type: ConfigVariableType.STRING,

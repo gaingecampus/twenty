@@ -1,3 +1,4 @@
+import { CouponModule } from 'src/engine/core-modules/coupon/coupon.module';
 import { SmsModule } from 'src/engine/core-modules/sms/sms.module';
 import { Module } from '@nestjs/common';
 import { APP_FILTER, HttpAdapterHost } from '@nestjs/core';
@@ -119,6 +120,7 @@ import { FileModule } from './file/file.module';
     EmailingDomainModule,
     EmailingModule,
     SmsModule,
+    CouponModule,
     PublicDomainModule,
     CloudflareModule,
     DnsManagerModule,
