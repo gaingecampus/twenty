@@ -126,6 +126,8 @@ export const StyledDashboardKpiLabel = styled.div<{ tone?: DashboardTone }>`
   }
   font-weight: ${themeCssVariables.font.weight.medium};
   gap: 6px;
+  overflow-wrap: normal;
+  word-break: keep-all;
 `;
 
 export const StyledDashboardKpiValue = styled.div<{
