@@ -1,6 +1,6 @@
 import { isNonEmptyString, isNull, isUndefined } from '@sniptt/guards';
 import { clsx } from 'clsx';
-import { useState } from 'react';
+import { type ReactNode, useState } from 'react';
 
 import { handleClickableElementKeyDown } from '@ui/accessibility/utils/handleClickableElementKeyDown';
 import { type AvatarSize } from '@ui/data-display/Avatar/types/AvatarSize';
@@ -17,6 +17,7 @@ export type AvatarProps = {
   className?: string;
   size?: AvatarSize;
   placeholder: string | undefined;
+  placeholderContent?: ReactNode;
   placeholderColorSeed?: string;
   Icon?: IconComponent;
   iconColor?: string;
@@ -32,6 +33,7 @@ export const Avatar = ({
   className,
   size = 'md',
   placeholder,
+  placeholderContent,
   placeholderColorSeed = placeholder,
   Icon,
   iconColor,
@@ -51,11 +53,14 @@ export const Avatar = ({
 
   const placeholderFirstChar = placeholder?.trim()?.charAt(0);
   const isPlaceholderFirstCharEmpty =
-    !placeholderFirstChar || placeholderFirstChar === '';
+    !placeholderContent &&
+    (!placeholderFirstChar || placeholderFirstChar === '');
   const placeholderChar = placeholderFirstChar?.toUpperCase() || '-';
 
   const showPlaceholder =
-    isNull(avatarImageURI) || erroredAvatarImageURI === avatarImageURI;
+    Boolean(placeholderContent) ||
+    isNull(avatarImageURI) ||
+    erroredAvatarImageURI === avatarImageURI;
 
   const handleImageError = () => {
     if (isNonEmptyString(avatarImageURI)) {
@@ -134,7 +139,9 @@ export const Avatar = ({
           size={theme.icon.size.xl}
         />
       ) : showPlaceholder ? (
-        <span className={styles.placeholderChar}>{placeholderChar}</span>
+        <span className={styles.placeholderChar}>
+          {placeholderContent ?? placeholderChar}
+        </span>
       ) : (
         <img
           className={styles.image}

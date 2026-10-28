@@ -5,6 +5,7 @@ import { getLinkToShowPage } from '@/object-metadata/utils/getLinkToShowPage';
 import { useRecordChipData } from '@/object-record/hooks/useRecordChipData';
 import { recordIndexOpenRecordInState } from '@/object-record/record-index/states/recordIndexOpenRecordInState';
 import { type ObjectRecord } from '@/object-record/types/ObjectRecord';
+import { normalizeRecordEmoji } from '@/object-record/record-show/utils/normalizeRecordEmoji';
 import { canOpenObjectInSidePanel } from '@/object-record/utils/canOpenObjectInSidePanel';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 import { ViewOpenRecordIn } from '~/generated-metadata/graphql';
@@ -13,12 +14,14 @@ import { t } from '@lingui/core/macro';
 import { type MouseEvent } from 'react';
 import { isDefined } from 'twenty-shared/utils';
 import {
-  AvatarOrIcon,
+  Avatar,
   Chip,
   type ChipSize,
   ChipVariant,
   LinkChip,
 } from 'twenty-ui/data-display';
+import { MAIN_COLOR_NAMES } from 'twenty-ui/theme';
+import { themeCssVariables } from 'twenty-ui/theme-constants';
 import { type TriggerEventType } from 'twenty-ui/utilities';
 
 const compactRecordChip = css`
@@ -64,6 +67,26 @@ export const RecordChip = ({
     objectNameSingular,
     record,
   });
+  const avatarEmoji = normalizeRecordEmoji(record.avatarEmoji);
+  const avatarColor =
+    MAIN_COLOR_NAMES.find((color) => color === record.avatarColor) ??
+    (avatarEmoji || objectNameSingular === 'messageList'
+      ? 'orange'
+      : undefined);
+  const avatar = isIconHidden ? null : (
+    <Avatar
+      size="sm"
+      placeholder={recordChipData.name}
+      placeholderContent={avatarEmoji ?? undefined}
+      placeholderColorSeed={record.id}
+      type={recordChipData.avatarType}
+      avatarUrl={getAbsoluteImageUrl(recordChipData.avatarUrl ?? '')}
+      backgroundColor={
+        avatarColor ? themeCssVariables.tag.background[avatarColor] : undefined
+      }
+      color={avatarColor ? themeCssVariables.tag.text[avatarColor] : undefined}
+    />
+  );
 
   const { openRecordInSidePanel } = useOpenRecordInSidePanel();
 
@@ -102,16 +125,7 @@ export const RecordChip = ({
         maxWidth={maxWidth}
         className={`${className ?? ''} ${size === undefined || size === 'small' ? compactRecordChip : ''}`}
         variant={ChipVariant.Transparent}
-        leftComponent={
-          isIconHidden ? null : (
-            <AvatarOrIcon
-              placeholder={recordChipData.name}
-              placeholderColorSeed={record.id}
-              avatarType={recordChipData.avatarType}
-              avatarUrl={getAbsoluteImageUrl(recordChipData.avatarUrl ?? '')}
-            />
-          )
-        }
+        leftComponent={avatar}
       />
     );
   }
@@ -124,16 +138,7 @@ export const RecordChip = ({
       emptyLabel={t`Untitled`}
       isBold={isBold}
       isLabelHidden={isLabelHidden}
-      leftComponent={
-        isIconHidden ? null : (
-          <AvatarOrIcon
-            placeholder={recordChipData.name}
-            placeholderColorSeed={record.id}
-            avatarType={recordChipData.avatarType}
-            avatarUrl={getAbsoluteImageUrl(recordChipData.avatarUrl ?? '')}
-          />
-        )
-      }
+      leftComponent={avatar}
       className={`${className ?? ''} ${size === undefined || size === 'small' ? compactRecordChip : ''}`}
       variant={
         variant ??

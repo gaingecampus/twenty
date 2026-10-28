@@ -37,6 +37,11 @@ export const buildIdentifierGqlFields = (
 
   return {
     id: true,
+    ...Object.fromEntries(
+      objectMetadata.fields
+        .filter((field) => ['avatarEmoji', 'avatarColor'].includes(field.name))
+        .map((field) => [field.name, true]),
+    ),
     ...(isDefined(companyAvatarRelationField) && {
       [companyAvatarRelationField.name]: { id: true, domainName: true },
     }),
