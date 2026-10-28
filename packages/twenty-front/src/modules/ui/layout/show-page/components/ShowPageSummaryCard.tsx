@@ -70,6 +70,8 @@ const StyledDate = styled.div<{ isMobile: boolean }>`
 `;
 
 const StyledTitle = styled.div<{ isMobile: boolean }>`
+  --record-title-justify-content: ${({ isMobile }) =>
+    isMobile ? 'flex-start' : 'center'};
   color: ${themeCssVariables.font.color.primary};
   display: flex;
   font-size: ${themeCssVariables.font.size.xl};
