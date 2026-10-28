@@ -27,8 +27,8 @@ html.dark[data-ui-theme='enterprise'] {
   --t-font-color-light: #6b7280;
   --t-font-color-extra-light: #6b7280;
   --t-font-color-inverted: #ffffff;
-  --t-page-title-font-size: 22px;
-  --t-page-title-font-weight: 700;
+  --t-page-title-font-size: 18px;
+  --t-page-title-font-weight: 500;
   --t-page-header-icon-display: none;
   --t-page-header-padding-x: 16px;
   --t-page-header-padding-y: 8px;
@@ -227,7 +227,7 @@ html.dark[data-ui-theme='enterprise'] {
   --t-icon-size-sm: 16;
   --t-icon-size-md: 18;
   --t-icon-size-lg: 20;
-  --t-icon-size-xl: 24;
+  --t-icon-size-xl: 20;
   --t-icon-stroke-sm: 1.5;
   --t-icon-stroke-md: 1.5;
   --t-icon-stroke-lg: 1.75;
