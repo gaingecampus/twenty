@@ -10,7 +10,9 @@ export const getCashFlowDetailsFilters = (
   sourceHash: string,
   today = getCashFlowToday(),
 ) => ({
-  transactions: { sourceHash: { eq: sourceHash } } as RecordGqlOperationFilter,
+  transactions: {
+    bankKey: { in: ['shinhan', 'kb', 'nh'] },
+  } as RecordGqlOperationFilter,
   receipts: {
     and: [
       { sourceHash: { eq: sourceHash } },
@@ -20,17 +22,16 @@ export const getCashFlowDetailsFilters = (
   } as RecordGqlOperationFilter,
 });
 
-const useLatestBankTransaction = (sourceHash: string, bankKey: string) => {
+// Earlier months stay unchanged when importing the current month onward.
+// The latest retained transaction supplies the balance for an inactive bank.
+const useLatestBankTransaction = (bankKey: string) => {
   const result = useFindManyRecords({
     objectNameSingular: 'bankTransaction',
     filter: {
-      and: [{ sourceHash: { eq: sourceHash } }, { bankKey: { eq: bankKey } }],
+      bankKey: { eq: bankKey },
     },
     limit: 2,
-    orderBy: [
-      { transactionAt: 'DescNullsLast' },
-      { sourceRow: 'AscNullsLast' },
-    ],
+    orderBy: [{ transactionAt: 'DescNullsLast' }, { id: 'AscNullsLast' }],
     recordGqlFields: {
       id: true,
       transactionAt: true,
@@ -52,9 +53,9 @@ export const useCashFlowDetails = (
   today = getCashFlowToday(),
 ) => {
   const filters = getCashFlowDetailsFilters(sourceHash, today);
-  const shinhan = useLatestBankTransaction(sourceHash, 'shinhan');
-  const kb = useLatestBankTransaction(sourceHash, 'kb');
-  const nh = useLatestBankTransaction(sourceHash, 'nh');
+  const shinhan = useLatestBankTransaction('shinhan');
+  const kb = useLatestBankTransaction('kb');
+  const nh = useLatestBankTransaction('nh');
   const incoming = useAggregateRecords({
     objectNameSingular: 'expectedReceipt',
     filter: filters.receipts,

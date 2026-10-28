@@ -400,7 +400,6 @@ export const StatusBoardCashFlowSection = ({
       'bankKey',
       'bankName',
       'transactionAt',
-      'sourceRow',
       'balance',
       'incomingAmount',
       'outgoingAmount',

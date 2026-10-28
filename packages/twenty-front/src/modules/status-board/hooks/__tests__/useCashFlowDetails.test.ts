@@ -28,7 +28,7 @@ describe('cash flow detail sources', () => {
     sum = '125000000';
     (useFindManyRecords as jest.Mock).mockImplementation(({ filter }) => ({
       records:
-        missingBank && filter.and[1].bankKey.eq === 'nh'
+        missingBank && filter.bankKey.eq === 'nh'
           ? []
           : [
               {
@@ -64,7 +64,7 @@ describe('cash flow detail sources', () => {
       }),
     );
   });
-  it('uses latest balances, server sum, and same backup filters for drilldown', () => {
+  it('uses retained bank balances and the latest receipt backup for drilldown', () => {
     const { result, rerender } = renderHook(() =>
       useCashFlowDetails('backup-a'),
     );
@@ -83,15 +83,12 @@ describe('cash flow detail sources', () => {
       ],
     });
     expect(result.current.filters.transactions).toEqual({
-      sourceHash: { eq: 'backup-a' },
+      bankKey: { in: ['shinhan', 'kb', 'nh'] },
     });
     expect(useFindManyRecords).toHaveBeenCalledWith(
       expect.objectContaining({
         limit: 2,
-        orderBy: [
-          { transactionAt: 'DescNullsLast' },
-          { sourceRow: 'AscNullsLast' },
-        ],
+        orderBy: [{ transactionAt: 'DescNullsLast' }, { id: 'AscNullsLast' }],
       }),
     );
     sum = '225000000';
@@ -104,6 +101,25 @@ describe('cash flow detail sources', () => {
       renderHook(() => useCashFlowDetails('backup-a')).result.current.banks[2]
         .amount,
     ).toBeNull();
+  });
+  it('keeps the last retained balance when a bank has no current-month transactions', () => {
+    (useFindManyRecords as jest.Mock).mockReturnValue({
+      records: [
+        {
+          id: 'retained-september-transaction',
+          transactionAt: '2026-09-30T00:00:00Z',
+          balance: { amountMicros: '100000000', currencyCode: 'KRW' },
+        },
+      ],
+      loading: false,
+      refetch,
+    });
+    const { result } = renderHook(() => useCashFlowDetails('october-backup'));
+    expect(result.current.banks[0].amount).toBe(100);
+    expect(result.current.banks[0].date).toBe('2026-09-30T00:00:00Z');
+    expect(useFindManyRecords).toHaveBeenCalledWith(
+      expect.objectContaining({ filter: { bankKey: { eq: 'shinhan' } } }),
+    );
   });
   it('rejects conflicting balances at the latest timestamp', () => {
     conflictingBank = true;
