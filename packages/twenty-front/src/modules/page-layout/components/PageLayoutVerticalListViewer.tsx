@@ -1,3 +1,5 @@
+import { consolidateCampaignDeliveryWidgets } from '@/activities/emails/utils/consolidateCampaignDeliveryWidgets';
+import { useObjectMetadataItems } from '@/object-metadata/hooks/useObjectMetadataItems';
 import { styled } from '@linaria/react';
 import { useIsMobile } from 'twenty-ui/utilities';
 
@@ -36,7 +38,20 @@ type PageLayoutVerticalListViewerProps = {
 export const PageLayoutVerticalListViewer = ({
   widgets,
 }: PageLayoutVerticalListViewerProps) => {
-  const { isInSidePanel } = useLayoutRenderingContext();
+  const { isInSidePanel, targetRecordIdentifier } = useLayoutRenderingContext();
+  const { objectMetadataItems } = useObjectMetadataItems();
+  const campaign = objectMetadataItems.find(
+    (object) => object.nameSingular === 'messageCampaign',
+  );
+  const visibleWidgets = consolidateCampaignDeliveryWidgets({
+    widgets,
+    objectNameSingular: targetRecordIdentifier?.targetObjectNameSingular,
+    recipientsFieldId: campaign?.fields.find(
+      (field) => field.name === 'recipients',
+    )?.id,
+    messagesFieldId: campaign?.fields.find((field) => field.name === 'messages')
+      ?.id,
+  });
   const isMobile = useIsMobile();
   const { isInPinnedTab } = useIsInPinnedTab();
 
@@ -51,7 +66,7 @@ export const PageLayoutVerticalListViewer = ({
       variant={variant}
       shouldUseWhiteBackground={!isInPinnedTab || isMobile}
     >
-      {widgets.map((widget) => (
+      {visibleWidgets.map((widget) => (
         <div key={widget.id}>
           <WidgetRenderer widget={widget} />
         </div>

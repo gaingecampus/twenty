@@ -52,6 +52,7 @@ export const useMessageListRecordPage = <T extends ObjectRecord>({
       ? data?.[objectMetadataItem.namePlural]
       : undefined;
   return {
+    canReadObjectRecords,
     records: connection
       ? getRecordsFromRecordConnection<T>({ recordConnection: connection })
       : [],

@@ -102,6 +102,20 @@ export const WidgetCardShell = ({
             (field) =>
               field.id === fieldMetadataId || field.name === fieldMetadataId,
           )?.name;
+  const campaignMetadata = objectMetadataItems.find(
+    (object) => object.nameSingular === 'messageCampaign',
+  );
+  const campaignField =
+    fieldMetadataId === undefined
+      ? undefined
+      : campaignMetadata?.fields.find(
+          (field) =>
+            field.id === fieldMetadataId ||
+            (campaignMetadata.id === widget.objectMetadataId &&
+              field.name === fieldMetadataId),
+        )?.name;
+  const isCampaignDelivery =
+    campaignField === 'recipients' || campaignField === 'messages';
   const isMessageListMembers = messageListField === 'members';
   const isMessageListCampaigns = messageListField === 'campaigns';
   const isMessageListTable = isMessageListMembers || isMessageListCampaigns;
@@ -133,7 +147,11 @@ export const WidgetCardShell = ({
         {showHeader && (
           <WidgetCardHeader
             actionSlotRef={setHeaderActionTarget}
-            titleSlotRef={isMessageListTable ? setHeaderTitleTarget : undefined}
+            titleSlotRef={
+              isMessageListTable || isCampaignDelivery
+                ? setHeaderTitleTarget
+                : undefined
+            }
             wrapActions={isMessageListTable}
             widgetId={widget.id}
             variant={variant}
@@ -141,15 +159,23 @@ export const WidgetCardShell = ({
             isResizing={isResizing}
             isReorderEnabled={isReorderEnabled}
             isDeletingWidgetEnabled={isDeletingWidgetEnabled}
-            title={isMessageListMembers ? t`고객 분류` : widget.title}
+            title={
+              isCampaignDelivery
+                ? '수신자별 발송 결과'
+                : isMessageListMembers
+                  ? t`고객 분류`
+                  : widget.title
+            }
             titleHelp={
-              isMessageListMembers
-                ? t`이메일이 없거나 수신을 거부한 고객은 심방콜 발송 시 제외됩니다.`
-                : undefined
+              isCampaignDelivery
+                ? '한 행은 수신자에게 보내는 메시지 한 건입니다. 발송 완료는 메일 서버에 전달된 상태이며, 읽음이나 최종 수신을 보장하지 않습니다. 기록 시각은 발송 처리 기록이 생성된 시각입니다.'
+                : isMessageListMembers
+                  ? t`이메일이 없거나 수신을 거부한 고객은 심방콜 발송 시 제외됩니다.`
+                  : undefined
             }
             onRemove={onRemove}
             actions={
-              isMessageListCampaigns
+              isMessageListCampaigns || isCampaignDelivery
                 ? actions.filter((action) => action.id !== 'see-all')
                 : actions
             }
@@ -166,7 +192,7 @@ export const WidgetCardShell = ({
 
         <WidgetCardContent
           variant={variant}
-          frameless={isMessageListTable && !isEditable}
+          frameless={(isMessageListTable || isCampaignDelivery) && !isEditable}
           hasHeader={showHeader}
           isEditable={isEditable}
           isInVerticalListTab={isInVerticalListTab}
