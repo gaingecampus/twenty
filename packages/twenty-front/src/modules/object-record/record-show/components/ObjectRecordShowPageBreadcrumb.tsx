@@ -3,15 +3,9 @@ import { ObjectMetadataIcon } from '@/object-metadata/components/ObjectMetadataI
 import { useObjectMetadataItem } from '@/object-metadata/hooks/useObjectMetadataItem';
 import { type FieldMetadataItem } from '@/object-metadata/types/FieldMetadataItem';
 import { useFindOneRecord } from '@/object-record/hooks/useFindOneRecord';
-import { useIsRecordFieldReadOnly } from '@/object-record/read-only/hooks/useIsRecordFieldReadOnly';
-import { FieldContext } from '@/object-record/record-field/ui/contexts/FieldContext';
-import { useRecordShowContainerActions } from '@/object-record/record-show/hooks/useRecordShowContainerActions';
 import { useRecordShowPagePagination } from '@/object-record/record-show/hooks/useRecordShowPagePagination';
-import { RecordTitleCell } from '@/object-record/record-title-cell/components/RecordTitleCell';
-import { RecordTitleCellContainerType } from '@/object-record/record-title-cell/types/RecordTitleCellContainerType';
 import { styled } from '@linaria/react';
 import { useState } from 'react';
-import { FieldMetadataType } from 'twenty-shared/types';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 
 const StyledEditableTitleContainer = styled.div`
@@ -33,18 +27,13 @@ const StyledEditableTitlePrefix = styled.div`
   display: flex;
   flex-direction: row;
   gap: ${themeCssVariables.spacing[1]};
+  white-space: nowrap;
 `;
 
 const StyledBreadcrumbPrefixObjectIcon = styled.div`
   display: flex;
   flex-shrink: 0;
   opacity: 0.64;
-`;
-
-const StyledTitle = styled.div`
-  max-width: 100%;
-  overflow: hidden;
-  width: fit-content;
 `;
 
 const StyledPaginationInformation = styled.span`
@@ -76,16 +65,6 @@ export const ObjectRecordShowPageBreadcrumb = ({
     objectNameSingular,
   });
 
-  const { useUpdateOneObjectRecordMutation } = useRecordShowContainerActions({
-    objectNameSingular,
-  });
-
-  const isLabelIdentifierReadOnly = useIsRecordFieldReadOnly({
-    recordId: objectRecordId,
-    objectMetadataId: objectMetadataItem.id,
-    fieldMetadataId: labelIdentifierFieldMetadataItem?.id ?? '',
-  });
-
   const { navigateToIndexView, rankInView, totalCount } =
     useRecordShowPagePagination(objectNameSingular, objectRecordId);
 
@@ -113,38 +92,7 @@ export const ObjectRecordShowPageBreadcrumb = ({
           />
         </StyledBreadcrumbPrefixObjectIcon>
         {objectLabel}
-        <span>{' / '}</span>
       </StyledEditableTitlePrefix>
-      <StyledTitle>
-        <FieldContext.Provider
-          value={{
-            recordId: objectRecordId,
-            isLabelIdentifier: false,
-            fieldDefinition: {
-              type:
-                labelIdentifierFieldMetadataItem?.type ||
-                FieldMetadataType.TEXT,
-              iconName: '',
-              fieldMetadataId: labelIdentifierFieldMetadataItem?.id ?? '',
-              label: labelIdentifierFieldMetadataItem?.label || '',
-              metadata: {
-                fieldName: labelIdentifierFieldMetadataItem?.name || '',
-                objectMetadataNameSingular: objectNameSingular,
-              },
-              defaultValue: labelIdentifierFieldMetadataItem?.defaultValue,
-            },
-            useUpdateRecord: useUpdateOneObjectRecordMutation,
-            isCentered: false,
-            isDisplayModeFixHeight: true,
-            isRecordFieldReadOnly: isLabelIdentifierReadOnly,
-          }}
-        >
-          <RecordTitleCell
-            sizeVariant="md"
-            containerType={RecordTitleCellContainerType.PageHeader}
-          />
-        </FieldContext.Provider>
-      </StyledTitle>
       <StyledPaginationInformation>
         {`(${formatNumber(rankInView + 1)}/${formatNumber(totalCount)})`}
       </StyledPaginationInformation>

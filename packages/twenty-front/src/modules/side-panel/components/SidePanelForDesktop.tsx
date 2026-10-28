@@ -27,6 +27,7 @@ const StyledSidePanelWrapper = styled.div<{
   isResizing: boolean;
 }>`
   flex-shrink: 0;
+  max-width: 100%;
   min-width: 0;
   overflow: hidden;
   transition: ${({ isResizing }) =>

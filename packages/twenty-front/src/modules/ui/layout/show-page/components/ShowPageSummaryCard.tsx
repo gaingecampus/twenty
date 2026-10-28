@@ -40,14 +40,14 @@ export const StyledShowPageSummaryCard = styled.div<{
   isMobile: boolean;
 }>`
   align-items: center;
-  border-bottom: 1px solid ${themeCssVariables.border.color.light};
   box-sizing: border-box;
   display: flex;
   flex-direction: ${({ isMobile }) => (isMobile ? 'row' : 'column')};
+  flex-shrink: 0;
   gap: ${({ isMobile }) =>
     isMobile ? themeCssVariables.spacing[2] : themeCssVariables.spacing[3]};
-  height: ${({ isMobile }) => (isMobile ? '77px' : '127px')};
   justify-content: ${({ isMobile }) => (isMobile ? 'flex-start' : 'center')};
+  min-height: ${({ isMobile }) => (isMobile ? '96px' : '127px')};
   padding: ${themeCssVariables.spacing[4]};
 `;
 
@@ -56,6 +56,7 @@ const StyledInfoContainer = styled.div<{ isMobile: boolean }>`
   display: flex;
   flex-direction: column;
   gap: ${themeCssVariables.spacing[1]};
+  min-width: 0;
   width: 100%;
 `;
 
@@ -63,6 +64,7 @@ const StyledDate = styled.div<{ isMobile: boolean }>`
   color: ${themeCssVariables.font.color.tertiary};
   cursor: pointer;
   padding-left: ${themeCssVariables.spacing[1]};
+  white-space: nowrap;
 `;
 
 const StyledTitle = styled.div<{ isMobile: boolean }>`
@@ -71,7 +73,8 @@ const StyledTitle = styled.div<{ isMobile: boolean }>`
   font-size: ${themeCssVariables.font.size.xl};
   font-weight: ${themeCssVariables.font.weight.semiBold};
   justify-content: ${({ isMobile }) => (isMobile ? 'flex-start' : 'center')};
-  width: 90%;
+  min-width: 0;
+  width: 100%;
 `;
 
 const StyledAvatarWrapper = styled.div<{
@@ -83,6 +86,7 @@ const StyledAvatarWrapper = styled.div<{
   border-radius: ${themeCssVariables.border.radius.sm};
   cursor: ${({ isAvatarEditable }) =>
     isAvatarEditable ? 'pointer' : 'default'};
+  flex-shrink: 0;
 `;
 
 const StyledFileInput = styled.input`

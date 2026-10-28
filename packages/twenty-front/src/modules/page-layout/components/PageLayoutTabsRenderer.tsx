@@ -1,3 +1,4 @@
+import { SummaryCard } from '@/object-record/record-show/components/SummaryCard';
 import { FieldManagement } from '@/field-management/FieldManagement';
 import {
   FIELD_MANAGEMENT_RECORD_TAB_ID,
@@ -44,7 +45,9 @@ const StyledContainer = styled.div<{
 }>`
   display: grid;
   grid-template-columns: ${({ hasPinnedTab, panelWidth }) =>
-    hasPinnedTab ? `min(${panelWidth}px, 60%) 0px minmax(0, 1fr)` : '1fr'};
+    hasPinnedTab
+      ? `clamp(260px, ${panelWidth}px, 60%) 0px minmax(0, 1fr)`
+      : '1fr'};
   grid-template-rows: minmax(0, 1fr);
   height: 100%;
   width: 100%;
@@ -340,6 +343,13 @@ export const PageLayoutTabsRenderer = () => {
       )}
 
       <StyledTabsAndDashboardContainer>
+        {!isDefined(pinnedLeftTab) && isDefined(targetRecordIdentifier) && (
+          <SummaryCard
+            objectNameSingular={targetRecordIdentifier.targetObjectNameSingular}
+            objectRecordId={targetRecordIdentifier.id}
+            isInSidePanel={isInSidePanel}
+          />
+        )}
         <PageLayoutTabListEffect
           tabs={displayTabs}
           componentInstanceId={tabListInstanceId}

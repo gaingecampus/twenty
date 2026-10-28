@@ -23,11 +23,13 @@ const StyledRow = styled.div`
   flex-direction: row;
   min-height: 0;
   min-width: 0;
+  overflow: hidden;
 
   @media print {
     display: block;
     min-height: auto;
     min-width: auto;
+    overflow: visible;
 
     // Only the main content (first child) is printed; the side panel and its
     // resize chrome that follow it are hidden.
@@ -52,11 +54,11 @@ const StyledContent = styled.div`
   }
 `;
 
-const StyledContentTransitionContainer = styled.div`
+const StyledContentTransitionContainer = styled.div<{ isMobile: boolean }>`
   display: grid;
   flex: 1 1 0;
   min-height: 0;
-  min-width: 0;
+  min-width: ${({ isMobile }) => (isMobile ? '0' : '640px')};
   overflow: hidden;
 
   @media print {
@@ -82,12 +84,13 @@ const StyledContentTransitionPage = styled(motion.div)`
 `;
 
 const MainAppLayoutOutlet = () => {
+  const isMobile = useIsMobile();
   const { pathname } = useLocation();
   const outlet = useOutlet();
   const routeSection = getMainAppLayoutRouteSection(pathname);
 
   return (
-    <StyledContentTransitionContainer>
+    <StyledContentTransitionContainer isMobile={isMobile}>
       <AnimatePresence initial={false}>
         <StyledContentTransitionPage
           key={routeSection}

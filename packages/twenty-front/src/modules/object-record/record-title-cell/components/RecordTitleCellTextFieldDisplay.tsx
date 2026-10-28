@@ -1,7 +1,7 @@
 import { FieldContext } from '@/object-record/record-field/ui/contexts/FieldContext';
 import { recordStoreFamilyState } from '@/object-record/record-store/states/recordStoreFamilyState';
 import { useRecordTitleCell } from '@/object-record/record-title-cell/hooks/useRecordTitleCell';
-import { type RecordTitleCellContainerType } from '@/object-record/record-title-cell/types/RecordTitleCellContainerType';
+import { RecordTitleCellContainerType } from '@/object-record/record-title-cell/types/RecordTitleCellContainerType';
 import { getRecordFieldInputInstanceId } from '@/object-record/utils/getRecordFieldInputId';
 import { useAtomFamilyStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomFamilyStateValue';
 import { styled } from '@linaria/react';
@@ -11,7 +11,7 @@ import { isDefined } from 'twenty-shared/utils';
 import { OverflowingTextWithTooltip } from 'twenty-ui/surfaces';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 
-const StyledDiv = styled.div`
+const StyledDiv = styled.div<{ isSummary: boolean }>`
   align-items: center;
   background: inherit;
   border: none;
@@ -20,10 +20,14 @@ const StyledDiv = styled.div`
   color: ${themeCssVariables.font.color.primary};
   cursor: pointer;
   display: flex;
-  height: 24px;
+  height: ${({ isSummary }) => (isSummary ? 'auto' : '24px')};
   justify-content: var(--record-title-justify-content, center);
+  min-height: 24px;
+  min-width: 0;
   overflow: hidden;
+  overflow-wrap: anywhere;
   padding: ${themeCssVariables.spacing[0]} 5px;
+  white-space: ${({ isSummary }) => (isSummary ? 'normal' : 'nowrap')};
   &:hover {
     background: ${themeCssVariables.background.transparent.light};
   }
@@ -49,6 +53,7 @@ export const RecordTitleCellSingleTextDisplayMode = ({
 
   return (
     <StyledDiv
+      isSummary={containerType === RecordTitleCellContainerType.ShowPage}
       onClick={() => {
         openRecordTitleCell({
           recordId,
@@ -63,6 +68,8 @@ export const RecordTitleCellSingleTextDisplayMode = ({
     >
       {isEmpty ? (
         <StyledEmptyText>{t`Untitled`}</StyledEmptyText>
+      ) : containerType === RecordTitleCellContainerType.ShowPage ? (
+        <span>{fieldValue}</span>
       ) : (
         <OverflowingTextWithTooltip
           text={
