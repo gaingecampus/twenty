@@ -1,3 +1,12 @@
+import { MessageListHeaderCount } from '@/activities/emails/components/message-lists/MessageListHeaderCount';
+import { WidgetHeaderActionContext } from '@/page-layout/widgets/widget-card/contexts/WidgetHeaderActionContext';
+import { createPortal } from 'react-dom';
+import {
+  StyledMessageListTable,
+  StyledMessageListHeader,
+  StyledMessageListCell,
+} from '@/activities/emails/components/message-lists/MessageListTableStyles';
+import { TableRow } from '@/ui/layout/table/components/TableRow';
 import { StyledMessageListEmpty } from '@/activities/emails/components/message-lists/MessageListSectionStyles';
 import { RecordChip } from '@/object-record/components/RecordChip';
 import { EmailDisplay } from '@/ui/field/display/components/EmailDisplay';
@@ -10,7 +19,7 @@ import { type ObjectRecord } from '@/object-record/types/ObjectRecord';
 import { useSnackBar } from '@/ui/feedback/snack-bar-manager/hooks/useSnackBar';
 import { styled } from '@linaria/react';
 import { t } from '@lingui/core/macro';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { Button } from 'twenty-ui/input';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 type MessageListMember = ObjectRecord & {
@@ -38,49 +47,34 @@ const StyledSection = styled.section`
   min-width: 0;
   width: 100%;
 `;
-const StyledDescription = styled.p`
-  color: ${themeCssVariables.font.color.secondary};
-  line-height: 1.6;
-  margin: 0;
-`;
 const StyledActions = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: ${themeCssVariables.spacing[2]};
 `;
-const StyledMembers = styled.ul`
-  display: flex;
-  flex-direction: column;
-  gap: ${themeCssVariables.spacing[2]};
-  list-style: none;
-  margin: 0;
-  padding: 0;
-`;
-const StyledMember = styled.li`
-  align-items: center;
-  display: flex;
-  gap: ${themeCssVariables.spacing[3]};
-  padding: ${themeCssVariables.spacing[2]} 0;
-`;
-const StyledIdentity = styled.div`
-  align-items: center;
-  display: flex;
-  flex: 1;
-  flex-direction: row;
-  flex-wrap: wrap;
-  gap: ${themeCssVariables.spacing[2]};
+const StyledTableScroll = styled.div`
   min-width: 0;
-  overflow-wrap: anywhere;
+  overflow-x: auto;
 `;
 const StyledMetadata = styled.span`
   color: ${themeCssVariables.font.color.secondary};
   font-size: ${themeCssVariables.font.size.sm};
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;
+const StyledRecipientNotice = styled.span`
+  font-size: ${themeCssVariables.font.size.sm};
+  white-space: normal;
+`;
+const MEMBER_GRID_COLUMNS =
+  'minmax(180px, 1fr) minmax(150px, 1fr) minmax(280px, 1.5fr) 80px';
+
 export const MessageListMembers = ({ listId }: { listId: string }) => (
   <MessageListMembersPage key={listId} listId={listId} />
 );
 
 const MessageListMembersPage = ({ listId }: { listId: string }) => {
+  const headerActionTarget = useContext(WidgetHeaderActionContext);
   const [page, setPage] = useState(0);
   const pageSize = 50;
   const [busy, setBusy] = useState(false);
@@ -125,29 +119,37 @@ const MessageListMembersPage = ({ listId }: { listId: string }) => {
       setBusy(false);
     }
   };
+  const actions = (
+    <StyledActions>
+      {permissions.canUpdateObjectRecords && (
+        <Button
+          title={t`고객 추가`}
+          size="small"
+          variant="primary"
+          accent="blue"
+          disabled={busy}
+          onClick={() => setAdding('person')}
+        />
+      )}
+      {permissions.canUpdateObjectRecords && (
+        <Button
+          title={t`워크스페이스 멤버 추가`}
+          size="small"
+          disabled={busy}
+          onClick={() => setAdding('workspaceMember')}
+        />
+      )}
+    </StyledActions>
+  );
   return (
     <StyledSection>
-      {!loading && !error && (
-        <StyledDescription>{t`등록된 수신자 ${totalCount}명`}</StyledDescription>
-      )}
-      <StyledActions>
-        {permissions.canUpdateObjectRecords && (
-          <Button
-            title={t`고객 추가`}
-            variant="primary"
-            accent="blue"
-            disabled={busy}
-            onClick={() => setAdding('person')}
-          />
-        )}
-        {permissions.canUpdateObjectRecords && (
-          <Button
-            title={t`워크스페이스 멤버 추가`}
-            disabled={busy}
-            onClick={() => setAdding('workspaceMember')}
-          />
-        )}
-      </StyledActions>
+      <MessageListHeaderCount
+        count={totalCount}
+        loading={loading}
+        error={Boolean(error)}
+        label={t`등록된 수신자`}
+      />
+      {headerActionTarget ? createPortal(actions, headerActionTarget) : actions}
       {adding && (
         <MessageListAddCustomersModal
           initialListId={listId}
@@ -169,57 +171,93 @@ const MessageListMembersPage = ({ listId }: { listId: string }) => {
         </StyledMessageListEmpty>
       )}
       {records.length > 0 && (
-        <StyledMembers aria-label={t`등록된 수신자`}>
-          {records.map((member) => (
-            <StyledMember key={member.id}>
-              <StyledIdentity>
-                {member.person ? (
-                  <RecordChip
-                    objectNameSingular="person"
-                    record={member.person}
-                  />
-                ) : member.workspaceMember ? (
-                  <RecordChip
-                    objectNameSingular="workspaceMember"
-                    record={member.workspaceMember}
-                  />
-                ) : (
-                  t`삭제되었거나 접근할 수 없는 수신자`
-                )}
-                <StyledMetadata>
-                  {member.person
-                    ? [member.person.company?.name, member.person.jobTitle]
-                        .filter(Boolean)
-                        .join(' · ') || t`고객`
-                    : member.workspaceMember
-                      ? t`워크스페이스 멤버`
-                      : ''}
-                </StyledMetadata>
-                {member.person?.emails?.primaryEmail ||
-                member.workspaceMember?.userEmail ? (
-                  <EmailDisplay
-                    value={
-                      member.person?.emails?.primaryEmail ||
-                      member.workspaceMember?.userEmail ||
-                      ''
+        <StyledTableScroll
+          tabIndex={0}
+          role="region"
+          aria-label={t`등록된 수신자 표`}
+        >
+          <StyledMessageListTable>
+            <TableRow gridTemplateColumns={MEMBER_GRID_COLUMNS}>
+              <StyledMessageListHeader>{t`수신자`}</StyledMessageListHeader>
+              <StyledMessageListHeader>{t`구분 / 소속`}</StyledMessageListHeader>
+              <StyledMessageListHeader>{t`이메일`}</StyledMessageListHeader>
+              <StyledMessageListHeader>{t`관리`}</StyledMessageListHeader>
+            </TableRow>
+            {records.map((member) => (
+              <TableRow
+                key={member.id}
+                gridTemplateColumns={MEMBER_GRID_COLUMNS}
+                hoverBackgroundColor={
+                  themeCssVariables.background.transparent.light
+                }
+              >
+                <StyledMessageListCell>
+                  {member.person ? (
+                    <RecordChip
+                      objectNameSingular="person"
+                      record={member.person}
+                    />
+                  ) : member.workspaceMember ? (
+                    <RecordChip
+                      objectNameSingular="workspaceMember"
+                      record={member.workspaceMember}
+                    />
+                  ) : (
+                    <StyledRecipientNotice>{t`삭제되었거나 접근할 수 없는 수신자`}</StyledRecipientNotice>
+                  )}
+                </StyledMessageListCell>
+                <StyledMessageListCell>
+                  <StyledMetadata
+                    title={
+                      member.person
+                        ? [member.person.company?.name, member.person.jobTitle]
+                            .filter(Boolean)
+                            .join(' · ') || t`고객`
+                        : member.workspaceMember
+                          ? t`워크스페이스 멤버`
+                          : ''
                     }
-                  />
-                ) : (
-                  <StyledMetadata>{t`이메일 미등록 · 이메일 발송 시 제외됩니다`}</StyledMetadata>
-                )}
-              </StyledIdentity>
-              {permissions.canSoftDeleteObjectRecords && (
-                <Button
-                  title={t`제외`}
-                  size="small"
-                  variant="tertiary"
-                  disabled={busy}
-                  onClick={() => runMutation(() => deleteOneRecord(member.id))}
-                />
-              )}
-            </StyledMember>
-          ))}
-        </StyledMembers>
+                  >
+                    {member.person
+                      ? [member.person.company?.name, member.person.jobTitle]
+                          .filter(Boolean)
+                          .join(' · ') || t`고객`
+                      : member.workspaceMember
+                        ? t`워크스페이스 멤버`
+                        : ''}
+                  </StyledMetadata>
+                </StyledMessageListCell>
+                <StyledMessageListCell>
+                  {member.person?.emails?.primaryEmail ||
+                  member.workspaceMember?.userEmail ? (
+                    <EmailDisplay
+                      value={
+                        member.person?.emails?.primaryEmail ||
+                        member.workspaceMember?.userEmail ||
+                        ''
+                      }
+                    />
+                  ) : (
+                    <StyledRecipientNotice>{t`이메일 미등록 · 이메일 발송 시 제외됩니다`}</StyledRecipientNotice>
+                  )}
+                </StyledMessageListCell>
+                <StyledMessageListCell align="center">
+                  {permissions.canSoftDeleteObjectRecords && (
+                    <Button
+                      title={t`제외`}
+                      size="small"
+                      variant="tertiary"
+                      disabled={busy}
+                      onClick={() =>
+                        runMutation(() => deleteOneRecord(member.id))
+                      }
+                    />
+                  )}
+                </StyledMessageListCell>
+              </TableRow>
+            ))}
+          </StyledMessageListTable>
+        </StyledTableScroll>
       )}
       {!error && (
         <RecordPaginationBar

@@ -1,3 +1,4 @@
+import { WidgetHeaderTitleContext } from '@/page-layout/widgets/widget-card/contexts/WidgetHeaderTitleContext';
 import { WidgetHeaderActionContext } from '@/page-layout/widgets/widget-card/contexts/WidgetHeaderActionContext';
 import { useObjectMetadataItems } from '@/object-metadata/hooks/useObjectMetadataItems';
 import { t } from '@lingui/core/macro';
@@ -16,7 +17,7 @@ import { styled } from '@linaria/react';
 import { type MouseEvent, useContext, useState } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { IconLock } from 'twenty-ui/icon';
-import { ThemeContext } from 'twenty-ui/theme-constants';
+import { ThemeContext, themeCssVariables } from 'twenty-ui/theme-constants';
 import {
   WidgetConfigurationType,
   WidgetType,
@@ -26,6 +27,16 @@ const StyledNoAccessContainer = styled.div`
   align-items: center;
   display: flex;
   justify-content: center;
+`;
+
+const StyledWidgetCard = styled(WidgetCard)`
+  &.message-list-section {
+    background: ${themeCssVariables.background.tertiary};
+    border: none;
+    border-radius: ${themeCssVariables.border.radius.md};
+    gap: ${themeCssVariables.spacing[2]};
+    padding: ${themeCssVariables.spacing[4]};
+  }
 `;
 
 type WidgetCardShellProps = {
@@ -74,30 +85,33 @@ export const WidgetCardShell = ({
   const { theme } = useContext(ThemeContext);
   const [headerActionTarget, setHeaderActionTarget] =
     useState<HTMLDivElement | null>(null);
+  const [headerTitleTarget, setHeaderTitleTarget] =
+    useState<HTMLSpanElement | null>(null);
   const { objectMetadataItems } = useObjectMetadataItems();
   const fieldMetadataId =
     widget.configuration.configurationType === WidgetConfigurationType.FIELD &&
     'fieldMetadataId' in widget.configuration
       ? widget.configuration.fieldMetadataId
       : undefined;
-  const isMessageListMembers =
-    fieldMetadataId !== undefined &&
-    objectMetadataItems.some(
-      (object) =>
-        object.nameSingular === 'messageList' &&
-        object.fields.some(
-          (field) =>
-            field.name === 'members' &&
-            (field.id === fieldMetadataId || field.name === fieldMetadataId),
-        ),
-    );
+  const messageListField =
+    fieldMetadataId === undefined
+      ? undefined
+      : objectMetadataItems
+          .find((object) => object.nameSingular === 'messageList')
+          ?.fields.find(
+            (field) =>
+              field.id === fieldMetadataId || field.name === fieldMetadataId,
+          )?.name;
+  const isMessageListMembers = messageListField === 'members';
+  const isMessageListCampaigns = messageListField === 'campaigns';
+  const isMessageListTable = isMessageListMembers || isMessageListCampaigns;
 
   const dataTestId =
     widget.type === WidgetType.FIELDS ? 'record-fields-widget' : widget.id;
 
   return (
     <WidgetComponentInstanceContext.Provider value={{ instanceId: widget.id }}>
-      <WidgetCard
+      <StyledWidgetCard
         headerLess={!showHeader}
         variant={variant}
         isEditable={isEditable}
@@ -110,11 +124,17 @@ export const WidgetCardShell = ({
         onMouseLeave={onMouseLeave}
         data-widget-id={widget.id}
         data-testid={dataTestId}
-        className="widget"
+        className={
+          isMessageListTable && !isEditable
+            ? 'widget message-list-section'
+            : 'widget'
+        }
       >
         {showHeader && (
           <WidgetCardHeader
             actionSlotRef={setHeaderActionTarget}
+            titleSlotRef={isMessageListTable ? setHeaderTitleTarget : undefined}
+            wrapActions={isMessageListTable}
             widgetId={widget.id}
             variant={variant}
             isInEditMode={isEditable}
@@ -128,7 +148,11 @@ export const WidgetCardShell = ({
                 : undefined
             }
             onRemove={onRemove}
-            actions={actions}
+            actions={
+              isMessageListCampaigns
+                ? actions.filter((action) => action.id !== 'see-all')
+                : actions
+            }
             forbiddenDisplay={
               !hasAccess && (
                 <PageLayoutWidgetForbiddenDisplay
@@ -142,6 +166,7 @@ export const WidgetCardShell = ({
 
         <WidgetCardContent
           variant={variant}
+          frameless={isMessageListTable && !isEditable}
           hasHeader={showHeader}
           isEditable={isEditable}
           isInVerticalListTab={isInVerticalListTab}
@@ -160,7 +185,11 @@ export const WidgetCardShell = ({
               <WidgetHeaderActionContext.Provider
                 value={showHeader ? headerActionTarget : null}
               >
-                <WidgetContentRenderer widget={widget} />
+                <WidgetHeaderTitleContext.Provider
+                  value={showHeader ? headerTitleTarget : null}
+                >
+                  <WidgetContentRenderer widget={widget} />
+                </WidgetHeaderTitleContext.Provider>
               </WidgetHeaderActionContext.Provider>
             </ErrorBoundary>
           ) : (
@@ -172,7 +201,7 @@ export const WidgetCardShell = ({
             </StyledNoAccessContainer>
           )}
         </WidgetCardContent>
-      </WidgetCard>
+      </StyledWidgetCard>
     </WidgetComponentInstanceContext.Provider>
   );
 };

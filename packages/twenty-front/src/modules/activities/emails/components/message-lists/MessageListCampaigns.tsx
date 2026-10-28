@@ -1,3 +1,9 @@
+import { MessageListHeaderCount } from '@/activities/emails/components/message-lists/MessageListHeaderCount';
+import {
+  StyledMessageListTable,
+  StyledMessageListHeader,
+  StyledMessageListCell,
+} from '@/activities/emails/components/message-lists/MessageListTableStyles';
 import { StyledMessageListEmpty } from '@/activities/emails/components/message-lists/MessageListSectionStyles';
 import { MessageListLinkCampaign } from '@/activities/emails/components/message-lists/MessageListLinkCampaign';
 import { DateTimeDisplay } from '@/ui/field/display/components/DateTimeDisplay';
@@ -5,11 +11,7 @@ import { useMessageListRecordPage } from '@/activities/emails/hooks/useMessageLi
 import { RecordPaginationBar } from '@/object-record/record-index/components/RecordIndexPaginationBar';
 import { useState } from 'react';
 import { type ObjectRecord } from '@/object-record/types/ObjectRecord';
-import { Table } from '@/ui/layout/table/components/Table';
 import { TableRow } from '@/ui/layout/table/components/TableRow';
-import { TableHeader } from '@/ui/layout/table/components/TableHeader';
-import { TableCell } from '@/ui/layout/table/components/TableCell';
-import { RECORD_TABLE_ROW_HEIGHT } from '@/object-record/record-table/constants/RecordTableRowHeight';
 import { styled } from '@linaria/react';
 import { t } from '@lingui/core/macro';
 import { RecordChip } from '@/object-record/components/RecordChip';
@@ -27,49 +29,6 @@ type Campaign = ObjectRecord & {
 const StyledSection = styled.section`
   overflow: auto;
   width: 100%;
-`;
-
-const StyledCampaignTable = styled(Table)`
-  background: ${themeCssVariables.background.primary};
-  border: 1px solid ${themeCssVariables.border.color.light};
-  border-radius: ${themeCssVariables.border.radius.md};
-  box-sizing: border-box;
-  min-width: 700px;
-  overflow: hidden;
-
-  > [data-table-row] {
-    border-radius: 0;
-  }
-
-  > [data-table-row]:not(:last-child) {
-    border-bottom: 1px solid ${themeCssVariables.border.color.light};
-  }
-
-  > [data-table-row] > :not(:last-child) {
-    border-right: 1px solid ${themeCssVariables.border.color.light};
-  }
-
-  > [data-table-row]:has([data-table-header])
-    + [data-table-row]:not(:has([data-table-header])),
-  > [data-table-row]:last-child:not(:has([data-table-header])) {
-    margin: 0;
-  }
-`;
-
-const StyledCampaignHeader = styled(TableHeader)`
-  border-bottom: none;
-  box-sizing: border-box;
-  height: ${RECORD_TABLE_ROW_HEIGHT}px;
-  padding: 0 ${themeCssVariables.spacing[3]};
-`;
-
-const StyledCampaignCell = styled(TableCell)`
-  box-sizing: border-box;
-  height: ${RECORD_TABLE_ROW_HEIGHT}px;
-  min-width: 0;
-  overflow: hidden;
-  padding: 0 ${themeCssVariables.spacing[3]};
-  white-space: nowrap;
 `;
 
 const CAMPAIGN_GRID_COLUMNS =
@@ -117,6 +76,12 @@ const MessageListCampaignsPage = ({ listId }: { listId: string }) => {
   };
   return (
     <StyledSection aria-label={t`연결된 심방콜 발송`}>
+      <MessageListHeaderCount
+        count={totalCount}
+        loading={loading}
+        error={Boolean(error)}
+        label={t`연결된 단체 발송`}
+      />
       <MessageListLinkCampaign
         listId={listId}
         onLinked={async () => {
@@ -134,12 +99,12 @@ const MessageListCampaignsPage = ({ listId }: { listId: string }) => {
         </StyledMessageListEmpty>
       )}
       {records.length > 0 && (
-        <StyledCampaignTable>
+        <StyledMessageListTable>
           <TableRow gridTemplateColumns={CAMPAIGN_GRID_COLUMNS}>
-            <StyledCampaignHeader>{t`심방콜 발송`}</StyledCampaignHeader>
-            <StyledCampaignHeader>{t`발신자`}</StyledCampaignHeader>
-            <StyledCampaignHeader>{t`상태`}</StyledCampaignHeader>
-            <StyledCampaignHeader>{t`예약 / 발송 시각`}</StyledCampaignHeader>
+            <StyledMessageListHeader>{t`심방콜 발송`}</StyledMessageListHeader>
+            <StyledMessageListHeader>{t`발신자`}</StyledMessageListHeader>
+            <StyledMessageListHeader>{t`상태`}</StyledMessageListHeader>
+            <StyledMessageListHeader>{t`예약 / 발송 시각`}</StyledMessageListHeader>
           </TableRow>
           {records.map((campaign) => (
             <TableRow
@@ -149,22 +114,22 @@ const MessageListCampaignsPage = ({ listId }: { listId: string }) => {
               }
               gridTemplateColumns={CAMPAIGN_GRID_COLUMNS}
             >
-              <StyledCampaignCell>
+              <StyledMessageListCell>
                 <RecordChip
                   objectNameSingular="messageCampaign"
                   record={campaign}
                 />
-              </StyledCampaignCell>
-              <StyledCampaignCell>
+              </StyledMessageListCell>
+              <StyledMessageListCell>
                 <EmailDisplay value={campaign.fromAddress?.primaryEmail} />
-              </StyledCampaignCell>
-              <StyledCampaignCell>
+              </StyledMessageListCell>
+              <StyledMessageListCell>
                 <Tag
                   text={statusLabels[campaign.status] ?? campaign.status}
                   color={statusColors[campaign.status] ?? 'gray'}
                 />
-              </StyledCampaignCell>
-              <StyledCampaignCell>
+              </StyledMessageListCell>
+              <StyledMessageListCell>
                 {campaign.sentAt || campaign.scheduledAt ? (
                   <DateTimeDisplay
                     value={campaign.sentAt ?? campaign.scheduledAt}
@@ -172,10 +137,10 @@ const MessageListCampaignsPage = ({ listId }: { listId: string }) => {
                 ) : (
                   '—'
                 )}
-              </StyledCampaignCell>
+              </StyledMessageListCell>
             </TableRow>
           ))}
-        </StyledCampaignTable>
+        </StyledMessageListTable>
       )}
       {!error && (
         <RecordPaginationBar

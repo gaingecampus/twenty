@@ -4,6 +4,7 @@ import { type WidgetCardVariant } from '~/modules/page-layout/widgets/types/Widg
 
 type WidgetCardContentStyledProps = {
   variant: WidgetCardVariant;
+  frameless?: boolean;
   hasHeader: boolean;
   isEditable: boolean;
   isInVerticalListTab: boolean;
@@ -11,16 +12,18 @@ type WidgetCardContentStyledProps = {
 };
 
 const StyledWidgetCardContent = styled.div<WidgetCardContentStyledProps>`
-  background-color: ${({ variant, isInVerticalListTab, isMobile }) =>
-    variant === 'record-page' && isInVerticalListTab && !isMobile
+  background-color: ${({ variant, isInVerticalListTab, isMobile, frameless }) =>
+    !frameless && variant === 'record-page' && isInVerticalListTab && !isMobile
       ? themeCssVariables.background.secondary
       : 'transparent'};
-  border: ${({ variant, isEditable }) =>
-    variant === 'record-page' || (variant === 'side-column' && isEditable)
+  border: ${({ variant, isEditable, frameless }) =>
+    !frameless &&
+    (variant === 'record-page' || (variant === 'side-column' && isEditable))
       ? `1px solid ${themeCssVariables.border.color.medium}`
       : 'none'};
-  border-radius: ${({ variant, isEditable }) =>
-    variant === 'record-page' || (variant === 'side-column' && isEditable)
+  border-radius: ${({ variant, isEditable, frameless }) =>
+    !frameless &&
+    (variant === 'record-page' || (variant === 'side-column' && isEditable))
       ? themeCssVariables.border.radius.md
       : '0'};
   box-sizing: border-box;
@@ -34,7 +37,8 @@ const StyledWidgetCardContent = styled.div<WidgetCardContentStyledProps>`
 
   overflow: hidden;
 
-  padding: ${({ variant, isEditable }) => {
+  padding: ${({ variant, isEditable, frameless }) => {
+    if (frameless) return '0';
     if (variant === 'dashboard' || variant === 'standalone')
       return themeCssVariables.spacing[2];
     if (
@@ -56,6 +60,7 @@ const StyledWidgetCardContent = styled.div<WidgetCardContentStyledProps>`
 
 type WidgetCardContentProps = {
   variant: WidgetCardVariant;
+  frameless?: boolean;
   hasHeader: boolean;
   isEditable: boolean;
   isInVerticalListTab: boolean;
@@ -67,6 +72,7 @@ type WidgetCardContentProps = {
 
 export const WidgetCardContent = ({
   variant,
+  frameless = false,
   hasHeader,
   isEditable,
   isInVerticalListTab,
@@ -86,6 +92,7 @@ export const WidgetCardContent = ({
   return (
     <StyledWidgetCardContent
       variant={variant}
+      frameless={frameless}
       hasHeader={hasHeader}
       isEditable={isEditable}
       isInVerticalListTab={isInVerticalListTab}

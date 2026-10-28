@@ -26,6 +26,8 @@ export type WidgetCardHeaderProps = {
   title: string;
   titleHelp?: string;
   actionSlotRef?: Ref<HTMLDivElement>;
+  titleSlotRef?: Ref<HTMLSpanElement>;
+  wrapActions?: boolean;
   onRemove?: (e?: React.MouseEvent) => void;
   forbiddenDisplay?: ReactNode;
   actions?: WidgetAction[];
@@ -35,10 +37,13 @@ export type WidgetCardHeaderProps = {
   isDeletingWidgetEnabled?: boolean;
 };
 
-const StyledWidgetCardHeader = styled.div`
+const StyledWidgetCardHeader = styled.div<{ wrapActions: boolean }>`
   align-items: center;
   display: flex;
   flex-shrink: 0;
+  flex-wrap: ${({ wrapActions }) => (wrapActions ? 'wrap' : 'nowrap')};
+  gap: ${({ wrapActions }) =>
+    wrapActions ? themeCssVariables.spacing[2] : '0'};
   min-height: ${themeCssVariables.spacing[6]};
 `;
 
@@ -97,6 +102,8 @@ export const WidgetCardHeader = ({
   title,
   titleHelp,
   actionSlotRef,
+  titleSlotRef,
+  wrapActions = false,
   onRemove,
   forbiddenDisplay,
   actions,
@@ -110,7 +117,7 @@ export const WidgetCardHeader = ({
   );
 
   return (
-    <StyledWidgetCardHeader className={className}>
+    <StyledWidgetCardHeader className={className} wrapActions={wrapActions}>
       <AnimatePresence initial={false}>
         {!isEmpty && isInEditMode && isReorderEnabled && (
           <WidgetGrip
@@ -121,6 +128,7 @@ export const WidgetCardHeader = ({
       </AnimatePresence>
       <StyledTitleContainer variant={variant}>
         <OverflowingTextWithTooltip text={isEmpty ? t`Add Widget` : title} />
+        {titleSlotRef && <span ref={titleSlotRef} />}
         {titleHelp && !isEmpty && (
           <>
             <span id={helpId}>
