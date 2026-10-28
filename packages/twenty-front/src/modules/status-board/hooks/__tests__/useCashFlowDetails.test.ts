@@ -80,6 +80,7 @@ describe('cash flow detail sources', () => {
         { sourceHash: { eq: 'backup-a' } },
         { inclusionStatus: { eq: '포함' } },
         { expectedDate: { gte: '2026-10-28' } },
+        { expectedDate: { lte: '2026-10-31' } },
       ],
     });
     expect(result.current.filters.transactions).toEqual({

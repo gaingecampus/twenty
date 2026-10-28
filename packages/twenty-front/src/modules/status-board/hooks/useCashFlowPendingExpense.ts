@@ -1,4 +1,5 @@
 import { getCashFlowToday } from '@/status-board/utils/getCashFlowToday';
+import { getCashFlowMonthEnd } from '@/status-board/utils/getCashFlowMonthEnd';
 import { useAggregateRecords } from '@/object-record/hooks/useAggregateRecords';
 import { AggregateOperations } from '@/object-record/record-table/constants/AggregateOperations';
 import { readCashFlowCurrency } from '@/status-board/utils/calculateCashFlow';
@@ -12,6 +13,7 @@ export const getCashFlowPendingExpenseFilter = (
   and: [
     { expenseMonth: { eq: month } },
     { scheduledDate: { gte: today } },
+    { scheduledDate: { lte: getCashFlowMonthEnd(today) } },
     {
       or: [
         { sourceRecordType: { is: 'NULL' } },

@@ -1,4 +1,5 @@
 import { getCashFlowToday } from '@/status-board/utils/getCashFlowToday';
+import { getCashFlowMonthEnd } from '@/status-board/utils/getCashFlowMonthEnd';
 import { useAggregateRecords } from '@/object-record/hooks/useAggregateRecords';
 import { useFindManyRecords } from '@/object-record/hooks/useFindManyRecords';
 import { AggregateOperations } from '@/object-record/record-table/constants/AggregateOperations';
@@ -18,6 +19,7 @@ export const getCashFlowDetailsFilters = (
       { sourceHash: { eq: sourceHash } },
       { inclusionStatus: { eq: '포함' } },
       { expectedDate: { gte: today } },
+      { expectedDate: { lte: getCashFlowMonthEnd(today) } },
     ],
   } as RecordGqlOperationFilter,
 });

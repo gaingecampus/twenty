@@ -57,6 +57,7 @@ describe('CRM pending expense cash flow', () => {
       and: [
         { expenseMonth: { eq: '2026-10' } },
         { scheduledDate: { gte: '2026-10-28' } },
+        { scheduledDate: { lte: '2026-10-31' } },
         {
           or: [
             { sourceRecordType: { is: 'NULL' } },
