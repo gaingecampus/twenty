@@ -672,12 +672,17 @@ export const StyledStatusBoardSheetActions = styled.div`
   gap: 8px;
   margin-left: auto;
 `;
-export const StyledStatusBoardSheetToolbar = styled.div`
+export const StyledStatusBoardSheetToolbar = styled.div<{
+  hasBankFilter?: boolean;
+}>`
   align-items: stretch;
   display: grid;
   flex-shrink: 0;
   gap: 12px;
-  grid-template-columns: minmax(0, 3fr) minmax(128px, 1fr);
+  grid-template-columns: ${({ hasBankFilter }) =>
+    hasBankFilter
+      ? 'minmax(0, 2fr) repeat(2, minmax(128px, 1fr))'
+      : 'minmax(0, 3fr) minmax(128px, 1fr)'};
   margin: 0 0 12px;
 
   > div {

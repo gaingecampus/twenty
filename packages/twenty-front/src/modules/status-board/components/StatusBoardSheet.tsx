@@ -46,6 +46,7 @@ export type StatusBoardSheetState = {
   recordBadges?: Record<string, string>;
   recordMembers?: StatusBoardRecordMembers;
   summary?: string;
+  sortDateField?: 'transactionAt' | 'expectedDate';
 };
 
 type StatusBoardSheetProps = {
@@ -65,6 +66,8 @@ export const StatusBoardSheet = ({ sheet, onClose }: StatusBoardSheetProps) => {
     useState<HTMLDivElement | null>(null);
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState('newest');
+  const [bank, setBank] = useState('all');
+  const hasBankFilter = sheet.objectNameSingular === 'bankTransaction';
   const bodyRef = useRef<HTMLDivElement>(null);
 
   const [debouncedSearch] = useDebounce(search.trim(), 200);
@@ -72,6 +75,7 @@ export const StatusBoardSheet = ({ sheet, onClose }: StatusBoardSheetProps) => {
   const dialogRef = useRef<HTMLDivElement>(null);
   const filter = andStatusBoardFilters([
     sheet.filter,
+    hasBankFilter && bank !== 'all' ? { bankKey: { eq: bank } } : undefined,
     debouncedSearch === ''
       ? undefined
       : sheet.objectNameSingular === 'person'
@@ -139,7 +143,7 @@ export const StatusBoardSheet = ({ sheet, onClose }: StatusBoardSheetProps) => {
           </StyledStatusBoardSheetListLink>,
           sidePanelHeaderActionsElement,
         )}
-      <StyledStatusBoardSheetToolbar>
+      <StyledStatusBoardSheetToolbar hasBankFilter={hasBankFilter}>
         <StyledStatusBoardModalSearch
           role="search"
           aria-label={`${sheet.title} 검색`}
@@ -167,6 +171,24 @@ export const StatusBoardSheet = ({ sheet, onClose }: StatusBoardSheetProps) => {
             </StyledStatusBoardSearchClear>
           )}
         </StyledStatusBoardModalSearch>
+        {hasBankFilter && (
+          <StyledStatusBoardSort role="group" aria-label="은행 필터">
+            <Select
+              dropdownId="status-board-sheet-bank"
+              dropdownWidthAuto
+              fullWidth
+              needIconCheck
+              value={bank}
+              onChange={setBank}
+              options={[
+                { value: 'all', label: '전체 은행' },
+                { value: 'shinhan', label: '신한' },
+                { value: 'kb', label: '국민' },
+                { value: 'nh', label: '농협' },
+              ]}
+            />
+          </StyledStatusBoardSort>
+        )}
         <StyledStatusBoardSort role="group" aria-label="목록 정렬">
           <Select
             dropdownId="status-board-sheet-sort"
@@ -176,8 +198,14 @@ export const StatusBoardSheet = ({ sheet, onClose }: StatusBoardSheetProps) => {
             value={sort}
             onChange={setSort}
             options={[
-              { value: 'newest', label: '최신 등록순' },
-              { value: 'oldest', label: '오래된 등록순' },
+              {
+                value: 'newest',
+                label: sheet.sortDateField ? '최신 날짜순' : '최신 등록순',
+              },
+              {
+                value: 'oldest',
+                label: sheet.sortDateField ? '오래된 날짜순' : '오래된 등록순',
+              },
             ]}
           />
         </StyledStatusBoardSort>
@@ -196,7 +224,8 @@ export const StatusBoardSheet = ({ sheet, onClose }: StatusBoardSheetProps) => {
           onPageChange={() => bodyRef.current?.scrollTo({ top: 0 })}
           orderBy={[
             {
-              createdAt: sort === 'newest' ? 'DescNullsLast' : 'AscNullsLast',
+              [sheet.sortDateField ?? 'createdAt']:
+                sort === 'newest' ? 'DescNullsLast' : 'AscNullsLast',
             },
             { id: 'AscNullsLast' },
           ]}

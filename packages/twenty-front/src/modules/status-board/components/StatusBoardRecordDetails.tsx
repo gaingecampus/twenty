@@ -17,6 +17,7 @@ import {
 import { getStatusBoardContractProgress } from '@/status-board/utils/getStatusBoardContractProgress';
 import { differenceInCalendarDays, parseISO } from 'date-fns';
 import { getStatusBoardStageTimings } from '@/status-board/utils/getStatusBoardStageTimings';
+import { readCashFlowCurrency } from '@/status-board/utils/calculateCashFlow';
 
 const StatusBoardStageLabel = ({
   objectNameSingular,
@@ -128,6 +129,48 @@ export const StatusBoardRecordDetails = ({
   objectNameSingular: string;
 }) => {
   const { objectMetadataItem } = useObjectMetadataItem({ objectNameSingular });
+  if (
+    objectNameSingular === 'bankTransaction' ||
+    objectNameSingular === 'expectedReceipt'
+  ) {
+    const formatMoney = (value: unknown) => {
+      const amount = readCashFlowCurrency(value);
+      return amount === null ? '—' : `${amount.toLocaleString('ko-KR')}원`;
+    };
+    const isBank = objectNameSingular === 'bankTransaction';
+    return (
+      <StyledStatusBoardRowAside>
+        {isBank
+          ? `잔액 ${formatMoney(record.balance)}`
+          : formatMoney(record.outstandingAmount)}
+        <StyledStatusBoardRowCaption>
+          {isBank
+            ? `입금 ${formatMoney(record.incomingAmount)} · 출금 ${formatMoney(record.outgoingAmount)}`
+            : record.inclusionStatus}
+        </StyledStatusBoardRowCaption>
+      </StyledStatusBoardRowAside>
+    );
+  }
+  if (objectNameSingular === 'pendingExpense') {
+    const amount = readCashFlowCurrency(record.plannedCashAmount);
+    return (
+      <StyledStatusBoardRowAside>
+        {amount === null
+          ? '금액 미입력'
+          : `${amount.toLocaleString('ko-KR')}원`}
+        <StyledStatusBoardRowCaption>
+          {[
+            record.vendorName,
+            typeof record.scheduledDate === 'string'
+              ? `예정 ${record.scheduledDate.slice(0, 10)}`
+              : null,
+          ]
+            .filter((value) => typeof value === 'string' && value.length > 0)
+            .join(' · ')}
+        </StyledStatusBoardRowCaption>
+      </StyledStatusBoardRowAside>
+    );
+  }
   if (
     record.expectedPaymentDate !== undefined ||
     record.depositStatus !== undefined
