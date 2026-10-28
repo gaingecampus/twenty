@@ -81,12 +81,32 @@ async function main() {
     for (const [name, label, type] of fields) {
       const existing = (
         await c.query(
-          'select id,type from core."fieldMetadata" where "objectMetadataId"=$1 and name=$2',
+          'select id,type,settings from core."fieldMetadata" where "objectMetadataId"=$1 and name=$2',
           [object.id, name],
         )
       ).rows[0];
       if (existing) {
         if (existing.type !== type) throw Error(`Field type mismatch: ${name}`);
+        if (
+          type === 'CURRENCY' &&
+          (existing.settings?.format !== 'full' ||
+            existing.settings?.decimals !== 0)
+        )
+          await gql(
+            'mutation($input:UpdateOneFieldMetadataInput!){updateOneField(input:$input){id}}',
+            {
+              input: {
+                id: existing.id,
+                update: {
+                  settings: {
+                    ...existing.settings,
+                    format: 'full',
+                    decimals: 0,
+                  },
+                },
+              },
+            },
+          );
         continue;
       }
       await gql(
@@ -100,6 +120,9 @@ async function main() {
               type,
               icon: type === 'CURRENCY' ? 'IconCurrencyWon' : 'IconDatabase',
               isNullable: true,
+              ...(type === 'CURRENCY'
+                ? { settings: { format: 'full', decimals: 0 } }
+                : {}),
             },
           },
         },
