@@ -9,7 +9,7 @@ import { DropdownContent } from '@/ui/layout/dropdown/components/DropdownContent
 import { styled } from '@linaria/react';
 import { useState } from 'react';
 import { Button } from 'twenty-ui/input';
-import { ColorSample } from 'twenty-ui/data-display';
+import { Avatar, ColorSample } from 'twenty-ui/data-display';
 import { DEFAULT_COLOR_LABELS } from 'twenty-ui/navigation';
 import { MAIN_COLOR_NAMES, type ThemeColor } from 'twenty-ui/theme';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
@@ -51,9 +51,15 @@ const StyledAvatarButton = styled.button<{ colorName: ThemeColor }>`
   display: flex;
   flex-shrink: 0;
   font-size: ${themeCssVariables.font.size.xxl};
-  height: 48px;
+  height: var(--t-avatar-size-xl, 40px);
   justify-content: center;
-  width: 48px;
+  width: var(--t-avatar-size-xl, 40px);
+  img {
+    box-sizing: border-box;
+    object-fit: contain;
+    object-position: center;
+    padding: ${themeCssVariables.spacing[2]};
+  }
   &:disabled {
     cursor: default;
   }
@@ -97,15 +103,19 @@ const StyledError = styled.p`
   margin: 0;
 `;
 
-export const MessageListAvatarPicker = ({
+export const RecordAvatarPicker = ({
   recordId,
   name,
+  objectNameSingular,
+  avatarUrl,
 }: {
   recordId: string;
   name: string;
+  objectNameSingular: 'messageList' | 'company';
+  avatarUrl?: string;
 }) => {
   const { objectMetadataItem } = useObjectMetadataItem({
-    objectNameSingular: 'messageList',
+    objectNameSingular,
   });
   const emojiField = objectMetadataItem.fields.find(
     (field) => field.name === 'avatarEmoji',
@@ -124,7 +134,7 @@ export const MessageListAvatarPicker = ({
     fieldMetadataId: colorField?.id ?? '',
   });
   const { record, loading, error, refetch } = useFindOneRecord({
-    objectNameSingular: 'messageList',
+    objectNameSingular,
     objectRecordId: recordId,
     recordGqlFields: FIELDS,
   });
@@ -151,7 +161,7 @@ export const MessageListAvatarPicker = ({
     setSaveError('');
     try {
       await updateOneRecord({
-        objectNameSingular: 'messageList',
+        objectNameSingular,
         idToUpdate: recordId,
         updateOneRecordInput: input,
         recordGqlFields: FIELDS,
@@ -165,17 +175,43 @@ export const MessageListAvatarPicker = ({
   };
   return (
     <Dropdown
-      dropdownId={`message-list-avatar-${recordId}`}
+      dropdownId={`record-avatar-${objectNameSingular}-${recordId}`}
       dropdownPlacement="bottom-start"
       disableClickForClickableComponent={disabled}
       clickableComponent={
         <StyledAvatarButton
           type="button"
           colorName={color}
+          style={
+            objectNameSingular === 'company' && !record?.avatarColor && !emoji
+              ? { background: 'transparent' }
+              : undefined
+          }
           disabled={disabled}
           aria-label="프로필 이모지와 배경색 선택"
         >
-          {emoji ?? [...name.trim()][0]?.toUpperCase() ?? '?'}
+          {emoji ??
+            (objectNameSingular === 'company' ? (
+              <Avatar
+                size="xl"
+                avatarUrl={avatarUrl}
+                placeholder={name}
+                placeholderColorSeed={recordId}
+                type="rounded"
+                backgroundColor={
+                  record?.avatarColor
+                    ? themeCssVariables.tag.background[color]
+                    : undefined
+                }
+                color={
+                  record?.avatarColor
+                    ? themeCssVariables.tag.text[color]
+                    : undefined
+                }
+              />
+            ) : (
+              ([...name.trim()][0]?.toUpperCase() ?? '?')
+            ))}
         </StyledAvatarButton>
       }
       dropdownComponents={
