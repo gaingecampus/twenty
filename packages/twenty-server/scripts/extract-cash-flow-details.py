@@ -10,6 +10,7 @@ import uuid
 from decimal import Decimal
 
 import openpyxl
+from backup_identity import backup_id, is_payroll
 
 spec = importlib.util.spec_from_file_location('cash_flow', pathlib.Path(__file__).with_name('extract-cash-flow.py'))
 cash = importlib.util.module_from_spec(spec)
@@ -58,15 +59,17 @@ def bank_records(sheet, key, label, digest, captured_at):
         bank_balance = money(sheet.cell(row, balance).value)
         if bank_balance is None:
             raise ValueError(f'Missing transaction balance: {key} row {row}')
-        detail = masked(sheet.cell(row, description).value)
+        payroll = is_payroll(sheet, row)
+        detail = '급여 (대상자 비공개)' if payroll else masked(sheet.cell(row, description).value)
         records.append(dict(
             id=record_id('bankTransaction', digest, sheet.title, row),
+            backupId=backup_id(sheet, row, key),
             name=f'{label} {at:%Y-%m-%d} {detail or "거래"}',
             bankName=label, bankKey=key, transactionAt=at.isoformat() + '+09:00',
             incomingAmount=money(sheet.cell(row, incoming).value, True),
             outgoingAmount=money(sheet.cell(row, outgoing).value, True),
             balance=bank_balance, description=detail,
-            sourceDetails='\n'.join(f'{masked(sheet.cell(4, col).value) or f"열 {col}"}: {masked(sheet.cell(row, col).value)}'
+            sourceDetails='급여: 대상자와 원문 비공개' if payroll else '\n'.join(f'{masked(sheet.cell(4, col).value) or f"열 {col}"}: {masked(sheet.cell(row, col).value)}'
                                     for col in range(3, min(sheet.max_column, 11) + 1) if sheet.cell(row, col).value is not None),
             **source_fields(digest, sheet, row, captured_at),
         ))
@@ -91,6 +94,7 @@ def receipt_records(sheet, digest, captured_at):
         status = '포함' if row in included or row in closing else '완료 제외' if row in completed else '중복 제외' if row in duplicates else '분할 중간 내역'
         records.append(dict(
             id=record_id('expectedReceipt', digest, sheet.title, row),
+            backupId=backup_id(sheet, row),
             name=f'{masked(company)} · {date:%Y-%m-%d}', companyName=masked(company),
             expectedDate=date.date().isoformat(), description=masked(description),
             invoiceAmount=money(amount_e if mode == 'installment' else amount_f),

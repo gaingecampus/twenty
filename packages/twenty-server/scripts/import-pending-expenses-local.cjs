@@ -1,15 +1,17 @@
 // Local-only import of normalized sheet rows. Financial source files stay outside Git.
 // Usage: node packages/twenty-server/scripts/import-pending-expenses-local.cjs /path/to/rows.json --apply
 const fs = require('node:fs');
-const { createHash, randomUUID } = require('node:crypto');
+const { randomUUID } = require('node:crypto');
+const {
+  identityFields,
+  getFromMonth,
+  syncTables,
+  hideProvenance,
+  summarize,
+  writeIdentityMap,
+} = require('./backup-record-sync.cjs');
 const connect = require('./local-status-board-client.cjs');
 
-const stableId = (key) => {
-  const hash = createHash('sha256')
-    .update(`pending-expense:${key}`)
-    .digest('hex');
-  return `${hash.slice(0, 8)}-${hash.slice(8, 12)}-4${hash.slice(13, 16)}-8${hash.slice(17, 20)}-${hash.slice(20, 32)}`;
-};
 const options = (items) =>
   items.map(([value, label, color], position) => ({
     id: randomUUID(),
@@ -19,6 +21,7 @@ const options = (items) =>
     position,
   }));
 const fields = [
+  ...identityFields,
   ['sourceRecordType', '원본 보존 행 유형', 'TEXT', 'IconList'],
   ['expenseMonth', '귀속 월', 'TEXT', 'IconCalendar'],
   [
@@ -74,23 +77,21 @@ const fields = [
   ['importReview', '확인 사항', 'TEXT', 'IconAlertCircle'],
   ['sourceExtraNotes', '원본 추가 메모', 'TEXT', 'IconNotes'],
   ['sourceUrl', '원본 시트', 'LINKS', 'IconLink'],
-  ['sourceRow', '원본 행', 'NUMBER', 'IconNumber'],
   ['sourceKey', '원본 식별자', 'TEXT', 'IconKey', { isUnique: true }],
 ];
 
 async function main() {
   const payload = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
-  const records = payload.records.map((record) => ({
-    ...record,
-    id: stableId(record.sourceKey),
-  }));
+  const records = payload.records;
+  const fromMonth = getFromMonth();
+  const apply = process.argv.includes('--apply');
   if (
     !records.length ||
     new Set(records.map((record) => record.sourceKey)).size !== records.length
   )
     throw Error('Empty source or duplicate source keys');
   for (const record of records) {
-    if (!record.name || !/^2026-\d{2}$/.test(record.expenseMonth))
+    if (!record.name || !/^\d{4}-\d{2}$/.test(record.expenseMonth))
       throw Error('Invalid source row');
     for (const field of ['supplyAmount', 'plannedCashAmount', 'paidAmount']) {
       if (
@@ -107,9 +108,19 @@ async function main() {
       apply: process.argv.includes('--apply'),
     }),
   );
-  if (!process.argv.includes('--apply')) return;
+
   const { c, gql, workspaceId, schema } = await connect();
   try {
+    if (!apply) {
+      const plans = await syncTables(
+        c,
+        schema,
+        [{ kind: 'pendingExpense', fields, incoming: records, fromMonth }],
+        false,
+      );
+      console.log(JSON.stringify(summarize(plans)));
+      return;
+    }
     let object = (
       await c.query(
         'select id from core."objectMetadata" where "workspaceId"=$1 and "nameSingular"=$2',
@@ -155,7 +166,7 @@ async function main() {
               name,
               label,
               type,
-              icon,
+              icon: icon || 'IconDatabase',
               isNullable: true,
               ...extra,
             },
@@ -195,24 +206,21 @@ async function main() {
         },
       );
     }
-    const existingRows = (
-      await c.query(
-        `select id from "${schema}"."_pendingExpense" where id=ANY($1::uuid[])`,
-        [records.map((record) => record.id)],
-      )
-    ).rows;
-    const existingIds = new Set(existingRows.map((record) => record.id));
-    const missing = records.filter((record) => !existingIds.has(record.id));
-    for (let offset = 0; offset < missing.length; offset += 50) {
-      await gql(
-        'mutation($data:[PendingExpenseCreateInput!]!){createPendingExpenses(data:$data){id}}',
-        { data: missing.slice(offset, offset + 50) },
-        'graphql',
+    await c.query('BEGIN');
+    let results;
+    try {
+      results = await syncTables(
+        c,
+        schema,
+        [{ kind: 'pendingExpense', fields, incoming: records, fromMonth }],
+        true,
       );
-      console.log(
-        `Imported ${Math.min(offset + 50, missing.length)}/${missing.length}`,
-      );
+      await c.query('COMMIT');
+    } catch (error) {
+      await c.query('ROLLBACK');
+      throw error;
     }
+    writeIdentityMap(process.argv[2], results);
     let view = (
       await c.query(
         'select id from core.view where "objectMetadataId"=$1 and name=$2 and "deletedAt" IS NULL',
@@ -250,7 +258,6 @@ async function main() {
         'importReview',
         'scheduledDateSource',
         'sourceUrl',
-        'sourceRow',
         'sourceExtraNotes',
       ];
       await gql(
@@ -270,14 +277,19 @@ async function main() {
         {
           input: {
             viewId: view.id,
-            fieldMetadataId: fieldIds.sourceRow,
+            fieldMetadataId: fieldIds.scheduledDate,
             direction: 'ASC',
           },
         },
       );
     }
     for (const config of [
-      { name: '원본 보충 행', field: 'sourceRecordType', operand: 'IS_NOT_EMPTY', value: '' },
+      {
+        name: '원본 보충 행',
+        field: 'sourceRecordType',
+        operand: 'IS_NOT_EMPTY',
+        value: '',
+      },
       {
         name: '2026년 10월',
         field: 'expenseMonth',
@@ -328,7 +340,6 @@ async function main() {
         'sourceUrl',
         'sourceRecordType',
         'sourceExtraNotes',
-        'sourceRow',
       ];
       if (!existingView)
         await gql(
@@ -373,81 +384,23 @@ async function main() {
           {
             input: {
               viewId: newView.id,
-              fieldMetadataId: fieldIds.sourceRow,
+              fieldMetadataId: fieldIds.scheduledDate,
               direction: 'ASC',
             },
           },
         );
       console.log(JSON.stringify({ view: config.name, id: newView.id }));
     }
-    const stored = (
-      await c.query(
-        `select * from "${schema}"."_pendingExpense" where id=ANY($1::uuid[]) and "deletedAt" IS NULL`,
-        [records.map((record) => record.id)],
-      )
-    ).rows;
-    if (stored.length !== records.length)
-      throw Error('Imported count differs from source');
-    const byId = new Map(stored.map((record) => [record.id, record]));
-    for (const record of records) {
-      const saved = byId.get(record.id);
-      if (saved.sourceRecordType !== (record.sourceRecordType ?? null))
-        throw Error(`Source type mismatch at row ${record.sourceRow}`);
-      const savedDate =
-        saved.scheduledDate instanceof Date
-          ? [
-              saved.scheduledDate.getFullYear(),
-              String(saved.scheduledDate.getMonth() + 1).padStart(2, '0'),
-              String(saved.scheduledDate.getDate()).padStart(2, '0'),
-            ].join('-')
-          : saved.scheduledDate;
-      if (
-        savedDate !== record.scheduledDate ||
-        saved.sourceRow !== record.sourceRow ||
-        saved.sourceUrlPrimaryLinkUrl !== record.sourceUrl.primaryLinkUrl
-      )
-        throw Error(`Date/source mismatch at row ${record.sourceRow}`);
-      for (const field of [
-        'name',
-        'expenseMonth',
-        'frequency',
-        'projectCategory',
-        'accountCategory',
-        'vendorName',
-        'notes',
-        'sourceSectionStatus',
-        'scheduledDateSource',
-        'importReview',
-        'sourceExtraNotes',
-        'sourceKey',
-      ]) {
-        if (saved[field] !== record[field])
-          throw Error(
-            `Verification mismatch at row ${record.sourceRow}: ${field}`,
-          );
-      }
-      for (const field of ['supplyAmount', 'plannedCashAmount', 'paidAmount']) {
-        const amount = saved[`${field}AmountMicros`];
-        if (
-          (amount === null ? null : String(amount)) !==
-          (record[field]?.amountMicros ?? null)
-        )
-          throw Error(`Amount mismatch at row ${record.sourceRow}: ${field}`);
-      }
-    }
-    console.log(
-      JSON.stringify({
-        verifiedRows: stored.length,
-        inserted: missing.length,
-        viewId: view.id,
-        url: `http://localhost:3001/objects/pendingExpenses?viewId=${view.id}`,
-      }),
-    );
+    await hideProvenance(c, gql, object.id);
+    console.log(JSON.stringify(summarize(results)));
   } finally {
     await c.end();
   }
 }
-main().catch((error) => {
-  console.error(error.message);
-  process.exitCode = 1;
-});
+if (require.main === module)
+  main().catch((error) => {
+    console.error(error.message);
+    process.exitCode = 1;
+  });
+
+module.exports = { fields };

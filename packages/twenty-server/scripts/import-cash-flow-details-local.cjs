@@ -1,12 +1,20 @@
 // Local-only, resumable import. Private payloads must never be committed.
 const fs = require('node:fs');
 const { randomUUID } = require('node:crypto');
+const {
+  identityFields,
+  getFromMonth,
+  syncTables,
+  hideProvenance,
+  summarize,
+  writeIdentityMap,
+} = require('./backup-record-sync.cjs');
 const connect = require('./local-status-board-client.cjs');
 
 const commonFields = [
+  ...identityFields,
   ['sourceHash', '원본 파일 SHA256', 'TEXT'],
   ['sourceSheet', '원본 탭', 'TEXT'],
-  ['sourceRow', '원본 행', 'NUMBER'],
   ['capturedAt', '백업 기준 시각', 'DATE_TIME'],
   ['sourceUrl', '원본 시트', 'LINKS'],
   ['description', '내용', 'TEXT'],
@@ -35,7 +43,6 @@ const configs = [
       'balance',
       'description',
       'sourceSheet',
-      'sourceRow',
       'capturedAt',
       'sourceUrl',
       'sourceDetails',
@@ -66,7 +73,6 @@ const configs = [
       'closingBalance',
       'description',
       'sourceSheet',
-      'sourceRow',
       'capturedAt',
       'sourceUrl',
       'sourceDetails',
@@ -155,6 +161,9 @@ function validate(payload) {
 async function main() {
   const payload = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
   validate(payload);
+  const fromMonth = getFromMonth(process.argv, payload.month);
+  if (fromMonth !== payload.month)
+    throw Error('Backup month and --from-month must match');
   console.log(
     JSON.stringify({
       mode: process.argv.includes('--apply') ? 'apply' : 'dry-run',
@@ -162,9 +171,24 @@ async function main() {
       expectedReceipts: payload.expectedReceipts.length,
     }),
   );
-  if (!process.argv.includes('--apply')) return;
+  const apply = process.argv.includes('--apply');
   const { c, gql, schema, workspaceId } = await connect();
   try {
+    if (!apply) {
+      const plans = await syncTables(
+        c,
+        schema,
+        configs.map((config) => ({
+          kind: config.singular,
+          fields: config.fields,
+          incoming: payload[config.plural],
+          fromMonth,
+        })),
+        false,
+      );
+      console.log(JSON.stringify(summarize(plans)));
+      return;
+    }
     const snapshot = (
       await c.query(
         `select * from "${schema}"."_cashFlowSnapshot" where "sourceHash"=$1 and month=$2 and "deletedAt" is null`,
@@ -194,12 +218,6 @@ async function main() {
     await ensureFields(c, gql, snapshotObject.id, [
       ['detailsReady', '상세 백업 확인', 'BOOLEAN'],
     ]);
-    // An incomplete import must not be presented as a complete set of financial records.
-    await gql(
-      'mutation($id:UUID!,$data:CashFlowSnapshotUpdateInput!){updateCashFlowSnapshot(id:$id,data:$data){id}}',
-      { id: snapshot[0].id, data: { detailsReady: false } },
-      'graphql',
-    );
     for (const config of configs) {
       let object = (
         await c.query(
@@ -220,105 +238,75 @@ async function main() {
                   labelPlural: config.label,
                   icon: 'IconWallet',
                   description:
-                    '원본 시트의 상세 백업. 식별번호는 마스킹하며 백업별로 보존합니다.',
+                    '원본 시트의 상세 내역. 고정 ID로 최신화하며 원본 파일은 별도 보관합니다.',
                 },
               },
             },
           )
         ).createOneObject;
       await ensureFields(c, gql, object.id, config.fields);
-      const records = payload[config.plural];
-      const existing = (
-        await c.query(
-          `select id,"deletedAt" from "${schema}"."_${config.singular}" where "sourceHash"=$1`,
-          [payload.sourceHash],
+    }
+    await c.query('BEGIN');
+    let results;
+    try {
+      results = await syncTables(
+        c,
+        schema,
+        configs.map((config) => ({
+          kind: config.singular,
+          fields: config.fields,
+          incoming: payload[config.plural],
+          fromMonth,
+        })),
+        true,
+      );
+      // Historical rows are immutable; they can still supply a bank's opening balance.
+      for (const key of ['shinhan', 'kb', 'nh']) {
+        const latest = (
+          await c.query(
+            `SELECT "transactionAt", "balanceAmountMicros" FROM "${schema}"."_bankTransaction" WHERE "bankKey"=$1 AND "deletedAt" IS NULL AND "transactionAt"=(SELECT max("transactionAt") FROM "${schema}"."_bankTransaction" WHERE "bankKey"=$1 AND "deletedAt" IS NULL)`,
+            [key],
+          )
+        ).rows;
+        if (
+          !latest.length ||
+          latest.some(
+            (row) =>
+              String(row.balanceAmountMicros) !==
+                wonMicros(payload.banks[key].amount) ||
+              new Date(row.transactionAt).getTime() !==
+                Date.parse(payload.banks[key].at),
+          )
         )
-      ).rows;
-      if (existing.some((record) => record.deletedAt))
-        throw Error('Previously deleted backup rows require review');
-      const existingIds = new Set(existing.map((record) => record.id));
-      const missing = records.filter((record) => !existingIds.has(record.id));
-      const typeName =
-        config.singular[0].toUpperCase() + config.singular.slice(1);
-      const mutationName =
-        'create' + config.plural[0].toUpperCase() + config.plural.slice(1);
-      for (let offset = 0; offset < missing.length; offset += 100) {
-        await gql(
-          `mutation($data:[${typeName}CreateInput!]!){${mutationName}(data:$data){id}}`,
-          { data: missing.slice(offset, offset + 100) },
-          'graphql',
-        );
-        if (offset % 1000 === 0)
-          console.log(
-            JSON.stringify({
-              object: config.singular,
-              imported: Math.min(offset + 100, missing.length),
-              total: missing.length,
-            }),
+          throw Error(
+            'Retained bank closing balance differs from source; historical rows were not updated',
           );
       }
-      const saved = (
-        await c.query(
-          `select * from "${schema}"."_${config.singular}" where "sourceHash"=$1 and "deletedAt" is null`,
-          [payload.sourceHash],
-        )
-      ).rows;
-      if (saved.length !== records.length)
-        throw Error('Backup row count mismatch');
-      const savedById = new Map(saved.map((record) => [record.id, record]));
-      for (const record of records) {
-        const stored = savedById.get(record.id);
-        if (!stored) throw Error('Missing backup row');
-        if (stored.name !== record.name) throw Error('Stored name differs');
-        for (const [name, , type] of config.fields) {
-          if (type === 'CURRENCY') {
-            if (
-              String(stored[`${name}AmountMicros`] ?? '') !==
-                String(record[name]?.amountMicros ?? '') ||
-              (record[name] && stored[`${name}CurrencyCode`] !== 'KRW')
-            )
-              throw Error(`Stored amount differs: ${name}`);
-          } else if (type === 'TEXT' || type === 'NUMBER') {
-            if ((stored[name] ?? '') !== record[name])
-              throw Error(`Stored field differs: ${name}`);
-          } else if (
-            type === 'DATE_TIME' &&
-            new Date(stored[name]).getTime() !==
-              new Date(record[name]).getTime()
-          )
-            throw Error(`Stored time differs: ${name}`);
-          else if (type === 'DATE') {
-            const date =
-              stored[name] instanceof Date
-                ? [
-                    stored[name].getFullYear(),
-                    String(stored[name].getMonth() + 1).padStart(2, '0'),
-                    String(stored[name].getDate()).padStart(2, '0'),
-                  ].join('-')
-                : stored[name];
-            if (date !== record[name])
-              throw Error(`Stored date differs: ${name}`);
-          } else if (
-            type === 'LINKS' &&
-            stored[`${name}PrimaryLinkUrl`] !== record[name].primaryLinkUrl
-          )
-            throw Error('Stored source link differs');
-        }
-      }
-      await ensureView(c, gql, object.id, config);
-      console.log(
-        JSON.stringify({
-          object: config.singular,
-          verified: saved.length,
-          inserted: missing.length,
-        }),
+      // Canonical rows now belong to the latest backup, not immutable snapshots.
+      await c.query(
+        `UPDATE "${schema}"."_cashFlowSnapshot" SET "detailsReady"=false WHERE "detailsReady"=true`,
       );
+      await c.query(
+        `UPDATE "${schema}"."_cashFlowSnapshot" SET "detailsReady"=true WHERE id=$1`,
+        [snapshot[0].id],
+      );
+      await c.query('COMMIT');
+    } catch (error) {
+      await c.query('ROLLBACK');
+      throw error;
     }
-    await gql(
-      'mutation($id:UUID!,$data:CashFlowSnapshotUpdateInput!){updateCashFlowSnapshot(id:$id,data:$data){id}}',
-      { id: snapshot[0].id, data: { detailsReady: true } },
-      'graphql',
-    );
+    writeIdentityMap(process.argv[2], results);
+    for (const config of configs) {
+      const object = (
+        await c.query(
+          'select id from core."objectMetadata" where "workspaceId"=$1 and "nameSingular"=$2',
+          [workspaceId, config.singular],
+        )
+      ).rows[0];
+      await ensureView(c, gql, object.id, config);
+      await hideProvenance(c, gql, object.id);
+    }
+    console.log(JSON.stringify(summarize(results)));
     console.log(JSON.stringify({ verified: true, month: payload.month }));
   } finally {
     await c.end();
@@ -482,4 +470,4 @@ if (require.main === module)
     console.error(error.message);
     process.exitCode = 1;
   });
-module.exports = { validate };
+module.exports = { validate, configs, ensureFields };

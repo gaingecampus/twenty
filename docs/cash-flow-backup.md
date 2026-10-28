@@ -1,37 +1,157 @@
 # AX-1327 월간 자금 흐름
 
-대시보드는 `cashFlowSnapshot`에서 한국 시간 기준 이번 달의 최신 백업 식별자를 찾고, 같은 `sourceHash`의 CRM `bankTransaction`·`expectedReceipt` 상세 레코드를 직접 조회·집계한다. 저장된 스냅샷 합계는 검증용으로 보존한다. 지출대기액은 CRM `pendingExpense`의 이번 달 현재 데이터를 직접 합산한다. 은행 실시간 연동이 아니며 도움말에서 백업일과 은행별 잔액·최종 거래일을 확인한다. 전사 자금이므로 그룹·구성원 필터를 적용하지 않는다. 누락·권한 오류·미완료 상세 백업은 0원 대신 미확인으로 표시한다.
+대시보드는 `cashFlowSnapshot`에서 한국 시간 기준 이번 달의 최신 백업 식별자를 찾고, CRM `bankTransaction`의 은행별 최종 거래와 같은 `sourceHash`의 `expectedReceipt` 상세 레코드를 직접 조회·집계한다. 저장된 스냅샷 합계는 검증용으로 보존한다. 지출대기액은 CRM `pendingExpense`의 이번 달 현재 데이터를 직접 합산한다. 은행 실시간 연동이 아니며 도움말에서 백업일과 은행별 잔액·최종 거래일을 확인한다. 전사 자금이므로 그룹·구성원 필터를 적용하지 않는다. 누락·권한 오류·미완료 상세 백업은 0원 대신 미확인으로 표시한다.
 
 ## 승인된 집계 규칙
 
-- 잔액: 같은 백업의 신한·국민·농협 입출금 내역에서 은행별 최종 거래 시각의 잔액을 합산한다. 행 순서에 의존하지 않는다. 클릭하면 해당 백업의 입출금 전체 목록을 거래일순으로 열고, 행 클릭으로 개별 상세를 연다.
+- 잔액: 보존된 신한·국민·농협 입출금 내역에서 은행별 최종 거래 시각의 잔액을 합산한다. 행 순서에 의존하지 않는다. 클릭하면 보존된 입출금 전체 목록을 거래일순으로 열고, 행 클릭으로 개별 상세를 연다.
 - 입금예정액: 발행 기업 입금 리스트 중 `expectedDate`가 한국 시간 기준 오늘 이후인 항목(오늘 포함, 향후 월 포함). 지난 예정일·예정일 미입력·노란색 완료 행 제외. `inclusionStatus = 포함` 행의 `outstandingAmount`를 서버에서 합산한다. 클릭하면 같은 조건의 근거 목록을 열고, 개별 상세를 확인할 수 있다. 별도 메뉴에는 제외된 원본 행도 보존한다.
 - 분할 입금: 그룹별 마지막 누적 잔금(H열) 한 번만 사용한다. 발행액(E)−입금액(G)과 대조한다. 일반 표와 기업명 별칭·일자·금액이 일치한 항목은 중복 제외한다. 모호한 일치는 자동 추측하지 않고 실패시킨다.
 - 지출대기액: CRM `pendingExpense.expenseMonth`가 이번 달이며 `scheduledDate`가 한국 시간 기준 오늘 이후(오늘 포함)이고 `sourceRecordType`이 비어 있는 상세 행의 `plannedCashAmount` 합계. 서버에서 전체 행을 집계하며 원본 보충 행(제목·소계·메모)은 제외한다. 지난 예정일·예정일 미입력 행도 제외한다. `paidAmount`는 차감하지 않는다. 금액을 클릭하면 동일 조건의 근거 목록을 연다. 조회 실패·통화 이상은 0원으로 치환하지 않는다.
 - 가용액: 잔액 + 입금예정액 − CRM 지출대기액. 잔액·입금예정액은 최신 백업에 연결된 상세 DB를 사용하고 새로고침은 백업 식별자와 CRM 집계를 모두 다시 조회한다. 은행·시트 자동 동기화는 포함하지 않는다.
 
-## 백업과 로컬 반영
+## 반복 최신화 범위
 
-금액 필드는 원화 전체 숫자(천 단위 쉼표, 소수점 0자리)로 표시한다. 가져오기 시 신규·기존 금액 필드 모두 `format: full`, `decimals: 0`을 적용해 k/m 축약을 사용하지 않는다.
+**행 번호는 최신화 기준이 아니다. 지정한 기준 월부터 이후 항목만 갱신·추가한다.**
+`--from-month 2026-10`이면 2026년 10월과 이후 월(다음 연도 포함)이 대상이며,
+8·9월 등 과거 항목은 수정·재생성·삭제하지 않는다. 기준 월 이전에 새로 발견된 항목도
+이 작업에서는 추가하지 않는다. 과거 누락 복구가 필요하면 별도 범위로 검토한다.
 
-원본 XLSX 전체와 정규화 JSON은 Git에 포함하지 않는 `data/backups/`에 보관한다. 원본을 수정하지 않으며 SHA256·백업 시각·은행별 원본 행·입금 제외 행을 JSON에 남긴다. 2026-10-28 백업은 `data/backups/ax-1327-20261028/`에 저장했다. 실제 금융 금액·기업별 내역은 이 문서나 Git에 복사하지 않는다.
+- 지출대기액: `expenseMonth` 기준. 제목·소계·빈 양식은 최신화 대상에서 제외한다.
+- 입금예정액: `expectedDate`의 월 기준. 기준 월 이후 완료·제외 행도 보존한다.
+- 입출금: 한국 시간의 `transactionAt` 월 기준.
+- 이번 달 거래가 없는 은행은 기존에 보존된 마지막 거래를 읽어 잔액을 표시한다.
+  과거 거래 자체를 갱신하지 않는다. 저장된 최종 잔액과 새 파일이 다르면 적용을 중단한다.
 
-저장소 루트에서:
+백업 범위는 **월 단위**, 대시보드 입금·지출 집계는 **오늘 이후(오늘 포함)**다.
+백업 스크립트가 대시보드 계산식이나 집계용 합계를 새로 만들지는 않는다.
+
+## 고정 ID와 비교 규칙
+
+- CRM 레코드 ID를 유지하고 내부 `backupId`로 반복 가져오기를 연결한다.
+  원본의 `CRM 백업 ID` 열에 그 ID를 보존하면 금액·이름·예정일이 바뀌어도 같은 항목을 갱신한다.
+  행 번호가 아니라 UUID이며, 정렬할 때 해당 열도 함께 이동해야 한다.
+- 은행 원본에 `거래고유번호` 또는 `은행 거래 ID`가 있으면 은행·원본 탭 범위에서 해시한 고정 ID를 사용한다.
+- ID가 없는 자료는 이전 가져오기 내용과 정확히 일치하는 항목만 연결한다.
+  행 삽입·정렬·파일 해시 변경은 중복을 만들지 않는다.
+- 완전히 같은 거래가 여러 개면 개수를 유지한다. 개수가 달라지거나 수정/신규 여부를
+  구분할 수 없으면 임의로 합치거나 추가하지 않고 전체 적용을 중단한다.
+  이 경우 현재 파일에 고정 ID를 연결한 뒤 다시 검증한다.
+- 비교값(`backupBaseline`)·현재 CRM·새 원본을 비교한다. CRM에서 별도 수정한 값과
+  원본이 충돌하면 덮어쓰지 않는다. 원본에서 사라진 현재/미래 항목도 자동 삭제하지 않는다.
+- CRM의 `sourceRow`(원본 행) 칼럼은 제거한다. 행 위치는 원본 파일 검증과 비공개 ID 연결표에만
+  사용하며 CRM에 저장하지 않는다. 원본 링크·파일 해시는 출처와 최신 백업 연결에 필요하므로
+  유지한다. 내부 ID·비교값·기존 원본 식별자는 일반 목록에서 숨긴다. 추출 JSON의 `id`는
+  입력 파일 검사용이며 CRM 식별자로 사용하지 않는다.
+
+고정 ID가 없는 임의의 수정까지 자동 식별할 수 있는 것은 아니다. **행 번호 없이 수정까지
+안전하게 반복 반영하려면 원본 고정 ID를 유지해야 한다.** 파일마다 별도 CRM 사본을 만들지 않고
+현재 레코드를 최신화하며, 과거 파일 원본은 별도 백업으로 보관한다.
+
+## 로컬 반영 절차
+
+금액 필드는 원화 전체 숫자(`format: full`, 소수점 0자리)로 표시한다.
+원본 XLSX·정규화 JSON·ID 연결표는 Git에 포함하지 않는 `data/backups/`에 보관한다.
+원본 파일 자체는 수정하지 않는다. 아래 스크립트는 localhost DB만 허용한다.
+
+기존 CRM을 한 번 준비할 때는 **현재 CRM 값**을 기준으로 내부 ID와 비교값을 설정한다.
+오래된 파일의 행 번호로 연결하지 않는다. 금액·날짜는 유지하며, 기준 월 이전 행은 건드리지 않는다.
+이미 설정된 비교값을 다시 초기화하여 CRM 편집 충돌을 숨기지 않는다.
+
+```sh
+node packages/twenty-server/scripts/initialize-backup-identities-local.cjs --from-month 2026-10
+node packages/twenty-server/scripts/initialize-backup-identities-local.cjs --from-month 2026-10 --apply --output data/backups/identity-migration
+```
+
+성공 후 `*.identities.json`에 고정 ID 연결표를 저장한다. 연결표의 행 위치는 **그 파일을 생성한 시점만**
+가리킨다. 이후 시트가 바뀌었다면 옛 행 위치로 ID를 붙이면 안 된다. 최초 연결 후 원본의
+`CRM 백업 ID` 열에 ID를 유지한다. 새 항목은 새 UUID를 사용하고 기존 ID를 복사하지 않는다.
+
+다음 백업에서는 기준 월 이후 데이터가 빠지지 않은 전체 시트를 사용한다.
 
 ```sh
 python3 packages/twenty-server/scripts/extract-pending-expenses.py SOURCE.xlsx pending-expenses.json
-python3 packages/twenty-server/scripts/extract-cash-flow.py SOURCE.xlsx pending-expenses.json YYYY-MM cash-flow.json
-node packages/twenty-server/scripts/import-cash-flow-local.cjs cash-flow.json
+node packages/twenty-server/scripts/import-pending-expenses-local.cjs pending-expenses.json --from-month 2026-10
+node packages/twenty-server/scripts/import-pending-expenses-local.cjs pending-expenses.json --from-month 2026-10 --apply
+python3 packages/twenty-server/scripts/extract-cash-flow.py SOURCE.xlsx pending-expenses.json 2026-10 cash-flow.json
 node packages/twenty-server/scripts/import-cash-flow-local.cjs cash-flow.json --apply
-python3 packages/twenty-server/scripts/extract-cash-flow-details.py SOURCE.xlsx YYYY-MM cash-flow-details.json
-node packages/twenty-server/scripts/import-cash-flow-details-local.cjs cash-flow-details.json
-node packages/twenty-server/scripts/import-cash-flow-details-local.cjs cash-flow-details.json --apply
+python3 packages/twenty-server/scripts/extract-cash-flow-details.py SOURCE.xlsx 2026-10 cash-flow-details.json
+node packages/twenty-server/scripts/import-cash-flow-details-local.cjs cash-flow-details.json --from-month 2026-10
+node packages/twenty-server/scripts/import-cash-flow-details-local.cjs cash-flow-details.json --from-month 2026-10 --apply
 ```
 
-Python은 openpyxl이 필요하다. 마지막 단계는 localhost DB만 허용하며 메타데이터와 레코드를 API로 반영한다. 같은 원본 해시·월은 같은 ID를 사용해 재실행 시 중복 생성하지 않는다. 새 백업은 새 해시의 레코드로 보관한다. 금융 원본과 이 객체의 조회 권한은 운영 반영 전에 담당자가 설정해야 한다. 운영 자동 동기화는 포함하지 않는다.
+`--apply`가 없으면 CRM을 읽어 변경 계획만 출력한다. 지출 기본 기준 월은 한국 시간의 현재 월,
+입출금·입금예정 기본 기준 월은 입력 JSON의 `month`다. 상세 백업의 기준 월과 스냅샷 월은 같아야 한다.
+Python에는 openpyxl이 필요하다.
 
-`bankTransaction`은 은행·거래일시·입금액·출금액·거래 후 잔액·내용을 보존한다. `expectedReceipt`는 기업·예정일·발행금액·분할입금액·누적잔금·합산 대상 미입금액·합산 구분을 보존한다. 양쪽 모두 원본 탭·행·링크·해시·백업시각을 보관하며 텍스트의 계좌·카드 등 긴 식별번호는 끝 4자리만 남긴다. 원본 파일은 변경하지 않는다.
+메타데이터·보기는 API로 관리한다. 로컬 데이터 반영은 테이블 쓰기 잠금과 PostgreSQL 트랜잭션으로
+비교·저장·재조회 검증을 묶는다. 충돌이나 저장 오류가 있으면 해당 실행의 데이터 변경을 롤백한다.
+입출금·입금예정은 함께 반영하며 성공한 뒤에만 `detailsReady`를 켠다. 이전 스냅샷은 요약 이력으로
+보존하고 상세 준비 표시를 해제한다. 지출대기액 가져오기는 별도 트랜잭션이다.
+새 객체/필드 생성이나 보기 숨김은 데이터 트랜잭션 밖에서 처리되며 실패 시 재실행할 수 있다.
+이 로컬 직접 반영은 API 이벤트·자동화 실행을 발생시키지 않는다.
 
-상세 레코드 ID는 원본 해시·탭·행으로 결정한다. 동일 백업 재실행은 누락 행만 생성하고 기존 금액·내용을 덮어쓰지 않는다. 검증 불일치나 이전 삭제가 있으면 중단한다. 모든 저장 행·금액·날짜를 확인한 후에만 스냅샷의 `detailsReady`를 활성화한다. 서로 다른 백업은 구분하여 보존하고 대시보드는 한 백업만 집계하므로 재수입에 따른 중복 합산을 방지한다.
+## 급여 정보
 
-기존 지출대기액 행은 별도 기존 데이터를 유지한다. 새 파일을 기존 지출 상세 테이블에 무조건 재수입하지 않는다. 신규 객체·보기·메뉴 생성은 현재 로컬 전용 스크립트이며 운영 배포나 Google Sheets 주기 수집은 포함하지 않는다.
+입출금에서 급여·상여·성과급·퇴직금으로 표시된 행은 이름·내용·원문 메모와 비교값에
+대상자 이름을 저장하지 않고 `급여 (대상자 비공개)`로 바꾼다. 급여 표시 없이 이름만 있는
+거래는 자동 판별할 수 없으므로 원본 `CRM 급여` 열에 `Y` 또는 `true`를 표시해야 한다.
+식별번호는 기존처럼 마스킹한다. 과거 월은 이번 최신화에서 수정하지 않으므로 이미 저장된
+과거 급여 이름 정리는 별도 작업이다. 원본 파일의 접근 권한은 별도로 관리한다.
+
+운영 배포·Google Sheets 정기 수집·과거 전체 재수입은 이 작업에 포함하지 않는다.
+
+## 원본 행 칼럼 정리
+
+기존 로컬 DB는 아래 스크립트로 세 객체의 `sourceRow` 칼럼을 삭제한다.
+행 번호에 의존한 보기 정렬은 각 객체의 거래일/예정일 정렬로 전환한다.
+필드 정의·기존 좌표·정렬은 비공개 복구 파일에 보관하고, 삭제 전후 전체 레코드에서
+`sourceRow` 외 값과 건수가 동일한지 검증한다. 내부 식별자와 최신 백업 조회용 정보는 유지한다.
+
+```sh
+node packages/twenty-server/scripts/remove-backup-row-columns-local.cjs
+node packages/twenty-server/scripts/remove-backup-row-columns-local.cjs --apply
+```
+
+## 재사용 백업 요청 프롬프트
+
+아래의 기준 월과 대상 환경을 확인한 뒤 사용한다. 이 프롬프트 자체는 정기 실행을 설정하지 않는다.
+
+```text
+첨부한 최신 엑셀 파일 또는 아래 Google Sheets를 기존 CRM에 백업해 주세요.
+원본: https://docs.google.com/spreadsheets/d/1KfF1FAPPvD-yjAjubd1RRHew5COM5NVovgQsRsMELl8/edit?gid=740594009
+대상 환경: 로컬 CRM
+기준 월: 2026-10
+
+1. 기존 입출금 내역, 입금예정액, 지출대기액 DB를 사용해 기준 월과 이후 데이터만
+   갱신·추가해 주세요. 다음 연도 데이터도 포함합니다. 기준 월 이전의 기존 데이터는
+   수정·재생성·삭제하지 마세요.
+   - 입출금: 한국 시간의 거래일 기준
+   - 입금예정액: 입금 예정일 기준
+   - 지출대기액: 해당 지출 월 기준
+   대상 월을 판단할 날짜가 없는 항목은 임의 추정하거나 조용히 누락하지 말고 별도 보고해 주세요.
+
+2. 행 번호·행 순서·파일명으로 같은 거래를 판별하지 마세요. CRM에 원본 행 칼럼을
+   만들거나 저장하지 마세요. 기존 고정 ID와 검증된 연결 정보를 사용하고, 동일 항목은
+   변경분만 갱신하며 새 항목만 추가해 주세요. 금액·날짜가 같아도 서로 다른 실제 거래는
+   유지해 주세요. 수정과 신규를 구분할 수 없거나 CRM에서 수정한 내용과 충돌하면
+   해당 가져오기를 중단하고 확인이 필요한 항목을 알려 주세요. 원본에서 사라진 항목도
+   자동 삭제하지 마세요. 원본 시트에 ID를 새로 쓰는 작업은 별도로 확인해 주세요.
+
+3. 입출금의 급여·상여·성과급·퇴직금은 대상자 이름을 CRM에 절대 저장하지 마세요.
+   이름·내용·메모·원본 상세·내부 비교값 모두 ‘급여 (대상자 비공개)’로 처리하고,
+   날짜·은행·입금액·출금액·잔액만 필요한 대로 보존해 주세요. 이름만 적힌 거래처럼
+   급여 여부가 불명확하면 먼저 확인하고, 확인 전에는 이름을 포함해 저장하지 마세요.
+   계좌번호 등 식별번호도 마스킹해 주세요.
+
+4. 대시보드 계산 조건 때문에 백업 데이터를 빼지 마세요. 기준 월 안에서 예정일이
+   지난 항목과 완료·제외 항목도 상태를 보존해 백업하고, 제목·소계·빈 양식은 실제 거래로
+   추가하지 마세요. 분할 입금은 기존 검증 규칙에 따라 누적 잔금과 중복 여부를 확인해 주세요.
+   대시보드의 집계·필터·화면은 기존 기능을 사용하며 새로 만들거나 바꾸지 마세요.
+   현재 가져오기에 필요한 백업 기준 정보와 검증 정보만 함께 갱신해 주세요.
+
+5. 적용 전 중복·충돌·누락 및 금액을 검증하고, 통과한 뒤 반영해 주세요.
+   반영 후 원본과 CRM의 대상 건수·금액, 과거 데이터 보존 여부를 다시 확인해 주세요.
+   결과는 객체별 추가·수정·변경 없음·범위 제외·확인 필요 건수로 요약하고,
+   급여 대상자 이름은 결과 보고와 로그에도 노출하지 마세요.
+```

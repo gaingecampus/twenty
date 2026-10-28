@@ -2,6 +2,8 @@ import datetime
 import importlib.util
 import pathlib
 import unittest
+import json
+from backup_identity import backup_id
 from openpyxl import Workbook
 
 def load(name, filename):
@@ -52,6 +54,39 @@ class CashFlowDetailsTest(unittest.TestCase):
     def test_source_dates_are_not_mistaken_for_account_numbers(self):
         self.assertEqual(details.masked(datetime.datetime(2026, 10, 28)), '2026-10-28T00:00:00')
         self.assertNotIn('123456789012', details.masked('123456789012'))
+
+    def test_fixed_id_survives_row_insertion_and_source_id_has_priority_over_position(self):
+        sheet = Workbook().active
+        sheet.title = '신한 입출금'
+        sheet.cell(1, 12, 'CRM 백업 ID')
+        sheet.cell(5, 12, '00000000-0000-4000-8000-000000000001')
+        original = backup_id(sheet, 5)
+        sheet.insert_rows(3, 2)
+        self.assertEqual(backup_id(sheet, 7), original)
+        sheet.cell(1, 13, '은행 거래 ID')
+        sheet.cell(8, 13, 'bank-transaction-001')
+        native = backup_id(sheet, 8, 'shinhan')
+        sheet.insert_rows(3)
+        self.assertEqual(backup_id(sheet, 9, 'shinhan'), native)
+
+    def test_payroll_never_includes_recipient_in_name_description_or_raw_text(self):
+        sheet = Workbook().active
+        sheet.title = '신한 입출금'
+        sheet.cell(4, 2, '거래일시')
+        sheet.append([None, '2026.10.28 12:00:00', '가상직원', 0, 50, '10월 급여 가상직원', 150])
+        rows, _ = details.bank_records(sheet, 'shinhan', '신한', 'a' * 64, '2026-10-28T00:00:00Z')
+        self.assertNotIn('가상직원', json.dumps(rows, ensure_ascii=False))
+
+    def test_payroll_flag_handles_source_without_salary_keyword(self):
+        sheet = Workbook().active
+        sheet.title = '신한 입출금'
+        sheet.cell(4, 2, '거래일시')
+        sheet.cell(1, 12, 'CRM 급여')
+        for column, value in enumerate([None, '2026.10.28 12:00:00', '가상직원', 0, 50, '가상직원', 150], 1):
+            if value is not None: sheet.cell(5, column, value)
+        sheet.cell(5, 12, 'Y')
+        rows, _ = details.bank_records(sheet, 'shinhan', '신한', 'a' * 64, '2026-10-28T00:00:00Z')
+        self.assertNotIn('가상직원', json.dumps(rows, ensure_ascii=False))
 
 
 if __name__ == '__main__':

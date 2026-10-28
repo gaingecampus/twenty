@@ -2,12 +2,15 @@ import sys, json, re, datetime, calendar
 from decimal import Decimal
 from collections import Counter
 import openpyxl
+from backup_identity import backup_id, header_column
 
 source, output = sys.argv[1:]
 values = openpyxl.load_workbook(source, data_only=True)
 formulas = openpyxl.load_workbook(source, data_only=False)
 sheet = next(s for s in values if '지출대기' in s.title)
+identity_column = header_column(sheet, {'CRM 백업 ID'})
 formula_sheet = formulas[sheet.title]
+source_rows = [tuple(None if column == identity_column else value for column, value in enumerate(row, 1)) + (None,) * max(0, 25 - len(row)) for row in sheet.values]
 records, totals, exclusions = [], [], []
 year = month = None
 section_status = None
@@ -23,8 +26,8 @@ def money(value):
     if not isinstance(value, (float, int)): raise ValueError(f'Unexpected amount {value!r}')
     return {'amountMicros': str(int(Decimal(str(value)) * 1000000)), 'currencyCode': 'KRW'}
 
-for row_number, row in enumerate(sheet.values, 1):
-    section = re.search(r'(2026)년\s*(\d+)월\)\s*(예정|확정)', str(row[1]))
+for row_number, row in enumerate(source_rows, 1):
+    section = re.search(r'(\d{4})년\s*(\d+)월\)\s*(예정|확정)', str(row[1]))
     if section:
         year, month = map(int, section.group(1, 2))
         section_status = 'PLANNED' if section[3] == '예정' else 'CONFIRMED'
@@ -60,6 +63,7 @@ for row_number, row in enumerate(sheet.values, 1):
         'scheduledDate': due_date, 'scheduledDateSource': text(date_value), 'notes': text(row[10]),
         'sourceSectionStatus': section_status, 'importReview': issue,
         'sourceRow': row_number,
+        'backupId': backup_id(sheet, row_number),
         'sourceKey': f'1KfF1FAPPvD-yjAjubd1RRHew5COM5NVovgQsRsMELl8:1659969985:{row_number}',
         'sourceUrl': {'primaryLinkUrl': f'https://docs.google.com/spreadsheets/d/1KfF1FAPPvD-yjAjubd1RRHew5COM5NVovgQsRsMELl8/edit#gid=1659969985&range=B{row_number}:K{row_number}', 'primaryLinkLabel': '원본 시트 행'},
         'sourceExtraNotes': extra or None,
@@ -69,8 +73,8 @@ for row_number, row in enumerate(sheet.values, 1):
 imported_rows = {r['sourceRow'] for r in records}
 year = month = None
 section_status = None
-for row_number, row in enumerate(sheet.values, 1):
-    section = re.search(r'(2026)년\s*(\d+)월\)\s*(예정|확정)', str(row[1]))
+for row_number, row in enumerate(source_rows, 1):
+    section = re.search(r'(\d{4})년\s*(\d+)월\)\s*(예정|확정)', str(row[1]))
     if section:
         year, month = map(int, section.group(1, 2))
         section_status = 'PLANNED' if section[3] == '예정' else 'CONFIRMED'
@@ -82,6 +86,7 @@ for row_number, row in enumerate(sheet.values, 1):
             '빈 양식' if row_number in exclusions else '추가 메모')
     raw = []
     for column, value in enumerate(row, 1):
+        if column == identity_column: continue
         original = formula_sheet.cell(row_number, column).value
         if value is None and original is None: continue
         line = f'{openpyxl.utils.get_column_letter(column)}열: {text(value) or "(빈 값)"}'
@@ -97,14 +102,15 @@ for row_number, row in enumerate(sheet.values, 1):
         'notes': '원본 보존 행: 금액·수식은 원본 추가 메모에 보존하며 지출 합산에서 제외합니다.',
         'sourceSectionStatus': section_status, 'importReview': None,
         'sourceRecordType': kind, 'sourceRow': row_number,
+        'backupId': backup_id(sheet, row_number),
         'sourceKey': f'1KfF1FAPPvD-yjAjubd1RRHew5COM5NVovgQsRsMELl8:1659969985:{row_number}',
         'sourceUrl': {'primaryLinkUrl': f'https://docs.google.com/spreadsheets/d/1KfF1FAPPvD-yjAjubd1RRHew5COM5NVovgQsRsMELl8/edit#gid=1659969985&range=B{row_number}:K{row_number}', 'primaryLinkLabel': '원본 시트 행'},
         'sourceExtraNotes': '\n'.join(raw),
     })
 records.sort(key=lambda r: r['sourceRow'])
 assert {r['sourceRow'] for r in records} == {
-    n for n, row in enumerate(sheet.values, 1) if any(v is not None for v in row)
+    n for n, row in enumerate(source_rows, 1) if any(v is not None for v in row)
 }
-result = {'sheet': '가인지 지출대기액[2026]', 'records': records, 'sourceTotals': totals, 'preservedTemplateRows': exclusions}
+result = {'sheet': sheet.title, 'records': records, 'sourceTotals': totals, 'preservedTemplateRows': exclusions}
 with open(output, 'w') as handle: json.dump(result, handle, ensure_ascii=False, indent=2, default=str)
 print(json.dumps({'count': len(records), 'byMonth': Counter(r['expenseMonth'] for r in records), 'review': Counter(r['importReview'] for r in records if r['importReview']), 'preservedTemplateRows': exclusions}, ensure_ascii=False))
