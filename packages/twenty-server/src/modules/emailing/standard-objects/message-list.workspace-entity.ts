@@ -5,6 +5,8 @@ import { type MessageListMemberWorkspaceEntity } from 'src/modules/emailing/stan
 
 export class MessageListWorkspaceEntity extends BaseWorkspaceEntity {
   name: string | null;
+  avatarEmoji: string | null;
+  avatarColor: string | null;
   members: EntityRelation<MessageListMemberWorkspaceEntity[]>;
   campaigns: EntityRelation<MessageCampaignWorkspaceEntity[]>;
   searchVector: string;

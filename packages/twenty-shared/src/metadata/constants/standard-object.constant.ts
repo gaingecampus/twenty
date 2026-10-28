@@ -1061,6 +1061,12 @@ export const STANDARD_OBJECTS = {
         universalIdentifier: '1c6f5064-6e99-4ac9-ac1f-1b8060edf9bc',
       },
       name: { universalIdentifier: '69b9ed8b-7b26-4108-894f-05700ef7e8ee' },
+      avatarEmoji: {
+        universalIdentifier: '256c3ef1-8adf-4e0e-a051-a06e9308c574',
+      },
+      avatarColor: {
+        universalIdentifier: '1d8fb055-80c9-4707-92cf-6df6adbf25ba',
+      },
       members: {
         universalIdentifier: '92df3493-91cf-4665-8587-1b08917d299b',
       },
