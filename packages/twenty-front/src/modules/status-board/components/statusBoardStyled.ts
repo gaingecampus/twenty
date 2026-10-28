@@ -559,7 +559,7 @@ export const StyledStatusBoardModalSearchInput = styled.input`
   padding: 0;
 
   &::placeholder {
-    color: ${themeCssVariables.font.color.secondary};
+    color: ${themeCssVariables.font.color.light};
     opacity: 1;
   }
 

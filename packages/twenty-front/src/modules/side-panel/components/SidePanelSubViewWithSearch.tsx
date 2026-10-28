@@ -31,7 +31,7 @@ const StyledSearchInput = styled.input`
   width: 100%;
 
   &::placeholder {
-    color: ${themeCssVariables.font.color.tertiary};
+    color: ${themeCssVariables.font.color.light};
   }
 `;
 
