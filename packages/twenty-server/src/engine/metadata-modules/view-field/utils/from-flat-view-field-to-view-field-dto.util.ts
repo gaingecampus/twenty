@@ -16,7 +16,8 @@ export const fromFlatViewFieldToViewFieldDto = (
 
   return {
     ...rest,
-    relationRollup: (relationRollup ?? null) as RelationRollupSettingsDTO | null,
+    relationRollup: (relationRollup ??
+      null) as RelationRollupSettingsDTO | null,
     ...(overrides ?? {}),
     isOverridden: false,
     createdAt: new Date(createdAt),

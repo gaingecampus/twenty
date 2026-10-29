@@ -41,7 +41,9 @@ export const RecordTableRowVirtualizedSkeleton = () => {
       {!isRecordTableAddColumnButtonHidden && (
         <RecordTableCellStyleWrapper
           hasRightBorder={false}
-          widthClassName={RECORD_TABLE_COLUMN_ADD_COLUMN_BUTTON_WIDTH_CLASS_NAME}
+          widthClassName={
+            RECORD_TABLE_COLUMN_ADD_COLUMN_BUTTON_WIDTH_CLASS_NAME
+          }
           isSelected={hasUserSelectedAllRows}
         />
       )}

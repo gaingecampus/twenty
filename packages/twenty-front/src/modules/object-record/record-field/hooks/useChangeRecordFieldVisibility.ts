@@ -146,9 +146,7 @@ export const useChangeRecordFieldVisibility = (
 
         upsertRecordField(recordFieldToUpsert);
 
-        await saveViewFields([
-          buildViewFieldToSave(recordFieldToUpsert),
-        ]);
+        await saveViewFields([buildViewFieldToSave(recordFieldToUpsert)]);
 
         if (isDefined(currentViewId)) {
           syncRecordIndexStatesAfterViewFieldChange(currentViewId);

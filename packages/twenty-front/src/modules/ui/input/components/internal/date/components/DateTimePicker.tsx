@@ -319,7 +319,7 @@ export const DateTimePicker = ({
             }
           >
             <ReactDatePicker
-            locale={localeCatalog}
+              locale={localeCatalog}
               key={relativeDateRangeKey}
               open={true}
               disabledKeyboardNavigation

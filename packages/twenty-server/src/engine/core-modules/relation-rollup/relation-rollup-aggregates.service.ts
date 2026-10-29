@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 
-import { FieldMetadataType, type ObjectsPermissionsByRoleId } from 'twenty-shared/types';
+import {
+  FieldMetadataType,
+  type ObjectsPermissionsByRoleId,
+} from 'twenty-shared/types';
 import { isDefined } from 'twenty-shared/utils';
 import { type ObjectLiteral } from 'typeorm';
 
@@ -72,7 +75,9 @@ export class RelationRollupAggregatesService {
       'apiKeyRoleMap',
     ]);
 
-    const { idByNameSingular } = buildObjectIdByNameMaps(flatObjectMetadataMaps);
+    const { idByNameSingular } = buildObjectIdByNameMaps(
+      flatObjectMetadataMaps,
+    );
 
     const parentObjectMetadataId = idByNameSingular[parentObjectNameSingular];
 

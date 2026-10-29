@@ -46,8 +46,7 @@ export const mapRecordFiltersToRelationRollupFilters = ({
         : undefined;
 
       return {
-        fieldMetadataUniversalIdentifier:
-          fieldMetadataItem.universalIdentifier,
+        fieldMetadataUniversalIdentifier: fieldMetadataItem.universalIdentifier,
         relationTargetFieldMetadataUniversalIdentifier:
           relationTargetFieldMetadataItem?.universalIdentifier ?? null,
         operand: recordFilter.operand,

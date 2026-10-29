@@ -256,9 +256,12 @@ describe('FileController', () => {
         });
 
       mockPipeline.mockRejectedValue(
-        Object.assign(new Error('Cannot pipe to a closed or destroyed stream'), {
-          code: 'ERR_STREAM_UNABLE_TO_PIPE',
-        }),
+        Object.assign(
+          new Error('Cannot pipe to a closed or destroyed stream'),
+          {
+            code: 'ERR_STREAM_UNABLE_TO_PIPE',
+          },
+        ),
       );
 
       const mockRequest = { workspaceId: 'workspace-id' } as any;

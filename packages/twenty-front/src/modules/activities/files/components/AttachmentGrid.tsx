@@ -38,7 +38,10 @@ export const AttachmentGrid = ({
         />
       ))}
       {externalLinkAttachments.map((attachment) => (
-        <ExternalLinkAttachmentCard key={attachment.id} attachment={attachment} />
+        <ExternalLinkAttachmentCard
+          key={attachment.id}
+          attachment={attachment}
+        />
       ))}
     </StyledGridContainer>
   );

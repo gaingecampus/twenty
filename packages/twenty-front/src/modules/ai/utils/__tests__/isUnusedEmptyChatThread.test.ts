@@ -27,10 +27,7 @@ describe('isUnusedEmptyChatThread', () => {
 
   it('should keep threads that already have messages', () => {
     expect(
-      isUnusedEmptyChatThread(
-        { ...emptyThread, conversationSize: 2 },
-        null,
-      ),
+      isUnusedEmptyChatThread({ ...emptyThread, conversationSize: 2 }, null),
     ).toBe(false);
   });
 });

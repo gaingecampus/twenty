@@ -67,10 +67,12 @@ export class MicrosoftGetMessagesService {
       }
 
       const attachmentsByMessageId =
-        await this.microsoftFetchAttachmentsService.fetchAttachmentsByMessageIds({
-          messageIds: messageIdsWithAttachments,
-          connectedAccount,
-        });
+        await this.microsoftFetchAttachmentsService.fetchAttachmentsByMessageIds(
+          {
+            messageIds: messageIdsWithAttachments,
+            connectedAccount,
+          },
+        );
 
       return messages.map((message) => ({
         ...message,

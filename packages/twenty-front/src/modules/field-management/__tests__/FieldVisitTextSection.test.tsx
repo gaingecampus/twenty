@@ -19,7 +19,9 @@ jest.mock('twenty-ui/input', () => ({
 }));
 
 it('copies only the rendered body, retaining line breaks', () => {
-  render(<FieldVisitTextSection title="수행 내용" text={'**첫 줄**\n둘째 줄'} />);
+  render(
+    <FieldVisitTextSection title="수행 내용" text={'**첫 줄**\n둘째 줄'} />,
+  );
   const content = screen.getByText('**첫 줄** 둘째 줄').parentElement!;
   Object.defineProperty(content, 'innerText', { value: '첫 줄\n둘째 줄' });
   fireEvent.click(screen.getByRole('button', { name: '수행 내용 복사' }));

@@ -43,7 +43,10 @@ export class MessagingEmailAttachmentListener {
           participantsByMessageId.get(participant.messageId) ?? [];
 
         existingParticipants.push(participant);
-        participantsByMessageId.set(participant.messageId, existingParticipants);
+        participantsByMessageId.set(
+          participant.messageId,
+          existingParticipants,
+        );
       }
     }
 

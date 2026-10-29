@@ -16,10 +16,7 @@ export const formatDateISOStringToDate = ({
   dateFormat: DateFormat;
   localeCatalog?: Locale;
 }) => {
-  const localizedDateFormat = getLocalizedDateFormat(
-    dateFormat,
-    localeCatalog,
-  );
+  const localizedDateFormat = getLocalizedDateFormat(dateFormat, localeCatalog);
 
   if (isDateWithoutTime(date)) {
     return formatPlainDateISOString({

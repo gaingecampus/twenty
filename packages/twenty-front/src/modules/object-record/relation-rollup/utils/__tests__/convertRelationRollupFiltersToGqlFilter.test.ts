@@ -44,8 +44,8 @@ describe('convertRelationRollupFiltersToGqlFilter', () => {
           {
             fieldMetadataUniversalIdentifier:
               '00000000-0000-0000-0000-000000000010',
-          operand: ViewFilterOperand.GREATER_THAN_OR_EQUAL,
-          value: '100',
+            operand: ViewFilterOperand.GREATER_THAN_OR_EQUAL,
+            value: '100',
           },
         ],
       },

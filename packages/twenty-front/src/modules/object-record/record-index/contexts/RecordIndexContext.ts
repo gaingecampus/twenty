@@ -25,10 +25,7 @@ export type RecordIndexContextValue = {
     string,
     ColumnDefinition<FieldMetadata>
   >;
-  fieldDefinitionByViewFieldId: Record<
-    string,
-    ColumnDefinition<FieldMetadata>
-  >;
+  fieldDefinitionByViewFieldId: Record<string, ColumnDefinition<FieldMetadata>>;
   recordLimit?: number;
 };
 

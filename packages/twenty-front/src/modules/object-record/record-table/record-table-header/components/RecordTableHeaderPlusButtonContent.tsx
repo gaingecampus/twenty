@@ -17,8 +17,17 @@ import { useSetAtomState } from '@/ui/utilities/state/jotai/hooks/useSetAtomStat
 import { useLingui } from '@lingui/react/macro';
 import { SettingsPath } from 'twenty-shared/types';
 import { getSettingsPath } from 'twenty-shared/utils';
-import { IconChevronLeft, IconSettings, IconSum, useIcons } from 'twenty-ui/icon';
-import { MenuItem, MenuItemNavigate, UndecoratedLink } from 'twenty-ui/navigation';
+import {
+  IconChevronLeft,
+  IconSettings,
+  IconSum,
+  useIcons,
+} from 'twenty-ui/icon';
+import {
+  MenuItem,
+  MenuItemNavigate,
+  UndecoratedLink,
+} from 'twenty-ui/navigation';
 
 type PlusButtonView = 'main' | 'addAggregateColumn';
 
@@ -36,14 +45,11 @@ export const RecordTableHeaderPlusButtonContent = () => {
   const { changeRecordFieldVisibility } =
     useChangeRecordFieldVisibility(recordTableId);
 
-  const {
-    addableRegularFields,
-    hiddenRollupViewFields,
-    hiddenViewFields,
-  } = useTableColumnPickerItems({
-    objectMetadataItem,
-    recordIndexId: recordTableId,
-  });
+  const { addableRegularFields, hiddenRollupViewFields, hiddenViewFields } =
+    useTableColumnPickerItems({
+      objectMetadataItem,
+      recordIndexId: recordTableId,
+    });
 
   const handleAddRegularColumn = useCallback(
     async (fieldMetadataId: string) => {
@@ -72,8 +78,8 @@ export const RecordTableHeaderPlusButtonContent = () => {
 
   const normalizedSearch = searchInput.toLowerCase();
 
-  const filteredHiddenRollupViewFields = hiddenRollupViewFields.filter(
-    (item) => item.label.toLowerCase().includes(normalizedSearch),
+  const filteredHiddenRollupViewFields = hiddenRollupViewFields.filter((item) =>
+    item.label.toLowerCase().includes(normalizedSearch),
   );
 
   const filteredHiddenRegularViewFields = hiddenViewFields

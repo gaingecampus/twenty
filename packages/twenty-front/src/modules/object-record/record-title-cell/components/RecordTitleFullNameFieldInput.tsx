@@ -15,10 +15,7 @@ export const RecordTitleFullNameFieldInput = ({
 }: RecordTitleFullNameFieldInputProps) => {
   const { draftValue, setDraftValue, fieldDefinition } = useFullNameField();
   const [originalValue] = useState(draftValue);
-  const originalName = [
-    originalValue?.firstName,
-    originalValue?.lastName,
-  ]
+  const originalName = [originalValue?.firstName, originalValue?.lastName]
     .filter(Boolean)
     .join(' ')
     .trim();

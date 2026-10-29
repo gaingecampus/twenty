@@ -24,7 +24,10 @@ export const useSaveRecordFields = () => {
 
     saveViewFields(
       recordFields.map((recordField) =>
-        mapRecordFieldToViewFieldFromCurrentView(recordField, currentViewFields),
+        mapRecordFieldToViewFieldFromCurrentView(
+          recordField,
+          currentViewFields,
+        ),
       ),
     );
   };

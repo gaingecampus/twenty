@@ -1,4 +1,8 @@
-import { assigned, visitsFor, visitMetrics } from '@/field-management/fieldManagementUtils';
+import {
+  assigned,
+  visitsFor,
+  visitMetrics,
+} from '@/field-management/fieldManagementUtils';
 
 describe('field management contract isolation and metrics', () => {
   const contracts = [

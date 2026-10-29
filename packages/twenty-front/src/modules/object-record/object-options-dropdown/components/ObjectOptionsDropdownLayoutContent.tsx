@@ -51,8 +51,13 @@ import {
 export const ObjectOptionsDropdownLayoutContent = () => {
   const { t } = useLingui();
 
-  const { objectMetadataItem, resetContent, onContentChange, dropdownId, recordIndexId } =
-    useObjectOptionsDropdown();
+  const {
+    objectMetadataItem,
+    resetContent,
+    onContentChange,
+    dropdownId,
+    recordIndexId,
+  } = useObjectOptionsDropdown();
 
   const { currentView } = useGetCurrentViewOnly();
   const { updateCurrentView } = useUpdateCurrentView();

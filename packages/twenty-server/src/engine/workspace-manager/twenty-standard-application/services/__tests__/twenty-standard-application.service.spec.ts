@@ -27,12 +27,10 @@ describe('standard application synchronization', () => {
         flatEntity: customTab,
         flatEntityMaps: allFlatEntityMaps.flatPageLayoutTabMaps,
       });
-    const validate = jest
-      .fn()
-      .mockResolvedValue({
-        status: 'success',
-        workspaceMigration: { actions: [] },
-      });
+    const validate = jest.fn().mockResolvedValue({
+      status: 'success',
+      workspaceMigration: { actions: [] },
+    });
     type Dependencies = ConstructorParameters<
       typeof TwentyStandardApplicationService
     >;

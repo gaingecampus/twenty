@@ -1,10 +1,7 @@
 import { type FieldMetadataItem } from '@/object-metadata/types/FieldMetadataItem';
 import { mapRecordFiltersToRelationRollupFilters } from '@/object-record/relation-rollup/utils/mapRecordFiltersToRelationRollupFilters';
 import { mapRelationRollupFiltersToRecordFilters } from '@/object-record/relation-rollup/utils/mapRelationRollupFiltersToRecordFilters';
-import {
-  AggregateOperations,
-  ViewFilterOperand,
-} from 'twenty-shared/types';
+import { AggregateOperations, ViewFilterOperand } from 'twenty-shared/types';
 import { FieldMetadataType } from '~/generated-metadata/graphql';
 
 const targetFieldMetadataItem: FieldMetadataItem = {

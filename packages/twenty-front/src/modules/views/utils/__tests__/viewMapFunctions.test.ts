@@ -169,9 +169,24 @@ describe('mapViewFieldsToColumnDefinitions', () => {
         nameSingular: 'company',
         namePlural: 'companies',
         fields: [
-          { id: '1', label: 'Field 1', name: 'field1', type: FieldMetadataType.TEXT },
-          { id: '2', label: 'Field 2', name: 'field2', type: FieldMetadataType.TEXT },
-          { id: '3', label: 'Field 3', name: 'field3', type: FieldMetadataType.TEXT },
+          {
+            id: '1',
+            label: 'Field 1',
+            name: 'field1',
+            type: FieldMetadataType.TEXT,
+          },
+          {
+            id: '2',
+            label: 'Field 2',
+            name: 'field2',
+            type: FieldMetadataType.TEXT,
+          },
+          {
+            id: '3',
+            label: 'Field 3',
+            name: 'field3',
+            type: FieldMetadataType.TEXT,
+          },
         ],
       } as never,
     });

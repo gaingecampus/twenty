@@ -28,10 +28,7 @@ import { MicrosoftDownloadAttachmentService } from 'src/modules/messaging/messag
     MessagingGmailDriverModule,
     MessagingIMAPDriverModule,
     MessagingMicrosoftDriverModule,
-    TypeOrmModule.forFeature([
-      FileEntity,
-      MessageChannelEntity,
-    ]),
+    TypeOrmModule.forFeature([FileEntity, MessageChannelEntity]),
   ],
   providers: [
     provideWorkspaceScopedRepository(FileEntity),

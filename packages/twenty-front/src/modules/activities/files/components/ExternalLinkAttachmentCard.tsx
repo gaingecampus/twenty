@@ -15,11 +15,7 @@ import { useLingui } from '@lingui/react/macro';
 import { useContext } from 'react';
 import { CoreObjectNameSingular } from 'twenty-shared/types';
 import { getSafeUrl, isDefined } from 'twenty-shared/utils';
-import {
-  IconDotsVertical,
-  IconExternalLink,
-  IconTrash,
-} from 'twenty-ui/icon';
+import { IconDotsVertical, IconExternalLink, IconTrash } from 'twenty-ui/icon';
 import { LightIconButton } from 'twenty-ui/input';
 import { MenuItem } from 'twenty-ui/navigation';
 import { OverflowingTextWithTooltip } from 'twenty-ui/surfaces';

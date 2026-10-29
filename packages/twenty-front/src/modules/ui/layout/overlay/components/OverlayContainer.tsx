@@ -24,10 +24,7 @@ export const OverlayContainer = styled.div<{
 
   border-radius: ${({ borderRadius }) =>
     `var(--t-overlay-radius, ${themeCssVariables.border.radius[borderRadius ?? 'md']})`};
-  box-shadow: var(
-    --t-overlay-shadow,
-    ${themeCssVariables.boxShadow.strong}
-  );
+  box-shadow: var(--t-overlay-shadow, ${themeCssVariables.boxShadow.strong});
   display: flex;
 
   overflow: hidden;

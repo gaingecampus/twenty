@@ -44,10 +44,7 @@ export const buildCreateNavigationMenuItemInput = (
     input.folderId = resolveFolderId(draftItem.folderId);
   }
 
-  if (
-    !isNavigationMenuItemSeparator(draftItem) &&
-    isDefined(draftItem.color)
-  ) {
+  if (!isNavigationMenuItemSeparator(draftItem) && isDefined(draftItem.color)) {
     input.color = draftItem.color;
   }
 

@@ -9,10 +9,7 @@ export const getFieldDefinitionForRecordField = ({
   fieldDefinitionByFieldMetadataItemId,
 }: {
   recordField: RecordField;
-  fieldDefinitionByViewFieldId: Record<
-    string,
-    ColumnDefinition<FieldMetadata>
-  >;
+  fieldDefinitionByViewFieldId: Record<string, ColumnDefinition<FieldMetadata>>;
   fieldDefinitionByFieldMetadataItemId: Record<
     string,
     ColumnDefinition<FieldMetadata>

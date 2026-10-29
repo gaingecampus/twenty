@@ -43,10 +43,7 @@ const StyledChip = styled.div<{ variant: SortOrFilterChipVariant }>`
   display: flex;
   flex-direction: row;
   flex-shrink: 0;
-  font-size: var(
-    --t-toolbar-chip-font-size,
-    ${themeCssVariables.font.size.sm}
-  );
+  font-size: var(--t-toolbar-chip-font-size, ${themeCssVariables.font.size.sm});
   font-weight: var(
     --t-toolbar-chip-font-weight,
     ${themeCssVariables.font.weight.medium}
@@ -79,10 +76,7 @@ const StyledDelete = styled.button<{ variant: SortOrFilterChipVariant }>`
   cursor: pointer;
   display: flex;
   flex-shrink: 0;
-  font-size: var(
-    --t-toolbar-chip-font-size,
-    ${themeCssVariables.font.size.sm}
-  );
+  font-size: var(--t-toolbar-chip-font-size, ${themeCssVariables.font.size.sm});
   height: 24px;
   justify-content: center;
   margin: 0;

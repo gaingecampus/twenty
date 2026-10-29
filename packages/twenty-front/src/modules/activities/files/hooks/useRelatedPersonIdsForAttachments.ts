@@ -24,7 +24,8 @@ export const useRelatedPersonIdsForAttachments = (
   targetableObject: ActivityTargetableObject,
 ) => {
   const isCompany =
-    targetableObject.targetObjectNameSingular === CoreObjectNameSingular.Company;
+    targetableObject.targetObjectNameSingular ===
+    CoreObjectNameSingular.Company;
   const isOpportunity =
     targetableObject.targetObjectNameSingular ===
     CoreObjectNameSingular.Opportunity;
@@ -90,8 +91,7 @@ export const useRelatedPersonIdsForAttachments = (
 
   const loading =
     (isCompany && companyPeopleLoading) ||
-    (isOpportunity &&
-      (opportunityLoading || opportunityCompanyPeopleLoading));
+    (isOpportunity && (opportunityLoading || opportunityCompanyPeopleLoading));
 
   return { relatedPersonIds, loading };
 };

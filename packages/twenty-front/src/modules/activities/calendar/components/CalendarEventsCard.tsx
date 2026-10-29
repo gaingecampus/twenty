@@ -92,8 +92,7 @@ export const CalendarEventsCard = () => {
   const { objectMetadataItem } = useObjectMetadataItem({
     objectNameSingular: objectName,
   });
-  const objectLabel =
-    objectMetadataItem?.labelSingular ?? objectName;
+  const objectLabel = objectMetadataItem?.labelSingular ?? objectName;
 
   if (firstQueryLoading) {
     return <SkeletonLoader />;

@@ -7,7 +7,10 @@ import { WorkspaceCacheModule } from 'src/engine/workspace-cache/workspace-cache
 
 @Module({
   imports: [UserModule, WorkspaceCacheModule],
-  providers: [RelationRollupAggregatesResolver, RelationRollupAggregatesService],
+  providers: [
+    RelationRollupAggregatesResolver,
+    RelationRollupAggregatesService,
+  ],
   exports: [RelationRollupAggregatesService],
 })
 export class RelationRollupAggregatesModule {}

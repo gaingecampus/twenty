@@ -30,10 +30,8 @@ export const RecordTableColumnHeadWithDropdown = ({
   const [currentView, setCurrentView] =
     useState<ColumnHeadDropdownView>('main');
 
-  const {
-    fieldDefinitionByFieldMetadataItemId,
-    fieldDefinitionByViewFieldId,
-  } = useRecordIndexContextOrThrow();
+  const { fieldDefinitionByFieldMetadataItemId, fieldDefinitionByViewFieldId } =
+    useRecordIndexContextOrThrow();
 
   const fieldDefinition = getFieldDefinitionForRecordField({
     recordField,

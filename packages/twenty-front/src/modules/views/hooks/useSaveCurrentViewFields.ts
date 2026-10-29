@@ -91,7 +91,8 @@ export const useSaveCurrentViewFields = () => {
             }
 
             const relationRollupToSave =
-              createViewFieldInput.relationRollup ?? existingField.relationRollup;
+              createViewFieldInput.relationRollup ??
+              existingField.relationRollup;
 
             const hasRelationRollupChange =
               isDefined(createViewFieldInput.relationRollup) &&
@@ -137,7 +138,8 @@ export const useSaveCurrentViewFields = () => {
                       isVisible: createViewFieldInput.isVisible,
                       position: createViewFieldInput.position,
                       size: createViewFieldInput.size,
-                      ...(hasRelationRollupChange && isDefined(relationRollupToSave)
+                      ...(hasRelationRollupChange &&
+                      isDefined(relationRollupToSave)
                         ? {
                             relationRollup:
                               relationRollupToSave as RelationRollupSettings,
@@ -204,13 +206,14 @@ export const useSaveCurrentViewFields = () => {
             isVisible:
               viewFieldToUpdate.input.update.isVisible ??
               existingViewField.isVisible,
-            size:
-              viewFieldToUpdate.input.update.size ?? existingViewField.size,
+            size: viewFieldToUpdate.input.update.size ?? existingViewField.size,
             isActive: existingViewField.isActive,
             aggregateOperation:
               viewFieldToUpdate.input.update.aggregateOperation ??
               existingViewField.aggregateOperation,
-            relationRollup: isDefined(viewFieldToUpdate.input.update.relationRollup)
+            relationRollup: isDefined(
+              viewFieldToUpdate.input.update.relationRollup,
+            )
               ? (viewFieldToUpdate.input.update
                   .relationRollup as RelationRollupSettings)
               : existingViewField.relationRollup,

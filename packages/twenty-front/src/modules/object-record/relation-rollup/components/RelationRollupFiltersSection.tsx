@@ -44,7 +44,9 @@ export const RelationRollupFiltersSection = ({
   const handleRemoveFilter = useCallback(
     (recordFilterId: string) => {
       onRecordFiltersChange(
-        recordFilters.filter((recordFilter) => recordFilter.id !== recordFilterId),
+        recordFilters.filter(
+          (recordFilter) => recordFilter.id !== recordFilterId,
+        ),
       );
     },
     [onRecordFiltersChange, recordFilters],
@@ -126,7 +128,10 @@ export const RelationRollupFiltersSection = ({
             });
 
             return (
-              <DropdownMenuItemsContainer key={recordFilter.id} scrollable={false}>
+              <DropdownMenuItemsContainer
+                key={recordFilter.id}
+                scrollable={false}
+              >
                 <MenuItemSelect
                   selected={false}
                   onClick={() => {}}

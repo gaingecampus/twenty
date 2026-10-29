@@ -57,10 +57,8 @@ export const RecordTableColumnHead = ({
 }: RecordTableColumnHeadProps) => {
   const { theme } = useContext(ThemeContext);
 
-  const {
-    fieldDefinitionByFieldMetadataItemId,
-    fieldDefinitionByViewFieldId,
-  } = useRecordIndexContextOrThrow();
+  const { fieldDefinitionByFieldMetadataItemId, fieldDefinitionByViewFieldId } =
+    useRecordIndexContextOrThrow();
 
   const fieldDefinition = getFieldDefinitionForRecordField({
     recordField,

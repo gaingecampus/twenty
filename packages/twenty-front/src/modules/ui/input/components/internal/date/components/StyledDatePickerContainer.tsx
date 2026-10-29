@@ -194,8 +194,7 @@ export const StyledDatePickerContainer = styled.div<{
   }
 
   & .react-datepicker__day-names {
-    display: ${({ hideCalendar }) =>
-      hideCalendar === true ? 'none' : 'grid'};
+    display: ${({ hideCalendar }) => (hideCalendar === true ? 'none' : 'grid')};
   }
 
   & .react-datepicker__day {

@@ -84,10 +84,9 @@ describe('RelatedPersonIdsService', () => {
 
     it('should return only people linked via companyId for company records', async () => {
       const personRepository = {
-        find: jest.fn().mockResolvedValue([
-          { id: 'person-1' },
-          { id: 'person-2' },
-        ]),
+        find: jest
+          .fn()
+          .mockResolvedValue([{ id: 'person-1' }, { id: 'person-2' }]),
       };
 
       mockGlobalWorkspaceOrmManager.getRepository.mockResolvedValue(
@@ -163,16 +162,16 @@ describe('RelatedPersonIdsService', () => {
       const opportunityRepository = {
         find: jest
           .fn()
-          .mockResolvedValueOnce([
-            { pointOfContactId: 'poc-person-id' },
-          ])
+          .mockResolvedValueOnce([{ pointOfContactId: 'poc-person-id' }])
           .mockResolvedValueOnce([{ companyId }]),
       };
       const personRepository = {
-        find: jest.fn().mockResolvedValue([
-          { id: 'company-person-1' },
-          { id: 'company-person-2' },
-        ]),
+        find: jest
+          .fn()
+          .mockResolvedValue([
+            { id: 'company-person-1' },
+            { id: 'company-person-2' },
+          ]),
       };
 
       mockGlobalWorkspaceOrmManager.getRepository.mockImplementation(

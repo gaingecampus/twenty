@@ -9,8 +9,7 @@ type MessagingReprocessEmailAttachmentsCommandOptions = {
 
 @Command({
   name: 'messaging:reprocess-email-attachments',
-  description:
-    'Re-fetch and persist email attachments for an existing message',
+  description: 'Re-fetch and persist email attachments for an existing message',
 })
 export class MessagingReprocessEmailAttachmentsCommand extends CommandRunner {
   constructor(

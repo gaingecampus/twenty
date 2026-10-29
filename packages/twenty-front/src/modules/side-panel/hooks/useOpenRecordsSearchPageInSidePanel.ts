@@ -24,10 +24,7 @@ export const useOpenRecordsSearchPageInSidePanel = () => {
   }, [isSidePanelOpened, navigateSidePanelMenu]);
 
   const toggleRecordsSearchPage = useCallback(() => {
-    if (
-      isSidePanelOpened &&
-      sidePanelPage === SidePanelPages.SearchRecords
-    ) {
+    if (isSidePanelOpened && sidePanelPage === SidePanelPages.SearchRecords) {
       closeSidePanelMenu();
       return;
     }

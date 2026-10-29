@@ -39,13 +39,11 @@ export const ViewFieldsSearchDropdownSection = ({
       ? handleBoardFieldVisibilityChange
       : changeRecordFieldVisibility;
 
-  const {
-    allRollupViewFields,
-    isRegularColumnVisible,
-  } = useTableColumnPickerItems({
-    objectMetadataItem,
-    recordIndexId,
-  });
+  const { allRollupViewFields, isRegularColumnVisible } =
+    useTableColumnPickerItems({
+      objectMetadataItem,
+      recordIndexId,
+    });
 
   const { activeFieldMetadataItems } = useActiveFieldMetadataItems({
     objectMetadataItem,

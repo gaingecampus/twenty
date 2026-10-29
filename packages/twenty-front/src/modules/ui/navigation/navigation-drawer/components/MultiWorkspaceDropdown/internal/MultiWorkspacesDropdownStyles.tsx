@@ -7,7 +7,10 @@ export const StyledContainer = styled.div<{
   disabled?: boolean;
 }>`
   --t-avatar-font-size-md: var(--t-workspace-switcher-avatar-font-size, 12px);
-  --t-avatar-radius: var(--t-workspace-switcher-avatar-radius, var(--t-avatar-radius));
+  --t-avatar-radius: var(
+    --t-workspace-switcher-avatar-radius,
+    var(--t-avatar-radius)
+  );
   --t-avatar-size-md: var(--t-workspace-switcher-avatar-size, 16px);
   align-items: center;
   border: 1px solid transparent;

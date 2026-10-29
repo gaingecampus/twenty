@@ -14,9 +14,9 @@ describe('isClientClosedStreamError', () => {
   });
 
   it('should return false for a generic stream failure', () => {
-    expect(isClientClosedStreamError(new Error('source backend exploded'))).toBe(
-      false,
-    );
+    expect(
+      isClientClosedStreamError(new Error('source backend exploded')),
+    ).toBe(false);
   });
 
   it('should return false for non-error values', () => {

@@ -246,36 +246,36 @@ export const ObjectOptionsDropdownCustomView = ({
           </SelectableListItem>
           {customViewData?.type !== ViewType.CALENDAR &&
             customViewData?.type !== ViewType.GALLERY && (
-            <div id="group-by-menu-item">
-              <SelectableListItem
-                itemId="Group"
-                onEnter={() =>
-                  isDefined(recordIndexGroupFieldMetadataItem)
-                    ? onContentChange('recordGroups')
-                    : onContentChange('recordGroupFields')
-                }
-              >
-                <MenuItem
-                  focused={selectedItemId === 'Group'}
-                  onClick={() =>
+              <div id="group-by-menu-item">
+                <SelectableListItem
+                  itemId="Group"
+                  onEnter={() =>
                     isDefined(recordIndexGroupFieldMetadataItem)
                       ? onContentChange('recordGroups')
                       : onContentChange('recordGroupFields')
                   }
-                  LeftIcon={IconLayoutList}
-                  text={t`Group`}
-                  contextualText={
-                    isDefaultView
-                      ? t`Not available on Default View`
-                      : recordIndexGroupFieldMetadataItem?.label
-                  }
-                  contextualTextPosition="right"
-                  hasSubMenu
-                  disabled={isDefaultView}
-                />
-              </SelectableListItem>
-            </div>
-          )}
+                >
+                  <MenuItem
+                    focused={selectedItemId === 'Group'}
+                    onClick={() =>
+                      isDefined(recordIndexGroupFieldMetadataItem)
+                        ? onContentChange('recordGroups')
+                        : onContentChange('recordGroupFields')
+                    }
+                    LeftIcon={IconLayoutList}
+                    text={t`Group`}
+                    contextualText={
+                      isDefaultView
+                        ? t`Not available on Default View`
+                        : recordIndexGroupFieldMetadataItem?.label
+                    }
+                    contextualTextPosition="right"
+                    hasSubMenu
+                    disabled={isDefaultView}
+                  />
+                </SelectableListItem>
+              </div>
+            )}
           {isDefaultView && (
             <AppTooltip
               anchorSelect={`#group-by-menu-item`}

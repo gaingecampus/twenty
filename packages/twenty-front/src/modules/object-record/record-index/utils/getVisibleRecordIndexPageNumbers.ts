@@ -34,10 +34,7 @@ export const getVisibleRecordIndexPageNumbers = (
 
     const trailingStart = Math.max(
       1,
-      Math.min(
-        pageCount - EDGE_PAGE_COUNT + 1,
-        currentPage - SIBLING_COUNT,
-      ),
+      Math.min(pageCount - EDGE_PAGE_COUNT + 1, currentPage - SIBLING_COUNT),
     );
 
     for (let page = trailingStart; page <= pageCount; page++) {
