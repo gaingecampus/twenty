@@ -28,6 +28,10 @@ import { InjectWorkspaceScopedRepository } from 'src/engine/twenty-orm/workspace
 import { WorkspaceScopedRepository } from 'src/engine/twenty-orm/workspace-scoped-repository/workspace-scoped-repository';
 import { ATTACHMENT_KIND } from 'src/modules/messaging/email-attachment/constants/attachment-kind.constant';
 
+type FileRegistrationFailure = Omit<ToolOutput<never>, 'success'> & {
+  success: false;
+};
+
 const MAX_REGISTER_FILE_BASE64_BYTES = 10 * 1024 * 1024;
 
 export type RegisterFileOnRecordResult = {
@@ -122,6 +126,8 @@ export class RecordFileRegistrationService {
       objectName: input.objectNameSingular,
       filter: { id: { eq: input.recordId } },
       limit: 1,
+      select: ['id'],
+      shouldBuildEffectiveSelectFields: true,
       authContext,
       rolePermissionConfig,
     });
@@ -159,6 +165,8 @@ export class RecordFileRegistrationService {
       const createdBy: ActorMetadata = actorContext ?? {
         source: FieldActorSource.AGENT,
         name: 'Agent',
+        workspaceMemberId: null,
+        context: {},
       };
 
       // FILES create input is FileInput (fileId + label only). Extension is
@@ -182,7 +190,11 @@ export class RecordFileRegistrationService {
         slimResponse: true,
       });
 
-      if (!createResult.success || !isDefined(createResult.result?.id)) {
+      const attachmentId =
+        isDefined(createResult.result) && 'id' in createResult.result
+          ? createResult.result.id
+          : undefined;
+      if (!createResult.success || typeof attachmentId !== 'string') {
         return {
           success: false,
           message: 'Failed to create attachment record',
@@ -194,7 +206,7 @@ export class RecordFileRegistrationService {
         success: true,
         message: `Registered ${sourceFile.filename} on ${input.objectNameSingular}`,
         result: {
-          attachmentId: createResult.result.id,
+          attachmentId,
           fileId: savedFile.id,
           filename: sourceFile.filename,
           objectNameSingular: input.objectNameSingular,
@@ -233,7 +245,7 @@ export class RecordFileRegistrationService {
         { objectMetadataId: string; name: string } | undefined
       >;
     };
-  }): { success: true; joinColumnName: string } | ToolOutput {
+  }): { success: true; joinColumnName: string } | FileRegistrationFailure {
     // Morph relation field is "targetCompany"; join column for create is "targetCompanyId"
     const morphFieldName = `target${capitalize(objectNameSingular)}`;
     const joinColumnName = `${morphFieldName}Id`;
@@ -284,7 +296,8 @@ export class RecordFileRegistrationService {
     input: RegisterFileOnRecordInput;
     workspaceId: string;
   }): Promise<
-    { success: true; buffer: Buffer; filename: string } | ToolOutput
+    | { success: true; buffer: Buffer; filename: string }
+    | FileRegistrationFailure
   > {
     // Prefer sourceFileId over contentBase64 when both are present so AI
     // cannot rename an existing chat upload by also passing filename.
@@ -316,7 +329,8 @@ export class RecordFileRegistrationService {
     fileId: string;
     workspaceId: string;
   }): Promise<
-    { success: true; buffer: Buffer; filename: string } | ToolOutput
+    | { success: true; buffer: Buffer; filename: string }
+    | FileRegistrationFailure
   > {
     const fileContent = await this.fileService.getFileContentById({
       fileId,
@@ -401,7 +415,9 @@ export class RecordFileRegistrationService {
   }: {
     contentBase64: string;
     filename: string;
-  }): { success: true; buffer: Buffer; filename: string } | ToolOutput {
+  }):
+    | { success: true; buffer: Buffer; filename: string }
+    | FileRegistrationFailure {
     const normalizedBase64 = contentBase64.replace(/^data:[^;]+;base64,/, '');
 
     let buffer: Buffer;

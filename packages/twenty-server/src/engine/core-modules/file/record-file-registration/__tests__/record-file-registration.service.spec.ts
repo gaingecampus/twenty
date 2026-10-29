@@ -179,10 +179,23 @@ describe('RecordFileRegistrationService', () => {
       },
       authContext,
       rolePermissionConfig,
-      actorContext: { source: FieldActorSource.AGENT, name: 'Agent' },
+      actorContext: {
+        source: FieldActorSource.AGENT,
+        workspaceMemberId: null,
+        context: {},
+        name: 'Agent',
+      },
     });
 
     expect(result.success).toBe(true);
+    expect(mockFindRecordsExecute).toHaveBeenCalledWith(
+      expect.objectContaining({
+        select: ['id'],
+        shouldBuildEffectiveSelectFields: true,
+        authContext,
+        rolePermissionConfig,
+      }),
+    );
     expect(mockHasToolPermission).toHaveBeenCalledWith(
       rolePermissionConfig,
       'workspace-1',

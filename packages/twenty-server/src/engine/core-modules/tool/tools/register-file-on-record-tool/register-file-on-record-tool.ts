@@ -81,6 +81,8 @@ export class RegisterFileOnRecordTool implements Tool {
         actorContext: context.actorContext ?? {
           source: FieldActorSource.AGENT,
           name: 'Agent',
+          workspaceMemberId: null,
+          context: {},
         },
       });
     } catch (error) {
