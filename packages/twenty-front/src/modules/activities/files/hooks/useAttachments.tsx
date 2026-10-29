@@ -4,8 +4,8 @@ import { ATTACHMENT_GQL_FIELDS } from '@/activities/files/constants/attachment-g
 import { useAttachmentEmailDirections } from '@/activities/files/hooks/useAttachmentEmailDirections';
 import { useRelatedPersonIdsForAttachments } from '@/activities/files/hooks/useRelatedPersonIdsForAttachments';
 import { type Attachment } from '@/activities/files/types/Attachment';
-import { buildActivityTargetsFilterForTargetableObject } from '@/activities/files/utils/build-activity-targets-filter-for-targetable-object.util';
-import { buildAttachmentsFilterForTargetableObject } from '@/activities/files/utils/build-attachments-filter-for-targetable-object.util';
+import { buildActivityTargetsFilterForTargetableObject } from '@/activities/files/utils/buildActivityTargetsFilterForTargetableObject';
+import { buildAttachmentsFilterForTargetableObject } from '@/activities/files/utils/buildAttachmentsFilterForTargetableObject';
 import { enrichAttachmentWithEmailDirection } from '@/activities/files/utils/enrichAttachmentWithEmailDirection';
 import { type ActivityTargetableObject } from '@/activities/types/ActivityTargetableEntity';
 import { type NoteTarget } from '@/activities/types/NoteTarget';

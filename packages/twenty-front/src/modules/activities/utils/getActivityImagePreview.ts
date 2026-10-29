@@ -15,7 +15,7 @@ export const getActivityImagePreview = (
 
   const visitBlocks = (blocks: PartialBlock[]) => {
     for (const block of blocks) {
-      if (!block || typeof block !== 'object') continue;
+      if (block === null || typeof block !== 'object') continue;
 
       if (block.type === 'image' && isNonEmptyString(block.props?.url)) {
         images.push({

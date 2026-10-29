@@ -11,7 +11,7 @@ import { getJunctionConfig } from '@/object-record/record-field/ui/utils/junctio
 import { getTargetObjectMetadataIdsFromField } from '@/object-record/record-field/ui/utils/junction/getTargetObjectMetadataIdsFromField';
 import { hasJunctionConfig } from '@/object-record/record-field/ui/utils/junction/hasJunctionConfig';
 import { useRecordIndexContextOrThrow } from '@/object-record/record-index/contexts/RecordIndexContext';
-import { getRecordTableChipMaxWidth } from '@/object-record/record-table/constants/RecordTableColumnWidthExtra';
+import { getRecordTableChipMaxWidth } from '@/object-record/record-table/utils/getRecordTableChipMaxWidth';
 import { useRecordTableContextOrThrow } from '@/object-record/record-table/contexts/RecordTableContext';
 import { useRecordTableRowContextOrThrow } from '@/object-record/record-table/contexts/RecordTableRowContext';
 import { RecordTableUpdateContext } from '@/object-record/record-table/contexts/RecordTableUpdateContext';
@@ -44,6 +44,10 @@ export const RecordTableCellFieldContextGeneric = ({
     fieldDefinitionByViewFieldId,
   } = useRecordIndexContextOrThrow();
 
+  const updateRecord = useContext(RecordTableUpdateContext);
+  const getIsMetadataItemFromStandardApplication =
+    useGetIsMetadataItemFromStandardApplication();
+
   const fieldDefinition = getFieldDefinitionForRecordField({
     recordField,
     fieldDefinitionByViewFieldId,
@@ -53,10 +57,6 @@ export const RecordTableCellFieldContextGeneric = ({
   if (!isDefined(fieldDefinition)) {
     return null;
   }
-
-  const updateRecord = useContext(RecordTableUpdateContext);
-  const getIsMetadataItemFromStandardApplication =
-    useGetIsMetadataItemFromStandardApplication();
 
   let hasObjectReadPermissions = objectPermissions.canReadObjectRecords;
 

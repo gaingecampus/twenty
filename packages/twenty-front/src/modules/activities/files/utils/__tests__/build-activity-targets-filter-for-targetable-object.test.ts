@@ -1,4 +1,4 @@
-import { buildActivityTargetsFilterForTargetableObject } from '@/activities/files/utils/build-activity-targets-filter-for-targetable-object.util';
+import { buildActivityTargetsFilterForTargetableObject } from '@/activities/files/utils/buildActivityTargetsFilterForTargetableObject';
 
 describe('buildActivityTargetsFilterForTargetableObject', () => {
   it('should return direct person filter for person records', () => {

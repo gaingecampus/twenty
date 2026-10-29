@@ -37,10 +37,18 @@ const StyledContainer = styled.div`
   }
 
   button {
-    --btn-active-bg: rgb(255 255 255 / 0.24) !important;
+    --btn-active-bg: color-mix(
+      in srgb,
+      ${GRAY_SCALE_LIGHT.gray1} 24%,
+      transparent
+    ) !important;
     --btn-border-color: transparent !important;
     --btn-box-shadow: none !important;
-    --btn-hover-bg: rgb(255 255 255 / 0.16) !important;
+    --btn-hover-bg: color-mix(
+      in srgb,
+      ${GRAY_SCALE_LIGHT.gray1} 16%,
+      transparent
+    ) !important;
     --tw-button-color: ${GRAY_SCALE_LIGHT.gray1} !important;
   }
 
@@ -50,7 +58,11 @@ const StyledContainer = styled.div`
   }
 
   button[type='submit']:not(:disabled):not(:focus) {
-    border-color: color(display-p3 1 1 1 / 0.5);
+    border-color: color-mix(
+      in srgb,
+      ${GRAY_SCALE_LIGHT.gray1} 50%,
+      transparent
+    );
   }
 `;
 

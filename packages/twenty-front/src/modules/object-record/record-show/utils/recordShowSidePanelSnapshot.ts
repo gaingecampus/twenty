@@ -12,7 +12,7 @@ export const captureRecordShowSidePanel = (store: Store) => {
     store.get(sidePanelNavigationMorphItemsByPageState.atom),
   );
   const tabs = Array.from(morphItems).flatMap(([pageId, records]) => {
-    if (!records[0]) return [];
+    if (records.length === 0) return [];
     const instanceId = getShowPageTabListComponentId({
       pageId,
       targetObjectId: records[0].recordId,

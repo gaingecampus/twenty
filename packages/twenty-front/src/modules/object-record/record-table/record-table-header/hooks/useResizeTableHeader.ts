@@ -2,7 +2,7 @@ import { useUpdateRecordField } from '@/object-record/record-field/hooks/useUpda
 
 import { RECORD_TABLE_COLUMN_LAST_EMPTY_COLUMN_WIDTH_VARIABLE_NAME } from '@/object-record/record-table/constants/RecordTableColumnLastEmptyColumnWidthVariableName';
 import { RECORD_TABLE_COLUMN_MIN_WIDTH } from '@/object-record/record-table/constants/RecordTableColumnMinWidth';
-import { getRecordTableColumnDisplayWidth } from '@/object-record/record-table/constants/RecordTableColumnWidthExtra';
+import { getRecordTableColumnDisplayWidth } from '@/object-record/record-table/utils/getRecordTableColumnDisplayWidth';
 import { RECORD_TABLE_COLUMN_WITH_GROUP_LAST_EMPTY_COLUMN_WIDTH_VARIABLE_NAME } from '@/object-record/record-table/constants/RecordTableColumnWithGroupLastEmptyColumnWidthVariableName';
 import { useRecordTableContextOrThrow } from '@/object-record/record-table/contexts/RecordTableContext';
 import { useResetTableRowSelection } from '@/object-record/record-table/hooks/internal/useResetTableRowSelection';
@@ -27,10 +27,7 @@ import { useSetAtomComponentState } from '@/ui/utilities/state/jotai/hooks/useSe
 import { useSaveRecordFields } from '@/views/hooks/useSaveRecordFields';
 import { useStore } from 'jotai';
 import { useCallback, useState } from 'react';
-import {
-  findById,
-  throwIfNotDefined,
-} from 'twenty-shared/utils';
+import { findById, throwIfNotDefined } from 'twenty-shared/utils';
 
 export const useResizeTableHeader = () => {
   const { recordTableId, visibleRecordFields } = useRecordTableContextOrThrow();

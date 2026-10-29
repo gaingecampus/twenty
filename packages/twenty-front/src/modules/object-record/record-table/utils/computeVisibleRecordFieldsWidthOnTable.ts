@@ -1,5 +1,5 @@
 import { type RecordField } from '@/object-record/record-field/types/RecordField';
-import { getRecordTableColumnDisplayWidth } from '@/object-record/record-table/constants/RecordTableColumnWidthExtra';
+import { getRecordTableColumnDisplayWidth } from '@/object-record/record-table/utils/getRecordTableColumnDisplayWidth';
 import { RECORD_TABLE_LABEL_IDENTIFIER_COLUMN_WIDTH_ON_MOBILE } from '@/object-record/record-table/constants/RecordTableLabelIdentifierColumnWidthOnMobile';
 
 export const computeVisibleRecordFieldsWidthOnTable = ({

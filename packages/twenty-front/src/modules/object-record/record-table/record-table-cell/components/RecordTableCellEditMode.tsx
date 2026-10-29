@@ -3,7 +3,7 @@ import { RecordFieldComponentInstanceContext } from '@/object-record/record-fiel
 import { recordFieldInputIsFieldInErrorComponentState } from '@/object-record/record-field/ui/states/recordFieldInputIsFieldInErrorComponentState';
 import { recordFieldInputLayoutDirectionComponentState } from '@/object-record/record-field/ui/states/recordFieldInputLayoutDirectionComponentState';
 import { recordFieldInputLayoutDirectionLoadingComponentState } from '@/object-record/record-field/ui/states/recordFieldInputLayoutDirectionLoadingComponentState';
-import { RECORD_TABLE_ROW_HEIGHT_WITH_BORDER } from '@/object-record/record-table/constants/RecordTableRowHeight';
+import { RECORD_TABLE_ROW_HEIGHT_WITH_BORDER } from '@/object-record/record-table/constants/RecordTableRowHeightWithBorder';
 import { RecordTableCellContext } from '@/object-record/record-table/contexts/RecordTableCellContext';
 import { useFocusRecordTableCell } from '@/object-record/record-table/record-table-cell/hooks/useFocusRecordTableCell';
 import { OverlayContainer } from '@/ui/layout/overlay/components/OverlayContainer';

@@ -1,4 +1,4 @@
-import { getRecordTableColumnDisplayWidth } from '@/object-record/record-table/constants/RecordTableColumnWidthExtra';
+import { getRecordTableColumnDisplayWidth } from '@/object-record/record-table/utils/getRecordTableColumnDisplayWidth';
 import { computeLastRecordTableColumnWidth } from '@/object-record/record-table/utils/computeLastRecordTableColumnWidth';
 
 describe('computeLastRecordTableColumnWidth', () => {

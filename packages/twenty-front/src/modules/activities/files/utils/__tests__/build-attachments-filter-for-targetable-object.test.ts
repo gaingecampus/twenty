@@ -1,4 +1,4 @@
-import { buildAttachmentsFilterForTargetableObject } from '@/activities/files/utils/build-attachments-filter-for-targetable-object.util';
+import { buildAttachmentsFilterForTargetableObject } from '@/activities/files/utils/buildAttachmentsFilterForTargetableObject';
 
 describe('buildAttachmentsFilterForTargetableObject', () => {
   it('should return only direct target filter when note and task ids are empty', () => {

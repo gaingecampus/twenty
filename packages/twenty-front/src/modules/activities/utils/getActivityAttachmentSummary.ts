@@ -107,7 +107,7 @@ export const getActivityAttachmentSummary = ({
 
   const visitBlocks = (blocks: PartialBlock[]) => {
     for (const block of blocks) {
-      if (!block || typeof block !== 'object') continue;
+      if (block === null || typeof block !== 'object') continue;
       const props = block.props as { url?: string; name?: string } | undefined;
       if (
         ['image', 'file', 'video', 'audio'].includes(block.type ?? '') &&

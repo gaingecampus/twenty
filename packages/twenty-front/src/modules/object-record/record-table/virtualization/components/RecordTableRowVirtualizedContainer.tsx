@@ -1,7 +1,5 @@
-import {
-  RECORD_TABLE_ROW_HEIGHT,
-  RECORD_TABLE_ROW_HEIGHT_WITH_BORDER,
-} from '@/object-record/record-table/constants/RecordTableRowHeight';
+import { RECORD_TABLE_ROW_HEIGHT } from '@/object-record/record-table/constants/RecordTableRowHeight';
+import { RECORD_TABLE_ROW_HEIGHT_WITH_BORDER } from '@/object-record/record-table/constants/RecordTableRowHeightWithBorder';
 import { RecordTableRowVirtualizedDebugRowHelper } from '@/object-record/record-table/virtualization/components/RecordTableRowVirtualizedDebugRowHelper';
 import { RecordTableRowVirtualizedRouterLevel1 } from '@/object-record/record-table/virtualization/components/RecordTableRowVirtualizedRouterLevel1';
 import { TABLE_VIRTUALIZATION_DEBUG_ACTIVATED } from '@/object-record/record-table/virtualization/constants/TableVirtualizationDebugActivated';

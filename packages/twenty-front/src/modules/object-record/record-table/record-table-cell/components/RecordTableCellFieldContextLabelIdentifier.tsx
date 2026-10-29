@@ -4,7 +4,7 @@ import { isRecordFieldReadOnly } from '@/object-record/read-only/utils/isRecordF
 import { FieldContext } from '@/object-record/record-field/ui/contexts/FieldContext';
 import { useRecordIndexContextOrThrow } from '@/object-record/record-index/contexts/RecordIndexContext';
 import { shouldCompactRecordIndexLabelIdentifierComponentState } from '@/object-record/record-index/states/shouldCompactRecordIndexLabelIdentifierComponentState';
-import { getRecordTableChipMaxWidth } from '@/object-record/record-table/constants/RecordTableColumnWidthExtra';
+import { getRecordTableChipMaxWidth } from '@/object-record/record-table/utils/getRecordTableChipMaxWidth';
 import { RecordTableCellContext } from '@/object-record/record-table/contexts/RecordTableCellContext';
 import { useRecordTableContextOrThrow } from '@/object-record/record-table/contexts/RecordTableContext';
 import { useRecordTableRowContextOrThrow } from '@/object-record/record-table/contexts/RecordTableRowContext';

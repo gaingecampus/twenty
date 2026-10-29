@@ -1,5 +1,7 @@
-import { ATTACHMENT_EMAIL_DIRECTION } from '@/activities/files/constants/attachment-email-direction.constant';
-import { type AttachmentEmailDirection } from '@/activities/files/constants/attachment-email-direction.constant';
+import {
+  ATTACHMENT_EMAIL_DIRECTION,
+  type AttachmentEmailDirection,
+} from '@/activities/files/constants/attachment-email-direction.constant';
 
 type MessageChannelMessageAssociationWithDirection = {
   direction?: string | null;

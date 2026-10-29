@@ -131,7 +131,11 @@ export const beautifyPastDateRelativeToNowShort = (
     const shouldUseLocalizedDistance =
       isDefined(locale) && locale.code !== 'en-US' && locale.code !== 'en';
 
-    const formatShort = (count: number, suffix: string, token: string) =>
+    const formatShort = (
+      count: number,
+      suffix: string,
+      token: Parameters<Locale['formatDistance']>[0],
+    ) =>
       shouldUseLocalizedDistance && isDefined(locale?.formatDistance)
         ? locale.formatDistance(token, count)
         : `${count}${suffix}`;
