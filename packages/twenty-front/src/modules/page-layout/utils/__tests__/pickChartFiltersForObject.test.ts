@@ -1,6 +1,9 @@
 import { pickChartFiltersForObject } from '@/page-layout/utils/pickChartFiltersForObject';
 import { type ChartFilters } from '@/side-panel/pages/page-layout/types/ChartFilters';
-import { ViewFilterOperand } from 'twenty-shared/types';
+import {
+  RecordFilterGroupLogicalOperator,
+  ViewFilterOperand,
+} from 'twenty-shared/types';
 
 describe('pickChartFiltersForObject', () => {
   it('should keep filters whose field belongs to the object', () => {
@@ -43,7 +46,7 @@ describe('pickChartFiltersForObject', () => {
       recordFilterGroups: [
         {
           id: 'group-1',
-          logicalOperator: 'AND',
+          logicalOperator: RecordFilterGroupLogicalOperator.AND,
         },
       ],
       recordFilters: [

@@ -1,13 +1,19 @@
-import { type ChartFilters } from '@/side-panel/pages/page-layout/types/ChartFilters';
+import {
+  type ChartRecordFilter,
+  type ChartRecordFilterGroup,
+} from 'twenty-shared/types';
 import { isDefined } from 'twenty-shared/utils';
 
-export const dropChartRecordFiltersWithDeletedFields = ({
+export const dropChartRecordFiltersWithDeletedFields = <
+  TFilter extends ChartRecordFilter,
+  TGroup extends ChartRecordFilterGroup,
+>({
   chartFilters,
   validFieldMetadataIds,
 }: {
-  chartFilters: ChartFilters;
+  chartFilters: { recordFilters?: TFilter[]; recordFilterGroups?: TGroup[] };
   validFieldMetadataIds: Set<string>;
-}): ChartFilters => {
+}) => {
   const validRecordFilters = (chartFilters.recordFilters ?? []).filter(
     (recordFilter) => validFieldMetadataIds.has(recordFilter.fieldMetadataId),
   );

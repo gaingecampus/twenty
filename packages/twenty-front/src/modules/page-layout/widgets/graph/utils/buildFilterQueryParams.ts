@@ -1,6 +1,8 @@
 import { type EnrichedObjectMetadataItem } from '@/object-metadata/types/EnrichedObjectMetadataItem';
-import { type RecordFilterGroup } from '@/object-record/record-filter-group/types/RecordFilterGroup';
-import { type RecordFilter } from '@/object-record/record-filter/types/RecordFilter';
+import {
+  type ChartRecordFilterGroup,
+  type ChartRecordFilter,
+} from 'twenty-shared/types';
 import { isDefined } from 'twenty-shared/utils';
 import { appendNestedUrlFilterGroupsToQueryParams } from './appendNestedUrlFilterGroupsToQueryParams';
 import { mapRecordFilterToUrlFilter } from './mapRecordFilterToUrlFilter';
@@ -11,8 +13,12 @@ export const buildFilterQueryParams = ({
   recordFilterGroups = [],
   objectMetadataItem,
 }: {
-  recordFilters?: RecordFilter[];
-  recordFilterGroups?: RecordFilterGroup[];
+  recordFilters?: (ChartRecordFilter & {
+    positionInRecordFilterGroup?: number | null;
+  })[];
+  recordFilterGroups?: (ChartRecordFilterGroup & {
+    positionInRecordFilterGroup?: number | null;
+  })[];
   objectMetadataItem: EnrichedObjectMetadataItem;
 }): URLSearchParams => {
   const params = new URLSearchParams();

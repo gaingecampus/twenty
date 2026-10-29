@@ -1,6 +1,9 @@
 import { replaceChartFiltersForObject } from '@/page-layout/utils/replaceChartFiltersForObject';
 import { type ChartFilters } from '@/side-panel/pages/page-layout/types/ChartFilters';
-import { ViewFilterOperand } from 'twenty-shared/types';
+import {
+  RecordFilterGroupLogicalOperator,
+  ViewFilterOperand,
+} from 'twenty-shared/types';
 
 describe('replaceChartFiltersForObject', () => {
   it('should replace filters for the given object and keep other objects', () => {
@@ -56,7 +59,7 @@ describe('replaceChartFiltersForObject', () => {
       recordFilterGroups: [
         {
           id: 'group-1',
-          logicalOperator: 'AND',
+          logicalOperator: RecordFilterGroupLogicalOperator.AND,
         },
       ],
       recordFilters: [

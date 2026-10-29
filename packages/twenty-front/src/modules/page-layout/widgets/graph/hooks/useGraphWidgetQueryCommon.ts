@@ -1,3 +1,4 @@
+import { normalizeChartFiltersForQuery } from '@/page-layout/widgets/graph/utils/normalizeChartFiltersForQuery';
 import { useObjectMetadataItemById } from '@/object-metadata/hooks/useObjectMetadataItemById';
 import { flattenedFieldMetadataItemsSelector } from '@/object-metadata/states/flattenedFieldMetadataItemsSelector';
 import { useFilterValueDependencies } from '@/object-record/record-filter/hooks/useFilterValueDependencies';
@@ -65,8 +66,10 @@ export const useGraphWidgetQueryCommon = ({
   const gqlOperationFilter = computeRecordGqlOperationFilter({
     fieldMetadataItems: flattenedFieldMetadataItems,
     filterValueDependencies,
-    recordFilters: sanitizedChartFilters.recordFilters ?? [],
-    recordFilterGroups: sanitizedChartFilters.recordFilterGroups ?? [],
+    ...normalizeChartFiltersForQuery(
+      sanitizedChartFilters,
+      flattenedFieldMetadataItems,
+    ),
   });
 
   return {
