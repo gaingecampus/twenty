@@ -12,7 +12,7 @@ import {
 import { type FlatObjectMetadata } from 'src/engine/metadata-modules/flat-object-metadata/types/flat-object-metadata.type';
 import { type FlatSearchFieldMetadata } from 'src/engine/metadata-modules/flat-search-field-metadata/types/flat-search-field-metadata.type';
 
-const CUSTOM_APPLICATION_UNIVERSAL_IDENTIFIER = 'custom-application-uid';
+const CUSTOM_APPLICATION_UNIVERSAL_IDENTIFIER = '6ad7fbcf-dd2e-49ea-b921-3509f67f521e';
 const CUSTOM_APPLICATION_ID = 'custom-application-id';
 
 const buildUniversalIdentifiersByApplicationId = (

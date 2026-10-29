@@ -364,9 +364,11 @@ describe('UserWorkspaceService', () => {
       jest
         .spyOn(globalWorkspaceOrmManager, 'getRepository')
         .mockResolvedValue(workspaceMemberRepository as any);
-      jest.spyOn(userWorkspaceRepository, 'findOneOrFail').mockResolvedValue({
-        defaultAvatarUrl: null,
-      } as UserWorkspaceEntity);
+      jest
+        .spyOn(userWorkspaceRepository, 'findOneOrFail')
+        .mockResolvedValue(
+          Object.assign(new UserWorkspaceEntity(), { defaultAvatarUrl: null }),
+        );
 
       await service.createWorkspaceMember(workspaceId, user);
 

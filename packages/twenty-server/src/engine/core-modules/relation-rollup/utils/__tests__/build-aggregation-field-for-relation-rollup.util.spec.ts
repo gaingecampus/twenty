@@ -1,9 +1,8 @@
-import { AggregateOperations } from 'twenty-shared/types';
+import { AggregateOperations, FieldMetadataType } from 'twenty-shared/types';
 
 import { buildAggregationFieldForRelationRollup } from 'src/engine/core-modules/relation-rollup/utils/build-aggregation-field-for-relation-rollup.util';
 import { getAvailableAggregationsFromObjectFields } from 'src/engine/api/graphql/workspace-schema-builder/utils/get-available-aggregations-from-object-fields.util';
 import { type FlatFieldMetadata } from 'src/engine/metadata-modules/flat-field-metadata/types/flat-field-metadata.type';
-import { FieldMetadataType } from 'twenty-shared/types';
 
 describe('buildAggregationFieldForRelationRollup', () => {
   const amountField = {
