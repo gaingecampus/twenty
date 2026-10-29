@@ -1,3 +1,4 @@
+import { MicrosoftFetchAttachmentsService } from 'src/modules/messaging/message-import-manager/drivers/microsoft/services/microsoft-fetch-attachments.service';
 import { Logger } from '@nestjs/common';
 import { Test, type TestingModule } from '@nestjs/testing';
 
@@ -22,6 +23,14 @@ describe('Microsoft get messages service', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         MicrosoftGetMessagesService,
+        {
+          provide: MicrosoftFetchAttachmentsService,
+          useValue: {
+            fetchAttachmentsByMessageIds: jest
+              .fn()
+              .mockResolvedValue(new Map()),
+          },
+        },
         {
           provide: MicrosoftMessagesImportErrorHandler,
           useValue: { handleError: jest.fn() },

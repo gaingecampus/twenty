@@ -283,6 +283,7 @@ describe('ImapSmtpCalDavAPIService', () => {
         userWorkspaceId: 'user-workspace-id',
         workspaceId: 'workspace-id',
         authFailedAt: null,
+        archivedAt: null,
       });
 
       expect(
@@ -362,6 +363,7 @@ describe('ImapSmtpCalDavAPIService', () => {
         userWorkspaceId: 'user-workspace-id',
         workspaceId: 'workspace-id',
         authFailedAt: null,
+        archivedAt: null,
       });
 
       expect(
@@ -670,6 +672,7 @@ describe('ImapSmtpCalDavAPIService', () => {
         userWorkspaceId: 'user-workspace-id',
         workspaceId: 'workspace-id',
         authFailedAt: null,
+        archivedAt: null,
       });
     });
 

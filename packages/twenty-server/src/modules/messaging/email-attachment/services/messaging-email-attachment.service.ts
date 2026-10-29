@@ -39,8 +39,10 @@ import {
   extractDriveLinksFromMessageBodies,
   hasDriveLinksInMessageBody,
 } from 'src/modules/messaging/message-import-manager/drivers/gmail/utils/extract-drive-links-from-html.util';
-import { type MessageWithParticipants } from 'src/modules/messaging/message-import-manager/types/message';
-import { type MessageImportAttachment } from 'src/modules/messaging/message-import-manager/types/message';
+import {
+  type MessageWithParticipants,
+  type MessageImportAttachment,
+} from 'src/modules/messaging/message-import-manager/types/message';
 import { type MessageParticipantWorkspaceEntity } from 'src/modules/messaging/common/standard-objects/message-participant.workspace-entity';
 import { streamToBuffer } from 'src/utils/stream-to-buffer';
 
@@ -71,7 +73,10 @@ export class MessagingEmailAttachmentService {
     participants,
     pendingContext,
   }: {
-    participants: MessageParticipantWorkspaceEntity[];
+    participants: Pick<
+      MessageParticipantWorkspaceEntity,
+      'role' | 'personId'
+    >[];
     pendingContext: EmailAttachmentPendingContext;
   }): boolean {
     const direction =
@@ -80,9 +85,7 @@ export class MessagingEmailAttachmentService {
         ? MessageDirection.OUTGOING
         : pendingContext.direction;
 
-    return (
-      this.getTargetPersonIds({ participants, direction }).length > 0
-    );
+    return this.getTargetPersonIds({ participants, direction }).length > 0;
   }
 
   async persistAttachmentsForMessage({
@@ -93,7 +96,10 @@ export class MessagingEmailAttachmentService {
   }: {
     workspaceId: string;
     messageId: string;
-    participants: MessageParticipantWorkspaceEntity[];
+    participants: Pick<
+      MessageParticipantWorkspaceEntity,
+      'role' | 'personId'
+    >[];
     pendingContext: EmailAttachmentPendingContext;
   }): Promise<boolean> {
     if (
@@ -197,7 +203,10 @@ export class MessagingEmailAttachmentService {
   }: {
     workspaceId: string;
     messageId: string;
-    participants: MessageParticipantWorkspaceEntity[];
+    participants: Pick<
+      MessageParticipantWorkspaceEntity,
+      'role' | 'personId'
+    >[];
     attachmentFileIds: string[];
   }): Promise<boolean> {
     if (attachmentFileIds.length === 0) {
@@ -401,7 +410,7 @@ export class MessagingEmailAttachmentService {
         const hasHtmlBody = isDefined(importedMessage.htmlBody);
         const hasDriveLinks = hasDriveLinksInMessageBody({
           htmlBody: importedMessage.htmlBody,
-          textBody: importedMessage.text,
+          textBody: importedMessage.text ?? undefined,
         });
 
         if (!hasMimeAttachments && !hasHtmlBody && !hasDriveLinks) {
@@ -419,7 +428,7 @@ export class MessagingEmailAttachmentService {
           direction: importedMessage.direction,
           attachments: importedMessage.attachments,
           htmlBody: importedMessage.htmlBody,
-          textBody: importedMessage.text,
+          textBody: importedMessage.text ?? undefined,
         };
 
         await this.messagingEmailAttachmentPendingCacheService.setPendingContext(
@@ -561,7 +570,10 @@ export class MessagingEmailAttachmentService {
     participants,
     direction,
   }: {
-    participants: MessageParticipantWorkspaceEntity[];
+    participants: Pick<
+      MessageParticipantWorkspaceEntity,
+      'role' | 'personId'
+    >[];
     direction: MessageDirection;
   }): string[] {
     const roles =
@@ -640,7 +652,6 @@ export class MessagingEmailAttachmentService {
   }
 
   private async createExternalLinkAttachmentsForPersons({
-    workspaceId,
     attachmentRepository,
     targetPersonIds,
     messageId,

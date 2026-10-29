@@ -167,7 +167,7 @@ export class MessagingSaveMessagesAndEnqueueContactCreationService {
                 const hasHtmlBody = isDefined(message.htmlBody);
                 const hasDriveLinks = hasDriveLinksInMessageBody({
                   htmlBody: message.htmlBody,
-                  textBody: message.text,
+                  textBody: message.text ?? undefined,
                 });
 
                 if (!hasMimeAttachments && !hasHtmlBody && !hasDriveLinks) {
@@ -185,7 +185,7 @@ export class MessagingSaveMessagesAndEnqueueContactCreationService {
                       direction: message.direction,
                       attachments: message.attachments,
                       htmlBody: message.htmlBody,
-                      textBody: message.text,
+                      textBody: message.text ?? undefined,
                     },
                   },
                 );
