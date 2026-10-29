@@ -375,6 +375,8 @@ export class DataloaderService {
                     ...acc,
                     [property]: resolveFieldMetadataStandardOverride(
                       {
+                        name: flatFieldMetadata.name,
+                        isSystem: flatFieldMetadata.isSystem,
                         label: flatFieldMetadata.label,
                         description: flatFieldMetadata.description ?? undefined,
                         icon: flatFieldMetadata.icon ?? undefined,

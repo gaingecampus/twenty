@@ -5521,6 +5521,7 @@ export type UpdateOneObjectInput = {
 };
 
 export type UpdatePageLayoutInput = {
+  filters?: InputMaybe<Scalars['JSON']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   objectMetadataId?: InputMaybe<Scalars['UUID']['input']>;
   type?: InputMaybe<PageLayoutType>;

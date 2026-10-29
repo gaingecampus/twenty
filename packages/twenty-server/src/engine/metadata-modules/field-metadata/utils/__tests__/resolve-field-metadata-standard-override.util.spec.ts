@@ -125,6 +125,7 @@ describe('resolveFieldMetadataStandardOverride', () => {
 
     it('should return the field value for custom description field', () => {
       const fieldMetadata = {
+        name: 'customField',
         label: 'Custom Label',
         description: 'Custom Description',
         icon: 'custom-icon',
@@ -145,6 +146,7 @@ describe('resolveFieldMetadataStandardOverride', () => {
 
     it('should return the field value for custom icon field', () => {
       const fieldMetadata = {
+        name: 'customField',
         label: 'Custom Label',
         description: 'Custom Description',
         icon: 'custom-icon',
@@ -167,6 +169,7 @@ describe('resolveFieldMetadataStandardOverride', () => {
   describe('Standard fields - Icon overrides', () => {
     it('should return override icon when available for standard field', () => {
       const fieldMetadata = {
+        name: 'customField',
         label: 'Standard Label',
         description: 'Standard Description',
         icon: 'default-icon',
@@ -191,6 +194,7 @@ describe('resolveFieldMetadataStandardOverride', () => {
   describe('Standard fields - Translation overrides', () => {
     it('should return translation override when available for non-icon fields', () => {
       const fieldMetadata = {
+        name: 'customField',
         label: 'Standard Label',
         description: 'Standard Description',
         icon: 'default-icon',
@@ -227,6 +231,7 @@ describe('resolveFieldMetadataStandardOverride', () => {
 
     it('should fallback when translation override is not available for the locale', () => {
       const fieldMetadata = {
+        name: 'customField',
         label: 'Standard Label',
         description: 'Standard Description',
         icon: 'default-icon',
@@ -256,6 +261,7 @@ describe('resolveFieldMetadataStandardOverride', () => {
 
     it('should fallback when translation override is not available for the labelKey', () => {
       const fieldMetadata = {
+        name: 'customField',
         label: 'Standard Label',
         description: 'Standard Description',
         icon: 'default-icon',
@@ -285,6 +291,7 @@ describe('resolveFieldMetadataStandardOverride', () => {
 
     it('should not use translation overrides when locale is undefined', () => {
       const fieldMetadata = {
+        name: 'customField',
         label: 'Standard Label',
         description: 'Standard Description',
         icon: 'default-icon',
@@ -316,6 +323,7 @@ describe('resolveFieldMetadataStandardOverride', () => {
   describe('Standard fields - SOURCE_LOCALE overrides', () => {
     it('should return direct override for SOURCE_LOCALE when available', () => {
       const fieldMetadata = {
+        name: 'customField',
         label: 'Standard Label',
         description: 'Standard Description',
         icon: 'default-icon',
@@ -358,6 +366,7 @@ describe('resolveFieldMetadataStandardOverride', () => {
 
     it('should use direct override for non-SOURCE_LOCALE when translation override is missing', () => {
       const fieldMetadata = {
+        name: 'customField',
         label: 'Standard Label',
         description: 'Standard Description',
         icon: 'default-icon',
@@ -385,6 +394,7 @@ describe('resolveFieldMetadataStandardOverride', () => {
 
     it('should not use empty string override for SOURCE_LOCALE', () => {
       const fieldMetadata = {
+        name: 'customField',
         label: 'Standard Label',
         description: 'Standard Description',
         icon: 'default-icon',
@@ -410,6 +420,7 @@ describe('resolveFieldMetadataStandardOverride', () => {
 
     it('should not use undefined override for SOURCE_LOCALE', () => {
       const fieldMetadata = {
+        name: 'customField',
         label: 'Standard Label',
         description: 'Standard Description',
         icon: 'default-icon',
@@ -437,6 +448,7 @@ describe('resolveFieldMetadataStandardOverride', () => {
   describe('Standard fields - Auto translation fallback', () => {
     it('should return translated message when translation is available', () => {
       const fieldMetadata = {
+        name: 'customField',
         label: 'Standard Label',
         description: 'Standard Description',
         icon: 'default-icon',
@@ -462,6 +474,7 @@ describe('resolveFieldMetadataStandardOverride', () => {
 
     it('should return original field value when no translation is found', () => {
       const fieldMetadata = {
+        name: 'customField',
         label: 'Standard Label',
         description: 'Standard Description',
         icon: 'default-icon',
@@ -489,6 +502,7 @@ describe('resolveFieldMetadataStandardOverride', () => {
   describe('Priority order - Standard fields', () => {
     it('should prioritize translation override over SOURCE_LOCALE override for non-SOURCE_LOCALE', () => {
       const fieldMetadata = {
+        name: 'customField',
         label: 'Standard Label',
         description: 'Standard Description',
         icon: 'default-icon',
@@ -518,6 +532,7 @@ describe('resolveFieldMetadataStandardOverride', () => {
 
     it('should prioritize SOURCE_LOCALE override over auto translation for SOURCE_LOCALE', () => {
       const fieldMetadata = {
+        name: 'customField',
         label: 'Standard Label',
         description: 'Standard Description',
         icon: 'default-icon',
@@ -542,6 +557,7 @@ describe('resolveFieldMetadataStandardOverride', () => {
 
     it('should use auto translation when no overrides are available', () => {
       const fieldMetadata = {
+        name: 'customField',
         label: 'Standard Label',
         description: 'Standard Description',
         icon: 'default-icon',

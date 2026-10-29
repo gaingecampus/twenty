@@ -130,6 +130,7 @@ export const computeFlatDefaultRecordPageLayoutToCreate = ({
   }
 
   const pageLayout: FlatPageLayout = {
+    filters: null,
     id: pageLayoutId,
     universalIdentifier: pageLayoutUniversalIdentifier,
     applicationId: flatApplication.id,

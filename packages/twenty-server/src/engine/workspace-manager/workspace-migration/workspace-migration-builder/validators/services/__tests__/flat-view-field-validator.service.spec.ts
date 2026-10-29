@@ -1,3 +1,4 @@
+import { type SyncableFlatEntity } from 'src/engine/metadata-modules/flat-entity/types/flat-entity-from.type';
 import { Test, type TestingModule } from '@nestjs/testing';
 
 import { ViewType } from 'twenty-shared/types';
@@ -9,8 +10,7 @@ import { type FlatView } from 'src/engine/metadata-modules/flat-view/types/flat-
 import { type FlatViewField } from 'src/engine/metadata-modules/flat-view-field/types/flat-view-field.type';
 import { FlatViewFieldValidatorService } from 'src/engine/workspace-manager/workspace-migration/workspace-migration-builder/validators/services/flat-view-field-validator.service';
 
-const LABEL_FIELD_UNIVERSAL_IDENTIFIER =
-  '00000000-0000-0000-0000-0000000000a1';
+const LABEL_FIELD_UNIVERSAL_IDENTIFIER = '00000000-0000-0000-0000-0000000000a1';
 const LABEL_VIEW_FIELD_UNIVERSAL_IDENTIFIER =
   '00000000-0000-0000-0000-0000000000b1';
 const CUSTOM_VIEW_FIELD_UNIVERSAL_IDENTIFIER =
@@ -69,7 +69,7 @@ const buildFlatObjectMetadata = (
     ...overrides,
   }) as unknown as FlatObjectMetadata;
 
-const addToMaps = <T extends { id: string; universalIdentifier: string }>(
+const addToMaps = <T extends SyncableFlatEntity>(
   entity: T,
 ): FlatEntityMaps<T> =>
   ({

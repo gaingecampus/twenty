@@ -1,29 +1,30 @@
 import { type AllMetadataName } from 'twenty-shared/metadata';
 import { isDefined } from 'twenty-shared/utils';
 
-import { type SyncableFlatEntity } from 'src/engine/metadata-modules/flat-entity/types/flat-entity-from.type';
 import {
   getWorkspaceOwnedFlatEntityPropertyNames,
   type WorkspaceOwnedFlatEntityPropertyName,
 } from 'src/engine/workspace-manager/workspace-migration/universal-flat-entity/constants/workspace-owned-flat-entity-property-names.constant';
-import { type UniversalFlatEntityMaps } from 'src/engine/workspace-manager/workspace-migration/universal-flat-entity/types/universal-flat-entity-maps.type';
-import { type UniversalSyncableFlatEntity } from 'src/engine/workspace-manager/workspace-migration/universal-flat-entity/types/universal-flat-entity-from.type';
 
 export const preserveWorkspaceOwnedPropertiesOnToFlatEntityMaps = <
-  TEntity extends SyncableFlatEntity | UniversalSyncableFlatEntity,
-  TMaps extends UniversalFlatEntityMaps<TEntity>,
+  TMaps extends {
+    byUniversalIdentifier: Partial<
+      Record<string, { universalIdentifier: string }>
+    >;
+  },
 >({
   fromFlatEntityMaps,
   toFlatEntityMaps,
   metadataName,
   propertyNames = getWorkspaceOwnedFlatEntityPropertyNames(metadataName),
 }: {
-  fromFlatEntityMaps: UniversalFlatEntityMaps<TEntity>;
+  fromFlatEntityMaps: TMaps;
   toFlatEntityMaps: TMaps;
   metadataName?: AllMetadataName;
   propertyNames?: readonly WorkspaceOwnedFlatEntityPropertyName[];
 }): TMaps => {
-  const preservedByUniversalIdentifier: Partial<Record<string, TEntity>> = {
+  type TEntity = NonNullable<TMaps['byUniversalIdentifier'][string]>;
+  const preservedByUniversalIdentifier = {
     ...toFlatEntityMaps.byUniversalIdentifier,
   };
 
@@ -48,10 +49,10 @@ export const preserveWorkspaceOwnedPropertiesOnToFlatEntityMaps = <
         continue;
       }
 
-      const fromPropertyValue = fromFlatEntity[
+      const fromPropertyValue = (fromFlatEntity as TEntity)[
         propertyName as keyof TEntity
       ] as TEntity[keyof TEntity];
-      const toPropertyValue = toFlatEntity[
+      const toPropertyValue = (toFlatEntity as TEntity)[
         propertyName as keyof TEntity
       ] as TEntity[keyof TEntity];
 
