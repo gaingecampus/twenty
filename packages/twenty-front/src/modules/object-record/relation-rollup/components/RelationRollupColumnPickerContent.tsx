@@ -132,12 +132,15 @@ export const RelationRollupColumnPickerContent = ({
       )
     : undefined;
 
-  const aggregateableTargetFields =
-    targetObjectMetadata?.fields.filter(
-      (field) =>
-        field.type === FieldMetadataType.NUMBER ||
-        field.type === FieldMetadataType.CURRENCY,
-    ) ?? [];
+  const aggregateableTargetFields = useMemo(
+    () =>
+      targetObjectMetadata?.fields.filter(
+        (field) =>
+          field.type === FieldMetadataType.NUMBER ||
+          field.type === FieldMetadataType.CURRENCY,
+      ) ?? [],
+    [targetObjectMetadata],
+  );
 
   const existingAggregateFieldId = isDefined(
     existingViewField?.relationRollup
@@ -162,7 +165,10 @@ export const RelationRollupColumnPickerContent = ({
   >(existingAggregateFieldId ?? aggregateableTargetFields.at(0)?.id ?? null);
 
   const initialRecordFilters = useMemo(() => {
-    if (!isDefined(existingViewField?.relationRollup) || !targetObjectMetadata) {
+    if (
+      !isDefined(existingViewField?.relationRollup) ||
+      !targetObjectMetadata
+    ) {
       return [];
     }
 
@@ -187,61 +193,62 @@ export const RelationRollupColumnPickerContent = ({
     );
   }, [store, targetObjectMetadata]);
 
-  const buildRelationRollupSettings = useCallback((): RelationRollupSettings | null => {
-    if (
-      !isDefined(selectedRelationField) ||
-      !isDefined(selectedRelationField.universalIdentifier) ||
-      !isDefined(targetObjectMetadata)
-    ) {
-      return null;
-    }
+  const buildRelationRollupSettings =
+    useCallback((): RelationRollupSettings | null => {
+      if (
+        !isDefined(selectedRelationField) ||
+        !isDefined(selectedRelationField.universalIdentifier) ||
+        !isDefined(targetObjectMetadata)
+      ) {
+        return null;
+      }
 
-    const selectedAggregateField = aggregateableTargetFields.find(
-      (field) => field.id === selectedAggregateFieldId,
-    );
+      const selectedAggregateField = aggregateableTargetFields.find(
+        (field) => field.id === selectedAggregateFieldId,
+      );
 
-    if (
-      selectedAggregateOperation !== AggregateOperations.COUNT &&
-      !isDefined(selectedAggregateField?.universalIdentifier)
-    ) {
-      return null;
-    }
+      if (
+        selectedAggregateOperation !== AggregateOperations.COUNT &&
+        !isDefined(selectedAggregateField?.universalIdentifier)
+      ) {
+        return null;
+      }
 
-    const { recordFilters: rollupRecordFilters, recordFilterGroups } =
-      mapRecordFiltersToRelationRollupFilters({
-        recordFilters,
-        recordFilterGroups: [],
-        fieldMetadataItems: targetObjectMetadata.fields,
-      });
+      const { recordFilters: rollupRecordFilters, recordFilterGroups } =
+        mapRecordFiltersToRelationRollupFilters({
+          recordFilters,
+          recordFilterGroups: [],
+          fieldMetadataItems: targetObjectMetadata.fields,
+        });
 
-    return {
-      relationFieldMetadataUniversalIdentifier:
-        selectedRelationField.universalIdentifier,
-      aggregateOperation: selectedAggregateOperation,
-      aggregateFieldMetadataUniversalIdentifier:
-        selectedAggregateOperation === AggregateOperations.COUNT
-          ? undefined
-          : selectedAggregateField?.universalIdentifier,
-      label: getRelationRollupDisplayLabel({
-        relationFieldLabel: selectedRelationField.label,
+      return {
+        relationFieldMetadataUniversalIdentifier:
+          selectedRelationField.universalIdentifier,
         aggregateOperation: selectedAggregateOperation,
-        aggregateFieldLabel: selectedAggregateField?.label,
-      }),
-      ...(rollupRecordFilters.length > 0
-        ? {
-            recordFilters: rollupRecordFilters,
-            recordFilterGroups,
-          }
-        : {}),
-    };
-  }, [
-    aggregateableTargetFields,
-    recordFilters,
-    selectedAggregateFieldId,
-    selectedAggregateOperation,
-    selectedRelationField,
-    targetObjectMetadata,
-  ]);
+        aggregateFieldMetadataUniversalIdentifier:
+          selectedAggregateOperation === AggregateOperations.COUNT
+            ? undefined
+            : selectedAggregateField?.universalIdentifier,
+        label: getRelationRollupDisplayLabel({
+          relationFieldLabel: selectedRelationField.label,
+          aggregateOperation: selectedAggregateOperation,
+          aggregateFieldLabel: selectedAggregateField?.label,
+        }),
+        ...(rollupRecordFilters.length > 0
+          ? {
+              recordFilters: rollupRecordFilters,
+              recordFilterGroups,
+            }
+          : {}),
+      };
+    }, [
+      aggregateableTargetFields,
+      recordFilters,
+      selectedAggregateFieldId,
+      selectedAggregateOperation,
+      selectedRelationField,
+      targetObjectMetadata,
+    ]);
 
   const handleSaveRollupColumn = useCallback(async () => {
     const currentViewIdValue = store.get(currentViewIdCallbackState);
@@ -338,7 +345,10 @@ export const RelationRollupColumnPickerContent = ({
       (viewField) =>
         isDefined(viewField.relationRollup) &&
         viewField.fieldMetadataId === selectedRelationField.id &&
-        areRelationRollupSettingsEqual(viewField.relationRollup, relationRollup),
+        areRelationRollupSettingsEqual(
+          viewField.relationRollup,
+          relationRollup,
+        ),
     );
 
     if (isDefined(existingRelationRollupViewField)) {

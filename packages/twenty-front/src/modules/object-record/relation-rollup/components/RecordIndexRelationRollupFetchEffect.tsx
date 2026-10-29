@@ -5,10 +5,10 @@ import { useFetchRelationRollupAggregates } from '@/object-record/relation-rollu
 import { recordStoreFamilyState } from '@/object-record/record-store/states/recordStoreFamilyState';
 import { type ObjectRecord } from '@/object-record/types/ObjectRecord';
 import { useAtomComponentSelectorValue } from '@/ui/utilities/state/jotai/hooks/useAtomComponentSelectorValue';
-import { useAtomComponentStateCallbackState } from '@/ui/utilities/state/jotai/hooks/useAtomComponentStateCallbackState';
+import { useAtomComponentStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomComponentStateValue';
 import { useGetViewFromState } from '@/views/hooks/useGetViewFromState';
 import { useStore } from 'jotai';
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { isDefined } from 'twenty-shared/utils';
 import { useDebouncedCallback } from 'use-debounce';
 
@@ -22,7 +22,7 @@ export const RecordIndexRelationRollupFetchEffect = () => {
     objectNameSingular,
   });
 
-  const currentViewIdCallbackState = useAtomComponentStateCallbackState(
+  const contextStoreCurrentViewId = useAtomComponentStateValue(
     contextStoreCurrentViewIdComponentState,
   );
 
@@ -31,16 +31,12 @@ export const RecordIndexRelationRollupFetchEffect = () => {
     recordIndexId,
   );
 
-  const previousViewIdRef = useRef<string | null>(null);
-
   const fetchRollupsForCurrentRecords = useDebouncedCallback(async () => {
-    const currentViewId = store.get(currentViewIdCallbackState);
-
-    if (!isDefined(currentViewId)) {
+    if (!isDefined(contextStoreCurrentViewId)) {
       return;
     }
 
-    const view = getViewFromState(currentViewId);
+    const view = getViewFromState(contextStoreCurrentViewId);
 
     if (!isDefined(view)) {
       return;
@@ -70,23 +66,13 @@ export const RecordIndexRelationRollupFetchEffect = () => {
   }, RELATION_ROLLUP_FETCH_DEBOUNCE_MS);
 
   useEffect(() => {
-    const currentViewId = store.get(currentViewIdCallbackState);
-    const viewIdChanged = previousViewIdRef.current !== currentViewId;
-
-    previousViewIdRef.current = currentViewId ?? null;
-
-    if (viewIdChanged) {
-      fetchRollupsForCurrentRecords.cancel();
-      void fetchRollupsForCurrentRecords.flush();
-    } else {
-      fetchRollupsForCurrentRecords();
-    }
+    fetchRollupsForCurrentRecords();
 
     return () => {
       fetchRollupsForCurrentRecords.cancel();
     };
   }, [
-    currentViewIdCallbackState,
+    contextStoreCurrentViewId,
     fetchRollupsForCurrentRecords,
     recordIds,
     store,

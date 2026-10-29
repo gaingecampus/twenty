@@ -1,5 +1,6 @@
+import { logError } from '~/utils/logError';
 import { useStore } from 'jotai';
-import { useCallback, useRef } from 'react';
+import { useCallback } from 'react';
 
 import { contextStoreCurrentViewIdComponentState } from '@/context-store/states/contextStoreCurrentViewIdComponentState';
 import { useApolloCoreClient } from '@/object-metadata/hooks/useApolloCoreClient';
@@ -41,8 +42,6 @@ export const useFetchRelationRollupAggregates = ({
     contextStoreCurrentViewIdComponentState,
   );
 
-  const previousViewIdRef = useRef<string | null>(null);
-
   const fetchRelationRollupAggregates = useCallback(
     async (records: ObjectRecord[]) => {
       const currentViewId = store.get(currentViewIdCallbackState);
@@ -66,16 +65,11 @@ export const useFetchRelationRollupAggregates = ({
       }
 
       const parentRecordIds = records.map((record) => record.id);
-      const viewIdChanged = previousViewIdRef.current !== currentViewId;
-      previousViewIdRef.current = currentViewId;
-
-      if (viewIdChanged) {
-        clearRelationRollupValuesForView({
-          store,
-          viewFields: view.viewFields,
-          recordIds: parentRecordIds,
-        });
-      }
+      clearRelationRollupValuesForView({
+        store,
+        viewFields: view.viewFields,
+        recordIds: parentRecordIds,
+      });
 
       const flattenedFieldMetadataItems = store.get(
         flattenedFieldMetadataItemsSelector.atom,
@@ -116,6 +110,10 @@ export const useFetchRelationRollupAggregates = ({
             fetchPolicy: 'network-only',
           });
 
+        if (store.get(currentViewIdCallbackState) !== currentViewId) {
+          return;
+        }
+
         for (const rollupResult of data?.relationRollupAggregates ?? []) {
           for (const valueEntry of rollupResult.values) {
             store.set(
@@ -128,7 +126,7 @@ export const useFetchRelationRollupAggregates = ({
           }
         }
       } catch (error) {
-        console.error('Failed to fetch relation rollup aggregates', error);
+        logError(error);
       }
     },
     [
