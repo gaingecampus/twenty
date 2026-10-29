@@ -1,9 +1,9 @@
 import { Command } from 'nest-commander';
 
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectWorkspaceScopedRepository } from 'src/engine/twenty-orm/workspace-scoped-repository/inject-workspace-scoped-repository.decorator';
 import { getSearchFieldUniversalIdentifier } from 'twenty-shared/application';
 import { isDefined } from 'twenty-shared/utils';
-import { Repository } from 'typeorm';
+import { WorkspaceScopedRepository } from 'src/engine/twenty-orm/workspace-scoped-repository/workspace-scoped-repository';
 
 import { ActiveOrSuspendedWorkspaceCommandRunner } from 'src/database/commands/command-runners/active-or-suspended-workspace.command-runner';
 import { WorkspaceIteratorService } from 'src/database/commands/command-runners/workspace-iterator.service';
@@ -25,8 +25,8 @@ export class NormalizeSearchFieldMetadataUniversalIdentifiersCommand extends Act
     protected readonly workspaceIteratorService: WorkspaceIteratorService,
     private readonly workspaceCacheService: WorkspaceCacheService,
     private readonly workspaceMetadataVersionService: WorkspaceMetadataVersionService,
-    @InjectRepository(SearchFieldMetadataEntity)
-    private readonly searchFieldMetadataRepository: Repository<SearchFieldMetadataEntity>,
+    @InjectWorkspaceScopedRepository(SearchFieldMetadataEntity)
+    private readonly searchFieldMetadataRepository: WorkspaceScopedRepository<SearchFieldMetadataEntity>,
   ) {
     super(workspaceIteratorService);
   }
@@ -86,9 +86,9 @@ export class NormalizeSearchFieldMetadataUniversalIdentifiersCommand extends Act
       deterministicUniversalIdentifier,
     } of searchFieldMetadataRowsToNormalize) {
       await this.searchFieldMetadataRepository.update(
+        workspaceId,
         {
           id: flatSearchFieldMetadata.id,
-          workspaceId,
         },
         {
           universalIdentifier: deterministicUniversalIdentifier,

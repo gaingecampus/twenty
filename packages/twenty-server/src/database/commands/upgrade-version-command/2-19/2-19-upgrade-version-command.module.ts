@@ -1,3 +1,4 @@
+import { provideWorkspaceScopedRepository } from 'src/engine/twenty-orm/workspace-scoped-repository/provide-workspace-scoped-repository';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
@@ -20,6 +21,7 @@ import { WorkspaceMigrationModule } from 'src/engine/workspace-manager/workspace
     WorkspaceMigrationModule,
   ],
   providers: [
+    provideWorkspaceScopedRepository(SearchFieldMetadataEntity),
     AddEmailAttachmentFieldsCommand,
     NormalizeSearchFieldMetadataUniversalIdentifiersCommand,
   ],
