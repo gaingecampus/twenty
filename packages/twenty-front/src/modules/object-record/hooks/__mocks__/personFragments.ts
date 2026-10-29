@@ -99,6 +99,7 @@ export const PERSON_FRAGMENT_WITH_DEPTH_ONE_RELATIONS = `
               id
               name
             }
+            petId
           }
         }
       }
@@ -171,6 +172,15 @@ export const PERSON_FRAGMENT_WITH_DEPTH_ONE_RELATIONS = `
         edges {
           node {
             __typename
+            company {
+              __typename
+              domainName {
+                primaryLinkUrl
+                primaryLinkLabel
+                secondaryLinks
+              }
+              id
+            }
             id
             name
           }
@@ -191,6 +201,7 @@ export const PERSON_FRAGMENT_WITH_DEPTH_ONE_RELATIONS = `
               id
               name
             }
+            companyId
             id
           }
         }

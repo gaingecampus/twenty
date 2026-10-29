@@ -1,3 +1,5 @@
+import { i18n } from '@lingui/core';
+import { I18nProvider } from '@lingui/react';
 import { renderHook } from '@testing-library/react';
 import { act } from 'react';
 import { Provider as JotaiProvider } from 'jotai';
@@ -58,7 +60,7 @@ const wrapper = ({ children }: { children: React.ReactNode }) => {
         <RecordFiltersComponentInstanceContext.Provider
           value={{ instanceId: 'test' }}
         >
-          {children}
+          <I18nProvider i18n={i18n}>{children}</I18nProvider>
         </RecordFiltersComponentInstanceContext.Provider>
       </ObjectFilterDropdownComponentInstanceContext.Provider>
     </JotaiProvider>

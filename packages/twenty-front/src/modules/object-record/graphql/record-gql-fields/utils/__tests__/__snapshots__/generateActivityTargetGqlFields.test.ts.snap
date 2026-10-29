@@ -34,6 +34,10 @@ exports[`generateActivityTargetGqlFields snapshot tests should match snapshot fo
   },
   "targetEmploymentHistoryId": true,
   "targetOpportunity": {
+    "company": {
+      "domainName": true,
+      "id": true,
+    },
     "id": true,
     "name": true,
   },
@@ -126,6 +130,10 @@ exports[`generateActivityTargetGqlFields snapshot tests should match snapshot fo
   },
   "targetEmploymentHistoryId": true,
   "targetOpportunity": {
+    "company": {
+      "domainName": true,
+      "id": true,
+    },
     "id": true,
     "name": true,
   },

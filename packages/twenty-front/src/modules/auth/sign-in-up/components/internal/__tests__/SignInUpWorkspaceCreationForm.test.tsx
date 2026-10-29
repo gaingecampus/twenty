@@ -27,6 +27,16 @@ jest.mock('@/auth/sign-in-up/hooks/useWorkspaceSubdomainField', () => ({
   useWorkspaceSubdomainField: () => useWorkspaceSubdomainFieldMock(),
 }));
 
+jest.mock('@/ui/input/components/ImageCropModal', () => ({
+  ImageCropModal: ({
+    file,
+    onConfirm,
+  }: {
+    file: File;
+    onConfirm: (file: File) => void;
+  }) => <button onClick={() => onConfirm(file)}>Confirm crop</button>,
+}));
+
 global.URL.createObjectURL = jest.fn(() => 'blob:logo-preview');
 global.URL.revokeObjectURL = jest.fn();
 
@@ -121,6 +131,10 @@ describe('SignInUpWorkspaceCreationForm', () => {
         fireEvent.change(fileInput, { target: { files: [logoFile] } });
       });
 
+      expect(createWorkspaceMock).not.toHaveBeenCalled();
+      await act(async () => {
+        fireEvent.click(screen.getByRole('button', { name: 'Confirm crop' }));
+      });
       await act(async () => {
         fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
       });
