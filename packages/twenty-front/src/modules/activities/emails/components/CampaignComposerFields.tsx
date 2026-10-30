@@ -405,6 +405,7 @@ export const CampaignComposerFields = ({
           <StyledLabelRow>
             <StyledCheckboxLabel>
               <Checkbox
+                hoverable={false}
                 checked={campaignState.includeSignature}
                 onCheckedChange={campaignState.setIncludeSignature}
               />
