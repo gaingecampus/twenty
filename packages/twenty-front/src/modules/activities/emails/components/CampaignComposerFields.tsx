@@ -307,7 +307,7 @@ export const CampaignComposerFields = ({
         {isDefined(audiencePreview) && (
           <StyledAudience role="status" aria-atomic="true">
             <Tag
-              color="gray"
+              color="green"
               Icon={IconUsers}
               text={`발송 가능 ${audiencePreview.sendable.toLocaleString('ko-KR')}명`}
             />
