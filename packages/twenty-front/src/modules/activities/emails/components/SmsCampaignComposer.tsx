@@ -222,6 +222,27 @@ export const SmsCampaignComposer = ({
   };
   return (
     <StyledForm>
+      <StyledFieldSection aria-label="광고 문자 설정">
+        <label>
+          <input
+            type="checkbox"
+            aria-describedby={advertising ? 'sms-advertising-help' : undefined}
+            checked={advertising}
+            disabled={busy}
+            onChange={(event) => {
+              reset();
+              setAdvertising(event.target.checked);
+            }}
+          />{' '}
+          광고 문자
+        </label>
+        {advertising && (
+          <small id="sms-advertising-help">
+            (광고)로 시작하고 발신자 이름 및 등록된 무료수신거부 080 번호를
+            메시지에 넣어주세요.
+          </small>
+        )}
+      </StyledFieldSection>
       <StyledFieldSection>
         <CampaignFieldLabel
           label="수신자"
@@ -303,24 +324,6 @@ export const SmsCampaignComposer = ({
           </StyledMessageCounter>
         </StyledMessageInput>
       </StyledFieldSection>
-      <label>
-        <input
-          type="checkbox"
-          checked={advertising}
-          disabled={busy}
-          onChange={(event) => {
-            reset();
-            setAdvertising(event.target.checked);
-          }}
-        />{' '}
-        광고 문자
-      </label>
-      {advertising && (
-        <small>
-          (광고)로 시작하고 발신자 이름 및 등록된 무료수신거부 080 번호를
-          메시지에 넣어주세요.
-        </small>
-      )}
       {sidePanelHeaderActionsElement &&
         createPortal(
           <Button
