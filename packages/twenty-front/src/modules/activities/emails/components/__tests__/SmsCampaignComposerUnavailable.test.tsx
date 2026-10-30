@@ -10,6 +10,19 @@ import {
 } from '@testing-library/react';
 import { SmsCampaignComposer } from '@/activities/emails/components/SmsCampaignComposer';
 import { TextEncoder } from 'node:util';
+import { type ReactNode } from 'react';
+
+jest.mock('@/ui/layout/fullscreen/hooks/useFullScreenModal', () => ({
+  useFullScreenModal: ({ onClose }: { onClose: () => void }) => ({
+    renderFullScreenModal: (children: ReactNode, isOpen: boolean) =>
+      isOpen ? (
+        <div role="dialog">
+          <button onClick={onClose}>편집기 닫기</button>
+          {children}
+        </div>
+      ) : null,
+  }),
+}));
 
 const originalTextEncoder = Object.getOwnPropertyDescriptor(
   globalThis,
@@ -137,6 +150,23 @@ it('allows composing but never queries SMS history, reviews recipients, or sends
   contentInput.setSelectionRange(12, 17);
   fireEvent.click(screen.getByRole('button', { name: 'companyName' }));
   expect(contentInput).toHaveValue('{{fullName}}{{companyName}}');
+  fireEvent.click(
+    screen.getByRole('button', { name: '메시지 전체 화면으로 열기' }),
+  );
+  const fullScreenInput = within(screen.getByRole('dialog')).getByRole(
+    'textbox',
+    {
+      name: '메시지',
+    },
+  );
+  expect(fullScreenInput).toHaveValue('{{fullName}}{{companyName}}');
+  fireEvent.change(fullScreenInput, {
+    target: { value: '전체 화면에서 작성' },
+  });
+  fireEvent.click(screen.getByRole('button', { name: '편집기 닫기' }));
+  expect(screen.getByRole('textbox', { name: '메시지' })).toHaveValue(
+    '전체 화면에서 작성',
+  );
   expect(
     screen.queryByRole('button', { name: 'email' }),
   ).not.toBeInTheDocument();

@@ -1,14 +1,13 @@
-import { StyledCampaignOptionRow } from '@/activities/emails/components/StyledCampaignOptionRow';
-import { StyledCampaignNotice } from '@/activities/emails/components/StyledCampaignNotice';
 import { CampaignRecipientHeader } from '@/activities/emails/components/CampaignRecipientHeader';
 import { StyledCampaignCheckboxLabel } from '@/activities/emails/components/StyledCampaignCheckboxLabel';
+import { StyledCampaignNotice } from '@/activities/emails/components/StyledCampaignNotice';
+import { StyledCampaignOptionRow } from '@/activities/emails/components/StyledCampaignOptionRow';
 import { CampaignRecipientSelector } from '@/activities/emails/components/CampaignRecipientSelector';
 import { type CampaignRecipientMode } from '@/activities/emails/types/CampaignRecipientMode';
-import { FORM_FIELD_PLACEHOLDER_STYLES } from '@/object-record/record-field/ui/form-types/constants/FormFieldPlaceholderStyles';
 import { sidePanelHeaderActionsElementState } from '@/side-panel/states/sidePanelHeaderActionsElementState';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 import { createPortal } from 'react-dom';
-import { CampaignBodyVariablePicker } from '@/activities/emails/components/CampaignBodyVariablePicker';
+import { SmsCampaignMessageEditor } from '@/activities/emails/components/SmsCampaignMessageEditor';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 import { CampaignFieldLabel } from '@/activities/emails/components/CampaignFieldLabel';
 import {
@@ -17,7 +16,7 @@ import {
 } from '@/activities/emails/components/CampaignDispatchStyles';
 import { gql } from '@apollo/client';
 import { useLazyQuery, useMutation } from '@apollo/client/react';
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { Button, Checkbox } from 'twenty-ui/input';
 import { InlineBanner } from 'twenty-ui/feedback';
 import { IconAlertTriangle, IconSend } from 'twenty-ui/icon';
@@ -34,42 +33,6 @@ const StyledFieldSection = styled.section`
   && {
     gap: ${themeCssVariables.spacing[2]};
   }
-`;
-
-const StyledMessageInput = styled.div`
-  position: relative;
-
-  && textarea {
-    background: var(
-      --t-input-background,
-      ${themeCssVariables.background.transparent.lighter}
-    );
-    display: block;
-    font-family: ${themeCssVariables.font.family};
-    font-size: ${themeCssVariables.font.size.sm};
-    font-weight: ${themeCssVariables.font.weight.regular};
-    line-height: 1.5;
-    min-height: 180px;
-    padding: var(--t-input-padding-y, ${themeCssVariables.spacing[1]})
-      var(--t-input-padding-x, ${themeCssVariables.spacing[2]})
-      ${themeCssVariables.spacing[8]};
-    resize: none;
-
-    &::placeholder {
-      ${FORM_FIELD_PLACEHOLDER_STYLES}
-      opacity: 1;
-    }
-  }
-`;
-
-const StyledMessageCounter = styled.div`
-  bottom: ${themeCssVariables.spacing[2]};
-  color: ${themeCssVariables.font.color.tertiary};
-  font-size: ${themeCssVariables.font.size.xs};
-  line-height: 1.5;
-  pointer-events: none;
-  position: absolute;
-  right: var(--t-input-padding-x, ${themeCssVariables.spacing[2]});
 `;
 
 const PREVIEW = gql`
@@ -141,7 +104,6 @@ export const SmsCampaignComposer = ({
   const [listId, setListId] = useState<string>();
   const [subject, setSubject] = useState('');
   const [content, setContent] = useState('');
-  const contentInputRef = useRef<HTMLTextAreaElement>(null);
   const [advertising, setAdvertising] = useState(false);
   const [requestId, setRequestId] = useState(() => crypto.randomUUID());
   const [preview, setPreview] = useState<Preview | null>(null);
@@ -170,19 +132,6 @@ export const SmsCampaignComposer = ({
     !!content.trim() &&
     bytes <= 2000 &&
     !submitted;
-  const insertCustomerInfo = (text: string) => {
-    if (busy) return;
-    const input = contentInputRef.current;
-    if (!input) return;
-    const start = input.selectionStart;
-    const end = input.selectionEnd;
-    reset();
-    setContent(content.slice(0, start) + text + content.slice(end));
-    requestAnimationFrame(() => {
-      input.focus();
-      input.setSelectionRange(start + text.length, start + text.length);
-    });
-  };
   const review = async () => {
     if (!canReview) return;
     setError('');
@@ -310,29 +259,15 @@ export const SmsCampaignComposer = ({
           label="메시지"
           help="고객 정보 메뉴에서 이름·기업을 넣을 수 있어요. 정보가 없으면 빈칸으로 표시됩니다."
         />
-        <CampaignBodyVariablePicker
-          variables={['fullName', 'companyName']}
+        <SmsCampaignMessageEditor
+          value={content}
           disabled={busy}
-          onInsert={insertCustomerInfo}
+          isLongMessage={!!subject.trim() || bytes > 90}
+          onChange={(value) => {
+            reset();
+            setContent(value);
+          }}
         />
-        <StyledMessageInput>
-          <textarea
-            ref={contentInputRef}
-            aria-describedby="sms-message-byte-count"
-            aria-label="메시지"
-            value={content}
-            disabled={busy}
-            onChange={(event) => {
-              reset();
-              setContent(event.target.value);
-            }}
-            placeholder="고객에게 전할 내용을 입력하세요"
-          />
-          <StyledMessageCounter id="sms-message-byte-count">
-            {bytes.toLocaleString()} / 2,000바이트 ·{' '}
-            {subject.trim() || bytes > 90 ? 'LMS 장문' : 'SMS 단문'}
-          </StyledMessageCounter>
-        </StyledMessageInput>
       </StyledFieldSection>
       {sidePanelHeaderActionsElement &&
         createPortal(
