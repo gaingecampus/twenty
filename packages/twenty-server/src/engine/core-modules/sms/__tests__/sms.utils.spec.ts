@@ -16,6 +16,11 @@ describe('SMS validation', () => {
     expect(() => smsMessageType('a'.repeat(2001))).toThrow();
     expect(() => smsMessageType('  ')).toThrow();
   });
+  it('matches upstream title and long-name LMS rules', () => {
+    expect(smsMessageType('안내', '제목')).toBe('LMS');
+    expect(smsMessageType('안내', '', '다섯글자명')).toBe('LMS');
+    expect(smsMessageType('안내', '', '고객')).toBe('SMS');
+  });
   it('replaces names as text without treating template values as markup', () => {
     expect(renderSms('{{fullName}} / {{companyName}}', '루나', '가인지')).toBe(
       '루나 / 가인지',

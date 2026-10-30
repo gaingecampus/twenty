@@ -3,6 +3,7 @@ import { IsBoolean, IsString, IsUUID, Length } from 'class-validator';
 
 @InputType()
 export class SmsPreviewInput {
+  @Field(() => String) @IsString() @Length(0, 15) subject: string;
   @Field(() => String) @IsUUID('4') listId: string;
   @Field(() => String) @IsString() @Length(1, 2000) content: string;
   @Field(() => Boolean) @IsBoolean() advertising: boolean;
@@ -10,7 +11,6 @@ export class SmsPreviewInput {
 @InputType()
 export class SmsSendInput extends SmsPreviewInput {
   @Field(() => String) @IsUUID('4') requestId: string;
-  @Field(() => String) @IsString() @Length(1, 30) subject: string;
 }
 @ObjectType()
 export class SmsPreview {

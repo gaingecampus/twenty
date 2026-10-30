@@ -24,6 +24,11 @@ import { SmsService } from './sms.service';
 @MetadataResolver()
 export class SmsResolver {
   constructor(private readonly sms: SmsService) {}
+  @Query(() => Boolean)
+  isSmsDispatchAvailable(@AuthWorkspace() workspace: WorkspaceEntity) {
+    return this.sms.isAvailable(workspace.id);
+  }
+
   @Query(() => SmsPreview)
   previewSmsDispatch(
     @Args('input') input: SmsPreviewInput,

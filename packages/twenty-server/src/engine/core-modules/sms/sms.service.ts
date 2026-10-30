@@ -20,13 +20,18 @@ import {
   type SmsBatch,
   type SmsTarget,
 } from './sms-dispatch.entity';
-import { PpurioService } from './ppurio.service';
+import { GaingeSmsService } from './gainge-sms.service';
 import {
   type SmsDispatchSummary,
   type SmsPreviewInput,
   type SmsSendInput,
 } from './sms.dto';
-import { normalizeSmsPhone, renderSms, smsMessageType } from './sms.utils';
+import {
+  normalizeSmsPhone,
+  renderSms,
+  smsMessageType,
+  toGaingeSmsContent,
+} from './sms.utils';
 
 export const SEND_SMS_JOB = 'SendSmsDispatchJob';
 @Injectable()
@@ -37,12 +42,17 @@ export class SmsService {
     @InjectRepository(SmsDispatchEntity)
     private readonly dispatches: Repository<SmsDispatchEntity>,
     private readonly orm: GlobalWorkspaceOrmManager,
-    private readonly ppurio: PpurioService,
+    private readonly gaingeSms: GaingeSmsService,
     @InjectMessageQueue(MessageQueue.emailQueue)
     private readonly queue: MessageQueueService,
   ) {}
 
+  isAvailable(workspaceId: string) {
+    return this.gaingeSms.isAvailable(workspaceId);
+  }
+
   async preview(workspaceId: string, input: SmsPreviewInput) {
+    this.gaingeSms.settings(workspaceId);
     return this.orm.executeInWorkspaceContext(() =>
       this.previewInContext(workspaceId, input),
     );
@@ -131,12 +141,20 @@ export class SmsService {
         name,
         person.company?.name ?? '',
       );
+      const renderedType = smsMessageType(content, input.subject, name);
       targets.push({
         to,
         name,
         company: person.company?.name ?? '',
         content,
-        messageType: smsMessageType(content),
+        messageType:
+          smsMessageType(
+            toGaingeSmsContent(input.content),
+            input.subject,
+            name,
+          ) === 'LMS'
+            ? 'LMS'
+            : renderedType,
       });
     }
     return {
@@ -155,6 +173,7 @@ export class SmsService {
     userWorkspaceId: string,
     input: SmsSendInput,
   ) {
+    const settings = this.gaingeSms.settings(workspaceId);
     const existing = await this.dispatches.findOneBy({
       workspaceId,
       requestId: input.requestId,
@@ -169,7 +188,6 @@ export class SmsService {
         );
       return this.summary(existing);
     }
-    const settings = this.ppurio.settings(workspaceId);
     const { targets } = await this.preview(workspaceId, input);
     if (!targets.length)
       throw new BadRequestException('발송 가능한 휴대전화번호가 없습니다.');
@@ -201,7 +219,8 @@ export class SmsService {
         listId: input.listId,
         subject: input.subject,
         content: input.content,
-        from: settings.from,
+        // Keep the API destination snapshot in the legacy sender column.
+        from: settings.endpoint,
         advertising: input.advertising,
         batches,
         status: 'QUEUED',
@@ -287,7 +306,7 @@ export class SmsService {
         if (batch.status === 'SENDING') {
           batch.status = 'UNKNOWN';
           batch.error =
-            '처리 중 서버가 재시작되었습니다. 뿌리오에서 접수 여부를 확인하세요.';
+            '처리 중 서버가 재시작되었습니다. 가인지 어드민에서 접수 여부를 확인하세요.';
         }
       }
       row.status = 'SENDING';
@@ -300,7 +319,7 @@ export class SmsService {
         try {
           Object.assign(
             batch,
-            await this.ppurio.send(
+            await this.gaingeSms.send(
               workspaceId,
               row.from,
               row.subject,

@@ -1,48 +1,67 @@
-# 일반 뿌리오 SMS/LMS (AX-679)
+# 가인지 SMS/LMS 연동 (AX-679)
 
-공식 개발 가이드: https://www.ppurio.com/send-api/guide → 문자연동 → 개발 가이드
-2026-10-17 확인. 일반 뿌리오 `https://message.ppurio.com/v1/token`, `/v1/message` 사용.
-비즈뿌리오 API 또는 과거 `send_sms.json` API가 아니다.
+CRM → 가인지 API → 발송 이력 DB + SQS → 별도 SMS 워커 → 뿌리오 순서로 처리한다.
+CRM에서 뿌리오나 SQS에 직접 요청하지 않는다. SMS 워커는 HTTP API 서버가 아니며,
+운영 큐의 refKey에 대응하는 발송 DB 행이 없으면 발송하지 않는다.
 
-## 설정
+## 확인한 소스
 
-관리자 설정 > 구성 변수에 다음 값을 설정한다.
+2026-10-30 각 저장소의 dev 브랜치를 확인했다. 운영 배포 버전 일치 여부는 별도 확인이 필요하다.
 
-- `PPURIO_ACCOUNT`: 일반 뿌리오 계정
-- `PPURIO_API_KEY`: 연동 관리에서 발급한 인증키 (민감 값, 서버 전용)
-- `PPURIO_FROM_NUMBER`: 등록된 발신번호, 숫자만
-- `PPURIO_WORKSPACE_ID`: 허용할 CRM 워크스페이스 UUID
+- [gainge-200 어드민 클라이언트](https://github.com/gaingecampus/gainge-200/blob/dev/admin/inc/lib/messaging/messages_client.php): `/admin/messages/sms`를 campus API 클라이언트로 호출한다.
+- [Moon-Gainge-Back 컨트롤러](https://github.com/gaingecampus/Moon-Gainge-Back/blob/dev/src/modules/apis/messages/messages.admin.api.controller.ts): `POST /api/admin/messages/sms`, Admin 인증.
+- [API DTO](https://github.com/gaingecampus/Moon-Gainge-Back/blob/dev/src/modules/apis/messages/dtos/admin-send-sms.dto.ts): `content`, `targets[{to,name,var1…var8}]`, 선택 `subject`, `rejectType: AD`, `duplicateFlag: Y|N`.
+- [SMS provider](https://github.com/gaingecampus/Moon-Gainge-Back/blob/dev/src/modules/providers/message/sms/sms-provider.service.ts): DB 이력 저장 후 SQS 적재, 단일 대상은 실시간 큐, 복수 대상은 최대 200명/240KB 단위 배치 큐.
+- [SMS 워커](https://github.com/gaingecampus/Moon-Gainge-Back-SMS/blob/dev/src/workers/sms/sms.worker.service.ts): DB 행 claim 후 발송. 제목 존재, 템플릿 UTF-8 90바이트 초과, 또는 이름 4자 초과이면 LMS.
 
-기업회원 연동 승인, 발신번호 등록, API/워커 서버의 공인 IP 등록이 선행되어야 한다.
-계정 암호가 아닌 연동 인증키를 사용한다. 아직 실계정/실문자로 검증하지 않았다.
+## 설정과 노출 조건
 
-## 사용
+CRM API와 CRM 큐 워커에 동일한 환경변수 또는 관리자 구성 변수를 적용한다.
 
-심방콜 발송 > 새 발송 > 문자 · 뿌리오. 동반 고객 목록, 제목, 본문을 입력하고
-수신 대상·내용 미리보기에서 건수를 확인한 다음 발송한다. 워크스페이스 설정 권한이
-있는 사용자만 API를 호출할 수 있다. 최근 20건의 본인 접수 내역을 같은 화면에서 확인한다.
+| 변수 | 값 |
+| --- | --- |
+| `GAINGE_SMS_ENABLED` | 기본 `false`. 아래 준비 확인 후 명시적으로 `true` |
+| `GAINGE_SMS_API_URL` | `https://<가인지 API 호스트>/api/admin/messages/sms` 전체 주소 |
+| `GAINGE_SMS_AUTH_HEADER` | API 서버의 `SECRET_HEADER`와 같은 인증 헤더 이름 |
+| `GAINGE_SMS_AUTH_TOKEN` | API 서버의 `SECRET_KEY_ADMIN`에 대응하는 값. 민감 값, 서버 전용 |
+| `GAINGE_SMS_WORKSPACE_ID` | 허용할 CRM 워크스페이스 UUID |
 
-대표 국내 휴대전화만 사용한다. 워크스페이스 멤버 객체에는 전화번호가 없어 제외한다.
-목록/고객 조회는 호출자의 레코드 권한으로 처리한다. 최대 10,000명, 번호 중복 제거.
-`{{fullName}}`, `{{companyName}}`를 지원한다. 개인화 후 길이를 검증하고 SMS/LMS로 묶어
-최대 100명씩 요청한다. UTF-8 바이트로 보수적으로 90/2,000바이트를 적용하며
-통신사 한글 바이트 계산보다 일찍 LMS로 전환될 수 있다. 예상 비용은 계정 단가에 따라 다르다.
-광고 모드는 `(광고)`와 080 번호를 요구하고 `rejectType: AD`를 전달한다.
+준비 확인: 해당 환경의 API 배포 및 Admin 인증, API의 MySQL/SQS 연결, SMS 워커 큐 소비,
+워커의 뿌리오 계정·등록 발신번호·잔액을 확인한다. 실제 소량 발송 검증은 별도 승인된
+수신 대상으로 수행한 뒤 활성화한다. 이번 변경은 실제 발송 검증이나 운영 설정을 수행하지 않았다.
+CRM에 뿌리오 키·발신번호·SQS 자격증명을 추가할 필요는 없다. 기존 `PPURIO_*` 구성은 사용하지 않는다.
 
-## 신뢰성 / 부하
+워크스페이스 설정 권한이 있고, 활성화·주소·인증·워크스페이스 설정이 모두 유효한 경우에만
+문자 탭과 작성 화면을 노출한다. 조회 중/오류/구버전 서버에서는 숨긴다. 서버도 미리보기와
+발송을 차단한다. 가용성 조회는 외부 health check가 아니라 구성 검사이므로, 운영 준비 확인을
+생략하고 활성화하지 않는다. 설정 변경 후 작성 패널을 다시 열어 새 가용성 값을 조회한다.
 
-`core.smsDispatch`에 수신 대상 스냅샷과 배치 상태를 저장한다. requestId unique로
-동일 요청을 중복 생성하지 않는다. API/워커 양쪽에서 같은 DB 및 설정을 사용해야 한다.
-DB advisory lock으로 여러 워커 중 한 개만 처리하며 매 요청 사이 250ms를 둔다.
-작업당 한 배치만 실행하고 나머지는 후속 작업으로 분리한다. 토큰은 프로세스 내 캐시한다.
-개인화 본문 전체를 고객마다 중복 저장하지 않고 뿌리오 이름/변수 치환을 사용한다.
+## 발송 계약
 
-외부 요청 직전 SENDING을 저장한다. 타임아웃/5xx/재시작으로 결과가 불명확하면 UNKNOWN으로
-남기고 자동 재발송하지 않는다. 인증/4xx 실패는 FAILED. 접수 성공은 ACCEPTED이며
-도착 성공이 아니다. 공식 일반 뿌리오 공개 규격은 최종 결과를 홈페이지에서 확인하도록
-안내한다. 최종 도달/잔액 부족/수신 거부 결과는 뿌리오 발송결과와 연동 사용내역에서 확인한다.
-대기열 장애 후에는 같은 요청으로 재시도할 수 있다. Redis 작업이 영구 유실된 경우 운영자가
-DB의 대기 상태를 확인하여 같은 dispatchId 작업을 재등록해야 한다.
+대표 국내 휴대전화만 사용하고 번호 없음·중복을 제외한다. 호출자의 레코드 권한으로
+목록과 고객을 조회하며 최대 10,000명이다. 개인화 이름·기업명은 각 100자 이내다.
+`{{fullName}}` → `[*이름*]`, `{{companyName}}` → `[*1*]`로 전송한다.
+CRM은 개인화 후와 템플릿 길이를 모두 확인하고 SMS/LMS별 최대 **100명**씩 API에 요청한다.
+상위 API의 200명 한도보다 작게 유지한다. 제목은 선택이며 최대 15자다.
+개인화 값 때문에 LMS가 필요한데 제목이 없으면 `심방콜 문자`를 제목으로 보내 LMS를 보장한다.
 
-즉시 SMS/LMS 범위이며 예약·MMS·카카오·직접 번호 테스트 UI는 이번 구현에 포함하지 않는다.
-운영 반영 전 신규 instance command 적용과 실계정의 소량 발송 검증이 필요하다.
+본문은 보수적인 UTF-8 90/2,000바이트 기준이다. 상위 API는 CP949/EUC-KR 지원 문자만
+허용하며, 미지원 문자 요청은 실패할 수 있다. 광고는 `(광고)`와 080 번호를 요구하고
+`rejectType: AD`를 보낸다. `duplicateFlag: N`으로 중복 번호 발송을 금지한다.
+
+## 접수 상태와 재시도
+
+`core.smsDispatch`에 스냅샷과 배치 상태를 저장하고 requestId unique 및 DB advisory lock으로
+CRM 내 중복 실행을 방지한다. 작업당 한 배치만 실행하고 나머지는 후속 작업으로 분리한다.
+기존 DB `from` 열에는 API 주소 스냅샷을 저장한다. 기존 직접 뿌리오 작업이나 다른 주소로
+생성한 작업은 새 API로 돌려 보내지 않고 실패 처리한다.
+
+외부 요청 전에 SENDING을 저장한다. API의 HTTP 성공 및 `statusCode: 200`은 ACCEPTED,
+최종 도착 성공은 아니다. 상위 API는 호출자 멱등키를 지원하지 않고 발송 추적 키를 반환하지
+않는다. 일부 배치가 이미 접수된 후 502가 발생할 수 있어 타임아웃·5xx·불명확한 응답·중단은
+UNKNOWN으로 남기고 자동 재발송하지 않는다. 명시적인 400/401/403/404/422 거절만 FAILED다.
+최종 발송 결과 및 불명확한 접수는 가인지 어드민 발송 이력을 확인한다.
+
+CRM 대기열 장애 후에는 동일 requestId로 대기 작업만 다시 등록할 수 있다. Redis 작업이
+영구 유실되면 운영자가 DB의 대기 상태를 확인한 뒤 같은 dispatchId 작업을 재등록한다.
+즉시 SMS/LMS 범위이며 예약·MMS는 포함하지 않는다.

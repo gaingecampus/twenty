@@ -8,17 +8,26 @@ export const normalizeSmsPhone = (value: string): string | null => {
 
 // UTF-8 is the documented transport encoding. Using its byte length is
 // conservative for Korean carriers and never underestimates their limit.
-export const smsMessageType = (content: string): 'SMS' | 'LMS' => {
+export const smsMessageType = (
+  content: string,
+  subject = '',
+  name = '',
+): 'SMS' | 'LMS' => {
   const bytes = Buffer.byteLength(content, 'utf8');
   if (!content.trim() || bytes > 2000) {
     throw new BadRequestException(
       '문자 본문은 1~2,000바이트까지 입력할 수 있습니다.',
     );
   }
-  return bytes <= 90 ? 'SMS' : 'LMS';
+  return !subject.trim() && name.length <= 4 && bytes <= 90 ? 'SMS' : 'LMS';
 };
 
 export const renderSms = (content: string, name: string, company: string) =>
   content.replace(/\{\{(fullName|companyName)\}\}/g, (_, key: string) =>
     key === 'fullName' ? name : company,
   );
+
+export const toGaingeSmsContent = (content: string) =>
+  content
+    .replace(/\{\{fullName\}\}/g, '[*이름*]')
+    .replace(/\{\{companyName\}\}/g, '[*1*]');

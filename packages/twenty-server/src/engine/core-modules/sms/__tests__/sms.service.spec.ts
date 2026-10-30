@@ -2,7 +2,7 @@ import { SmsService } from '../sms.service';
 import { SmsDispatchEntity, type SmsBatch } from '../sms-dispatch.entity';
 import { type Repository } from 'typeorm';
 import { type GlobalWorkspaceOrmManager } from 'src/engine/twenty-orm/global-workspace-datasource/global-workspace-orm.manager';
-import { type PpurioService } from '../ppurio.service';
+import { type GaingeSmsService } from '../gainge-sms.service';
 import { type MessageQueueService } from 'src/engine/core-modules/message-queue/services/message-queue.service';
 
 jest.mock(
@@ -67,7 +67,7 @@ describe('durable SMS dispatch worker', () => {
     service = new SmsService(
       repository,
       {} as GlobalWorkspaceOrmManager,
-      { send } as unknown as PpurioService,
+      { send, settings: jest.fn() } as unknown as GaingeSmsService,
       { add } as unknown as MessageQueueService,
     );
   });
@@ -143,11 +143,12 @@ describe('SMS recipient preview', () => {
     const service = new SmsService(
       {} as Repository<SmsDispatchEntity>,
       orm,
-      {} as PpurioService,
+      { settings: jest.fn() } as unknown as GaingeSmsService,
       {} as MessageQueueService,
     );
     const result = await service.preview('workspace', {
       listId: 'list',
+      subject: '',
       content: '{{fullName}} {{companyName}}',
       advertising: false,
     });
@@ -167,5 +168,39 @@ describe('SMS recipient preview', () => {
     expect(
       getRepository.mock.calls.every((call) => call[0] === 'workspace'),
     ).toBe(true);
+  });
+});
+
+describe('unconfigured SMS access', () => {
+  it('rejects preview and send before customer lookup, persistence or queueing', async () => {
+    const findOneBy = jest.fn();
+    const executeInWorkspaceContext = jest.fn();
+    const add = jest.fn();
+    const service = new SmsService(
+      { findOneBy } as unknown as Repository<SmsDispatchEntity>,
+      { executeInWorkspaceContext } as unknown as GlobalWorkspaceOrmManager,
+      {
+        settings: () => {
+          throw new Error('not ready');
+        },
+      } as unknown as GaingeSmsService,
+      { add } as unknown as MessageQueueService,
+    );
+    const input = {
+      listId: 'list',
+      subject: '',
+      content: '안내',
+      advertising: false,
+      requestId: 'request',
+    };
+    await expect(service.preview('workspace', input)).rejects.toThrow(
+      'not ready',
+    );
+    await expect(service.send('workspace', 'user', input)).rejects.toThrow(
+      'not ready',
+    );
+    expect(findOneBy).not.toHaveBeenCalled();
+    expect(executeInWorkspaceContext).not.toHaveBeenCalled();
+    expect(add).not.toHaveBeenCalled();
   });
 });

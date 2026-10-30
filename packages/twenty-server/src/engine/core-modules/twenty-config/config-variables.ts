@@ -74,43 +74,52 @@ export class ConfigVariables {
 
   @ConfigVariablesMetadata({
     group: ConfigVariablesGroup.ADVANCED_SETTINGS,
+    type: ConfigVariableType.BOOLEAN,
+    description: '가인지 SMS API·SQS 워커 준비 확인 후 활성화',
+  })
+  @IsBoolean()
+  GAINGE_SMS_ENABLED = false;
+
+  @ConfigVariablesMetadata({
+    group: ConfigVariablesGroup.ADVANCED_SETTINGS,
     type: ConfigVariableType.STRING,
     isSensitive: false,
-    description: '일반 뿌리오 연동 계정',
+    description: '가인지 문자 API 전체 HTTPS 주소 (/api/admin/messages/sms)',
   })
   @IsOptional()
   @IsString()
-  PPURIO_ACCOUNT?: string;
+  GAINGE_SMS_API_URL?: string;
+
+  @ConfigVariablesMetadata({
+    group: ConfigVariablesGroup.ADVANCED_SETTINGS,
+    type: ConfigVariableType.STRING,
+    isSensitive: false,
+    description: '가인지 API의 관리자 인증 헤더 이름 (SECRET_HEADER와 일치)',
+  })
+  @IsOptional()
+  @IsString()
+  GAINGE_SMS_AUTH_HEADER?: string;
 
   @ConfigVariablesMetadata({
     group: ConfigVariablesGroup.ADVANCED_SETTINGS,
     type: ConfigVariableType.STRING,
     isSensitive: true,
-    description: '일반 뿌리오 연동 인증키 (서버 전용)',
+    description:
+      '가인지 API 관리자 인증값 (SECRET_KEY_ADMIN과 일치, 서버 전용)',
   })
   @IsOptional()
   @IsString()
-  PPURIO_API_KEY?: string;
+  GAINGE_SMS_AUTH_TOKEN?: string;
 
   @ConfigVariablesMetadata({
     group: ConfigVariablesGroup.ADVANCED_SETTINGS,
     type: ConfigVariableType.STRING,
     isSensitive: false,
-    description: '뿌리오 사전 등록 발신번호 (숫자만)',
+    description: '가인지 문자 발송을 허용할 CRM 워크스페이스 UUID',
   })
   @IsOptional()
   @IsString()
-  PPURIO_FROM_NUMBER?: string;
-
-  @ConfigVariablesMetadata({
-    group: ConfigVariablesGroup.ADVANCED_SETTINGS,
-    type: ConfigVariableType.STRING,
-    isSensitive: false,
-    description: '문자 발송을 허용할 워크스페이스 ID',
-  })
-  @IsOptional()
-  @IsString()
-  PPURIO_WORKSPACE_ID?: string;
+  GAINGE_SMS_WORKSPACE_ID?: string;
 
   @ConfigVariablesMetadata({
     group: ConfigVariablesGroup.ADVANCED_SETTINGS,
