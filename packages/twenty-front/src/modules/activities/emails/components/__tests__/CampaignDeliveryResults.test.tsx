@@ -1,3 +1,4 @@
+import { type ReactNode } from 'react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { CampaignDeliveryResults } from '@/activities/emails/components/CampaignDeliveryResults';
 import { useMessageListRecordPage } from '@/activities/emails/hooks/useMessageListRecordPage';
@@ -113,3 +114,12 @@ it('shows recipient and message status together without including the sender', (
   expect(screen.getByText('안내 메일')).toBeInTheDocument();
   expect(screen.queryByText('sender@example.com')).not.toBeInTheDocument();
 });
+
+jest.mock(
+  '@/object-record/record-table/components/RecordTableScrollbars',
+  () => ({
+    RecordTableScrollbars: ({ children }: { children: ReactNode }) => (
+      <div>{children}</div>
+    ),
+  }),
+);

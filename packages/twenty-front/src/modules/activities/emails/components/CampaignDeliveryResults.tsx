@@ -1,3 +1,4 @@
+import { MessageListTableScroll } from '@/activities/emails/components/message-lists/MessageListTableScroll';
 import { useContext, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { styled } from '@linaria/react';
@@ -56,9 +57,6 @@ const StyledSubtitle = styled(AnimatedPlaceholderEmptySubTitle)`
     width: 100%;
     word-break: keep-all;
   }
-`;
-const StyledScroll = styled.div`
-  overflow-x: auto;
 `;
 const StyledRecipient = styled.div`
   display: flex;
@@ -178,7 +176,10 @@ export const CampaignDeliveryResults = ({
         </StyledEmpty>
       ) : (
         <>
-          <StyledScroll role="region" aria-label="발송 결과 표" tabIndex={0}>
+          <MessageListTableScroll
+            tableId={`campaign-deliveries-${campaignId}`}
+            label="발송 결과 표"
+          >
             <StyledMessageListTable>
               <TableRow gridTemplateColumns={COLUMNS}>
                 {['수신자', '처리 상태', '메시지', '기록 시각'].map((title) => (
@@ -245,7 +246,7 @@ export const CampaignDeliveryResults = ({
                 );
               })}
             </StyledMessageListTable>
-          </StyledScroll>
+          </MessageListTableScroll>
           <RecordPaginationBar
             currentPage={page + 1}
             pageSize={20}

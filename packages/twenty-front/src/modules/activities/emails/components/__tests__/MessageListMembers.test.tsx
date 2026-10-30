@@ -1,3 +1,4 @@
+import { type ReactNode } from 'react';
 import { WidgetHeaderActionContext } from '@/page-layout/widgets/widget-card/contexts/WidgetHeaderActionContext';
 import { WidgetHeaderTitleContext } from '@/page-layout/widgets/widget-card/contexts/WidgetHeaderTitleContext';
 import {
@@ -287,4 +288,13 @@ it.each([false, true])(
     await waitFor(() => expect(refetchPage).toHaveBeenCalled());
     expect(refetchCounts).toHaveBeenCalledTimes(2);
   },
+);
+
+jest.mock(
+  '@/object-record/record-table/components/RecordTableScrollbars',
+  () => ({
+    RecordTableScrollbars: ({ children }: { children: ReactNode }) => (
+      <div>{children}</div>
+    ),
+  }),
 );

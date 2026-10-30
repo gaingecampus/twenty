@@ -1,3 +1,4 @@
+import { MessageListTableScroll } from '@/activities/emails/components/message-lists/MessageListTableScroll';
 import { MessageListHeaderCount } from '@/activities/emails/components/message-lists/MessageListHeaderCount';
 import {
   getMessageListMemberEmailFilter,
@@ -70,10 +71,6 @@ const StyledActions = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: ${themeCssVariables.spacing[2]};
-`;
-const StyledTableScroll = styled.div`
-  min-width: 0;
-  overflow-x: auto;
 `;
 const StyledMetadata = styled.span`
   color: ${themeCssVariables.font.color.secondary};
@@ -265,10 +262,9 @@ const MessageListMembersPage = ({ listId }: { listId: string }) => {
         </StyledMessageListEmpty>
       )}
       {records.length > 0 && (
-        <StyledTableScroll
-          tabIndex={0}
-          role="region"
-          aria-label={t`등록된 수신자 표`}
+        <MessageListTableScroll
+          tableId={`message-list-members-${listId}`}
+          label={t`등록된 수신자 표`}
         >
           <StyledMessageListTable>
             <TableRow gridTemplateColumns={MEMBER_GRID_COLUMNS}>
@@ -351,7 +347,7 @@ const MessageListMembersPage = ({ listId }: { listId: string }) => {
               </TableRow>
             ))}
           </StyledMessageListTable>
-        </StyledTableScroll>
+        </MessageListTableScroll>
       )}
       {!error && (
         <RecordPaginationBar
