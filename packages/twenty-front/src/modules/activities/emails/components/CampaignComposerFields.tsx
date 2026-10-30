@@ -302,6 +302,8 @@ export const CampaignComposerFields = ({
           onChange={campaignState.setSubject}
           placeholder={t`Subject`}
         />
+      </StyledFieldGroup>
+      <StyledFieldGroup>
         <CampaignFieldLabel
           label="메시지"
           help="고객 정보 메뉴에서 이름·기업을 넣을 수 있어요. 정보가 없으면 빈칸으로 표시됩니다."
