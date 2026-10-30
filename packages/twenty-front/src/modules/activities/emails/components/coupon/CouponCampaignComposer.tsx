@@ -1,3 +1,4 @@
+import { CampaignRecipientHeader } from '@/activities/emails/components/CampaignRecipientHeader';
 import { CampaignRecipientSelector } from '@/activities/emails/components/CampaignRecipientSelector';
 import { CampaignFieldLabel } from '@/activities/emails/components/CampaignFieldLabel';
 import { sidePanelHeaderActionsElementState } from '@/side-panel/states/sidePanelHeaderActionsElementState';
@@ -155,7 +156,9 @@ export const CouponCampaignComposer = ({
       {capabilities && (
         <>
           <section aria-label="수신자">
-            <span>수신자</span>
+            <CampaignRecipientHeader>
+              <span>수신자</span>
+            </CampaignRecipientHeader>
             <CampaignRecipientSelector
               channel="coupon"
               mode={target === 'phone' ? 'direct' : 'list'}

@@ -1,3 +1,4 @@
+import { CampaignRecipientHeader } from '@/activities/emails/components/CampaignRecipientHeader';
 import { CampaignRecipientSelector } from '@/activities/emails/components/CampaignRecipientSelector';
 import { type CampaignRecipientMode } from '@/activities/emails/types/CampaignRecipientMode';
 import { FORM_FIELD_PLACEHOLDER_STYLES } from '@/object-record/record-field/ui/form-types/constants/FormFieldPlaceholderStyles';
@@ -244,10 +245,12 @@ export const SmsCampaignComposer = ({
         )}
       </StyledFieldSection>
       <StyledFieldSection>
-        <CampaignFieldLabel
-          label="수신자"
-          help="번호 없음·중복 제외 · 가인지 문자 발송 요금 적용"
-        />
+        <CampaignRecipientHeader>
+          <CampaignFieldLabel
+            label="수신자"
+            help="번호 없음·중복 제외 · 가인지 문자 발송 요금 적용"
+          />
+        </CampaignRecipientHeader>
         <CampaignRecipientSelector
           channel="sms"
           mode={recipientMode}

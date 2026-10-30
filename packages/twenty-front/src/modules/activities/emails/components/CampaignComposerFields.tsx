@@ -1,3 +1,4 @@
+import { CampaignRecipientHeader } from '@/activities/emails/components/CampaignRecipientHeader';
 import { CampaignRecipientSelector } from '@/activities/emails/components/CampaignRecipientSelector';
 import { CampaignFieldLabel } from '@/activities/emails/components/CampaignFieldLabel';
 import { EmailSignaturePreview } from '@/settings/accounts/components/EmailSignaturePreview';
@@ -175,7 +176,7 @@ export const CampaignComposerFields = ({
   return (
     <StyledFieldsContainer>
       <StyledFieldGroup>
-        <StyledLabelRow>
+        <CampaignRecipientHeader>
           <CampaignFieldLabel
             label="수신자"
             help={
@@ -184,21 +185,7 @@ export const CampaignComposerFields = ({
                 : t`발송할 고객이 포함된 고객 분류를 선택하세요.`
             }
           />
-          <Button
-            title="고객 분류 관리"
-            Icon={IconExternalLink}
-            variant="secondary"
-            accent="blue"
-            size="small"
-            onClick={() =>
-              window.open(
-                '/objects/messageLists',
-                '_blank',
-                'noopener,noreferrer',
-              )
-            }
-          />
-        </StyledLabelRow>
+        </CampaignRecipientHeader>
         <CampaignRecipientSelector
           channel="email"
           mode={campaignState.recipientMode}
