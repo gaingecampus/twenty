@@ -39,6 +39,7 @@ export type SelectProps<Value extends SelectValue> = {
   disabled?: boolean;
   selectSizeVariant?: SelectSizeVariant;
   dropdownId: string;
+  isDropdownInModal?: boolean;
   dropdownWidth?: number;
   dropdownWidthAuto?: boolean;
   emptyOption?: SelectOption<Value>;
@@ -73,6 +74,7 @@ export const Select = <Value extends SelectValue>({
   disabled: disabledFromProps,
   selectSizeVariant,
   dropdownId,
+  isDropdownInModal = false,
   dropdownWidth = GenericDropdownContentWidth.Medium,
   dropdownWidthAuto = false,
   emptyOption,
@@ -205,6 +207,7 @@ export const Select = <Value extends SelectValue>({
       ) : (
         <Dropdown
           dropdownId={dropdownId}
+          isDropdownInModal={isDropdownInModal}
           dropdownPlacement="bottom-start"
           dropdownOffset={dropdownOffset}
           onOpen={handleDropdownOpen}

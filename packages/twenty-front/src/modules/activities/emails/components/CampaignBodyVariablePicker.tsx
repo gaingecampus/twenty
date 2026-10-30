@@ -12,10 +12,12 @@ export const CampaignBodyVariablePicker = ({
   onInsert,
   variables = ['fullName', 'email'],
   disabled = false,
+  isDropdownInModal = false,
 }: {
   onInsert: (text: string) => void;
   variables?: ('fullName' | 'email' | 'companyName')[];
   disabled?: boolean;
+  isDropdownInModal?: boolean;
 }) => {
   const { t } = useLingui();
   const id = useId();
@@ -24,6 +26,7 @@ export const CampaignBodyVariablePicker = ({
     <StyledVariablePicker>
       <Select
         dropdownId={`campaign-body-variable-${id}`}
+        isDropdownInModal={isDropdownInModal}
         dropdownWidth={260}
         value=""
         disabled={disabled}

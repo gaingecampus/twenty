@@ -277,8 +277,11 @@ export const CampaignComposerFields = ({
           minHeight={180}
           maxWidth={600}
           contentType="html"
-          renderToolbar={(insertText) => (
-            <CampaignBodyVariablePicker onInsert={insertText} />
+          renderToolbar={(insertText, { isFullScreen }) => (
+            <CampaignBodyVariablePicker
+              onInsert={insertText}
+              isDropdownInModal={isFullScreen}
+            />
           )}
         />
       </StyledFieldGroup>

@@ -90,7 +90,10 @@ type FormAdvancedTextFieldInputProps = {
   minHeight: number;
   maxWidth: number;
   contentType?: AdvancedTextEditorContentType;
-  renderToolbar?: (insertText: (text: string) => void) => ReactNode;
+  renderToolbar?: (
+    insertText: (text: string) => void,
+    options: { isFullScreen: boolean },
+  ) => ReactNode;
 };
 
 export const FormAdvancedTextFieldInput = ({
@@ -196,7 +199,7 @@ export const FormAdvancedTextFieldInput = ({
     ? renderFullScreenModal(
         <div data-globally-prevent-click-outside="true">
           <StyledFullScreenEditorContainer>
-            {!readonly && renderToolbar?.(insertText)}
+            {!readonly && renderToolbar?.(insertText, { isFullScreen: true })}
             <AdvancedTextEditor
               editor={editor}
               readonly={readonly}
@@ -220,7 +223,9 @@ export const FormAdvancedTextFieldInput = ({
           {label ? <InputLabel>{label}</InputLabel> : null}
 
           <StyledAdvancedTextFieldFieldContainer>
-            {!readonly && !isFullScreen && renderToolbar?.(insertText)}
+            {!readonly &&
+              !isFullScreen &&
+              renderToolbar?.(insertText, { isFullScreen: false })}
             <StyledAdvancedTextFieldInnerContainer>
               {!isFullScreen && (
                 <AdvancedTextEditor
