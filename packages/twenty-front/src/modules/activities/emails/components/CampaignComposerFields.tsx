@@ -169,7 +169,7 @@ export const CampaignComposerFields = ({
       <StyledFieldGroup>
         <StyledLabelRow>
           <CampaignFieldLabel
-            label={t`From`}
+            label={t`발신자`}
             help={
               senderOptions.length === 0
                 ? t`이메일 계정 연결 필요`
@@ -189,6 +189,7 @@ export const CampaignComposerFields = ({
         </StyledLabelRow>
         <Select
           dropdownId="campaign-composer-from-account"
+          emptyOptionIsPlaceholder
           dropdownWidthAuto
           callToActionButton={{
             text: t`이메일 계정 연결`,
@@ -218,7 +219,7 @@ export const CampaignComposerFields = ({
       <StyledFieldGroup>
         <StyledLabelRow>
           <CampaignFieldLabel
-            label="받는 고객"
+            label="수신자"
             help={
               isDefined(audiencePreview)
                 ? buildAudienceHint(audiencePreview)
@@ -226,7 +227,7 @@ export const CampaignComposerFields = ({
             }
           />
           <Button
-            title="목록 관리"
+            title="고객 분류 관리"
             Icon={IconExternalLink}
             variant="secondary"
             accent="blue"
@@ -242,7 +243,7 @@ export const CampaignComposerFields = ({
         </StyledLabelRow>
         <FormSingleRecordPicker
           objectNameSingulars={['messageList']}
-          defaultValue={campaignState.listId}
+          defaultValue={campaignState.listId ?? undefined}
           onChange={campaignState.setListId}
           onCreate={handleCreateList}
         />
@@ -261,7 +262,7 @@ export const CampaignComposerFields = ({
         <FormTextFieldInput
           defaultValue={campaignState.subject}
           onChange={campaignState.setSubject}
-          placeholder={t`Subject`}
+          placeholder={t`제목을 입력하세요`}
         />
       </StyledFieldGroup>
       <StyledFieldGroup>
@@ -281,23 +282,6 @@ export const CampaignComposerFields = ({
           )}
         />
       </StyledFieldGroup>
-      <StyledOptions>
-        <CampaignFieldLabel
-          label={
-            campaignState.files.length
-              ? `첨부 · ${campaignState.files.length}개`
-              : '첨부'
-          }
-          help="최대 20개 · 총 25MB"
-        />
-        <StyledOptionsBody>
-          <EmailAttachmentsField
-            files={campaignState.files}
-            onChange={campaignState.setFiles}
-            onUploadingChange={campaignState.setIsUploading}
-          />
-        </StyledOptionsBody>
-      </StyledOptions>
       <StyledOptions>
         <StyledOptionsBody>
           <StyledLabelRow>
@@ -325,7 +309,7 @@ export const CampaignComposerFields = ({
           </StyledLabelRow>
 
           {campaignState.isEditing && (
-            <StyledHint>{t`본문에 서명이 중복되지 않는지 확인해 주세요.`}</StyledHint>
+            <StyledHint>{t`메시지에 서명이 중복되지 않는지 확인해 주세요.`}</StyledHint>
           )}
           {campaignState.signatureLoading ? (
             <StyledHint>{t`서명 불러오는 중…`}</StyledHint>
@@ -334,6 +318,23 @@ export const CampaignComposerFields = ({
           ) : campaignState.includeSignature && campaignState.signature ? (
             <EmailSignaturePreview html={campaignState.signature} />
           ) : null}
+        </StyledOptionsBody>
+      </StyledOptions>
+      <StyledOptions>
+        <CampaignFieldLabel
+          label={
+            campaignState.files.length
+              ? `첨부 · ${campaignState.files.length}개`
+              : '첨부'
+          }
+          help="최대 20개 · 총 25MB"
+        />
+        <StyledOptionsBody>
+          <EmailAttachmentsField
+            files={campaignState.files}
+            onChange={campaignState.setFiles}
+            onUploadingChange={campaignState.setIsUploading}
+          />
         </StyledOptionsBody>
       </StyledOptions>
     </StyledFieldsContainer>

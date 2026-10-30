@@ -1,3 +1,4 @@
+import { FORM_FIELD_PLACEHOLDER_STYLES } from '@/object-record/record-field/ui/form-types/constants/FormFieldPlaceholderStyles';
 import { sidePanelHeaderActionsElementState } from '@/side-panel/states/sidePanelHeaderActionsElementState';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 import { createPortal } from 'react-dom';
@@ -25,14 +26,42 @@ const StyledFieldSection = styled.section`
   && {
     gap: ${themeCssVariables.spacing[2]};
   }
+`;
 
-  textarea {
+const StyledMessageInput = styled.div`
+  position: relative;
+
+  && textarea {
     background: var(
       --t-input-background,
       ${themeCssVariables.background.transparent.lighter}
     );
+    display: block;
+    font-family: ${themeCssVariables.font.family};
+    font-size: ${themeCssVariables.font.size.sm};
+    font-weight: ${themeCssVariables.font.weight.regular};
+    line-height: 1.5;
     min-height: 180px;
+    padding: var(--t-input-padding-y, ${themeCssVariables.spacing[1]})
+      var(--t-input-padding-x, ${themeCssVariables.spacing[2]})
+      ${themeCssVariables.spacing[8]};
+    resize: none;
+
+    &::placeholder {
+      ${FORM_FIELD_PLACEHOLDER_STYLES}
+      opacity: 1;
+    }
   }
+`;
+
+const StyledMessageCounter = styled.div`
+  bottom: ${themeCssVariables.spacing[2]};
+  color: ${themeCssVariables.font.color.tertiary};
+  font-size: ${themeCssVariables.font.size.xs};
+  line-height: 1.5;
+  pointer-events: none;
+  position: absolute;
+  right: var(--t-input-padding-x, ${themeCssVariables.spacing[2]});
 `;
 
 const PREVIEW = gql`
@@ -195,7 +224,7 @@ export const SmsCampaignComposer = ({
       )}
       <StyledFieldSection>
         <CampaignFieldLabel
-          label="받는 고객"
+          label="수신자"
           help="번호 없음·중복 제외 · 가인지 문자 발송 요금 적용"
         />
         <FormSingleRecordPicker
@@ -212,8 +241,8 @@ export const SmsCampaignComposer = ({
       <label>
         제목 (선택)
         <input
-          aria-label="문자 발송 제목"
-          placeholder="제목을 입력하세요 (선택)"
+          aria-label="제목 (선택)"
+          placeholder="제목을 입력하세요"
           maxLength={15}
           value={subject}
           disabled={busy}
@@ -233,21 +262,24 @@ export const SmsCampaignComposer = ({
           disabled={busy}
           onInsert={insertCustomerInfo}
         />
-        <textarea
-          ref={contentInputRef}
-          aria-label="문자 내용"
-          value={content}
-          disabled={busy}
-          onChange={(event) => {
-            reset();
-            setContent(event.target.value);
-          }}
-          placeholder="고객에게 전할 내용을 입력하세요"
-        />
-        <small>
-          {bytes.toLocaleString()} / 2,000바이트 ·{' '}
-          {subject.trim() || bytes > 90 ? 'LMS 장문' : 'SMS 단문'}
-        </small>
+        <StyledMessageInput>
+          <textarea
+            ref={contentInputRef}
+            aria-describedby="sms-message-byte-count"
+            aria-label="메시지"
+            value={content}
+            disabled={busy}
+            onChange={(event) => {
+              reset();
+              setContent(event.target.value);
+            }}
+            placeholder="고객에게 전할 내용을 입력하세요"
+          />
+          <StyledMessageCounter id="sms-message-byte-count">
+            {bytes.toLocaleString()} / 2,000바이트 ·{' '}
+            {subject.trim() || bytes > 90 ? 'LMS 장문' : 'SMS 단문'}
+          </StyledMessageCounter>
+        </StyledMessageInput>
       </StyledFieldSection>
       <label>
         <input
@@ -263,8 +295,8 @@ export const SmsCampaignComposer = ({
       </label>
       {advertising && (
         <small>
-          (광고)로 시작하고 발신자 이름 및 등록된 무료수신거부 080 번호를 본문에
-          넣어주세요.
+          (광고)로 시작하고 발신자 이름 및 등록된 무료수신거부 080 번호를
+          메시지에 넣어주세요.
         </small>
       )}
       {sidePanelHeaderActionsElement &&
@@ -283,7 +315,7 @@ export const SmsCampaignComposer = ({
       {error && <div role="alert">{error}</div>}
       {preview && (
         <StyledCard aria-label="문자 발송 확인">
-          <strong>발송 전 확인</strong>
+          <strong>발송 전 검토</strong>
           <p>
             전체 {preview.total}명 · 번호 없음/오류 {preview.missing}명 · 중복{' '}
             {preview.duplicates}명

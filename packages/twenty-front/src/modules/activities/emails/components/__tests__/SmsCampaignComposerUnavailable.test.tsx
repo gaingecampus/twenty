@@ -91,11 +91,11 @@ it('allows composing but never queries SMS history, reviews recipients, or sends
     >);
   render(<SmsCampaignComposer isSendingDisabled />);
   fireEvent.click(screen.getByRole('button', { name: '고객 목록 선택' }));
-  fireEvent.change(screen.getByRole('textbox', { name: '문자 내용' }), {
+  fireEvent.change(screen.getByRole('textbox', { name: '메시지' }), {
     target: { value: '안녕하세요' },
   });
   const contentInput = screen.getByRole('textbox', {
-    name: '문자 내용',
+    name: '메시지',
   }) as HTMLTextAreaElement;
   contentInput.setSelectionRange(0, 0);
   fireEvent.click(screen.getByRole('button', { name: 'fullName' }));
@@ -156,7 +156,7 @@ it('reviews from the header only after required fields are filled without sendin
     within(container).queryByRole('button', { name: /발송 전 검토/ }),
   ).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole('button', { name: '고객 목록 선택' }));
-  fireEvent.change(screen.getByRole('textbox', { name: '문자 내용' }), {
+  fireEvent.change(screen.getByRole('textbox', { name: '메시지' }), {
     target: { value: '안녕하세요' },
   });
   expect(reviewButton).toBeEnabled();

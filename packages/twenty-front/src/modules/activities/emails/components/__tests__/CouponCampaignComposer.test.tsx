@@ -113,7 +113,7 @@ it('blocks review and an existing confirmation when common options are unsupport
       typeof useMutation
     >);
   const { rerender } = render(<CouponCampaignComposer isSendingDisabled />);
-  fireEvent.change(screen.getByRole('textbox', { name: '쿠폰 테스트 번호' }), {
+  fireEvent.change(screen.getByRole('textbox', { name: '수신자 폰번호' }), {
     target: { value: '01012345678' },
   });
   fireEvent.click(screen.getByRole('button', { name: /커피/ }));

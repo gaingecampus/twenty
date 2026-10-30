@@ -148,15 +148,15 @@ export const CouponCampaignComposer = ({
       {capabilityError && <p role="alert">{capabilityError.message}</p>}
       {capabilities && (
         <>
-          <section aria-label="받는 고객">
-            <span>받는 고객</span>
+          <section aria-label="수신자">
+            <span>수신자</span>
             <Select
               dropdownId="coupon-target"
               value={target}
               disabled={busy}
               options={[
-                { value: 'phone', label: '휴대전화번호 직접 입력' },
-                { value: 'list', label: '고객 목록' },
+                { value: 'phone', label: '폰번호 직접 입력' },
+                { value: 'list', label: '고객 분류' },
               ]}
               onChange={(value) => {
                 invalidate();
@@ -179,9 +179,9 @@ export const CouponCampaignComposer = ({
           </section>
           {target === 'phone' && (
             <label>
-              받는 분 휴대전화번호
+              수신자 폰번호
               <input
-                aria-label="쿠폰 테스트 번호"
+                aria-label="수신자 폰번호"
                 type="tel"
                 autoComplete="off"
                 value={testPhone}
@@ -203,6 +203,7 @@ export const CouponCampaignComposer = ({
             />
             <Select
               dropdownId="coupon-product"
+              emptyOptionIsPlaceholder
               value={productId}
               disabled={busy}
               options={(mode === 'LIVE'
@@ -222,9 +223,10 @@ export const CouponCampaignComposer = ({
           </section>
           {mode === 'LIVE' && (
             <label>
-              쿠폰 제목
+              제목
               <input
-                aria-label="쿠폰 제목"
+                aria-label="제목"
+                placeholder="제목을 입력하세요"
                 value={title}
                 maxLength={100}
                 disabled={busy}
@@ -238,7 +240,8 @@ export const CouponCampaignComposer = ({
           <label>
             메시지
             <textarea
-              aria-label="쿠폰 안내 메시지"
+              aria-label="메시지"
+              placeholder="고객에게 전할 내용을 입력하세요"
               maxLength={500}
               value={message}
               disabled={busy}

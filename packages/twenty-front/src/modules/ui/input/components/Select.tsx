@@ -42,6 +42,7 @@ export type SelectProps<Value extends SelectValue> = {
   dropdownWidth?: number;
   dropdownWidthAuto?: boolean;
   emptyOption?: SelectOption<Value>;
+  emptyOptionIsPlaceholder?: boolean;
   fullWidth?: boolean;
   label?: string;
   description?: string;
@@ -75,6 +76,7 @@ export const Select = <Value extends SelectValue>({
   dropdownWidth = GenericDropdownContentWidth.Medium,
   dropdownWidthAuto = false,
   emptyOption,
+  emptyOptionIsPlaceholder = false,
   fullWidth,
   label,
   description,
@@ -191,6 +193,11 @@ export const Select = <Value extends SelectValue>({
       {isDisabled ? (
         <SelectControl
           selectedOption={controlSelectedOption}
+          textAccent={
+            emptyOptionIsPlaceholder && selectedOption === emptyOption
+              ? 'placeholder'
+              : 'default'
+          }
           isDisabled={isDisabled}
           selectSizeVariant={selectSizeVariant}
           hasRightElement={hasRightElement}
@@ -204,6 +211,11 @@ export const Select = <Value extends SelectValue>({
           clickableComponent={
             <SelectControl
               selectedOption={controlSelectedOption}
+              textAccent={
+                emptyOptionIsPlaceholder && selectedOption === emptyOption
+                  ? 'placeholder'
+                  : 'default'
+              }
               isDisabled={isDisabled}
               selectSizeVariant={selectSizeVariant}
               hasRightElement={hasRightElement}

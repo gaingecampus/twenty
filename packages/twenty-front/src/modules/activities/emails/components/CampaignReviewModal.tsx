@@ -127,13 +127,13 @@ export const CampaignReviewModal = ({
       <ModalContent contentPadding={5} gap={4}>
         <StyledDetails>
           <StyledDetailRow>
-            <dt>보내는 사람</dt>
+            <dt>발신자</dt>
             <dd>{campaignState.fromAddress.trim()}</dd>
           </StyledDetailRow>
           <StyledDetailRow>
-            <dt>받는 고객</dt>
+            <dt>수신자</dt>
             <dd>
-              {list?.name || '선택한 고객 목록'}
+              {list?.name || '선택한 고객 분류'}
               {audience
                 ? ` · ${audience.sendable}명 / 전체 ${audience.totalMembers}명`
                 : ' · 인원 확인 중'}
@@ -168,7 +168,7 @@ export const CampaignReviewModal = ({
             place="top"
           />
           <StyledPreview
-            title="발송할 이메일 본문 미리보기"
+            title="발송할 메시지 미리보기"
             sandbox=""
             referrerPolicy="no-referrer"
             srcDoc={`<!doctype html><html><head><meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; style-src 'unsafe-inline';"><style>body{font:14px sans-serif;overflow-wrap:anywhere;margin:0;}img{max-width:100%;}</style></head><body>${campaignState.bodyWithSignature}</body></html>`}
