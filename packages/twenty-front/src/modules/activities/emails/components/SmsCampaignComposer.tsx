@@ -1,3 +1,4 @@
+import { CampaignFieldLabel } from '@/activities/emails/components/CampaignFieldLabel';
 import {
   StyledDispatchForm as StyledForm,
   StyledDispatchCard as StyledCard,
@@ -156,7 +157,10 @@ export const SmsCampaignComposer = ({
           />
         </div>
       )}
-      <label>받는 고객</label>
+      <CampaignFieldLabel
+        label="받는 고객"
+        help="번호 없음·중복 제외 · 가인지 문자 발송 요금 적용"
+      />
       <FormSingleRecordPicker
         objectNameSingulars={['messageList']}
         defaultValue={listId}
@@ -180,8 +184,11 @@ export const SmsCampaignComposer = ({
           }}
         />
       </label>
-      <label>
-        문자 내용
+      <section>
+        <CampaignFieldLabel
+          label="문자 내용"
+          help="이름 {{fullName}} · 기업 {{companyName}}"
+        />
         <textarea
           aria-label="문자 내용"
           value={content}
@@ -192,16 +199,11 @@ export const SmsCampaignComposer = ({
           }}
           placeholder="{{fullName}}님, 안녕하세요."
         />
-      </label>
+      </section>
       <div>
         {bytes.toLocaleString()} / 2,000바이트 ·{' '}
         {subject.trim() || bytes > 90 ? 'LMS 장문' : 'SMS 단문'}
       </div>
-      <section>
-        <small>
-          이름 {'{{fullName}}'} · 기업 {'{{companyName}}'}
-        </small>
-      </section>
       <label>
         <input
           type="checkbox"
@@ -220,9 +222,6 @@ export const SmsCampaignComposer = ({
           넣어주세요.
         </small>
       )}
-      <section>
-        <small>번호 없음·중복 제외 · 가인지 문자 발송 요금 적용</small>
-      </section>
       <Button
         title="발송 전 검토"
         onClick={review}
@@ -264,7 +263,10 @@ export const SmsCampaignComposer = ({
         </div>
       )}
       <section>
-        <strong>최근 발송 내역</strong>
+        <CampaignFieldLabel
+          label="최근 발송 내역"
+          help="접수 완료는 가인지 SMS 대기열 접수를 뜻합니다. 최종 발송 결과는 가인지 어드민에서 확인하세요. 확인 필요 건은 결과 확인 전 재발송하지 마세요."
+        />
         <Button
           title="접수 내역 새로고침"
           disabled={isSendingDisabled}
@@ -272,10 +274,6 @@ export const SmsCampaignComposer = ({
             if (!isSendingDisabled) void refetch();
           }}
         />
-        <small>
-          접수 완료는 가인지 SMS 대기열 접수를 뜻합니다. 최종 발송 결과는 가인지
-          어드민에서 확인하세요. 확인 필요 건은 결과 확인 전 재발송하지 마세요.
-        </small>
         {historyError && <div role="alert">{historyError.message}</div>}
         {!isSendingDisabled &&
           data?.smsDispatchHistory.map((row) => (

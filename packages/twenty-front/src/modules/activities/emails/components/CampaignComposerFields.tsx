@@ -1,16 +1,14 @@
+import { CampaignFieldLabel } from '@/activities/emails/components/CampaignFieldLabel';
 import { EmailSignaturePreview } from '@/settings/accounts/components/EmailSignaturePreview';
 import { CampaignBodyVariablePicker } from '@/activities/emails/components/CampaignBodyVariablePicker';
 import { EmailAttachmentsField } from '@/activities/emails/components/EmailAttachmentsField';
-import { useId } from 'react';
 import {
   IconBolt,
   IconClock,
   IconExternalLink,
-  IconInfoCircle,
   IconUsers,
 } from 'twenty-ui/icon';
 import { Tag } from 'twenty-ui/data-display';
-import { AppTooltip, TooltipDelay } from 'twenty-ui/surfaces';
 import { useSnackBar } from '@/ui/feedback/snack-bar-manager/hooks/useSnackBar';
 import { FormDateTimeFieldInput } from '@/object-record/record-field/ui/form-types/components/FormDateTimeFieldInput';
 import { useUserTimezone } from '@/ui/input/components/internal/date/hooks/useUserTimezone';
@@ -99,41 +97,6 @@ const StyledHint = styled.div`
   font-size: ${themeCssVariables.font.size.sm};
   line-height: var(--t-text-line-height-md, 1.45);
 `;
-
-const StyledInfoButton = styled.button`
-  align-items: center;
-  background: transparent;
-  border: none;
-  color: ${themeCssVariables.font.color.tertiary};
-  cursor: help;
-  display: inline-flex;
-  padding: 0;
-`;
-
-const CampaignFieldLabel = ({
-  label,
-  help,
-}: {
-  label: string;
-  help: string;
-}) => {
-  const id = `campaign-help-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`;
-  return (
-    <StyledFieldLabel>
-      {label}
-      <StyledInfoButton id={id} type="button" aria-label={`${label} 도움말`}>
-        <IconInfoCircle size={16} />
-      </StyledInfoButton>
-      <AppTooltip
-        anchorSelect={`#${id}`}
-        content={help}
-        place="top"
-        delay={TooltipDelay.shortDelay}
-        positionStrategy="fixed"
-      />
-    </StyledFieldLabel>
-  );
-};
 
 type CampaignAudiencePreview = NonNullable<
   ReturnType<typeof useCampaignAudiencePreview>
