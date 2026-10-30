@@ -12,7 +12,7 @@ import { type SelectOption } from 'twenty-ui/input';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 
 const StyledContainer = styled.div`
-  border-bottom: 1px solid ${themeCssVariables.border.color.light};
+  border-bottom: 1px solid ${themeCssVariables.color.blue};
   display: flex;
   flex-direction: column;
   gap: ${themeCssVariables.spacing[5]};
