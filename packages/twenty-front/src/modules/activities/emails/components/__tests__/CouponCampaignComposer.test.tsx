@@ -133,6 +133,11 @@ it('blocks review and an existing confirmation when common options are unsupport
       typeof useMutation
     >);
   const { rerender } = render(<CouponCampaignComposer isSendingDisabled />);
+  expect(screen.getByRole('button', { name: '고객 분류' })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  );
+  fireEvent.click(screen.getByRole('button', { name: '폰번호 직접 입력' }));
   fireEvent.change(screen.getByRole('textbox', { name: '수신자 폰번호' }), {
     target: { value: '01012345678' },
   });

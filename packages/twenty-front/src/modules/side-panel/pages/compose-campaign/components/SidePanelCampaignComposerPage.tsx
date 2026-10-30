@@ -2,7 +2,7 @@ import { EmailCampaignRecipientFields } from '@/activities/emails/components/Ema
 import { CampaignDispatchOptions } from '@/activities/emails/components/CampaignDispatchOptions';
 import { InlineBanner } from 'twenty-ui/feedback';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { SmsCampaignComposerContent } from '@/activities/emails/components/SmsCampaignComposerContent';
 import { CouponCampaignComposer } from '@/activities/emails/components/coupon/CouponCampaignComposer';
 import { CampaignReviewModal } from '@/activities/emails/components/CampaignReviewModal';
@@ -124,6 +124,23 @@ export const SidePanelCampaignComposerPage = () => {
     (campaignState.sendMode === 'scheduled' ||
       campaignState.unsubscribeTopicId !== null);
 
+  const renderDispatchOptions = (recipientFields: ReactNode) => (
+    <>
+      <CampaignDispatchOptions campaignState={campaignState}>
+        {recipientFields}
+      </CampaignDispatchOptions>
+      {hasUnsupportedOptions && (
+        <StyledWarning role="alert">
+          <InlineBanner
+            color="danger"
+            LeftIcon={IconAlertTriangle}
+            message="문자·선물하기는 아직 예약 발송과 수신 거부 주제를 지원하지 않아 발송할 수 없습니다. 즉시 발송·주제 없음으로 변경하거나 이메일을 선택해 주세요."
+          />
+        </StyledWarning>
+      )}
+    </>
+  );
+
   return (
     <StyledContainer>
       {!campaignToEdit && (
@@ -156,28 +173,23 @@ export const SidePanelCampaignComposerPage = () => {
         </StyledChannelTabs>
       )}
       <StyledContent>
-        <CampaignDispatchOptions campaignState={campaignState}>
-          {(channel === 'email' || campaignToEdit) && (
-            <EmailCampaignRecipientFields campaignState={campaignState} />
-          )}
-        </CampaignDispatchOptions>
-        {hasUnsupportedOptions && (
-          <StyledWarning role="alert">
-            <InlineBanner
-              color="danger"
-              LeftIcon={IconAlertTriangle}
-              message="문자·선물하기는 아직 예약 발송과 수신 거부 주제를 지원하지 않아 발송할 수 없습니다. 즉시 발송·주제 없음으로 변경하거나 이메일을 선택해 주세요."
-            />
-          </StyledWarning>
-        )}
         {channel === 'coupon' && !campaignToEdit ? (
-          <CouponCampaignComposer isSendingDisabled={hasUnsupportedOptions} />
+          <CouponCampaignComposer
+            isSendingDisabled={hasUnsupportedOptions}
+            renderDispatchOptions={renderDispatchOptions}
+          />
         ) : channel === 'sms' && !campaignToEdit ? (
           <SmsCampaignComposerContent
             isSendingBlocked={hasUnsupportedOptions}
+            renderDispatchOptions={renderDispatchOptions}
           />
         ) : (
-          <EmailCampaignComposer campaignState={campaignState} />
+          <>
+            {renderDispatchOptions(
+              <EmailCampaignRecipientFields campaignState={campaignState} />,
+            )}
+            <EmailCampaignComposer campaignState={campaignState} />
+          </>
         )}
       </StyledContent>
     </StyledContainer>

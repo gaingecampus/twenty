@@ -16,7 +16,8 @@ import {
 } from '@/activities/emails/components/CampaignDispatchStyles';
 import { gql } from '@apollo/client';
 import { useLazyQuery, useMutation } from '@apollo/client/react';
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
+import { StyledCampaignRecipientSection } from '@/activities/emails/components/StyledCampaignRecipientSection';
 import { Button, Checkbox } from 'twenty-ui/input';
 import { InlineBanner } from 'twenty-ui/feedback';
 import { IconAlertTriangle, IconSend } from 'twenty-ui/icon';
@@ -91,9 +92,11 @@ type Summary = {
 export const SmsCampaignComposer = ({
   isSendingDisabled = false,
   isSendingBlocked = false,
+  renderDispatchOptions,
 }: {
   isSendingDisabled?: boolean;
   isSendingBlocked?: boolean;
+  renderDispatchOptions?: (recipientFields: ReactNode) => ReactNode;
 }) => {
   const sidePanelHeaderActionsElement = useAtomStateValue(
     sidePanelHeaderActionsElementState,
@@ -173,147 +176,155 @@ export const SmsCampaignComposer = ({
       );
     }
   };
-  return (
-    <StyledForm>
-      <StyledFieldSection aria-label="광고 문자 설정">
-        <StyledCampaignOptionRow>
-          <StyledCampaignCheckboxLabel>
-            <Checkbox
-              hoverable={false}
-              aria-describedby={
-                advertising ? 'sms-advertising-help' : undefined
-              }
-              checked={advertising}
-              disabled={busy}
-              onCheckedChange={(checked) => {
-                reset();
-                setAdvertising(checked);
-              }}
-            />
-            <span>광고 문자</span>
-          </StyledCampaignCheckboxLabel>
-        </StyledCampaignOptionRow>
-        {advertising && (
-          <StyledCampaignNotice id="sms-advertising-help">
-            (광고)로 시작하고 발신자 이름 및 등록된 무료수신거부 080 번호를
-            메시지에 넣어주세요.
-          </StyledCampaignNotice>
-        )}
-      </StyledFieldSection>
-      <StyledFieldSection>
-        <CampaignRecipientHeader>
-          <CampaignFieldLabel
-            label="수신자"
-            help="번호 없음·중복 제외 · 가인지 문자 발송 요금 적용"
-          />
-        </CampaignRecipientHeader>
-        <CampaignRecipientSelector
-          channel="sms"
-          mode={recipientMode}
-          onModeChange={(mode) => {
-            if (busy) return;
-            reset();
-            setRecipientMode(mode);
+  const recipientFields = (
+    <StyledCampaignRecipientSection>
+      <CampaignRecipientHeader>
+        <CampaignFieldLabel
+          label="수신자"
+          help="번호 없음·중복 제외 · 가인지 문자 발송 요금 적용"
+        />
+      </CampaignRecipientHeader>
+      <CampaignRecipientSelector
+        channel="sms"
+        mode={recipientMode}
+        onModeChange={(mode) => {
+          if (busy) return;
+          reset();
+          setRecipientMode(mode);
+        }}
+        directValue={directPhone}
+        onDirectValueChange={setDirectPhone}
+        disabled={busy}
+      >
+        <FormSingleRecordPicker
+          objectNameSingulars={['messageList']}
+          defaultValue={listId}
+          onChange={(value) => {
+            if (!busy) {
+              reset();
+              setListId(value ?? undefined);
+            }
           }}
-          directValue={directPhone}
-          onDirectValueChange={setDirectPhone}
-          disabled={busy}
-        >
-          <FormSingleRecordPicker
-            objectNameSingulars={['messageList']}
-            defaultValue={listId}
-            onChange={(value) => {
-              if (!busy) {
-                reset();
-                setListId(value ?? undefined);
-              }
+        />
+      </CampaignRecipientSelector>
+    </StyledCampaignRecipientSection>
+  );
+
+  return (
+    <>
+      {renderDispatchOptions?.(recipientFields)}
+      <StyledForm>
+        {!renderDispatchOptions && recipientFields}
+        <StyledFieldSection aria-label="광고 문자 설정">
+          <StyledCampaignOptionRow>
+            <StyledCampaignCheckboxLabel>
+              <Checkbox
+                hoverable={false}
+                aria-describedby={
+                  advertising ? 'sms-advertising-help' : undefined
+                }
+                checked={advertising}
+                disabled={busy}
+                onCheckedChange={(checked) => {
+                  reset();
+                  setAdvertising(checked);
+                }}
+              />
+              <span>광고 문자</span>
+            </StyledCampaignCheckboxLabel>
+          </StyledCampaignOptionRow>
+          {advertising && (
+            <StyledCampaignNotice id="sms-advertising-help">
+              (광고)로 시작하고 발신자 이름 및 등록된 무료수신거부 080 번호를
+              메시지에 넣어주세요.
+            </StyledCampaignNotice>
+          )}
+        </StyledFieldSection>
+
+        {isSendingDisabled && (
+          <div role="alert">
+            <StyledSetupBanner
+              color="danger"
+              LeftIcon={IconAlertTriangle}
+              message="문자 발송 설정이 완료되지 않아 전송할 수 없습니다."
+            />
+          </div>
+        )}
+        <label>
+          제목 (선택)
+          <input
+            aria-label="제목 (선택)"
+            placeholder="제목을 입력하세요"
+            maxLength={15}
+            value={subject}
+            disabled={busy}
+            onChange={(event) => {
+              reset();
+              setSubject(event.target.value);
             }}
           />
-        </CampaignRecipientSelector>
-      </StyledFieldSection>
-      {isSendingDisabled && (
-        <div role="alert">
-          <StyledSetupBanner
-            color="danger"
-            LeftIcon={IconAlertTriangle}
-            message="문자 발송 설정이 완료되지 않아 전송할 수 없습니다."
+        </label>
+        <StyledFieldSection>
+          <CampaignFieldLabel
+            label="메시지"
+            help="고객 정보 메뉴에서 이름·기업을 넣을 수 있어요. 정보가 없으면 빈칸으로 표시됩니다."
           />
-        </div>
-      )}
-      <label>
-        제목 (선택)
-        <input
-          aria-label="제목 (선택)"
-          placeholder="제목을 입력하세요"
-          maxLength={15}
-          value={subject}
-          disabled={busy}
-          onChange={(event) => {
-            reset();
-            setSubject(event.target.value);
-          }}
-        />
-      </label>
-      <StyledFieldSection>
-        <CampaignFieldLabel
-          label="메시지"
-          help="고객 정보 메뉴에서 이름·기업을 넣을 수 있어요. 정보가 없으면 빈칸으로 표시됩니다."
-        />
-        <SmsCampaignMessageEditor
-          value={content}
-          disabled={busy}
-          isLongMessage={!!subject.trim() || bytes > 90}
-          onChange={(value) => {
-            reset();
-            setContent(value);
-          }}
-        />
-      </StyledFieldSection>
-      {sidePanelHeaderActionsElement &&
-        createPortal(
-          <Button
-            title="발송 전 검토"
-            size="small"
-            variant="primary"
-            accent="blue"
-            Icon={IconSend}
-            onClick={review}
-            disabled={!canReview}
-          />,
-          sidePanelHeaderActionsElement,
+          <SmsCampaignMessageEditor
+            value={content}
+            disabled={busy}
+            isLongMessage={!!subject.trim() || bytes > 90}
+            onChange={(value) => {
+              reset();
+              setContent(value);
+            }}
+          />
+        </StyledFieldSection>
+        {sidePanelHeaderActionsElement &&
+          createPortal(
+            <Button
+              title="발송 전 검토"
+              size="small"
+              variant="primary"
+              accent="blue"
+              Icon={IconSend}
+              onClick={review}
+              disabled={!canReview}
+            />,
+            sidePanelHeaderActionsElement,
+          )}
+        {error && <div role="alert">{error}</div>}
+        {preview && (
+          <StyledCard aria-label="문자 발송 확인">
+            <strong>발송 전 검토</strong>
+            <p>
+              전체 {preview.total}명 · 번호 없음/오류 {preview.missing}명 · 중복{' '}
+              {preview.duplicates}명
+            </p>
+            <p>
+              SMS {preview.sms}건 · LMS {preview.lms}건
+            </p>
+            <pre>{preview.sample}</pre>
+            <Button
+              title={`${preview.sms + preview.lms}명에게 문자 발송`}
+              variant="primary"
+              accent="blue"
+              onClick={submit}
+              disabled={
+                isSendingDisabled ||
+                isSendingBlocked ||
+                busy ||
+                preview.sms + preview.lms === 0
+              }
+            />
+          </StyledCard>
         )}
-      {error && <div role="alert">{error}</div>}
-      {preview && (
-        <StyledCard aria-label="문자 발송 확인">
-          <strong>발송 전 검토</strong>
-          <p>
-            전체 {preview.total}명 · 번호 없음/오류 {preview.missing}명 · 중복{' '}
-            {preview.duplicates}명
-          </p>
-          <p>
-            SMS {preview.sms}건 · LMS {preview.lms}건
-          </p>
-          <pre>{preview.sample}</pre>
-          <Button
-            title={`${preview.sms + preview.lms}명에게 문자 발송`}
-            variant="primary"
-            accent="blue"
-            onClick={submit}
-            disabled={
-              isSendingDisabled ||
-              isSendingBlocked ||
-              busy ||
-              preview.sms + preview.lms === 0
-            }
-          />
-        </StyledCard>
-      )}
-      {submitted && (
-        <div role="status">
-          문자 발송 요청을 저장했습니다. 최종 발송 결과는 가인지 어드민에서
-          확인하세요.
-        </div>
-      )}
-    </StyledForm>
+        {submitted && (
+          <div role="status">
+            문자 발송 요청을 저장했습니다. 최종 발송 결과는 가인지 어드민에서
+            확인하세요.
+          </div>
+        )}
+      </StyledForm>
+    </>
   );
 };

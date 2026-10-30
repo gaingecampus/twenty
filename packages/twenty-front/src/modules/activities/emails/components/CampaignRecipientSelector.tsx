@@ -57,8 +57,8 @@ export const CampaignRecipientSelector = ({
         value={mode}
         disabled={disabled}
         options={[
-          { value: 'direct', label: `${contactLabel} 직접 입력` },
           { value: 'list', label: '고객 분류' },
+          { value: 'direct', label: `${contactLabel} 직접 입력` },
         ]}
         onChange={onModeChange}
         fullWidth
