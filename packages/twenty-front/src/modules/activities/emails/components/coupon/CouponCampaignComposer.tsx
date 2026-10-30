@@ -16,6 +16,7 @@ import { IconAlertTriangle, IconSend, IconUsers } from 'twenty-ui/icon';
 import {
   StyledCouponBanner,
   StyledCouponSummary,
+  StyledCouponValidationGroup,
 } from './CouponCampaignComposerStyles';
 
 import { FormSingleRecordPicker } from '@/object-record/record-field/ui/form-types/components/FormSingleRecordPicker';
@@ -288,36 +289,38 @@ export const CouponCampaignComposer = ({
               />
             </div>
           </section>
-          {mode === 'SIMULATION' && (
-            <section aria-label="검증 상황">
-              <span>검증 상황</span>
-              <Select
-                dropdownId="coupon-scenario"
-                value={scenario}
-                disabled={busy}
-                options={[
-                  { value: 'SUCCESS', label: '정상 처리' },
-                  { value: 'DELIVERY_FAILED', label: '카카오 전달 실패' },
-                  { value: 'UNKNOWN', label: '응답 불명확' },
-                  { value: 'INSUFFICIENT_BALANCE', label: '잔액 부족' },
-                ]}
-                onChange={(value) => {
-                  invalidate();
-                  setScenario(value);
-                }}
-                fullWidth
-              />
+          <StyledCouponValidationGroup>
+            {mode === 'SIMULATION' && (
+              <section aria-label="검증 상황">
+                <span>검증 상황</span>
+                <Select
+                  dropdownId="coupon-scenario"
+                  value={scenario}
+                  disabled={busy}
+                  options={[
+                    { value: 'SUCCESS', label: '정상 처리' },
+                    { value: 'DELIVERY_FAILED', label: '카카오 전달 실패' },
+                    { value: 'UNKNOWN', label: '응답 불명확' },
+                    { value: 'INSUFFICIENT_BALANCE', label: '잔액 부족' },
+                  ]}
+                  onChange={(value) => {
+                    invalidate();
+                    setScenario(value);
+                  }}
+                  fullWidth
+                />
+              </section>
+            )}
+            <section aria-label="발송 한도">
+              <StyledCouponSummary>
+                <Tag
+                  color="orange"
+                  text={`${mode === 'LIVE' ? '발송 한도' : '검증 예산'} ${(mode === 'LIVE' ? capabilities.liveBudget : capabilities.simulationBudget).toLocaleString('ko-KR')}원`}
+                />
+                <Tag color="blue" Icon={IconUsers} text="최대 1,000명" />
+              </StyledCouponSummary>
             </section>
-          )}
-          <section aria-label="발송 한도">
-            <StyledCouponSummary>
-              <Tag
-                color="orange"
-                text={`${mode === 'LIVE' ? '발송 한도' : '검증 예산'} ${(mode === 'LIVE' ? capabilities.liveBudget : capabilities.simulationBudget).toLocaleString('ko-KR')}원`}
-              />
-              <Tag color="blue" Icon={IconUsers} text="최대 1,000명" />
-            </StyledCouponSummary>
-          </section>
+          </StyledCouponValidationGroup>
           {sidePanelHeaderActionsElement &&
             createPortal(
               <Button
