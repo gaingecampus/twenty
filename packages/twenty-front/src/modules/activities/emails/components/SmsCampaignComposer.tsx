@@ -134,7 +134,7 @@ type Summary = {
 
 export const SmsCampaignComposer = () => {
   const [listId, setListId] = useState<string>();
-  const [subject, setSubject] = useState('심방콜 문자');
+  const [subject, setSubject] = useState('');
   const [content, setContent] = useState('');
   const [advertising, setAdvertising] = useState(false);
   const [requestId, setRequestId] = useState(() => crypto.randomUUID());
@@ -166,7 +166,7 @@ export const SmsCampaignComposer = () => {
     setError('');
     try {
       const result = await loadPreview({
-        variables: { input: { listId, content, advertising } },
+        variables: { input: { listId, subject, content, advertising } },
       });
       setPreview(result.data?.previewSmsDispatch ?? null);
     } catch (failure) {
@@ -209,10 +209,10 @@ export const SmsCampaignComposer = () => {
         }}
       />
       <label>
-        제목
+        제목 (선택)
         <input
           aria-label="문자 발송 제목"
-          maxLength={30}
+          maxLength={15}
           value={subject}
           disabled={busy}
           onChange={(event) => {
@@ -236,7 +236,7 @@ export const SmsCampaignComposer = () => {
       </label>
       <div>
         {bytes.toLocaleString()} / 2,000바이트 ·{' '}
-        {bytes <= 90 ? 'SMS 단문' : 'LMS 장문'}
+        {subject.trim() || bytes > 90 ? 'LMS 장문' : 'SMS 단문'}
       </div>
       <section>
         <small>
@@ -262,18 +262,13 @@ export const SmsCampaignComposer = () => {
         </small>
       )}
       <section>
-        <small>번호 없음·중복 제외 · 뿌리오 요금 적용</small>
+        <small>번호 없음·중복 제외 · 가인지 문자 발송 요금 적용</small>
       </section>
       <Button
         title="발송 전 검토"
         onClick={review}
         disabled={
-          busy ||
-          !listId ||
-          !subject.trim() ||
-          !content.trim() ||
-          bytes > 2000 ||
-          submitted
+          busy || !listId || !content.trim() || bytes > 2000 || submitted
         }
       />
       {error && <div role="alert">{error}</div>}
@@ -306,17 +301,8 @@ export const SmsCampaignComposer = () => {
         <strong>최근 발송 내역</strong>
         <Button title="접수 내역 새로고침" onClick={() => void refetch()} />
         <small>
-          접수 완료는 최종 도착을 뜻하지 않습니다. 최종 결과·잔액
-          부족·수신거부는{' '}
-          <a
-            href="https://www.ppurio.com/result/message"
-            target="_blank"
-            rel="noreferrer"
-          >
-            뿌리오 발송 결과
-          </a>
-          와 연동 사용내역에서 확인하세요. 확인 필요 건은 재발송 전에
-          확인하세요.
+          접수 완료는 가인지 SMS 대기열 접수를 뜻합니다. 최종 발송 결과는 가인지
+          어드민에서 확인하세요. 확인 필요 건은 결과 확인 전 재발송하지 마세요.
         </small>
         {historyError && <div role="alert">{historyError.message}</div>}
         {data?.smsDispatchHistory.map((row) => (

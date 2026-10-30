@@ -1,3 +1,4 @@
+import { useSmsDispatchAvailability } from '@/activities/emails/hooks/useSmsDispatchAvailability';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 import { useState } from 'react';
 import { SmsCampaignComposer } from '@/activities/emails/components/SmsCampaignComposer';
@@ -105,10 +106,13 @@ const StyledChannelTabs = styled.div`
 `;
 
 export const SidePanelCampaignComposerPage = () => {
+  const isSmsAvailable = useSmsDispatchAvailability();
   const [channel, setChannel] = useState<'email' | 'sms' | 'coupon'>('email');
   const campaignToEdit = useAtomComponentStateValue(
     campaignToEditComponentState,
   );
+  const visibleChannel =
+    channel === 'sms' && !isSmsAvailable ? 'email' : channel;
   return (
     <StyledContainer>
       {!campaignToEdit && (
@@ -118,32 +122,34 @@ export const SidePanelCampaignComposerPage = () => {
             title="이메일"
             LeftIcon={IconMail}
             contentSize="md"
-            active={channel === 'email'}
+            active={visibleChannel === 'email'}
             onClick={() => setChannel('email')}
           />
-          <TabButton
-            id="campaign-channel-sms"
-            title="문자"
-            LeftIcon={IconMessage}
-            contentSize="md"
-            active={channel === 'sms'}
-            onClick={() => setChannel('sms')}
-          />
+          {isSmsAvailable && (
+            <TabButton
+              id="campaign-channel-sms"
+              title="문자"
+              LeftIcon={IconMessage}
+              contentSize="md"
+              active={visibleChannel === 'sms'}
+              onClick={() => setChannel('sms')}
+            />
+          )}
           <TabButton
             id="campaign-channel-coupon"
             title="카카오 쿠폰"
             LeftIcon={IconSend}
             contentSize="md"
-            active={channel === 'coupon'}
+            active={visibleChannel === 'coupon'}
             onClick={() => setChannel('coupon')}
           />
         </StyledChannelTabs>
       )}
-      {channel === 'coupon' && !campaignToEdit ? (
+      {visibleChannel === 'coupon' && !campaignToEdit ? (
         <StyledContent>
           <CouponCampaignComposer />
         </StyledContent>
-      ) : channel === 'sms' && !campaignToEdit ? (
+      ) : visibleChannel === 'sms' && !campaignToEdit ? (
         <StyledContent>
           <SmsCampaignComposer />
         </StyledContent>
