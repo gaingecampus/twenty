@@ -48,7 +48,7 @@ export const CampaignRecipientSelector = ({
   children,
 }: CampaignRecipientSelectorProps) => {
   const isEmail = channel === 'email';
-  const contactLabel = isEmail ? '이메일' : '폰번호';
+  const contactLabel = isEmail ? '이메일' : '휴대폰번호';
 
   return (
     <StyledFields>

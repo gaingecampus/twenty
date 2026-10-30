@@ -1,7 +1,6 @@
 import { type CampaignDraftControls } from '@/activities/emails/types/CampaignDraftControls';
 import { CampaignRecipientHeader } from '@/activities/emails/components/CampaignRecipientHeader';
 import { StyledCampaignCheckboxLabel } from '@/activities/emails/components/StyledCampaignCheckboxLabel';
-import { StyledCampaignNotice } from '@/activities/emails/components/StyledCampaignNotice';
 import { StyledCampaignOptionRow } from '@/activities/emails/components/StyledCampaignOptionRow';
 import { CampaignRecipientSelector } from '@/activities/emails/components/CampaignRecipientSelector';
 import { type CampaignRecipientMode } from '@/activities/emails/types/CampaignRecipientMode';
@@ -25,10 +24,14 @@ import { IconAlertTriangle, IconSend } from 'twenty-ui/icon';
 import { styled } from '@linaria/react';
 import { FormSingleRecordPicker } from '@/object-record/record-field/ui/form-types/components/FormSingleRecordPicker';
 
-const StyledSetupBanner = styled(InlineBanner)`
+const StyledWarningBanner = styled(InlineBanner)`
   && {
     margin: 0;
   }
+`;
+
+const StyledSetupNotice = styled.div`
+  padding: ${themeCssVariables.spacing[4]} ${themeCssVariables.spacing[4]} 0;
 `;
 
 const StyledFieldSection = styled.section`
@@ -231,9 +234,32 @@ export const SmsCampaignComposer = ({
 
   return (
     <>
+      {isSendingDisabled && (
+        <StyledSetupNotice role="alert">
+          <StyledWarningBanner
+            color="danger"
+            LeftIcon={IconAlertTriangle}
+            message="문자 발송 설정이 완료되지 않아 전송할 수 없습니다."
+          />
+        </StyledSetupNotice>
+      )}
       {renderDispatchOptions?.(recipientFields)}
       <StyledForm>
         {!renderDispatchOptions && recipientFields}
+        <label>
+          제목 (선택)
+          <input
+            aria-label="제목 (선택)"
+            placeholder="제목을 입력하세요"
+            maxLength={15}
+            value={subject}
+            disabled={busy}
+            onChange={(event) => {
+              reset();
+              setSubject(event.target.value);
+            }}
+          />
+        </label>
         <StyledFieldSection aria-label="광고 문자 설정">
           <StyledCampaignOptionRow>
             <StyledCampaignCheckboxLabel>
@@ -253,36 +279,15 @@ export const SmsCampaignComposer = ({
             </StyledCampaignCheckboxLabel>
           </StyledCampaignOptionRow>
           {advertising && (
-            <StyledCampaignNotice id="sms-advertising-help">
-              (광고)로 시작하고 발신자 이름 및 등록된 무료수신거부 080 번호를
-              메시지에 넣어주세요.
-            </StyledCampaignNotice>
+            <div id="sms-advertising-help">
+              <StyledWarningBanner
+                color="danger"
+                LeftIcon={IconAlertTriangle}
+                message="(광고)로 시작하고 발신자 이름 및 등록된 무료수신거부 080 번호를 메시지에 넣어주세요."
+              />
+            </div>
           )}
         </StyledFieldSection>
-
-        {isSendingDisabled && (
-          <div role="alert">
-            <StyledSetupBanner
-              color="danger"
-              LeftIcon={IconAlertTriangle}
-              message="문자 발송 설정이 완료되지 않아 전송할 수 없습니다."
-            />
-          </div>
-        )}
-        <label>
-          제목 (선택)
-          <input
-            aria-label="제목 (선택)"
-            placeholder="제목을 입력하세요"
-            maxLength={15}
-            value={subject}
-            disabled={busy}
-            onChange={(event) => {
-              reset();
-              setSubject(event.target.value);
-            }}
-          />
-        </label>
         <StyledFieldSection>
           <CampaignFieldLabel
             label="메시지"

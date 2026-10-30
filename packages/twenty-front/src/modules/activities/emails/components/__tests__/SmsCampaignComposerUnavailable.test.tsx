@@ -259,8 +259,8 @@ it('reviews from the header only after required fields are filled without sendin
   rerender(<SmsCampaignComposer />);
   expect(reviewButton).toBeEnabled();
   expect(sendButton).toBeEnabled();
-  fireEvent.click(screen.getByRole('button', { name: '폰번호 직접 입력' }));
-  fireEvent.change(screen.getByRole('textbox', { name: '수신자 폰번호' }), {
+  fireEvent.click(screen.getByRole('button', { name: '휴대폰번호 직접 입력' }));
+  fireEvent.change(screen.getByRole('textbox', { name: '수신자 휴대폰번호' }), {
     target: { value: '01012345678' },
   });
   expect(reviewButton).toBeDisabled();

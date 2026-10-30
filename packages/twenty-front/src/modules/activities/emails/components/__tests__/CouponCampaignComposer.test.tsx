@@ -138,8 +138,8 @@ it('blocks review and an existing confirmation when common options are unsupport
     'aria-pressed',
     'true',
   );
-  fireEvent.click(screen.getByRole('button', { name: '폰번호 직접 입력' }));
-  fireEvent.change(screen.getByRole('textbox', { name: '수신자 폰번호' }), {
+  fireEvent.click(screen.getByRole('button', { name: '휴대폰번호 직접 입력' }));
+  fireEvent.change(screen.getByRole('textbox', { name: '수신자 휴대폰번호' }), {
     target: { value: '01012345678' },
   });
   fireEvent.click(screen.getByRole('button', { name: /커피/ }));
