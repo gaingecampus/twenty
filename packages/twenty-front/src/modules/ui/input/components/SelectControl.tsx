@@ -45,7 +45,7 @@ export const StyledControlContainer = styled.div<{
   display: grid;
   font-size: ${themeCssVariables.font.size.md};
 
-  gap: ${themeCssVariables.spacing[1]};
+  gap: ${themeCssVariables.spacing[2]};
   grid-template-columns: ${({ hasIcon }) =>
     hasIcon ? 'auto 1fr auto' : '1fr auto'};
   height: ${({ selectSizeVariant }) =>
