@@ -26,6 +26,8 @@ import { styled } from '@linaria/react';
 import { t } from '@lingui/core/macro';
 import { useContext, useState } from 'react';
 import { Button } from 'twenty-ui/input';
+import { Tag } from 'twenty-ui/data-display';
+import { IconMail } from 'twenty-ui/icon';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 type MessageListMember = ObjectRecord & {
   personId: string;
@@ -48,9 +50,20 @@ type MessageListMember = ObjectRecord & {
 const StyledSection = styled.section`
   display: flex;
   flex-direction: column;
-  gap: ${themeCssVariables.spacing[4]};
+  gap: ${themeCssVariables.spacing[3]};
   min-width: 0;
   width: 100%;
+
+  p {
+    margin: 0;
+  }
+`;
+const StyledFilterRow = styled.div`
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: ${themeCssVariables.spacing[2]};
+  justify-content: space-between;
 `;
 const StyledActions = styled.div`
   align-items: center;
@@ -159,30 +172,6 @@ const MessageListMembersPage = ({ listId }: { listId: string }) => {
   };
   const actions = (
     <StyledActions>
-      <Select<MessageListMemberEmailFilter>
-        dropdownId={`message-list-email-filter-${listId}`}
-        selectSizeVariant="small"
-        value={emailFilter}
-        disabled={busy}
-        options={[
-          {
-            value: 'all',
-            label: t`전체 ${formatCount(allMembers.totalCount)}명`,
-          },
-          {
-            value: 'withEmail',
-            label: t`이메일 있음 ${formatCount(membersWithEmail.totalCount)}명`,
-          },
-          {
-            value: 'withoutEmail',
-            label: t`이메일 없음 ${formatCount(Math.max(0, allMembers.totalCount - membersWithEmail.totalCount))}명`,
-          },
-        ]}
-        onChange={(value) => {
-          setEmailFilter(value);
-          setPage(0);
-        }}
-      />
       {permissions.canUpdateObjectRecords && (
         <Button
           title={t`고객 추가`}
@@ -224,9 +213,39 @@ const MessageListMembersPage = ({ listId }: { listId: string }) => {
           }}
         />
       )}
-      <StyledMetadata role="status">
-        {t`이메일 등록 ${formatCount(membersWithEmail.totalCount)}명 / 전체 ${formatCount(allMembers.totalCount)}명`}
-      </StyledMetadata>
+      <StyledFilterRow>
+        <Select<MessageListMemberEmailFilter>
+          dropdownId={`message-list-email-filter-${listId}`}
+          selectSizeVariant="small"
+          value={emailFilter}
+          disabled={busy}
+          options={[
+            {
+              value: 'all',
+              label: t`전체`,
+            },
+            {
+              value: 'withEmail',
+              label: t`이메일 있음 ${formatCount(membersWithEmail.totalCount)}명`,
+            },
+            {
+              value: 'withoutEmail',
+              label: t`이메일 없음 ${formatCount(Math.max(0, allMembers.totalCount - membersWithEmail.totalCount))}명`,
+            },
+          ]}
+          onChange={(value) => {
+            setEmailFilter(value);
+            setPage(0);
+          }}
+        />
+        <span role="status" aria-atomic="true">
+          <Tag
+            color={countsLoading || countsError ? 'gray' : 'green'}
+            Icon={IconMail}
+            text={t`이메일 등록 ${formatCount(membersWithEmail.totalCount)}명`}
+          />
+        </span>
+      </StyledFilterRow>
       {countsError && (
         <p role="alert">{t`이메일 등록 인원을 불러오지 못했습니다.`}</p>
       )}

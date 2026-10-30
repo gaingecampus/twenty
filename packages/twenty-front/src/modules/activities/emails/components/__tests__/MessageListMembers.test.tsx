@@ -166,6 +166,12 @@ it('places the full recipient count and add actions in the widget header without
     within(container).queryByRole('button', { name: /^고객 추가/ }),
   ).toBeNull();
   expect(within(container).queryByText('1,000')).toBeNull();
+  expect(
+    within(actionTarget).queryByRole('button', { name: '전체' }),
+  ).toBeNull();
+  expect(
+    within(container).getByRole('button', { name: '전체' }),
+  ).toBeInTheDocument();
 });
 
 it('shows whole-list email counts and resets pagination when filtering', () => {
@@ -194,9 +200,7 @@ it('shows whole-list email counts and resets pagination when filtering', () => {
       } as unknown as ReturnType<typeof useMessageListRecordPage>;
     });
   render(<MessageListMembers listId="email-list" />);
-  expect(screen.getByRole('status')).toHaveTextContent(
-    '이메일 등록 820명 / 전체 1,000명',
-  );
+  expect(screen.getByRole('status')).toHaveTextContent('이메일 등록 820명');
   expect(
     screen.getByRole('button', { name: '이메일 없음 180명' }),
   ).toBeInTheDocument();
@@ -247,9 +251,7 @@ it('keeps filtering available for empty results and does not show failed counts 
       }) as unknown as ReturnType<typeof useMessageListRecordPage>,
   );
   render(<MessageListMembers listId="empty-list" />);
-  expect(screen.getByRole('status')).toHaveTextContent(
-    '이메일 등록 —명 / 전체 —명',
-  );
+  expect(screen.getByRole('status')).toHaveTextContent('이메일 등록 —명');
   fireEvent.click(screen.getByRole('button', { name: '이메일 없음 —명' }));
   expect(
     screen.getByText('선택한 이메일 조건에 해당하는 수신자가 없습니다.'),

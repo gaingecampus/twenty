@@ -161,7 +161,7 @@ export const WidgetCardShell = ({
               isCampaignDelivery
                 ? '수신자별 발송 결과'
                 : isMessageListMembers
-                  ? t`고객 분류`
+                  ? t`등록된 수신자`
                   : widget.title
             }
             titleHelp={
