@@ -2,7 +2,8 @@ import { EmailSignaturePreview } from '@/settings/accounts/components/EmailSigna
 import { CampaignBodyVariablePicker } from '@/activities/emails/components/CampaignBodyVariablePicker';
 import { EmailAttachmentsField } from '@/activities/emails/components/EmailAttachmentsField';
 import { useId } from 'react';
-import { IconExternalLink, IconInfoCircle } from 'twenty-ui/icon';
+import { IconExternalLink, IconInfoCircle, IconUsers } from 'twenty-ui/icon';
+import { Tag } from 'twenty-ui/data-display';
 import { AppTooltip, TooltipDelay } from 'twenty-ui/surfaces';
 import { useSnackBar } from '@/ui/feedback/snack-bar-manager/hooks/useSnackBar';
 import { FormDateTimeFieldInput } from '@/object-record/record-field/ui/form-types/components/FormDateTimeFieldInput';
@@ -68,12 +69,9 @@ const StyledOptionsBody = styled.div`
 `;
 
 const StyledAudience = styled.div`
-  background: ${themeCssVariables.background.secondary};
-  border-radius: ${themeCssVariables.border.radius.sm};
-  color: ${themeCssVariables.font.color.secondary};
-  font-size: ${themeCssVariables.font.size.sm};
-  line-height: 1.6;
-  padding: ${themeCssVariables.spacing[3]};
+  align-items: center;
+  display: flex;
+  min-width: 0;
 `;
 
 const StyledFieldLabel = styled.div`
@@ -297,8 +295,12 @@ export const CampaignComposerFields = ({
           onCreate={handleCreateList}
         />
         {isDefined(audiencePreview) && (
-          <StyledAudience role="status">
-            <strong>발송 가능 {audiencePreview.sendable}명</strong>
+          <StyledAudience role="status" aria-atomic="true">
+            <Tag
+              color="gray"
+              Icon={IconUsers}
+              text={`발송 가능 ${audiencePreview.sendable.toLocaleString('ko-KR')}명`}
+            />
           </StyledAudience>
         )}
       </StyledFieldGroup>
