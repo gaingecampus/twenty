@@ -6,6 +6,7 @@ import { gql } from '@apollo/client';
 import { useLazyQuery, useMutation, useQuery } from '@apollo/client/react';
 import { useState } from 'react';
 import { Button } from 'twenty-ui/input';
+import { SidePanelInformationBanner } from 'twenty-ui/feedback';
 import { FormSingleRecordPicker } from '@/object-record/record-field/ui/form-types/components/FormSingleRecordPicker';
 
 const PREVIEW = gql`
@@ -69,7 +70,11 @@ type Summary = {
   errors: string[];
 };
 
-export const SmsCampaignComposer = () => {
+export const SmsCampaignComposer = ({
+  isPreview = false,
+}: {
+  isPreview?: boolean;
+}) => {
   const [listId, setListId] = useState<string>();
   const [subject, setSubject] = useState('');
   const [content, setContent] = useState('');
@@ -90,6 +95,7 @@ export const SmsCampaignComposer = () => {
     refetch,
   } = useQuery<{ smsDispatchHistory: Summary[] }>(HISTORY, {
     fetchPolicy: 'network-only',
+    skip: isPreview,
   });
   const reset = () => {
     setPreview(null);
@@ -100,6 +106,7 @@ export const SmsCampaignComposer = () => {
   const bytes = new TextEncoder().encode(content).length;
   const busy = sending || previewLoading;
   const review = async () => {
+    if (isPreview) return;
     setError('');
     try {
       const result = await loadPreview({
@@ -113,7 +120,7 @@ export const SmsCampaignComposer = () => {
     }
   };
   const submit = async () => {
-    if (!preview || sending || submitted) return;
+    if (isPreview || !preview || sending || submitted) return;
     setError('');
     try {
       await send({
@@ -134,6 +141,11 @@ export const SmsCampaignComposer = () => {
   };
   return (
     <StyledForm>
+      {isPreview && (
+        <div role="status">
+          <SidePanelInformationBanner message="화면 미리보기 · 실제 문자는 발송되지 않습니다." />
+        </div>
+      )}
       <label>받는 고객</label>
       <FormSingleRecordPicker
         objectNameSingulars={['messageList']}
@@ -205,7 +217,12 @@ export const SmsCampaignComposer = () => {
         title="발송 전 검토"
         onClick={review}
         disabled={
-          busy || !listId || !content.trim() || bytes > 2000 || submitted
+          isPreview ||
+          busy ||
+          !listId ||
+          !content.trim() ||
+          bytes > 2000 ||
+          submitted
         }
       />
       {error && <div role="alert">{error}</div>}
@@ -225,7 +242,7 @@ export const SmsCampaignComposer = () => {
             variant="primary"
             accent="blue"
             onClick={submit}
-            disabled={busy || preview.sms + preview.lms === 0}
+            disabled={isPreview || busy || preview.sms + preview.lms === 0}
           />
         </StyledCard>
       )}
@@ -236,25 +253,35 @@ export const SmsCampaignComposer = () => {
       )}
       <section>
         <strong>최근 발송 내역</strong>
-        <Button title="접수 내역 새로고침" onClick={() => void refetch()} />
+        <Button
+          title="접수 내역 새로고침"
+          disabled={isPreview}
+          onClick={() => {
+            if (!isPreview) void refetch();
+          }}
+        />
         <small>
           접수 완료는 가인지 SMS 대기열 접수를 뜻합니다. 최종 발송 결과는 가인지
           어드민에서 확인하세요. 확인 필요 건은 결과 확인 전 재발송하지 마세요.
         </small>
         {historyError && <div role="alert">{historyError.message}</div>}
-        {data?.smsDispatchHistory.map((row) => (
-          <StyledCard key={row.id}>
-            <strong>{row.subject}</strong>
-            <p>{new Date(row.createdAt).toLocaleString('ko-KR')}</p>
-            <p>
-              대기 {row.queued} · 접수 완료 {row.accepted} · 실패 {row.failed} ·
-              처리 중/확인 필요 {row.unknown}
-            </p>
-            {row.errors.map((message) => (
-              <p key={message}>{message}</p>
-            ))}
-          </StyledCard>
-        ))}
+        {isPreview && (
+          <small>미리보기에서는 실제 발송 내역을 조회하지 않습니다.</small>
+        )}
+        {!isPreview &&
+          data?.smsDispatchHistory.map((row) => (
+            <StyledCard key={row.id}>
+              <strong>{row.subject}</strong>
+              <p>{new Date(row.createdAt).toLocaleString('ko-KR')}</p>
+              <p>
+                대기 {row.queued} · 접수 완료 {row.accepted} · 실패 {row.failed}{' '}
+                · 처리 중/확인 필요 {row.unknown}
+              </p>
+              {row.errors.map((message) => (
+                <p key={message}>{message}</p>
+              ))}
+            </StyledCard>
+          ))}
       </section>
     </StyledForm>
   );
