@@ -10,6 +10,7 @@ const GO_TO_SETTINGS_SUFFIX = ' Settings';
 // Prefill/custom-app labels that are not resolved via standard-app i18n on the server
 const KNOWN_SEEDED_COMMAND_MENU_LABELS: Record<string, MessageDescriptor> = {
   'Quick Lead': msg`Quick Lead`,
+  '새 고객 분류': msg`새 분류`,
   'Create Campaign': msg`새 발송`,
   '새 심방콜 발송': msg`새 발송`,
   '새 단체 발송': msg`새 발송`,
