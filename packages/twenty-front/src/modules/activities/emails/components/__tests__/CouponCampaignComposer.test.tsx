@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from '@apollo/client/react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { CouponCampaignComposer } from '@/activities/emails/components/coupon/CouponCampaignComposer';
 import { COUPON_CAPABILITIES } from '@/activities/emails/components/coupon/coupon-operations';
 
@@ -87,4 +87,53 @@ it('retains the production payment notice and live budget when switching modes',
   expect(
     screen.queryByText(/검증 모드 · 실제 전송 및 과금 없음/),
   ).not.toBeInTheDocument();
+});
+
+it('blocks review and an existing confirmation when common options are unsupported', async () => {
+  const product = { id: 'coffee', name: '커피', price: 5000, validityDays: 30 };
+  setQueryState({ products: [product] });
+  const mutate = jest.fn().mockResolvedValue({
+    data: {
+      previewCouponDispatch: {
+        id: 'quote',
+        mode: 'SIMULATION',
+        product,
+        recipientCount: 1,
+        missing: 0,
+        duplicates: 0,
+        estimatedCost: 5000,
+        message: '감사합니다',
+        expiresAt: '2026-10-30T10:00:00Z',
+      },
+    },
+  });
+  jest
+    .mocked(useMutation)
+    .mockReturnValue([mutate, { loading: false }] as unknown as ReturnType<
+      typeof useMutation
+    >);
+  const { rerender } = render(<CouponCampaignComposer isSendingDisabled />);
+  fireEvent.change(screen.getByRole('textbox', { name: '쿠폰 테스트 번호' }), {
+    target: { value: '01012345678' },
+  });
+  fireEvent.click(screen.getByRole('button', { name: /커피/ }));
+  const review = screen.getByRole('button', { name: /발송 전 검토/ });
+  expect(review).toBeDisabled();
+  fireEvent.click(review);
+  expect(mutate).not.toHaveBeenCalled();
+  rerender(<CouponCampaignComposer />);
+  expect(review).toBeEnabled();
+  fireEvent.click(review);
+  await waitFor(() =>
+    expect(
+      screen.getByRole('button', { name: /외부 전송 없이 검증 실행/ }),
+    ).toBeEnabled(),
+  );
+  rerender(<CouponCampaignComposer isSendingDisabled />);
+  const confirm = screen.getByRole('button', {
+    name: /외부 전송 없이 검증 실행/,
+  });
+  expect(confirm).toBeDisabled();
+  fireEvent.click(confirm);
+  expect(mutate).toHaveBeenCalledTimes(1);
 });

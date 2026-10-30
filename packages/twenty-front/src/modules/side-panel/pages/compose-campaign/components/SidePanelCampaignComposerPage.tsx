@@ -1,3 +1,5 @@
+import { CampaignDispatchOptions } from '@/activities/emails/components/CampaignDispatchOptions';
+import { InlineBanner } from 'twenty-ui/feedback';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 import { useState } from 'react';
 import { SmsCampaignComposerContent } from '@/activities/emails/components/SmsCampaignComposerContent';
@@ -16,7 +18,12 @@ import { isDefined } from 'twenty-shared/utils';
 import { useHotkeysOnFocusedElement } from '@/ui/utilities/hotkey/hooks/useHotkeysOnFocusedElement';
 import { styled } from '@linaria/react';
 import { t } from '@lingui/core/macro';
-import { IconMail, IconMessage, IconSend } from 'twenty-ui/icon';
+import {
+  IconAlertTriangle,
+  IconMail,
+  IconMessage,
+  IconSend,
+} from 'twenty-ui/icon';
 import { Tag } from 'twenty-ui/data-display';
 import { Button, TabButton } from 'twenty-ui/input';
 import { getOsControlSymbol } from 'twenty-ui/utilities';
@@ -36,19 +43,14 @@ const StyledContent = styled.div`
   overflow-y: auto;
 `;
 
-const EmailCampaignComposer = () => {
-  const { goBackFromSidePanel } = useSidePanelHistory();
+const EmailCampaignComposer = ({
+  campaignState,
+}: {
+  campaignState: ReturnType<typeof useCampaignComposerState>;
+}) => {
   const sidePanelHeaderActionsElement = useAtomStateValue(
     sidePanelHeaderActionsElementState,
   );
-
-  const campaignToEdit = useAtomComponentStateValue(
-    campaignToEditComponentState,
-  );
-  const campaignState = useCampaignComposerState({
-    onSent: goBackFromSidePanel,
-    campaign: campaignToEdit,
-  });
 
   useHotkeysOnFocusedElement({
     keys: ['ctrl+Enter,meta+Enter'],
@@ -62,9 +64,7 @@ const EmailCampaignComposer = () => {
       {campaignState.isReviewOpen && (
         <CampaignReviewModal campaignState={campaignState} />
       )}
-      <StyledContent>
-        <CampaignComposerFields campaignState={campaignState} />
-      </StyledContent>
+      <CampaignComposerFields campaignState={campaignState} />
       {isDefined(sidePanelHeaderActionsElement) &&
         createPortal(
           <>
@@ -96,6 +96,10 @@ const EmailCampaignComposer = () => {
   );
 };
 
+const StyledWarning = styled.div`
+  padding: ${themeCssVariables.spacing[4]} ${themeCssVariables.spacing[4]} 0;
+`;
+
 const StyledChannelTabs = styled.div`
   border-bottom: 1px solid ${themeCssVariables.border.color.light};
   display: flex;
@@ -110,6 +114,17 @@ export const SidePanelCampaignComposerPage = () => {
   const campaignToEdit = useAtomComponentStateValue(
     campaignToEditComponentState,
   );
+  const { goBackFromSidePanel } = useSidePanelHistory();
+  const campaignState = useCampaignComposerState({
+    onSent: goBackFromSidePanel,
+    campaign: campaignToEdit,
+  });
+  const hasUnsupportedOptions =
+    !campaignToEdit &&
+    channel !== 'email' &&
+    (campaignState.sendMode === 'scheduled' ||
+      campaignState.unsubscribeTopicId !== null);
+
   return (
     <StyledContainer>
       {!campaignToEdit && (
@@ -141,17 +156,27 @@ export const SidePanelCampaignComposerPage = () => {
           />
         </StyledChannelTabs>
       )}
-      {channel === 'coupon' && !campaignToEdit ? (
-        <StyledContent>
-          <CouponCampaignComposer />
-        </StyledContent>
-      ) : channel === 'sms' && !campaignToEdit ? (
-        <StyledContent>
-          <SmsCampaignComposerContent />
-        </StyledContent>
-      ) : (
-        <EmailCampaignComposer />
-      )}
+      <StyledContent>
+        <CampaignDispatchOptions campaignState={campaignState} />
+        {hasUnsupportedOptions && (
+          <StyledWarning role="alert">
+            <InlineBanner
+              color="danger"
+              LeftIcon={IconAlertTriangle}
+              message="문자·선물하기는 아직 예약 발송과 수신 거부 주제를 지원하지 않아 발송할 수 없습니다. 즉시 발송·주제 없음으로 변경하거나 이메일을 선택해 주세요."
+            />
+          </StyledWarning>
+        )}
+        {channel === 'coupon' && !campaignToEdit ? (
+          <CouponCampaignComposer isSendingDisabled={hasUnsupportedOptions} />
+        ) : channel === 'sms' && !campaignToEdit ? (
+          <SmsCampaignComposerContent
+            isSendingBlocked={hasUnsupportedOptions}
+          />
+        ) : (
+          <EmailCampaignComposer campaignState={campaignState} />
+        )}
+      </StyledContent>
     </StyledContainer>
   );
 };

@@ -2,21 +2,13 @@ import { CampaignFieldLabel } from '@/activities/emails/components/CampaignField
 import { EmailSignaturePreview } from '@/settings/accounts/components/EmailSignaturePreview';
 import { CampaignBodyVariablePicker } from '@/activities/emails/components/CampaignBodyVariablePicker';
 import { EmailAttachmentsField } from '@/activities/emails/components/EmailAttachmentsField';
-import {
-  IconBolt,
-  IconClock,
-  IconExternalLink,
-  IconUsers,
-} from 'twenty-ui/icon';
+import { IconExternalLink, IconUsers } from 'twenty-ui/icon';
 import { Tag } from 'twenty-ui/data-display';
 import { useSnackBar } from '@/ui/feedback/snack-bar-manager/hooks/useSnackBar';
-import { FormDateTimeFieldInput } from '@/object-record/record-field/ui/form-types/components/FormDateTimeFieldInput';
-import { useUserTimezone } from '@/ui/input/components/internal/date/hooks/useUserTimezone';
 import { styled } from '@linaria/react';
 
 import { useCampaignAudiencePreview } from '@/activities/emails/hooks/useCampaignAudiencePreview';
 import { type useCampaignComposerState } from '@/activities/emails/hooks/useCampaignComposerState';
-import { useUnsubscribeTopics } from '@/activities/emails/hooks/useUnsubscribeTopics';
 import { useCreateOneRecord } from '@/object-record/hooks/useCreateOneRecord';
 import { FormAdvancedTextFieldInput } from '@/object-record/record-field/ui/form-types/components/FormAdvancedTextFieldInput';
 import { FormSingleRecordPicker } from '@/object-record/record-field/ui/form-types/components/FormSingleRecordPicker';
@@ -133,17 +125,11 @@ type CampaignComposerFieldsProps = {
 export const CampaignComposerFields = ({
   campaignState,
 }: CampaignComposerFieldsProps) => {
-  const { userTimezone } = useUserTimezone();
   const {
     channels,
     loading: loadingChannels,
     error: channelsError,
   } = useMyMessageChannels();
-  const {
-    unsubscribeTopics,
-    loading: loadingTopics,
-    error: topicsError,
-  } = useUnsubscribeTopics();
   const { createOneRecord: createMessageList } = useCreateOneRecord({
     objectNameSingular: 'messageList',
   });
@@ -177,13 +163,6 @@ export const CampaignComposerFields = ({
     .filter(isDefined)
     .filter((handle, index, handles) => handles.indexOf(handle) === index)
     .map((handle) => ({ label: handle, value: handle }));
-
-  const topicOptions: SelectOption<string>[] = unsubscribeTopics.map(
-    (topic) => ({
-      label: topic.name ?? t`Untitled topic`,
-      value: topic.id,
-    }),
-  );
 
   return (
     <StyledFieldsContainer>
@@ -302,87 +281,6 @@ export const CampaignComposerFields = ({
           )}
         />
       </StyledFieldGroup>
-      <StyledOptions>
-        <StyledOptionsBody>
-          {!campaignState.isEditing && (
-            <>
-              <StyledFieldLabel>{t`Send time`}</StyledFieldLabel>
-              <Select
-                dropdownId="campaign-send-mode"
-                fullWidth
-                value={campaignState.sendMode}
-                options={[
-                  {
-                    label: t`Send immediately`,
-                    value: 'immediate',
-                    Icon: IconBolt,
-                    iconThemeColor: 'red',
-                  },
-                  {
-                    label: t`Schedule send`,
-                    value: 'scheduled',
-                    Icon: IconClock,
-                    iconThemeColor: 'yellow',
-                  },
-                ]}
-                onChange={campaignState.setSendMode}
-              />
-            </>
-          )}
-          {campaignState.sendMode === 'scheduled' && (
-            <>
-              <CampaignFieldLabel
-                label={t`Scheduled at`}
-                help={
-                  t`Time zone: ${userTimezone}. Choose a time at least one minute from now.` +
-                  ' ' +
-                  t`Recipients are saved when scheduling. Unsubscribes are checked again before sending.`
-                }
-              />
-              <FormDateTimeFieldInput
-                defaultValue={campaignState.scheduledAt ?? undefined}
-                onChange={campaignState.setScheduledAt}
-                timeZone={userTimezone}
-              />
-            </>
-          )}
-        </StyledOptionsBody>
-      </StyledOptions>
-      <StyledOptions>
-        <StyledOptionsBody>
-          <CampaignFieldLabel
-            label={t`Unsubscribe topic`}
-            help={
-              (topicOptions.length === 0
-                ? t`등록된 수신 거부 주제가 없습니다. 주제 없이 발송하거나 이메일 설정에서 주제를 만들 수 있습니다.` +
-                  ' '
-                : '') +
-              t`The unsubscribe topic this email belongs to. Recipients who opted out of it are skipped, and the unsubscribe link is scoped to it.`
-            }
-          />
-          <Select
-            dropdownId="campaign-composer-unsubscribe-topic"
-            dropdownWidthAuto
-            callToActionButton={{
-              text: t`수신 거부 주제 설정 열기 (새 탭)`,
-              onClick: () =>
-                window.open('/settings/email', '_blank', 'noopener,noreferrer'),
-            }}
-            fullWidth
-            value={campaignState.unsubscribeTopicId ?? ''}
-            options={topicOptions}
-            emptyOption={{ label: t`No topic`, value: '' }}
-            onChange={(value) =>
-              campaignState.setUnsubscribeTopicId(value === '' ? null : value)
-            }
-          />
-          {loadingTopics ? (
-            <StyledHint>{t`불러오는 중…`}</StyledHint>
-          ) : topicsError ? (
-            <StyledHint role="alert">{t`주제 조회 실패 · 새로고침해 주세요`}</StyledHint>
-          ) : null}
-        </StyledOptionsBody>
-      </StyledOptions>
       <StyledOptions>
         <CampaignFieldLabel
           label={

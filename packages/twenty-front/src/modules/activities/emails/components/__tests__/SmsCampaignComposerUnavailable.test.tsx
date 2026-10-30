@@ -147,7 +147,7 @@ it('reviews from the header only after required fields are filled without sendin
     .mockReturnValue([send, { loading: false }] as unknown as ReturnType<
       typeof useMutation
     >);
-  const { container } = render(<SmsCampaignComposer />);
+  const { container, rerender } = render(<SmsCampaignComposer />);
   const reviewButton = within(headerElement).getByRole('button', {
     name: /발송 전 검토/,
   });
@@ -176,6 +176,15 @@ it('reviews from the header only after required fields are filled without sendin
       },
     },
   });
+  rerender(<SmsCampaignComposer isSendingBlocked />);
+  expect(reviewButton).toBeDisabled();
+  const sendButton = screen.getByRole('button', { name: /1명에게 문자 발송/ });
+  expect(sendButton).toBeDisabled();
+  fireEvent.click(sendButton);
   expect(send).not.toHaveBeenCalled();
+  expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  rerender(<SmsCampaignComposer />);
+  expect(reviewButton).toBeEnabled();
+  expect(sendButton).toBeEnabled();
   expect(useQuery).not.toHaveBeenCalled();
 });

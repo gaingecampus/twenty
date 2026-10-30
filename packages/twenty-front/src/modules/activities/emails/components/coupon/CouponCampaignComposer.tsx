@@ -38,7 +38,11 @@ const statusLabels: Record<string, string> = {
   UNAVAILABLE: '쿠폰 사용 불가',
 };
 
-export const CouponCampaignComposer = () => {
+export const CouponCampaignComposer = ({
+  isSendingDisabled = false,
+}: {
+  isSendingDisabled?: boolean;
+}) => {
   const [mode, setMode] = useState('SIMULATION');
   const [title, setTitle] = useState('가인지 CRM 쿠폰 선물');
   const [confirmed, setConfirmed] = useState(false);
@@ -85,6 +89,7 @@ export const CouponCampaignComposer = () => {
     failure instanceof Error ? failure.message : '요청을 처리하지 못했습니다.';
 
   const review = async () => {
+    if (isSendingDisabled || busy) return;
     const currentRevision = revision.current;
     setError('');
     setQuote(null);
@@ -111,7 +116,7 @@ export const CouponCampaignComposer = () => {
     }
   };
   const run = async () => {
-    if (!quote || submitting.current) return;
+    if (isSendingDisabled || !quote || submitting.current) return;
     submitting.current = true;
     setError('');
     try {
@@ -323,6 +328,7 @@ export const CouponCampaignComposer = () => {
                 accent="blue"
                 onClick={review}
                 disabled={
+                  isSendingDisabled ||
                   busy ||
                   !productId ||
                   !message.trim() ||
@@ -383,6 +389,7 @@ export const CouponCampaignComposer = () => {
             accent="blue"
             onClick={run}
             disabled={
+              isSendingDisabled ||
               busy ||
               (quote.mode === 'LIVE' && !confirmed) ||
               quote.estimatedCost >

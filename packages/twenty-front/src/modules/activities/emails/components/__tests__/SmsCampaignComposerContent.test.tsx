@@ -8,11 +8,14 @@ jest.mock('@/activities/emails/hooks/useSmsDispatchAvailability', () => ({
 jest.mock('@/activities/emails/components/SmsCampaignComposer', () => ({
   SmsCampaignComposer: ({
     isSendingDisabled,
+    isSendingBlocked,
   }: {
     isSendingDisabled?: boolean;
+    isSendingBlocked?: boolean;
   }) => (
     <div>
-      문자 작성 화면<button disabled={isSendingDisabled}>발송</button>
+      문자 작성 화면
+      <button disabled={isSendingDisabled || isSendingBlocked}>발송</button>
     </div>
   ),
 }));
@@ -24,6 +27,11 @@ it('always shows the composer while enabling sending only when SMS is available'
   expect(screen.getByRole('button', { name: '발송' })).toBeDisabled();
 
   jest.mocked(useSmsDispatchAvailability).mockReturnValue(true);
+  rerender(<SmsCampaignComposerContent />);
+  expect(screen.getByRole('button', { name: '발송' })).toBeEnabled();
+
+  rerender(<SmsCampaignComposerContent isSendingBlocked />);
+  expect(screen.getByRole('button', { name: '발송' })).toBeDisabled();
   rerender(<SmsCampaignComposerContent />);
   expect(screen.getByRole('button', { name: '발송' })).toBeEnabled();
 

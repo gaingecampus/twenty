@@ -90,8 +90,10 @@ type Summary = {
 
 export const SmsCampaignComposer = ({
   isSendingDisabled = false,
+  isSendingBlocked = false,
 }: {
   isSendingDisabled?: boolean;
+  isSendingBlocked?: boolean;
 }) => {
   const sidePanelHeaderActionsElement = useAtomStateValue(
     sidePanelHeaderActionsElementState,
@@ -121,6 +123,7 @@ export const SmsCampaignComposer = ({
   const busy = sending || previewLoading;
   const canReview =
     !isSendingDisabled &&
+    !isSendingBlocked &&
     !busy &&
     !!listId &&
     !!content.trim() &&
@@ -154,7 +157,14 @@ export const SmsCampaignComposer = ({
     }
   };
   const submit = async () => {
-    if (isSendingDisabled || !preview || sending || submitted) return;
+    if (
+      isSendingDisabled ||
+      isSendingBlocked ||
+      !preview ||
+      sending ||
+      submitted
+    )
+      return;
     setError('');
     try {
       await send({
@@ -288,7 +298,10 @@ export const SmsCampaignComposer = ({
             accent="blue"
             onClick={submit}
             disabled={
-              isSendingDisabled || busy || preview.sms + preview.lms === 0
+              isSendingDisabled ||
+              isSendingBlocked ||
+              busy ||
+              preview.sms + preview.lms === 0
             }
           />
         </StyledCard>
