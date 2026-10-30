@@ -5,6 +5,22 @@ import {
 import { useMutation, useQuery } from '@apollo/client/react';
 import { useRef, useState } from 'react';
 import { Button } from 'twenty-ui/input';
+import { Tag } from 'twenty-ui/data-display';
+import { IconRefresh, IconUsers } from 'twenty-ui/icon';
+import { H3Title } from 'twenty-ui/typography';
+import {
+  AnimatedPlaceholder,
+  AnimatedPlaceholderEmptySubTitle,
+  AnimatedPlaceholderEmptyTextContainer,
+  AnimatedPlaceholderEmptyTitle,
+  SidePanelInformationBanner,
+} from 'twenty-ui/feedback';
+import {
+  StyledCouponActions,
+  StyledCouponEmpty,
+  StyledCouponHeader,
+  StyledCouponSummary,
+} from './CouponCampaignComposerStyles';
 
 import { FormSingleRecordPicker } from '@/object-record/record-field/ui/form-types/components/FormSingleRecordPicker';
 import { Select } from '@/ui/input/components/Select';
@@ -60,9 +76,11 @@ export const CouponCampaignComposer = () => {
   const {
     data: history,
     error: historyError,
+    loading: historyLoading,
     refetch,
   } = useQuery<{ couponDispatchHistory: CouponDispatch[] }>(COUPON_HISTORY, {
     fetchPolicy: 'network-only',
+    notifyOnNetworkStatusChange: true,
   });
   const [preview, { loading: reviewing }] = useMutation<{
     previewCouponDispatch: CouponDispatch;
@@ -272,16 +290,21 @@ export const CouponCampaignComposer = () => {
               }}
               fullWidth
             />
-            <small role="status">
-              {mode === 'SIMULATION'
-                ? '검증 모드 · 실제 전송 및 과금 없음'
-                : capabilities.environment === 'production'
-                  ? '실제 발송 · 센드비 캐시 차감'
-                  : '센드비 개발 환경 · 테스트 발송'}
-            </small>
-            {!capabilities.liveAvailable && capabilities.liveBlockedReason && (
-              <small>{capabilities.liveBlockedReason}</small>
-            )}
+            <div role="status">
+              <SidePanelInformationBanner
+                variant={mode === 'LIVE' ? 'warning' : 'default'}
+                message={[
+                  mode === 'SIMULATION'
+                    ? '검증 모드 · 실제 전송 및 과금 없음'
+                    : capabilities.environment === 'production'
+                      ? '실제 발송 · 센드비 캐시 차감'
+                      : '센드비 개발 환경 · 테스트 발송',
+                  !capabilities.liveAvailable && capabilities.liveBlockedReason,
+                ]
+                  .filter(Boolean)
+                  .join('. ')}
+              />
+            </div>
           </section>
           {mode === 'SIMULATION' && (
             <section aria-label="검증 상황">
@@ -304,27 +327,33 @@ export const CouponCampaignComposer = () => {
               />
             </section>
           )}
-          <small>
-            {mode === 'LIVE'
-              ? '센드비 판매가 기준 · 1회 발송 한도 '
-              : '샘플 상품·가격 기준 · 검증 예산 '}
-            {(mode === 'LIVE'
-              ? capabilities.liveBudget
-              : capabilities.simulationBudget
-            ).toLocaleString()}
-            원 · 최대 1,000명
-          </small>
-          <Button
-            title="발송 전 검토"
-            onClick={review}
-            disabled={
-              busy ||
-              !productId ||
-              !message.trim() ||
-              (mode === 'LIVE' && !title.trim()) ||
-              (target === 'phone' ? !testPhone.trim() : !listId)
-            }
-          />
+          <section aria-label="발송 한도 및 검토">
+            <StyledCouponSummary>
+              <Tag
+                color="gray"
+                text={`${mode === 'LIVE' ? '발송 한도' : '검증 예산'} ${(mode === 'LIVE' ? capabilities.liveBudget : capabilities.simulationBudget).toLocaleString('ko-KR')}원`}
+              />
+              <Tag color="gray" Icon={IconUsers} text="최대 1,000명" />
+            </StyledCouponSummary>
+            <small>
+              {mode === 'LIVE' ? '센드비 판매가 기준' : '샘플 상품·가격 기준'}
+            </small>
+            <StyledCouponActions>
+              <Button
+                title="발송 전 검토"
+                variant="primary"
+                accent="blue"
+                onClick={review}
+                disabled={
+                  busy ||
+                  !productId ||
+                  !message.trim() ||
+                  (mode === 'LIVE' && !title.trim()) ||
+                  (target === 'phone' ? !testPhone.trim() : !listId)
+                }
+              />
+            </StyledCouponActions>
+          </section>
         </>
       )}
       {error && <p role="alert">{error}</p>}
@@ -397,69 +426,98 @@ export const CouponCampaignComposer = () => {
           )}
         </section>
       )}
-      <section aria-label="쿠폰 검증 이력">
-        <strong>최근 발송 내역</strong>
-        <Button
-          title="쿠폰 내역 새로고침"
-          disabled={busy}
-          onClick={() => {
-            void refetch().catch(() => setError('내역을 불러오지 못했습니다.'));
-          }}
-        />
-        {historyError && <p role="alert">{historyError.message}</p>}
-        {history?.couponDispatchHistory.length === 0 && (
-          <p>아직 검증 내역이 없습니다.</p>
-        )}
-        {history?.couponDispatchHistory.map((dispatch) => (
-          <StyledCard key={dispatch.id}>
-            <strong>{dispatch.product.name}</strong>
-            <small>
-              {new Date(dispatch.createdAt).toLocaleString('ko-KR')} ·{' '}
-              {dispatch.recipientCount}명
-            </small>
-            <small>
-              {dispatch.mode === 'SIMULATION'
-                ? '내부 검증'
-                : dispatch.environment === 'production'
-                  ? '운영 발송'
-                  : '개발 서버'}
-            </small>
-            <p>{statusLabels[dispatch.status] ?? dispatch.status}</p>
-            {dispatch.orderTrId && (
-              <small>주문거래번호 {dispatch.orderTrId}</small>
-            )}
-            {dispatch.actualCost != null && (
+      <section aria-label="쿠폰 검증 이력" aria-busy={historyLoading}>
+        <StyledCouponHeader>
+          <H3Title title="최근 발송 내역" />
+          <Button
+            title="새로고침"
+            Icon={IconRefresh}
+            size="small"
+            variant="secondary"
+            disabled={busy || historyLoading}
+            onClick={() => {
+              void refetch().catch(() =>
+                setError('내역을 불러오지 못했습니다.'),
+              );
+            }}
+          />
+        </StyledCouponHeader>
+        {historyLoading ? (
+          <p role="status">발송 내역을 불러오는 중…</p>
+        ) : historyError ? (
+          <div role="alert">
+            <SidePanelInformationBanner
+              variant="warning"
+              message="발송 내역을 불러오지 못했습니다. 새로고침해 주세요."
+            />
+          </div>
+        ) : history?.couponDispatchHistory.length === 0 ? (
+          <StyledCouponEmpty role="status">
+            <AnimatedPlaceholder type="emptyInbox" />
+            <AnimatedPlaceholderEmptyTextContainer>
+              <AnimatedPlaceholderEmptyTitle>
+                아직 발송 내역이 없습니다
+              </AnimatedPlaceholderEmptyTitle>
+              <AnimatedPlaceholderEmptySubTitle>
+                쿠폰 검증 또는 발송을 완료하면 여기에 표시됩니다.
+              </AnimatedPlaceholderEmptySubTitle>
+            </AnimatedPlaceholderEmptyTextContainer>
+          </StyledCouponEmpty>
+        ) : null}
+        {!historyLoading &&
+          !historyError &&
+          history?.couponDispatchHistory.map((dispatch) => (
+            <StyledCard key={dispatch.id}>
+              <strong>{dispatch.product.name}</strong>
               <small>
-                센드비 결제금액 {dispatch.actualCost.toLocaleString()}원
+                {new Date(dispatch.createdAt).toLocaleString('ko-KR')} ·{' '}
+                {dispatch.recipientCount}명
               </small>
-            )}
-            {dispatch.orderId && (
-              <Button
-                title="센드비 발급 상태 조회"
-                disabled={busy}
-                onClick={async () => {
-                  try {
-                    await refresh({
-                      variables: { input: { quoteId: dispatch.id } },
-                    });
-                    await refetch();
-                  } catch (failure) {
-                    setError(failureMessage(failure));
-                  }
-                }}
-              />
-            )}
-            {dispatch.recipients.slice(0, 5).map((recipient, index) => (
-              <small key={`${recipient.personId ?? index}-${recipient.phone}`}>
-                {recipient.phone} ·{' '}
-                {statusLabels[recipient.status] ?? recipient.status}
+              <small>
+                {dispatch.mode === 'SIMULATION'
+                  ? '내부 검증'
+                  : dispatch.environment === 'production'
+                    ? '운영 발송'
+                    : '개발 서버'}
               </small>
-            ))}
-            {dispatch.recipients.length > 5 && (
-              <small>외 {dispatch.recipients.length - 5}명</small>
-            )}
-          </StyledCard>
-        ))}
+              <p>{statusLabels[dispatch.status] ?? dispatch.status}</p>
+              {dispatch.orderTrId && (
+                <small>주문거래번호 {dispatch.orderTrId}</small>
+              )}
+              {dispatch.actualCost != null && (
+                <small>
+                  센드비 결제금액 {dispatch.actualCost.toLocaleString()}원
+                </small>
+              )}
+              {dispatch.orderId && (
+                <Button
+                  title="센드비 발급 상태 조회"
+                  disabled={busy}
+                  onClick={async () => {
+                    try {
+                      await refresh({
+                        variables: { input: { quoteId: dispatch.id } },
+                      });
+                      await refetch();
+                    } catch (failure) {
+                      setError(failureMessage(failure));
+                    }
+                  }}
+                />
+              )}
+              {dispatch.recipients.slice(0, 5).map((recipient, index) => (
+                <small
+                  key={`${recipient.personId ?? index}-${recipient.phone}`}
+                >
+                  {recipient.phone} ·{' '}
+                  {statusLabels[recipient.status] ?? recipient.status}
+                </small>
+              ))}
+              {dispatch.recipients.length > 5 && (
+                <small>외 {dispatch.recipients.length - 5}명</small>
+              )}
+            </StyledCard>
+          ))}
       </section>
     </StyledForm>
   );
