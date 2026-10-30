@@ -62,7 +62,7 @@ const StyledCheckboxLabel = styled.label`
   gap: ${themeCssVariables.spacing[2]};
 
   & [role='checkbox'] {
-    --checkbox-box-radius: 0;
+    --checkbox-box-radius: calc(${themeCssVariables.border.radius.xs} / 2);
   }
 `;
 
