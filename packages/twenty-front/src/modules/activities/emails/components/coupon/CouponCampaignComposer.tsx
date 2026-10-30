@@ -1,8 +1,10 @@
+import {
+  StyledDispatchForm as StyledForm,
+  StyledDispatchCard as StyledCard,
+} from '@/activities/emails/components/CampaignDispatchStyles';
 import { useMutation, useQuery } from '@apollo/client/react';
-import { styled } from '@linaria/react';
 import { useRef, useState } from 'react';
 import { Button } from 'twenty-ui/input';
-import { themeCssVariables } from 'twenty-ui/theme-constants';
 
 import { FormSingleRecordPicker } from '@/object-record/record-field/ui/form-types/components/FormSingleRecordPicker';
 import { Select } from '@/ui/input/components/Select';
@@ -16,52 +18,6 @@ import {
   type CouponCapabilities,
   type CouponDispatch,
 } from './coupon-operations';
-
-const StyledForm = styled.div`
-  color: ${themeCssVariables.font.color.primary};
-  display: flex;
-  flex-direction: column;
-  gap: ${themeCssVariables.spacing[4]};
-  min-width: 0;
-  padding: ${themeCssVariables.spacing[4]};
-  section,
-  label {
-    display: flex;
-    flex-direction: column;
-    gap: ${themeCssVariables.spacing[2]};
-  }
-  p {
-    margin: 0;
-    overflow-wrap: anywhere;
-  }
-  small {
-    color: ${themeCssVariables.font.color.secondary};
-  }
-  input,
-  textarea {
-    background: ${themeCssVariables.background.primary};
-    border: 1px solid ${themeCssVariables.border.color.medium};
-    border-radius: ${themeCssVariables.border.radius.sm};
-    box-sizing: border-box;
-    color: inherit;
-    font: inherit;
-    width: 100%;
-  }
-  input {
-    height: var(--t-input-height);
-    padding: 0 var(--t-input-padding-x);
-  }
-  input[type='checkbox'] {
-    width: auto;
-    height: auto;
-    align-self: flex-start;
-  }
-  textarea {
-    min-height: 100px;
-    padding: ${themeCssVariables.spacing[2]};
-    resize: vertical;
-  }
-`;
 
 const statusLabels: Record<string, string> = {
   PREVIEW: '검토 대기',
@@ -191,116 +147,76 @@ export const CouponCampaignComposer = () => {
 
   return (
     <StyledForm>
-      <section aria-label="쿠폰 연동 상태">
-        <strong>카카오 쿠폰 · 센드비</strong>
-        <p role="status">
-          {mode === 'SIMULATION'
-            ? '검증 모드 · 실제 카카오 전송과 과금이 없습니다.'
-            : capabilities?.environment === 'production'
-              ? '운영 연동 · 카카오 쿠폰 발송 시 센드비 캐시가 차감됩니다.'
-              : '센드비 개발 서버 연동 · 발급 테스트 환경'}
-        </p>
-        {capabilities && <small>{capabilities.liveBlockedReason}</small>}
-        <a
-          href="https://guttural-mouth-47c.notion.site/API-_v0-8-26503bacc2ba80899455e8d7570b131d"
-          target="_blank"
-          rel="noreferrer"
-        >
-          센드비 API 명세서
-        </a>
-      </section>
       {loading && <p>연동 정보를 불러오는 중…</p>}
       {capabilityError && <p role="alert">{capabilityError.message}</p>}
       {capabilities && (
         <>
-          <Select
-            dropdownId="coupon-mode"
-            label="발송 모드"
-            value={mode}
-            disabled={busy}
-            options={[
-              { value: 'SIMULATION', label: '내부 검증 · 과금 없음' },
-              ...(capabilities.liveAvailable
-                ? [
-                    {
-                      value: 'LIVE',
-                      label:
-                        capabilities.environment === 'production'
-                          ? '실제 카카오 발송'
-                          : '센드비 개발 서버',
-                    },
-                  ]
-                : []),
-            ]}
-            onChange={(value) => {
-              invalidate();
-              setMode(value);
-              setProductId('');
-            }}
-            fullWidth
-          />
-          <Select
-            dropdownId="coupon-target"
-            label="받는 고객"
-            value={target}
-            disabled={busy}
-            options={[
-              { value: 'phone', label: '휴대전화번호 직접 입력' },
-              { value: 'list', label: '고객 목록' },
-            ]}
-            onChange={(value) => {
-              invalidate();
-              setTarget(value);
-            }}
-            fullWidth
-          />
-          {target === 'phone' ? (
-            <label>
-              받는 분 휴대전화번호
-              <input
-                aria-label="쿠폰 테스트 번호"
-                type="tel"
-                autoComplete="off"
-                value={testPhone}
-                disabled={busy}
-                onChange={(event) => {
-                  invalidate();
-                  setTestPhone(event.target.value);
-                }}
-                placeholder="01012345678"
-              />
-            </label>
-          ) : (
-            <FormSingleRecordPicker
-              objectNameSingulars={['messageList']}
-              defaultValue={listId}
+          <section aria-label="받는 고객">
+            <span>받는 고객</span>
+            <Select
+              dropdownId="coupon-target"
+              value={target}
+              disabled={busy}
+              options={[
+                { value: 'phone', label: '휴대전화번호 직접 입력' },
+                { value: 'list', label: '고객 목록' },
+              ]}
               onChange={(value) => {
-                if (!busy) {
-                  invalidate();
-                  setListId(value ?? undefined);
-                }
+                invalidate();
+                setTarget(value);
               }}
+              fullWidth
             />
-          )}
-          <Select
-            dropdownId="coupon-product"
-            label={mode === 'LIVE' ? '센드비 상품' : '테스트 상품'}
-            value={productId}
-            disabled={busy}
-            options={(mode === 'LIVE'
-              ? capabilities.liveProducts
-              : capabilities.products
-            ).map((product) => ({
-              value: product.id,
-              label: `${product.name} · ${product.price.toLocaleString()}원`,
-            }))}
-            emptyOption={{ value: '', label: '상품 선택' }}
-            onChange={(value) => {
-              invalidate();
-              setProductId(value);
-            }}
-            fullWidth
-          />
+            {target === 'phone' ? (
+              <label>
+                받는 분 휴대전화번호
+                <input
+                  aria-label="쿠폰 테스트 번호"
+                  type="tel"
+                  autoComplete="off"
+                  value={testPhone}
+                  disabled={busy}
+                  onChange={(event) => {
+                    invalidate();
+                    setTestPhone(event.target.value);
+                  }}
+                  placeholder="01012345678"
+                />
+              </label>
+            ) : (
+              <FormSingleRecordPicker
+                objectNameSingulars={['messageList']}
+                defaultValue={listId}
+                onChange={(value) => {
+                  if (!busy) {
+                    invalidate();
+                    setListId(value ?? undefined);
+                  }
+                }}
+              />
+            )}
+          </section>
+          <section aria-label="쿠폰 상품">
+            <span>{mode === 'LIVE' ? '센드비 상품' : '테스트 상품'}</span>
+            <Select
+              dropdownId="coupon-product"
+              value={productId}
+              disabled={busy}
+              options={(mode === 'LIVE'
+                ? capabilities.liveProducts
+                : capabilities.products
+              ).map((product) => ({
+                value: product.id,
+                label: `${product.name} · ${product.price.toLocaleString()}원`,
+              }))}
+              emptyOption={{ value: '', label: '상품 선택' }}
+              onChange={(value) => {
+                invalidate();
+                setProductId(value);
+              }}
+              fullWidth
+            />
+          </section>
           {mode === 'LIVE' && (
             <label>
               쿠폰 제목
@@ -329,24 +245,64 @@ export const CouponCampaignComposer = () => {
               }}
             />
           </label>
-          {mode === 'SIMULATION' && (
+          <section aria-label="발송 모드">
+            <span>발송 모드</span>
             <Select
-              dropdownId="coupon-scenario"
-              label="검증 상황"
-              value={scenario}
+              dropdownId="coupon-mode"
+              value={mode}
               disabled={busy}
               options={[
-                { value: 'SUCCESS', label: '정상 처리' },
-                { value: 'DELIVERY_FAILED', label: '카카오 전달 실패' },
-                { value: 'UNKNOWN', label: '응답 불명확' },
-                { value: 'INSUFFICIENT_BALANCE', label: '잔액 부족' },
+                { value: 'SIMULATION', label: '내부 검증 · 과금 없음' },
+                ...(capabilities.liveAvailable
+                  ? [
+                      {
+                        value: 'LIVE',
+                        label:
+                          capabilities.environment === 'production'
+                            ? '실제 카카오 발송'
+                            : '센드비 개발 서버',
+                      },
+                    ]
+                  : []),
               ]}
               onChange={(value) => {
                 invalidate();
-                setScenario(value);
+                setMode(value);
+                setProductId('');
               }}
               fullWidth
             />
+            <small role="status">
+              {mode === 'SIMULATION'
+                ? '검증 모드 · 실제 전송 및 과금 없음'
+                : capabilities.environment === 'production'
+                  ? '실제 발송 · 센드비 캐시 차감'
+                  : '센드비 개발 환경 · 테스트 발송'}
+            </small>
+            {!capabilities.liveAvailable && capabilities.liveBlockedReason && (
+              <small>{capabilities.liveBlockedReason}</small>
+            )}
+          </section>
+          {mode === 'SIMULATION' && (
+            <section aria-label="검증 상황">
+              <span>검증 상황</span>
+              <Select
+                dropdownId="coupon-scenario"
+                value={scenario}
+                disabled={busy}
+                options={[
+                  { value: 'SUCCESS', label: '정상 처리' },
+                  { value: 'DELIVERY_FAILED', label: '카카오 전달 실패' },
+                  { value: 'UNKNOWN', label: '응답 불명확' },
+                  { value: 'INSUFFICIENT_BALANCE', label: '잔액 부족' },
+                ]}
+                onChange={(value) => {
+                  invalidate();
+                  setScenario(value);
+                }}
+                fullWidth
+              />
+            </section>
           )}
           <small>
             {mode === 'LIVE'
@@ -359,7 +315,7 @@ export const CouponCampaignComposer = () => {
             원 · 최대 1,000명
           </small>
           <Button
-            title="대상·비용 검토"
+            title="발송 전 검토"
             onClick={review}
             disabled={
               busy ||
@@ -373,7 +329,7 @@ export const CouponCampaignComposer = () => {
       )}
       {error && <p role="alert">{error}</p>}
       {quote && (
-        <section aria-label="쿠폰 발송 전 검토">
+        <StyledCard aria-label="쿠폰 발송 전 검토">
           <strong>
             {quote.product.name} ·{' '}
             {quote.product.validityDays > 0
@@ -428,7 +384,7 @@ export const CouponCampaignComposer = () => {
                   : (capabilities?.simulationBudget ?? 0))
             }
           />
-        </section>
+        </StyledCard>
       )}
       {result && (
         <section role="status" aria-label="쿠폰 검증 결과">
@@ -442,7 +398,7 @@ export const CouponCampaignComposer = () => {
         </section>
       )}
       <section aria-label="쿠폰 검증 이력">
-        <strong>최근 쿠폰 발송·검증 이력</strong>
+        <strong>최근 발송 내역</strong>
         <Button
           title="쿠폰 내역 새로고침"
           disabled={busy}
@@ -455,7 +411,7 @@ export const CouponCampaignComposer = () => {
           <p>아직 검증 내역이 없습니다.</p>
         )}
         {history?.couponDispatchHistory.map((dispatch) => (
-          <section key={dispatch.id}>
+          <StyledCard key={dispatch.id}>
             <strong>{dispatch.product.name}</strong>
             <small>
               {new Date(dispatch.createdAt).toLocaleString('ko-KR')} ·{' '}
@@ -502,7 +458,7 @@ export const CouponCampaignComposer = () => {
             {dispatch.recipients.length > 5 && (
               <small>외 {dispatch.recipients.length - 5}명</small>
             )}
-          </section>
+          </StyledCard>
         ))}
       </section>
     </StyledForm>
