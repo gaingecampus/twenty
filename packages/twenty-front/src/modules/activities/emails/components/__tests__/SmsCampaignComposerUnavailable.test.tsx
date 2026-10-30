@@ -35,7 +35,7 @@ jest.mock(
   }),
 );
 
-it('allows composing but never queries SMS history, reviews recipients, or sends in preview mode', () => {
+it('allows composing but never queries SMS history, reviews recipients, or sends while SMS is unavailable', () => {
   const loadPreview = jest.fn();
   const send = jest.fn();
   const refetch = jest.fn();
@@ -52,7 +52,7 @@ it('allows composing but never queries SMS history, reviews recipients, or sends
   jest
     .mocked(useQuery)
     .mockReturnValue({ refetch } as unknown as ReturnType<typeof useQuery>);
-  render(<SmsCampaignComposer isPreview />);
+  render(<SmsCampaignComposer isSendingDisabled />);
   fireEvent.click(screen.getByRole('button', { name: '고객 목록 선택' }));
   fireEvent.change(screen.getByRole('textbox', { name: '문자 내용' }), {
     target: { value: '안녕하세요' },
@@ -72,7 +72,7 @@ it('allows composing but never queries SMS history, reviews recipients, or sends
     expect.anything(),
     expect.objectContaining({ skip: true }),
   );
-  expect(screen.getByRole('status')).toHaveTextContent(
-    '실제 문자는 발송되지 않습니다',
+  expect(screen.getByRole('alert')).toHaveTextContent(
+    '문자 발송 설정이 완료되지 않아 전송할 수 없습니다.',
   );
 });

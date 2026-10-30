@@ -6,8 +6,14 @@ import { gql } from '@apollo/client';
 import { useLazyQuery, useMutation, useQuery } from '@apollo/client/react';
 import { useState } from 'react';
 import { Button } from 'twenty-ui/input';
-import { SidePanelInformationBanner } from 'twenty-ui/feedback';
+import { InlineBanner } from 'twenty-ui/feedback';
+import { IconAlertTriangle } from 'twenty-ui/icon';
+import { styled } from '@linaria/react';
 import { FormSingleRecordPicker } from '@/object-record/record-field/ui/form-types/components/FormSingleRecordPicker';
+
+const StyledSetupBanner = styled(InlineBanner)`
+  margin-bottom: 0;
+`;
 
 const PREVIEW = gql`
   query PreviewSmsDispatch($input: SmsPreviewInput!) {
@@ -71,9 +77,9 @@ type Summary = {
 };
 
 export const SmsCampaignComposer = ({
-  isPreview = false,
+  isSendingDisabled = false,
 }: {
-  isPreview?: boolean;
+  isSendingDisabled?: boolean;
 }) => {
   const [listId, setListId] = useState<string>();
   const [subject, setSubject] = useState('');
@@ -95,7 +101,7 @@ export const SmsCampaignComposer = ({
     refetch,
   } = useQuery<{ smsDispatchHistory: Summary[] }>(HISTORY, {
     fetchPolicy: 'network-only',
-    skip: isPreview,
+    skip: isSendingDisabled,
   });
   const reset = () => {
     setPreview(null);
@@ -106,7 +112,7 @@ export const SmsCampaignComposer = ({
   const bytes = new TextEncoder().encode(content).length;
   const busy = sending || previewLoading;
   const review = async () => {
-    if (isPreview) return;
+    if (isSendingDisabled) return;
     setError('');
     try {
       const result = await loadPreview({
@@ -120,7 +126,7 @@ export const SmsCampaignComposer = ({
     }
   };
   const submit = async () => {
-    if (isPreview || !preview || sending || submitted) return;
+    if (isSendingDisabled || !preview || sending || submitted) return;
     setError('');
     try {
       await send({
@@ -141,9 +147,13 @@ export const SmsCampaignComposer = ({
   };
   return (
     <StyledForm>
-      {isPreview && (
-        <div role="status">
-          <SidePanelInformationBanner message="화면 미리보기 · 실제 문자는 발송되지 않습니다." />
+      {isSendingDisabled && (
+        <div role="alert">
+          <StyledSetupBanner
+            color="danger"
+            LeftIcon={IconAlertTriangle}
+            message="문자 발송 설정이 완료되지 않아 전송할 수 없습니다."
+          />
         </div>
       )}
       <label>받는 고객</label>
@@ -217,7 +227,7 @@ export const SmsCampaignComposer = ({
         title="발송 전 검토"
         onClick={review}
         disabled={
-          isPreview ||
+          isSendingDisabled ||
           busy ||
           !listId ||
           !content.trim() ||
@@ -242,7 +252,9 @@ export const SmsCampaignComposer = ({
             variant="primary"
             accent="blue"
             onClick={submit}
-            disabled={isPreview || busy || preview.sms + preview.lms === 0}
+            disabled={
+              isSendingDisabled || busy || preview.sms + preview.lms === 0
+            }
           />
         </StyledCard>
       )}
@@ -255,9 +267,9 @@ export const SmsCampaignComposer = ({
         <strong>최근 발송 내역</strong>
         <Button
           title="접수 내역 새로고침"
-          disabled={isPreview}
+          disabled={isSendingDisabled}
           onClick={() => {
-            if (!isPreview) void refetch();
+            if (!isSendingDisabled) void refetch();
           }}
         />
         <small>
@@ -265,10 +277,7 @@ export const SmsCampaignComposer = ({
           어드민에서 확인하세요. 확인 필요 건은 결과 확인 전 재발송하지 마세요.
         </small>
         {historyError && <div role="alert">{historyError.message}</div>}
-        {isPreview && (
-          <small>미리보기에서는 실제 발송 내역을 조회하지 않습니다.</small>
-        )}
-        {!isPreview &&
+        {!isSendingDisabled &&
           data?.smsDispatchHistory.map((row) => (
             <StyledCard key={row.id}>
               <strong>{row.subject}</strong>
