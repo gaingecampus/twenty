@@ -81,6 +81,12 @@ export const TextBubbleMenu = ({ editor }: TextBubbleMenuProps) => {
       editor={editor}
       shouldShow={handleShouldShow}
       updateDelay={0}
+      options={{
+        placement: 'bottom-start',
+        offset: 8,
+        shift: { padding: 8 },
+        flip: { padding: 8 },
+      }}
     >
       <StyledBubbleMenuContainer>
         <TurnIntoBlockDropdown editor={editor} />
