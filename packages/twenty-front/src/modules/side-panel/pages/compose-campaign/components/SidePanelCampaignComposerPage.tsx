@@ -138,6 +138,7 @@ export const SidePanelCampaignComposerPage = () => {
           <TabButton
             id="campaign-channel-coupon"
             title="카카오 쿠폰"
+            pill="준비중"
             LeftIcon={IconSend}
             contentSize="md"
             active={visibleChannel === 'coupon'}
