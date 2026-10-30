@@ -1,6 +1,14 @@
+import { Type } from 'class-transformer';
+import { CampaignDraftReferenceInput } from 'src/modules/emailing/drafts/campaign-draft-reference.input';
 import { UseGuards, UsePipes } from '@nestjs/common';
 import { Args, Field, InputType, Int, Mutation, Query } from '@nestjs/graphql';
-import { IsInt, IsUUID, Min } from 'class-validator';
+import {
+  IsOptional,
+  ValidateNested,
+  IsInt,
+  IsUUID,
+  Min,
+} from 'class-validator';
 import { PermissionFlagType } from 'twenty-shared/constants';
 
 import { MetadataResolver } from 'src/engine/api/graphql/graphql-config/decorators/metadata-resolver.decorator';
@@ -19,11 +27,16 @@ import { CouponService } from './coupon.service';
 
 @InputType()
 class CouponSimulationInput {
+  @Field(() => CampaignDraftReferenceInput, { nullable: true })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => CampaignDraftReferenceInput)
+  draft?: CampaignDraftReferenceInput;
   @Field(() => String) @IsUUID('4') quoteId: string;
 }
 
 @InputType()
-class CouponSendInput {
+class CouponSendInput extends CouponSimulationInput {
   @Field(() => String) @IsUUID('4') quoteId: string;
   @Field(() => Int) @IsInt() @Min(0) confirmedCost: number;
 }
@@ -57,7 +70,12 @@ export class CouponResolver {
     @AuthWorkspace() workspace: WorkspaceEntity,
     @AuthUserWorkspaceId() actor: string,
   ) {
-    return this.coupons.simulate(workspace.id, actor, input.quoteId);
+    return this.coupons.simulate(
+      workspace.id,
+      actor,
+      input.quoteId,
+      input.draft,
+    );
   }
 
   @Mutation(() => CouponDispatchSummary)
@@ -71,6 +89,7 @@ export class CouponResolver {
       actor,
       input.quoteId,
       input.confirmedCost,
+      input.draft,
     );
   }
 

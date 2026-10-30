@@ -107,6 +107,32 @@ describe('Campaign scheduling and delivery guards', () => {
     emailingDomainId: 'domain',
   };
 
+  it('atomically consumes a saved email draft for immediate delivery', async () => {
+    campaign.findOne.mockResolvedValue({ draftData: { channel: 'email' } });
+    await service.send({
+      ...input,
+      scheduledAt: undefined,
+      draft: { id: 'draft', version: 'revision' },
+    });
+    expect(campaign.update).toHaveBeenCalledWith(
+      { id: 'draft', status: 'DRAFT', scheduleVersion: 'revision' },
+      expect.objectContaining({ status: 'SENDING', scheduleVersion: null }),
+      undefined,
+      transactionManager,
+    );
+    expect(campaign.insert).not.toHaveBeenCalled();
+    expect(queue.add).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not enqueue a stale or already consumed email draft', async () => {
+    campaign.findOne.mockResolvedValue({ draftData: { channel: 'email' } });
+    campaign.update.mockResolvedValue({ affected: 0 });
+    await expect(
+      service.send({ ...input, draft: { id: 'draft', version: 'stale' } }),
+    ).rejects.toBeInstanceOf(ConflictException);
+    expect(queue.add).not.toHaveBeenCalled();
+  });
+
   it('passes the caller role to customer and campaign repositories', async () => {
     await service.send(input);
 

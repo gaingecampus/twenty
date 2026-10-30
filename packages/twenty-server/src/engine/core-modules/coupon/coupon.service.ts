@@ -1,3 +1,5 @@
+import { type CampaignDraftReferenceInput } from 'src/modules/emailing/drafts/campaign-draft-reference.input';
+import { CampaignDraftService } from 'src/modules/emailing/drafts/campaign-draft.service';
 import { randomUUID } from 'node:crypto';
 import { SecretEncryptionService } from '../secret-encryption/secret-encryption.service';
 import { type PlaintextString } from '../secret-encryption/branded-strings/plaintext-string.type';
@@ -43,6 +45,7 @@ export class CouponService {
     private readonly orm: GlobalWorkspaceOrmManager,
     private readonly sendbee: SendbeeClient,
     private readonly encryption: SecretEncryptionService,
+    private readonly drafts: CampaignDraftService,
   ) {}
 
   async capabilities(workspaceId: string) {
@@ -216,7 +219,12 @@ export class CouponService {
     );
   }
 
-  async simulate(workspaceId: string, userWorkspaceId: string, id: string) {
+  async simulate(
+    workspaceId: string,
+    userWorkspaceId: string,
+    id: string,
+    draft?: CampaignDraftReferenceInput,
+  ) {
     return this.dispatches.manager.transaction(async (manager) => {
       // One immutable quote is the idempotency key. Concurrent submissions serialize here.
       const repository = manager.getRepository(CouponDispatchEntity);
@@ -243,12 +251,19 @@ export class CouponService {
           : row.scenario === 'UNKNOWN'
             ? 'UNKNOWN'
             : 'SIMULATED_FAILED';
+      await this.drafts.claim(workspaceId, draft, 'coupon', id, {
+        subject: row.provider?.title || '카카오 쿠폰',
+        bodyTemplate: row.message,
+        listId: row.listId ?? null,
+      });
       row.status = status;
       row.recipients = row.recipients.map((recipient) => ({
         ...recipient,
         status,
       }));
-      return this.summary(await repository.save(row));
+      const result = this.summary(await repository.save(row));
+      if (draft) await this.drafts.finishDispatch(workspaceId, id, 'SIMULATED');
+      return result;
     });
   }
 
@@ -257,6 +272,7 @@ export class CouponService {
     userWorkspaceId: string,
     id: string,
     confirmedCost: number,
+    draft?: CampaignDraftReferenceInput,
   ) {
     // Persist a claim BEFORE the network call. A crash can leave SUBMITTING, but cannot duplicate payment.
     const claimed = await this.dispatches.manager.transaction(
@@ -336,6 +352,11 @@ export class CouponService {
           throw new BadRequestException(
             '수신자 정보를 확인할 수 없습니다. 다시 검토하세요.',
           );
+        await this.drafts.claim(workspaceId, draft, 'coupon', id, {
+          subject: row.provider?.title || '카카오 쿠폰',
+          bodyTemplate: row.message,
+          listId: row.listId ?? null,
+        });
         row.status = 'SUBMITTING';
         row.provider.submittedAt = new Date().toISOString();
         await repository.save(row);
@@ -361,7 +382,9 @@ export class CouponService {
       }));
     }
     // If saving fails, the durable SUBMITTING claim still prevents another order.
-    return this.summary(await this.dispatches.save(row));
+    const result = this.summary(await this.dispatches.save(row));
+    await this.finishDraft(row);
+    return result;
   }
 
   async refresh(workspaceId: string, userWorkspaceId: string, id: string) {
@@ -385,8 +408,24 @@ export class CouponService {
         row.product.id,
       );
       this.applyOrder(row, response, this.phones(row));
-      return this.summary(await repository.save(row));
+      const result = this.summary(await repository.save(row));
+      await this.finishDraft(row);
+      return result;
     });
+  }
+
+  private async finishDraft(row: CouponDispatchEntity) {
+    if (['SENT', 'AVAILABLE', 'UNAVAILABLE'].includes(row.status)) {
+      await this.drafts.finishDispatch(row.workspaceId, row.id, 'SENT');
+    } else if (row.status === 'CANCELLED') {
+      await this.drafts.finishDispatch(row.workspaceId, row.id, 'CANCELLED');
+    } else if (row.status === 'UNKNOWN') {
+      await this.drafts.finishDispatch(
+        row.workspaceId,
+        row.id,
+        'SENT_WITH_ERRORS',
+      );
+    }
   }
 
   private assertAccount(row: CouponDispatchEntity, config: SendbeeConfig) {

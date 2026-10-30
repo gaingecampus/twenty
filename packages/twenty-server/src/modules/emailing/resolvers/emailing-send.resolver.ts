@@ -66,6 +66,7 @@ export class EmailingSendResolver {
       unsubscribeTopicId: input.unsubscribeTopicId,
       scheduledAt: input.scheduledAt,
       campaignId: input.campaignId,
+      draft: input.draft,
       scheduleVersion: input.scheduleVersion,
       listId: input.listId,
       subject: input.subject,

@@ -2706,6 +2706,12 @@ export type Mutation = {
   verifyEmailAndGetWorkspaceAgnosticToken: AvailableWorkspacesAndAccessTokens;
   verifyEmailingDomain: EmailingDomain;
   verifyTwoFactorAuthenticationMethodForAuthenticatedUser: VerifyTwoFactorAuthenticationMethod;
+  previewCouponDispatch: CouponDispatchSummary;
+  refreshCouponDispatch: CouponDispatchSummary;
+  saveMessageCampaignDraft: SavedMessageCampaignDraft;
+  sendCouponDispatch: CouponDispatchSummary;
+  sendSmsDispatch: SmsDispatchSummary;
+  simulateCouponDispatch: CouponDispatchSummary;
 };
 
 
@@ -4411,6 +4417,11 @@ export type Query = {
   validatePasswordResetToken: ValidatePasswordResetToken;
   webhook?: Maybe<Webhook>;
   webhooks: Array<Webhook>;
+  couponCapabilities: CouponCapabilities;
+  couponDispatchHistory: Array<CouponDispatchSummary>;
+  isSmsDispatchAvailable: Scalars['Boolean']['output'];
+  previewSmsDispatch: SmsPreview;
+  smsDispatchHistory: Array<SmsDispatchSummary>;
 };
 
 
@@ -5098,9 +5109,10 @@ export type SendInvitations = {
 };
 
 export type SendMessageCampaignInput = {
-  files?: InputMaybe<Array<CampaignAttachmentInput>>;
   body: Scalars['String']['input'];
   campaignId?: InputMaybe<Scalars['String']['input']>;
+  draft?: InputMaybe<CampaignDraftReferenceInput>;
+  files?: InputMaybe<Array<CampaignAttachmentInput>>;
   fromAddress: Scalars['String']['input'];
   listId: Scalars['String']['input'];
   scheduleVersion?: InputMaybe<Scalars['String']['input']>;
@@ -9071,3 +9083,184 @@ export const CheckCustomDomainValidRecordsDocument = {"kind":"Document","definit
 export const GetAiSystemPromptPreviewDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetAiSystemPromptPreview"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"getAiSystemPromptPreview"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"sections"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"content"}},{"kind":"Field","name":{"kind":"Name","value":"estimatedTokenCount"}}]}},{"kind":"Field","name":{"kind":"Name","value":"estimatedTokenCount"}}]}}]}}]} as unknown as DocumentNode<GetAiSystemPromptPreviewQuery, GetAiSystemPromptPreviewQueryVariables>;
 export const GetPublicWorkspaceDataByIdDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetPublicWorkspaceDataById"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UUID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"getPublicWorkspaceDataById"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"displayName"}},{"kind":"Field","name":{"kind":"Name","value":"logo"}}]}}]}}]} as unknown as DocumentNode<GetPublicWorkspaceDataByIdQuery, GetPublicWorkspaceDataByIdQueryVariables>;
 export const GetWorkspaceFromInviteHashDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetWorkspaceFromInviteHash"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"inviteHash"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"findWorkspaceFromInviteHash"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"inviteHash"},"value":{"kind":"Variable","name":{"kind":"Name","value":"inviteHash"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"displayName"}},{"kind":"Field","name":{"kind":"Name","value":"logo"}},{"kind":"Field","name":{"kind":"Name","value":"allowImpersonation"}}]}}]}}]} as unknown as DocumentNode<GetWorkspaceFromInviteHashQuery, GetWorkspaceFromInviteHashQueryVariables>;
+export type CampaignDraftContentInput = {
+  advertising: Scalars['Boolean']['input'];
+  body: Scalars['String']['input'];
+  channel: Scalars['String']['input'];
+  couponMode: Scalars['String']['input'];
+  directRecipient: Scalars['String']['input'];
+  files: Array<CampaignAttachmentInput>;
+  fromAddress: Scalars['String']['input'];
+  includeSignature: Scalars['Boolean']['input'];
+  listId?: InputMaybe<Scalars['String']['input']>;
+  productId: Scalars['String']['input'];
+  recipientMode: Scalars['String']['input'];
+  scenario: Scalars['String']['input'];
+  scheduledAt?: InputMaybe<Scalars['String']['input']>;
+  sendMode: Scalars['String']['input'];
+  subject: Scalars['String']['input'];
+  unsubscribeTopicId?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type CampaignDraftReferenceInput = {
+  id: Scalars['String']['input'];
+  version: Scalars['String']['input'];
+};
+
+export type CouponCapabilities = {
+  __typename?: 'CouponCapabilities';
+  environment?: Maybe<Scalars['String']['output']>;
+  liveAvailable: Scalars['Boolean']['output'];
+  liveBlockedReason: Scalars['String']['output'];
+  liveBudget: Scalars['Int']['output'];
+  liveProducts: Array<CouponProductInfo>;
+  mode: Scalars['String']['output'];
+  products: Array<CouponProductInfo>;
+  simulationBudget: Scalars['Int']['output'];
+};
+
+export type CouponDispatchSummary = {
+  __typename?: 'CouponDispatchSummary';
+  actualCost?: Maybe<Scalars['Int']['output']>;
+  createdAt: Scalars['String']['output'];
+  duplicates: Scalars['Int']['output'];
+  environment?: Maybe<Scalars['String']['output']>;
+  estimatedCost: Scalars['Int']['output'];
+  expiresAt: Scalars['String']['output'];
+  id: Scalars['String']['output'];
+  message: Scalars['String']['output'];
+  missing: Scalars['Int']['output'];
+  mode: Scalars['String']['output'];
+  orderId?: Maybe<Scalars['String']['output']>;
+  orderTrId?: Maybe<Scalars['String']['output']>;
+  product: CouponProductInfo;
+  recipientCount: Scalars['Int']['output'];
+  recipients: Array<CouponRecipientInfo>;
+  scenario: Scalars['String']['output'];
+  status: Scalars['String']['output'];
+  title?: Maybe<Scalars['String']['output']>;
+  total: Scalars['Int']['output'];
+};
+
+export type CouponPreviewInput = {
+  listId?: InputMaybe<Scalars['String']['input']>;
+  message: Scalars['String']['input'];
+  mode: Scalars['String']['input'];
+  productId: Scalars['String']['input'];
+  scenario: Scalars['String']['input'];
+  testPhone?: InputMaybe<Scalars['String']['input']>;
+  title?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type CouponProductInfo = {
+  __typename?: 'CouponProductInfo';
+  id: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+  price: Scalars['Int']['output'];
+  validityDays: Scalars['Int']['output'];
+};
+
+export type CouponRecipientInfo = {
+  __typename?: 'CouponRecipientInfo';
+  personId?: Maybe<Scalars['String']['output']>;
+  phone: Scalars['String']['output'];
+  status: Scalars['String']['output'];
+};
+
+export type CouponSendInput = {
+  confirmedCost: Scalars['Int']['input'];
+  draft?: InputMaybe<CampaignDraftReferenceInput>;
+  quoteId: Scalars['String']['input'];
+};
+
+export type CouponSimulationInput = {
+  draft?: InputMaybe<CampaignDraftReferenceInput>;
+  quoteId: Scalars['String']['input'];
+};
+
+export type MutationPreviewCouponDispatchArgs = {
+  input: CouponPreviewInput;
+};
+
+
+export type MutationRefreshCouponDispatchArgs = {
+  input: CouponSimulationInput;
+};
+
+
+export type MutationSaveMessageCampaignDraftArgs = {
+  input: SaveMessageCampaignDraftInput;
+};
+
+
+export type MutationSendCouponDispatchArgs = {
+  input: CouponSendInput;
+};
+
+
+export type MutationSendSmsDispatchArgs = {
+  input: SmsSendInput;
+};
+
+
+export type MutationSimulateCouponDispatchArgs = {
+  input: CouponSimulationInput;
+};
+
+
+export type QueryPreviewSmsDispatchArgs = {
+  input: SmsPreviewInput;
+};
+
+
+export type SaveMessageCampaignDraftInput = {
+  content: CampaignDraftContentInput;
+  id: Scalars['String']['input'];
+  previousVersion?: InputMaybe<Scalars['String']['input']>;
+  version: Scalars['String']['input'];
+};
+
+export type SavedMessageCampaignDraft = {
+  __typename?: 'SavedMessageCampaignDraft';
+  id: Scalars['String']['output'];
+  version: Scalars['String']['output'];
+};
+
+export type SmsDispatchSummary = {
+  __typename?: 'SmsDispatchSummary';
+  accepted: Scalars['Int']['output'];
+  createdAt: Scalars['String']['output'];
+  errors: Array<Scalars['String']['output']>;
+  failed: Scalars['Int']['output'];
+  id: Scalars['String']['output'];
+  queued: Scalars['Int']['output'];
+  status: Scalars['String']['output'];
+  subject: Scalars['String']['output'];
+  unknown: Scalars['Int']['output'];
+};
+
+export type SmsPreview = {
+  __typename?: 'SmsPreview';
+  duplicates: Scalars['Int']['output'];
+  lms: Scalars['Int']['output'];
+  missing: Scalars['Int']['output'];
+  sample: Scalars['String']['output'];
+  sms: Scalars['Int']['output'];
+  total: Scalars['Int']['output'];
+};
+
+export type SmsPreviewInput = {
+  advertising: Scalars['Boolean']['input'];
+  content: Scalars['String']['input'];
+  listId: Scalars['String']['input'];
+  subject: Scalars['String']['input'];
+};
+
+export type SmsSendInput = {
+  advertising: Scalars['Boolean']['input'];
+  content: Scalars['String']['input'];
+  draft?: InputMaybe<CampaignDraftReferenceInput>;
+  listId: Scalars['String']['input'];
+  requestId: Scalars['String']['input'];
+  subject: Scalars['String']['input'];
+};

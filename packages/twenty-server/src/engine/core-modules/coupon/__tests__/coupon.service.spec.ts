@@ -1,3 +1,4 @@
+import { type CampaignDraftService } from 'src/modules/emailing/drafts/campaign-draft.service';
 import { type SendbeeClient } from '../sendbee.client';
 import { type SecretEncryptionService } from '../../secret-encryption/secret-encryption.service';
 import { type Repository } from 'typeorm';
@@ -90,6 +91,10 @@ describe('coupon review and simulation', () => {
       {} as GlobalWorkspaceOrmManager,
       provider,
       encryption,
+      {
+        claim: jest.fn(),
+        finishDispatch: jest.fn(),
+      } as unknown as CampaignDraftService,
     );
   });
 
@@ -238,6 +243,10 @@ describe('coupon review and simulation', () => {
       orm,
       provider,
       encryption,
+      {
+        claim: jest.fn(),
+        finishDispatch: jest.fn(),
+      } as unknown as CampaignDraftService,
     );
     const result = await scopedService.preview('workspace', 'actor', {
       ...input,

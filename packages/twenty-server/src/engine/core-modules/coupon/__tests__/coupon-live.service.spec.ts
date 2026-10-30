@@ -1,3 +1,4 @@
+import { type CampaignDraftService } from 'src/modules/emailing/drafts/campaign-draft.service';
 import { type Repository } from 'typeorm';
 import { type GlobalWorkspaceOrmManager } from 'src/engine/twenty-orm/global-workspace-datasource/global-workspace-orm.manager';
 import { type SecretEncryptionService } from '../../secret-encryption/secret-encryption.service';
@@ -119,6 +120,10 @@ describe('durable coupon orders', () => {
       } as unknown as GlobalWorkspaceOrmManager,
       { settings, products, order, status } as unknown as SendbeeClient,
       encryption as unknown as SecretEncryptionService,
+      {
+        claim: jest.fn(),
+        finishDispatch: jest.fn(),
+      } as unknown as CampaignDraftService,
     );
   });
 

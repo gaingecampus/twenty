@@ -1,3 +1,4 @@
+import { CampaignDraftModule } from 'src/modules/emailing/drafts/campaign-draft.module';
 import { CampaignAttachmentsService } from 'src/modules/emailing/services/campaign-attachments.service';
 import { FileModule } from 'src/engine/core-modules/file/file.module';
 import { FileEntity } from 'src/engine/core-modules/file/entities/file.entity';
@@ -26,6 +27,7 @@ import { UnsubscribeTopicService } from 'src/modules/emailing/services/unsubscri
 
 @Module({
   imports: [
+    CampaignDraftModule,
     FileModule,
     EmailingDomainModule,
     ConnectedAccountMetadataModule,

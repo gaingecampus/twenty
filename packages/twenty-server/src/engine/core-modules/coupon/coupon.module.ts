@@ -1,3 +1,4 @@
+import { CampaignDraftModule } from 'src/modules/emailing/drafts/campaign-draft.module';
 import { SecretEncryptionModule } from '../secret-encryption/secret-encryption.module';
 import { SendbeeClient } from './sendbee.client';
 import { Module } from '@nestjs/common';
@@ -10,6 +11,7 @@ import { CouponService } from './coupon.service';
 
 @Module({
   imports: [
+    CampaignDraftModule,
     TypeOrmModule.forFeature([CouponDispatchEntity]),
     PermissionsModule,
     SecretEncryptionModule,

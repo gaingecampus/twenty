@@ -1,5 +1,14 @@
+import { Type } from 'class-transformer';
+import { CampaignDraftReferenceInput } from 'src/modules/emailing/drafts/campaign-draft-reference.input';
 import { Field, InputType, Int, ObjectType } from '@nestjs/graphql';
-import { IsBoolean, IsString, IsUUID, Length } from 'class-validator';
+import {
+  IsOptional,
+  ValidateNested,
+  IsBoolean,
+  IsString,
+  IsUUID,
+  Length,
+} from 'class-validator';
 
 @InputType()
 export class SmsPreviewInput {
@@ -10,6 +19,11 @@ export class SmsPreviewInput {
 }
 @InputType()
 export class SmsSendInput extends SmsPreviewInput {
+  @Field(() => CampaignDraftReferenceInput, { nullable: true })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => CampaignDraftReferenceInput)
+  draft?: CampaignDraftReferenceInput;
   @Field(() => String) @IsUUID('4') requestId: string;
 }
 @ObjectType()

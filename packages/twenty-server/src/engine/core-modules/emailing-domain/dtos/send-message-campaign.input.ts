@@ -1,3 +1,4 @@
+import { CampaignDraftReferenceInput } from 'src/modules/emailing/drafts/campaign-draft-reference.input';
 import { Type } from 'class-transformer';
 import { Field, InputType } from '@nestjs/graphql';
 
@@ -28,6 +29,12 @@ export class CampaignAttachmentInput {
 
 @InputType()
 export class SendMessageCampaignInput {
+  @Field(() => CampaignDraftReferenceInput, { nullable: true })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => CampaignDraftReferenceInput)
+  draft?: CampaignDraftReferenceInput;
+
   @Field(() => [CampaignAttachmentInput], { nullable: true })
   @IsOptional()
   @IsArray()

@@ -1,3 +1,4 @@
+import { type CampaignDraftReferenceInput } from 'src/modules/emailing/drafts/campaign-draft-reference.input';
 import { WorkspaceMemberWorkspaceEntity } from 'src/modules/workspace-member/standard-objects/workspace-member.workspace-entity';
 import { CampaignAttachmentsService } from 'src/modules/emailing/services/campaign-attachments.service';
 import { CampaignConnectedAccountSenderService } from 'src/modules/emailing/services/campaign-connected-account-sender.service';
@@ -65,6 +66,7 @@ import {
 import { getDomainFromEmail } from 'src/utils/get-domain-from-email';
 
 type SendCampaignArgs = {
+  draft?: CampaignDraftReferenceInput;
   files?: EmailAttachment[];
   scheduledAt?: string;
   campaignId?: string;
@@ -169,6 +171,8 @@ export class MessageCampaignService {
         '예약 시간은 시간대를 포함하여 현재보다 최소 1분 이후여야 합니다.',
       );
     }
+    if (args.draft && args.campaignId)
+      throw new BadRequestException('초안과 예약을 함께 변경할 수 없습니다.');
     if (args.campaignId && (!scheduledAt || !args.scheduleVersion)) {
       throw new BadRequestException(
         '예약 변경에는 예약 시간과 버전이 필요합니다.',
@@ -219,7 +223,14 @@ export class MessageCampaignService {
         const dataSource =
           await this.globalWorkspaceOrmManager.getGlobalWorkspaceDataSource();
         if (!dataSource) throw new Error('Workspace datasource unavailable');
-        const campaignId = args.campaignId ?? v4();
+        const campaignId = args.draft?.id ?? args.campaignId ?? v4();
+        if (args.draft) {
+          const draft = await repository.findOne({
+            where: { id: args.draft.id },
+          });
+          if (draft?.draftData?.channel !== 'email')
+            throw new ConflictException('이메일 초안을 찾을 수 없습니다.');
+        }
         const scheduleVersion = scheduledAt ? v4() : null;
 
         await dataSource.transaction(
@@ -242,12 +253,14 @@ export class MessageCampaignService {
                 ? CAMPAIGN_STATUS.SCHEDULED
                 : CAMPAIGN_STATUS.SENDING,
             };
-            if (args.campaignId) {
+            if (args.campaignId || args.draft) {
               const result = await repository.update(
                 {
                   id: campaignId,
-                  status: CAMPAIGN_STATUS.SCHEDULED,
-                  scheduleVersion: args.scheduleVersion,
+                  status: args.draft
+                    ? CAMPAIGN_STATUS.DRAFT
+                    : CAMPAIGN_STATUS.SCHEDULED,
+                  scheduleVersion: args.draft?.version ?? args.scheduleVersion,
                 },
                 content,
                 undefined,

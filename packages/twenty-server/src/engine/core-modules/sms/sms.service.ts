@@ -1,3 +1,4 @@
+import { CampaignDraftService } from 'src/modules/emailing/drafts/campaign-draft.service';
 import {
   BadRequestException,
   ForbiddenException,
@@ -45,6 +46,7 @@ export class SmsService {
     private readonly gaingeSms: GaingeSmsService,
     @InjectMessageQueue(MessageQueue.emailQueue)
     private readonly queue: MessageQueueService,
+    private readonly drafts: CampaignDraftService,
   ) {}
 
   isAvailable(workspaceId: string) {
@@ -207,6 +209,11 @@ export class SmsService {
         });
       }
     }
+    await this.drafts.claim(workspaceId, input.draft, 'sms', input.requestId, {
+      subject: input.subject || '문자 발송',
+      bodyTemplate: input.content,
+      listId: input.listId,
+    });
     const id = randomUUID();
     await this.dispatches
       .createQueryBuilder()
@@ -279,6 +286,16 @@ export class SmsService {
     };
   }
 
+  private finishDraft(row: SmsDispatchEntity) {
+    return this.drafts.finishDispatch(
+      row.workspaceId,
+      row.requestId,
+      row.batches.every((batch) => batch.status === 'ACCEPTED')
+        ? 'SENT'
+        : 'SENT_WITH_ERRORS',
+    );
+  }
+
   async process(workspaceId: string, dispatchId: string) {
     const runner = this.dispatches.manager.connection.createQueryRunner();
     await runner.connect();
@@ -301,7 +318,11 @@ export class SmsService {
         id: dispatchId,
         workspaceId,
       });
-      if (!row || row.status === 'FINISHED') return;
+      if (!row) return;
+      if (row.status === 'FINISHED') {
+        await this.finishDraft(row);
+        return;
+      }
       for (const batch of row.batches) {
         if (batch.status === 'SENDING') {
           batch.status = 'UNKNOWN';
@@ -345,6 +366,7 @@ export class SmsService {
       } else {
         row.status = 'FINISHED';
         await this.dispatches.save(row);
+        await this.finishDraft(row);
       }
     } finally {
       try {

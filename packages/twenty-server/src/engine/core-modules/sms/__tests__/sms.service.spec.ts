@@ -1,3 +1,4 @@
+import { type CampaignDraftService } from 'src/modules/emailing/drafts/campaign-draft.service';
 import { SmsService } from '../sms.service';
 import { SmsDispatchEntity, type SmsBatch } from '../sms-dispatch.entity';
 import { type Repository } from 'typeorm';
@@ -69,6 +70,10 @@ describe('durable SMS dispatch worker', () => {
       {} as GlobalWorkspaceOrmManager,
       { send, settings: jest.fn() } as unknown as GaingeSmsService,
       { add } as unknown as MessageQueueService,
+      {
+        claim: jest.fn(),
+        finishDispatch: jest.fn(),
+      } as unknown as CampaignDraftService,
     );
   });
   it('marks before external send and never sends accepted batches again', async () => {
@@ -145,6 +150,10 @@ describe('SMS recipient preview', () => {
       orm,
       { settings: jest.fn() } as unknown as GaingeSmsService,
       {} as MessageQueueService,
+      {
+        claim: jest.fn(),
+        finishDispatch: jest.fn(),
+      } as unknown as CampaignDraftService,
     );
     const result = await service.preview('workspace', {
       listId: 'list',
@@ -185,6 +194,10 @@ describe('unconfigured SMS access', () => {
         },
       } as unknown as GaingeSmsService,
       { add } as unknown as MessageQueueService,
+      {
+        claim: jest.fn(),
+        finishDispatch: jest.fn(),
+      } as unknown as CampaignDraftService,
     );
     const input = {
       listId: 'list',
