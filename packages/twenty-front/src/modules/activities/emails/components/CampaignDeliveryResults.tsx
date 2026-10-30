@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useContext, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { styled } from '@linaria/react';
 import { Tag, type TagColor } from 'twenty-ui/data-display';
 import { Button } from 'twenty-ui/input';
+import { IconRefresh } from 'twenty-ui/icon';
 import {
   AnimatedPlaceholder,
   AnimatedPlaceholderEmptySubTitle,
@@ -11,6 +13,8 @@ import {
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 
 import { MessageListHeaderCount } from '@/activities/emails/components/message-lists/MessageListHeaderCount';
+import { StyledMessageListToolbar } from '@/activities/emails/components/message-lists/MessageListSectionStyles';
+import { WidgetHeaderActionContext } from '@/page-layout/widgets/widget-card/contexts/WidgetHeaderActionContext';
 import {
   StyledMessageListTable,
   StyledMessageListHeader,
@@ -22,29 +26,19 @@ import { useFindOneRecord } from '@/object-record/hooks/useFindOneRecord';
 import { RecordPaginationBar } from '@/object-record/record-index/components/RecordIndexPaginationBar';
 import { type ObjectRecord } from '@/object-record/types/ObjectRecord';
 import { DateTimeDisplay } from '@/ui/field/display/components/DateTimeDisplay';
+import { EmailDisplay } from '@/ui/field/display/components/EmailDisplay';
 import { TableRow } from '@/ui/layout/table/components/TableRow';
 
 const StyledSection = styled.section`
   display: flex;
   flex-direction: column;
-  gap: ${themeCssVariables.spacing[4]};
+  gap: ${themeCssVariables.spacing[3]};
   min-width: 0;
-  padding: ${themeCssVariables.spacing[3]};
+  width: 100%;
 
   p {
     margin: 0;
   }
-`;
-const StyledToolbar = styled.div`
-  align-items: center;
-  display: flex;
-  flex-wrap: wrap;
-  gap: ${themeCssVariables.spacing[2]};
-  justify-content: space-between;
-`;
-const StyledHint = styled.p`
-  color: ${themeCssVariables.font.color.secondary};
-  font-size: ${themeCssVariables.font.size.sm};
 `;
 const StyledEmpty = styled.div`
   align-items: center;
@@ -103,6 +97,7 @@ export const CampaignDeliveryResults = ({
 }: {
   campaignId: string;
 }) => {
+  const headerActionTarget = useContext(WidgetHeaderActionContext);
   const [page, setPage] = useState(0);
   const { records, totalCount, loading, error, refetch, canReadObjectRecords } =
     useMessageListRecordPage<Delivery>({
@@ -140,6 +135,18 @@ export const CampaignDeliveryResults = ({
     : draft
       ? '발송을 시작하면 수신자별 대기·성공·실패 결과가 여기에 표시됩니다.'
       : '발송 처리가 시작되면 기록이 표시됩니다. 발송 상태와 예약 시각은 홈에서 확인하세요.';
+  const refreshButton = (
+    <Button
+      title="새로고침"
+      Icon={IconRefresh}
+      size="small"
+      variant="secondary"
+      disabled={loading || !canReadObjectRecords}
+      onClick={() => {
+        void refetch().catch(() => undefined);
+      }}
+    />
+  );
   return (
     <StyledSection aria-label="수신자별 발송 결과" aria-busy={loading}>
       <MessageListHeaderCount
@@ -148,18 +155,11 @@ export const CampaignDeliveryResults = ({
         error={Boolean(error) || !canReadObjectRecords}
         label="발송 처리 기록"
       />
-      <StyledToolbar>
-        <StyledHint>
-          수신자별 처리 결과와 발송 메시지를 함께 확인하세요.
-        </StyledHint>
-        <Button
-          title="새로고침"
-          disabled={loading || !canReadObjectRecords}
-          onClick={() => {
-            void refetch().catch(() => undefined);
-          }}
-        />
-      </StyledToolbar>
+      {headerActionTarget ? (
+        createPortal(refreshButton, headerActionTarget)
+      ) : (
+        <StyledMessageListToolbar>{refreshButton}</StyledMessageListToolbar>
+      )}
       {!canReadObjectRecords ? (
         <p role="alert">발송 결과를 조회할 권한이 없습니다.</p>
       ) : error ? (
@@ -198,7 +198,13 @@ export const CampaignDeliveryResults = ({
                   color: 'gray' as const,
                 };
                 return (
-                  <TableRow key={record.id} gridTemplateColumns={COLUMNS}>
+                  <TableRow
+                    key={record.id}
+                    gridTemplateColumns={COLUMNS}
+                    hoverBackgroundColor={
+                      themeCssVariables.background.transparent.light
+                    }
+                  >
                     <StyledMessageListCell>
                       {recipients.length
                         ? recipients.map((recipient) => (
@@ -210,9 +216,11 @@ export const CampaignDeliveryResults = ({
                                 recipient.displayName !== recipient.handle && (
                                   <span>{recipient.displayName}</span>
                                 )}
-                              <span>
-                                {recipient.handle || '주소 정보 없음'}
-                              </span>
+                              {recipient.handle ? (
+                                <EmailDisplay value={recipient.handle} />
+                              ) : (
+                                '주소 정보 없음'
+                              )}
                             </StyledRecipient>
                           ))
                         : '수신자 정보 없음'}

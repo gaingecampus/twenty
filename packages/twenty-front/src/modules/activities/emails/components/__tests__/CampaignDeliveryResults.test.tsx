@@ -1,7 +1,8 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { CampaignDeliveryResults } from '@/activities/emails/components/CampaignDeliveryResults';
 import { useMessageListRecordPage } from '@/activities/emails/hooks/useMessageListRecordPage';
 import { useFindOneRecord } from '@/object-record/hooks/useFindOneRecord';
+import { WidgetHeaderActionContext } from '@/page-layout/widgets/widget-card/contexts/WidgetHeaderActionContext';
 jest.mock('@/activities/emails/hooks/useMessageListRecordPage', () => ({
   useMessageListRecordPage: jest.fn(),
 }));
@@ -45,6 +46,21 @@ it('explains scheduled empty results and offers a safe refresh', () => {
   expect(screen.queryByText('발송 실패')).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole('button', { name: /새로고침/ }));
   expect(refetch).toHaveBeenCalled();
+});
+it('places refresh in the widget header when an action slot is available', () => {
+  const header = document.createElement('div');
+  const { unmount } = render(
+    <WidgetHeaderActionContext.Provider value={header}>
+      <CampaignDeliveryResults campaignId="campaign" />
+    </WidgetHeaderActionContext.Provider>,
+  );
+  fireEvent.click(within(header).getByRole('button', { name: /새로고침/ }));
+  expect(refetch).toHaveBeenCalled();
+  expect(
+    screen.queryByRole('button', { name: /새로고침/ }),
+  ).not.toBeInTheDocument();
+  unmount();
+  expect(header).toBeEmptyDOMElement();
 });
 it('does not show an empty success state while loading', () => {
   setPage({ loading: true });

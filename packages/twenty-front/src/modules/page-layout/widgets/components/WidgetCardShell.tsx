@@ -137,7 +137,7 @@ export const WidgetCardShell = ({
         data-widget-id={widget.id}
         data-testid={dataTestId}
         className={
-          isMessageListTable && !isEditable
+          (isMessageListTable || isCampaignDelivery) && !isEditable
             ? 'widget message-list-section'
             : 'widget'
         }
@@ -150,7 +150,7 @@ export const WidgetCardShell = ({
                 ? setHeaderTitleTarget
                 : undefined
             }
-            wrapActions={isMessageListTable}
+            wrapActions={isMessageListTable || isCampaignDelivery}
             widgetId={widget.id}
             variant={variant}
             isInEditMode={isEditable}
