@@ -44,6 +44,10 @@ const StyledSection = styled.section`
 const CAMPAIGN_GRID_COLUMNS =
   'minmax(160px, 1fr) minmax(180px, 1fr) 110px minmax(230px, 1fr)';
 
+const StyledEmptyContainer = styled(AnimatedPlaceholderEmptyContainer)`
+  padding-block: ${themeCssVariables.spacing[6]};
+`;
+
 export const MessageListCampaigns = ({ listId }: { listId: string }) => (
   <MessageListCampaignsPage key={listId} listId={listId} />
 );
@@ -103,7 +107,7 @@ const MessageListCampaignsPage = ({ listId }: { listId: string }) => {
       {loading && <p>{t`불러오는 중…`}</p>}
       {error && <p role="alert">{t`심방콜 발송을 불러오지 못했습니다.`}</p>}
       {!loading && !error && records.length === 0 && (
-        <AnimatedPlaceholderEmptyContainer>
+        <StyledEmptyContainer>
           <AnimatedPlaceholder type="emptyInbox" />
           <AnimatedPlaceholderEmptyTextContainer>
             <AnimatedPlaceholderEmptyTitle>
@@ -113,7 +117,7 @@ const MessageListCampaignsPage = ({ listId }: { listId: string }) => {
               {t`심방콜 발송을 연결해 주세요.`}
             </AnimatedPlaceholderEmptySubTitle>
           </AnimatedPlaceholderEmptyTextContainer>
-        </AnimatedPlaceholderEmptyContainer>
+        </StyledEmptyContainer>
       )}
       {records.length > 0 && (
         <MessageListTableScroll tableId={tableId} label="연결된 심방콜 발송 표">
