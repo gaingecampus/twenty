@@ -1,7 +1,6 @@
-import { useSmsDispatchAvailability } from '@/activities/emails/hooks/useSmsDispatchAvailability';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 import { useState } from 'react';
-import { SmsCampaignComposer } from '@/activities/emails/components/SmsCampaignComposer';
+import { SmsCampaignComposerContent } from '@/activities/emails/components/SmsCampaignComposerContent';
 import { CouponCampaignComposer } from '@/activities/emails/components/coupon/CouponCampaignComposer';
 import { CampaignReviewModal } from '@/activities/emails/components/CampaignReviewModal';
 import { useAtomComponentStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomComponentStateValue';
@@ -106,13 +105,10 @@ const StyledChannelTabs = styled.div`
 `;
 
 export const SidePanelCampaignComposerPage = () => {
-  const isSmsAvailable = useSmsDispatchAvailability();
   const [channel, setChannel] = useState<'email' | 'sms' | 'coupon'>('email');
   const campaignToEdit = useAtomComponentStateValue(
     campaignToEditComponentState,
   );
-  const visibleChannel =
-    channel === 'sms' && !isSmsAvailable ? 'email' : channel;
   return (
     <StyledContainer>
       {!campaignToEdit && (
@@ -122,37 +118,35 @@ export const SidePanelCampaignComposerPage = () => {
             title="이메일"
             LeftIcon={IconMail}
             contentSize="md"
-            active={visibleChannel === 'email'}
+            active={channel === 'email'}
             onClick={() => setChannel('email')}
           />
-          {isSmsAvailable && (
-            <TabButton
-              id="campaign-channel-sms"
-              title="문자"
-              LeftIcon={IconMessage}
-              contentSize="md"
-              active={visibleChannel === 'sms'}
-              onClick={() => setChannel('sms')}
-            />
-          )}
+          <TabButton
+            id="campaign-channel-sms"
+            title="문자"
+            LeftIcon={IconMessage}
+            contentSize="md"
+            active={channel === 'sms'}
+            onClick={() => setChannel('sms')}
+          />
           <TabButton
             id="campaign-channel-coupon"
             title="카카오 쿠폰"
             pill="준비중"
             LeftIcon={IconSend}
             contentSize="md"
-            active={visibleChannel === 'coupon'}
+            active={channel === 'coupon'}
             onClick={() => setChannel('coupon')}
           />
         </StyledChannelTabs>
       )}
-      {visibleChannel === 'coupon' && !campaignToEdit ? (
+      {channel === 'coupon' && !campaignToEdit ? (
         <StyledContent>
           <CouponCampaignComposer />
         </StyledContent>
-      ) : visibleChannel === 'sms' && !campaignToEdit ? (
+      ) : channel === 'sms' && !campaignToEdit ? (
         <StyledContent>
-          <SmsCampaignComposer />
+          <SmsCampaignComposerContent />
         </StyledContent>
       ) : (
         <EmailCampaignComposer />
