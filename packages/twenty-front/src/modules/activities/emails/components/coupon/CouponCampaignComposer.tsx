@@ -1,3 +1,4 @@
+import { CampaignFieldLabel } from '@/activities/emails/components/CampaignFieldLabel';
 import {
   StyledDispatchForm as StyledForm,
   StyledDispatchCard as StyledCard,
@@ -6,10 +7,10 @@ import { useMutation, useQuery } from '@apollo/client/react';
 import { useRef, useState } from 'react';
 import { Button } from 'twenty-ui/input';
 import { Tag } from 'twenty-ui/data-display';
-import { IconUsers } from 'twenty-ui/icon';
-import { SidePanelInformationBanner } from 'twenty-ui/feedback';
+import { IconAlertTriangle, IconUsers } from 'twenty-ui/icon';
 import {
   StyledCouponActions,
+  StyledCouponBanner,
   StyledCouponSummary,
 } from './CouponCampaignComposerStyles';
 
@@ -189,7 +190,12 @@ export const CouponCampaignComposer = () => {
             </label>
           )}
           <section aria-label="쿠폰 상품">
-            <span>{mode === 'LIVE' ? '센드비 상품' : '테스트 상품'}</span>
+            <CampaignFieldLabel
+              label={mode === 'LIVE' ? '센드비 상품' : '테스트 상품'}
+              help={
+                mode === 'LIVE' ? '센드비 판매가 기준' : '샘플 상품·가격 기준'
+              }
+            />
             <Select
               dropdownId="coupon-product"
               value={productId}
@@ -265,8 +271,9 @@ export const CouponCampaignComposer = () => {
               fullWidth
             />
             <div role="status">
-              <SidePanelInformationBanner
-                variant={mode === 'LIVE' ? 'warning' : 'default'}
+              <StyledCouponBanner
+                color="danger"
+                LeftIcon={IconAlertTriangle}
                 message={[
                   mode === 'SIMULATION'
                     ? '검증 모드 · 실제 전송 및 과금 없음'
@@ -304,14 +311,11 @@ export const CouponCampaignComposer = () => {
           <section aria-label="발송 한도 및 검토">
             <StyledCouponSummary>
               <Tag
-                color="gray"
+                color="orange"
                 text={`${mode === 'LIVE' ? '발송 한도' : '검증 예산'} ${(mode === 'LIVE' ? capabilities.liveBudget : capabilities.simulationBudget).toLocaleString('ko-KR')}원`}
               />
-              <Tag color="gray" Icon={IconUsers} text="최대 1,000명" />
+              <Tag color="blue" Icon={IconUsers} text="최대 1,000명" />
             </StyledCouponSummary>
-            <small>
-              {mode === 'LIVE' ? '센드비 판매가 기준' : '샘플 상품·가격 기준'}
-            </small>
             <StyledCouponActions>
               <Button
                 title="발송 전 검토"

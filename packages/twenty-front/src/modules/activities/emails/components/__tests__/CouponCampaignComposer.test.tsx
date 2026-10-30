@@ -36,12 +36,6 @@ jest.mock('@/ui/input/components/Select', () => ({
     </div>
   ),
 }));
-jest.mock('twenty-ui/feedback', () => ({
-  SidePanelInformationBanner: ({ message }: { message: string }) => (
-    <p>{message}</p>
-  ),
-}));
-
 const setQueryState = (capabilityOverrides = {}) => {
   jest.mocked(useQuery).mockReturnValue({
     data: {
