@@ -31,7 +31,7 @@ const StyledUploadArea = styled.div`
   flex-direction: column;
   gap: ${themeCssVariables.spacing[3]};
   justify-content: center;
-  min-height: var(--t-input-height, 32px);
+  min-height: calc(var(--t-input-height, 32px) * 2);
   padding-bottom: ${themeCssVariables.spacing[3]};
   padding-left: ${themeCssVariables.spacing[2]};
   padding-right: ${themeCssVariables.spacing[2]};
