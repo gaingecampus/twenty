@@ -1,3 +1,4 @@
+import { CampaignBodySection } from '@/activities/emails/components/CampaignBodySection';
 import { useObjectMetadataItem } from '@/object-metadata/hooks/useObjectMetadataItem';
 import { RecordFieldsScopeContextProvider } from '@/object-record/record-field-list/contexts/RecordFieldsScopeContext';
 import { RecordFieldListComponentInstanceContext } from '@/object-record/record-field-list/states/contexts/RecordFieldListComponentInstanceContext';
@@ -86,6 +87,12 @@ export const FieldsWidget = ({ widget }: FieldsWidgetProps) => {
     hiddenFields.length > 0;
 
   const visibleFields = groups.flatMap((group) => group.fields);
+  const campaignBodyField =
+    targetRecord.targetObjectNameSingular === 'messageCampaign'
+      ? visibleFields.find(
+          ({ fieldMetadataItem }) => fieldMetadataItem.name === 'bodyTemplate',
+        )?.fieldMetadataItem
+      : undefined;
 
   const hiddenFieldsWithOffsetGlobalIndex = shouldShowHiddenFields
     ? hiddenFields.map((field) => ({
@@ -182,6 +189,13 @@ export const FieldsWidget = ({ widget }: FieldsWidgetProps) => {
             flattenedFieldMetadataItems={flattenedFieldMetadataItems}
           />
         </RecordFieldListComponentInstanceContext.Provider>
+        {campaignBodyField && (
+          <CampaignBodySection
+            recordId={targetRecord.id}
+            objectMetadataId={objectMetadataItem.id}
+            fieldMetadataId={campaignBodyField.id}
+          />
+        )}
       </StyledContainer>
     </RecordFieldsScopeContextProvider>
   );
