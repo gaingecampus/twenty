@@ -72,6 +72,9 @@ const StyledFilterRow = styled.div`
   gap: ${themeCssVariables.spacing[2]};
   justify-content: space-between;
 `;
+const StyledEmptyContainer = styled(AnimatedPlaceholderEmptyContainer)`
+  padding-block: ${themeCssVariables.spacing[6]};
+`;
 const StyledActions = styled.div`
   align-items: center;
   display: flex;
@@ -270,7 +273,7 @@ const MessageListMembersPage = ({ listId }: { listId: string }) => {
       {loading && <p>{t`불러오는 중…`}</p>}
       {error && <p role="alert">{t`고객 분류를 불러오지 못했습니다.`}</p>}
       {!loading && !error && records.length === 0 && (
-        <AnimatedPlaceholderEmptyContainer>
+        <StyledEmptyContainer>
           <AnimatedPlaceholder
             type={emailFilter === 'all' ? 'noRecord' : 'noMatchRecord'}
           />
@@ -286,7 +289,7 @@ const MessageListMembersPage = ({ listId }: { listId: string }) => {
                 : t`다른 필터를 선택해 주세요.`}
             </AnimatedPlaceholderEmptySubTitle>
           </AnimatedPlaceholderEmptyTextContainer>
-        </AnimatedPlaceholderEmptyContainer>
+        </StyledEmptyContainer>
       )}
       {records.length > 0 && (
         <MessageListTableScroll
