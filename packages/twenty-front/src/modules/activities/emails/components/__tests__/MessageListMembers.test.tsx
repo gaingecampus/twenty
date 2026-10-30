@@ -17,6 +17,23 @@ jest.mock('@/activities/emails/hooks/useMessageListRecordPage', () => ({
 jest.mock('@/object-record/hooks/useDeleteOneRecord', () => ({
   useDeleteOneRecord: jest.fn(),
 }));
+jest.mock('@/ui/input/components/Select', () => ({
+  Select: ({
+    options,
+    onChange,
+  }: {
+    options: { value: string; label: string }[];
+    onChange: (value: string) => void;
+  }) => (
+    <div>
+      {options.map((option) => (
+        <button key={option.value} onClick={() => onChange(option.value)}>
+          {option.label}
+        </button>
+      ))}
+    </div>
+  ),
+}));
 jest.mock('@/object-record/hooks/useObjectPermissionsForObject', () => ({
   useObjectPermissionsForObject: () => ({
     canUpdateObjectRecords: true,
@@ -150,3 +167,122 @@ it('places the full recipient count and add actions in the widget header without
   ).toBeNull();
   expect(within(container).queryByText('1,000')).toBeNull();
 });
+
+it('shows whole-list email counts and resets pagination when filtering', () => {
+  jest
+    .mocked(useMessageListRecordPage)
+    .mockImplementation(({ filter, pageSize }) => {
+      const isFiltered = Boolean(filter && 'and' in filter);
+      return {
+        records:
+          pageSize === 50
+            ? [
+                {
+                  id: 'member',
+                  person: {
+                    id: 'person',
+                    emails: { primaryEmail: 'person@example.com' },
+                  },
+                },
+              ]
+            : [],
+        totalCount: isFiltered ? 820 : 1000,
+        loading: false,
+        error: undefined,
+        objectMetadataItem: { id: 'member' },
+        refetch: jest.fn(),
+      } as unknown as ReturnType<typeof useMessageListRecordPage>;
+    });
+  render(<MessageListMembers listId="email-list" />);
+  expect(screen.getByRole('status')).toHaveTextContent(
+    '이메일 등록 820명 / 전체 1,000명',
+  );
+  expect(
+    screen.getByRole('button', { name: '이메일 없음 180명' }),
+  ).toBeInTheDocument();
+  fireEvent.click(screen.getByText('last page'));
+  fireEvent.click(screen.getByRole('button', { name: '이메일 있음 820명' }));
+  expect(screen.getByText('page 1')).toBeInTheDocument();
+  expect(useMessageListRecordPage).toHaveBeenCalledWith(
+    expect.objectContaining({
+      page: 0,
+      pageSize: 50,
+      filter: {
+        and: [
+          { listId: { eq: 'email-list' } },
+          {
+            not: {
+              and: [
+                {
+                  or: [
+                    { person: { emails: { primaryEmail: { is: 'NULL' } } } },
+                    { person: { emails: { primaryEmail: { eq: '' } } } },
+                  ],
+                },
+                {
+                  or: [
+                    { workspaceMember: { userEmail: { is: 'NULL' } } },
+                    { workspaceMember: { userEmail: { eq: '' } } },
+                  ],
+                },
+              ],
+            },
+          },
+        ],
+      },
+    }),
+  );
+});
+
+it('keeps filtering available for empty results and does not show failed counts as zero', () => {
+  jest.mocked(useMessageListRecordPage).mockImplementation(
+    ({ pageSize }) =>
+      ({
+        records: [],
+        totalCount: 0,
+        loading: false,
+        error: pageSize === 1 ? new Error('Count unavailable') : undefined,
+        objectMetadataItem: { id: 'member' },
+        refetch: jest.fn(),
+      }) as unknown as ReturnType<typeof useMessageListRecordPage>,
+  );
+  render(<MessageListMembers listId="empty-list" />);
+  expect(screen.getByRole('status')).toHaveTextContent(
+    '이메일 등록 —명 / 전체 —명',
+  );
+  fireEvent.click(screen.getByRole('button', { name: '이메일 없음 —명' }));
+  expect(
+    screen.getByText('선택한 이메일 조건에 해당하는 수신자가 없습니다.'),
+  ).toBeInTheDocument();
+  expect(
+    screen.queryByText('고객 또는 워크스페이스 멤버를 추가하세요.'),
+  ).not.toBeInTheDocument();
+});
+
+it.each([false, true])(
+  'refreshes recipients after excluding one even if count refresh fails: %s',
+  async (countRefreshFails) => {
+    const refetchCounts = countRefreshFails
+      ? jest.fn().mockRejectedValue(new Error('Count unavailable'))
+      : jest.fn().mockResolvedValue(undefined);
+    const refetchPage = jest.fn().mockResolvedValue(undefined);
+    jest.mocked(useDeleteOneRecord).mockReturnValue({
+      deleteOneRecord: jest.fn().mockResolvedValue(undefined),
+    } as unknown as ReturnType<typeof useDeleteOneRecord>);
+    jest.mocked(useMessageListRecordPage).mockImplementation(
+      ({ pageSize }) =>
+        ({
+          records: pageSize === 50 ? [{ id: 'member', person: null }] : [],
+          totalCount: 1,
+          loading: false,
+          error: undefined,
+          objectMetadataItem: { id: 'member' },
+          refetch: pageSize === 1 ? refetchCounts : refetchPage,
+        }) as unknown as ReturnType<typeof useMessageListRecordPage>,
+    );
+    render(<MessageListMembers listId="removal-list" />);
+    fireEvent.click(screen.getByRole('button', { name: /^제외/ }));
+    await waitFor(() => expect(refetchPage).toHaveBeenCalled());
+    expect(refetchCounts).toHaveBeenCalledTimes(2);
+  },
+);

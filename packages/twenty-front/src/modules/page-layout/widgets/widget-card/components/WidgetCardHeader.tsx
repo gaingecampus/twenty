@@ -72,6 +72,12 @@ const StyledInfoButton = styled.button`
   padding: 0;
 `;
 
+const StyledTitleSlot = styled.span`
+  align-items: center;
+  display: inline-flex;
+  flex-shrink: 0;
+`;
+
 const StyledRightContainer = styled.div`
   align-items: center;
   display: flex;
@@ -128,14 +134,14 @@ export const WidgetCardHeader = ({
       </AnimatePresence>
       <StyledTitleContainer variant={variant}>
         <OverflowingTextWithTooltip text={isEmpty ? t`Add Widget` : title} />
-        {titleSlotRef && <span ref={titleSlotRef} />}
+        {titleSlotRef && <StyledTitleSlot ref={titleSlotRef} />}
         {titleHelp && !isEmpty && (
           <>
-            <span id={helpId}>
+            <StyledTitleSlot id={helpId}>
               <StyledInfoButton type="button" aria-label={`${title} 도움말`}>
                 <IconInfoCircle size={16} />
               </StyledInfoButton>
-            </span>
+            </StyledTitleSlot>
             <AppTooltip
               anchorSelect={`#${helpId}`}
               content={titleHelp}

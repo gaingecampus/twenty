@@ -1,4 +1,9 @@
 import { MessageListHeaderCount } from '@/activities/emails/components/message-lists/MessageListHeaderCount';
+import {
+  getMessageListMemberEmailFilter,
+  type MessageListMemberEmailFilter,
+} from '@/activities/emails/utils/getMessageListMemberEmailFilter';
+import { Select } from '@/ui/input/components/Select';
 import { WidgetHeaderActionContext } from '@/page-layout/widgets/widget-card/contexts/WidgetHeaderActionContext';
 import { createPortal } from 'react-dom';
 import {
@@ -48,6 +53,7 @@ const StyledSection = styled.section`
   width: 100%;
 `;
 const StyledActions = styled.div`
+  align-items: center;
   display: flex;
   flex-wrap: wrap;
   gap: ${themeCssVariables.spacing[2]};
@@ -66,6 +72,15 @@ const StyledRecipientNotice = styled.span`
   font-size: ${themeCssVariables.font.size.sm};
   white-space: normal;
 `;
+const StyledRemoveButton = styled(Button)`
+  && {
+    background: ${themeCssVariables.background.tertiary};
+
+    &:hover {
+      background: ${themeCssVariables.background.quaternary};
+    }
+  }
+`;
 const MEMBER_GRID_COLUMNS =
   'minmax(180px, 1fr) minmax(150px, 1fr) minmax(280px, 1.5fr) 80px';
 
@@ -76,6 +91,8 @@ export const MessageListMembers = ({ listId }: { listId: string }) => (
 const MessageListMembersPage = ({ listId }: { listId: string }) => {
   const headerActionTarget = useContext(WidgetHeaderActionContext);
   const [page, setPage] = useState(0);
+  const [emailFilter, setEmailFilter] =
+    useState<MessageListMemberEmailFilter>('all');
   const pageSize = 50;
   const [busy, setBusy] = useState(false);
   const { enqueueErrorSnackBar } = useSnackBar();
@@ -84,7 +101,7 @@ const MessageListMembersPage = ({ listId }: { listId: string }) => {
       page,
       pageSize,
       objectNameSingular: 'messageListMember',
-      filter: { listId: { eq: listId } },
+      filter: getMessageListMemberEmailFilter(listId, emailFilter),
       recordGqlFields: {
         id: true,
         personId: true,
@@ -98,6 +115,26 @@ const MessageListMembersPage = ({ listId }: { listId: string }) => {
         workspaceMember: { id: true, name: true, userEmail: true },
       },
     });
+  const allMembers = useMessageListRecordPage({
+    objectNameSingular: 'messageListMember',
+    filter: getMessageListMemberEmailFilter(listId, 'all'),
+    recordGqlFields: { id: true },
+    page: 0,
+    pageSize: 1,
+  });
+  const membersWithEmail = useMessageListRecordPage({
+    objectNameSingular: 'messageListMember',
+    filter: getMessageListMemberEmailFilter(listId, 'withEmail'),
+    recordGqlFields: { id: true },
+    page: 0,
+    pageSize: 1,
+  });
+  const countsLoading = allMembers.loading || membersWithEmail.loading;
+  const countsError = Boolean(allMembers.error || membersWithEmail.error);
+  const formatCount = (count: number) =>
+    countsLoading ? '…' : countsError ? '—' : count.toLocaleString('ko-KR');
+  const refreshCounts = () =>
+    Promise.allSettled([allMembers.refetch(), membersWithEmail.refetch()]);
   const permissions = useObjectPermissionsForObject(objectMetadataItem.id);
   const [adding, setAdding] = useState<'person' | 'workspaceMember' | null>(
     null,
@@ -109,6 +146,7 @@ const MessageListMembersPage = ({ listId }: { listId: string }) => {
     setBusy(true);
     try {
       await action();
+      await refreshCounts();
       if (page > 0 && records.length === 1) setPage(page - 1);
       else await refetch();
     } catch {
@@ -121,6 +159,30 @@ const MessageListMembersPage = ({ listId }: { listId: string }) => {
   };
   const actions = (
     <StyledActions>
+      <Select<MessageListMemberEmailFilter>
+        dropdownId={`message-list-email-filter-${listId}`}
+        selectSizeVariant="small"
+        value={emailFilter}
+        disabled={busy}
+        options={[
+          {
+            value: 'all',
+            label: t`전체 ${formatCount(allMembers.totalCount)}명`,
+          },
+          {
+            value: 'withEmail',
+            label: t`이메일 있음 ${formatCount(membersWithEmail.totalCount)}명`,
+          },
+          {
+            value: 'withoutEmail',
+            label: t`이메일 없음 ${formatCount(Math.max(0, allMembers.totalCount - membersWithEmail.totalCount))}명`,
+          },
+        ]}
+        onChange={(value) => {
+          setEmailFilter(value);
+          setPage(0);
+        }}
+      />
       {permissions.canUpdateObjectRecords && (
         <Button
           title={t`고객 추가`}
@@ -144,9 +206,9 @@ const MessageListMembersPage = ({ listId }: { listId: string }) => {
   return (
     <StyledSection>
       <MessageListHeaderCount
-        count={totalCount}
-        loading={loading}
-        error={Boolean(error)}
+        count={allMembers.totalCount}
+        loading={allMembers.loading}
+        error={Boolean(allMembers.error)}
         label={t`등록된 수신자`}
       />
       {headerActionTarget ? createPortal(actions, headerActionTarget) : actions}
@@ -156,18 +218,31 @@ const MessageListMembersPage = ({ listId }: { listId: string }) => {
           recipientType={adding}
           onClose={() => setAdding(null)}
           onAdded={async () => {
+            await refreshCounts();
             if (page !== 0) setPage(0);
             else await refetch();
           }}
         />
       )}
+      <StyledMetadata role="status">
+        {t`이메일 등록 ${formatCount(membersWithEmail.totalCount)}명 / 전체 ${formatCount(allMembers.totalCount)}명`}
+      </StyledMetadata>
+      {countsError && (
+        <p role="alert">{t`이메일 등록 인원을 불러오지 못했습니다.`}</p>
+      )}
       {loading && <p>{t`불러오는 중…`}</p>}
       {error && <p role="alert">{t`고객 분류를 불러오지 못했습니다.`}</p>}
       {!loading && !error && records.length === 0 && (
         <StyledMessageListEmpty>
-          {t`아직 등록된 수신자가 없습니다.`}
-          <br />
-          {t`고객 또는 워크스페이스 멤버를 추가하세요.`}
+          {emailFilter === 'all' ? (
+            <>
+              {t`아직 등록된 수신자가 없습니다.`}
+              <br />
+              {t`고객 또는 워크스페이스 멤버를 추가하세요.`}
+            </>
+          ) : (
+            t`선택한 이메일 조건에 해당하는 수신자가 없습니다.`
+          )}
         </StyledMessageListEmpty>
       )}
       {records.length > 0 && (
@@ -243,10 +318,10 @@ const MessageListMembersPage = ({ listId }: { listId: string }) => {
                 </StyledMessageListCell>
                 <StyledMessageListCell align="center">
                   {permissions.canSoftDeleteObjectRecords && (
-                    <Button
+                    <StyledRemoveButton
                       title={t`제외`}
                       size="small"
-                      variant="tertiary"
+                      variant="primary"
                       disabled={busy}
                       onClick={() =>
                         runMutation(() => deleteOneRecord(member.id))
