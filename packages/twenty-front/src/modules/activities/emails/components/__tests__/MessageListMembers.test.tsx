@@ -11,6 +11,7 @@ import {
 import { MessageListMembers } from '@/activities/emails/components/message-lists/MessageListMembers';
 import { useMessageListRecordPage } from '@/activities/emails/hooks/useMessageListRecordPage';
 import { useDeleteOneRecord } from '@/object-record/hooks/useDeleteOneRecord';
+import { getMessageListMemberFilter } from '@/activities/emails/utils/getMessageListMemberFilter';
 
 jest.mock('@/activities/emails/hooks/useMessageListRecordPage', () => ({
   useMessageListRecordPage: jest.fn(),
@@ -201,8 +202,8 @@ it('shows whole-list email counts and resets pagination when filtering', () => {
       } as unknown as ReturnType<typeof useMessageListRecordPage>;
     });
   render(<MessageListMembers listId="email-list" />);
-  expect(screen.getByRole('status')).toHaveTextContent('이메일 등록 820명');
-  expect(screen.getByRole('status')).toHaveTextContent('이메일 미등록 180명');
+  expect(screen.queryByRole('status')).not.toBeInTheDocument();
+  expect(screen.queryByText('이메일 등록 820명')).not.toBeInTheDocument();
   expect(
     screen.getByRole('button', { name: '이메일 없음 180명' }),
   ).toBeInTheDocument();
@@ -253,8 +254,9 @@ it('keeps filtering available for empty results and does not show failed counts 
       }) as unknown as ReturnType<typeof useMessageListRecordPage>,
   );
   render(<MessageListMembers listId="empty-list" />);
-  expect(screen.getByRole('status')).toHaveTextContent('이메일 등록 —명');
-  expect(screen.getByRole('status')).toHaveTextContent('이메일 미등록 —명');
+  expect(screen.getByRole('alert')).toHaveTextContent(
+    '이메일 등록 인원을 불러오지 못했습니다.',
+  );
   fireEvent.click(screen.getByRole('button', { name: '이메일 없음 —명' }));
   expect(
     screen.getByText('선택한 이메일 조건에 해당하는 수신자가 없습니다.'),
@@ -262,6 +264,45 @@ it('keeps filtering available for empty results and does not show failed counts 
   expect(
     screen.queryByText('고객 또는 워크스페이스 멤버를 추가하세요.'),
   ).not.toBeInTheDocument();
+});
+
+it('searches the full list with the email filter, resets pagination, and restores results when cleared', () => {
+  jest.mocked(useMessageListRecordPage).mockReturnValue({
+    records: [],
+    totalCount: 1000,
+    loading: false,
+    error: undefined,
+    objectMetadataItem: { id: 'member' },
+    refetch: jest.fn(),
+  } as unknown as ReturnType<typeof useMessageListRecordPage>);
+  const { rerender } = render(<MessageListMembers listId="search-list" />);
+  fireEvent.click(screen.getByRole('button', { name: '이메일 없음 0명' }));
+  fireEvent.click(screen.getByText('last page'));
+  const searchInput = screen.getByRole('textbox', {
+    name: '수신자 이름 또는 이메일 검색',
+  });
+  fireEvent.change(searchInput, { target: { value: 'luna' } });
+  expect(screen.getByText('page 1')).toBeInTheDocument();
+  expect(useMessageListRecordPage).toHaveBeenCalledWith(
+    expect.objectContaining({
+      page: 0,
+      pageSize: 50,
+      filter: getMessageListMemberFilter('search-list', 'withoutEmail', 'luna'),
+    }),
+  );
+  expect(
+    screen.getByText('검색 조건에 맞는 수신자가 없습니다.'),
+  ).toBeInTheDocument();
+  fireEvent.change(searchInput, { target: { value: '' } });
+  expect(
+    screen.getByText('선택한 이메일 조건에 해당하는 수신자가 없습니다.'),
+  ).toBeInTheDocument();
+  fireEvent.change(searchInput, { target: { value: 'another' } });
+  rerender(<MessageListMembers listId="other-list" />);
+  expect(searchInput).not.toBeInTheDocument();
+  expect(
+    screen.getByRole('textbox', { name: '수신자 이름 또는 이메일 검색' }),
+  ).toHaveValue('');
 });
 
 it.each([false, true])(

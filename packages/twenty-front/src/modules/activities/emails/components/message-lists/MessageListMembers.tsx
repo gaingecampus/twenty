@@ -5,6 +5,8 @@ import {
   type MessageListMemberEmailFilter,
 } from '@/activities/emails/utils/getMessageListMemberEmailFilter';
 import { Select } from '@/ui/input/components/Select';
+import { SearchInput } from '@/ui/input/components/SearchInput';
+import { getMessageListMemberFilter } from '@/activities/emails/utils/getMessageListMemberFilter';
 import { WidgetHeaderActionContext } from '@/page-layout/widgets/widget-card/contexts/WidgetHeaderActionContext';
 import { createPortal } from 'react-dom';
 import {
@@ -26,7 +28,6 @@ import { styled } from '@linaria/react';
 import { t } from '@lingui/core/macro';
 import { useContext, useState } from 'react';
 import { Button } from 'twenty-ui/input';
-import { Tag } from 'twenty-ui/data-display';
 import { IconFilter, IconMail, IconMailX } from 'twenty-ui/icon';
 import {
   AnimatedPlaceholder,
@@ -68,9 +69,12 @@ const StyledSection = styled.section`
 const StyledFilterRow = styled.div`
   align-items: center;
   display: flex;
-  flex-wrap: wrap;
   gap: ${themeCssVariables.spacing[2]};
   justify-content: space-between;
+`;
+const StyledSearchContainer = styled.div`
+  flex: 1;
+  min-width: 0;
 `;
 const StyledEmptyContainer = styled(AnimatedPlaceholderEmptyContainer)`
   padding-block: ${themeCssVariables.spacing[6]};
@@ -110,6 +114,8 @@ export const MessageListMembers = ({ listId }: { listId: string }) => (
 const MessageListMembersPage = ({ listId }: { listId: string }) => {
   const headerActionTarget = useContext(WidgetHeaderActionContext);
   const [page, setPage] = useState(0);
+  const [search, setSearch] = useState('');
+  const hasSearch = search.trim().length > 0;
   const [emailFilter, setEmailFilter] =
     useState<MessageListMemberEmailFilter>('all');
   const pageSize = 50;
@@ -120,7 +126,7 @@ const MessageListMembersPage = ({ listId }: { listId: string }) => {
       page,
       pageSize,
       objectNameSingular: 'messageListMember',
-      filter: getMessageListMemberEmailFilter(listId, emailFilter),
+      filter: getMessageListMemberFilter(listId, emailFilter, search),
       recordGqlFields: {
         id: true,
         personId: true,
@@ -224,6 +230,17 @@ const MessageListMembersPage = ({ listId }: { listId: string }) => {
         />
       )}
       <StyledFilterRow>
+        <StyledSearchContainer>
+          <SearchInput
+            value={search}
+            placeholder={t`수신자 이름 또는 이메일 검색`}
+            disabled={busy}
+            onChange={(value) => {
+              setSearch(value);
+              setPage(0);
+            }}
+          />
+        </StyledSearchContainer>
         <Select<MessageListMemberEmailFilter>
           dropdownId={`message-list-email-filter-${listId}`}
           value={emailFilter}
@@ -250,22 +267,6 @@ const MessageListMembersPage = ({ listId }: { listId: string }) => {
             setPage(0);
           }}
         />
-        <StyledActions role="status" aria-atomic="true">
-          <Tag
-            color={countsLoading || countsError ? 'gray' : 'green'}
-            size="medium"
-            preventShrink
-            Icon={IconMail}
-            text={t`이메일 등록 ${formatCount(membersWithEmail.totalCount)}명`}
-          />
-          <Tag
-            color="gray"
-            size="medium"
-            preventShrink
-            Icon={IconMailX}
-            text={t`이메일 미등록 ${formatCount(membersWithoutEmailCount)}명`}
-          />
-        </StyledActions>
       </StyledFilterRow>
       {countsError && (
         <p role="alert">{t`이메일 등록 인원을 불러오지 못했습니다.`}</p>
@@ -275,18 +276,24 @@ const MessageListMembersPage = ({ listId }: { listId: string }) => {
       {!loading && !error && records.length === 0 && (
         <StyledEmptyContainer>
           <AnimatedPlaceholder
-            type={emailFilter === 'all' ? 'noRecord' : 'noMatchRecord'}
+            type={
+              emailFilter === 'all' && !hasSearch ? 'noRecord' : 'noMatchRecord'
+            }
           />
           <AnimatedPlaceholderEmptyTextContainer>
             <AnimatedPlaceholderEmptyTitle>
-              {emailFilter === 'all'
-                ? t`아직 등록된 수신자가 없습니다.`
-                : t`선택한 이메일 조건에 해당하는 수신자가 없습니다.`}
+              {hasSearch
+                ? t`검색 조건에 맞는 수신자가 없습니다.`
+                : emailFilter === 'all'
+                  ? t`아직 등록된 수신자가 없습니다.`
+                  : t`선택한 이메일 조건에 해당하는 수신자가 없습니다.`}
             </AnimatedPlaceholderEmptyTitle>
             <AnimatedPlaceholderEmptySubTitle>
-              {emailFilter === 'all'
-                ? t`고객 또는 워크스페이스 멤버를 추가하세요.`
-                : t`다른 필터를 선택해 주세요.`}
+              {hasSearch
+                ? t`검색어나 필터를 변경해 주세요.`
+                : emailFilter === 'all'
+                  ? t`고객 또는 워크스페이스 멤버를 추가하세요.`
+                  : t`다른 필터를 선택해 주세요.`}
             </AnimatedPlaceholderEmptySubTitle>
           </AnimatedPlaceholderEmptyTextContainer>
         </StyledEmptyContainer>
