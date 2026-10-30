@@ -26,7 +26,6 @@ import {
 } from 'twenty-ui/icon';
 import { Tag } from 'twenty-ui/data-display';
 import { Button, TabButton } from 'twenty-ui/input';
-import { getOsControlSymbol } from 'twenty-ui/utilities';
 
 const StyledContainer = styled.div`
   display: flex;
@@ -85,7 +84,6 @@ const EmailCampaignComposer = ({
                 campaignState.isEditing ? t`예약 변경 검토` : t`발송 전 검토`
               }
               Icon={IconSend}
-              hotkeys={[getOsControlSymbol(), '⏎']}
               onClick={campaignState.handleSend}
               disabled={!campaignState.canSend}
             />
