@@ -18,7 +18,13 @@ import { RecordChip } from '@/object-record/components/RecordChip';
 import { EmailDisplay } from '@/ui/field/display/components/EmailDisplay';
 import { Tag, type TagColor } from 'twenty-ui/data-display';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
-import { AnimatedPlaceholderEmptySubTitle } from 'twenty-ui/feedback';
+import {
+  AnimatedPlaceholder,
+  AnimatedPlaceholderEmptyContainer,
+  AnimatedPlaceholderEmptySubTitle,
+  AnimatedPlaceholderEmptyTextContainer,
+  AnimatedPlaceholderEmptyTitle,
+} from 'twenty-ui/feedback';
 
 type Campaign = ObjectRecord & {
   subject: string | null;
@@ -33,9 +39,6 @@ const StyledSection = styled.section`
   gap: ${themeCssVariables.spacing[3]};
   min-width: 0;
   width: 100%;
-`;
-const StyledEmpty = styled.div`
-  padding-block: ${themeCssVariables.spacing[4]};
 `;
 
 const CAMPAIGN_GRID_COLUMNS =
@@ -100,11 +103,17 @@ const MessageListCampaignsPage = ({ listId }: { listId: string }) => {
       {loading && <p>{t`불러오는 중…`}</p>}
       {error && <p role="alert">{t`심방콜 발송을 불러오지 못했습니다.`}</p>}
       {!loading && !error && records.length === 0 && (
-        <StyledEmpty>
-          <AnimatedPlaceholderEmptySubTitle>
-            {t`연결된 심방콜 발송이 없습니다.`}
-          </AnimatedPlaceholderEmptySubTitle>
-        </StyledEmpty>
+        <AnimatedPlaceholderEmptyContainer>
+          <AnimatedPlaceholder type="emptyInbox" />
+          <AnimatedPlaceholderEmptyTextContainer>
+            <AnimatedPlaceholderEmptyTitle>
+              {t`연결된 심방콜 발송이 없습니다.`}
+            </AnimatedPlaceholderEmptyTitle>
+            <AnimatedPlaceholderEmptySubTitle>
+              {t`심방콜 발송을 연결해 주세요.`}
+            </AnimatedPlaceholderEmptySubTitle>
+          </AnimatedPlaceholderEmptyTextContainer>
+        </AnimatedPlaceholderEmptyContainer>
       )}
       {records.length > 0 && (
         <MessageListTableScroll tableId={tableId} label="연결된 심방콜 발송 표">
