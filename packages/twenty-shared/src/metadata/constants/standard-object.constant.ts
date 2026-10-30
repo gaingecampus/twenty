@@ -948,6 +948,12 @@ export const STANDARD_OBJECTS = {
   messageCampaign: {
     universalIdentifier: '238acb94-dd4c-4036-bc55-19b99d821efd',
     fields: {
+      draftData: {
+        universalIdentifier: 'fe01eb92-79f9-4c92-9095-85271836a421',
+      },
+      draftDispatchId: {
+        universalIdentifier: '327b085e-8553-4f49-bc64-344859e73ec1',
+      },
       id: { universalIdentifier: '819a9eb4-2738-49df-a302-76d2dc7d7114' },
       createdAt: {
         universalIdentifier: '2c7eb5f4-03f8-4101-9486-b2bdf69175d8',

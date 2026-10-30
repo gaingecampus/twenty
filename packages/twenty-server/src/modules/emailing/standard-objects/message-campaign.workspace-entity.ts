@@ -1,4 +1,8 @@
-import { type EmailAttachment, type EmailsMetadata } from 'twenty-shared/types';
+import {
+  type CampaignDraft,
+  type EmailAttachment,
+  type EmailsMetadata,
+} from 'twenty-shared/types';
 
 import { BaseWorkspaceEntity } from 'src/engine/twenty-orm/base.workspace-entity';
 import { type EntityRelation } from 'src/engine/workspace-manager/workspace-migration/types/entity-relation.interface';
@@ -7,6 +11,8 @@ import { type MessageParticipantWorkspaceEntity } from 'src/modules/messaging/co
 import { type MessageWorkspaceEntity } from 'src/modules/messaging/common/standard-objects/message.workspace-entity';
 
 export class MessageCampaignWorkspaceEntity extends BaseWorkspaceEntity {
+  draftData: CampaignDraft | null;
+  draftDispatchId: string | null;
   attachmentFiles: EmailAttachment[] | null;
   subject: string | null;
   bodyTemplate: string | null;

@@ -41,6 +41,32 @@ export const buildMessageCampaignStandardFlatFieldMetadatas = ({
   };
 
   return {
+    draftData: createStandardFieldFlatMetadata({
+      ...base,
+      context: {
+        fieldName: 'draftData',
+        type: FieldMetadataType.RAW_JSON,
+        label: i18nLabel(msg`초안 내용`),
+        description: i18nLabel(msg`작성 중인 발송 설정`),
+        icon: 'IconFileText',
+        isNullable: true,
+        isSystem: true,
+        isUIEditable: false,
+      },
+    }),
+    draftDispatchId: createStandardFieldFlatMetadata({
+      ...base,
+      context: {
+        fieldName: 'draftDispatchId',
+        type: FieldMetadataType.UUID,
+        label: i18nLabel(msg`초안 발송 요청`),
+        description: i18nLabel(msg`중복 발송을 방지하는 요청 ID`),
+        icon: 'IconSend',
+        isNullable: true,
+        isSystem: true,
+        isUIEditable: false,
+      },
+    }),
     id: createStandardFieldFlatMetadata({
       ...base,
       context: {
@@ -219,6 +245,13 @@ export const buildMessageCampaignStandardFlatFieldMetadatas = ({
         isUIEditable: false,
         defaultValue: "'DRAFT'",
         options: [
+          {
+            id: '5c57718d-d2f9-47c2-abf5-e12975165b47',
+            value: 'SIMULATED',
+            label: i18nLabel(msg`검증 완료`),
+            position: 6,
+            color: 'gray',
+          },
           {
             id: '2ea5fb56-314d-4a33-bbcf-07b3955f2f27',
             value: 'CANCELLED',
