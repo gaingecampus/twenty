@@ -1,5 +1,6 @@
 import { CampaignFieldLabel } from '@/activities/emails/components/CampaignFieldLabel';
 import { StyledCampaignCheckboxLabel } from '@/activities/emails/components/StyledCampaignCheckboxLabel';
+import { StyledCampaignOptionRow } from '@/activities/emails/components/StyledCampaignOptionRow';
 import { EmailSignaturePreview } from '@/settings/accounts/components/EmailSignaturePreview';
 import { CampaignBodyVariablePicker } from '@/activities/emails/components/CampaignBodyVariablePicker';
 import { EmailAttachmentsField } from '@/activities/emails/components/EmailAttachmentsField';
@@ -178,7 +179,7 @@ export const CampaignComposerFields = ({
         </StyledFieldGroup>
         <StyledOptions>
           <StyledOptionsBody>
-            <StyledLabelRow>
+            <StyledCampaignOptionRow>
               <StyledCampaignCheckboxLabel>
                 <Checkbox
                   hoverable={false}
@@ -200,7 +201,7 @@ export const CampaignComposerFields = ({
                   )
                 }
               />
-            </StyledLabelRow>
+            </StyledCampaignOptionRow>
 
             {campaignState.isEditing && (
               <StyledHint>{t`메시지에 서명이 중복되지 않는지 확인해 주세요.`}</StyledHint>

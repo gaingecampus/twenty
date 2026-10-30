@@ -1,3 +1,5 @@
+import { StyledCampaignOptionRow } from '@/activities/emails/components/StyledCampaignOptionRow';
+import { StyledCampaignNotice } from '@/activities/emails/components/StyledCampaignNotice';
 import { CampaignRecipientHeader } from '@/activities/emails/components/CampaignRecipientHeader';
 import { StyledCampaignCheckboxLabel } from '@/activities/emails/components/StyledCampaignCheckboxLabel';
 import { CampaignRecipientSelector } from '@/activities/emails/components/CampaignRecipientSelector';
@@ -225,24 +227,28 @@ export const SmsCampaignComposer = ({
   return (
     <StyledForm>
       <StyledFieldSection aria-label="광고 문자 설정">
-        <StyledCampaignCheckboxLabel>
-          <Checkbox
-            hoverable={false}
-            aria-describedby={advertising ? 'sms-advertising-help' : undefined}
-            checked={advertising}
-            disabled={busy}
-            onCheckedChange={(checked) => {
-              reset();
-              setAdvertising(checked);
-            }}
-          />
-          <span>광고 문자</span>
-        </StyledCampaignCheckboxLabel>
+        <StyledCampaignOptionRow>
+          <StyledCampaignCheckboxLabel>
+            <Checkbox
+              hoverable={false}
+              aria-describedby={
+                advertising ? 'sms-advertising-help' : undefined
+              }
+              checked={advertising}
+              disabled={busy}
+              onCheckedChange={(checked) => {
+                reset();
+                setAdvertising(checked);
+              }}
+            />
+            <span>광고 문자</span>
+          </StyledCampaignCheckboxLabel>
+        </StyledCampaignOptionRow>
         {advertising && (
-          <small id="sms-advertising-help">
+          <StyledCampaignNotice id="sms-advertising-help">
             (광고)로 시작하고 발신자 이름 및 등록된 무료수신거부 080 번호를
             메시지에 넣어주세요.
-          </small>
+          </StyledCampaignNotice>
         )}
       </StyledFieldSection>
       <StyledFieldSection>

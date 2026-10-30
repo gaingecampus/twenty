@@ -271,6 +271,7 @@ const TextInputComponent = forwardRef<
     {
       className,
       label,
+      'aria-label': ariaLabel,
       value,
       onChange,
       onFocus,
@@ -353,6 +354,7 @@ const TextInputComponent = forwardRef<
 
           <StyledInput
             id={instanceId}
+            aria-label={ariaLabel}
             width={width}
             data-testid={dataTestId}
             autoComplete={autoComplete ?? 'off'}

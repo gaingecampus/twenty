@@ -144,6 +144,7 @@ export const CampaignDispatchOptions = ({
             value={campaignState.unsubscribeTopicId ?? ''}
             options={topicOptions}
             emptyOption={{ label: t`No topic`, value: '' }}
+            emptyOptionIsPlaceholder
             onChange={(value) =>
               campaignState.setUnsubscribeTopicId(value === '' ? null : value)
             }
