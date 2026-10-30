@@ -1,6 +1,7 @@
 import { StyledHeaderDropdownButton } from '@/ui/layout/dropdown/components/StyledHeaderDropdownButton';
 import { useRecordIndexFullscreen } from '@/ui/layout/fullscreen/hooks/useRecordIndexFullscreen';
 import { IconMaximize, IconMinimize } from 'twenty-ui/icon';
+import { Button } from 'twenty-ui/input';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 
 export const RecordIndexFullscreenButton = () => {
@@ -10,6 +11,20 @@ export const RecordIndexFullscreenButton = () => {
     ? '전체 화면 해제'
     : '전체 화면으로 보기';
   const Icon = isRecordIndexFullscreen ? IconMinimize : IconMaximize;
+
+  if (isRecordIndexFullscreen) {
+    return (
+      <Button
+        type="button"
+        Icon={IconMinimize}
+        title={label}
+        ariaLabel={label}
+        variant="primary"
+        accent="blue"
+        onClick={toggleRecordIndexFullscreen}
+      />
+    );
+  }
 
   return (
     <StyledHeaderDropdownButton
