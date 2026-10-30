@@ -7,7 +7,8 @@ export const StyledDispatchForm = styled.div`
   flex-direction: column;
   gap: ${themeCssVariables.spacing[4]};
   min-width: 0;
-  padding: ${themeCssVariables.spacing[4]};
+  padding: ${themeCssVariables.spacing[4]} ${themeCssVariables.spacing[4]}
+    ${themeCssVariables.spacing[8]};
   section {
     display: flex;
     flex-direction: column;
