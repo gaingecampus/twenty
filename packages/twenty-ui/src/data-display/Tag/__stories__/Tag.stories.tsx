@@ -51,6 +51,17 @@ export const WithLongText: Story = {
   },
 };
 
+export const Medium: Story = {
+  decorators: [ComponentDecorator],
+  args: {
+    color: 'green',
+    text: '이메일 등록 1,000명',
+    size: 'medium',
+    Icon: IconUser,
+    preventShrink: true,
+  },
+};
+
 export const WithIcon: Story = {
   decorators: [ComponentDecorator],
   args: {

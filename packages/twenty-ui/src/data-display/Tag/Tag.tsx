@@ -19,6 +19,7 @@ type TagProps = {
   onClick?: () => void;
   weight?: TagWeight;
   variant?: TagVariant;
+  size?: 'small' | 'medium';
   preventShrink?: boolean;
   preventPadding?: boolean;
 };
@@ -31,6 +32,7 @@ export const Tag = ({
   onClick,
   weight = 'regular',
   variant = 'solid',
+  size = 'small',
   preventShrink,
   preventPadding,
 }: TagProps) => {
@@ -55,7 +57,7 @@ export const Tag = ({
       {isDefined(Icon) ? (
         <div className={styles.iconContainer}>
           <Icon
-            size={theme.icon.size.sm}
+            size={size === 'medium' ? theme.icon.size.md : theme.icon.size.sm}
             stroke={theme.icon.stroke.sm}
             aria-hidden
           />
@@ -80,6 +82,7 @@ export const Tag = ({
 
   const sharedClassName = clsx(
     styles.tag,
+    size === 'medium' && styles.sizeMedium,
     weight === 'medium' && styles.weightMedium,
     variant === 'outline' && styles.variantOutline,
     variant === 'border' && styles.variantBorder,

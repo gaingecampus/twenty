@@ -250,11 +250,15 @@ const MessageListMembersPage = ({ listId }: { listId: string }) => {
         <StyledActions role="status" aria-atomic="true">
           <Tag
             color={countsLoading || countsError ? 'gray' : 'green'}
+            size="medium"
+            preventShrink
             Icon={IconMail}
             text={t`이메일 등록 ${formatCount(membersWithEmail.totalCount)}명`}
           />
           <Tag
             color="gray"
+            size="medium"
+            preventShrink
             Icon={IconMailX}
             text={t`이메일 미등록 ${formatCount(membersWithoutEmailCount)}명`}
           />

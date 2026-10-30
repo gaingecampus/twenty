@@ -26,6 +26,14 @@
   text-align: inherit;
 }
 
+.sizeMedium {
+  box-sizing: border-box;
+  height: var(--t-input-height, var(--t-spacing-8));
+  padding: 0 var(--t-input-padding-x, var(--t-spacing-2));
+  font-size: var(--t-font-size-md);
+  gap: var(--t-spacing-2);
+}
+
 .weightMedium {
   font-weight: var(--t-font-weight-medium);
 }
