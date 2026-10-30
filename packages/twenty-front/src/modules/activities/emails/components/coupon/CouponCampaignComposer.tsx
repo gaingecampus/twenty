@@ -6,19 +6,10 @@ import { useMutation, useQuery } from '@apollo/client/react';
 import { useRef, useState } from 'react';
 import { Button } from 'twenty-ui/input';
 import { Tag } from 'twenty-ui/data-display';
-import { IconRefresh, IconUsers } from 'twenty-ui/icon';
-import { H3Title } from 'twenty-ui/typography';
-import {
-  AnimatedPlaceholder,
-  AnimatedPlaceholderEmptySubTitle,
-  AnimatedPlaceholderEmptyTextContainer,
-  AnimatedPlaceholderEmptyTitle,
-  SidePanelInformationBanner,
-} from 'twenty-ui/feedback';
+import { IconUsers } from 'twenty-ui/icon';
+import { SidePanelInformationBanner } from 'twenty-ui/feedback';
 import {
   StyledCouponActions,
-  StyledCouponEmpty,
-  StyledCouponHeader,
   StyledCouponSummary,
 } from './CouponCampaignComposerStyles';
 
@@ -26,11 +17,9 @@ import { FormSingleRecordPicker } from '@/object-record/record-field/ui/form-typ
 import { Select } from '@/ui/input/components/Select';
 import {
   COUPON_CAPABILITIES,
-  COUPON_HISTORY,
   PREVIEW_COUPON,
   SIMULATE_COUPON,
   SEND_COUPON,
-  REFRESH_COUPON,
   type CouponCapabilities,
   type CouponDispatch,
 } from './coupon-operations';
@@ -73,15 +62,6 @@ export const CouponCampaignComposer = () => {
     loading,
     error: capabilityError,
   } = useQuery<{ couponCapabilities: CouponCapabilities }>(COUPON_CAPABILITIES);
-  const {
-    data: history,
-    error: historyError,
-    loading: historyLoading,
-    refetch,
-  } = useQuery<{ couponDispatchHistory: CouponDispatch[] }>(COUPON_HISTORY, {
-    fetchPolicy: 'network-only',
-    notifyOnNetworkStatusChange: true,
-  });
   const [preview, { loading: reviewing }] = useMutation<{
     previewCouponDispatch: CouponDispatch;
   }>(PREVIEW_COUPON);
@@ -91,10 +71,7 @@ export const CouponCampaignComposer = () => {
   const [send, { loading: sending }] = useMutation<{
     sendCouponDispatch: CouponDispatch;
   }>(SEND_COUPON);
-  const [refresh, { loading: refreshing }] = useMutation<{
-    refreshCouponDispatch: CouponDispatch;
-  }>(REFRESH_COUPON);
-  const busy = reviewing || running || sending || refreshing;
+  const busy = reviewing || running || sending;
   const capabilities = data?.couponCapabilities;
   const invalidate = () => {
     revision.current++;
@@ -152,12 +129,8 @@ export const CouponCampaignComposer = () => {
         setResult(response.data?.simulateCouponDispatch ?? null);
       }
       setQuote(null);
-      // A history failure must not turn a completed operation into a retry prompt.
-      await refetch().catch(() => undefined);
     } catch (failure) {
       setError(failureMessage(failure));
-      // A lost GraphQL response does not prove that payment failed. Recover the durable history.
-      await refetch().catch(() => undefined);
     } finally {
       submitting.current = false;
     }
@@ -427,99 +400,6 @@ export const CouponCampaignComposer = () => {
           )}
         </section>
       )}
-      <section aria-label="쿠폰 검증 이력" aria-busy={historyLoading}>
-        <StyledCouponHeader>
-          <H3Title title="최근 발송 내역" />
-          <Button
-            title="새로고침"
-            Icon={IconRefresh}
-            size="small"
-            variant="secondary"
-            disabled={busy || historyLoading}
-            onClick={() => {
-              void refetch().catch(() =>
-                setError('내역을 불러오지 못했습니다.'),
-              );
-            }}
-          />
-        </StyledCouponHeader>
-        {historyLoading ? (
-          <p role="status">발송 내역을 불러오는 중…</p>
-        ) : historyError ? (
-          <div role="alert">
-            <SidePanelInformationBanner
-              variant="warning"
-              message="발송 내역을 불러오지 못했습니다. 새로고침해 주세요."
-            />
-          </div>
-        ) : history?.couponDispatchHistory.length === 0 ? (
-          <StyledCouponEmpty role="status">
-            <AnimatedPlaceholder type="emptyInbox" />
-            <AnimatedPlaceholderEmptyTextContainer>
-              <AnimatedPlaceholderEmptyTitle>
-                아직 발송 내역이 없습니다
-              </AnimatedPlaceholderEmptyTitle>
-              <AnimatedPlaceholderEmptySubTitle>
-                쿠폰 검증 또는 발송을 완료하면 여기에 표시됩니다.
-              </AnimatedPlaceholderEmptySubTitle>
-            </AnimatedPlaceholderEmptyTextContainer>
-          </StyledCouponEmpty>
-        ) : null}
-        {!historyLoading &&
-          !historyError &&
-          history?.couponDispatchHistory.map((dispatch) => (
-            <StyledCard key={dispatch.id}>
-              <strong>{dispatch.product.name}</strong>
-              <small>
-                {new Date(dispatch.createdAt).toLocaleString('ko-KR')} ·{' '}
-                {dispatch.recipientCount}명
-              </small>
-              <small>
-                {dispatch.mode === 'SIMULATION'
-                  ? '내부 검증'
-                  : dispatch.environment === 'production'
-                    ? '운영 발송'
-                    : '개발 서버'}
-              </small>
-              <p>{statusLabels[dispatch.status] ?? dispatch.status}</p>
-              {dispatch.orderTrId && (
-                <small>주문거래번호 {dispatch.orderTrId}</small>
-              )}
-              {dispatch.actualCost != null && (
-                <small>
-                  센드비 결제금액 {dispatch.actualCost.toLocaleString()}원
-                </small>
-              )}
-              {dispatch.orderId && (
-                <Button
-                  title="센드비 발급 상태 조회"
-                  disabled={busy}
-                  onClick={async () => {
-                    try {
-                      await refresh({
-                        variables: { input: { quoteId: dispatch.id } },
-                      });
-                      await refetch();
-                    } catch (failure) {
-                      setError(failureMessage(failure));
-                    }
-                  }}
-                />
-              )}
-              {dispatch.recipients.slice(0, 5).map((recipient, index) => (
-                <small
-                  key={`${recipient.personId ?? index}-${recipient.phone}`}
-                >
-                  {recipient.phone} ·{' '}
-                  {statusLabels[recipient.status] ?? recipient.status}
-                </small>
-              ))}
-              {dispatch.recipients.length > 5 && (
-                <small>외 {dispatch.recipients.length - 5}명</small>
-              )}
-            </StyledCard>
-          ))}
-      </section>
     </StyledForm>
   );
 };
