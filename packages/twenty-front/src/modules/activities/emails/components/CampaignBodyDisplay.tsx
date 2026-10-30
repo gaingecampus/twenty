@@ -5,6 +5,7 @@ import { campaignBodyToText } from '@/activities/emails/utils/campaignDisplay';
 
 const StyledBody = styled.div`
   background: ${themeCssVariables.background.tertiary};
+  border-radius: ${themeCssVariables.border.radius.sm};
   line-height: 1.6;
   overflow-wrap: anywhere;
   padding: ${themeCssVariables.spacing[3]};
