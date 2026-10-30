@@ -2,10 +2,9 @@ import { styled } from '@linaria/react';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 
 export const StyledMessageListToolbar = styled.div`
-  align-items: flex-start;
+  align-items: center;
   display: flex;
   justify-content: flex-end;
-  padding-bottom: ${themeCssVariables.spacing[3]};
 `;
 
 export const StyledMessageListEmpty = styled.div`

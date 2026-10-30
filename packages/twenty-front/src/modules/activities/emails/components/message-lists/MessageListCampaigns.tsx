@@ -4,7 +4,6 @@ import {
   StyledMessageListHeader,
   StyledMessageListCell,
 } from '@/activities/emails/components/message-lists/MessageListTableStyles';
-import { StyledMessageListEmpty } from '@/activities/emails/components/message-lists/MessageListSectionStyles';
 import { MessageListLinkCampaign } from '@/activities/emails/components/message-lists/MessageListLinkCampaign';
 import { DateTimeDisplay } from '@/ui/field/display/components/DateTimeDisplay';
 import { useMessageListRecordPage } from '@/activities/emails/hooks/useMessageListRecordPage';
@@ -18,6 +17,7 @@ import { RecordChip } from '@/object-record/components/RecordChip';
 import { EmailDisplay } from '@/ui/field/display/components/EmailDisplay';
 import { Tag, type TagColor } from 'twenty-ui/data-display';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
+import { AnimatedPlaceholderEmptySubTitle } from 'twenty-ui/feedback';
 
 type Campaign = ObjectRecord & {
   subject: string | null;
@@ -27,8 +27,14 @@ type Campaign = ObjectRecord & {
   sentAt: string | null;
 };
 const StyledSection = styled.section`
+  display: flex;
+  flex-direction: column;
+  gap: ${themeCssVariables.spacing[3]};
   overflow: auto;
   width: 100%;
+`;
+const StyledEmpty = styled.div`
+  padding-block: ${themeCssVariables.spacing[4]};
 `;
 
 const CAMPAIGN_GRID_COLUMNS =
@@ -92,11 +98,11 @@ const MessageListCampaignsPage = ({ listId }: { listId: string }) => {
       {loading && <p>{t`불러오는 중…`}</p>}
       {error && <p role="alert">{t`심방콜 발송을 불러오지 못했습니다.`}</p>}
       {!loading && !error && records.length === 0 && (
-        <StyledMessageListEmpty>
-          {t`아직 연결된 심방콜 발송이 없습니다.`}
-          <br />
-          {t`심방콜 발송 연결 버튼으로 초안을 선택하세요.`}
-        </StyledMessageListEmpty>
+        <StyledEmpty>
+          <AnimatedPlaceholderEmptySubTitle>
+            {t`연결된 심방콜 발송이 없습니다.`}
+          </AnimatedPlaceholderEmptySubTitle>
+        </StyledEmpty>
       )}
       {records.length > 0 && (
         <StyledMessageListTable>
@@ -142,7 +148,7 @@ const MessageListCampaignsPage = ({ listId }: { listId: string }) => {
           ))}
         </StyledMessageListTable>
       )}
-      {!error && (
+      {!loading && !error && totalCount > 0 && (
         <RecordPaginationBar
           currentPage={page + 1}
           pageSize={pageSize}
