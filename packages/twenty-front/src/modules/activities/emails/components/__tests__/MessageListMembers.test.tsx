@@ -202,6 +202,7 @@ it('shows whole-list email counts and resets pagination when filtering', () => {
     });
   render(<MessageListMembers listId="email-list" />);
   expect(screen.getByRole('status')).toHaveTextContent('이메일 등록 820명');
+  expect(screen.getByRole('status')).toHaveTextContent('이메일 미등록 180명');
   expect(
     screen.getByRole('button', { name: '이메일 없음 180명' }),
   ).toBeInTheDocument();
@@ -253,6 +254,7 @@ it('keeps filtering available for empty results and does not show failed counts 
   );
   render(<MessageListMembers listId="empty-list" />);
   expect(screen.getByRole('status')).toHaveTextContent('이메일 등록 —명');
+  expect(screen.getByRole('status')).toHaveTextContent('이메일 미등록 —명');
   fireEvent.click(screen.getByRole('button', { name: '이메일 없음 —명' }));
   expect(
     screen.getByText('선택한 이메일 조건에 해당하는 수신자가 없습니다.'),

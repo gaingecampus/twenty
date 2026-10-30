@@ -13,7 +13,6 @@ import {
   StyledMessageListCell,
 } from '@/activities/emails/components/message-lists/MessageListTableStyles';
 import { TableRow } from '@/ui/layout/table/components/TableRow';
-import { StyledMessageListEmpty } from '@/activities/emails/components/message-lists/MessageListSectionStyles';
 import { RecordChip } from '@/object-record/components/RecordChip';
 import { EmailDisplay } from '@/ui/field/display/components/EmailDisplay';
 import { MessageListAddCustomersModal } from '@/activities/emails/components/message-lists/MessageListAddCustomersModal';
@@ -28,7 +27,14 @@ import { t } from '@lingui/core/macro';
 import { useContext, useState } from 'react';
 import { Button } from 'twenty-ui/input';
 import { Tag } from 'twenty-ui/data-display';
-import { IconMail } from 'twenty-ui/icon';
+import { IconFilter, IconMail, IconMailX } from 'twenty-ui/icon';
+import {
+  AnimatedPlaceholder,
+  AnimatedPlaceholderEmptyContainer,
+  AnimatedPlaceholderEmptySubTitle,
+  AnimatedPlaceholderEmptyTextContainer,
+  AnimatedPlaceholderEmptyTitle,
+} from 'twenty-ui/feedback';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 type MessageListMember = ObjectRecord & {
   personId: string;
@@ -141,6 +147,10 @@ const MessageListMembersPage = ({ listId }: { listId: string }) => {
   });
   const countsLoading = allMembers.loading || membersWithEmail.loading;
   const countsError = Boolean(allMembers.error || membersWithEmail.error);
+  const membersWithoutEmailCount = Math.max(
+    0,
+    allMembers.totalCount - membersWithEmail.totalCount,
+  );
   const formatCount = (count: number) =>
     countsLoading ? '…' : countsError ? '—' : count.toLocaleString('ko-KR');
   const refreshCounts = () =>
@@ -213,21 +223,23 @@ const MessageListMembersPage = ({ listId }: { listId: string }) => {
       <StyledFilterRow>
         <Select<MessageListMemberEmailFilter>
           dropdownId={`message-list-email-filter-${listId}`}
-          selectSizeVariant="small"
           value={emailFilter}
           disabled={busy}
           options={[
             {
               value: 'all',
               label: t`전체`,
+              Icon: IconFilter,
             },
             {
               value: 'withEmail',
               label: t`이메일 있음 ${formatCount(membersWithEmail.totalCount)}명`,
+              Icon: IconMail,
             },
             {
               value: 'withoutEmail',
-              label: t`이메일 없음 ${formatCount(Math.max(0, allMembers.totalCount - membersWithEmail.totalCount))}명`,
+              label: t`이메일 없음 ${formatCount(membersWithoutEmailCount)}명`,
+              Icon: IconMailX,
             },
           ]}
           onChange={(value) => {
@@ -235,13 +247,18 @@ const MessageListMembersPage = ({ listId }: { listId: string }) => {
             setPage(0);
           }}
         />
-        <span role="status" aria-atomic="true">
+        <StyledActions role="status" aria-atomic="true">
           <Tag
             color={countsLoading || countsError ? 'gray' : 'green'}
             Icon={IconMail}
             text={t`이메일 등록 ${formatCount(membersWithEmail.totalCount)}명`}
           />
-        </span>
+          <Tag
+            color="gray"
+            Icon={IconMailX}
+            text={t`이메일 미등록 ${formatCount(membersWithoutEmailCount)}명`}
+          />
+        </StyledActions>
       </StyledFilterRow>
       {countsError && (
         <p role="alert">{t`이메일 등록 인원을 불러오지 못했습니다.`}</p>
@@ -249,17 +266,23 @@ const MessageListMembersPage = ({ listId }: { listId: string }) => {
       {loading && <p>{t`불러오는 중…`}</p>}
       {error && <p role="alert">{t`고객 분류를 불러오지 못했습니다.`}</p>}
       {!loading && !error && records.length === 0 && (
-        <StyledMessageListEmpty>
-          {emailFilter === 'all' ? (
-            <>
-              {t`아직 등록된 수신자가 없습니다.`}
-              <br />
-              {t`고객 또는 워크스페이스 멤버를 추가하세요.`}
-            </>
-          ) : (
-            t`선택한 이메일 조건에 해당하는 수신자가 없습니다.`
-          )}
-        </StyledMessageListEmpty>
+        <AnimatedPlaceholderEmptyContainer>
+          <AnimatedPlaceholder
+            type={emailFilter === 'all' ? 'noRecord' : 'noMatchRecord'}
+          />
+          <AnimatedPlaceholderEmptyTextContainer>
+            <AnimatedPlaceholderEmptyTitle>
+              {emailFilter === 'all'
+                ? t`아직 등록된 수신자가 없습니다.`
+                : t`선택한 이메일 조건에 해당하는 수신자가 없습니다.`}
+            </AnimatedPlaceholderEmptyTitle>
+            <AnimatedPlaceholderEmptySubTitle>
+              {emailFilter === 'all'
+                ? t`고객 또는 워크스페이스 멤버를 추가하세요.`
+                : t`다른 필터를 선택해 주세요.`}
+            </AnimatedPlaceholderEmptySubTitle>
+          </AnimatedPlaceholderEmptyTextContainer>
+        </AnimatedPlaceholderEmptyContainer>
       )}
       {records.length > 0 && (
         <MessageListTableScroll
