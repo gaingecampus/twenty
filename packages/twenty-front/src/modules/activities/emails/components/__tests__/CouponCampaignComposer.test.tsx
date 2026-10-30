@@ -1,3 +1,4 @@
+import { buildCampaignDraft } from '@/activities/emails/utils/buildCampaignDraft';
 import { useMutation, useQuery } from '@apollo/client/react';
 import {
   cleanup,
@@ -166,4 +167,34 @@ it('blocks review and an existing confirmation when common options are unsupport
   expect(confirm).toBeDisabled();
   fireEvent.click(confirm);
   expect(mutate).toHaveBeenCalledTimes(1);
+});
+
+it('restores coupon inputs and permits saving without a product or recipient', () => {
+  const saveDraft = jest.fn();
+  render(
+    <CouponCampaignComposer
+      initialDraft={buildCampaignDraft({
+        channel: 'coupon',
+        body: '쿠폰 초안',
+        subject: '작성 중',
+        couponMode: 'SIMULATION',
+        scenario: 'UNKNOWN',
+      })}
+      saveDraft={saveDraft}
+    />,
+  );
+  expect(screen.getByRole('textbox', { name: '메시지' })).toHaveValue(
+    '쿠폰 초안',
+  );
+  fireEvent.click(screen.getByRole('button', { name: /임시 저장/ }));
+  expect(saveDraft).toHaveBeenCalledWith(
+    expect.objectContaining({
+      body: '쿠폰 초안',
+      subject: '작성 중',
+      productId: '',
+      listId: null,
+      scenario: 'UNKNOWN',
+    }),
+  );
+  expect(screen.getByRole('button', { name: /발송 전 검토/ })).toBeDisabled();
 });

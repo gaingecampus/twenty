@@ -1,3 +1,4 @@
+import { buildCampaignDraft } from '@/activities/emails/utils/buildCampaignDraft';
 import { type ScheduledCampaign } from '@/activities/emails/types/ScheduledCampaign';
 import { act, renderHook } from '@testing-library/react';
 
@@ -59,6 +60,48 @@ describe('useCampaignComposerState', () => {
       sendMessageCampaign: sendMessageCampaignMock,
       loading: false,
     });
+  });
+
+  it('restores an incomplete server draft without treating it as a scheduled campaign', () => {
+    signatureMock = '<p>서명</p>';
+    const campaign = {
+      id: 'draft',
+      status: 'DRAFT',
+      scheduleVersion: 'version',
+      draftData: buildCampaignDraft({
+        body: '<p>작성 중</p>',
+        recipientMode: 'direct',
+        directRecipient: 'person@',
+        includeSignature: false,
+        files: [{ id: 'file', name: '안내.pdf' }],
+      }),
+    } as ScheduledCampaign;
+    const { result } = renderHook(() => useCampaignComposerState({ campaign }));
+    expect(result.current.isEditing).toBe(false);
+    expect(result.current.sendMode).toBe('immediate');
+    expect(result.current.body).toBe('<p>작성 중</p>');
+    expect(result.current.bodyWithSignature).toBe('<p>작성 중</p>');
+    expect(result.current.directEmail).toBe('person@');
+    expect(result.current.files).toEqual([{ id: 'file', name: '안내.pdf' }]);
+    expect(result.current.canSend).toBe(false);
+  });
+
+  it('consumes the saved draft only after explicit review confirmation', async () => {
+    const draftReference = { id: 'draft', version: 'version' };
+    const { result } = renderHook(() =>
+      useCampaignComposerState({ draftReference }),
+    );
+    fillSendableFields(result);
+    act(() => result.current.handleSend());
+    expect(sendMessageCampaignMock).not.toHaveBeenCalled();
+    await act(() => result.current.confirmSend());
+    expect(sendMessageCampaignMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        draft: draftReference,
+        campaignId: undefined,
+        scheduleVersion: undefined,
+      }),
+    );
   });
 
   it('blocks direct recipients even when a list was selected and review was opened', async () => {

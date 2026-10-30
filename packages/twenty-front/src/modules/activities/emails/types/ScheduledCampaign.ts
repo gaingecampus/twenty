@@ -1,7 +1,8 @@
-import { type EmailAttachment } from 'twenty-shared/types';
+import { type CampaignDraft, type EmailAttachment } from 'twenty-shared/types';
 import { type ObjectRecord } from '@/object-record/types/ObjectRecord';
 
 export type ScheduledCampaign = ObjectRecord & {
+  draftData?: CampaignDraft | null;
   attachmentFiles?: EmailAttachment[] | null;
   subject: string | null;
   bodyTemplate: string | null;

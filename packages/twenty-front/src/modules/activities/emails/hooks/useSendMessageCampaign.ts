@@ -11,6 +11,7 @@ import {
 } from '~/generated-metadata/graphql';
 
 type SendMessageCampaignParams = {
+  draft?: { id: string; version: string };
   files?: EmailAttachment[];
   scheduledAt?: string;
   campaignId?: string;

@@ -18,37 +18,50 @@ import { useSendMessageCampaign } from '@/activities/emails/hooks/useSendMessage
 type UseCampaignComposerStateArgs = {
   onSent?: () => void;
   campaign?: ScheduledCampaign | null;
+  draftReference?: { id: string; version: string };
+  savingDraft?: boolean;
 };
 
 export const useCampaignComposerState = ({
   onSent,
   campaign,
+  draftReference,
+  savingDraft = false,
 }: UseCampaignComposerStateArgs) => {
+  const draft = campaign?.status === 'DRAFT' ? campaign.draftData : undefined;
+  const isEditing = campaign?.status === 'SCHEDULED';
   const [unsubscribeTopicId, setUnsubscribeTopicId] = useState<string | null>(
-    campaign?.unsubscribeTopicId ?? null,
+    draft?.unsubscribeTopicId ?? campaign?.unsubscribeTopicId ?? null,
   );
-  const [recipientMode, setRecipientMode] =
-    useState<CampaignRecipientMode>('list');
-  const [directEmail, setDirectEmail] = useState('');
-  const [listId, setListId] = useState<string | null>(campaign?.listId ?? null);
+  const [recipientMode, setRecipientMode] = useState<CampaignRecipientMode>(
+    draft?.recipientMode ?? 'list',
+  );
+  const [directEmail, setDirectEmail] = useState(draft?.directRecipient ?? '');
+  const [listId, setListId] = useState<string | null>(
+    draft?.listId ?? campaign?.listId ?? null,
+  );
   const [fromAddress, setFromAddress] = useState(
-    campaign?.fromAddress?.primaryEmail ?? '',
+    draft?.fromAddress ?? campaign?.fromAddress?.primaryEmail ?? '',
   );
-  const [subject, setSubject] = useState(campaign?.subject ?? '');
+  const [subject, setSubject] = useState(
+    draft?.subject ?? campaign?.subject ?? '',
+  );
   const [files, setFiles] = useState<EmailAttachment[]>(
-    campaign?.attachmentFiles ?? [],
+    draft?.files ?? campaign?.attachmentFiles ?? [],
   );
   const [isUploading, setIsUploading] = useState(false);
   const [isTestSending, setIsTestSending] = useState(false);
   const [isReviewOpen, setIsReviewOpen] = useState(false);
-  const [body, setBody] = useState(campaign?.bodyTemplate ?? '');
+  const [body, setBody] = useState(draft?.body ?? campaign?.bodyTemplate ?? '');
   const {
     signature,
     loading: signatureLoading,
     error: signatureError,
   } = useEmailSignature();
   // Scheduled campaigns already contain the signature saved at scheduling time.
-  const [includeSignature, setIncludeSignature] = useState(!campaign);
+  const [includeSignature, setIncludeSignature] = useState(
+    draft?.includeSignature ?? !isEditing,
+  );
   const bodyWithSignature = appendEmailSignature(
     body,
     signature,
@@ -60,10 +73,10 @@ export const useCampaignComposerState = ({
   const { sendMessageCampaign, loading } = useSendMessageCampaign();
 
   const [sendMode, setSendMode] = useState(
-    campaign ? 'scheduled' : 'immediate',
+    draft?.sendMode ?? (isEditing ? 'scheduled' : 'immediate'),
   );
   const [scheduledAt, setScheduledAt] = useState<string | null>(
-    campaign?.scheduledAt ?? null,
+    draft?.scheduledAt ?? campaign?.scheduledAt ?? null,
   );
   const [cancelMutation, { loading: cancelling }] = useMutation<
     CancelScheduledMessageCampaignMutation,
@@ -106,7 +119,8 @@ export const useCampaignComposerState = ({
     !isTestSending &&
     signatureReady &&
     !cancelling &&
-    !loading;
+    !loading &&
+    !savingDraft;
 
   // Synchronous submission lock; rendered loading state comes from the mutation.
   // oxlint-disable-next-line twenty/no-state-useref
@@ -127,8 +141,11 @@ export const useCampaignComposerState = ({
       const success = await sendMessageCampaign({
         scheduledAt:
           sendMode === 'scheduled' ? (scheduledAt ?? undefined) : undefined,
-        campaignId: campaign?.id,
-        scheduleVersion: campaign?.scheduleVersion ?? undefined,
+        draft: draftReference,
+        campaignId: isEditing ? campaign?.id : undefined,
+        scheduleVersion: isEditing
+          ? (campaign?.scheduleVersion ?? undefined)
+          : undefined,
         listId,
         unsubscribeTopicId: unsubscribeTopicId ?? undefined,
         subject,
@@ -163,7 +180,7 @@ export const useCampaignComposerState = ({
     isUploading,
     isTestSending,
     setIsTestSending,
-    isEditing: !!campaign,
+    isEditing,
     sendMode,
     setSendMode,
     scheduledAt,

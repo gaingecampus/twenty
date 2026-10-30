@@ -1,3 +1,6 @@
+import { type CampaignDraft } from 'twenty-shared/types';
+import { useCampaignDraft } from '@/activities/emails/hooks/useCampaignDraft';
+import { buildCampaignDraft } from '@/activities/emails/utils/buildCampaignDraft';
 import { EmailCampaignRecipientFields } from '@/activities/emails/components/EmailCampaignRecipientFields';
 import { CampaignDispatchOptions } from '@/activities/emails/components/CampaignDispatchOptions';
 import { InlineBanner } from 'twenty-ui/feedback';
@@ -45,8 +48,12 @@ const StyledContent = styled.div`
 
 const EmailCampaignComposer = ({
   campaignState,
+  saveDraft,
+  savingDraft,
 }: {
   campaignState: ReturnType<typeof useCampaignComposerState>;
+  saveDraft: () => Promise<void>;
+  savingDraft: boolean;
 }) => {
   const sidePanelHeaderActionsElement = useAtomStateValue(
     sidePanelHeaderActionsElementState,
@@ -68,6 +75,20 @@ const EmailCampaignComposer = ({
       {isDefined(sidePanelHeaderActionsElement) &&
         createPortal(
           <>
+            {!campaignState.isEditing && (
+              <Button
+                size="small"
+                variant="secondary"
+                title={savingDraft ? '저장 중…' : '임시 저장'}
+                onClick={saveDraft}
+                disabled={
+                  savingDraft ||
+                  campaignState.loading ||
+                  campaignState.isUploading ||
+                  campaignState.isTestSending
+                }
+              />
+            )}
             {campaignState.isEditing && (
               <Button
                 size="small"
@@ -109,20 +130,41 @@ const StyledChannelTabs = styled.div`
 `;
 
 export const SidePanelCampaignComposerPage = () => {
-  const [channel, setChannel] = useState<'email' | 'sms' | 'coupon'>('email');
   const campaignToEdit = useAtomComponentStateValue(
     campaignToEditComponentState,
   );
+  const initialDraft =
+    campaignToEdit?.status === 'DRAFT' ? campaignToEdit.draftData : undefined;
+  const isScheduledEdit = campaignToEdit?.status === 'SCHEDULED';
+  const [channel, setChannel] = useState<CampaignDraft['channel']>(
+    initialDraft?.channel ?? 'email',
+  );
+  const { saveDraft, saving, draftReference } =
+    useCampaignDraft(campaignToEdit);
   const { goBackFromSidePanel } = useSidePanelHistory();
   const campaignState = useCampaignComposerState({
     onSent: goBackFromSidePanel,
     campaign: campaignToEdit,
+    draftReference,
+    savingDraft: saving,
   });
   const hasUnsupportedOptions =
-    !campaignToEdit &&
+    !isScheduledEdit &&
     channel !== 'email' &&
     (campaignState.sendMode === 'scheduled' ||
       campaignState.unsubscribeTopicId !== null);
+
+  const saveChannelDraft = (fields: Partial<CampaignDraft>) =>
+    saveDraft(
+      buildCampaignDraft({
+        ...fields,
+        channel,
+        sendMode:
+          campaignState.sendMode === 'scheduled' ? 'scheduled' : 'immediate',
+        scheduledAt: campaignState.scheduledAt,
+        unsubscribeTopicId: campaignState.unsubscribeTopicId,
+      }),
+    );
 
   const renderDispatchOptions = (recipientFields: ReactNode) => (
     <>
@@ -143,7 +185,7 @@ export const SidePanelCampaignComposerPage = () => {
 
   return (
     <StyledContainer>
-      {!campaignToEdit && (
+      {!isScheduledEdit && (
         <StyledChannelTabs role="group" aria-label="발송 채널">
           <TabButton
             id="campaign-channel-email"
@@ -151,7 +193,7 @@ export const SidePanelCampaignComposerPage = () => {
             LeftIcon={IconMail}
             contentSize="md"
             active={channel === 'email'}
-            onClick={() => setChannel('email')}
+            onClick={() => !saving && setChannel('email')}
           />
           <TabButton
             id="campaign-channel-sms"
@@ -159,7 +201,7 @@ export const SidePanelCampaignComposerPage = () => {
             LeftIcon={IconMessage}
             contentSize="md"
             active={channel === 'sms'}
-            onClick={() => setChannel('sms')}
+            onClick={() => !saving && setChannel('sms')}
           />
           <TabButton
             id="campaign-channel-coupon"
@@ -168,18 +210,30 @@ export const SidePanelCampaignComposerPage = () => {
             LeftIcon={IconSend}
             contentSize="md"
             active={channel === 'coupon'}
-            onClick={() => setChannel('coupon')}
+            onClick={() => !saving && setChannel('coupon')}
           />
         </StyledChannelTabs>
       )}
       <StyledContent>
-        {channel === 'coupon' && !campaignToEdit ? (
+        {channel === 'coupon' && !isScheduledEdit ? (
           <CouponCampaignComposer
+            initialDraft={
+              initialDraft?.channel === channel ? initialDraft : undefined
+            }
+            draftReference={draftReference}
+            savingDraft={saving}
+            saveDraft={saveChannelDraft}
             isSendingDisabled={hasUnsupportedOptions}
             renderDispatchOptions={renderDispatchOptions}
           />
-        ) : channel === 'sms' && !campaignToEdit ? (
+        ) : channel === 'sms' && !isScheduledEdit ? (
           <SmsCampaignComposerContent
+            initialDraft={
+              initialDraft?.channel === channel ? initialDraft : undefined
+            }
+            draftReference={draftReference}
+            savingDraft={saving}
+            saveDraft={saveChannelDraft}
             isSendingBlocked={hasUnsupportedOptions}
             renderDispatchOptions={renderDispatchOptions}
           />
@@ -188,7 +242,22 @@ export const SidePanelCampaignComposerPage = () => {
             {renderDispatchOptions(
               <EmailCampaignRecipientFields campaignState={campaignState} />,
             )}
-            <EmailCampaignComposer campaignState={campaignState} />
+            <EmailCampaignComposer
+              campaignState={campaignState}
+              savingDraft={saving}
+              saveDraft={() =>
+                saveChannelDraft({
+                  recipientMode: campaignState.recipientMode,
+                  directRecipient: campaignState.directEmail,
+                  listId: campaignState.listId,
+                  fromAddress: campaignState.fromAddress,
+                  subject: campaignState.subject,
+                  body: campaignState.body,
+                  files: campaignState.files,
+                  includeSignature: campaignState.includeSignature,
+                })
+              }
+            />
           </>
         )}
       </StyledContent>

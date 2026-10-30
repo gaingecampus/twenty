@@ -23,7 +23,12 @@ export const useOpenCampaignComposerInSidePanel = () => {
       );
       navigateSidePanelMenu({
         page: SidePanelPages.ComposeCampaign,
-        pageTitle: campaign ? t`Edit scheduled campaign` : t`New Campaign`,
+        pageTitle:
+          campaign?.status === 'DRAFT'
+            ? '심방콜 이어서 작성'
+            : campaign
+              ? t`Edit scheduled campaign`
+              : t`New Campaign`,
         pageIcon: IconSend,
         pageId,
       });

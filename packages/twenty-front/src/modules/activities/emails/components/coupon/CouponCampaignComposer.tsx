@@ -1,3 +1,5 @@
+import { type CampaignDraft } from 'twenty-shared/types';
+import { type CampaignDraftControls } from '@/activities/emails/types/CampaignDraftControls';
 import { CampaignRecipientHeader } from '@/activities/emails/components/CampaignRecipientHeader';
 import { CampaignRecipientSelector } from '@/activities/emails/components/CampaignRecipientSelector';
 import { CampaignFieldLabel } from '@/activities/emails/components/CampaignFieldLabel';
@@ -47,24 +49,40 @@ const statusLabels: Record<string, string> = {
 export const CouponCampaignComposer = ({
   isSendingDisabled = false,
   renderDispatchOptions,
-}: {
+  initialDraft,
+  draftReference,
+  saveDraft,
+  savingDraft = false,
+}: CampaignDraftControls & {
   isSendingDisabled?: boolean;
   renderDispatchOptions?: (recipientFields: ReactNode) => ReactNode;
 }) => {
   const sidePanelHeaderActionsElement = useAtomStateValue(
     sidePanelHeaderActionsElementState,
   );
-  const [mode, setMode] = useState('SIMULATION');
-  const [title, setTitle] = useState('가인지 CRM 쿠폰 선물');
-  const [confirmed, setConfirmed] = useState(false);
-  const [target, setTarget] = useState('list');
-  const [testPhone, setTestPhone] = useState('');
-  const [listId, setListId] = useState<string>();
-  const [productId, setProductId] = useState('');
-  const [message, setMessage] = useState(
-    '참여해 주셔서 감사합니다. 쿠폰을 보내드립니다.',
+  const [mode, setMode] = useState<CampaignDraft['couponMode']>(
+    initialDraft?.couponMode ?? 'SIMULATION',
   );
-  const [scenario, setScenario] = useState('SUCCESS');
+  const [title, setTitle] = useState(
+    initialDraft?.subject ?? '가인지 CRM 쿠폰 선물',
+  );
+  const [confirmed, setConfirmed] = useState(false);
+  const [target, setTarget] = useState(
+    initialDraft?.recipientMode === 'direct' ? 'phone' : 'list',
+  );
+  const [testPhone, setTestPhone] = useState(
+    initialDraft?.directRecipient ?? '',
+  );
+  const [listId, setListId] = useState<string | undefined>(
+    initialDraft?.listId ?? undefined,
+  );
+  const [productId, setProductId] = useState(initialDraft?.productId ?? '');
+  const [message, setMessage] = useState(
+    initialDraft?.body ?? '참여해 주셔서 감사합니다. 쿠폰을 보내드립니다.',
+  );
+  const [scenario, setScenario] = useState<CampaignDraft['scenario']>(
+    initialDraft?.scenario ?? 'SUCCESS',
+  );
   const [quote, setQuote] = useState<CouponDispatch | null>(null);
   const [result, setResult] = useState<CouponDispatch | null>(null);
   const [error, setError] = useState('');
@@ -87,7 +105,7 @@ export const CouponCampaignComposer = ({
   const [send, { loading: sending }] = useMutation<{
     sendCouponDispatch: CouponDispatch;
   }>(SEND_COUPON);
-  const busy = reviewing || running || sending;
+  const busy = reviewing || running || sending || savingDraft;
   const capabilities = data?.couponCapabilities;
   const invalidate = () => {
     revision.current++;
@@ -135,13 +153,17 @@ export const CouponCampaignComposer = ({
         if (!confirmed) return;
         const response = await send({
           variables: {
-            input: { quoteId: quote.id, confirmedCost: quote.estimatedCost },
+            input: {
+              quoteId: quote.id,
+              confirmedCost: quote.estimatedCost,
+              draft: draftReference,
+            },
           },
         });
         setResult(response.data?.sendCouponDispatch ?? null);
       } else {
         const response = await simulate({
-          variables: { input: { quoteId: quote.id } },
+          variables: { input: { quoteId: quote.id, draft: draftReference } },
         });
         setResult(response.data?.simulateCouponDispatch ?? null);
       }
@@ -191,6 +213,29 @@ export const CouponCampaignComposer = ({
   return (
     <>
       {renderDispatchOptions?.(recipientFields)}
+      {sidePanelHeaderActionsElement &&
+        saveDraft &&
+        createPortal(
+          <Button
+            title={savingDraft ? '저장 중…' : '임시 저장'}
+            size="small"
+            variant="secondary"
+            disabled={busy || !!result}
+            onClick={() =>
+              saveDraft({
+                recipientMode: target === 'phone' ? 'direct' : 'list',
+                directRecipient: testPhone,
+                listId: listId ?? null,
+                subject: title,
+                body: message,
+                couponMode: mode,
+                productId,
+                scenario,
+              })
+            }
+          />,
+          sidePanelHeaderActionsElement,
+        )}
       <StyledForm>
         {!renderDispatchOptions && recipientFields}
         {loading && <p>연동 정보를 불러오는 중…</p>}
@@ -276,7 +321,7 @@ export const CouponCampaignComposer = ({
                 ]}
                 onChange={(value) => {
                   invalidate();
-                  setMode(value);
+                  setMode(value === 'LIVE' ? 'LIVE' : 'SIMULATION');
                   setProductId('');
                 }}
                 fullWidth

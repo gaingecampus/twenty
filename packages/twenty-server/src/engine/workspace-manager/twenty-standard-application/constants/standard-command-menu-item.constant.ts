@@ -739,6 +739,22 @@ export const STANDARD_COMMAND_MENU_ITEMS = {
     engineComponentKey: EngineComponentKey.ADD_CUSTOMERS_TO_MESSAGE_LIST,
     hotKeys: null,
   },
+  resumeCampaignDraft: {
+    universalIdentifier: '66d142be-aa86-4ba9-b87c-c07f4e57b87c',
+    label: '이어서 작성',
+    icon: 'IconPencil',
+    isPinned: true,
+    position: 69,
+    shortLabel: '이어서 작성',
+    frontComponentUniversalIdentifier: null,
+    hotKeys: null,
+    availabilityType: CommandMenuItemAvailabilityType.RECORD_SELECTION,
+    conditionalAvailabilityExpression:
+      'arrayLength(selectedRecords) == 1 and not isSelectAll and everyEquals(selectedRecords, "status", "DRAFT")',
+    availabilityObjectMetadataUniversalIdentifier:
+      STANDARD_OBJECTS.messageCampaign.universalIdentifier,
+    engineComponentKey: EngineComponentKey.EDIT_SCHEDULED_CAMPAIGN,
+  },
   editScheduledCampaign: {
     universalIdentifier: '01a5a6fc-f7ea-4c7d-921f-8bd50998eeae',
     label: '예약 변경 및 취소',

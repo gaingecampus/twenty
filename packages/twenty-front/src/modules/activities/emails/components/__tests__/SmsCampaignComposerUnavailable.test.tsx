@@ -1,3 +1,4 @@
+import { buildCampaignDraft } from '@/activities/emails/utils/buildCampaignDraft';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 import { useLazyQuery, useMutation, useQuery } from '@apollo/client/react';
 import {
@@ -278,4 +279,38 @@ it('reviews from the header only after required fields are filled without sendin
     screen.queryByRole('region', { name: '문자 발송 확인' }),
   ).not.toBeInTheDocument();
   expect(useQuery).not.toHaveBeenCalled();
+});
+
+it('restores and saves an unfinished SMS even when sending is unavailable', () => {
+  const saveDraft = jest.fn();
+  render(
+    <SmsCampaignComposer
+      isSendingDisabled
+      initialDraft={buildCampaignDraft({
+        channel: 'sms',
+        recipientMode: 'direct',
+        directRecipient: '01012',
+        subject: '작성 중',
+        body: '문자 초안',
+        advertising: true,
+      })}
+      saveDraft={saveDraft}
+    />,
+  );
+  expect(screen.getByRole('textbox', { name: '제목 (선택)' })).toHaveValue(
+    '작성 중',
+  );
+  expect(screen.getByRole('textbox', { name: '메시지' })).toHaveValue(
+    '문자 초안',
+  );
+  fireEvent.click(screen.getByRole('button', { name: /임시 저장/ }));
+  expect(saveDraft).toHaveBeenCalledWith(
+    expect.objectContaining({
+      recipientMode: 'direct',
+      directRecipient: '01012',
+      body: '문자 초안',
+      advertising: true,
+    }),
+  );
+  expect(screen.getByRole('button', { name: /발송 전 검토/ })).toBeDisabled();
 });

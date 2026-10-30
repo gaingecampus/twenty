@@ -13,6 +13,7 @@ export const EditScheduledCampaignCommand = () => {
     objectRecordId: selectedRecords[0]?.id,
     recordGqlFields: {
       id: true,
+      draftData: true,
       subject: true,
       bodyTemplate: true,
       attachmentFiles: true,
@@ -28,7 +29,7 @@ export const EditScheduledCampaignCommand = () => {
     useOpenCampaignComposerInSidePanel();
   const { enqueueErrorSnackBar } = useSnackBar();
   const execute = () => {
-    if (!record || record.status !== 'SCHEDULED') {
+    if (!record || !['SCHEDULED', 'DRAFT'].includes(record.status)) {
       enqueueErrorSnackBar({
         message: t`This campaign is no longer scheduled. Refresh the list.`,
       });

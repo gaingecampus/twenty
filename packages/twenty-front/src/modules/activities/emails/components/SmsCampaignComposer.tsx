@@ -1,3 +1,4 @@
+import { type CampaignDraftControls } from '@/activities/emails/types/CampaignDraftControls';
 import { CampaignRecipientHeader } from '@/activities/emails/components/CampaignRecipientHeader';
 import { StyledCampaignCheckboxLabel } from '@/activities/emails/components/StyledCampaignCheckboxLabel';
 import { StyledCampaignNotice } from '@/activities/emails/components/StyledCampaignNotice';
@@ -93,7 +94,11 @@ export const SmsCampaignComposer = ({
   isSendingDisabled = false,
   isSendingBlocked = false,
   renderDispatchOptions,
-}: {
+  initialDraft,
+  draftReference,
+  saveDraft,
+  savingDraft = false,
+}: CampaignDraftControls & {
   isSendingDisabled?: boolean;
   isSendingBlocked?: boolean;
   renderDispatchOptions?: (recipientFields: ReactNode) => ReactNode;
@@ -101,13 +106,20 @@ export const SmsCampaignComposer = ({
   const sidePanelHeaderActionsElement = useAtomStateValue(
     sidePanelHeaderActionsElementState,
   );
-  const [recipientMode, setRecipientMode] =
-    useState<CampaignRecipientMode>('list');
-  const [directPhone, setDirectPhone] = useState('');
-  const [listId, setListId] = useState<string>();
-  const [subject, setSubject] = useState('');
-  const [content, setContent] = useState('');
-  const [advertising, setAdvertising] = useState(false);
+  const [recipientMode, setRecipientMode] = useState<CampaignRecipientMode>(
+    initialDraft?.recipientMode ?? 'list',
+  );
+  const [directPhone, setDirectPhone] = useState(
+    initialDraft?.directRecipient ?? '',
+  );
+  const [listId, setListId] = useState<string | undefined>(
+    initialDraft?.listId ?? undefined,
+  );
+  const [subject, setSubject] = useState(initialDraft?.subject ?? '');
+  const [content, setContent] = useState(initialDraft?.body ?? '');
+  const [advertising, setAdvertising] = useState(
+    initialDraft?.advertising ?? false,
+  );
   const [requestId, setRequestId] = useState(() => crypto.randomUUID());
   const [preview, setPreview] = useState<Preview | null>(null);
   const [error, setError] = useState('');
@@ -125,7 +137,7 @@ export const SmsCampaignComposer = ({
     setRequestId(crypto.randomUUID());
   };
   const bytes = new TextEncoder().encode(content).length;
-  const busy = sending || previewLoading;
+  const busy = sending || previewLoading || savingDraft;
   const canReview =
     recipientMode === 'list' &&
     !isSendingDisabled &&
@@ -163,7 +175,14 @@ export const SmsCampaignComposer = ({
     try {
       await send({
         variables: {
-          input: { requestId, listId, content, advertising, subject },
+          input: {
+            requestId,
+            listId,
+            content,
+            advertising,
+            subject,
+            draft: draftReference,
+          },
         },
       });
       setSubmitted(true);
@@ -281,15 +300,35 @@ export const SmsCampaignComposer = ({
         </StyledFieldSection>
         {sidePanelHeaderActionsElement &&
           createPortal(
-            <Button
-              title="발송 전 검토"
-              size="small"
-              variant="primary"
-              accent="blue"
-              Icon={IconSend}
-              onClick={review}
-              disabled={!canReview}
-            />,
+            <>
+              {saveDraft && (
+                <Button
+                  title={savingDraft ? '저장 중…' : '임시 저장'}
+                  size="small"
+                  variant="secondary"
+                  disabled={busy || submitted}
+                  onClick={() =>
+                    saveDraft({
+                      recipientMode,
+                      directRecipient: directPhone,
+                      listId: listId ?? null,
+                      subject,
+                      body: content,
+                      advertising,
+                    })
+                  }
+                />
+              )}
+              <Button
+                title="발송 전 검토"
+                size="small"
+                variant="primary"
+                accent="blue"
+                Icon={IconSend}
+                onClick={review}
+                disabled={!canReview}
+              />
+            </>,
             sidePanelHeaderActionsElement,
           )}
         {error && <div role="alert">{error}</div>}

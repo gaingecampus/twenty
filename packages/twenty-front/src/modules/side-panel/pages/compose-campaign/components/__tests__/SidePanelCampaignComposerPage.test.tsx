@@ -1,3 +1,9 @@
+jest.mock('@/object-record/record-store/hooks/useUpsertRecordsInStore', () => ({
+  useUpsertRecordsInStore: () => ({ upsertRecordsInStore: jest.fn() }),
+}));
+jest.mock('@/object-metadata/hooks/useApolloCoreClient', () => ({
+  useApolloCoreClient: () => ({ refetchQueries: jest.fn() }),
+}));
 import { SidePanelCampaignComposerPage } from '@/side-panel/pages/compose-campaign/components/SidePanelCampaignComposerPage';
 import { type ReactNode } from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
