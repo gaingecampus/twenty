@@ -21,7 +21,7 @@ import { Select } from '@/ui/input/components/Select';
 import { t } from '@lingui/core/macro';
 import { getConfiguredEmailChannels } from '@/settings/accounts/utils/getConfiguredEmailChannels';
 import { isDefined } from 'twenty-shared/utils';
-import { Button, type SelectOption } from 'twenty-ui/input';
+import { Button, Checkbox, type SelectOption } from 'twenty-ui/input';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 
 const StyledFieldsContainer = styled.div`
@@ -46,6 +46,13 @@ const StyledLabelRow = styled.div`
   flex-wrap: wrap;
   gap: ${themeCssVariables.spacing[2]};
   justify-content: space-between;
+`;
+
+const StyledCheckboxLabel = styled.label`
+  align-items: center;
+  cursor: pointer;
+  display: inline-flex;
+  gap: ${themeCssVariables.spacing[2]};
 `;
 
 const StyledOptions = styled.section`
@@ -411,16 +418,13 @@ export const CampaignComposerFields = ({
       <StyledOptions>
         <StyledOptionsBody>
           <StyledLabelRow>
-            <label>
-              <input
-                type="checkbox"
+            <StyledCheckboxLabel>
+              <Checkbox
                 checked={campaignState.includeSignature}
-                onChange={(event) =>
-                  campaignState.setIncludeSignature(event.target.checked)
-                }
+                onCheckedChange={campaignState.setIncludeSignature}
               />
-              {t`서명 포함`}
-            </label>{' '}
+              <span>{t`서명 포함`}</span>
+            </StyledCheckboxLabel>
             <Button
               title={t`서명 설정`}
               size="small"
