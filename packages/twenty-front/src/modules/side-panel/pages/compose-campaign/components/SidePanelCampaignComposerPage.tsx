@@ -17,6 +17,7 @@ import { useHotkeysOnFocusedElement } from '@/ui/utilities/hotkey/hooks/useHotke
 import { styled } from '@linaria/react';
 import { t } from '@lingui/core/macro';
 import { IconMail, IconMessage, IconSend } from 'twenty-ui/icon';
+import { Tag } from 'twenty-ui/data-display';
 import { Button, TabButton } from 'twenty-ui/input';
 import { getOsControlSymbol } from 'twenty-ui/utilities';
 
@@ -132,7 +133,7 @@ export const SidePanelCampaignComposerPage = () => {
           <TabButton
             id="campaign-channel-coupon"
             title="카카오 쿠폰"
-            pill="준비중"
+            pill={<Tag color="orange" text="준비중" />}
             LeftIcon={IconSend}
             contentSize="md"
             active={channel === 'coupon'}
