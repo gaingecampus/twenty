@@ -56,16 +56,22 @@ const StyledCheckboxLabel = styled.label`
   }
 `;
 
-const StyledOptions = styled.section`
+const StyledMessageSection = styled.section`
   display: flex;
   flex-direction: column;
   gap: ${themeCssVariables.spacing[3]};
 `;
 
+const StyledOptions = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${themeCssVariables.spacing[2]};
+`;
+
 const StyledOptionsBody = styled.div`
   display: flex;
   flex-direction: column;
-  gap: ${themeCssVariables.spacing[3]};
+  gap: ${themeCssVariables.spacing[2]};
 `;
 
 const StyledAudience = styled.div`
@@ -265,81 +271,83 @@ export const CampaignComposerFields = ({
           placeholder={t`제목을 입력하세요`}
         />
       </StyledFieldGroup>
-      <StyledFieldGroup>
-        <CampaignFieldLabel
-          label="메시지"
-          help="고객 정보 메뉴에서 이름·기업을 넣을 수 있어요. 정보가 없으면 빈칸으로 표시됩니다."
-        />
-        <FormAdvancedTextFieldInput
-          defaultValue={campaignState.body}
-          onChange={campaignState.setBody}
-          placeholder="고객에게 전할 내용을 입력하세요"
-          minHeight={180}
-          maxWidth={600}
-          contentType="html"
-          renderToolbar={(insertText, { isFullScreen }) => (
-            <CampaignBodyVariablePicker
-              onInsert={insertText}
-              isDropdownInModal={isFullScreen}
-            />
-          )}
-        />
-      </StyledFieldGroup>
-      <StyledOptions>
-        <StyledOptionsBody>
-          <StyledLabelRow>
-            <StyledCheckboxLabel>
-              <Checkbox
-                hoverable={false}
-                checked={campaignState.includeSignature}
-                onCheckedChange={campaignState.setIncludeSignature}
-              />
-              <span>{t`서명 포함`}</span>
-            </StyledCheckboxLabel>
-            <Button
-              title={t`서명 설정`}
-              size="small"
-              variant="secondary"
-              Icon={IconExternalLink}
-              onClick={() =>
-                window.open(
-                  '/settings/accounts/emails',
-                  '_blank',
-                  'noopener,noreferrer',
-                )
-              }
-            />
-          </StyledLabelRow>
-
-          {campaignState.isEditing && (
-            <StyledHint>{t`메시지에 서명이 중복되지 않는지 확인해 주세요.`}</StyledHint>
-          )}
-          {campaignState.signatureLoading ? (
-            <StyledHint>{t`서명 불러오는 중…`}</StyledHint>
-          ) : campaignState.signatureError ? (
-            <StyledHint role="alert">{t`서명 조회 실패 · 새로고침하거나 포함을 해제해 주세요.`}</StyledHint>
-          ) : campaignState.includeSignature && campaignState.signature ? (
-            <EmailSignaturePreview html={campaignState.signature} />
-          ) : null}
-        </StyledOptionsBody>
-      </StyledOptions>
-      <StyledOptions>
-        <CampaignFieldLabel
-          label={
-            campaignState.files.length
-              ? `첨부 · ${campaignState.files.length}개`
-              : '첨부'
-          }
-          help="최대 20개 · 총 25MB"
-        />
-        <StyledOptionsBody>
-          <EmailAttachmentsField
-            files={campaignState.files}
-            onChange={campaignState.setFiles}
-            onUploadingChange={campaignState.setIsUploading}
+      <StyledMessageSection aria-label="메시지 작성">
+        <StyledFieldGroup as="div">
+          <CampaignFieldLabel
+            label="메시지"
+            help="고객 정보 메뉴에서 이름·기업을 넣을 수 있어요. 정보가 없으면 빈칸으로 표시됩니다."
           />
-        </StyledOptionsBody>
-      </StyledOptions>
+          <FormAdvancedTextFieldInput
+            defaultValue={campaignState.body}
+            onChange={campaignState.setBody}
+            placeholder="고객에게 전할 내용을 입력하세요"
+            minHeight={180}
+            maxWidth={600}
+            contentType="html"
+            renderToolbar={(insertText, { isFullScreen }) => (
+              <CampaignBodyVariablePicker
+                onInsert={insertText}
+                isDropdownInModal={isFullScreen}
+              />
+            )}
+          />
+        </StyledFieldGroup>
+        <StyledOptions>
+          <StyledOptionsBody>
+            <StyledLabelRow>
+              <StyledCheckboxLabel>
+                <Checkbox
+                  hoverable={false}
+                  checked={campaignState.includeSignature}
+                  onCheckedChange={campaignState.setIncludeSignature}
+                />
+                <span>{t`서명 포함`}</span>
+              </StyledCheckboxLabel>
+              <Button
+                title={t`서명 설정`}
+                size="small"
+                variant="secondary"
+                Icon={IconExternalLink}
+                onClick={() =>
+                  window.open(
+                    '/settings/accounts/emails',
+                    '_blank',
+                    'noopener,noreferrer',
+                  )
+                }
+              />
+            </StyledLabelRow>
+
+            {campaignState.isEditing && (
+              <StyledHint>{t`메시지에 서명이 중복되지 않는지 확인해 주세요.`}</StyledHint>
+            )}
+            {campaignState.signatureLoading ? (
+              <StyledHint>{t`서명 불러오는 중…`}</StyledHint>
+            ) : campaignState.signatureError ? (
+              <StyledHint role="alert">{t`서명 조회 실패 · 새로고침하거나 포함을 해제해 주세요.`}</StyledHint>
+            ) : campaignState.includeSignature && campaignState.signature ? (
+              <EmailSignaturePreview html={campaignState.signature} />
+            ) : null}
+          </StyledOptionsBody>
+        </StyledOptions>
+        <StyledOptions>
+          <CampaignFieldLabel
+            label={
+              campaignState.files.length
+                ? `첨부 · ${campaignState.files.length}개`
+                : '첨부'
+            }
+            help="최대 20개 · 총 25MB"
+          />
+          <StyledOptionsBody>
+            <EmailAttachmentsField
+              files={campaignState.files}
+              onChange={campaignState.setFiles}
+              onUploadingChange={campaignState.setIsUploading}
+            />
+          </StyledOptionsBody>
+        </StyledOptions>
+      </StyledMessageSection>
     </StyledFieldsContainer>
   );
 };
