@@ -10,7 +10,9 @@ export const StyledCouponSummary = styled.div`
 `;
 
 export const StyledCouponBanner = styled(InlineBanner)`
-  margin-bottom: 0;
+  && {
+    margin-bottom: 0;
+  }
 `;
 
 export const StyledCouponValidationGroup = styled.div`
