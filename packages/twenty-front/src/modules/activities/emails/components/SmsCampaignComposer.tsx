@@ -1,3 +1,6 @@
+import { sidePanelHeaderActionsElementState } from '@/side-panel/states/sidePanelHeaderActionsElementState';
+import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
+import { createPortal } from 'react-dom';
 import { CampaignBodyVariablePicker } from '@/activities/emails/components/CampaignBodyVariablePicker';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 import { CampaignFieldLabel } from '@/activities/emails/components/CampaignFieldLabel';
@@ -6,11 +9,11 @@ import {
   StyledDispatchCard as StyledCard,
 } from '@/activities/emails/components/CampaignDispatchStyles';
 import { gql } from '@apollo/client';
-import { useLazyQuery, useMutation, useQuery } from '@apollo/client/react';
+import { useLazyQuery, useMutation } from '@apollo/client/react';
 import { useRef, useState } from 'react';
 import { Button } from 'twenty-ui/input';
 import { InlineBanner } from 'twenty-ui/feedback';
-import { IconAlertTriangle } from 'twenty-ui/icon';
+import { IconAlertTriangle, IconSend } from 'twenty-ui/icon';
 import { styled } from '@linaria/react';
 import { FormSingleRecordPicker } from '@/object-record/record-field/ui/form-types/components/FormSingleRecordPicker';
 
@@ -18,7 +21,7 @@ const StyledSetupBanner = styled(InlineBanner)`
   margin-bottom: 0;
 `;
 
-const StyledMessageSection = styled.section`
+const StyledFieldSection = styled.section`
   && {
     gap: ${themeCssVariables.spacing[2]};
   }
@@ -65,14 +68,6 @@ const SEND = gql`
   }
   ${SUMMARY}
 `;
-const HISTORY = gql`
-  query SmsDispatchHistory {
-    smsDispatchHistory {
-      ...SmsDispatchFields
-    }
-  }
-  ${SUMMARY}
-`;
 type Preview = {
   total: number;
   missing: number;
@@ -98,6 +93,9 @@ export const SmsCampaignComposer = ({
 }: {
   isSendingDisabled?: boolean;
 }) => {
+  const sidePanelHeaderActionsElement = useAtomStateValue(
+    sidePanelHeaderActionsElementState,
+  );
   const [listId, setListId] = useState<string>();
   const [subject, setSubject] = useState('');
   const [content, setContent] = useState('');
@@ -113,14 +111,6 @@ export const SmsCampaignComposer = ({
   const [send, { loading: sending }] = useMutation<{
     sendSmsDispatch: Summary;
   }>(SEND);
-  const {
-    data,
-    error: historyError,
-    refetch,
-  } = useQuery<{ smsDispatchHistory: Summary[] }>(HISTORY, {
-    fetchPolicy: 'network-only',
-    skip: isSendingDisabled,
-  });
   const reset = () => {
     setPreview(null);
     setSubmitted(false);
@@ -129,6 +119,13 @@ export const SmsCampaignComposer = ({
   };
   const bytes = new TextEncoder().encode(content).length;
   const busy = sending || previewLoading;
+  const canReview =
+    !isSendingDisabled &&
+    !busy &&
+    !!listId &&
+    !!content.trim() &&
+    bytes <= 2000 &&
+    !submitted;
   const insertCustomerInfo = (text: string) => {
     if (busy) return;
     const input = contentInputRef.current;
@@ -143,7 +140,7 @@ export const SmsCampaignComposer = ({
     });
   };
   const review = async () => {
-    if (isSendingDisabled) return;
+    if (!canReview) return;
     setError('');
     try {
       const result = await loadPreview({
@@ -167,7 +164,6 @@ export const SmsCampaignComposer = ({
       });
       setSubmitted(true);
       setPreview(null);
-      await refetch();
     } catch (failure) {
       setError(
         failure instanceof Error
@@ -187,24 +183,27 @@ export const SmsCampaignComposer = ({
           />
         </div>
       )}
-      <CampaignFieldLabel
-        label="받는 고객"
-        help="번호 없음·중복 제외 · 가인지 문자 발송 요금 적용"
-      />
-      <FormSingleRecordPicker
-        objectNameSingulars={['messageList']}
-        defaultValue={listId}
-        onChange={(value) => {
-          if (!busy) {
-            reset();
-            setListId(value ?? undefined);
-          }
-        }}
-      />
+      <StyledFieldSection>
+        <CampaignFieldLabel
+          label="받는 고객"
+          help="번호 없음·중복 제외 · 가인지 문자 발송 요금 적용"
+        />
+        <FormSingleRecordPicker
+          objectNameSingulars={['messageList']}
+          defaultValue={listId}
+          onChange={(value) => {
+            if (!busy) {
+              reset();
+              setListId(value ?? undefined);
+            }
+          }}
+        />
+      </StyledFieldSection>
       <label>
         제목 (선택)
         <input
           aria-label="문자 발송 제목"
+          placeholder="제목을 입력하세요 (선택)"
           maxLength={15}
           value={subject}
           disabled={busy}
@@ -214,7 +213,7 @@ export const SmsCampaignComposer = ({
           }}
         />
       </label>
-      <StyledMessageSection>
+      <StyledFieldSection>
         <CampaignFieldLabel
           label="메시지"
           help="고객 정보 메뉴에서 이름·기업을 넣을 수 있어요. 정보가 없으면 빈칸으로 표시됩니다."
@@ -239,7 +238,7 @@ export const SmsCampaignComposer = ({
           {bytes.toLocaleString()} / 2,000바이트 ·{' '}
           {subject.trim() || bytes > 90 ? 'LMS 장문' : 'SMS 단문'}
         </small>
-      </StyledMessageSection>
+      </StyledFieldSection>
       <label>
         <input
           type="checkbox"
@@ -258,18 +257,19 @@ export const SmsCampaignComposer = ({
           넣어주세요.
         </small>
       )}
-      <Button
-        title="발송 전 검토"
-        onClick={review}
-        disabled={
-          isSendingDisabled ||
-          busy ||
-          !listId ||
-          !content.trim() ||
-          bytes > 2000 ||
-          submitted
-        }
-      />
+      {sidePanelHeaderActionsElement &&
+        createPortal(
+          <Button
+            title="발송 전 검토"
+            size="small"
+            variant="primary"
+            accent="blue"
+            Icon={IconSend}
+            onClick={review}
+            disabled={!canReview}
+          />,
+          sidePanelHeaderActionsElement,
+        )}
       {error && <div role="alert">{error}</div>}
       {preview && (
         <StyledCard aria-label="문자 발송 확인">
@@ -295,37 +295,10 @@ export const SmsCampaignComposer = ({
       )}
       {submitted && (
         <div role="status">
-          문자 발송 요청을 저장했습니다. 아래 접수 내역을 새로고침해 확인하세요.
+          문자 발송 요청을 저장했습니다. 최종 발송 결과는 가인지 어드민에서
+          확인하세요.
         </div>
       )}
-      <section>
-        <CampaignFieldLabel
-          label="최근 발송 내역"
-          help="접수 완료는 가인지 SMS 대기열 접수를 뜻합니다. 최종 발송 결과는 가인지 어드민에서 확인하세요. 확인 필요 건은 결과 확인 전 재발송하지 마세요."
-        />
-        <Button
-          title="접수 내역 새로고침"
-          disabled={isSendingDisabled}
-          onClick={() => {
-            if (!isSendingDisabled) void refetch();
-          }}
-        />
-        {historyError && <div role="alert">{historyError.message}</div>}
-        {!isSendingDisabled &&
-          data?.smsDispatchHistory.map((row) => (
-            <StyledCard key={row.id}>
-              <strong>{row.subject}</strong>
-              <p>{new Date(row.createdAt).toLocaleString('ko-KR')}</p>
-              <p>
-                대기 {row.queued} · 접수 완료 {row.accepted} · 실패 {row.failed}{' '}
-                · 처리 중/확인 필요 {row.unknown}
-              </p>
-              {row.errors.map((message) => (
-                <p key={message}>{message}</p>
-              ))}
-            </StyledCard>
-          ))}
-      </section>
     </StyledForm>
   );
 };

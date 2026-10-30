@@ -1,5 +1,13 @@
+import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 import { useLazyQuery, useMutation, useQuery } from '@apollo/client/react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import {
+  fireEvent,
+  render,
+  screen,
+  within,
+  waitFor,
+  cleanup,
+} from '@testing-library/react';
 import { SmsCampaignComposer } from '@/activities/emails/components/SmsCampaignComposer';
 import { TextEncoder } from 'node:util';
 
@@ -37,6 +45,21 @@ jest.mock('@/activities/emails/components/CampaignBodyVariablePicker', () => ({
   ),
 }));
 
+jest.mock('@/ui/utilities/state/jotai/hooks/useAtomStateValue', () => ({
+  useAtomStateValue: jest.fn(),
+}));
+let headerElement: HTMLElement;
+beforeEach(() => {
+  jest.clearAllMocks();
+  headerElement = document.createElement('header');
+  document.body.appendChild(headerElement);
+  jest.mocked(useAtomStateValue).mockReturnValue(headerElement);
+});
+afterEach(() => {
+  cleanup();
+  headerElement.remove();
+});
+
 jest.mock('@apollo/client/react', () => ({
   useLazyQuery: jest.fn(),
   useMutation: jest.fn(),
@@ -56,7 +79,6 @@ jest.mock(
 it('allows composing but never queries SMS history, reviews recipients, or sends while SMS is unavailable', () => {
   const loadPreview = jest.fn();
   const send = jest.fn();
-  const refetch = jest.fn();
   jest
     .mocked(useLazyQuery)
     .mockReturnValue([loadPreview, { loading: false }] as unknown as ReturnType<
@@ -67,9 +89,6 @@ it('allows composing but never queries SMS history, reviews recipients, or sends
     .mockReturnValue([send, { loading: false }] as unknown as ReturnType<
       typeof useMutation
     >);
-  jest
-    .mocked(useQuery)
-    .mockReturnValue({ refetch } as unknown as ReturnType<typeof useQuery>);
   render(<SmsCampaignComposer isSendingDisabled />);
   fireEvent.click(screen.getByRole('button', { name: '고객 목록 선택' }));
   fireEvent.change(screen.getByRole('textbox', { name: '문자 내용' }), {
@@ -87,22 +106,76 @@ it('allows composing but never queries SMS history, reviews recipients, or sends
   expect(
     screen.queryByRole('button', { name: 'email' }),
   ).not.toBeInTheDocument();
-  const reviewButton = screen.getByRole('button', { name: /발송 전 검토/ });
-  const refreshButton = screen.getByRole('button', {
-    name: /접수 내역 새로고침/,
+  const reviewButton = within(headerElement).getByRole('button', {
+    name: /발송 전 검토/,
   });
   expect(reviewButton).toBeDisabled();
-  expect(refreshButton).toBeDisabled();
   fireEvent.click(reviewButton);
-  fireEvent.click(refreshButton);
   expect(loadPreview).not.toHaveBeenCalled();
   expect(send).not.toHaveBeenCalled();
-  expect(refetch).not.toHaveBeenCalled();
-  expect(useQuery).toHaveBeenLastCalledWith(
-    expect.anything(),
-    expect.objectContaining({ skip: true }),
-  );
+  expect(useQuery).not.toHaveBeenCalled();
+  expect(screen.queryByText('최근 발송 내역')).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole('button', { name: /접수 내역 새로고침/ }),
+  ).not.toBeInTheDocument();
   expect(screen.getByRole('alert')).toHaveTextContent(
     '문자 발송 설정이 완료되지 않아 전송할 수 없습니다.',
   );
+});
+
+it('reviews from the header only after required fields are filled without sending', async () => {
+  const loadPreview = jest.fn().mockResolvedValue({
+    data: {
+      previewSmsDispatch: {
+        total: 1,
+        missing: 0,
+        duplicates: 0,
+        sms: 1,
+        lms: 0,
+        sample: '안녕하세요',
+      },
+    },
+  });
+  const send = jest.fn();
+  jest
+    .mocked(useLazyQuery)
+    .mockReturnValue([loadPreview, { loading: false }] as unknown as ReturnType<
+      typeof useLazyQuery
+    >);
+  jest
+    .mocked(useMutation)
+    .mockReturnValue([send, { loading: false }] as unknown as ReturnType<
+      typeof useMutation
+    >);
+  const { container } = render(<SmsCampaignComposer />);
+  const reviewButton = within(headerElement).getByRole('button', {
+    name: /발송 전 검토/,
+  });
+  expect(reviewButton).toBeDisabled();
+  expect(
+    within(container).queryByRole('button', { name: /발송 전 검토/ }),
+  ).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: '고객 목록 선택' }));
+  fireEvent.change(screen.getByRole('textbox', { name: '문자 내용' }), {
+    target: { value: '안녕하세요' },
+  });
+  expect(reviewButton).toBeEnabled();
+  fireEvent.click(reviewButton);
+  await waitFor(() =>
+    expect(
+      screen.getByRole('region', { name: '문자 발송 확인' }),
+    ).toBeInTheDocument(),
+  );
+  expect(loadPreview).toHaveBeenCalledWith({
+    variables: {
+      input: {
+        listId: 'list',
+        subject: '',
+        content: '안녕하세요',
+        advertising: false,
+      },
+    },
+  });
+  expect(send).not.toHaveBeenCalled();
+  expect(useQuery).not.toHaveBeenCalled();
 });
