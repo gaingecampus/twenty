@@ -24,8 +24,12 @@ export const CampaignBodyVariablePicker = ({
         value=""
         emptyOption={{ label: t`고객 정보 넣기`, value: '' }}
         options={[
-          { label: t`고객 이름`, value: 'fullName' },
-          { label: t`이메일`, value: 'email' },
+          {
+            label: t`고객 이름`,
+            value: 'fullName',
+            contextualText: '{{fullName}}',
+          },
+          { label: t`이메일`, value: 'email', contextualText: '{{email}}' },
         ]}
         onChange={(value) => {
           if (value) onInsert(`{{${value}}}`);
