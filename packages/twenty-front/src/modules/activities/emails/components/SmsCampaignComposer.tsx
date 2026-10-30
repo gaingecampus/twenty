@@ -19,7 +19,9 @@ import { styled } from '@linaria/react';
 import { FormSingleRecordPicker } from '@/object-record/record-field/ui/form-types/components/FormSingleRecordPicker';
 
 const StyledSetupBanner = styled(InlineBanner)`
-  margin-bottom: 0;
+  && {
+    margin: 0;
+  }
 `;
 
 const StyledFieldSection = styled.section`
