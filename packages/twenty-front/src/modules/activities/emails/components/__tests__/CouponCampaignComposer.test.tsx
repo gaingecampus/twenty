@@ -1,7 +1,20 @@
 import { useMutation, useQuery } from '@apollo/client/react';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from '@testing-library/react';
+import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 import { CouponCampaignComposer } from '@/activities/emails/components/coupon/CouponCampaignComposer';
 import { COUPON_CAPABILITIES } from '@/activities/emails/components/coupon/coupon-operations';
+
+jest.mock('@/ui/utilities/state/jotai/hooks/useAtomStateValue', () => ({
+  useAtomStateValue: jest.fn(),
+}));
+let headerElement: HTMLElement;
 
 jest.mock('@apollo/client/react', () => ({
   useQuery: jest.fn(),
@@ -54,12 +67,19 @@ const setQueryState = (capabilityOverrides = {}) => {
 };
 beforeEach(() => {
   jest.clearAllMocks();
+  headerElement = document.createElement('header');
+  document.body.appendChild(headerElement);
+  jest.mocked(useAtomStateValue).mockReturnValue(headerElement);
   jest
     .mocked(useMutation)
     .mockReturnValue([jest.fn(), { loading: false }] as unknown as ReturnType<
       typeof useMutation
     >);
   setQueryState();
+});
+afterEach(() => {
+  cleanup();
+  headerElement.remove();
 });
 it('keeps simulation and setup notices visible together with the budget', () => {
   render(<CouponCampaignComposer />);
@@ -117,7 +137,12 @@ it('blocks review and an existing confirmation when common options are unsupport
     target: { value: '01012345678' },
   });
   fireEvent.click(screen.getByRole('button', { name: /커피/ }));
-  const review = screen.getByRole('button', { name: /발송 전 검토/ });
+  const review = within(headerElement).getByRole('button', {
+    name: /발송 전 검토/,
+  });
+  expect(screen.getAllByRole('button', { name: /발송 전 검토/ })).toHaveLength(
+    1,
+  );
   expect(review).toBeDisabled();
   fireEvent.click(review);
   expect(mutate).not.toHaveBeenCalled();

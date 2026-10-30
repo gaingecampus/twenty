@@ -9,11 +9,6 @@ export const StyledCouponSummary = styled.div`
   gap: ${themeCssVariables.spacing[2]};
 `;
 
-export const StyledCouponActions = styled.div`
-  display: flex;
-  justify-content: flex-end;
-`;
-
 export const StyledCouponBanner = styled(InlineBanner)`
   margin-bottom: 0;
 `;

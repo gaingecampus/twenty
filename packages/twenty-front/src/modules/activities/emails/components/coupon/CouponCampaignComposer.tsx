@@ -1,4 +1,7 @@
 import { CampaignFieldLabel } from '@/activities/emails/components/CampaignFieldLabel';
+import { sidePanelHeaderActionsElementState } from '@/side-panel/states/sidePanelHeaderActionsElementState';
+import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
+import { createPortal } from 'react-dom';
 import {
   StyledDispatchForm as StyledForm,
   StyledDispatchCard as StyledCard,
@@ -7,9 +10,8 @@ import { useMutation, useQuery } from '@apollo/client/react';
 import { useRef, useState } from 'react';
 import { Button } from 'twenty-ui/input';
 import { Tag } from 'twenty-ui/data-display';
-import { IconAlertTriangle, IconUsers } from 'twenty-ui/icon';
+import { IconAlertTriangle, IconSend, IconUsers } from 'twenty-ui/icon';
 import {
-  StyledCouponActions,
   StyledCouponBanner,
   StyledCouponSummary,
 } from './CouponCampaignComposerStyles';
@@ -43,6 +45,9 @@ export const CouponCampaignComposer = ({
 }: {
   isSendingDisabled?: boolean;
 }) => {
+  const sidePanelHeaderActionsElement = useAtomStateValue(
+    sidePanelHeaderActionsElementState,
+  );
   const [mode, setMode] = useState('SIMULATION');
   const [title, setTitle] = useState('가인지 CRM 쿠폰 선물');
   const [confirmed, setConfirmed] = useState(false);
@@ -316,7 +321,7 @@ export const CouponCampaignComposer = ({
               />
             </section>
           )}
-          <section aria-label="발송 한도 및 검토">
+          <section aria-label="발송 한도">
             <StyledCouponSummary>
               <Tag
                 color="orange"
@@ -324,11 +329,15 @@ export const CouponCampaignComposer = ({
               />
               <Tag color="blue" Icon={IconUsers} text="최대 1,000명" />
             </StyledCouponSummary>
-            <StyledCouponActions>
+          </section>
+          {sidePanelHeaderActionsElement &&
+            createPortal(
               <Button
                 title="발송 전 검토"
+                size="small"
                 variant="primary"
                 accent="blue"
+                Icon={IconSend}
                 onClick={review}
                 disabled={
                   isSendingDisabled ||
@@ -338,9 +347,9 @@ export const CouponCampaignComposer = ({
                   (mode === 'LIVE' && !title.trim()) ||
                   (target === 'phone' ? !testPhone.trim() : !listId)
                 }
-              />
-            </StyledCouponActions>
-          </section>
+              />,
+              sidePanelHeaderActionsElement,
+            )}
         </>
       )}
       {error && <p role="alert">{error}</p>}
