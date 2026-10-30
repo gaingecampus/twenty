@@ -365,7 +365,11 @@ export const PageLayoutTabsRenderer = () => {
             undefined
           }
         />
-        {(displayTabs.length > 1 || isPageLayoutInEditMode) && (
+        {(displayTabs.length > 1 ||
+          (displayTabs.length > 0 &&
+            targetRecordIdentifier?.targetObjectNameSingular ===
+              'messageList') ||
+          isPageLayoutInEditMode) && (
           <PageLayoutTabList
             className="page-layout-tab-list-print-hidden"
             tabs={displayTabs}

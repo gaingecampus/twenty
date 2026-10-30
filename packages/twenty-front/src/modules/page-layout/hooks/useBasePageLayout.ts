@@ -1,3 +1,5 @@
+import { moveMessageListCampaignsToTab } from '@/activities/emails/utils/moveMessageListCampaignsToTab';
+import { useObjectMetadataItems } from '@/object-metadata/hooks/useObjectMetadataItems';
 import { DEFAULT_COMPANY_RECORD_PAGE_LAYOUT } from '@/page-layout/constants/DefaultCompanyRecordPageLayout';
 import { DEFAULT_COMPANY_RECORD_PAGE_LAYOUT_ID } from '@/page-layout/constants/DefaultCompanyRecordPageLayoutId';
 import { DEFAULT_MESSAGE_THREAD_RECORD_PAGE_LAYOUT } from '@/page-layout/constants/DefaultMessageThreadRecordPageLayout';
@@ -57,6 +59,7 @@ export const useBasePageLayout = (
   pageLayoutId: string,
 ): PageLayout | undefined => {
   const isDefaultLayout = isDefaultPageLayoutId(pageLayoutId);
+  const { objectMetadataItems } = useObjectMetadataItems();
 
   const cachedRecordPageLayout = useAtomFamilySelectorValue(
     recordPageLayoutFromIdFamilySelector,
@@ -76,13 +79,20 @@ export const useBasePageLayout = (
     return getDefaultLayoutById(pageLayoutId);
   }
 
-  if (isDefined(cachedRecordPageLayout)) {
-    return cachedRecordPageLayout;
-  }
+  const pageLayout =
+    cachedRecordPageLayout ??
+    (isDefined(data?.getPageLayout)
+      ? transformPageLayout(data.getPageLayout)
+      : undefined);
+  if (!pageLayout) return undefined;
 
-  if (isDefined(data?.getPageLayout)) {
-    return transformPageLayout(data.getPageLayout);
-  }
-
-  return undefined;
+  const object = objectMetadataItems.find(
+    (item) => item.id === pageLayout.objectMetadataId,
+  );
+  return moveMessageListCampaignsToTab({
+    pageLayout,
+    objectNameSingular: object?.nameSingular,
+    campaignsFieldId: object?.fields.find((field) => field.name === 'campaigns')
+      ?.id,
+  });
 };
