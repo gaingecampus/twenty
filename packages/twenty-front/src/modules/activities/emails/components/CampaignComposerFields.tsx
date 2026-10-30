@@ -60,6 +60,10 @@ const StyledCheckboxLabel = styled.label`
   cursor: pointer;
   display: inline-flex;
   gap: ${themeCssVariables.spacing[2]};
+
+  & [role='checkbox'] {
+    --checkbox-box-radius: 0;
+  }
 `;
 
 const StyledOptions = styled.section`
