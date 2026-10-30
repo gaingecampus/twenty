@@ -10,8 +10,12 @@ const StyledVariablePicker = styled.div`
 
 export const CampaignBodyVariablePicker = ({
   onInsert,
+  variables = ['fullName', 'email'],
+  disabled = false,
 }: {
   onInsert: (text: string) => void;
+  variables?: ('fullName' | 'email' | 'companyName')[];
+  disabled?: boolean;
 }) => {
   const { t } = useLingui();
   const id = useId();
@@ -22,15 +26,18 @@ export const CampaignBodyVariablePicker = ({
         dropdownId={`campaign-body-variable-${id}`}
         dropdownWidth={260}
         value=""
+        disabled={disabled}
         emptyOption={{ label: t`고객 정보 넣기`, value: '' }}
-        options={[
-          {
-            label: t`고객 이름`,
-            value: 'fullName',
-            contextualText: '{{fullName}}',
-          },
-          { label: t`이메일`, value: 'email', contextualText: '{{email}}' },
-        ]}
+        options={variables.map((variable) => ({
+          label:
+            variable === 'fullName'
+              ? t`고객 이름`
+              : variable === 'companyName'
+                ? t`기업`
+                : t`이메일`,
+          value: variable,
+          contextualText: `{{${variable}}}`,
+        }))}
         onChange={(value) => {
           if (value) onInsert(`{{${value}}}`);
         }}

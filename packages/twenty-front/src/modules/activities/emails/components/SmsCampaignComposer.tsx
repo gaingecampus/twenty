@@ -1,3 +1,5 @@
+import { CampaignBodyVariablePicker } from '@/activities/emails/components/CampaignBodyVariablePicker';
+import { themeCssVariables } from 'twenty-ui/theme-constants';
 import { CampaignFieldLabel } from '@/activities/emails/components/CampaignFieldLabel';
 import {
   StyledDispatchForm as StyledForm,
@@ -5,7 +7,7 @@ import {
 } from '@/activities/emails/components/CampaignDispatchStyles';
 import { gql } from '@apollo/client';
 import { useLazyQuery, useMutation, useQuery } from '@apollo/client/react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Button } from 'twenty-ui/input';
 import { InlineBanner } from 'twenty-ui/feedback';
 import { IconAlertTriangle } from 'twenty-ui/icon';
@@ -14,6 +16,20 @@ import { FormSingleRecordPicker } from '@/object-record/record-field/ui/form-typ
 
 const StyledSetupBanner = styled(InlineBanner)`
   margin-bottom: 0;
+`;
+
+const StyledMessageSection = styled.section`
+  && {
+    gap: ${themeCssVariables.spacing[2]};
+  }
+
+  textarea {
+    background: var(
+      --t-input-background,
+      ${themeCssVariables.background.transparent.lighter}
+    );
+    min-height: 180px;
+  }
 `;
 
 const PREVIEW = gql`
@@ -85,6 +101,7 @@ export const SmsCampaignComposer = ({
   const [listId, setListId] = useState<string>();
   const [subject, setSubject] = useState('');
   const [content, setContent] = useState('');
+  const contentInputRef = useRef<HTMLTextAreaElement>(null);
   const [advertising, setAdvertising] = useState(false);
   const [requestId, setRequestId] = useState(() => crypto.randomUUID());
   const [preview, setPreview] = useState<Preview | null>(null);
@@ -112,6 +129,19 @@ export const SmsCampaignComposer = ({
   };
   const bytes = new TextEncoder().encode(content).length;
   const busy = sending || previewLoading;
+  const insertCustomerInfo = (text: string) => {
+    if (busy) return;
+    const input = contentInputRef.current;
+    if (!input) return;
+    const start = input.selectionStart;
+    const end = input.selectionEnd;
+    reset();
+    setContent(content.slice(0, start) + text + content.slice(end));
+    requestAnimationFrame(() => {
+      input.focus();
+      input.setSelectionRange(start + text.length, start + text.length);
+    });
+  };
   const review = async () => {
     if (isSendingDisabled) return;
     setError('');
@@ -184,12 +214,18 @@ export const SmsCampaignComposer = ({
           }}
         />
       </label>
-      <section>
+      <StyledMessageSection>
         <CampaignFieldLabel
-          label="문자 내용"
-          help="이름 {{fullName}} · 기업 {{companyName}}"
+          label="메시지"
+          help="고객 정보 메뉴에서 이름·기업을 넣을 수 있어요. 정보가 없으면 빈칸으로 표시됩니다."
+        />
+        <CampaignBodyVariablePicker
+          variables={['fullName', 'companyName']}
+          disabled={busy}
+          onInsert={insertCustomerInfo}
         />
         <textarea
+          ref={contentInputRef}
           aria-label="문자 내용"
           value={content}
           disabled={busy}
@@ -197,13 +233,13 @@ export const SmsCampaignComposer = ({
             reset();
             setContent(event.target.value);
           }}
-          placeholder="{{fullName}}님, 안녕하세요."
+          placeholder="고객에게 전할 내용을 입력하세요"
         />
-      </section>
-      <div>
-        {bytes.toLocaleString()} / 2,000바이트 ·{' '}
-        {subject.trim() || bytes > 90 ? 'LMS 장문' : 'SMS 단문'}
-      </div>
+        <small>
+          {bytes.toLocaleString()} / 2,000바이트 ·{' '}
+          {subject.trim() || bytes > 90 ? 'LMS 장문' : 'SMS 단문'}
+        </small>
+      </StyledMessageSection>
       <label>
         <input
           type="checkbox"

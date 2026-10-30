@@ -19,6 +19,24 @@ afterAll(() => {
   else Reflect.deleteProperty(globalThis, 'TextEncoder');
 });
 
+jest.mock('@/activities/emails/components/CampaignBodyVariablePicker', () => ({
+  CampaignBodyVariablePicker: ({
+    onInsert,
+    variables,
+  }: {
+    onInsert: (text: string) => void;
+    variables: string[];
+  }) => (
+    <div>
+      {variables.map((variable) => (
+        <button key={variable} onClick={() => onInsert(`{{${variable}}}`)}>
+          {variable}
+        </button>
+      ))}
+    </div>
+  ),
+}));
+
 jest.mock('@apollo/client/react', () => ({
   useLazyQuery: jest.fn(),
   useMutation: jest.fn(),
@@ -57,6 +75,18 @@ it('allows composing but never queries SMS history, reviews recipients, or sends
   fireEvent.change(screen.getByRole('textbox', { name: '문자 내용' }), {
     target: { value: '안녕하세요' },
   });
+  const contentInput = screen.getByRole('textbox', {
+    name: '문자 내용',
+  }) as HTMLTextAreaElement;
+  contentInput.setSelectionRange(0, 0);
+  fireEvent.click(screen.getByRole('button', { name: 'fullName' }));
+  expect(contentInput).toHaveValue('{{fullName}}안녕하세요');
+  contentInput.setSelectionRange(12, 17);
+  fireEvent.click(screen.getByRole('button', { name: 'companyName' }));
+  expect(contentInput).toHaveValue('{{fullName}}{{companyName}}');
+  expect(
+    screen.queryByRole('button', { name: 'email' }),
+  ).not.toBeInTheDocument();
   const reviewButton = screen.getByRole('button', { name: /발송 전 검토/ });
   const refreshButton = screen.getByRole('button', {
     name: /접수 내역 새로고침/,
