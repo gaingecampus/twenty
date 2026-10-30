@@ -1,3 +1,4 @@
+import { StyledCampaignDraftSaveButton } from '@/activities/emails/components/StyledCampaignDraftSaveButton';
 import { styled } from '@linaria/react';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 import { CampaignPlainTextMessageEditor } from '@/activities/emails/components/CampaignPlainTextMessageEditor';
@@ -253,10 +254,10 @@ export const CouponCampaignComposer = ({
       {sidePanelHeaderActionsElement &&
         saveDraft &&
         createPortal(
-          <Button
+          <StyledCampaignDraftSaveButton
             title={savingDraft ? '저장 중…' : '임시 저장'}
             size="small"
-            variant="secondary"
+            variant="primary"
             disabled={busy || !!result}
             onClick={() =>
               saveDraft({

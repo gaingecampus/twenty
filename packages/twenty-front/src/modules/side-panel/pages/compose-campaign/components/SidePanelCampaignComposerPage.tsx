@@ -1,3 +1,4 @@
+import { StyledCampaignDraftSaveButton } from '@/activities/emails/components/StyledCampaignDraftSaveButton';
 import { type CampaignDraft } from 'twenty-shared/types';
 import { useCampaignDraft } from '@/activities/emails/hooks/useCampaignDraft';
 import { buildCampaignDraft } from '@/activities/emails/utils/buildCampaignDraft';
@@ -76,9 +77,9 @@ const EmailCampaignComposer = ({
         createPortal(
           <>
             {!campaignState.isEditing && (
-              <Button
+              <StyledCampaignDraftSaveButton
                 size="small"
-                variant="secondary"
+                variant="primary"
                 title={savingDraft ? '저장 중…' : '임시 저장'}
                 onClick={saveDraft}
                 disabled={

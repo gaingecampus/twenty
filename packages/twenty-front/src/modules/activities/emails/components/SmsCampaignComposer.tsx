@@ -1,3 +1,4 @@
+import { StyledCampaignDraftSaveButton } from '@/activities/emails/components/StyledCampaignDraftSaveButton';
 import { type CampaignDraftControls } from '@/activities/emails/types/CampaignDraftControls';
 import { CampaignRecipientHeader } from '@/activities/emails/components/CampaignRecipientHeader';
 import { StyledCampaignCheckboxLabel } from '@/activities/emails/components/StyledCampaignCheckboxLabel';
@@ -307,10 +308,10 @@ export const SmsCampaignComposer = ({
           createPortal(
             <>
               {saveDraft && (
-                <Button
+                <StyledCampaignDraftSaveButton
                   title={savingDraft ? '저장 중…' : '임시 저장'}
                   size="small"
-                  variant="secondary"
+                  variant="primary"
                   disabled={busy || submitted}
                   onClick={() =>
                     saveDraft({
