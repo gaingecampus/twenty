@@ -42,6 +42,7 @@ type CheckboxProps = {
   id?: string;
   'aria-label'?: string;
   'aria-labelledby'?: string;
+  'aria-describedby'?: string;
 };
 
 export const Checkbox = ({
@@ -59,6 +60,7 @@ export const Checkbox = ({
   id,
   'aria-label': ariaLabel,
   'aria-labelledby': ariaLabelledby,
+  'aria-describedby': ariaDescribedby,
 }: CheckboxProps) => {
   const [isInternalChecked, setIsInternalChecked] =
     React.useState<boolean>(false);
@@ -76,6 +78,7 @@ export const Checkbox = ({
       name="styled-checkbox"
       aria-label={ariaLabel}
       aria-labelledby={ariaLabelledby}
+      aria-describedby={ariaDescribedby}
       data-testid="input-checkbox"
       onCheckedChange={(value, eventDetails) => {
         onChange?.(

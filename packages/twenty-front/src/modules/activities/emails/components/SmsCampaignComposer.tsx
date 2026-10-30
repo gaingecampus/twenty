@@ -1,4 +1,5 @@
 import { CampaignRecipientHeader } from '@/activities/emails/components/CampaignRecipientHeader';
+import { StyledCampaignCheckboxLabel } from '@/activities/emails/components/StyledCampaignCheckboxLabel';
 import { CampaignRecipientSelector } from '@/activities/emails/components/CampaignRecipientSelector';
 import { type CampaignRecipientMode } from '@/activities/emails/types/CampaignRecipientMode';
 import { FORM_FIELD_PLACEHOLDER_STYLES } from '@/object-record/record-field/ui/form-types/constants/FormFieldPlaceholderStyles';
@@ -15,7 +16,7 @@ import {
 import { gql } from '@apollo/client';
 import { useLazyQuery, useMutation } from '@apollo/client/react';
 import { useRef, useState } from 'react';
-import { Button } from 'twenty-ui/input';
+import { Button, Checkbox } from 'twenty-ui/input';
 import { InlineBanner } from 'twenty-ui/feedback';
 import { IconAlertTriangle, IconSend } from 'twenty-ui/icon';
 import { styled } from '@linaria/react';
@@ -224,19 +225,19 @@ export const SmsCampaignComposer = ({
   return (
     <StyledForm>
       <StyledFieldSection aria-label="광고 문자 설정">
-        <label>
-          <input
-            type="checkbox"
+        <StyledCampaignCheckboxLabel>
+          <Checkbox
+            hoverable={false}
             aria-describedby={advertising ? 'sms-advertising-help' : undefined}
             checked={advertising}
             disabled={busy}
-            onChange={(event) => {
+            onCheckedChange={(checked) => {
               reset();
-              setAdvertising(event.target.checked);
+              setAdvertising(checked);
             }}
-          />{' '}
-          광고 문자
-        </label>
+          />
+          <span>광고 문자</span>
+        </StyledCampaignCheckboxLabel>
         {advertising && (
           <small id="sms-advertising-help">
             (광고)로 시작하고 발신자 이름 및 등록된 무료수신거부 080 번호를

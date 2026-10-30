@@ -1,4 +1,5 @@
 import { CampaignFieldLabel } from '@/activities/emails/components/CampaignFieldLabel';
+import { StyledCampaignCheckboxLabel } from '@/activities/emails/components/StyledCampaignCheckboxLabel';
 import { EmailSignaturePreview } from '@/settings/accounts/components/EmailSignaturePreview';
 import { CampaignBodyVariablePicker } from '@/activities/emails/components/CampaignBodyVariablePicker';
 import { EmailAttachmentsField } from '@/activities/emails/components/EmailAttachmentsField';
@@ -38,17 +39,6 @@ const StyledLabelRow = styled.div`
   flex-wrap: wrap;
   gap: ${themeCssVariables.spacing[2]};
   justify-content: space-between;
-`;
-
-const StyledCheckboxLabel = styled.label`
-  align-items: center;
-  cursor: pointer;
-  display: inline-flex;
-  gap: ${themeCssVariables.spacing[2]};
-
-  & [role='checkbox'] {
-    --checkbox-box-radius: calc(${themeCssVariables.border.radius.xs} / 2);
-  }
 `;
 
 const StyledMessageSection = styled.section`
@@ -189,14 +179,14 @@ export const CampaignComposerFields = ({
         <StyledOptions>
           <StyledOptionsBody>
             <StyledLabelRow>
-              <StyledCheckboxLabel>
+              <StyledCampaignCheckboxLabel>
                 <Checkbox
                   hoverable={false}
                   checked={campaignState.includeSignature}
                   onCheckedChange={campaignState.setIncludeSignature}
                 />
                 <span>{t`서명 포함`}</span>
-              </StyledCheckboxLabel>
+              </StyledCampaignCheckboxLabel>
               <Button
                 title={t`서명 설정`}
                 size="small"

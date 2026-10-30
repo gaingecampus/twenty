@@ -15,13 +15,24 @@ const originalTextEncoder = Object.getOwnPropertyDescriptor(
   globalThis,
   'TextEncoder',
 );
+const originalPointerEvent = Object.getOwnPropertyDescriptor(
+  window,
+  'PointerEvent',
+);
 beforeAll(() => {
+  Object.defineProperty(window, 'PointerEvent', {
+    configurable: true,
+    value: MouseEvent,
+  });
   Object.defineProperty(globalThis, 'TextEncoder', {
     configurable: true,
     value: TextEncoder,
   });
 });
 afterAll(() => {
+  if (originalPointerEvent)
+    Object.defineProperty(window, 'PointerEvent', originalPointerEvent);
+  else Reflect.deleteProperty(window, 'PointerEvent');
   if (originalTextEncoder)
     Object.defineProperty(globalThis, 'TextEncoder', originalTextEncoder);
   else Reflect.deleteProperty(globalThis, 'TextEncoder');
@@ -183,6 +194,14 @@ it('reviews from the header only after required fields are filled without sendin
     target: { value: '안녕하세요' },
   });
   expect(reviewButton).toBeEnabled();
+  const advertisingCheckbox = screen.getByRole('checkbox', {
+    name: '광고 문자',
+  });
+  fireEvent.click(advertisingCheckbox);
+  expect(advertisingCheckbox).toBeChecked();
+  expect(advertisingCheckbox).toHaveAccessibleDescription(
+    '(광고)로 시작하고 발신자 이름 및 등록된 무료수신거부 080 번호를 메시지에 넣어주세요.',
+  );
   fireEvent.click(reviewButton);
   await waitFor(() =>
     expect(
@@ -195,7 +214,7 @@ it('reviews from the header only after required fields are filled without sendin
         listId: 'list',
         subject: '',
         content: '안녕하세요',
-        advertising: false,
+        advertising: true,
       },
     },
   });
