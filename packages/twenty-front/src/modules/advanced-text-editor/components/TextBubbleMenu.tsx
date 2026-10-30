@@ -17,6 +17,7 @@ import {
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 
 export const StyledBubbleMenuContainer = styled.div`
+  align-items: center;
   backdrop-filter: blur(20px);
   background-color: ${themeCssVariables.background.primary};
   border-radius: ${themeCssVariables.border.radius.md};
@@ -24,8 +25,8 @@ export const StyledBubbleMenuContainer = styled.div`
     0px 2px 4px 0px ${themeCssVariables.background.transparent.light},
     0px 0px 4px 0px ${themeCssVariables.background.transparent.medium};
   display: inline-flex;
-  gap: 2px;
-  padding: 2px;
+  gap: ${themeCssVariables.spacing[1]};
+  padding: ${themeCssVariables.spacing[1]};
 `;
 
 type TextBubbleMenuProps = {

@@ -20,6 +20,13 @@ const StyledBubbleMenuIconButtonContainer = styled.div`
   width: ${themeCssVariables.spacing[6]};
 `;
 
+const StyledBubbleMenuIconButton = styled(FloatingIconButton)`
+  && {
+    border: none;
+    color: ${themeCssVariables.font.color.secondary};
+  }
+`;
+
 export const BubbleMenuIconButton = ({
   className,
   Icon,
@@ -30,7 +37,7 @@ export const BubbleMenuIconButton = ({
 }: BubbleMenuIconButtonProps) => {
   return (
     <StyledBubbleMenuIconButtonContainer className={className}>
-      <FloatingIconButton
+      <StyledBubbleMenuIconButton
         Icon={Icon}
         disabled={disabled}
         focus={focus}
@@ -38,7 +45,7 @@ export const BubbleMenuIconButton = ({
         isActive={isActive}
         applyShadow={false}
         applyBlur={false}
-        size="medium"
+        size="small"
         position="standalone"
       />
     </StyledBubbleMenuIconButtonContainer>

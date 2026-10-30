@@ -24,7 +24,6 @@ const StyledMenuItem = styled.button`
   gap: 4px;
   height: ${themeCssVariables.spacing[6]};
   padding: 0 ${themeCssVariables.spacing[1.5]};
-  padding: 0;
   width: 100%;
 
   :hover {
@@ -75,6 +74,7 @@ export const TurnIntoBlockDropdown = ({
         </DropdownContent>
       }
       dropdownId={dropdownId}
+      isDropdownInModal
       clickableComponent={
         <StyledMenuItem>
           <ActiveIcon size={theme.icon.size.md} />
