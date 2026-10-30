@@ -116,9 +116,8 @@ export const RecordIndexPageHeader = () => {
   );
 
   return (
-    <StyledResponsiveHeaderContainer>
+    <StyledResponsiveHeaderContainer hidden={isRecordIndexFullscreen}>
       <PageCardHeader
-        contentOnly={isRecordIndexFullscreen}
         icon={
           <RecordIndexPageHeaderIcon objectMetadataItem={objectMetadataItem} />
         }
