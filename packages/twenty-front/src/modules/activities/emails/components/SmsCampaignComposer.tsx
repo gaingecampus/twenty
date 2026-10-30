@@ -215,15 +215,6 @@ export const SmsCampaignComposer = ({
   };
   return (
     <StyledForm>
-      {isSendingDisabled && (
-        <div role="alert">
-          <StyledSetupBanner
-            color="danger"
-            LeftIcon={IconAlertTriangle}
-            message="문자 발송 설정이 완료되지 않아 전송할 수 없습니다."
-          />
-        </div>
-      )}
       <StyledFieldSection>
         <CampaignFieldLabel
           label="수신자"
@@ -240,6 +231,15 @@ export const SmsCampaignComposer = ({
           }}
         />
       </StyledFieldSection>
+      {isSendingDisabled && (
+        <div role="alert">
+          <StyledSetupBanner
+            color="danger"
+            LeftIcon={IconAlertTriangle}
+            message="문자 발송 설정이 완료되지 않아 전송할 수 없습니다."
+          />
+        </div>
+      )}
       <label>
         제목 (선택)
         <input

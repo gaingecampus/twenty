@@ -169,6 +169,47 @@ export const CampaignComposerFields = ({
       <StyledFieldGroup>
         <StyledLabelRow>
           <CampaignFieldLabel
+            label="수신자"
+            help={
+              isDefined(audiencePreview)
+                ? buildAudienceHint(audiencePreview)
+                : t`발송할 고객이 포함된 고객 분류를 선택하세요.`
+            }
+          />
+          <Button
+            title="고객 분류 관리"
+            Icon={IconExternalLink}
+            variant="secondary"
+            accent="blue"
+            size="small"
+            onClick={() =>
+              window.open(
+                '/objects/messageLists',
+                '_blank',
+                'noopener,noreferrer',
+              )
+            }
+          />
+        </StyledLabelRow>
+        <FormSingleRecordPicker
+          objectNameSingulars={['messageList']}
+          defaultValue={campaignState.listId ?? undefined}
+          onChange={campaignState.setListId}
+          onCreate={handleCreateList}
+        />
+        {isDefined(audiencePreview) && (
+          <StyledAudience role="status" aria-atomic="true">
+            <Tag
+              color="green"
+              Icon={IconUsers}
+              text={`발송 가능 ${audiencePreview.sendable.toLocaleString('ko-KR')}명`}
+            />
+          </StyledAudience>
+        )}
+      </StyledFieldGroup>
+      <StyledFieldGroup>
+        <StyledLabelRow>
+          <CampaignFieldLabel
             label={t`발신자`}
             help={
               senderOptions.length === 0
@@ -214,47 +255,6 @@ export const CampaignComposerFields = ({
                 ? t`계정 조회 실패 · 새로고침해 주세요`
                 : null}
           </StyledHint>
-        )}
-      </StyledFieldGroup>
-      <StyledFieldGroup>
-        <StyledLabelRow>
-          <CampaignFieldLabel
-            label="수신자"
-            help={
-              isDefined(audiencePreview)
-                ? buildAudienceHint(audiencePreview)
-                : t`발송할 고객이 포함된 고객 분류를 선택하세요.`
-            }
-          />
-          <Button
-            title="고객 분류 관리"
-            Icon={IconExternalLink}
-            variant="secondary"
-            accent="blue"
-            size="small"
-            onClick={() =>
-              window.open(
-                '/objects/messageLists',
-                '_blank',
-                'noopener,noreferrer',
-              )
-            }
-          />
-        </StyledLabelRow>
-        <FormSingleRecordPicker
-          objectNameSingulars={['messageList']}
-          defaultValue={campaignState.listId ?? undefined}
-          onChange={campaignState.setListId}
-          onCreate={handleCreateList}
-        />
-        {isDefined(audiencePreview) && (
-          <StyledAudience role="status" aria-atomic="true">
-            <Tag
-              color="green"
-              Icon={IconUsers}
-              text={`발송 가능 ${audiencePreview.sendable.toLocaleString('ko-KR')}명`}
-            />
-          </StyledAudience>
         )}
       </StyledFieldGroup>
       <StyledFieldGroup>
