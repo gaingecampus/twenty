@@ -96,10 +96,12 @@ const EmailCampaignComposer = () => {
 };
 
 const StyledChannelTabs = styled.div`
+  border-bottom: 1px solid ${themeCssVariables.border.color.light};
   display: flex;
   flex-shrink: 0;
   gap: ${themeCssVariables.spacing[2]};
-  padding: ${themeCssVariables.spacing[3]} ${themeCssVariables.spacing[4]};
+  min-height: ${themeCssVariables.spacing[12]};
+  padding: 0 ${themeCssVariables.spacing[4]};
 `;
 
 export const SidePanelCampaignComposerPage = () => {
