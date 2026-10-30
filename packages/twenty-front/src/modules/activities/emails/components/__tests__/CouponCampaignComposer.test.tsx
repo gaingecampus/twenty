@@ -1,3 +1,4 @@
+import { type ReactNode } from 'react';
 import { buildCampaignDraft } from '@/activities/emails/utils/buildCampaignDraft';
 import { useMutation, useQuery } from '@apollo/client/react';
 import {
@@ -11,6 +12,18 @@ import {
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 import { CouponCampaignComposer } from '@/activities/emails/components/coupon/CouponCampaignComposer';
 import { COUPON_CAPABILITIES } from '@/activities/emails/components/coupon/coupon-operations';
+
+jest.mock('@/ui/layout/fullscreen/hooks/useFullScreenModal', () => ({
+  useFullScreenModal: ({ onClose }: { onClose: () => void }) => ({
+    renderFullScreenModal: (children: ReactNode, isOpen: boolean) =>
+      isOpen ? (
+        <div role="dialog">
+          <button onClick={onClose}>편집기 닫기</button>
+          {children}
+        </div>
+      ) : null,
+  }),
+}));
 
 jest.mock('@/ui/utilities/state/jotai/hooks/useAtomStateValue', () => ({
   useAtomStateValue: jest.fn(),
@@ -83,7 +96,7 @@ afterEach(() => {
   headerElement.remove();
 });
 it('keeps simulation and setup notices visible together with the budget', () => {
-  render(<CouponCampaignComposer />);
+  render(<CouponCampaignComposer isAdminTesting />);
   expect(
     screen.getByText(/검증 모드 · 실제 전송 및 과금 없음/),
   ).toHaveTextContent('관리자에게 센드비 연동 설정을 요청하세요.');
@@ -101,7 +114,7 @@ it('keeps simulation and setup notices visible together with the budget', () => 
 });
 it('retains the production payment notice and live budget when switching modes', () => {
   setQueryState({ liveAvailable: true, environment: 'production' });
-  render(<CouponCampaignComposer />);
+  render(<CouponCampaignComposer isAdminTesting />);
   fireEvent.click(screen.getByRole('button', { name: '실제 카카오 발송' }));
   expect(screen.getByText('실제 발송 · 센드비 캐시 차감')).toBeInTheDocument();
   expect(screen.getByText('발송 한도 50,000원')).toBeInTheDocument();
@@ -133,7 +146,9 @@ it('blocks review and an existing confirmation when common options are unsupport
     .mockReturnValue([mutate, { loading: false }] as unknown as ReturnType<
       typeof useMutation
     >);
-  const { rerender } = render(<CouponCampaignComposer isSendingDisabled />);
+  const { rerender } = render(
+    <CouponCampaignComposer isAdminTesting isSendingDisabled />,
+  );
   expect(screen.getByRole('button', { name: '고객 분류' })).toHaveAttribute(
     'aria-pressed',
     'true',
@@ -143,7 +158,7 @@ it('blocks review and an existing confirmation when common options are unsupport
     target: { value: '01012345678' },
   });
   fireEvent.click(screen.getByRole('button', { name: /커피/ }));
-  const review = within(headerElement).getByRole('button', {
+  const review = screen.getByRole('button', {
     name: /발송 전 검토/,
   });
   expect(screen.getAllByRole('button', { name: /발송 전 검토/ })).toHaveLength(
@@ -152,7 +167,7 @@ it('blocks review and an existing confirmation when common options are unsupport
   expect(review).toBeDisabled();
   fireEvent.click(review);
   expect(mutate).not.toHaveBeenCalled();
-  rerender(<CouponCampaignComposer />);
+  rerender(<CouponCampaignComposer isAdminTesting />);
   expect(review).toBeEnabled();
   fireEvent.click(review);
   await waitFor(() =>
@@ -160,7 +175,7 @@ it('blocks review and an existing confirmation when common options are unsupport
       screen.getByRole('button', { name: /외부 전송 없이 검증 실행/ }),
     ).toBeEnabled(),
   );
-  rerender(<CouponCampaignComposer isSendingDisabled />);
+  rerender(<CouponCampaignComposer isAdminTesting isSendingDisabled />);
   const confirm = screen.getByRole('button', {
     name: /외부 전송 없이 검증 실행/,
   });
@@ -173,6 +188,7 @@ it('restores coupon inputs and permits saving without a product or recipient', (
   const saveDraft = jest.fn();
   render(
     <CouponCampaignComposer
+      isAdminTesting
       initialDraft={buildCampaignDraft({
         channel: 'coupon',
         body: '쿠폰 초안',
@@ -197,4 +213,62 @@ it('restores coupon inputs and permits saving without a product or recipient', (
     }),
   );
   expect(screen.getByRole('button', { name: /발송 전 검토/ })).toBeDisabled();
+});
+
+it('preserves coupon edits and its limit when opening and closing the full screen editor', () => {
+  render(<CouponCampaignComposer isAdminTesting />);
+  expect(screen.getByRole('textbox', { name: '메시지' })).toHaveAttribute(
+    'maxlength',
+    '500',
+  );
+  fireEvent.click(
+    screen.getByRole('button', { name: '메시지 전체 화면으로 열기' }),
+  );
+  const input = within(screen.getByRole('dialog')).getByRole('textbox', {
+    name: '메시지',
+  });
+  fireEvent.change(input, { target: { value: '쿠폰 메시지 수정' } });
+  expect(input).toHaveAttribute('maxlength', '500');
+  fireEvent.click(screen.getByRole('button', { name: '편집기 닫기' }));
+  expect(screen.getByRole('textbox', { name: '메시지' })).toHaveValue(
+    '쿠폰 메시지 수정',
+  );
+  expect(screen.getByText('9 / 500자')).toBeInTheDocument();
+});
+
+it('hides internal testing controls and blocks review until production dispatch is ready', () => {
+  render(<CouponCampaignComposer />);
+  expect(
+    screen.getByText('카카오 쿠폰 발송 준비 중입니다.'),
+  ).toBeInTheDocument();
+  expect(
+    screen.queryByRole('region', { name: '발송 모드' }),
+  ).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole('region', { name: '검증 상황' }),
+  ).not.toBeInTheDocument();
+  expect(screen.queryByText(/검증 예산/)).not.toBeInTheDocument();
+  expect(screen.queryByText('테스트 상품')).not.toBeInTheDocument();
+  expect(screen.getByRole('button', { name: /발송 전 검토/ })).toBeDisabled();
+});
+
+it('shows production products without a test mode selector in the normal composer', () => {
+  setQueryState({
+    liveAvailable: true,
+    environment: 'production',
+    liveProducts: [
+      { id: 'live-coffee', name: '운영 커피', price: 5000, validityDays: 30 },
+    ],
+  });
+  render(<CouponCampaignComposer />);
+  expect(
+    screen.getByRole('button', { name: '운영 커피 · 5,000원' }),
+  ).toBeInTheDocument();
+  expect(
+    screen.queryByText('카카오 쿠폰 발송 준비 중입니다.'),
+  ).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole('region', { name: '발송 모드' }),
+  ).not.toBeInTheDocument();
+  expect(screen.queryByText(/검증 예산/)).not.toBeInTheDocument();
 });

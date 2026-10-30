@@ -1,3 +1,4 @@
+import { SettingsAdminCouponTesting } from '@/settings/admin-panel/components/SettingsAdminCouponTesting';
 import { SettingsAdminAutomations } from '@/settings/admin-panel/automations/SettingsAdminAutomations';
 import { SettingsAdminAI } from '@/settings/admin-panel/ai/components/SettingsAdminAI';
 import { SettingsAdminApps } from '@/settings/admin-panel/apps/components/SettingsAdminApps';
@@ -17,6 +18,8 @@ export const SettingsAdminTabContent = () => {
   );
 
   switch (activeTabId) {
+    case SETTINGS_ADMIN_TABS.COUPON_TESTING:
+      return <SettingsAdminCouponTesting />;
     case SETTINGS_ADMIN_TABS.SYSTEM_METRICS:
       return <SettingsAdminSystemMetrics />;
     case SETTINGS_ADMIN_TABS.AUTOMATIONS:

@@ -62,6 +62,12 @@ export const SettingsAdminContent = () => {
       Icon: IconClock,
       disabled: !canAccessFullAdminPanel,
     },
+    {
+      id: SETTINGS_ADMIN_TABS.COUPON_TESTING,
+      title: t`쿠폰 테스트`,
+      Icon: IconSettings2,
+      disabled: !canAccessFullAdminPanel,
+    },
   ];
 
   return (

@@ -1,5 +1,6 @@
 export const SETTINGS_ADMIN_TABS = {
   GENERAL: 'general',
+  COUPON_TESTING: 'coupon-testing',
   AUTOMATIONS: 'automations',
   APPS: 'apps',
   AI: 'ai',

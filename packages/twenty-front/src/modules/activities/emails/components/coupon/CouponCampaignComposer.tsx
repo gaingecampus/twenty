@@ -1,3 +1,6 @@
+import { styled } from '@linaria/react';
+import { themeCssVariables } from 'twenty-ui/theme-constants';
+import { CampaignPlainTextMessageEditor } from '@/activities/emails/components/CampaignPlainTextMessageEditor';
 import { type CampaignDraft } from 'twenty-shared/types';
 import { type CampaignDraftControls } from '@/activities/emails/types/CampaignDraftControls';
 import { CampaignRecipientHeader } from '@/activities/emails/components/CampaignRecipientHeader';
@@ -33,6 +36,16 @@ import {
   type CouponDispatch,
 } from './coupon-operations';
 
+const StyledCouponMessageSection = styled.section`
+  && {
+    gap: ${themeCssVariables.spacing[2]};
+  }
+`;
+
+const StyledCouponSetupNotice = styled.div`
+  padding: ${themeCssVariables.spacing[4]} ${themeCssVariables.spacing[4]} 0;
+`;
+
 const statusLabels: Record<string, string> = {
   PREVIEW: '검토 대기',
   SIMULATED: '검증 완료 · 실제 발송 없음',
@@ -48,6 +61,7 @@ const statusLabels: Record<string, string> = {
 
 export const CouponCampaignComposer = ({
   isSendingDisabled = false,
+  isAdminTesting = false,
   renderDispatchOptions,
   initialDraft,
   draftReference,
@@ -55,14 +69,16 @@ export const CouponCampaignComposer = ({
   savingDraft = false,
 }: CampaignDraftControls & {
   isSendingDisabled?: boolean;
+  isAdminTesting?: boolean;
   renderDispatchOptions?: (recipientFields: ReactNode) => ReactNode;
 }) => {
   const sidePanelHeaderActionsElement = useAtomStateValue(
     sidePanelHeaderActionsElementState,
   );
-  const [mode, setMode] = useState<CampaignDraft['couponMode']>(
+  const [testMode, setMode] = useState<CampaignDraft['couponMode']>(
     initialDraft?.couponMode ?? 'SIMULATION',
   );
+  const mode = isAdminTesting ? testMode : 'LIVE';
   const [title, setTitle] = useState(
     initialDraft?.subject ?? '가인지 CRM 쿠폰 선물',
   );
@@ -107,6 +123,10 @@ export const CouponCampaignComposer = ({
   }>(SEND_COUPON);
   const busy = reviewing || running || sending || savingDraft;
   const capabilities = data?.couponCapabilities;
+  const canDispatch =
+    isAdminTesting ||
+    (capabilities?.liveAvailable === true &&
+      capabilities.environment === 'production');
   const invalidate = () => {
     revision.current++;
     setConfirmed(false);
@@ -118,7 +138,7 @@ export const CouponCampaignComposer = ({
     failure instanceof Error ? failure.message : '요청을 처리하지 못했습니다.';
 
   const review = async () => {
-    if (isSendingDisabled || busy) return;
+    if (isSendingDisabled || !canDispatch || busy) return;
     const currentRevision = revision.current;
     setError('');
     setQuote(null);
@@ -145,7 +165,8 @@ export const CouponCampaignComposer = ({
     }
   };
   const run = async () => {
-    if (isSendingDisabled || !quote || submitting.current) return;
+    if (isSendingDisabled || !canDispatch || !quote || submitting.current)
+      return;
     submitting.current = true;
     setError('');
     try {
@@ -174,6 +195,13 @@ export const CouponCampaignComposer = ({
       submitting.current = false;
     }
   };
+
+  const renderReviewButton = (button: ReactNode) =>
+    isAdminTesting
+      ? button
+      : sidePanelHeaderActionsElement
+        ? createPortal(button, sidePanelHeaderActionsElement)
+        : null;
 
   const recipientFields = (
     <StyledCampaignRecipientSection aria-label="수신자">
@@ -212,6 +240,15 @@ export const CouponCampaignComposer = ({
 
   return (
     <>
+      {!isAdminTesting && capabilities && !canDispatch && (
+        <StyledCouponSetupNotice>
+          <StyledCouponBanner
+            color="danger"
+            LeftIcon={IconAlertTriangle}
+            message="카카오 쿠폰 발송 준비 중입니다."
+          />
+        </StyledCouponSetupNotice>
+      )}
       {renderDispatchOptions?.(recipientFields)}
       {sidePanelHeaderActionsElement &&
         saveDraft &&
@@ -244,7 +281,13 @@ export const CouponCampaignComposer = ({
           <>
             <section aria-label="쿠폰 상품">
               <CampaignFieldLabel
-                label={mode === 'LIVE' ? '센드비 상품' : '테스트 상품'}
+                label={
+                  isAdminTesting
+                    ? mode === 'LIVE'
+                      ? '센드비 상품'
+                      : '테스트 상품'
+                    : '상품'
+                }
                 help={
                   mode === 'LIVE' ? '센드비 판매가 기준' : '샘플 상품·가격 기준'
                 }
@@ -253,7 +296,7 @@ export const CouponCampaignComposer = ({
                 dropdownId="coupon-product"
                 emptyOptionIsPlaceholder
                 value={productId}
-                disabled={busy}
+                disabled={busy || !canDispatch}
                 options={(mode === 'LIVE'
                   ? capabilities.liveProducts
                   : capabilities.products
@@ -285,117 +328,119 @@ export const CouponCampaignComposer = ({
                 />
               </label>
             )}
-            <label>
-              메시지
-              <textarea
-                aria-label="메시지"
-                placeholder="고객에게 전할 내용을 입력하세요"
+            <StyledCouponMessageSection>
+              <span>메시지</span>
+              <CampaignPlainTextMessageEditor
                 maxLength={500}
                 value={message}
                 disabled={busy}
-                onChange={(event) => {
-                  invalidate();
-                  setMessage(event.target.value);
-                }}
-              />
-            </label>
-            <section aria-label="발송 모드">
-              <span>발송 모드</span>
-              <Select
-                dropdownId="coupon-mode"
-                value={mode}
-                disabled={busy}
-                options={[
-                  { value: 'SIMULATION', label: '내부 검증 · 과금 없음' },
-                  ...(capabilities.liveAvailable
-                    ? [
-                        {
-                          value: 'LIVE',
-                          label:
-                            capabilities.environment === 'production'
-                              ? '실제 카카오 발송'
-                              : '센드비 개발 서버',
-                        },
-                      ]
-                    : []),
-                ]}
                 onChange={(value) => {
                   invalidate();
-                  setMode(value === 'LIVE' ? 'LIVE' : 'SIMULATION');
-                  setProductId('');
+                  setMessage(value);
                 }}
-                fullWidth
+                counter={`${message.length.toLocaleString()} / 500자`}
               />
-              <div role="status">
-                <StyledCouponBanner
-                  color="danger"
-                  LeftIcon={IconAlertTriangle}
-                  message={[
-                    mode === 'SIMULATION'
-                      ? '검증 모드 · 실제 전송 및 과금 없음'
-                      : capabilities.environment === 'production'
-                        ? '실제 발송 · 센드비 캐시 차감'
-                        : '센드비 개발 환경 · 테스트 발송',
-                    !capabilities.liveAvailable &&
-                      capabilities.liveBlockedReason,
-                  ]
-                    .filter(Boolean)
-                    .join('. ')}
+            </StyledCouponMessageSection>
+            {isAdminTesting && (
+              <section aria-label="발송 모드">
+                <span>발송 모드</span>
+                <Select
+                  dropdownId="coupon-mode"
+                  value={mode}
+                  disabled={busy}
+                  options={[
+                    { value: 'SIMULATION', label: '내부 검증 · 과금 없음' },
+                    ...(capabilities.liveAvailable
+                      ? [
+                          {
+                            value: 'LIVE',
+                            label:
+                              capabilities.environment === 'production'
+                                ? '실제 카카오 발송'
+                                : '센드비 개발 서버',
+                          },
+                        ]
+                      : []),
+                  ]}
+                  onChange={(value) => {
+                    invalidate();
+                    setMode(value === 'LIVE' ? 'LIVE' : 'SIMULATION');
+                    setProductId('');
+                  }}
+                  fullWidth
                 />
-              </div>
-            </section>
-            <StyledCouponValidationGroup>
-              {mode === 'SIMULATION' && (
-                <section aria-label="검증 상황">
-                  <span>검증 상황</span>
-                  <Select
-                    dropdownId="coupon-scenario"
-                    value={scenario}
-                    disabled={busy}
-                    options={[
-                      { value: 'SUCCESS', label: '정상 처리' },
-                      { value: 'DELIVERY_FAILED', label: '카카오 전달 실패' },
-                      { value: 'UNKNOWN', label: '응답 불명확' },
-                      { value: 'INSUFFICIENT_BALANCE', label: '잔액 부족' },
-                    ]}
-                    onChange={(value) => {
-                      invalidate();
-                      setScenario(value);
-                    }}
-                    fullWidth
+                <div role="status">
+                  <StyledCouponBanner
+                    color="danger"
+                    LeftIcon={IconAlertTriangle}
+                    message={[
+                      mode === 'SIMULATION'
+                        ? '검증 모드 · 실제 전송 및 과금 없음'
+                        : capabilities.environment === 'production'
+                          ? '실제 발송 · 센드비 캐시 차감'
+                          : '센드비 개발 환경 · 테스트 발송',
+                      !capabilities.liveAvailable &&
+                        capabilities.liveBlockedReason,
+                    ]
+                      .filter(Boolean)
+                      .join('. ')}
                   />
-                </section>
-              )}
-              <section aria-label="발송 한도">
-                <StyledCouponSummary>
-                  <Tag
-                    color="orange"
-                    text={`${mode === 'LIVE' ? '발송 한도' : '검증 예산'} ${(mode === 'LIVE' ? capabilities.liveBudget : capabilities.simulationBudget).toLocaleString('ko-KR')}원`}
-                  />
-                  <Tag color="blue" Icon={IconUsers} text="최대 1,000명" />
-                </StyledCouponSummary>
+                </div>
               </section>
-            </StyledCouponValidationGroup>
-            {sidePanelHeaderActionsElement &&
-              createPortal(
-                <Button
-                  title="발송 전 검토"
-                  size="small"
-                  variant="primary"
-                  accent="blue"
-                  Icon={IconSend}
-                  onClick={review}
-                  disabled={
-                    isSendingDisabled ||
-                    busy ||
-                    !productId ||
-                    !message.trim() ||
-                    (mode === 'LIVE' && !title.trim()) ||
-                    (target === 'phone' ? !testPhone.trim() : !listId)
-                  }
-                />,
-                sidePanelHeaderActionsElement,
-              )}
+            )}
+            {(isAdminTesting || canDispatch) && (
+              <StyledCouponValidationGroup>
+                {isAdminTesting && mode === 'SIMULATION' && (
+                  <section aria-label="검증 상황">
+                    <span>검증 상황</span>
+                    <Select
+                      dropdownId="coupon-scenario"
+                      value={scenario}
+                      disabled={busy}
+                      options={[
+                        { value: 'SUCCESS', label: '정상 처리' },
+                        { value: 'DELIVERY_FAILED', label: '카카오 전달 실패' },
+                        { value: 'UNKNOWN', label: '응답 불명확' },
+                        { value: 'INSUFFICIENT_BALANCE', label: '잔액 부족' },
+                      ]}
+                      onChange={(value) => {
+                        invalidate();
+                        setScenario(value);
+                      }}
+                      fullWidth
+                    />
+                  </section>
+                )}
+                <section aria-label="발송 한도">
+                  <StyledCouponSummary>
+                    <Tag
+                      color="orange"
+                      text={`${mode === 'LIVE' ? '발송 한도' : '검증 예산'} ${(mode === 'LIVE' ? capabilities.liveBudget : capabilities.simulationBudget).toLocaleString('ko-KR')}원`}
+                    />
+                    <Tag color="blue" Icon={IconUsers} text="최대 1,000명" />
+                  </StyledCouponSummary>
+                </section>
+              </StyledCouponValidationGroup>
+            )}
+            {renderReviewButton(
+              <Button
+                title="발송 전 검토"
+                size="small"
+                variant="primary"
+                accent="blue"
+                Icon={IconSend}
+                onClick={review}
+                disabled={
+                  isSendingDisabled ||
+                  !canDispatch ||
+                  busy ||
+                  !productId ||
+                  !message.trim() ||
+                  (mode === 'LIVE' && !title.trim()) ||
+                  (target === 'phone' ? !testPhone.trim() : !listId)
+                }
+              />,
+            )}
           </>
         )}
         {error && <p role="alert">{error}</p>}
@@ -448,6 +493,7 @@ export const CouponCampaignComposer = ({
               onClick={run}
               disabled={
                 isSendingDisabled ||
+                !canDispatch ||
                 busy ||
                 (quote.mode === 'LIVE' && !confirmed) ||
                 quote.estimatedCost >
