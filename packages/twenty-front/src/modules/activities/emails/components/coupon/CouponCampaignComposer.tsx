@@ -332,6 +332,7 @@ export const CouponCampaignComposer = ({
             <StyledCouponMessageSection>
               <span>메시지</span>
               <CampaignPlainTextMessageEditor
+                showCustomerInfo
                 maxLength={500}
                 value={message}
                 disabled={busy}

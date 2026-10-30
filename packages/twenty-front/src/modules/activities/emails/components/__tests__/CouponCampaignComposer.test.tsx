@@ -1,10 +1,12 @@
-import { type ReactNode } from 'react';
+import { type ReactElement, type ReactNode } from 'react';
+import { i18n } from '@lingui/core';
+import { I18nProvider } from '@lingui/react';
 import { buildCampaignDraft } from '@/activities/emails/utils/buildCampaignDraft';
 import { useMutation, useQuery } from '@apollo/client/react';
 import {
   cleanup,
   fireEvent,
-  render,
+  render as renderComponent,
   screen,
   waitFor,
   within,
@@ -12,6 +14,13 @@ import {
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 import { CouponCampaignComposer } from '@/activities/emails/components/coupon/CouponCampaignComposer';
 import { COUPON_CAPABILITIES } from '@/activities/emails/components/coupon/coupon-operations';
+
+const render = (component: ReactElement) =>
+  renderComponent(component, {
+    wrapper: ({ children }) => (
+      <I18nProvider i18n={i18n}>{children}</I18nProvider>
+    ),
+  });
 
 jest.mock('@/ui/layout/fullscreen/hooks/useFullScreenModal', () => ({
   useFullScreenModal: ({ onClose }: { onClose: () => void }) => ({
@@ -234,6 +243,49 @@ it('preserves coupon edits and its limit when opening and closing the full scree
     '쿠폰 메시지 수정',
   );
   expect(screen.getByText('9 / 500자')).toBeInTheDocument();
+});
+
+it('inserts customer information at the selection in both editors and saves the template', () => {
+  const saveDraft = jest.fn();
+  render(<CouponCampaignComposer saveDraft={saveDraft} />);
+  const input = screen.getByRole<HTMLTextAreaElement>('textbox', {
+    name: '메시지',
+  });
+  fireEvent.change(input, { target: { value: '고객님 감사합니다' } });
+  input.setSelectionRange(0, 2);
+  fireEvent.click(screen.getByRole('button', { name: '고객 이름' }));
+  expect(input).toHaveValue('{{fullName}}님 감사합니다');
+  fireEvent.click(
+    screen.getByRole('button', { name: '메시지 전체 화면으로 열기' }),
+  );
+  const expandedInput = within(
+    screen.getByRole('dialog'),
+  ).getByRole<HTMLTextAreaElement>('textbox', { name: '메시지' });
+  expandedInput.setSelectionRange(0, 0);
+  fireEvent.click(
+    within(screen.getByRole('dialog')).getByRole('button', { name: '기업' }),
+  );
+  fireEvent.click(screen.getByRole('button', { name: '편집기 닫기' }));
+  fireEvent.click(screen.getByRole('button', { name: /임시 저장/ }));
+  expect(saveDraft).toHaveBeenCalledWith(
+    expect.objectContaining({
+      body: '{{companyName}}{{fullName}}님 감사합니다',
+    }),
+  );
+});
+
+it('does not exceed the coupon message limit when inserting customer information', () => {
+  render(<CouponCampaignComposer />);
+  const input = screen.getByRole<HTMLTextAreaElement>('textbox', {
+    name: '메시지',
+  });
+  fireEvent.change(input, { target: { value: '가'.repeat(500) } });
+  input.setSelectionRange(500, 500);
+  fireEvent.click(screen.getByRole('button', { name: '고객 이름' }));
+  expect(input).toHaveValue('가'.repeat(500));
+  input.setSelectionRange(0, 12);
+  fireEvent.click(screen.getByRole('button', { name: '고객 이름' }));
+  expect(input).toHaveValue('{{fullName}}' + '가'.repeat(488));
 });
 
 it('hides internal testing controls and blocks review until production dispatch is ready', () => {

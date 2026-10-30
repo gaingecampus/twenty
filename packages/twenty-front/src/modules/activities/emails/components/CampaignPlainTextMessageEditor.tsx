@@ -93,7 +93,9 @@ export const CampaignPlainTextMessageEditor = ({
     if (disabled || !input) return;
     const start = input.selectionStart;
     const end = input.selectionEnd;
-    onChange(value.slice(0, start) + text + value.slice(end));
+    const nextValue = value.slice(0, start) + text + value.slice(end);
+    if (isDefined(maxLength) && nextValue.length > maxLength) return;
+    onChange(nextValue);
     requestAnimationFrame(() => {
       inputRef.current?.focus();
       inputRef.current?.setSelectionRange(
