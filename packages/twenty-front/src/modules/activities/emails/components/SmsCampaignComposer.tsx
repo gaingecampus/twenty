@@ -1,3 +1,5 @@
+import { CampaignRecipientSelector } from '@/activities/emails/components/CampaignRecipientSelector';
+import { type CampaignRecipientMode } from '@/activities/emails/types/CampaignRecipientMode';
 import { FORM_FIELD_PLACEHOLDER_STYLES } from '@/object-record/record-field/ui/form-types/constants/FormFieldPlaceholderStyles';
 import { sidePanelHeaderActionsElementState } from '@/side-panel/states/sidePanelHeaderActionsElementState';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
@@ -129,6 +131,9 @@ export const SmsCampaignComposer = ({
   const sidePanelHeaderActionsElement = useAtomStateValue(
     sidePanelHeaderActionsElementState,
   );
+  const [recipientMode, setRecipientMode] =
+    useState<CampaignRecipientMode>('list');
+  const [directPhone, setDirectPhone] = useState('');
   const [listId, setListId] = useState<string>();
   const [subject, setSubject] = useState('');
   const [content, setContent] = useState('');
@@ -153,6 +158,7 @@ export const SmsCampaignComposer = ({
   const bytes = new TextEncoder().encode(content).length;
   const busy = sending || previewLoading;
   const canReview =
+    recipientMode === 'list' &&
     !isSendingDisabled &&
     !isSendingBlocked &&
     !busy &&
@@ -189,6 +195,7 @@ export const SmsCampaignComposer = ({
   };
   const submit = async () => {
     if (
+      recipientMode !== 'list' ||
       isSendingDisabled ||
       isSendingBlocked ||
       !preview ||
@@ -220,16 +227,29 @@ export const SmsCampaignComposer = ({
           label="수신자"
           help="번호 없음·중복 제외 · 가인지 문자 발송 요금 적용"
         />
-        <FormSingleRecordPicker
-          objectNameSingulars={['messageList']}
-          defaultValue={listId}
-          onChange={(value) => {
-            if (!busy) {
-              reset();
-              setListId(value ?? undefined);
-            }
+        <CampaignRecipientSelector
+          channel="sms"
+          mode={recipientMode}
+          onModeChange={(mode) => {
+            if (busy) return;
+            reset();
+            setRecipientMode(mode);
           }}
-        />
+          directValue={directPhone}
+          onDirectValueChange={setDirectPhone}
+          disabled={busy}
+        >
+          <FormSingleRecordPicker
+            objectNameSingulars={['messageList']}
+            defaultValue={listId}
+            onChange={(value) => {
+              if (!busy) {
+                reset();
+                setListId(value ?? undefined);
+              }
+            }}
+          />
+        </CampaignRecipientSelector>
       </StyledFieldSection>
       {isSendingDisabled && (
         <div role="alert">

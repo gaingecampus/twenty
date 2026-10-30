@@ -1,3 +1,4 @@
+import { CampaignRecipientSelector } from '@/activities/emails/components/CampaignRecipientSelector';
 import { CampaignFieldLabel } from '@/activities/emails/components/CampaignFieldLabel';
 import { EmailSignaturePreview } from '@/settings/accounts/components/EmailSignaturePreview';
 import { CampaignBodyVariablePicker } from '@/activities/emails/components/CampaignBodyVariablePicker';
@@ -158,7 +159,8 @@ export const CampaignComposerFields = ({
   };
 
   const audiencePreview = useCampaignAudiencePreview({
-    listId: campaignState.listId,
+    listId:
+      campaignState.recipientMode === 'list' ? campaignState.listId : null,
     unsubscribeTopicId: campaignState.unsubscribeTopicId,
   });
 
@@ -197,21 +199,33 @@ export const CampaignComposerFields = ({
             }
           />
         </StyledLabelRow>
-        <FormSingleRecordPicker
-          objectNameSingulars={['messageList']}
-          defaultValue={campaignState.listId ?? undefined}
-          onChange={campaignState.setListId}
-          onCreate={handleCreateList}
-        />
-        {isDefined(audiencePreview) && (
-          <StyledAudience role="status" aria-atomic="true">
-            <Tag
-              color="green"
-              Icon={IconUsers}
-              text={`발송 가능 ${audiencePreview.sendable.toLocaleString('ko-KR')}명`}
-            />
-          </StyledAudience>
-        )}
+        <CampaignRecipientSelector
+          channel="email"
+          mode={campaignState.recipientMode}
+          onModeChange={(mode) => {
+            campaignState.closeReview();
+            campaignState.setRecipientMode(mode);
+          }}
+          directValue={campaignState.directEmail}
+          onDirectValueChange={campaignState.setDirectEmail}
+          disabled={campaignState.loading}
+        >
+          <FormSingleRecordPicker
+            objectNameSingulars={['messageList']}
+            defaultValue={campaignState.listId ?? undefined}
+            onChange={campaignState.setListId}
+            onCreate={handleCreateList}
+          />
+          {isDefined(audiencePreview) && (
+            <StyledAudience role="status" aria-atomic="true">
+              <Tag
+                color="green"
+                Icon={IconUsers}
+                text={`발송 가능 ${audiencePreview.sendable.toLocaleString('ko-KR')}명`}
+              />
+            </StyledAudience>
+          )}
+        </CampaignRecipientSelector>
       </StyledFieldGroup>
       <StyledFieldGroup>
         <StyledLabelRow>

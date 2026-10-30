@@ -1,3 +1,4 @@
+import { CampaignRecipientSelector } from '@/activities/emails/components/CampaignRecipientSelector';
 import { CampaignFieldLabel } from '@/activities/emails/components/CampaignFieldLabel';
 import { sidePanelHeaderActionsElementState } from '@/side-panel/states/sidePanelHeaderActionsElementState';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
@@ -155,50 +156,34 @@ export const CouponCampaignComposer = ({
         <>
           <section aria-label="수신자">
             <span>수신자</span>
-            <Select
-              dropdownId="coupon-target"
-              value={target}
-              disabled={busy}
-              options={[
-                { value: 'phone', label: '폰번호 직접 입력' },
-                { value: 'list', label: '고객 분류' },
-              ]}
-              onChange={(value) => {
+            <CampaignRecipientSelector
+              channel="coupon"
+              mode={target === 'phone' ? 'direct' : 'list'}
+              onModeChange={(mode) => {
                 invalidate();
-                setTarget(value);
+                setTarget(mode === 'direct' ? 'phone' : 'list');
               }}
-              fullWidth
-            />
-            {target === 'list' && (
-              <FormSingleRecordPicker
-                objectNameSingulars={['messageList']}
-                defaultValue={listId}
-                onChange={(value) => {
-                  if (!busy) {
-                    invalidate();
-                    setListId(value ?? undefined);
-                  }
-                }}
-              />
-            )}
+              directValue={testPhone}
+              onDirectValueChange={(value) => {
+                invalidate();
+                setTestPhone(value);
+              }}
+              disabled={busy}
+            >
+              {target === 'list' && (
+                <FormSingleRecordPicker
+                  objectNameSingulars={['messageList']}
+                  defaultValue={listId}
+                  onChange={(value) => {
+                    if (!busy) {
+                      invalidate();
+                      setListId(value ?? undefined);
+                    }
+                  }}
+                />
+              )}
+            </CampaignRecipientSelector>
           </section>
-          {target === 'phone' && (
-            <label>
-              수신자 폰번호
-              <input
-                aria-label="수신자 폰번호"
-                type="tel"
-                autoComplete="off"
-                value={testPhone}
-                disabled={busy}
-                onChange={(event) => {
-                  invalidate();
-                  setTestPhone(event.target.value);
-                }}
-                placeholder="01012345678"
-              />
-            </label>
-          )}
           <section aria-label="쿠폰 상품">
             <CampaignFieldLabel
               label={mode === 'LIVE' ? '센드비 상품' : '테스트 상품'}

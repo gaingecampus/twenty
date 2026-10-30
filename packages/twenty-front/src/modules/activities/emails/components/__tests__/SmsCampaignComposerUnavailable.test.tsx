@@ -60,6 +60,29 @@ afterEach(() => {
   headerElement.remove();
 });
 
+jest.mock('@/ui/input/components/Select', () => ({
+  Select: ({
+    options,
+    value,
+    onChange,
+  }: {
+    options: { value: string; label: string }[];
+    value: string;
+    onChange: (value: string) => void;
+  }) => (
+    <div>
+      {options.map((option) => (
+        <button
+          key={option.value}
+          aria-pressed={option.value === value}
+          onClick={() => onChange(option.value)}
+        >
+          {option.label}
+        </button>
+      ))}
+    </div>
+  ),
+}));
 jest.mock('@apollo/client/react', () => ({
   useLazyQuery: jest.fn(),
   useMutation: jest.fn(),
@@ -186,5 +209,24 @@ it('reviews from the header only after required fields are filled without sendin
   rerender(<SmsCampaignComposer />);
   expect(reviewButton).toBeEnabled();
   expect(sendButton).toBeEnabled();
+  fireEvent.click(screen.getByRole('button', { name: '폰번호 직접 입력' }));
+  fireEvent.change(screen.getByRole('textbox', { name: '수신자 폰번호' }), {
+    target: { value: '01012345678' },
+  });
+  expect(reviewButton).toBeDisabled();
+  expect(
+    screen.queryByRole('region', { name: '문자 발송 확인' }),
+  ).not.toBeInTheDocument();
+  expect(screen.getByRole('alert')).toHaveTextContent(
+    '직접 입력 발송은 아직 지원하지 않습니다.',
+  );
+  fireEvent.click(reviewButton);
+  expect(loadPreview).toHaveBeenCalledTimes(1);
+  expect(send).not.toHaveBeenCalled();
+  fireEvent.click(screen.getByRole('button', { name: '고객 분류' }));
+  expect(reviewButton).toBeEnabled();
+  expect(
+    screen.queryByRole('region', { name: '문자 발송 확인' }),
+  ).not.toBeInTheDocument();
   expect(useQuery).not.toHaveBeenCalled();
 });

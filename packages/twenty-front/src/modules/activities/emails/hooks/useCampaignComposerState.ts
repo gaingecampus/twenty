@@ -1,3 +1,4 @@
+import { type CampaignRecipientMode } from '@/activities/emails/types/CampaignRecipientMode';
 import { type EmailAttachment } from 'twenty-shared/types';
 import { useEmailSignature } from '@/settings/accounts/hooks/useEmailSignature';
 import { appendEmailSignature } from '@/activities/emails/utils/appendEmailSignature';
@@ -26,6 +27,9 @@ export const useCampaignComposerState = ({
   const [unsubscribeTopicId, setUnsubscribeTopicId] = useState<string | null>(
     campaign?.unsubscribeTopicId ?? null,
   );
+  const [recipientMode, setRecipientMode] =
+    useState<CampaignRecipientMode>('list');
+  const [directEmail, setDirectEmail] = useState('');
   const [listId, setListId] = useState<string | null>(campaign?.listId ?? null);
   const [fromAddress, setFromAddress] = useState(
     campaign?.fromAddress?.primaryEmail ?? '',
@@ -92,6 +96,7 @@ export const useCampaignComposerState = ({
   };
 
   const canSend =
+    recipientMode === 'list' &&
     listId !== null &&
     fromAddress.trim().length > 0 &&
     subject.trim().length > 0 &&
@@ -168,6 +173,10 @@ export const useCampaignComposerState = ({
     cancelling,
     unsubscribeTopicId,
     setUnsubscribeTopicId,
+    recipientMode,
+    setRecipientMode,
+    directEmail,
+    setDirectEmail,
     listId,
     setListId,
     fromAddress,

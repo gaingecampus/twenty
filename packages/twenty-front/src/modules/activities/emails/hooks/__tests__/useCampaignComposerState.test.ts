@@ -61,6 +61,25 @@ describe('useCampaignComposerState', () => {
     });
   });
 
+  it('blocks direct recipients even when a list was selected and review was opened', async () => {
+    const { result } = renderHook(() => useCampaignComposerState({}));
+    fillSendableFields(result);
+    act(() => result.current.handleSend());
+    expect(result.current.isReviewOpen).toBe(true);
+    act(() => {
+      result.current.setRecipientMode('direct');
+      result.current.setDirectEmail('recipient@example.com');
+    });
+    expect(result.current.canSend).toBe(false);
+    await act(async () => result.current.confirmSend());
+    expect(sendMessageCampaignMock).not.toHaveBeenCalled();
+    act(() => result.current.closeReview());
+    act(() => result.current.handleSend());
+    expect(result.current.isReviewOpen).toBe(false);
+    act(() => result.current.setRecipientMode('list'));
+    expect(result.current.canSend).toBe(true);
+  });
+
   it('blocks a reservation without a valid future date', () => {
     const { result } = renderHook(() => useCampaignComposerState({}));
     fillSendableFields(result);
