@@ -1,3 +1,5 @@
+import { RecordTableScrollbars } from '@/object-record/record-table/components/RecordTableScrollbars';
+import { ScrollWrapper } from '@/ui/utilities/scroll/components/ScrollWrapper';
 import { MessageListHeaderCount } from '@/activities/emails/components/message-lists/MessageListHeaderCount';
 import {
   StyledMessageListTable,
@@ -30,9 +32,13 @@ const StyledSection = styled.section`
   display: flex;
   flex-direction: column;
   gap: ${themeCssVariables.spacing[3]};
-  overflow: auto;
+  min-width: 0;
   width: 100%;
 `;
+const StyledTableScrollbars = styled(RecordTableScrollbars)`
+  flex: none;
+`;
+
 const StyledEmpty = styled.div`
   padding-block: ${themeCssVariables.spacing[4]};
 `;
@@ -46,6 +52,7 @@ export const MessageListCampaigns = ({ listId }: { listId: string }) => (
 
 const MessageListCampaignsPage = ({ listId }: { listId: string }) => {
   const [page, setPage] = useState(0);
+  const tableId = `message-list-campaigns-${listId}`;
   const pageSize = 20;
   const { records, totalCount, loading, error, refetch } =
     useMessageListRecordPage<Campaign>({
@@ -105,48 +112,56 @@ const MessageListCampaignsPage = ({ listId }: { listId: string }) => {
         </StyledEmpty>
       )}
       {records.length > 0 && (
-        <StyledMessageListTable>
-          <TableRow gridTemplateColumns={CAMPAIGN_GRID_COLUMNS}>
-            <StyledMessageListHeader>{t`심방콜 발송`}</StyledMessageListHeader>
-            <StyledMessageListHeader>{t`발신자`}</StyledMessageListHeader>
-            <StyledMessageListHeader>{t`상태`}</StyledMessageListHeader>
-            <StyledMessageListHeader>{t`예약 / 발송 시각`}</StyledMessageListHeader>
-          </TableRow>
-          {records.map((campaign) => (
-            <TableRow
-              key={campaign.id}
-              hoverBackgroundColor={
-                themeCssVariables.background.transparent.light
-              }
-              gridTemplateColumns={CAMPAIGN_GRID_COLUMNS}
-            >
-              <StyledMessageListCell>
-                <RecordChip
-                  objectNameSingular="messageCampaign"
-                  record={campaign}
-                />
-              </StyledMessageListCell>
-              <StyledMessageListCell>
-                <EmailDisplay value={campaign.fromAddress?.primaryEmail} />
-              </StyledMessageListCell>
-              <StyledMessageListCell>
-                <Tag
-                  text={statusLabels[campaign.status] ?? campaign.status}
-                  color={statusColors[campaign.status] ?? 'gray'}
-                />
-              </StyledMessageListCell>
-              <StyledMessageListCell>
-                {campaign.sentAt || campaign.scheduledAt ? (
-                  <DateTimeDisplay
-                    value={campaign.sentAt ?? campaign.scheduledAt}
-                  />
-                ) : (
-                  '—'
-                )}
-              </StyledMessageListCell>
-            </TableRow>
-          ))}
-        </StyledMessageListTable>
+        <StyledTableScrollbars recordTableId={tableId}>
+          <ScrollWrapper
+            componentInstanceId={`record-table-scroll-${tableId}`}
+            autoHeight
+            defaultEnableYScroll={false}
+          >
+            <StyledMessageListTable>
+              <TableRow gridTemplateColumns={CAMPAIGN_GRID_COLUMNS}>
+                <StyledMessageListHeader>{t`심방콜 발송`}</StyledMessageListHeader>
+                <StyledMessageListHeader>{t`발신자`}</StyledMessageListHeader>
+                <StyledMessageListHeader>{t`상태`}</StyledMessageListHeader>
+                <StyledMessageListHeader>{t`예약 / 발송 시각`}</StyledMessageListHeader>
+              </TableRow>
+              {records.map((campaign) => (
+                <TableRow
+                  key={campaign.id}
+                  hoverBackgroundColor={
+                    themeCssVariables.background.transparent.light
+                  }
+                  gridTemplateColumns={CAMPAIGN_GRID_COLUMNS}
+                >
+                  <StyledMessageListCell>
+                    <RecordChip
+                      objectNameSingular="messageCampaign"
+                      record={campaign}
+                    />
+                  </StyledMessageListCell>
+                  <StyledMessageListCell>
+                    <EmailDisplay value={campaign.fromAddress?.primaryEmail} />
+                  </StyledMessageListCell>
+                  <StyledMessageListCell>
+                    <Tag
+                      text={statusLabels[campaign.status] ?? campaign.status}
+                      color={statusColors[campaign.status] ?? 'gray'}
+                    />
+                  </StyledMessageListCell>
+                  <StyledMessageListCell>
+                    {campaign.sentAt || campaign.scheduledAt ? (
+                      <DateTimeDisplay
+                        value={campaign.sentAt ?? campaign.scheduledAt}
+                      />
+                    ) : (
+                      '—'
+                    )}
+                  </StyledMessageListCell>
+                </TableRow>
+              ))}
+            </StyledMessageListTable>
+          </ScrollWrapper>
+        </StyledTableScrollbars>
       )}
       {!loading && !error && totalCount > 0 && (
         <RecordPaginationBar
