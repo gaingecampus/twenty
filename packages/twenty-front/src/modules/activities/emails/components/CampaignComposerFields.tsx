@@ -2,7 +2,13 @@ import { EmailSignaturePreview } from '@/settings/accounts/components/EmailSigna
 import { CampaignBodyVariablePicker } from '@/activities/emails/components/CampaignBodyVariablePicker';
 import { EmailAttachmentsField } from '@/activities/emails/components/EmailAttachmentsField';
 import { useId } from 'react';
-import { IconExternalLink, IconInfoCircle, IconUsers } from 'twenty-ui/icon';
+import {
+  IconBolt,
+  IconClock,
+  IconExternalLink,
+  IconInfoCircle,
+  IconUsers,
+} from 'twenty-ui/icon';
 import { Tag } from 'twenty-ui/data-display';
 import { AppTooltip, TooltipDelay } from 'twenty-ui/surfaces';
 import { useSnackBar } from '@/ui/feedback/snack-bar-manager/hooks/useSnackBar';
@@ -339,8 +345,18 @@ export const CampaignComposerFields = ({
                 fullWidth
                 value={campaignState.sendMode}
                 options={[
-                  { label: t`Send immediately`, value: 'immediate' },
-                  { label: t`Schedule send`, value: 'scheduled' },
+                  {
+                    label: t`Send immediately`,
+                    value: 'immediate',
+                    Icon: IconBolt,
+                    iconThemeColor: 'red',
+                  },
+                  {
+                    label: t`Schedule send`,
+                    value: 'scheduled',
+                    Icon: IconClock,
+                    iconThemeColor: 'yellow',
+                  },
                 ]}
                 onChange={campaignState.setSendMode}
               />
