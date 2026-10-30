@@ -1,3 +1,4 @@
+import { filterCampaignDetailTabs } from '@/activities/emails/utils/filterCampaignDetailTabs';
 import { SummaryCard } from '@/object-record/record-show/components/SummaryCard';
 import { FieldManagement } from '@/field-management/FieldManagement';
 import {
@@ -201,7 +202,13 @@ export const PageLayoutTabsRenderer = () => {
   const fieldManagementTab = useFieldManagementRecordTab(currentPageLayout.id);
 
   const tabsWithVisibleWidgets = getTabsWithVisibleWidgets({
-    tabs: currentPageLayout.tabs,
+    tabs: filterCampaignDetailTabs({
+      tabs: currentPageLayout.tabs,
+      objectNameSingular: targetRecordIdentifier?.targetObjectNameSingular,
+      listFieldId: objectMetadataItems
+        .find((object) => object.nameSingular === 'messageCampaign')
+        ?.fields.find((field) => field.name === 'list')?.id,
+    }),
     contentTabIds: fieldManagementTab ? [fieldManagementTab.id] : [],
     isMobile,
     isInSidePanel,
@@ -288,7 +295,7 @@ export const PageLayoutTabsRenderer = () => {
     (activeTabId === fieldManagementTab.id ||
       activeTabId === FIELD_MANAGEMENT_RECORD_TAB_ID);
 
-  const activeTabExistsInCurrentPageLayout = currentPageLayout.tabs.some(
+  const activeTabExistsInCurrentPageLayout = tabsForCurrentObject.some(
     (tab) => tab.id === activeTabId,
   );
 
