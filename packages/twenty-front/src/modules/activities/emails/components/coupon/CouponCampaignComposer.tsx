@@ -185,23 +185,7 @@ export const CouponCampaignComposer = () => {
               }}
               fullWidth
             />
-            {target === 'phone' ? (
-              <label>
-                받는 분 휴대전화번호
-                <input
-                  aria-label="쿠폰 테스트 번호"
-                  type="tel"
-                  autoComplete="off"
-                  value={testPhone}
-                  disabled={busy}
-                  onChange={(event) => {
-                    invalidate();
-                    setTestPhone(event.target.value);
-                  }}
-                  placeholder="01012345678"
-                />
-              </label>
-            ) : (
+            {target === 'list' && (
               <FormSingleRecordPicker
                 objectNameSingulars={['messageList']}
                 defaultValue={listId}
@@ -214,6 +198,23 @@ export const CouponCampaignComposer = () => {
               />
             )}
           </section>
+          {target === 'phone' && (
+            <label>
+              받는 분 휴대전화번호
+              <input
+                aria-label="쿠폰 테스트 번호"
+                type="tel"
+                autoComplete="off"
+                value={testPhone}
+                disabled={busy}
+                onChange={(event) => {
+                  invalidate();
+                  setTestPhone(event.target.value);
+                }}
+                placeholder="01012345678"
+              />
+            </label>
+          )}
           <section aria-label="쿠폰 상품">
             <span>{mode === 'LIVE' ? '센드비 상품' : '테스트 상품'}</span>
             <Select
