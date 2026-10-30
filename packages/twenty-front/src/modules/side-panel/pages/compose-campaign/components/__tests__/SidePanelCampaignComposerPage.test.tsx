@@ -45,6 +45,12 @@ jest.mock('@/ui/input/components/internal/date/hooks/useUserTimezone', () => ({
 jest.mock('@/activities/emails/components/CampaignReviewModal', () => ({
   CampaignReviewModal: () => null,
 }));
+jest.mock(
+  '@/activities/emails/components/EmailCampaignRecipientFields',
+  () => ({
+    EmailCampaignRecipientFields: () => <div>이메일 수신자</div>,
+  }),
+);
 jest.mock('@/activities/emails/components/CampaignComposerFields', () => ({
   CampaignComposerFields: () => <div>이메일 작성</div>,
 }));

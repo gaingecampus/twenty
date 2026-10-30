@@ -1,3 +1,4 @@
+import { EmailCampaignRecipientFields } from '@/activities/emails/components/EmailCampaignRecipientFields';
 import { CampaignDispatchOptions } from '@/activities/emails/components/CampaignDispatchOptions';
 import { InlineBanner } from 'twenty-ui/feedback';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
@@ -155,7 +156,11 @@ export const SidePanelCampaignComposerPage = () => {
         </StyledChannelTabs>
       )}
       <StyledContent>
-        <CampaignDispatchOptions campaignState={campaignState} />
+        <CampaignDispatchOptions campaignState={campaignState}>
+          {(channel === 'email' || campaignToEdit) && (
+            <EmailCampaignRecipientFields campaignState={campaignState} />
+          )}
+        </CampaignDispatchOptions>
         {hasUnsupportedOptions && (
           <StyledWarning role="alert">
             <InlineBanner

@@ -1,3 +1,4 @@
+import { type ReactNode } from 'react';
 import { CampaignFieldLabel } from '@/activities/emails/components/CampaignFieldLabel';
 import { type useCampaignComposerState } from '@/activities/emails/hooks/useCampaignComposerState';
 import { useUnsubscribeTopics } from '@/activities/emails/hooks/useUnsubscribeTopics';
@@ -41,6 +42,7 @@ const StyledHint = styled.div`
 `;
 
 type CampaignDispatchOptionsProps = {
+  children?: ReactNode;
   campaignState: Pick<
     ReturnType<typeof useCampaignComposerState>,
     | 'sendMode'
@@ -55,6 +57,7 @@ type CampaignDispatchOptionsProps = {
 
 export const CampaignDispatchOptions = ({
   campaignState,
+  children,
 }: CampaignDispatchOptionsProps) => {
   const { userTimezone } = useUserTimezone();
   const {
@@ -152,6 +155,7 @@ export const CampaignDispatchOptions = ({
           ) : null}
         </StyledOptionsBody>
       </StyledOptions>
+      {children}
     </StyledContainer>
   );
 };

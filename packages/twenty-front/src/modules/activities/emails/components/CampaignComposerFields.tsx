@@ -1,19 +1,12 @@
-import { CampaignRecipientHeader } from '@/activities/emails/components/CampaignRecipientHeader';
-import { CampaignRecipientSelector } from '@/activities/emails/components/CampaignRecipientSelector';
 import { CampaignFieldLabel } from '@/activities/emails/components/CampaignFieldLabel';
 import { EmailSignaturePreview } from '@/settings/accounts/components/EmailSignaturePreview';
 import { CampaignBodyVariablePicker } from '@/activities/emails/components/CampaignBodyVariablePicker';
 import { EmailAttachmentsField } from '@/activities/emails/components/EmailAttachmentsField';
-import { IconExternalLink, IconUsers } from 'twenty-ui/icon';
-import { Tag } from 'twenty-ui/data-display';
-import { useSnackBar } from '@/ui/feedback/snack-bar-manager/hooks/useSnackBar';
+import { IconExternalLink } from 'twenty-ui/icon';
 import { styled } from '@linaria/react';
 
-import { useCampaignAudiencePreview } from '@/activities/emails/hooks/useCampaignAudiencePreview';
 import { type useCampaignComposerState } from '@/activities/emails/hooks/useCampaignComposerState';
-import { useCreateOneRecord } from '@/object-record/hooks/useCreateOneRecord';
 import { FormAdvancedTextFieldInput } from '@/object-record/record-field/ui/form-types/components/FormAdvancedTextFieldInput';
-import { FormSingleRecordPicker } from '@/object-record/record-field/ui/form-types/components/FormSingleRecordPicker';
 import { FormTextFieldInput } from '@/object-record/record-field/ui/form-types/components/FormTextFieldInput';
 import { useMyMessageChannels } from '@/settings/accounts/hooks/useMyMessageChannels';
 import { Select } from '@/ui/input/components/Select';
@@ -76,12 +69,6 @@ const StyledOptionsBody = styled.div`
   gap: ${themeCssVariables.spacing[2]};
 `;
 
-const StyledAudience = styled.div`
-  align-items: center;
-  display: flex;
-  min-width: 0;
-`;
-
 const StyledFieldLabel = styled.div`
   align-items: center;
   color: ${themeCssVariables.font.color.primary};
@@ -98,34 +85,6 @@ const StyledHint = styled.div`
   line-height: var(--t-text-line-height-md, 1.45);
 `;
 
-type CampaignAudiencePreview = NonNullable<
-  ReturnType<typeof useCampaignAudiencePreview>
->;
-
-const buildAudienceHint = (preview: CampaignAudiencePreview): string => {
-  const parts: string[] = [];
-
-  if (preview.withoutEmail > 0) {
-    parts.push(t`${preview.withoutEmail} without email`);
-  }
-  if (preview.duplicateEmails > 0) {
-    parts.push(t`${preview.duplicateEmails} duplicate`);
-  }
-  if (preview.globallyUnsubscribed > 0) {
-    parts.push(t`${preview.globallyUnsubscribed} unsubscribed from everything`);
-  }
-  if (preview.topicUnsubscribed > 0) {
-    parts.push(t`${preview.topicUnsubscribed} opted out of this topic`);
-  }
-
-  const breakdown = parts.length > 0 ? ` (${parts.join(', ')})` : '';
-
-  return (
-    t`${preview.totalMembers} in this list — ${preview.sendable} sendable` +
-    breakdown
-  );
-};
-
 type CampaignComposerFieldsProps = {
   campaignState: ReturnType<typeof useCampaignComposerState>;
 };
@@ -138,33 +97,6 @@ export const CampaignComposerFields = ({
     loading: loadingChannels,
     error: channelsError,
   } = useMyMessageChannels();
-  const { createOneRecord: createMessageList } = useCreateOneRecord({
-    objectNameSingular: 'messageList',
-  });
-
-  const { enqueueErrorSnackBar } = useSnackBar();
-
-  const handleCreateList = async (searchInput?: string) => {
-    const listName = searchInput?.trim() ?? '';
-    if (!listName) {
-      enqueueErrorSnackBar({
-        message: t`고객 분류 이름을 먼저 입력하세요.`,
-      });
-      return;
-    }
-    const createdList = await createMessageList({ name: listName });
-
-    if (isDefined(createdList)) {
-      campaignState.setListId(createdList.id);
-    }
-  };
-
-  const audiencePreview = useCampaignAudiencePreview({
-    listId:
-      campaignState.recipientMode === 'list' ? campaignState.listId : null,
-    unsubscribeTopicId: campaignState.unsubscribeTopicId,
-  });
-
   const senderOptions: SelectOption<string>[] = getConfiguredEmailChannels(
     channels,
   )
@@ -175,45 +107,6 @@ export const CampaignComposerFields = ({
 
   return (
     <StyledFieldsContainer>
-      <StyledFieldGroup>
-        <CampaignRecipientHeader>
-          <CampaignFieldLabel
-            label="수신자"
-            help={
-              isDefined(audiencePreview)
-                ? buildAudienceHint(audiencePreview)
-                : t`발송할 고객이 포함된 고객 분류를 선택하세요.`
-            }
-          />
-        </CampaignRecipientHeader>
-        <CampaignRecipientSelector
-          channel="email"
-          mode={campaignState.recipientMode}
-          onModeChange={(mode) => {
-            campaignState.closeReview();
-            campaignState.setRecipientMode(mode);
-          }}
-          directValue={campaignState.directEmail}
-          onDirectValueChange={campaignState.setDirectEmail}
-          disabled={campaignState.loading}
-        >
-          <FormSingleRecordPicker
-            objectNameSingulars={['messageList']}
-            defaultValue={campaignState.listId ?? undefined}
-            onChange={campaignState.setListId}
-            onCreate={handleCreateList}
-          />
-          {isDefined(audiencePreview) && (
-            <StyledAudience role="status" aria-atomic="true">
-              <Tag
-                color="green"
-                Icon={IconUsers}
-                text={`발송 가능 ${audiencePreview.sendable.toLocaleString('ko-KR')}명`}
-              />
-            </StyledAudience>
-          )}
-        </CampaignRecipientSelector>
-      </StyledFieldGroup>
       <StyledFieldGroup>
         <StyledLabelRow>
           <CampaignFieldLabel
