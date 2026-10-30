@@ -4,6 +4,7 @@ import { themeCssVariables } from 'twenty-ui/theme-constants';
 import { campaignBodyToText } from '@/activities/emails/utils/campaignDisplay';
 
 const StyledBody = styled.div`
+  background: ${themeCssVariables.background.tertiary};
   line-height: 1.6;
   overflow-wrap: anywhere;
   padding: ${themeCssVariables.spacing[3]};
