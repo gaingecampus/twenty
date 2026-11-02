@@ -9239,6 +9239,7 @@ export type SmsCampaignDeliveriesInput = {
 
 export type SmsCampaignDelivery = {
   __typename?: 'SmsCampaignDelivery';
+  personId?: Maybe<Scalars['String']['output']>;
   createdAt: Scalars['String']['output'];
   error?: Maybe<Scalars['String']['output']>;
   id: Scalars['String']['output'];

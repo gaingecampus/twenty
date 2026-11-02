@@ -55,7 +55,14 @@ describe('SMS campaign delivery history', () => {
       batches: [
         {
           status: 'ACCEPTED',
-          targets: [{ name: '수신자', to: '01012345678', messageType: 'SMS' }],
+          targets: [
+            {
+              personId: 'customer',
+              name: '수신자',
+              to: '01012345678',
+              messageType: 'SMS',
+            },
+          ],
         },
         {
           status: 'UNKNOWN',
@@ -86,6 +93,7 @@ describe('SMS campaign delivery history', () => {
       records: [
         {
           id: 'dispatch:0:0',
+          personId: 'customer',
           name: '수신자',
           phone: '01012345678',
           status: 'ACCEPTED',

@@ -9,6 +9,7 @@ import {
 import { WorkspaceRelatedEntity } from 'src/engine/workspace-manager/types/workspace-related-entity';
 
 export type SmsTarget = {
+  personId?: string;
   to: string;
   name: string;
   company?: string;

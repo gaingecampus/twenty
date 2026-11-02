@@ -120,6 +120,7 @@ export class SmsService {
         })
       : [];
     const candidates = contacts.map((person) => ({
+      personId: person.id as string | undefined,
       name: [person.name?.firstName, person.name?.lastName]
         .filter(Boolean)
         .join(' '),
@@ -157,6 +158,7 @@ export class SmsService {
         // An explicit, unique account link is required; never infer recipients from names or emails.
         if (matches.length !== 1) continue;
         candidates.push({
+          personId: undefined,
           name: matches[0].name ?? '',
           phones: matches[0].phoneNumber,
           company: '',
@@ -192,6 +194,7 @@ export class SmsService {
       const content = renderSms(input.content, name, person.company);
       const renderedType = smsMessageType(content, input.subject, name);
       targets.push({
+        personId: person.personId,
         to,
         name,
         company: person.company,
@@ -348,6 +351,7 @@ export class SmsService {
       const records = dispatch.batches.flatMap((batch, batchIndex) =>
         batch.targets.map((target, targetIndex) => ({
           id: `${dispatch.id}:${batchIndex}:${targetIndex}`,
+          personId: target.personId,
           name: target.name,
           phone: target.to,
           messageType: target.messageType,

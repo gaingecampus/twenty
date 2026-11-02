@@ -22,6 +22,7 @@ export class SmsCampaignDeliveriesInput {
 @ObjectType()
 export class SmsCampaignDelivery {
   @Field(() => String) id: string;
+  @Field(() => String, { nullable: true }) personId?: string;
   @Field(() => String) name: string;
   @Field(() => String) phone: string;
   @Field(() => String) messageType: string;

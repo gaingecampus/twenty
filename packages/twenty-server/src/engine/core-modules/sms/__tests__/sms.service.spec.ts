@@ -134,6 +134,7 @@ describe('SMS recipient preview', () => {
       .mockResolvedValueOnce({
         find: async () => [
           {
+            id: 'a',
             name: { firstName: '루나' },
             phones: { primaryPhoneNumber: '010-1234-5678' },
             company: { name: '가인지' },
@@ -175,6 +176,7 @@ describe('SMS recipient preview', () => {
       sample: '루나 가인지',
     });
     expect(result.targets[0]).toMatchObject({
+      personId: 'a',
       to: '01012345678',
       name: '루나',
       company: '가인지',
