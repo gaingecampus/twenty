@@ -46,6 +46,7 @@ export const useMessageListRecordPage = <T extends ObjectRecord>({
         offset: page * pageSize,
       },
       fetchPolicy: 'no-cache',
+      notifyOnNetworkStatusChange: true,
     });
   const connection =
     !loading && !error && !skip && canReadObjectRecords

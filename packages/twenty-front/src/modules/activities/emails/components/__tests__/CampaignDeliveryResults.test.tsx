@@ -1,5 +1,12 @@
 import { type ReactNode } from 'react';
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from '@testing-library/react';
 import { CampaignDeliveryResults } from '@/activities/emails/components/CampaignDeliveryResults';
 import { useMessageListRecordPage } from '@/activities/emails/hooks/useMessageListRecordPage';
 import { useFindOneRecord } from '@/object-record/hooks/useFindOneRecord';
@@ -23,6 +30,7 @@ jest.mock('@/ui/field/display/components/DateTimeDisplay', () => ({
   DateTimeDisplay: ({ value }: { value: string }) => <span>{value}</span>,
 }));
 jest.mock('twenty-ui/feedback', () => ({
+  Loader: () => <span data-testid="delivery-loader" />,
   AnimatedPlaceholder: () => <span>empty illustration</span>,
   AnimatedPlaceholderEmptySubTitle: 'div',
   AnimatedPlaceholderEmptyTextContainer: 'div',
@@ -125,14 +133,17 @@ it('shows SMS errors without presenting an empty success state', () => {
     screen.queryByText('아직 발송 처리 기록이 없어요'),
   ).not.toBeInTheDocument();
 });
-it('explains scheduled empty results and offers a safe refresh', () => {
+it('explains scheduled empty results and offers a safe refresh', async () => {
   render(<CampaignDeliveryResults campaignId="campaign" />);
   expect(screen.getByText('예약 발송을 기다리고 있어요')).toBeInTheDocument();
   expect(screen.queryByText('발송 실패')).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole('button', { name: /새로고침/ }));
   expect(refetch).toHaveBeenCalled();
+  await waitFor(() =>
+    expect(screen.queryByTestId('delivery-loader')).not.toBeInTheDocument(),
+  );
 });
-it('places refresh in the widget header when an action slot is available', () => {
+it('places refresh in the widget header when an action slot is available', async () => {
   const header = document.createElement('div');
   const { unmount } = render(
     <WidgetHeaderActionContext.Provider value={header}>
@@ -141,12 +152,63 @@ it('places refresh in the widget header when an action slot is available', () =>
   );
   fireEvent.click(within(header).getByRole('button', { name: /새로고침/ }));
   expect(refetch).toHaveBeenCalled();
+  await waitFor(() =>
+    expect(screen.queryByTestId('delivery-loader')).not.toBeInTheDocument(),
+  );
   expect(
     screen.queryByRole('button', { name: /새로고침/ }),
   ).not.toBeInTheDocument();
   unmount();
   expect(header).toBeEmptyDOMElement();
 });
+it.each(['EMAIL', 'SMS'])(
+  'keeps %s refresh busy until both requests settle, including failures',
+  async (channel) => {
+    let finishCampaign!: () => void;
+    let failDeliveries!: (error: Error) => void;
+    const campaignRefetch = jest.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          finishCampaign = resolve;
+        }),
+    );
+    const deliveryRefetch = jest.fn(
+      () =>
+        new Promise<void>((_resolve, reject) => {
+          failDeliveries = reject;
+        }),
+    );
+    jest.mocked(useFindOneRecord).mockReturnValue({
+      record: { channel },
+      refetch: campaignRefetch,
+    } as unknown as ReturnType<typeof useFindOneRecord>);
+    setPage({ refetch: deliveryRefetch });
+    jest.mocked(useSmsCampaignDeliveryPage).mockReturnValue({
+      records: [],
+      totalCount: 0,
+      loading: false,
+      error: undefined,
+      refetch: deliveryRefetch,
+    } as unknown as ReturnType<typeof useSmsCampaignDeliveryPage>);
+    render(<CampaignDeliveryResults campaignId="campaign" />);
+    fireEvent.click(screen.getByRole('button', { name: /새로고침/ }));
+    expect(screen.getByTestId('delivery-loader')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /불러오는 중/ })).toBeDisabled();
+    expect(screen.getByRole('region', { name: '발송 내역' })).toHaveAttribute(
+      'aria-busy',
+      'true',
+    );
+    await act(async () => {
+      failDeliveries(new Error('network'));
+    });
+    expect(screen.getByTestId('delivery-loader')).toBeInTheDocument();
+    await act(async () => {
+      finishCampaign();
+    });
+    expect(screen.queryByTestId('delivery-loader')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /새로고침/ })).toBeEnabled();
+  },
+);
 it('does not show an empty success state while loading', () => {
   setPage({ loading: true });
   render(<CampaignDeliveryResults campaignId="campaign" />);

@@ -34,6 +34,7 @@ export const useSmsCampaignDeliveryPage = ({
     variables: { input: { campaignId, offset: page * 20, limit: 20 } },
     skip,
     fetchPolicy: 'no-cache',
+    notifyOnNetworkStatusChange: true,
   });
   return {
     records:

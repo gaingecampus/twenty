@@ -10,6 +10,7 @@ import {
   AnimatedPlaceholderEmptySubTitle,
   AnimatedPlaceholderEmptyTextContainer,
   AnimatedPlaceholderEmptyTitle,
+  Loader,
 } from 'twenty-ui/feedback';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 
@@ -102,6 +103,7 @@ export const CampaignDeliveryResults = ({
 }) => {
   const headerActionTarget = useContext(WidgetHeaderActionContext);
   const [page, setPage] = useState(0);
+  const [refreshing, setRefreshing] = useState(false);
   const campaign = useFindOneRecord<
     ObjectRecord & { status?: string; channel?: string }
   >({
@@ -154,7 +156,7 @@ export const CampaignDeliveryResults = ({
     : emailPage.records;
   const activePage = isSms ? smsPage : emailPage;
   const { totalCount, refetch } = activePage;
-  const loading = campaign.loading || activePage.loading;
+  const loading = refreshing || campaign.loading || activePage.loading;
   const error = campaign.error || activePage.error;
   const canReadObjectRecords = isSms || emailPage.canReadObjectRecords;
   const scheduled = campaign.record?.status === 'SCHEDULED';
@@ -171,14 +173,15 @@ export const CampaignDeliveryResults = ({
       : '발송 처리가 시작되면 기록이 표시됩니다. 발송 상태와 예약 시각은 홈에서 확인하세요.';
   const refreshButton = (
     <Button
-      title="새로고침"
+      title={loading ? '불러오는 중…' : '새로고침'}
       Icon={IconRefresh}
       size="small"
       variant="secondary"
       disabled={loading || !canReadObjectRecords}
       onClick={() => {
-        void Promise.all([campaign.refetch(), refetch()]).catch(
-          () => undefined,
+        setRefreshing(true);
+        void Promise.allSettled([campaign.refetch(), refetch()]).finally(() =>
+          setRefreshing(false),
         );
       }}
     />
@@ -196,12 +199,15 @@ export const CampaignDeliveryResults = ({
       ) : (
         <StyledMessageListToolbar>{refreshButton}</StyledMessageListToolbar>
       )}
-      {!canReadObjectRecords ? (
+      {loading ? (
+        <StyledEmpty role="status" aria-live="polite">
+          <Loader />
+          <p>발송 내역을 불러오는 중…</p>
+        </StyledEmpty>
+      ) : !canReadObjectRecords ? (
         <p role="alert">발송 내역을 조회할 권한이 없습니다.</p>
       ) : error ? (
         <p role="alert">발송 내역을 불러오지 못했습니다. 새로고침해 주세요.</p>
-      ) : loading ? (
-        <p role="status">발송 내역을 불러오는 중…</p>
       ) : records.length === 0 ? (
         <StyledEmpty role="status">
           <AnimatedPlaceholder type="emptyInbox" />
