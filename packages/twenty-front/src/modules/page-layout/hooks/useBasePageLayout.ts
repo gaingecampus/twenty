@@ -1,4 +1,5 @@
 import { moveMessageListCampaignsToTab } from '@/activities/emails/utils/moveMessageListCampaignsToTab';
+import { ensureMessagingTimelineTab } from '@/activities/emails/utils/ensureMessagingTimelineTab';
 import { useObjectMetadataItems } from '@/object-metadata/hooks/useObjectMetadataItems';
 import { DEFAULT_COMPANY_RECORD_PAGE_LAYOUT } from '@/page-layout/constants/DefaultCompanyRecordPageLayout';
 import { DEFAULT_COMPANY_RECORD_PAGE_LAYOUT_ID } from '@/page-layout/constants/DefaultCompanyRecordPageLayoutId';
@@ -89,10 +90,14 @@ export const useBasePageLayout = (
   const object = objectMetadataItems.find(
     (item) => item.id === pageLayout.objectMetadataId,
   );
-  return moveMessageListCampaignsToTab({
-    pageLayout,
+  return ensureMessagingTimelineTab({
+    pageLayout: moveMessageListCampaignsToTab({
+      pageLayout,
+      objectNameSingular: object?.nameSingular,
+      campaignsFieldId: object?.fields.find(
+        (field) => field.name === 'campaigns',
+      )?.id,
+    }),
     objectNameSingular: object?.nameSingular,
-    campaignsFieldId: object?.fields.find((field) => field.name === 'campaigns')
-      ?.id,
   });
 };
