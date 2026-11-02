@@ -948,6 +948,7 @@ export const STANDARD_OBJECTS = {
   messageCampaign: {
     universalIdentifier: '238acb94-dd4c-4036-bc55-19b99d821efd',
     fields: {
+      channel: { universalIdentifier: 'b568df56-a8b7-4f03-b76d-905e9e4fb070' },
       draftData: {
         universalIdentifier: 'fe01eb92-79f9-4c92-9095-85271836a421',
       },
@@ -1021,6 +1022,9 @@ export const STANDARD_OBJECTS = {
       allMessageCampaigns: {
         universalIdentifier: '3acb902d-db6c-4f8a-8aca-f179dc0cdbb9',
         viewFields: {
+          channel: {
+            universalIdentifier: 'ff7beb1b-2722-4b8f-a4f9-8e1cf5b7cc14',
+          },
           subject: {
             universalIdentifier: '76e7e126-2345-43c0-bd8e-08c786bdf999',
           },

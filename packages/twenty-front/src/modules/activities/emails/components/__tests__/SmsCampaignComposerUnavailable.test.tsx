@@ -15,6 +15,10 @@ import { SmsCampaignComposer } from '@/activities/emails/components/SmsCampaignC
 import { TextEncoder } from 'node:util';
 import { type ReactNode } from 'react';
 
+const mockRefetchCampaigns = jest.fn().mockResolvedValue([]);
+jest.mock('@/object-metadata/hooks/useApolloCoreClient', () => ({
+  useApolloCoreClient: () => ({ refetchQueries: mockRefetchCampaigns }),
+}));
 jest.mock('@/ui/layout/modal/hooks/useModal', () => ({
   useModal: () => ({ openModal: mockOpenModal, closeModal: mockCloseModal }),
 }));
@@ -477,6 +481,7 @@ it('blocks empty recipients, rechecks changed contacts, and sends only after rev
     }),
   );
   await screen.findByText(/문자 발송 요청을 저장했습니다/);
+  expect(mockRefetchCampaigns).toHaveBeenCalled();
   expect(send).toHaveBeenCalledTimes(1);
   expect(send).toHaveBeenCalledWith({
     variables: {

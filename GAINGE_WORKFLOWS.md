@@ -163,7 +163,8 @@ Atlassian MCP 사용. 필수 파라미터:
 EC2 자동 배포(`run-upgrade.sh`)는 아래 순서로 실행됩니다.
 
 ```text
-database:migrate:prod → upgrade → sync-twenty-standard-application → cron:register:all → compose up
+database:migrate:prod → upgrade → sync-twenty-standard-application
+→ message-campaign:backfill-sms-history → cron:register:all → compose up
 ```
 
 | 변경 종류 | 만드는 것 | 배포 시 실행 |
@@ -171,6 +172,8 @@ database:migrate:prod → upgrade → sync-twenty-standard-application → cron:
 | DB 스키마 | instance command (`database:migrate:generate`) | `database:migrate:prod` |
 | 워크스페이스별 데이터/메타데이터 | workspace command (`@RegisteredWorkspaceCommand`) | `yarn command:prod upgrade` |
 | 표준 앱 정의와 DB 맞추기 | 코드 변경 (+ 필요 시 workspace command) | `sync-twenty-standard-application` |
+
+`message-campaign:backfill-sms-history`는 새 `channel` 필드가 생성된 뒤 실행하는 멱등 보정 명령입니다. `@RegisteredWorkspaceCommand`에 등록하지 않고 배포 스크립트에서 sync 이후 직접 실행하며, 문자 재발송 없이 기존 발송 기록만 연결합니다.
 
 **핵심:** `yarn command:prod upgrade`는 `TWENTY_CURRENT_VERSION`까지의 command만 실행합니다.
 `TWENTY_NEXT_VERSIONS`에만 있는 command는 **pre-release**라 배포 파이프라인에서 자동 실행되지 않습니다.

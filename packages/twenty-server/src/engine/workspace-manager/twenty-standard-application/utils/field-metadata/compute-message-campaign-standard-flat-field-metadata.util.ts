@@ -41,6 +41,42 @@ export const buildMessageCampaignStandardFlatFieldMetadatas = ({
   };
 
   return {
+    channel: createStandardFieldFlatMetadata({
+      ...base,
+      context: {
+        fieldName: 'channel',
+        type: FieldMetadataType.SELECT,
+        label: i18nLabel(msg`발송 유형`),
+        description: i18nLabel(msg`발송에 사용한 채널`),
+        icon: 'IconSend',
+        isNullable: false,
+        isUIEditable: false,
+        defaultValue: "'EMAIL'",
+        options: [
+          {
+            id: '2c00fc7a-59cc-48fa-971b-416335bb261e',
+            value: 'EMAIL',
+            label: i18nLabel(msg`이메일`),
+            position: 0,
+            color: 'blue',
+          },
+          {
+            id: '2b5c29f6-3232-4a27-a1c2-18f2277af09d',
+            value: 'SMS',
+            label: i18nLabel(msg`문자`),
+            position: 1,
+            color: 'green',
+          },
+          {
+            id: 'e851f17e-69df-4191-af30-680e5d859737',
+            value: 'COUPON',
+            label: i18nLabel(msg`카카오 쿠폰`),
+            position: 2,
+            color: 'orange',
+          },
+        ],
+      },
+    }),
     draftData: createStandardFieldFlatMetadata({
       ...base,
       context: {

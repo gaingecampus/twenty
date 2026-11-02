@@ -70,6 +70,7 @@ describe('campaign drafts', () => {
           id: 'id',
           status: 'DRAFT',
           subject: '제목 없는 초안',
+          channel: channel.toUpperCase(),
           draftData: { ...content, channel },
         }),
       );
@@ -152,6 +153,41 @@ describe('campaign drafts', () => {
     expect(insert).not.toHaveBeenCalled();
     expect(update).not.toHaveBeenCalled();
   });
+  it('creates a visible SMS campaign without requiring a saved draft', async () => {
+    const sentContent = {
+      subject: '안내',
+      bodyTemplate: '본문',
+      listId: 'list',
+    };
+    await service.claim('workspace', undefined, 'sms', 'request', sentContent);
+    expect(insert).toHaveBeenCalledWith({
+      id: 'request',
+      ...sentContent,
+      channel: 'SMS',
+      status: 'SENDING',
+      draftDispatchId: 'request',
+    });
+    findOne.mockResolvedValue({
+      channel: 'SMS',
+      draftDispatchId: 'request',
+      status: 'SENT',
+    });
+    await service.claim('workspace', undefined, 'sms', 'request', sentContent);
+    expect(insert).toHaveBeenCalledTimes(1);
+    expect(update).not.toHaveBeenCalled();
+  });
+  it('does not reuse a campaign belonging to another dispatch or channel', async () => {
+    findOne.mockResolvedValue({ channel: 'EMAIL', draftDispatchId: 'other' });
+    await expect(
+      service.claim('workspace', undefined, 'sms', 'request', {
+        subject: '안내',
+        bodyTemplate: '본문',
+        listId: null,
+      }),
+    ).rejects.toThrow('이미 사용된');
+    expect(insert).not.toHaveBeenCalled();
+    expect(update).not.toHaveBeenCalled();
+  });
   it('claims only the saved channel and version', async () => {
     findOne.mockResolvedValue({
       status: 'DRAFT',
@@ -166,7 +202,7 @@ describe('campaign drafts', () => {
     );
     expect(update).toHaveBeenCalledWith(
       { id: 'id', status: 'DRAFT', scheduleVersion: 'old' },
-      { status: 'SENDING', draftDispatchId: 'request' },
+      { channel: 'SMS', status: 'SENDING', draftDispatchId: 'request' },
     );
     await expect(
       service.claim(

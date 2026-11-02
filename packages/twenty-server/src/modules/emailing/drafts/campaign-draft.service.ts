@@ -61,6 +61,8 @@ export class CampaignDraftService {
         );
       await this.attachments.retain(workspaceId, input.content.files);
       const content = {
+        channel:
+          input.content.channel.toUpperCase() as MessageCampaignWorkspaceEntity['channel'],
         draftData: input.content,
         subject: input.content.subject || '제목 없는 초안',
         bodyTemplate: input.content.body,
@@ -103,9 +105,33 @@ export class CampaignDraftService {
       listId: string | null;
     },
   ) {
-    if (!draft) return;
+    const campaignChannel =
+      channel.toUpperCase() as MessageCampaignWorkspaceEntity['channel'];
     await this.orm.executeInWorkspaceContext(async () => {
       const repository = await this.repository(workspaceId);
+      if (!draft) {
+        if (!sentContent)
+          throw new ConflictException('발송 내용을 확인할 수 없습니다.');
+        const existing = await repository.findOne({
+          where: { id: dispatchId },
+        });
+        if (existing) {
+          if (
+            existing.channel !== campaignChannel ||
+            existing.draftDispatchId !== dispatchId
+          )
+            throw new ConflictException('이미 사용된 발송 요청입니다.');
+          return;
+        }
+        await repository.insert({
+          id: dispatchId,
+          ...sentContent,
+          channel: campaignChannel,
+          status: 'SENDING',
+          draftDispatchId: dispatchId,
+        });
+        return;
+      }
       const existing = await repository.findOne({ where: { id: draft.id } });
       if (
         !existing ||
@@ -122,7 +148,12 @@ export class CampaignDraftService {
         return;
       const result = await repository.update(
         { id: draft.id, status: 'DRAFT', scheduleVersion: draft.version },
-        { ...sentContent, status: 'SENDING', draftDispatchId: dispatchId },
+        {
+          ...sentContent,
+          channel: campaignChannel,
+          status: 'SENDING',
+          draftDispatchId: dispatchId,
+        },
       );
       if (result.affected !== 1)
         throw new ConflictException(

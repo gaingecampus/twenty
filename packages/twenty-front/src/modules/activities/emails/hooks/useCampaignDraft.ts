@@ -78,6 +78,7 @@ export const useCampaignDraft = (campaign?: ScheduledCampaign | null) => {
             id: saved.id,
             __typename: 'MessageCampaign',
             status: 'DRAFT',
+            channel: content.channel.toUpperCase(),
             subject: content.subject || '제목 없는 초안',
             bodyTemplate: content.body,
             attachmentFiles: content.files,

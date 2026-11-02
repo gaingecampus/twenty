@@ -1,3 +1,4 @@
+import { useApolloCoreClient } from '@/object-metadata/hooks/useApolloCoreClient';
 import { StyledCampaignDraftSaveButton } from '@/activities/emails/components/StyledCampaignDraftSaveButton';
 import { type CampaignDraftControls } from '@/activities/emails/types/CampaignDraftControls';
 import { CampaignRecipientHeader } from '@/activities/emails/components/CampaignRecipientHeader';
@@ -98,6 +99,7 @@ export const SmsCampaignComposer = ({
   isSendingBlocked?: boolean;
   renderDispatchOptions?: (recipientFields: ReactNode) => ReactNode;
 }) => {
+  const apolloCoreClient = useApolloCoreClient();
   const sidePanelHeaderActionsElement = useAtomStateValue(
     sidePanelHeaderActionsElementState,
   );
@@ -198,6 +200,17 @@ export const SmsCampaignComposer = ({
       });
       setSubmitted(true);
       setPreview(null);
+      void apolloCoreClient
+        .refetchQueries({
+          include: 'active',
+          onQueryUpdated: (query) =>
+            ['FindManyMessageCampaigns', 'FindOneMessageCampaign'].includes(
+              query.queryName ?? '',
+            ),
+        })
+        .catch(() => {
+          /* Dispatch succeeded; a list refresh failure must not trigger a resend. */
+        });
     } catch (failure) {
       setError(
         failure instanceof Error

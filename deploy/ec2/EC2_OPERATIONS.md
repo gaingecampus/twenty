@@ -197,8 +197,9 @@ sudo bash scripts/run-upgrade.sh
 1. `database:migrate:prod` (또는 최초 DB면 `database:init:prod`)
 2. `upgrade` (워크스페이스 upgrade 커서 기준 마이그레이션)
 3. `sync-twenty-standard-application` (표준 메타데이터 drift 보정 — upgrade 커서가 완료여도 누락 필드 추가)
-4. `cron:register:all`
-5. `upgrade:status --failed-only` 검증
+4. `message-campaign:backfill-sms-history` (기존 문자 발송 기록을 목록에 연결, 재발송·중복 생성 없음)
+5. `cron:register:all`
+6. `upgrade:status --failed-only` 검증
 
 완료 후 **앱 재시작** 섹션의 `up -d`를 실행하세요.
 
@@ -410,7 +411,7 @@ cd /opt/twenty/deploy/ec2 && sudo bash scripts/run-upgrade.sh
 | `deploy/ec2/docker-compose.prod.yml` | server/worker compose |
 | `deploy/ec2/docker-compose.env` | EC2 실제 env (Secrets Manager 기반, git 미포함) |
 | `deploy/ec2/docker-compose.env.example` | env 템플릿 |
-| `deploy/ec2/scripts/run-upgrade.sh` | DB migrate + upgrade + cron |
+| `deploy/ec2/scripts/run-upgrade.sh` | DB migrate + upgrade + sync + 문자 기록 연결 + cron |
 | `deploy/ec2/scripts/deploy-on-ec2.sh` | pull + compose up + healthz |
 
 ## Daily database dump to S3

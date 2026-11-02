@@ -147,6 +147,7 @@ docker run --rm \
     yarn command:prod cache:flush
     yarn command:prod upgrade
     yarn command:prod sync-twenty-standard-application
+    yarn command:prod message-campaign:backfill-sms-history
     yarn command:prod cron:register:all
     yarn command:prod cache:flush
 

@@ -1,3 +1,4 @@
+import { BackfillSmsCampaignHistoryCommand } from './backfill-sms-campaign-history.command';
 import { WorkspaceMetadataVersionModule } from 'src/engine/metadata-modules/workspace-metadata-version/workspace-metadata-version.module';
 import { WorkspaceCacheModule } from 'src/engine/workspace-cache/workspace-cache.module';
 import { Module } from '@nestjs/common';
@@ -10,6 +11,9 @@ import { RenameCustomerClassificationCommand } from './2-30-workspace-command-18
     WorkspaceCacheModule,
     WorkspaceMetadataVersionModule,
   ],
-  providers: [RenameCustomerClassificationCommand],
+  providers: [
+    RenameCustomerClassificationCommand,
+    BackfillSmsCampaignHistoryCommand,
+  ],
 })
 export class V2_30_UpgradeVersionCommandModule {}

@@ -36,6 +36,7 @@ describe('Message campaign index metadata', () => {
       columns.map((field) => field.fieldMetadataUniversalIdentifier),
     ).toEqual([
       campaign.fields.subject.universalIdentifier,
+      campaign.fields.channel.universalIdentifier,
       campaign.fields.status.universalIdentifier,
       campaign.fields.list.universalIdentifier,
       campaign.fields.scheduledAt.universalIdentifier,

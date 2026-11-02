@@ -236,6 +236,7 @@ export class MessageCampaignService {
         await dataSource.transaction(
           async (manager: WorkspaceEntityManager) => {
             const content = {
+              channel: 'EMAIL' as const,
               subject: args.subject,
               bodyTemplate: args.html,
               ...(args.files !== undefined
