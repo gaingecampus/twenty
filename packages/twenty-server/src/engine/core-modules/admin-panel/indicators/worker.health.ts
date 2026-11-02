@@ -10,6 +10,7 @@ import { HEALTH_ERROR_MESSAGES } from 'src/engine/core-modules/admin-panel/const
 import { METRICS_FAILURE_RATE_THRESHOLD } from 'src/engine/core-modules/admin-panel/constants/metrics-failure-rate-threshold.const';
 import { type WorkerQueueHealth } from 'src/engine/core-modules/admin-panel/types/worker-queue-health.type';
 import { withHealthCheckTimeout } from 'src/engine/core-modules/admin-panel/utils/health-check-timeout.util';
+import { getRecentWorkerMetrics } from 'src/engine/core-modules/admin-panel/utils/get-recent-worker-metrics.util';
 import { MessageQueue } from 'src/engine/core-modules/message-queue/message-queue.constants';
 import { RedisClientService } from 'src/engine/core-modules/redis-client/redis-client.service';
 
@@ -26,10 +27,7 @@ export class WorkerHealthIndicator {
     const indicator = this.healthIndicatorService.check('worker');
 
     try {
-      const workerStatus = await withHealthCheckTimeout(
-        this.checkWorkers(),
-        HEALTH_ERROR_MESSAGES.WORKER_TIMEOUT,
-      );
+      const workerStatus = await this.checkWorkers();
 
       if (workerStatus.status === 'up') {
         return indicator.up({
@@ -47,7 +45,7 @@ export class WorkerHealthIndicator {
           ? HEALTH_ERROR_MESSAGES.WORKER_TIMEOUT
           : HEALTH_ERROR_MESSAGES.WORKER_CHECK_FAILED;
 
-      return indicator.down(errorMessage);
+      return indicator.down({ message: errorMessage });
     }
   }
 
@@ -64,9 +62,7 @@ export class WorkerHealthIndicator {
       const workers = await queue.getWorkers();
 
       if (workers.length > 0) {
-        const metricsParams = options?.pointsNeeded
-          ? [0, options.pointsNeeded - 1]
-          : [];
+        const pointsNeeded = options?.pointsNeeded ?? 60;
 
         const [
           failedMetrics,
@@ -75,20 +71,26 @@ export class WorkerHealthIndicator {
           activeCount,
           delayedCount,
         ] = await Promise.all([
-          queue.getMetrics('failed', ...metricsParams),
-          queue.getMetrics('completed', ...metricsParams),
+          queue.getMetrics('failed', 0, pointsNeeded - 1),
+          queue.getMetrics('completed', 0, pointsNeeded - 1),
           queue.getWaitingCount(),
           queue.getActiveCount(),
           queue.getDelayedCount(),
         ]);
 
-        const failedCount = options?.pointsNeeded
-          ? this.calculateMetricsSum(failedMetrics.data)
-          : failedMetrics.count;
-
-        const completedCount = options?.pointsNeeded
-          ? this.calculateMetricsSum(completedMetrics.data)
-          : completedMetrics.count;
+        const now = Date.now();
+        const failedData = getRecentWorkerMetrics(
+          failedMetrics,
+          pointsNeeded,
+          now,
+        );
+        const completedData = getRecentWorkerMetrics(
+          completedMetrics,
+          pointsNeeded,
+          now,
+        );
+        const failedCount = this.calculateMetricsSum(failedData);
+        const completedCount = this.calculateMetricsSum(completedData);
 
         const totalJobs = failedCount + completedCount;
         const failureRate =
@@ -100,6 +102,10 @@ export class WorkerHealthIndicator {
           queueName,
           workers: workers.length,
           status: failureRate > METRICS_FAILURE_RATE_THRESHOLD ? 'down' : 'up',
+          errorMessage:
+            failureRate > METRICS_FAILURE_RATE_THRESHOLD
+              ? `최근 ${pointsNeeded}분 실패율 ${failureRate}% (실패 ${failedCount}건 / 전체 ${totalJobs}건, 기준 ${METRICS_FAILURE_RATE_THRESHOLD}% 초과)`
+              : undefined,
           metrics: {
             failed: failedCount,
             completed: completedCount,
@@ -108,8 +114,8 @@ export class WorkerHealthIndicator {
             delayed: delayedCount,
             failureRate,
             ...(options?.pointsNeeded && {
-              failedData: failedMetrics.data.map(Number),
-              completedData: completedMetrics.data.map(Number),
+              failedData,
+              completedData,
             }),
           },
         };
@@ -125,6 +131,7 @@ export class WorkerHealthIndicator {
           queueName,
           workers: 0,
           status: 'down',
+          errorMessage: `실행 중인 워커 없음 · 대기 ${waiting}건 / 처리 중 ${active}건`,
           metrics: {
             waiting,
             active,
@@ -161,7 +168,12 @@ export class WorkerHealthIndicator {
     const queueStatuses: WorkerQueueHealth[] = [];
 
     const results = await Promise.allSettled(
-      queues.map((queueName) => this.getQueueDetails(queueName)),
+      queues.map((queueName) =>
+        withHealthCheckTimeout(
+          this.getQueueDetails(queueName),
+          HEALTH_ERROR_MESSAGES.WORKER_TIMEOUT,
+        ),
+      ),
     );
     let failedChecks = 0;
     results.forEach((result, index) => {
@@ -169,13 +181,44 @@ export class WorkerHealthIndicator {
         if (result.value) queueStatuses.push(result.value);
       } else {
         failedChecks += 1;
+        const error: unknown = result.reason;
+        const message = error instanceof Error ? error.message : '';
+        // Keep raw errors in server logs, not in the browser (Redis URLs may contain secrets).
+        const reason =
+          message === HEALTH_ERROR_MESSAGES.WORKER_TIMEOUT
+            ? '큐 상태 조회 시간 초과 (3초)'
+            : /NOPERM|NOAUTH|WRONGPASS/.test(message)
+              ? 'Redis 인증 또는 명령 실행 권한 오류'
+              : /ECONNREFUSED|ENOTFOUND|ETIMEDOUT|Connection is closed/.test(
+                    message,
+                  )
+                ? 'Redis 연결 실패'
+                : /[Ii]nvalid worker metrics|timestamp is in the future/.test(
+                      message,
+                    )
+                  ? '작업 지표 또는 측정 시각 오류'
+                  : '큐 상태 조회 실패 · 서버 로그 확인 필요';
         this.logger.error(
-          `Error checking worker for queue ${queues[index]}: ${result.reason?.message}`,
+          `Error checking worker for queue ${queues[index]}: ${message}`,
         );
+        queueStatuses.push({
+          queueName: queues[index],
+          workers: 0,
+          status: 'down',
+          errorMessage: reason,
+          metrics: {
+            waiting: 0,
+            active: 0,
+            delayed: 0,
+            failed: 0,
+            completed: 0,
+            failureRate: 0,
+          },
+        });
       }
     });
 
-    const hasActiveWorkers = queueStatuses.some((q) => q.workers > 0);
+    const hasActiveWorkers = queueStatuses.some((queue) => queue.workers > 0);
 
     return {
       status:
@@ -184,13 +227,14 @@ export class WorkerHealthIndicator {
         queueStatuses.every((queue) => queue.status === 'up')
           ? 'up'
           : 'down',
-      error: !hasActiveWorkers
-        ? HEALTH_ERROR_MESSAGES.NO_ACTIVE_WORKERS
-        : failedChecks > 0
+      error:
+        failedChecks > 0
           ? HEALTH_ERROR_MESSAGES.WORKER_CHECK_FAILED
-          : queueStatuses.some((queue) => queue.status === 'down')
-            ? 'Worker queue failure or unprocessed work detected'
-            : undefined,
+          : !hasActiveWorkers
+            ? HEALTH_ERROR_MESSAGES.NO_ACTIVE_WORKERS
+            : queueStatuses.some((queue) => queue.status === 'down')
+              ? 'Worker queue failure or unprocessed work detected'
+              : undefined,
       queues: queueStatuses,
     };
   }

@@ -13,6 +13,9 @@ export class WorkerQueueHealth {
   @Field(() => Number)
   workers: number;
 
+  // Included in the admin health details JSON, without exposing raw job data.
+  errorMessage?: string;
+
   @Field(() => WorkerQueueMetrics)
   metrics: WorkerQueueMetrics;
 }

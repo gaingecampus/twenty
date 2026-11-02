@@ -24,28 +24,41 @@ const SettingsAdminWorkerMetricsGraph = lazy(() =>
 
 type SettingsAdminWorkerQueueMetricsSectionProps = {
   queue: AdminPanelWorkerQueueHealth;
+  errorMessage?: string;
+  showMetrics?: boolean;
 };
 
 const StyledControlsContainer = styled.div`
   align-items: flex-start;
   display: flex;
+  flex-wrap: wrap;
+  gap: ${themeCssVariables.spacing[2]};
   justify-content: space-between;
 `;
 
 const StyledRightControls = styled.div`
   align-items: center;
   display: flex;
+  flex-wrap: wrap;
   gap: ${themeCssVariables.spacing[2]};
 `;
 
 const StyledContainer = styled.div`
   display: flex;
   flex-direction: column;
-  margin-bottom: ${themeCssVariables.spacing[8]};
+  gap: ${themeCssVariables.spacing[4]};
+  min-width: 0;
+`;
+
+const StyledError = styled.div`
+  color: ${themeCssVariables.color.red};
+  overflow-wrap: anywhere;
 `;
 
 export const SettingsAdminWorkerQueueMetricsSection = ({
   queue,
+  errorMessage,
+  showMetrics = true,
 }: SettingsAdminWorkerQueueMetricsSectionProps) => {
   const [timeRange, setTimeRange] = useState(QueueMetricsTimeRange.OneHour);
 
@@ -64,27 +77,32 @@ export const SettingsAdminWorkerQueueMetricsSection = ({
                 queueName: queue.queueName,
               })}
             />
-            <Select
-              dropdownId={`timerange-${queue.queueName}`}
-              value={timeRange}
-              options={WORKER_QUEUE_METRICS_SELECT_OPTIONS.map((option) => ({
-                ...option,
-                label: t(option.label),
-              }))}
-              onChange={setTimeRange}
-              needIconCheck
-              selectSizeVariant="small"
-            />
+            {showMetrics && (
+              <Select
+                dropdownId={`timerange-${queue.queueName}`}
+                value={timeRange}
+                options={WORKER_QUEUE_METRICS_SELECT_OPTIONS.map((option) => ({
+                  ...option,
+                  label: t(option.label),
+                }))}
+                onChange={setTimeRange}
+                needIconCheck
+                selectSizeVariant="small"
+              />
+            )}
           </StyledRightControls>
         </StyledControlsContainer>
       </Section>
-      <Suspense fallback={<WidgetSkeletonLoader />}>
-        <SettingsAdminWorkerMetricsGraph
-          queueName={queue.queueName}
-          timeRange={timeRange}
-          onTimeRangeChange={setTimeRange}
-        />
-      </Suspense>
+      {errorMessage && <StyledError role="alert">{errorMessage}</StyledError>}
+      {showMetrics && (
+        <Suspense fallback={<WidgetSkeletonLoader />}>
+          <SettingsAdminWorkerMetricsGraph
+            queueName={queue.queueName}
+            timeRange={timeRange}
+            onTimeRangeChange={setTimeRange}
+          />
+        </Suspense>
+      )}
     </StyledContainer>
   );
 };
