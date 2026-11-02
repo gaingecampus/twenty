@@ -193,9 +193,10 @@ export const CampaignReviewModal = ({
         />
         <Button
           title={submitting ? '처리 중…' : confirmLabel}
+          isLoading={submitting}
           variant="primary"
           accent="blue"
-          disabled={!campaignState.canSend}
+          disabled={busy || !campaignState.canSend}
           onClick={campaignState.confirmSend}
         />
       </ModalFooter>

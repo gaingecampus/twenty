@@ -17,7 +17,7 @@ import {
 } from '@/activities/emails/components/CampaignDispatchStyles';
 import { gql } from '@apollo/client';
 import { useLazyQuery, useMutation } from '@apollo/client/react';
-import { useState, type ReactNode } from 'react';
+import { useRef, useState, type ReactNode } from 'react';
 import { StyledCampaignRecipientSection } from '@/activities/emails/components/StyledCampaignRecipientSection';
 import { Button, Checkbox } from 'twenty-ui/input';
 import { InlineBanner } from 'twenty-ui/feedback';
@@ -131,9 +131,17 @@ export const SmsCampaignComposer = ({
   const [loadPreview, { loading: previewLoading }] = useLazyQuery<{
     previewSmsDispatch: Preview;
   }>(PREVIEW, { fetchPolicy: 'network-only' });
-  const [send, { loading: sending }] = useMutation<{
+  const [send, { loading: sendLoading }] = useMutation<{
     sendSmsDispatch: Summary;
   }>(SEND);
+  const [pendingAction, setPendingAction] = useState<'review' | 'send' | null>(
+    null,
+  );
+  // Lock before React renders the pending state to prevent rapid submissions.
+  // oxlint-disable-next-line twenty/no-state-useref
+  const requestInFlight = useRef(false);
+  const sending = sendLoading || pendingAction === 'send';
+  const reviewing = previewLoading || pendingAction === 'review';
   const reset = () => {
     setPreview(null);
     setSubmitted(false);
@@ -141,7 +149,7 @@ export const SmsCampaignComposer = ({
     setRequestId(crypto.randomUUID());
   };
   const bytes = new TextEncoder().encode(content).length;
-  const busy = sending || previewLoading || savingDraft;
+  const busy = sending || reviewing || savingDraft;
   const canReview =
     recipientMode === 'list' &&
     !isSendingDisabled &&
@@ -152,7 +160,9 @@ export const SmsCampaignComposer = ({
     bytes <= 2000 &&
     !submitted;
   const review = async () => {
-    if (!canReview) return;
+    if (!canReview || requestInFlight.current) return;
+    requestInFlight.current = true;
+    setPendingAction('review');
     setError('');
     try {
       const result = await loadPreview({
@@ -163,6 +173,9 @@ export const SmsCampaignComposer = ({
       setError(
         failure instanceof Error ? failure.message : '미리보기에 실패했습니다.',
       );
+    } finally {
+      requestInFlight.current = false;
+      setPendingAction(null);
     }
   };
   const submit = async () => {
@@ -171,10 +184,13 @@ export const SmsCampaignComposer = ({
       isSendingDisabled ||
       isSendingBlocked ||
       !preview ||
-      sending ||
+      busy ||
+      requestInFlight.current ||
       submitted
     )
       return;
+    requestInFlight.current = true;
+    setPendingAction('send');
     setError('');
     try {
       await send({
@@ -197,6 +213,9 @@ export const SmsCampaignComposer = ({
           ? failure.message
           : '발송 요청에 실패했습니다.',
       );
+    } finally {
+      requestInFlight.current = false;
+      setPendingAction(null);
     }
   };
   const recipientFields = (
@@ -245,7 +264,7 @@ export const SmsCampaignComposer = ({
         </StyledSetupNotice>
       )}
       {renderDispatchOptions?.(recipientFields)}
-      <StyledForm>
+      <StyledForm aria-busy={busy}>
         {!renderDispatchOptions && recipientFields}
         <label>
           제목 (선택)
@@ -326,7 +345,8 @@ export const SmsCampaignComposer = ({
                 />
               )}
               <Button
-                title="발송 전 검토"
+                title={reviewing ? '수신자 확인 중…' : '발송 전 검토'}
+                isLoading={reviewing}
                 size="small"
                 variant="primary"
                 accent="blue"
@@ -350,7 +370,12 @@ export const SmsCampaignComposer = ({
             </p>
             <pre>{preview.sample}</pre>
             <Button
-              title={`${preview.sms + preview.lms}명에게 문자 발송`}
+              title={
+                sending
+                  ? '발송 요청 중…'
+                  : `${preview.sms + preview.lms}명에게 문자 발송`
+              }
+              isLoading={sending}
               variant="primary"
               accent="blue"
               onClick={submit}

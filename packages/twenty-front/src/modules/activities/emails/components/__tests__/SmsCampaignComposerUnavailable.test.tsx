@@ -2,6 +2,7 @@ import { buildCampaignDraft } from '@/activities/emails/utils/buildCampaignDraft
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 import { useLazyQuery, useMutation, useQuery } from '@apollo/client/react';
 import {
+  act,
   fireEvent,
   render,
   screen,
@@ -313,4 +314,68 @@ it('restores and saves an unfinished SMS even when sending is unavailable', () =
     }),
   );
   expect(screen.getByRole('button', { name: /발송 전 검토/ })).toBeDisabled();
+});
+
+it('shows pending review and send states, blocks duplicates, and recovers after failure', async () => {
+  let finishReview: (value: unknown) => void = () => {};
+  let failSend: (error: Error) => void = () => {};
+  const loadPreview = jest.fn(
+    () =>
+      new Promise((resolve) => {
+        finishReview = resolve;
+      }),
+  );
+  const send = jest.fn(
+    () =>
+      new Promise((_, reject) => {
+        failSend = reject;
+      }),
+  );
+  jest
+    .mocked(useLazyQuery)
+    .mockReturnValue([loadPreview, { loading: false }] as unknown as ReturnType<
+      typeof useLazyQuery
+    >);
+  jest
+    .mocked(useMutation)
+    .mockReturnValue([send, { loading: false }] as unknown as ReturnType<
+      typeof useMutation
+    >);
+  render(<SmsCampaignComposer />);
+  fireEvent.click(screen.getByRole('button', { name: '고객 목록 선택' }));
+  fireEvent.change(screen.getByRole('textbox', { name: '메시지' }), {
+    target: { value: '안녕하세요' },
+  });
+  const reviewButton = screen.getByRole('button', { name: /발송 전 검토/ });
+  fireEvent.click(reviewButton);
+  fireEvent.click(reviewButton);
+  expect(loadPreview).toHaveBeenCalledTimes(1);
+  expect(screen.getByRole('button', { name: /수신자 확인 중/ })).toBeDisabled();
+  expect(screen.getByRole('textbox', { name: '메시지' })).toBeDisabled();
+  await act(async () =>
+    finishReview({
+      data: {
+        previewSmsDispatch: {
+          total: 1,
+          missing: 0,
+          duplicates: 0,
+          sms: 1,
+          lms: 0,
+          sample: '안녕하세요',
+        },
+      },
+    }),
+  );
+  const sendButton = screen.getByRole('button', { name: /1명에게 문자 발송/ });
+  fireEvent.click(sendButton);
+  fireEvent.click(sendButton);
+  expect(send).toHaveBeenCalledTimes(1);
+  expect(screen.getByRole('button', { name: /발송 요청 중/ })).toBeDisabled();
+  expect(reviewButton).toBeDisabled();
+  await act(async () => failSend(new Error('네트워크 오류')));
+  expect(screen.getByRole('alert')).toHaveTextContent('네트워크 오류');
+  expect(
+    screen.getByRole('button', { name: /1명에게 문자 발송/ }),
+  ).toBeEnabled();
+  expect(screen.getByRole('textbox', { name: '메시지' })).toBeEnabled();
 });
