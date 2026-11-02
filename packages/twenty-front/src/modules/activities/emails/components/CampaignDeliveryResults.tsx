@@ -146,12 +146,12 @@ export const CampaignDeliveryResults = ({
     />
   );
   return (
-    <StyledSection aria-label="수신자별 발송 결과" aria-busy={loading}>
+    <StyledSection aria-label="발송 내역" aria-busy={loading}>
       <MessageListHeaderCount
         count={totalCount}
         loading={loading}
         error={Boolean(error) || !canReadObjectRecords}
-        label="발송 처리 기록"
+        label="발송 내역"
       />
       {headerActionTarget ? (
         createPortal(refreshButton, headerActionTarget)
@@ -159,11 +159,11 @@ export const CampaignDeliveryResults = ({
         <StyledMessageListToolbar>{refreshButton}</StyledMessageListToolbar>
       )}
       {!canReadObjectRecords ? (
-        <p role="alert">발송 결과를 조회할 권한이 없습니다.</p>
+        <p role="alert">발송 내역을 조회할 권한이 없습니다.</p>
       ) : error ? (
-        <p role="alert">발송 결과를 불러오지 못했습니다. 새로고침해 주세요.</p>
+        <p role="alert">발송 내역을 불러오지 못했습니다. 새로고침해 주세요.</p>
       ) : loading ? (
-        <p role="status">발송 결과를 불러오는 중…</p>
+        <p role="status">발송 내역을 불러오는 중…</p>
       ) : records.length === 0 ? (
         <StyledEmpty role="status">
           <AnimatedPlaceholder type="emptyInbox" />
@@ -178,7 +178,7 @@ export const CampaignDeliveryResults = ({
         <>
           <MessageListTableScroll
             tableId={`campaign-deliveries-${campaignId}`}
-            label="발송 결과 표"
+            label="발송 내역 표"
           >
             <StyledMessageListTable>
               <TableRow gridTemplateColumns={COLUMNS}>

@@ -159,7 +159,7 @@ export const WidgetCardShell = ({
             isDeletingWidgetEnabled={isDeletingWidgetEnabled}
             title={
               isCampaignDelivery
-                ? '수신자별 발송 결과'
+                ? '발송 내역'
                 : isMessageListMembers
                   ? t`등록된 수신자`
                   : widget.title

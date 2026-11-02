@@ -66,7 +66,7 @@ it('places refresh in the widget header when an action slot is available', () =>
 it('does not show an empty success state while loading', () => {
   setPage({ loading: true });
   render(<CampaignDeliveryResults campaignId="campaign" />);
-  expect(screen.getByText('발송 결과를 불러오는 중…')).toBeInTheDocument();
+  expect(screen.getByText('발송 내역을 불러오는 중…')).toBeInTheDocument();
   expect(
     screen.queryByText('예약 발송을 기다리고 있어요'),
   ).not.toBeInTheDocument();
