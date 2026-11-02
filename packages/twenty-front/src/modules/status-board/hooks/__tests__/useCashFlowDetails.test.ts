@@ -80,7 +80,7 @@ describe('cash flow detail sources', () => {
       and: [
         { sourceHash: { eq: 'backup-a' } },
         { inclusionStatus: { eq: '포함' } },
-        { expectedDate: { gte: '2026-10-28' } },
+        { expectedDate: { gte: '2026-10-01' } },
         { expectedDate: { lte: '2026-10-31' } },
       ],
     });

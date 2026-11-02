@@ -1,5 +1,3 @@
-import { getCashFlowToday } from '@/status-board/utils/getCashFlowToday';
-import { getCashFlowMonthEnd } from '@/status-board/utils/getCashFlowMonthEnd';
 import { useAggregateRecords } from '@/object-record/hooks/useAggregateRecords';
 import { AggregateOperations } from '@/object-record/record-table/constants/AggregateOperations';
 import { readCashFlowCurrency } from '@/status-board/utils/calculateCashFlow';
@@ -8,12 +6,9 @@ import { type RecordGqlOperationFilter } from 'twenty-shared/types';
 
 export const getCashFlowPendingExpenseFilter = (
   month: string,
-  today = getCashFlowToday(),
 ): RecordGqlOperationFilter => ({
   and: [
     { expenseMonth: { eq: month } },
-    { scheduledDate: { gte: today } },
-    { scheduledDate: { lte: getCashFlowMonthEnd(today) } },
     {
       or: [
         { sourceRecordType: { is: 'NULL' } },
@@ -23,11 +18,8 @@ export const getCashFlowPendingExpenseFilter = (
   ],
 });
 
-export const useCashFlowPendingExpense = (
-  month: string,
-  today = getCashFlowToday(),
-) => {
-  const filter = getCashFlowPendingExpenseFilter(month, today);
+export const useCashFlowPendingExpense = (month: string) => {
+  const filter = getCashFlowPendingExpenseFilter(month);
   const totals = useAggregateRecords({
     objectNameSingular: 'pendingExpense',
     filter,

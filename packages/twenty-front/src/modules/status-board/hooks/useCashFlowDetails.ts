@@ -19,7 +19,7 @@ export const getCashFlowDetailsFilters = (
     and: [
       { sourceHash: { eq: sourceHash } },
       { inclusionStatus: { eq: '포함' } },
-      { expectedDate: { gte: today } },
+      { expectedDate: { gte: `${today.slice(0, 7)}-01` } },
       { expectedDate: { lte: getCashFlowMonthEnd(today) } },
     ],
   } as RecordGqlOperationFilter,

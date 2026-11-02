@@ -13,6 +13,8 @@ jest.mock('@/object-record/hooks/useFindManyRecords', () => ({
 it.each([
   ['2026-10-29', '2026-10-31'],
   ['2026-11-01', '2026-11-30'],
+  ['2026-11-02', '2026-11-30'],
+  ['2026-11-30', '2026-11-30'],
   ['2026-12-31', '2026-12-31'],
   ['2027-02-01', '2027-02-28'],
   ['2028-02-01', '2028-02-29'],
@@ -20,17 +22,20 @@ it.each([
   expect(getCashFlowMonthEnd(today)).toBe(monthEnd);
   expect(getCashFlowDetailsFilters('backup', today).receipts).toMatchObject({
     and: expect.arrayContaining([
-      { expectedDate: { gte: today } },
+      { expectedDate: { gte: `${today.slice(0, 7)}-01` } },
       { expectedDate: { lte: monthEnd } },
     ]),
   });
-  expect(
-    getCashFlowPendingExpenseFilter(today.slice(0, 7), today),
-  ).toMatchObject({
-    and: expect.arrayContaining([
-      { scheduledDate: { gte: today } },
-      { scheduledDate: { lte: monthEnd } },
-    ]),
+  expect(getCashFlowPendingExpenseFilter(today.slice(0, 7))).toEqual({
+    and: [
+      { expenseMonth: { eq: today.slice(0, 7) } },
+      {
+        or: [
+          { sourceRecordType: { is: 'NULL' } },
+          { sourceRecordType: { eq: '' } },
+        ],
+      },
+    ],
   });
 });
 
