@@ -94,10 +94,13 @@ export const RecordChip = ({
     recordIndexOpenRecordInState,
   );
   const canOpenInSidePanel = canOpenObjectInSidePanel(objectNameSingular);
+  const isWorkspaceMember =
+    objectNameSingular === CoreObjectNameSingular.WorkspaceMember;
 
   const isSidePanelViewOpenRecordIn =
     recordIndexOpenRecordIn === ViewOpenRecordIn.SIDE_PANEL &&
-    canOpenInSidePanel;
+    canOpenInSidePanel &&
+    !isWorkspaceMember;
 
   const handleCustomClick = isDefined(onClick)
     ? onClick
@@ -110,12 +113,7 @@ export const RecordChip = ({
         }
       : undefined;
 
-  // TODO temporary until we create a record show page for Workspaces members
-
-  if (
-    forceDisableClick ||
-    objectNameSingular === CoreObjectNameSingular.WorkspaceMember
-  ) {
+  if (forceDisableClick || (isWorkspaceMember && !to)) {
     return (
       <Chip
         label={recordChipData.name}

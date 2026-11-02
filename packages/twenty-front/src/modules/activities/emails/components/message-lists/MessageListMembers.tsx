@@ -16,6 +16,7 @@ import {
 } from '@/activities/emails/components/message-lists/MessageListTableStyles';
 import { TableRow } from '@/ui/layout/table/components/TableRow';
 import { RecordChip } from '@/object-record/components/RecordChip';
+import { RecordTableCellSkeletonLoader } from '@/object-record/record-table/record-table-cell/components/RecordTableCellSkeletonLoader';
 import { EmailDisplay } from '@/ui/field/display/components/EmailDisplay';
 import { MessageListAddRecipientsDropdown } from '@/activities/emails/components/message-lists/MessageListAddRecipientsDropdown';
 import { useDeleteOneRecord } from '@/object-record/hooks/useDeleteOneRecord';
@@ -37,6 +38,8 @@ import {
   AnimatedPlaceholderEmptyTitle,
 } from 'twenty-ui/feedback';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
+import { SettingsPath } from 'twenty-shared/types';
+import { getSettingsPath } from 'twenty-shared/utils';
 type MessageListMember = ObjectRecord & {
   personId: string;
   workspaceMember:
@@ -50,7 +53,7 @@ type MessageListMember = ObjectRecord & {
         name: { firstName: string; lastName: string };
         emails: { primaryEmail: string };
         jobTitle?: string;
-        company?: { id: string; name: string } | null;
+        company?: (ObjectRecord & { name: string }) | null;
       })
     | null;
 };
@@ -105,7 +108,15 @@ const StyledRemoveButton = styled(Button)`
   }
 `;
 const MEMBER_GRID_COLUMNS =
-  'minmax(180px, 1fr) minmax(150px, 1fr) minmax(280px, 1.5fr) 80px';
+  'minmax(180px, 1fr) minmax(200px, 1fr) minmax(150px, 1fr) minmax(280px, 1.5fr) 80px';
+const StyledMembersTable = styled(StyledMessageListTable)`
+  min-width: 890px;
+`;
+const StyledSkeletonCell = styled(StyledMessageListCell)`
+  > div {
+    flex: 1;
+  }
+`;
 
 export const MessageListMembers = ({ listId }: { listId: string }) => (
   <MessageListMembersPage key={listId} listId={listId} />
@@ -209,7 +220,7 @@ const MessageListMembersPage = ({ listId }: { listId: string }) => {
     </StyledActions>
   );
   return (
-    <StyledSection>
+    <StyledSection aria-busy={loading}>
       <MessageListHeaderCount
         count={allMembers.totalCount}
         loading={allMembers.loading}
@@ -259,8 +270,9 @@ const MessageListMembersPage = ({ listId }: { listId: string }) => {
       {countsError && (
         <p role="alert">{t`이메일 등록 인원을 불러오지 못했습니다.`}</p>
       )}
-      {loading && <p>{t`불러오는 중…`}</p>}
-      {error && <p role="alert">{t`고객 분류를 불러오지 못했습니다.`}</p>}
+      {!loading && error && (
+        <p role="alert">{t`고객 분류를 불러오지 못했습니다.`}</p>
+      )}
       {!loading && !error && records.length === 0 && (
         <StyledEmptyContainer>
           <AnimatedPlaceholder
@@ -286,95 +298,124 @@ const MessageListMembersPage = ({ listId }: { listId: string }) => {
           </AnimatedPlaceholderEmptyTextContainer>
         </StyledEmptyContainer>
       )}
-      {records.length > 0 && (
+      {(loading || (!error && records.length > 0)) && (
         <MessageListTableScroll
           tableId={`message-list-members-${listId}`}
           label={t`등록된 수신자 표`}
         >
-          <StyledMessageListTable>
+          <StyledMembersTable>
             <TableRow gridTemplateColumns={MEMBER_GRID_COLUMNS}>
               <StyledMessageListHeader>{t`수신자`}</StyledMessageListHeader>
-              <StyledMessageListHeader>{t`구분 / 소속`}</StyledMessageListHeader>
+              <StyledMessageListHeader>{t`연결된 기업`}</StyledMessageListHeader>
+              <StyledMessageListHeader>{t`구분 / 직책`}</StyledMessageListHeader>
               <StyledMessageListHeader>{t`이메일`}</StyledMessageListHeader>
               <StyledMessageListHeader>{t`관리`}</StyledMessageListHeader>
             </TableRow>
-            {records.map((member) => (
-              <TableRow
-                key={member.id}
-                gridTemplateColumns={MEMBER_GRID_COLUMNS}
-                hoverBackgroundColor={
-                  themeCssVariables.background.transparent.light
-                }
-              >
-                <StyledMessageListCell>
-                  {member.person ? (
-                    <RecordChip
-                      objectNameSingular="person"
-                      record={member.person}
-                    />
-                  ) : member.workspaceMember ? (
-                    <RecordChip
-                      objectNameSingular="workspaceMember"
-                      record={member.workspaceMember}
-                    />
-                  ) : (
-                    <StyledRecipientNotice>{t`삭제되었거나 접근할 수 없는 수신자`}</StyledRecipientNotice>
-                  )}
-                </StyledMessageListCell>
-                <StyledMessageListCell>
-                  <StyledMetadata
-                    title={
-                      member.person
-                        ? [member.person.company?.name, member.person.jobTitle]
-                            .filter(Boolean)
-                            .join(' · ') || t`고객`
+            {loading ? (
+              <div role="status" aria-label={t`수신자를 불러오는 중`}>
+                <div aria-hidden="true">
+                  {Array.from({ length: 5 }, (_, rowIndex) => (
+                    <TableRow
+                      key={rowIndex}
+                      gridTemplateColumns={MEMBER_GRID_COLUMNS}
+                    >
+                      {Array.from({ length: 5 }, (_, columnIndex) => (
+                        <StyledSkeletonCell key={columnIndex}>
+                          <RecordTableCellSkeletonLoader />
+                        </StyledSkeletonCell>
+                      ))}
+                    </TableRow>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              records.map((member) => (
+                <TableRow
+                  key={member.id}
+                  gridTemplateColumns={MEMBER_GRID_COLUMNS}
+                  hoverBackgroundColor={
+                    themeCssVariables.background.transparent.light
+                  }
+                >
+                  <StyledMessageListCell>
+                    {member.person ? (
+                      <RecordChip
+                        objectNameSingular="person"
+                        record={member.person}
+                      />
+                    ) : member.workspaceMember ? (
+                      <RecordChip
+                        objectNameSingular="workspaceMember"
+                        record={member.workspaceMember}
+                        to={getSettingsPath(SettingsPath.WorkspaceMemberPage, {
+                          workspaceMemberId: member.workspaceMember.id,
+                        })}
+                      />
+                    ) : (
+                      <StyledRecipientNotice>{t`삭제되었거나 접근할 수 없는 수신자`}</StyledRecipientNotice>
+                    )}
+                  </StyledMessageListCell>
+                  <StyledMessageListCell>
+                    {member.person?.company ? (
+                      <RecordChip
+                        objectNameSingular="company"
+                        record={member.person.company}
+                      />
+                    ) : (
+                      <StyledMetadata>—</StyledMetadata>
+                    )}
+                  </StyledMessageListCell>
+                  <StyledMessageListCell>
+                    <StyledMetadata
+                      title={
+                        member.person
+                          ? member.person.jobTitle || t`고객`
+                          : member.workspaceMember
+                            ? t`워크스페이스 멤버`
+                            : ''
+                      }
+                    >
+                      {member.person
+                        ? member.person.jobTitle || t`고객`
                         : member.workspaceMember
                           ? t`워크스페이스 멤버`
-                          : ''
-                    }
-                  >
-                    {member.person
-                      ? [member.person.company?.name, member.person.jobTitle]
-                          .filter(Boolean)
-                          .join(' · ') || t`고객`
-                      : member.workspaceMember
-                        ? t`워크스페이스 멤버`
-                        : ''}
-                  </StyledMetadata>
-                </StyledMessageListCell>
-                <StyledMessageListCell>
-                  {member.person?.emails?.primaryEmail ||
-                  member.workspaceMember?.userEmail ? (
-                    <EmailDisplay
-                      value={
-                        member.person?.emails?.primaryEmail ||
-                        member.workspaceMember?.userEmail ||
-                        ''
-                      }
-                    />
-                  ) : (
-                    <StyledRecipientNotice>{t`이메일 미등록 · 이메일 발송 시 제외됩니다`}</StyledRecipientNotice>
-                  )}
-                </StyledMessageListCell>
-                <StyledMessageListCell align="center">
-                  {permissions.canSoftDeleteObjectRecords && (
-                    <StyledRemoveButton
-                      title={t`제외`}
-                      size="small"
-                      variant="primary"
-                      disabled={busy}
-                      onClick={() =>
-                        runMutation(() => deleteOneRecord(member.id))
-                      }
-                    />
-                  )}
-                </StyledMessageListCell>
-              </TableRow>
-            ))}
-          </StyledMessageListTable>
+                          : ''}
+                    </StyledMetadata>
+                  </StyledMessageListCell>
+                  <StyledMessageListCell>
+                    {member.person?.emails?.primaryEmail ||
+                    member.workspaceMember?.userEmail ? (
+                      <EmailDisplay
+                        value={
+                          member.person?.emails?.primaryEmail ||
+                          member.workspaceMember?.userEmail ||
+                          ''
+                        }
+                      />
+                    ) : (
+                      <StyledRecipientNotice>{t`이메일 미등록 · 이메일 발송 시 제외됩니다`}</StyledRecipientNotice>
+                    )}
+                  </StyledMessageListCell>
+                  <StyledMessageListCell align="center">
+                    {permissions.canSoftDeleteObjectRecords && (
+                      <StyledRemoveButton
+                        title={t`제외`}
+                        size="small"
+                        variant="primary"
+                        disabled={busy}
+                        onClick={() =>
+                          runMutation(() => deleteOneRecord(member.id))
+                        }
+                      />
+                    )}
+                  </StyledMessageListCell>
+                </TableRow>
+              ))
+            )}
+          </StyledMembersTable>
         </MessageListTableScroll>
       )}
-      {!error && (
+      {!loading && !error && (
         <RecordPaginationBar
           currentPage={page + 1}
           pageSize={pageSize}

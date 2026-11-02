@@ -2,6 +2,8 @@ import { render, screen } from '@testing-library/react';
 import { type ReactNode } from 'react';
 import { RecordChip } from '@/object-record/components/RecordChip';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
+import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
+import { ViewOpenRecordIn } from '~/generated-metadata/graphql';
 
 jest.mock('@/object-record/hooks/useRecordChipData', () => ({
   useRecordChipData: () => ({
@@ -23,7 +25,20 @@ jest.mock('twenty-ui/data-display', () => {
   const Chip = ({ leftComponent }: { leftComponent: ReactNode }) => (
     <div>{leftComponent}</div>
   );
-  return { ...actual, Chip, LinkChip: Chip };
+  const LinkChip = ({
+    leftComponent,
+    to,
+    onClick,
+  }: {
+    leftComponent: ReactNode;
+    to: string;
+    onClick?: () => void;
+  }) => (
+    <a href={to} data-side-panel-handler={Boolean(onClick)} onClick={onClick}>
+      {leftComponent}
+    </a>
+  );
+  return { ...actual, Chip, LinkChip };
 });
 
 it.each([false, true])(
@@ -95,4 +110,37 @@ it('keeps avatars hidden when requested', () => {
     />,
   );
   expect(screen.queryByText('⭐')).toBeNull();
+});
+
+it('opens an explicit workspace member link instead of a record side panel and respects disabled clicks', () => {
+  jest.mocked(useAtomStateValue).mockReturnValue(ViewOpenRecordIn.SIDE_PANEL);
+  const record = { __typename: 'WorkspaceMember', id: 'member' };
+  const { rerender } = render(
+    <RecordChip objectNameSingular="workspaceMember" record={record} />,
+  );
+  expect(screen.queryByRole('link')).not.toBeInTheDocument();
+  rerender(
+    <RecordChip
+      objectNameSingular="workspaceMember"
+      record={record}
+      to="/settings/members/member"
+    />,
+  );
+  expect(screen.getByRole('link')).toHaveAttribute(
+    'href',
+    '/settings/members/member',
+  );
+  expect(screen.getByRole('link')).toHaveAttribute(
+    'data-side-panel-handler',
+    'false',
+  );
+  rerender(
+    <RecordChip
+      objectNameSingular="workspaceMember"
+      record={record}
+      to="/settings/members/member"
+      forceDisableClick
+    />,
+  );
+  expect(screen.queryByRole('link')).not.toBeInTheDocument();
 });

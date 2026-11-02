@@ -351,3 +351,38 @@ jest.mock(
     ),
   }),
 );
+
+it('shows a table skeleton without stale rows or pagination while fetching, then renders recipients', () => {
+  const result = {
+    records: [{ id: 'member', person: { id: 'loaded-person', emails: {} } }],
+    totalCount: 1,
+    loading: true,
+    error: undefined,
+    objectMetadataItem: { id: 'member' },
+    refetch: jest.fn(),
+  };
+  jest
+    .mocked(useMessageListRecordPage)
+    .mockReturnValue(
+      result as unknown as ReturnType<typeof useMessageListRecordPage>,
+    );
+  const { rerender } = render(<MessageListMembers listId="loading-list" />);
+  expect(
+    screen.getByRole('status', { name: '수신자를 불러오는 중' }),
+  ).toBeInTheDocument();
+  expect(screen.getByText('연결된 기업')).toBeInTheDocument();
+  expect(screen.queryByText('loaded-person')).not.toBeInTheDocument();
+  expect(screen.queryByText('page 1')).not.toBeInTheDocument();
+  expect(
+    screen.queryByText('아직 등록된 수신자가 없습니다.'),
+  ).not.toBeInTheDocument();
+
+  jest.mocked(useMessageListRecordPage).mockReturnValue({
+    ...result,
+    loading: false,
+  } as unknown as ReturnType<typeof useMessageListRecordPage>);
+  rerender(<MessageListMembers listId="loading-list" />);
+  expect(screen.queryByRole('status')).not.toBeInTheDocument();
+  expect(screen.getByText('loaded-person')).toBeInTheDocument();
+  expect(screen.getByText('page 1')).toBeInTheDocument();
+});
