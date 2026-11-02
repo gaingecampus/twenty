@@ -106,6 +106,7 @@ export const MultipleSelectDropdown = ({
                   handleItemSelectChange(item, newCheckedValue);
                 }}
                 text={item.name}
+                description={item.description}
                 avatar={
                   <Avatar
                     avatarUrl={getAbsoluteImageUrl(item.avatarUrl)}

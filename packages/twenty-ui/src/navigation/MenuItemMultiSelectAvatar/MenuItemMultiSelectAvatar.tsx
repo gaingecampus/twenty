@@ -1,4 +1,5 @@
 import { type ReactNode } from 'react';
+import { clsx } from 'clsx';
 
 import { OverflowingTextWithTooltip } from '@ui/surfaces';
 import { Checkbox } from '@ui/input/Checkbox/Checkbox';
@@ -16,6 +17,7 @@ type MenuItemMultiSelectAvatarProps = {
   selected: boolean;
   isKeySelected?: boolean;
   text?: string;
+  description?: string;
   contextualText?: string;
   className?: string;
   onSelectChange?: (selected: boolean) => void;
@@ -24,6 +26,7 @@ type MenuItemMultiSelectAvatarProps = {
 export const MenuItemMultiSelectAvatar = ({
   avatar,
   text,
+  description,
   selected,
   contextualText,
   className,
@@ -36,7 +39,7 @@ export const MenuItemMultiSelectAvatar = ({
 
   return (
     <StyledMenuItemBase
-      className={className}
+      className={clsx(className, description && styles.withDescription)}
       onClick={handleOnClick}
       isKeySelected={isKeySelected}
     >
@@ -47,19 +50,26 @@ export const MenuItemMultiSelectAvatar = ({
         />
         <StyledMenuItemLeftContent>
           {avatar}
-          <div className={styles.textContainer}>
-            <StyledMenuItemLabel>
-              <OverflowingTextWithTooltip text={text} />
-            </StyledMenuItemLabel>
-            {contextualText && (
-              <>
-                <StyledMenuItemLabelLight>·</StyledMenuItemLabelLight>
-                <StyledMenuItemLabelLight>
-                  <OverflowingTextWithTooltip text={contextualText} />
-                </StyledMenuItemLabelLight>
-              </>
-            )}
-          </div>
+          {description ? (
+            <div className={styles.multilineText}>
+              <span className={styles.title}>{text}</span>
+              <span className={styles.description}>{description}</span>
+            </div>
+          ) : (
+            <div className={styles.textContainer}>
+              <StyledMenuItemLabel>
+                <OverflowingTextWithTooltip text={text} />
+              </StyledMenuItemLabel>
+              {contextualText && (
+                <>
+                  <StyledMenuItemLabelLight>·</StyledMenuItemLabelLight>
+                  <StyledMenuItemLabelLight>
+                    <OverflowingTextWithTooltip text={contextualText} />
+                  </StyledMenuItemLabelLight>
+                </>
+              )}
+            </div>
+          )}
         </StyledMenuItemLeftContent>
       </div>
     </StyledMenuItemBase>

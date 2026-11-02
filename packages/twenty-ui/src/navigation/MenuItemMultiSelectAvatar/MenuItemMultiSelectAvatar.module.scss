@@ -15,3 +15,29 @@
   text-overflow: ellipsis;
   overflow: hidden;
 }
+
+.withDescription.withDescription {
+  height: auto;
+  min-height: var(--t-control-height-md, 32px);
+}
+
+.multilineText {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--t-spacing-1);
+  min-width: 0;
+  overflow-wrap: anywhere;
+  white-space: normal;
+  word-break: keep-all;
+}
+
+.title {
+  color: var(--t-font-color-primary);
+  font-size: var(--t-font-size-md);
+}
+
+.description {
+  color: var(--t-font-color-light);
+  font-size: var(--t-font-size-sm);
+}

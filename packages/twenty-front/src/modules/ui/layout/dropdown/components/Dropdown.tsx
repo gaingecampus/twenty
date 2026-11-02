@@ -20,6 +20,7 @@ import {
   autoUpdate,
   flip,
   offset,
+  shift,
   size,
   useFloating,
 } from '@floating-ui/react';
@@ -56,6 +57,7 @@ export type DropdownProps = {
   dropdownPlacement?: Placement;
   dropdownOffset?: DropdownOffset;
   dropdownStrategy?: 'fixed' | 'absolute';
+  shiftWithinBoundary?: boolean;
   onClickOutside?: () => void;
   onClose?: () => void;
   onOpen?: () => void;
@@ -78,6 +80,7 @@ export const Dropdown = ({
   globalHotkeysConfig,
   dropdownPlacement = 'bottom-end',
   dropdownStrategy = 'absolute',
+  shiftWithinBoundary = false,
   dropdownOffset,
   onClickOutside,
   onClose,
@@ -147,6 +150,7 @@ export const Dropdown = ({
       flip({
         ...boundaryOptions,
       }),
+      ...(shiftWithinBoundary ? [shift(boundaryOptions)] : []),
       size({
         apply: ({ availableHeight, availableWidth, y: floatingY }) => {
           flushSync(() => {
