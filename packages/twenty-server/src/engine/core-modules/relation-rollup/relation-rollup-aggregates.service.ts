@@ -1,4 +1,6 @@
 import { Injectable } from '@nestjs/common';
+import { CampaignRecipientCountService } from './campaign-recipient-count.service';
+import { isCampaignRecipientCount } from './utils/is-campaign-recipient-count.util';
 
 import {
   FieldMetadataType,
@@ -39,6 +41,7 @@ export class RelationRollupAggregatesService {
   constructor(
     private readonly globalWorkspaceOrmManager: GlobalWorkspaceOrmManager,
     private readonly workspaceCacheService: WorkspaceCacheService,
+    private readonly campaignRecipientCountService: CampaignRecipientCountService,
   ) {}
 
   async computeRelationRollupAggregates({
@@ -115,6 +118,7 @@ export class RelationRollupAggregatesService {
           results.push(
             await this.computeSingleRollup({
               rollup,
+              workspaceId,
               parentObjectMetadata,
               parentRecordIds,
               flatObjectMetadataMaps,
@@ -133,6 +137,7 @@ export class RelationRollupAggregatesService {
   }
 
   private async computeSingleRollup({
+    workspaceId,
     rollup,
     parentObjectMetadata,
     parentRecordIds,
@@ -142,6 +147,7 @@ export class RelationRollupAggregatesService {
     rolePermissionConfig,
     workspaceDataSource,
   }: {
+    workspaceId: string;
     rollup: RelationRollupAggregateInput;
     parentObjectMetadata: FlatObjectMetadata;
     parentRecordIds: string[];
@@ -316,6 +322,24 @@ export class RelationRollupAggregatesService {
 
       return accumulator;
     }, {});
+
+    if (
+      isCampaignRecipientCount({
+        parentObjectName: parentObjectMetadata.nameSingular,
+        relationFieldName: relationFieldMetadata.name,
+        rollup,
+      })
+    ) {
+      const dispatchCounts = await this.campaignRecipientCountService.count({
+        workspaceId,
+        parentRecordIds,
+        workspaceDataSource,
+        rolePermissionConfig,
+      });
+      for (const [campaignId, count] of dispatchCounts) {
+        valuesByParentId[campaignId] = count;
+      }
+    }
 
     const values: RelationRollupAggregateValueDTO[] = parentRecordIds.map(
       (parentRecordId) => ({
