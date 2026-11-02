@@ -201,15 +201,6 @@ export const NavigationDrawerItemForObjectMetadataItem = ({
     <NavigationDrawerItem
       className={isRecord ? 'navigation-drawer-item-avatar' : undefined}
       label={label}
-      hideBadgeOnCompact
-      badgeLabel={
-        !isRecord &&
-        ['messageList', 'messageCampaign'].includes(
-          objectMetadataItem.nameSingular,
-        )
-          ? t`준비중`
-          : undefined
-      }
       secondaryLabel={secondaryLabel}
       to={
         isLayoutCustomizationModeEnabled || isDragging
