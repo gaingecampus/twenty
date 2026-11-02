@@ -1,83 +1,31 @@
-import { styled } from '@linaria/react';
-
-import { CustomResolverFetchMoreLoader } from '@/activities/components/CustomResolverFetchMoreLoader';
-import { SkeletonLoader } from '@/activities/components/SkeletonLoader';
-import { EventList } from '@/activities/timeline-activities/components/EventList';
+import { MessageListTimeline } from '@/activities/emails/components/message-lists/MessageListTimeline';
+import { TimelineCardContent } from '@/activities/timeline-activities/components/TimelineCardContent';
 import { useTimelineActivities } from '@/activities/timeline-activities/hooks/useTimelineActivities';
+import { type ActivityTargetableObject } from '@/activities/types/ActivityTargetableEntity';
 import { useTargetRecord } from '@/ui/layout/contexts/useTargetRecord';
-import { t } from '@lingui/core/macro';
-import {
-  AnimatedPlaceholder,
-  AnimatedPlaceholderEmptyContainer,
-  AnimatedPlaceholderEmptySubTitle,
-  AnimatedPlaceholderEmptyTextContainer,
-  AnimatedPlaceholderEmptyTitle,
-} from 'twenty-ui/feedback';
-import { MOBILE_VIEWPORT, themeCssVariables } from 'twenty-ui/theme-constants';
 
-const StyledMainContainer = styled.div`
-  align-items: flex-start;
-  align-self: stretch;
-  border-top: none;
-  display: flex;
-  flex-direction: column;
-  gap: ${themeCssVariables.spacing[4]};
-
-  justify-content: center;
-  overflow: auto;
-  padding-left: ${themeCssVariables.spacing[6]};
-  padding-right: ${themeCssVariables.spacing[6]};
-  padding-top: ${themeCssVariables.spacing[6]};
-
-  @media (max-width: ${MOBILE_VIEWPORT}px) {
-    border-top: 1px solid ${themeCssVariables.border.color.medium};
-    padding-right: ${themeCssVariables.spacing[1]};
-    padding-left: ${themeCssVariables.spacing[1]};
-  }
-`;
+const AuditTimelineCard = ({
+  targetRecord,
+}: {
+  targetRecord: ActivityTargetableObject;
+}) => {
+  const activity = useTimelineActivities(targetRecord);
+  return (
+    <TimelineCardContent
+      targetRecord={targetRecord}
+      timelineActivities={activity.timelineActivities}
+      firstQueryLoading={activity.firstQueryLoading}
+      loadingMore={activity.loadingMore}
+      fetchMoreRecords={activity.fetchMoreRecords}
+    />
+  );
+};
 
 export const TimelineCard = () => {
   const targetRecord = useTargetRecord();
-  const {
-    timelineActivities,
-    firstQueryLoading,
-    loadingMore,
-    fetchMoreRecords,
-  } = useTimelineActivities(targetRecord);
-
-  const isTimelineActivitiesEmpty = timelineActivities.length === 0;
-
-  if (firstQueryLoading === true) {
-    return <SkeletonLoader withSubSections />;
-  }
-
-  if (isTimelineActivitiesEmpty) {
-    return (
-      <AnimatedPlaceholderEmptyContainer>
-        <AnimatedPlaceholder type="emptyTimeline" />
-        <AnimatedPlaceholderEmptyTextContainer>
-          <AnimatedPlaceholderEmptyTitle>
-            {t`No activity yet`}
-          </AnimatedPlaceholderEmptyTitle>
-          <AnimatedPlaceholderEmptySubTitle>
-            {t`There is no activity associated with this record.`}
-          </AnimatedPlaceholderEmptySubTitle>
-        </AnimatedPlaceholderEmptyTextContainer>
-      </AnimatedPlaceholderEmptyContainer>
-    );
-  }
-
-  return (
-    <StyledMainContainer>
-      <EventList
-        targetableObject={targetRecord}
-        title={t`All`}
-        events={timelineActivities ?? []}
-      />
-      <CustomResolverFetchMoreLoader
-        loading={loadingMore}
-        onLastRowVisible={fetchMoreRecords}
-      />
-    </StyledMainContainer>
+  return targetRecord.targetObjectNameSingular === 'messageList' ? (
+    <MessageListTimeline key={targetRecord.id} targetRecord={targetRecord} />
+  ) : (
+    <AuditTimelineCard key={targetRecord.id} targetRecord={targetRecord} />
   );
 };

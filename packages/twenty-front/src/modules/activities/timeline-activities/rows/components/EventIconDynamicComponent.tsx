@@ -7,6 +7,7 @@ import {
 } from 'twenty-shared/timeline';
 import {
   IconCirclePlus,
+  IconSend,
   IconEditCircle,
   type IconComponent,
   IconRestore,
@@ -29,6 +30,9 @@ export const EventIconDynamicComponent = ({
   event: TimelineActivity;
   linkedObjectMetadataItem: EnrichedObjectMetadataItem | null;
 }) => {
+  if (event.properties?.messagingMilestone === 'campaign-sent')
+    return <IconSend />;
+
   const action = parseTimelineActivityAction(event.name);
 
   const ActionIcon = RECORD_CHANGE_ICONS[action];

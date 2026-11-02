@@ -1,3 +1,4 @@
+import { EventRowMessagingMilestone } from '@/activities/timeline-activities/rows/components/EventRowMessagingMilestone';
 import { EventRowActivity } from '@/activities/timeline-activities/rows/activity/components/EventRowActivity';
 import { EventRowCalendarEvent } from '@/activities/timeline-activities/rows/calendar/components/EventRowCalendarEvent';
 import { type EventRowDynamicComponentProps } from '@/activities/timeline-activities/rows/components/EventRowDynamicComponent.types';
@@ -11,6 +12,15 @@ export const EventRowDynamicComponent = (
   props: EventRowDynamicComponentProps,
 ) => {
   const { linkedObjectMetadataItem } = props;
+
+  if (props.event.properties?.messagingMilestone) {
+    return (
+      <EventRowMessagingMilestone
+        event={props.event}
+        createdAt={props.createdAt}
+      />
+    );
+  }
 
   if (!isDefined(linkedObjectMetadataItem)) {
     return (
