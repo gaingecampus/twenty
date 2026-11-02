@@ -2,7 +2,7 @@ import { MessageListTableScroll } from '@/activities/emails/components/message-l
 import { useContext, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { styled } from '@linaria/react';
-import { Tag, type TagColor } from 'twenty-ui/data-display';
+import { Avatar, Tag, type TagColor } from 'twenty-ui/data-display';
 import { Button } from 'twenty-ui/input';
 import { IconRefresh } from 'twenty-ui/icon';
 import {
@@ -24,6 +24,7 @@ import {
 } from '@/activities/emails/components/message-lists/MessageListTableStyles';
 import { useMessageListRecordPage } from '@/activities/emails/hooks/useMessageListRecordPage';
 import { useSmsCampaignDeliveryPage } from '@/activities/emails/hooks/useSmsCampaignDeliveryPage';
+import { useSmsDeliveryPeople } from '@/activities/emails/hooks/useSmsDeliveryPeople';
 import { RecordChip } from '@/object-record/components/RecordChip';
 import { useFindOneRecord } from '@/object-record/hooks/useFindOneRecord';
 import { RecordPaginationBar } from '@/object-record/record-index/components/RecordIndexPaginationBar';
@@ -69,6 +70,13 @@ const StyledRecipient = styled.div`
   text-overflow: ellipsis;
 `;
 const COLUMNS = 'minmax(210px, 1fr) 115px minmax(160px, 1fr) 180px';
+const SMS_COLUMNS = 'minmax(180px, 1fr) 140px 140px 90px 180px';
+const StyledRecipientIdentity = styled.div`
+  align-items: center;
+  display: flex;
+  gap: ${themeCssVariables.spacing[2]};
+  min-width: 0;
+`;
 const STATUS: Record<string, { label: string; color: TagColor }> = {
   QUEUED: { label: '발송 대기', color: 'gray' },
   PENDING: { label: '발송 대기', color: 'gray' },
@@ -136,6 +144,10 @@ export const CampaignDeliveryResults = ({
     page,
     skip: !isSms,
   });
+  const { peopleByDeliveryId, loading: peopleLoading } = useSmsDeliveryPeople(
+    isSms ? smsPage.records : [],
+  );
+  const columns = isSms ? SMS_COLUMNS : COLUMNS;
   const records: Delivery[] = isSms
     ? smsPage.records.map((record) => ({
         id: record.id,
@@ -156,7 +168,11 @@ export const CampaignDeliveryResults = ({
     : emailPage.records;
   const activePage = isSms ? smsPage : emailPage;
   const { totalCount, refetch } = activePage;
-  const loading = refreshing || campaign.loading || activePage.loading;
+  const loading =
+    refreshing ||
+    campaign.loading ||
+    activePage.loading ||
+    (isSms && peopleLoading);
   const error = campaign.error || activePage.error;
   const canReadObjectRecords = isSms || emailPage.canReadObjectRecords;
   const scheduled = campaign.record?.status === 'SCHEDULED';
@@ -225,9 +241,10 @@ export const CampaignDeliveryResults = ({
             label="발송 내역 표"
           >
             <StyledMessageListTable>
-              <TableRow gridTemplateColumns={COLUMNS}>
+              <TableRow gridTemplateColumns={columns}>
                 {[
                   '수신자',
+                  ...(isSms ? ['전화번호'] : []),
                   '처리 상태',
                   isSms ? '문자 유형' : '메시지',
                   '기록 시각',
@@ -250,33 +267,61 @@ export const CampaignDeliveryResults = ({
                 return (
                   <TableRow
                     key={record.id}
-                    gridTemplateColumns={COLUMNS}
+                    gridTemplateColumns={columns}
                     hoverBackgroundColor={
                       themeCssVariables.background.transparent.light
                     }
                   >
                     <StyledMessageListCell>
-                      {recipients.length
-                        ? recipients.map((recipient) => (
-                            <StyledRecipient
-                              key={recipient.id}
-                              title={recipient.handle}
-                            >
-                              {recipient.displayName &&
-                                recipient.displayName !== recipient.handle && (
-                                  <span>{recipient.displayName}</span>
-                                )}
-                              {recipient.handle && isSms ? (
-                                <span>{recipient.handle}</span>
-                              ) : recipient.handle ? (
-                                <EmailDisplay value={recipient.handle} />
-                              ) : (
-                                '주소 정보 없음'
+                      {isSms ? (
+                        peopleByDeliveryId.has(record.id) ? (
+                          <RecordChip
+                            objectNameSingular="person"
+                            record={peopleByDeliveryId.get(record.id)!}
+                          />
+                        ) : (
+                          <StyledRecipientIdentity>
+                            <Avatar
+                              type="rounded"
+                              size="sm"
+                              placeholder={
+                                recipients[0]?.displayName || '수신자'
+                              }
+                              placeholderColorSeed={
+                                recipients[0]?.handle || record.id
+                              }
+                            />
+                            <span>
+                              {recipients[0]?.displayName || '수신자 정보 없음'}
+                            </span>
+                          </StyledRecipientIdentity>
+                        )
+                      ) : recipients.length ? (
+                        recipients.map((recipient) => (
+                          <StyledRecipient
+                            key={recipient.id}
+                            title={recipient.handle}
+                          >
+                            {recipient.displayName &&
+                              recipient.displayName !== recipient.handle && (
+                                <span>{recipient.displayName}</span>
                               )}
-                            </StyledRecipient>
-                          ))
-                        : '수신자 정보 없음'}
+                            {recipient.handle ? (
+                              <EmailDisplay value={recipient.handle} />
+                            ) : (
+                              '주소 정보 없음'
+                            )}
+                          </StyledRecipient>
+                        ))
+                      ) : (
+                        '수신자 정보 없음'
+                      )}
                     </StyledMessageListCell>
+                    {isSms && (
+                      <StyledMessageListCell>
+                        {recipients[0]?.handle || '—'}
+                      </StyledMessageListCell>
+                    )}
                     <StyledMessageListCell>
                       <StyledRecipient>
                         <Tag text={status.label} color={status.color} />

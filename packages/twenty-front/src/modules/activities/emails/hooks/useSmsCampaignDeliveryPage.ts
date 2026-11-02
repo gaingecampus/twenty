@@ -8,6 +8,7 @@ const SMS_CAMPAIGN_DELIVERIES = gql`
       totalCount
       records {
         id
+        personId
         name
         phone
         messageType

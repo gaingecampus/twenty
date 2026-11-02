@@ -11,6 +11,7 @@ import { CampaignDeliveryResults } from '@/activities/emails/components/Campaign
 import { useMessageListRecordPage } from '@/activities/emails/hooks/useMessageListRecordPage';
 import { useFindOneRecord } from '@/object-record/hooks/useFindOneRecord';
 import { useSmsCampaignDeliveryPage } from '@/activities/emails/hooks/useSmsCampaignDeliveryPage';
+import { useSmsDeliveryPeople } from '@/activities/emails/hooks/useSmsDeliveryPeople';
 import { WidgetHeaderActionContext } from '@/page-layout/widgets/widget-card/contexts/WidgetHeaderActionContext';
 jest.mock('@/activities/emails/hooks/useMessageListRecordPage', () => ({
   useMessageListRecordPage: jest.fn(),
@@ -21,10 +22,22 @@ jest.mock('@/object-record/hooks/useFindOneRecord', () => ({
 jest.mock('@/activities/emails/hooks/useSmsCampaignDeliveryPage', () => ({
   useSmsCampaignDeliveryPage: jest.fn(),
 }));
+jest.mock('@/activities/emails/hooks/useSmsDeliveryPeople', () => ({
+  useSmsDeliveryPeople: jest.fn(),
+}));
 jest.mock('@/object-record/components/RecordChip', () => ({
-  RecordChip: ({ record }: { record: { subject: string } }) => (
-    <span>{record.subject}</span>
-  ),
+  RecordChip: ({
+    record,
+    objectNameSingular,
+  }: {
+    record: { id: string; subject?: string; name?: { firstName: string } };
+    objectNameSingular: string;
+  }) =>
+    objectNameSingular === 'person' ? (
+      <a href={`/object/person/${record.id}`}>{record.name?.firstName}</a>
+    ) : (
+      <span>{record.subject}</span>
+    ),
 }));
 jest.mock('@/ui/field/display/components/DateTimeDisplay', () => ({
   DateTimeDisplay: ({ value }: { value: string }) => <span>{value}</span>,
@@ -49,6 +62,9 @@ const setPage = (overrides = {}) =>
   } as unknown as ReturnType<typeof useMessageListRecordPage>);
 beforeEach(() => {
   jest.clearAllMocks();
+  jest
+    .mocked(useSmsDeliveryPeople)
+    .mockReturnValue({ loading: false, peopleByDeliveryId: new Map() });
   setPage();
   jest.mocked(useSmsCampaignDeliveryPage).mockReturnValue({
     records: [],
@@ -98,8 +114,55 @@ it('loads SMS snapshots rather than email messages and distinguishes acceptance 
     screen.queryByRole('link', { name: '01012345678' }),
   ).not.toBeInTheDocument();
   expect(screen.getByText('LMS')).toBeInTheDocument();
+  expect(screen.getByText('전화번호')).toBeInTheDocument();
+  expect(screen.getByText('문자 수신자').closest('div')).not.toContainElement(
+    screen.getByText('01012345678'),
+  );
   expect(screen.getByText('문자 서버 접수')).toBeInTheDocument();
   expect(screen.queryByText('전달 완료')).not.toBeInTheDocument();
+});
+
+it('opens the linked customer from the SMS recipient profile', () => {
+  jest.mocked(useFindOneRecord).mockReturnValue({
+    record: { channel: 'SMS' },
+    refetch,
+  } as unknown as ReturnType<typeof useFindOneRecord>);
+  jest.mocked(useSmsCampaignDeliveryPage).mockReturnValue({
+    records: [
+      {
+        id: 'sms',
+        name: '발송 당시 이름',
+        phone: '01012345678',
+        messageType: 'SMS',
+        status: 'ACCEPTED',
+        createdAt: '2026-11-02',
+      },
+    ],
+    totalCount: 1,
+    loading: false,
+    error: undefined,
+    refetch,
+  });
+  jest.mocked(useSmsDeliveryPeople).mockReturnValue({
+    loading: false,
+    peopleByDeliveryId: new Map([
+      [
+        'sms',
+        {
+          id: 'customer',
+          __typename: 'Person',
+          name: { firstName: '고객 이름', lastName: '' },
+          avatarUrl: '/photo.png',
+        },
+      ],
+    ]),
+  });
+  render(<CampaignDeliveryResults campaignId="campaign" />);
+  expect(screen.getByRole('link', { name: '고객 이름' })).toHaveAttribute(
+    'href',
+    '/object/person/customer',
+  );
+  expect(screen.getByText('01012345678')).toBeInTheDocument();
 });
 
 it('does not show an empty email result while campaign type is still loading', () => {
