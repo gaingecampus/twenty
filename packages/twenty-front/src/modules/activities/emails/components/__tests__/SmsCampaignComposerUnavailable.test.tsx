@@ -10,9 +10,34 @@ import {
   waitFor,
   cleanup,
 } from '@testing-library/react';
+import { SmsCampaignReviewModal } from '@/activities/emails/components/SmsCampaignReviewModal';
 import { SmsCampaignComposer } from '@/activities/emails/components/SmsCampaignComposer';
 import { TextEncoder } from 'node:util';
 import { type ReactNode } from 'react';
+
+jest.mock('@/ui/layout/modal/hooks/useModal', () => ({
+  useModal: () => ({ openModal: mockOpenModal, closeModal: mockCloseModal }),
+}));
+const mockOpenModal = jest.fn();
+const mockCloseModal = jest.fn();
+jest.mock('@/ui/layout/modal/components/ModalStatefulWrapper', () => ({
+  ModalStatefulWrapper: ({
+    children,
+    onClose,
+    isClosable,
+  }: {
+    children: ReactNode;
+    onClose: () => void;
+    isClosable: boolean;
+  }) => (
+    <div role="dialog" aria-label="문자 발송 전 검토">
+      {children}
+      <button aria-label="모달 닫기" disabled={!isClosable} onClick={onClose}>
+        닫기
+      </button>
+    </div>
+  ),
+}));
 
 jest.mock('@/ui/layout/fullscreen/hooks/useFullScreenModal', () => ({
   useFullScreenModal: ({ onClose }: { onClose: () => void }) => ({
@@ -237,7 +262,7 @@ it('reviews from the header only after required fields are filled without sendin
   fireEvent.click(reviewButton);
   await waitFor(() =>
     expect(
-      screen.getByRole('region', { name: '문자 발송 확인' }),
+      screen.getByRole('dialog', { name: '문자 발송 전 검토' }),
     ).toBeInTheDocument(),
   );
   expect(loadPreview).toHaveBeenCalledWith({
@@ -258,15 +283,17 @@ it('reviews from the header only after required fields are filled without sendin
   expect(send).not.toHaveBeenCalled();
   expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   rerender(<SmsCampaignComposer />);
-  expect(reviewButton).toBeEnabled();
+  expect(reviewButton).toBeDisabled();
   expect(sendButton).toBeEnabled();
+  fireEvent.click(screen.getByRole('button', { name: /수정/ }));
+  expect(reviewButton).toBeEnabled();
   fireEvent.click(screen.getByRole('button', { name: '휴대폰번호 직접 입력' }));
   fireEvent.change(screen.getByRole('textbox', { name: '수신자 휴대폰번호' }), {
     target: { value: '01012345678' },
   });
   expect(reviewButton).toBeDisabled();
   expect(
-    screen.queryByRole('region', { name: '문자 발송 확인' }),
+    screen.queryByRole('dialog', { name: '문자 발송 전 검토' }),
   ).not.toBeInTheDocument();
   expect(screen.getByRole('alert')).toHaveTextContent(
     '직접 입력 발송은 아직 지원하지 않습니다.',
@@ -277,7 +304,7 @@ it('reviews from the header only after required fields are filled without sendin
   fireEvent.click(screen.getByRole('button', { name: '고객 분류' }));
   expect(reviewButton).toBeEnabled();
   expect(
-    screen.queryByRole('region', { name: '문자 발송 확인' }),
+    screen.queryByRole('dialog', { name: '문자 발송 전 검토' }),
   ).not.toBeInTheDocument();
   expect(useQuery).not.toHaveBeenCalled();
 });
@@ -370,6 +397,11 @@ it('shows pending review and send states, blocks duplicates, and recovers after 
   fireEvent.click(sendButton);
   fireEvent.click(sendButton);
   expect(send).toHaveBeenCalledTimes(1);
+  expect(screen.getByRole('button', { name: /수정/ })).toBeDisabled();
+  fireEvent.click(screen.getByRole('button', { name: '모달 닫기' }));
+  expect(
+    screen.getByRole('dialog', { name: '문자 발송 전 검토' }),
+  ).toBeInTheDocument();
   expect(screen.getByRole('button', { name: /발송 요청 중/ })).toBeDisabled();
   expect(reviewButton).toBeDisabled();
   await act(async () => failSend(new Error('네트워크 오류')));
@@ -378,4 +410,163 @@ it('shows pending review and send states, blocks duplicates, and recovers after 
     screen.getByRole('button', { name: /1명에게 문자 발송/ }),
   ).toBeEnabled();
   expect(screen.getByRole('textbox', { name: '메시지' })).toBeEnabled();
+});
+
+it('blocks empty recipients, rechecks changed contacts, and sends only after review', async () => {
+  const preview = {
+    total: 3,
+    missing: 3,
+    duplicates: 0,
+    sms: 0,
+    lms: 0,
+    sample: '안녕하세요',
+  };
+  const loadPreview = jest
+    .fn()
+    .mockResolvedValueOnce({ data: { previewSmsDispatch: preview } })
+    .mockResolvedValue({
+      data: { previewSmsDispatch: { ...preview, missing: 2, sms: 1 } },
+    });
+  const send = jest.fn().mockResolvedValue({ data: {} });
+  jest
+    .mocked(useLazyQuery)
+    .mockReturnValue([loadPreview, { loading: false }] as unknown as ReturnType<
+      typeof useLazyQuery
+    >);
+  jest
+    .mocked(useMutation)
+    .mockReturnValue([send, { loading: false }] as unknown as ReturnType<
+      typeof useMutation
+    >);
+  render(<SmsCampaignComposer />);
+  fireEvent.click(screen.getByRole('button', { name: '고객 목록 선택' }));
+  fireEvent.change(screen.getByRole('textbox', { name: '메시지' }), {
+    target: { value: '안녕하세요' },
+  });
+  fireEvent.click(screen.getByRole('button', { name: /발송 전 검토/ }));
+  const emptySend = await screen.findByRole('button', {
+    name: /0명에게 문자 발송/,
+  });
+  expect(emptySend).toBeDisabled();
+  expect(screen.getByRole('alert')).toHaveTextContent(
+    '발송 가능한 수신자가 없습니다.',
+  );
+  fireEvent.click(emptySend);
+  expect(send).not.toHaveBeenCalled();
+  fireEvent.click(screen.getByRole('button', { name: /수정/ }));
+  fireEvent.click(screen.getByRole('button', { name: /발송 전 검토/ }));
+  expect(
+    await screen.findByRole('button', {
+      name: /1명에게 문자 발송/,
+    }),
+  ).toBeEnabled();
+  expect(send).not.toHaveBeenCalled();
+
+  // Closing review preserves the draft, and edits require another review.
+  fireEvent.click(screen.getByRole('button', { name: /수정/ }));
+  fireEvent.change(screen.getByRole('textbox', { name: '메시지' }), {
+    target: { value: '수정한 본문' },
+  });
+  expect(
+    screen.queryByRole('dialog', { name: '문자 발송 전 검토' }),
+  ).toBeNull();
+  fireEvent.click(screen.getByRole('button', { name: /발송 전 검토/ }));
+  fireEvent.click(
+    await screen.findByRole('button', {
+      name: /1명에게 문자 발송/,
+    }),
+  );
+  await screen.findByText(/문자 발송 요청을 저장했습니다/);
+  expect(send).toHaveBeenCalledTimes(1);
+  expect(send).toHaveBeenCalledWith({
+    variables: {
+      input: expect.objectContaining({
+        listId: 'list',
+        content: '수정한 본문',
+      }),
+    },
+  });
+  expect(screen.getByRole('button', { name: /발송 요청 완료/ })).toBeDisabled();
+});
+
+it('invalidates the previous review if rechecking recipients fails', async () => {
+  const loadPreview = jest
+    .fn()
+    .mockResolvedValueOnce({
+      data: {
+        previewSmsDispatch: {
+          total: 1,
+          missing: 0,
+          duplicates: 0,
+          sms: 1,
+          lms: 0,
+          sample: '본문',
+        },
+      },
+    })
+    .mockRejectedValueOnce(new Error('수신자 조회 실패'));
+  const send = jest.fn();
+  jest
+    .mocked(useLazyQuery)
+    .mockReturnValue([loadPreview, { loading: false }] as unknown as ReturnType<
+      typeof useLazyQuery
+    >);
+  jest
+    .mocked(useMutation)
+    .mockReturnValue([send, { loading: false }] as unknown as ReturnType<
+      typeof useMutation
+    >);
+  render(<SmsCampaignComposer />);
+  fireEvent.click(screen.getByRole('button', { name: '고객 목록 선택' }));
+  fireEvent.change(screen.getByRole('textbox', { name: '메시지' }), {
+    target: { value: '본문' },
+  });
+  fireEvent.click(screen.getByRole('button', { name: /발송 전 검토/ }));
+  fireEvent.click(await screen.findByRole('button', { name: /수정/ }));
+  fireEvent.click(screen.getByRole('button', { name: /발송 전 검토/ }));
+  expect(await screen.findByRole('alert')).toHaveTextContent(
+    '수신자 조회 실패',
+  );
+  expect(
+    screen.queryByRole('button', { name: /1명에게 문자 발송/ }),
+  ).toBeNull();
+  expect(screen.getByRole('button', { name: /발송 전 검토/ })).toBeEnabled();
+  expect(send).not.toHaveBeenCalled();
+});
+
+it('shows the excluded counts and the exact sendable total inside the review modal', () => {
+  render(
+    <SmsCampaignReviewModal
+      preview={{
+        total: 5,
+        missing: 2,
+        duplicates: 1,
+        sms: 1,
+        lms: 1,
+        sample: '첫 줄\n둘째 줄',
+      }}
+      sending={false}
+      canSend
+      error=""
+      onClose={jest.fn()}
+      onConfirm={jest.fn()}
+    />,
+  );
+  const dialog = screen.getByRole('dialog', { name: '문자 발송 전 검토' });
+  for (const [label, value] of [
+    ['전체 수신자', '5명'],
+    ['번호 없음 / 오류', '2명 제외'],
+    ['중복 번호', '1명 제외'],
+    ['최종 발송 인원', '2명'],
+  ]) {
+    expect(within(dialog).getByText(label).parentElement).toHaveTextContent(
+      value,
+    );
+  }
+  expect(
+    within(dialog).getByRole('button', { name: /2명에게 문자 발송/ }),
+  ).toBeEnabled();
+  expect(
+    within(dialog).getByLabelText('발송할 문자 미리보기').textContent,
+  ).toBe('첫 줄\n둘째 줄');
 });

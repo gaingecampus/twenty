@@ -8,13 +8,12 @@ import { type CampaignRecipientMode } from '@/activities/emails/types/CampaignRe
 import { sidePanelHeaderActionsElementState } from '@/side-panel/states/sidePanelHeaderActionsElementState';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 import { createPortal } from 'react-dom';
+import { SmsCampaignReviewModal } from '@/activities/emails/components/SmsCampaignReviewModal';
+import { type SmsAudiencePreview } from '@/activities/emails/types/SmsAudiencePreview';
 import { SmsCampaignMessageEditor } from '@/activities/emails/components/SmsCampaignMessageEditor';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 import { CampaignFieldLabel } from '@/activities/emails/components/CampaignFieldLabel';
-import {
-  StyledDispatchForm as StyledForm,
-  StyledDispatchCard as StyledCard,
-} from '@/activities/emails/components/CampaignDispatchStyles';
+import { StyledDispatchForm as StyledForm } from '@/activities/emails/components/CampaignDispatchStyles';
 import { gql } from '@apollo/client';
 import { useLazyQuery, useMutation } from '@apollo/client/react';
 import { useRef, useState, type ReactNode } from 'react';
@@ -74,14 +73,6 @@ const SEND = gql`
   }
   ${SUMMARY}
 `;
-type Preview = {
-  total: number;
-  missing: number;
-  duplicates: number;
-  sms: number;
-  lms: number;
-  sample: string;
-};
 type Summary = {
   id: string;
   subject: string;
@@ -125,11 +116,11 @@ export const SmsCampaignComposer = ({
     initialDraft?.advertising ?? false,
   );
   const [requestId, setRequestId] = useState(() => crypto.randomUUID());
-  const [preview, setPreview] = useState<Preview | null>(null);
+  const [preview, setPreview] = useState<SmsAudiencePreview | null>(null);
   const [error, setError] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [loadPreview, { loading: previewLoading }] = useLazyQuery<{
-    previewSmsDispatch: Preview;
+    previewSmsDispatch: SmsAudiencePreview;
   }>(PREVIEW, { fetchPolicy: 'network-only' });
   const [send, { loading: sendLoading }] = useMutation<{
     sendSmsDispatch: Summary;
@@ -150,6 +141,14 @@ export const SmsCampaignComposer = ({
   };
   const bytes = new TextEncoder().encode(content).length;
   const busy = sending || reviewing || savingDraft;
+  const recipientCount = (preview?.sms ?? 0) + (preview?.lms ?? 0);
+  const canSend =
+    recipientMode === 'list' &&
+    !isSendingDisabled &&
+    !isSendingBlocked &&
+    !busy &&
+    recipientCount > 0 &&
+    !submitted;
   const canReview =
     recipientMode === 'list' &&
     !isSendingDisabled &&
@@ -164,6 +163,7 @@ export const SmsCampaignComposer = ({
     requestInFlight.current = true;
     setPendingAction('review');
     setError('');
+    setPreview(null);
     try {
       const result = await loadPreview({
         variables: { input: { listId, subject, content, advertising } },
@@ -179,16 +179,7 @@ export const SmsCampaignComposer = ({
     }
   };
   const submit = async () => {
-    if (
-      recipientMode !== 'list' ||
-      isSendingDisabled ||
-      isSendingBlocked ||
-      !preview ||
-      busy ||
-      requestInFlight.current ||
-      submitted
-    )
-      return;
+    if (!canSend || requestInFlight.current) return;
     requestInFlight.current = true;
     setPendingAction('send');
     setError('');
@@ -223,7 +214,7 @@ export const SmsCampaignComposer = ({
       <CampaignRecipientHeader>
         <CampaignFieldLabel
           label="수신자"
-          help="번호 없음·중복 제외 · 가인지 문자 발송 요금 적용"
+          help="고객 또는 워크스페이스 계정에 연결된 구성원의 휴대전화번호로 발송합니다. 번호 없음·중복 제외 · 가인지 문자 발송 요금 적용"
         />
       </CampaignRecipientHeader>
       <CampaignRecipientSelector
@@ -345,48 +336,38 @@ export const SmsCampaignComposer = ({
                 />
               )}
               <Button
-                title={reviewing ? '수신자 확인 중…' : '발송 전 검토'}
+                title={
+                  submitted
+                    ? '발송 요청 완료'
+                    : reviewing
+                      ? '수신자 확인 중…'
+                      : '발송 전 검토'
+                }
                 isLoading={reviewing}
                 size="small"
                 variant="primary"
                 accent="blue"
                 Icon={IconSend}
                 onClick={review}
-                disabled={!canReview}
+                disabled={!canReview || !!preview}
               />
             </>,
             sidePanelHeaderActionsElement,
           )}
-        {error && <div role="alert">{error}</div>}
+        {error && !preview && <div role="alert">{error}</div>}
         {preview && (
-          <StyledCard aria-label="문자 발송 확인">
-            <strong>발송 전 검토</strong>
-            <p>
-              전체 {preview.total}명 · 번호 없음/오류 {preview.missing}명 · 중복{' '}
-              {preview.duplicates}명
-            </p>
-            <p>
-              SMS {preview.sms}건 · LMS {preview.lms}건
-            </p>
-            <pre>{preview.sample}</pre>
-            <Button
-              title={
-                sending
-                  ? '발송 요청 중…'
-                  : `${preview.sms + preview.lms}명에게 문자 발송`
-              }
-              isLoading={sending}
-              variant="primary"
-              accent="blue"
-              onClick={submit}
-              disabled={
-                isSendingDisabled ||
-                isSendingBlocked ||
-                busy ||
-                preview.sms + preview.lms === 0
-              }
-            />
-          </StyledCard>
+          <SmsCampaignReviewModal
+            preview={preview}
+            sending={sending}
+            canSend={canSend}
+            error={error}
+            onClose={() => {
+              if (requestInFlight.current) return;
+              setPreview(null);
+              setError('');
+            }}
+            onConfirm={submit}
+          />
         )}
         {submitted && (
           <div role="status">
