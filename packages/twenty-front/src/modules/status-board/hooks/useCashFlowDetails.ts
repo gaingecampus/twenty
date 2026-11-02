@@ -4,6 +4,7 @@ import { useAggregateRecords } from '@/object-record/hooks/useAggregateRecords';
 import { useFindManyRecords } from '@/object-record/hooks/useFindManyRecords';
 import { AggregateOperations } from '@/object-record/record-table/constants/AggregateOperations';
 import { readCashFlowCurrency } from '@/status-board/utils/calculateCashFlow';
+import { resolveCashFlowBankBalance } from '@/status-board/utils/resolveCashFlowBankBalance';
 import { FIELD_FOR_TOTAL_COUNT_AGGREGATE_OPERATION } from 'twenty-shared/constants';
 import { type RecordGqlOperationFilter } from 'twenty-shared/types';
 
@@ -32,22 +33,22 @@ const useLatestBankTransaction = (bankKey: string) => {
     filter: {
       bankKey: { eq: bankKey },
     },
-    limit: 2,
+    limit: 100,
     orderBy: [{ transactionAt: 'DescNullsLast' }, { id: 'AscNullsLast' }],
     recordGqlFields: {
       id: true,
       transactionAt: true,
       balance: { amountMicros: true, currencyCode: true },
+      incomingAmount: { amountMicros: true, currencyCode: true },
+      outgoingAmount: { amountMicros: true, currencyCode: true },
     },
   });
   const row = result.records.at(0);
-  const second = result.records.at(1);
-  const amount = readCashFlowCurrency(row?.balance);
-  const ambiguous =
-    second !== undefined &&
-    row?.transactionAt === second.transactionAt &&
-    amount !== readCashFlowCurrency(second.balance);
-  return { ...result, row, amount: ambiguous ? null : amount };
+  const amount = resolveCashFlowBankBalance(
+    result.records,
+    result.pageInfo?.hasNextPage !== false,
+  );
+  return { ...result, row, amount };
 };
 
 export const useCashFlowDetails = (

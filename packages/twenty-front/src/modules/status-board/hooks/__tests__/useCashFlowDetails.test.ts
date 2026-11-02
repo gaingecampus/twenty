@@ -46,6 +46,7 @@ describe('cash flow detail sources', () => {
             ],
       loading: false,
       error: undefined,
+      pageInfo: { hasNextPage: false },
       refetch,
     }));
     (useAggregateRecords as jest.Mock).mockImplementation(
@@ -88,8 +89,12 @@ describe('cash flow detail sources', () => {
     });
     expect(useFindManyRecords).toHaveBeenCalledWith(
       expect.objectContaining({
-        limit: 2,
+        limit: 100,
         orderBy: [{ transactionAt: 'DescNullsLast' }, { id: 'AscNullsLast' }],
+        recordGqlFields: expect.objectContaining({
+          incomingAmount: { amountMicros: true, currencyCode: true },
+          outgoingAmount: { amountMicros: true, currencyCode: true },
+        }),
       }),
     );
     sum = '225000000';
@@ -113,6 +118,7 @@ describe('cash flow detail sources', () => {
         },
       ],
       loading: false,
+      pageInfo: { hasNextPage: false },
       refetch,
     });
     const { result } = renderHook(() => useCashFlowDetails('october-backup'));
@@ -126,6 +132,61 @@ describe('cash flow detail sources', () => {
     conflictingBank = true;
     expect(
       renderHook(() => useCashFlowDetails('backup-a')).result.current.banks[0]
+        .amount,
+    ).toBeNull();
+  });
+  it('resolves simultaneous withdrawals and preserves their original timestamp', () => {
+    (useFindManyRecords as jest.Mock).mockReturnValue({
+      records: [
+        {
+          id: 'last-withdrawal',
+          transactionAt: '2026-11-01T22:40:45Z',
+          balance: { amountMicros: '22003603000000', currencyCode: 'KRW' },
+          incomingAmount: { amountMicros: '0', currencyCode: 'KRW' },
+          outgoingAmount: {
+            amountMicros: '2200000000000',
+            currencyCode: 'KRW',
+          },
+        },
+        {
+          id: 'first-withdrawal',
+          transactionAt: '2026-11-01T22:40:45Z',
+          balance: { amountMicros: '24203603000000', currencyCode: 'KRW' },
+          incomingAmount: { amountMicros: '0', currencyCode: 'KRW' },
+          outgoingAmount: { amountMicros: '30000000000', currencyCode: 'KRW' },
+        },
+      ],
+      pageInfo: { hasNextPage: false },
+      hasNextPage: true,
+      loading: false,
+      refetch,
+    });
+
+    expect(
+      renderHook(() => useCashFlowDetails('backup-a')).result.current.banks[1],
+    ).toEqual({
+      name: '국민',
+      amount: 22_003_603,
+      date: '2026-11-01T22:40:45Z',
+    });
+  });
+  it('does not display a balance when the latest timestamp group is incomplete', () => {
+    (useFindManyRecords as jest.Mock).mockReturnValue({
+      records: [
+        {
+          id: 'latest',
+          transactionAt: '2026-11-01T22:40:45Z',
+          balance: { amountMicros: '100000000', currencyCode: 'KRW' },
+        },
+      ],
+      pageInfo: { hasNextPage: true },
+      hasNextPage: false,
+      loading: false,
+      refetch,
+    });
+
+    expect(
+      renderHook(() => useCashFlowDetails('backup-a')).result.current.banks[1]
         .amount,
     ).toBeNull();
   });
