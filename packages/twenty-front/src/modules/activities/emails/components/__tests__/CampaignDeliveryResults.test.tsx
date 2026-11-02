@@ -3,12 +3,16 @@ import { fireEvent, render, screen, within } from '@testing-library/react';
 import { CampaignDeliveryResults } from '@/activities/emails/components/CampaignDeliveryResults';
 import { useMessageListRecordPage } from '@/activities/emails/hooks/useMessageListRecordPage';
 import { useFindOneRecord } from '@/object-record/hooks/useFindOneRecord';
+import { useSmsCampaignDeliveryPage } from '@/activities/emails/hooks/useSmsCampaignDeliveryPage';
 import { WidgetHeaderActionContext } from '@/page-layout/widgets/widget-card/contexts/WidgetHeaderActionContext';
 jest.mock('@/activities/emails/hooks/useMessageListRecordPage', () => ({
   useMessageListRecordPage: jest.fn(),
 }));
 jest.mock('@/object-record/hooks/useFindOneRecord', () => ({
   useFindOneRecord: jest.fn(),
+}));
+jest.mock('@/activities/emails/hooks/useSmsCampaignDeliveryPage', () => ({
+  useSmsCampaignDeliveryPage: jest.fn(),
 }));
 jest.mock('@/object-record/components/RecordChip', () => ({
   RecordChip: ({ record }: { record: { subject: string } }) => (
@@ -36,10 +40,90 @@ const setPage = (overrides = {}) =>
     ...overrides,
   } as unknown as ReturnType<typeof useMessageListRecordPage>);
 beforeEach(() => {
+  jest.clearAllMocks();
   setPage();
+  jest.mocked(useSmsCampaignDeliveryPage).mockReturnValue({
+    records: [],
+    totalCount: 0,
+    loading: false,
+    error: undefined,
+    refetch,
+  });
   jest.mocked(useFindOneRecord).mockReturnValue({
     record: { status: 'SCHEDULED' },
+    refetch,
   } as unknown as ReturnType<typeof useFindOneRecord>);
+});
+it('loads SMS snapshots rather than email messages and distinguishes acceptance from delivery', () => {
+  jest.mocked(useFindOneRecord).mockReturnValue({
+    record: { status: 'SENT', channel: 'SMS' },
+    refetch,
+  } as unknown as ReturnType<typeof useFindOneRecord>);
+  jest.mocked(useSmsCampaignDeliveryPage).mockReturnValue({
+    records: [
+      {
+        id: 'sms:0:0',
+        name: '문자 수신자',
+        phone: '01012345678',
+        status: 'ACCEPTED',
+        messageType: 'LMS',
+        createdAt: '2026-11-02T00:00:00Z',
+      },
+    ],
+    totalCount: 1,
+    loading: false,
+    error: undefined,
+    refetch,
+  });
+  render(<CampaignDeliveryResults campaignId="campaign" />);
+  expect(useMessageListRecordPage).toHaveBeenCalledWith(
+    expect.objectContaining({ skip: true }),
+  );
+  expect(useSmsCampaignDeliveryPage).toHaveBeenCalledWith({
+    campaignId: 'campaign',
+    page: 0,
+    skip: false,
+  });
+  expect(screen.getByText('문자 수신자')).toBeInTheDocument();
+  expect(screen.getByText('01012345678')).toBeInTheDocument();
+  expect(
+    screen.queryByRole('link', { name: '01012345678' }),
+  ).not.toBeInTheDocument();
+  expect(screen.getByText('LMS')).toBeInTheDocument();
+  expect(screen.getByText('문자 서버 접수')).toBeInTheDocument();
+  expect(screen.queryByText('전달 완료')).not.toBeInTheDocument();
+});
+
+it('does not show an empty email result while campaign type is still loading', () => {
+  jest
+    .mocked(useFindOneRecord)
+    .mockReturnValue({ loading: true, refetch } as unknown as ReturnType<
+      typeof useFindOneRecord
+    >);
+  render(<CampaignDeliveryResults campaignId="campaign" />);
+  expect(screen.getByText('발송 내역을 불러오는 중…')).toBeInTheDocument();
+  expect(useMessageListRecordPage).toHaveBeenCalledWith(
+    expect.objectContaining({ skip: true }),
+  );
+});
+
+it('shows SMS errors without presenting an empty success state', () => {
+  jest.mocked(useFindOneRecord).mockReturnValue({
+    record: { channel: 'SMS' },
+    refetch,
+  } as unknown as ReturnType<typeof useFindOneRecord>);
+  jest.mocked(useSmsCampaignDeliveryPage).mockReturnValue({
+    records: [],
+    totalCount: 0,
+    loading: false,
+    error: new Error('Forbidden'),
+    refetch,
+  });
+  render(<CampaignDeliveryResults campaignId="campaign" />);
+  expect(screen.getByRole('alert')).toHaveTextContent('불러오지 못했습니다');
+  expect(
+    screen.queryByText('아직 발송 처리 기록이 없어요'),
+  ).not.toBeInTheDocument();
 });
 it('explains scheduled empty results and offers a safe refresh', () => {
   render(<CampaignDeliveryResults campaignId="campaign" />);

@@ -22,6 +22,7 @@ import {
   StyledMessageListCell,
 } from '@/activities/emails/components/message-lists/MessageListTableStyles';
 import { useMessageListRecordPage } from '@/activities/emails/hooks/useMessageListRecordPage';
+import { useSmsCampaignDeliveryPage } from '@/activities/emails/hooks/useSmsCampaignDeliveryPage';
 import { RecordChip } from '@/object-record/components/RecordChip';
 import { useFindOneRecord } from '@/object-record/hooks/useFindOneRecord';
 import { RecordPaginationBar } from '@/object-record/record-index/components/RecordIndexPaginationBar';
@@ -77,11 +78,15 @@ const STATUS: Record<string, { label: string; color: TagColor }> = {
   BOUNCED: { label: '반송', color: 'red' },
   COMPLAINED: { label: '스팸 신고', color: 'red' },
   SKIPPED: { label: '발송 제외', color: 'gray' },
+  ACCEPTED: { label: '문자 서버 접수', color: 'green' },
+  UNKNOWN: { label: '접수 확인 필요', color: 'orange' },
 };
 type Delivery = ObjectRecord & {
   subject?: string;
   createdAt?: string;
   deliveryStatus?: string;
+  messageType?: string;
+  error?: string | null;
   messageParticipants?: {
     id: string;
     role: string;
@@ -97,30 +102,61 @@ export const CampaignDeliveryResults = ({
 }) => {
   const headerActionTarget = useContext(WidgetHeaderActionContext);
   const [page, setPage] = useState(0);
-  const { records, totalCount, loading, error, refetch, canReadObjectRecords } =
-    useMessageListRecordPage<Delivery>({
-      page,
-      pageSize: 20,
-      objectNameSingular: 'message',
-      filter: { messageCampaignId: { eq: campaignId } },
-      recordGqlFields: {
-        id: true,
-        subject: true,
-        createdAt: true,
-        deliveryStatus: true,
-        messageParticipants: {
-          id: true,
-          role: true,
-          displayName: true,
-          handle: true,
-        },
-      },
-    });
-  const campaign = useFindOneRecord<ObjectRecord & { status?: string }>({
+  const campaign = useFindOneRecord<
+    ObjectRecord & { status?: string; channel?: string }
+  >({
     objectNameSingular: 'messageCampaign',
     objectRecordId: campaignId,
-    recordGqlFields: { id: true, status: true },
+    recordGqlFields: { id: true, status: true, channel: true },
   });
+  const isSms = campaign.record?.channel === 'SMS';
+  const emailPage = useMessageListRecordPage<Delivery>({
+    skip: !campaign.record || isSms,
+    page,
+    pageSize: 20,
+    objectNameSingular: 'message',
+    filter: { messageCampaignId: { eq: campaignId } },
+    recordGqlFields: {
+      id: true,
+      subject: true,
+      createdAt: true,
+      deliveryStatus: true,
+      messageParticipants: {
+        id: true,
+        role: true,
+        displayName: true,
+        handle: true,
+      },
+    },
+  });
+  const smsPage = useSmsCampaignDeliveryPage({
+    campaignId,
+    page,
+    skip: !isSms,
+  });
+  const records: Delivery[] = isSms
+    ? smsPage.records.map((record) => ({
+        id: record.id,
+        __typename: 'SmsCampaignDelivery',
+        createdAt: record.createdAt,
+        deliveryStatus: record.status,
+        messageType: record.messageType,
+        error: record.error,
+        messageParticipants: [
+          {
+            id: record.id,
+            role: 'to',
+            displayName: record.name,
+            handle: record.phone,
+          },
+        ],
+      }))
+    : emailPage.records;
+  const activePage = isSms ? smsPage : emailPage;
+  const { totalCount, refetch } = activePage;
+  const loading = campaign.loading || activePage.loading;
+  const error = campaign.error || activePage.error;
+  const canReadObjectRecords = isSms || emailPage.canReadObjectRecords;
   const scheduled = campaign.record?.status === 'SCHEDULED';
   const draft = campaign.record?.status === 'DRAFT';
   const emptyTitle = scheduled
@@ -141,7 +177,9 @@ export const CampaignDeliveryResults = ({
       variant="secondary"
       disabled={loading || !canReadObjectRecords}
       onClick={() => {
-        void refetch().catch(() => undefined);
+        void Promise.all([campaign.refetch(), refetch()]).catch(
+          () => undefined,
+        );
       }}
     />
   );
@@ -182,7 +220,12 @@ export const CampaignDeliveryResults = ({
           >
             <StyledMessageListTable>
               <TableRow gridTemplateColumns={COLUMNS}>
-                {['수신자', '처리 상태', '메시지', '기록 시각'].map((title) => (
+                {[
+                  '수신자',
+                  '처리 상태',
+                  isSms ? '문자 유형' : '메시지',
+                  '기록 시각',
+                ].map((title) => (
                   <StyledMessageListHeader key={title}>
                     {title}
                   </StyledMessageListHeader>
@@ -217,7 +260,9 @@ export const CampaignDeliveryResults = ({
                                 recipient.displayName !== recipient.handle && (
                                   <span>{recipient.displayName}</span>
                                 )}
-                              {recipient.handle ? (
+                              {recipient.handle && isSms ? (
+                                <span>{recipient.handle}</span>
+                              ) : recipient.handle ? (
                                 <EmailDisplay value={recipient.handle} />
                               ) : (
                                 '주소 정보 없음'
@@ -227,13 +272,20 @@ export const CampaignDeliveryResults = ({
                         : '수신자 정보 없음'}
                     </StyledMessageListCell>
                     <StyledMessageListCell>
-                      <Tag text={status.label} color={status.color} />
+                      <StyledRecipient>
+                        <Tag text={status.label} color={status.color} />
+                        {record.error && <span>{record.error}</span>}
+                      </StyledRecipient>
                     </StyledMessageListCell>
                     <StyledMessageListCell>
-                      <RecordChip
-                        objectNameSingular="message"
-                        record={record}
-                      />
+                      {isSms ? (
+                        record.messageType
+                      ) : (
+                        <RecordChip
+                          objectNameSingular="message"
+                          record={record}
+                        />
+                      )}
                     </StyledMessageListCell>
                     <StyledMessageListCell>
                       {record.createdAt ? (
