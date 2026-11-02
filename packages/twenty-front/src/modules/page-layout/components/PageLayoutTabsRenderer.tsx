@@ -1,4 +1,5 @@
 import { filterCampaignDetailTabs } from '@/activities/emails/utils/filterCampaignDetailTabs';
+import { ensureCampaignDeliveryTabIcon } from '@/activities/emails/utils/ensureCampaignDeliveryTabIcon';
 import { SummaryCard } from '@/object-record/record-show/components/SummaryCard';
 import { FieldManagement } from '@/field-management/FieldManagement';
 import {
@@ -203,7 +204,17 @@ export const PageLayoutTabsRenderer = () => {
 
   const tabsWithVisibleWidgets = getTabsWithVisibleWidgets({
     tabs: filterCampaignDetailTabs({
-      tabs: currentPageLayout.tabs,
+      tabs: ensureCampaignDeliveryTabIcon({
+        tabs: currentPageLayout.tabs,
+        objectNameSingular: targetRecordIdentifier?.targetObjectNameSingular,
+        deliveryFieldIds:
+          objectMetadataItems
+            .find((object) => object.nameSingular === 'messageCampaign')
+            ?.fields.filter((field) =>
+              ['messages', 'recipients'].includes(field.name),
+            )
+            .map((field) => field.id) ?? [],
+      }),
       objectNameSingular: targetRecordIdentifier?.targetObjectNameSingular,
       listFieldId: objectMetadataItems
         .find((object) => object.nameSingular === 'messageCampaign')
