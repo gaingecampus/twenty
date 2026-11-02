@@ -18,6 +18,7 @@ import { useSendMessageCampaign } from '@/activities/emails/hooks/useSendMessage
 type UseCampaignComposerStateArgs = {
   onSent?: () => void;
   campaign?: ScheduledCampaign | null;
+  initialListId?: string | null;
   draftReference?: { id: string; version: string };
   savingDraft?: boolean;
 };
@@ -25,6 +26,7 @@ type UseCampaignComposerStateArgs = {
 export const useCampaignComposerState = ({
   onSent,
   campaign,
+  initialListId,
   draftReference,
   savingDraft = false,
 }: UseCampaignComposerStateArgs) => {
@@ -38,7 +40,7 @@ export const useCampaignComposerState = ({
   );
   const [directEmail, setDirectEmail] = useState(draft?.directRecipient ?? '');
   const [listId, setListId] = useState<string | null>(
-    draft?.listId ?? campaign?.listId ?? null,
+    draft?.listId ?? campaign?.listId ?? initialListId ?? null,
   );
   const [fromAddress, setFromAddress] = useState(
     draft?.fromAddress ?? campaign?.fromAddress?.primaryEmail ?? '',

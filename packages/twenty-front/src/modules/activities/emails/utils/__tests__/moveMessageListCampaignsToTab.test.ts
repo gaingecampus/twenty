@@ -60,7 +60,7 @@ it('moves campaigns out of the pinned home and exposes two right-side tabs witho
   expect(pinnedLeftTab?.widgets).toEqual([original.tabs[0].widgets[0]]);
   expect(tabsToRenderInTabList.map((tab) => tab.title)).toEqual([
     '등록된 수신자',
-    '연결된 심방콜 발송',
+    '심방콜 발송',
   ]);
   const campaignsTab = tabsToRenderInTabList[1];
   expect(campaignsTab.widgets[0]).toMatchObject({

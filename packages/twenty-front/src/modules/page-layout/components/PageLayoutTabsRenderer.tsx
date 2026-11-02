@@ -1,3 +1,4 @@
+import { normalizeMessageListTabs } from '@/activities/emails/utils/normalizeMessageListTabs';
 import { filterCampaignDetailTabs } from '@/activities/emails/utils/filterCampaignDetailTabs';
 import { ensureCampaignDeliveryTabIcon } from '@/activities/emails/utils/ensureCampaignDeliveryTabIcon';
 import { SummaryCard } from '@/object-record/record-show/components/SummaryCard';
@@ -205,7 +206,13 @@ export const PageLayoutTabsRenderer = () => {
   const tabsWithVisibleWidgets = getTabsWithVisibleWidgets({
     tabs: filterCampaignDetailTabs({
       tabs: ensureCampaignDeliveryTabIcon({
-        tabs: currentPageLayout.tabs,
+        tabs: normalizeMessageListTabs({
+          tabs: currentPageLayout.tabs,
+          objectNameSingular: targetRecordIdentifier?.targetObjectNameSingular,
+          membersFieldId: objectMetadataItems
+            .find((object) => object.nameSingular === 'messageList')
+            ?.fields.find((field) => field.name === 'members')?.id,
+        }),
         objectNameSingular: targetRecordIdentifier?.targetObjectNameSingular,
         deliveryFieldIds:
           objectMetadataItems

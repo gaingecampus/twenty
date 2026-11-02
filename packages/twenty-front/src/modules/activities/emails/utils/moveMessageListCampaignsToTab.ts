@@ -59,7 +59,7 @@ export const moveMessageListCampaignsToTab = ({
         id: tabId,
         pageLayoutId: pageLayout.id,
         applicationId: home.applicationId,
-        title: '연결된 심방콜 발송',
+        title: '심방콜 발송',
         icon: 'IconSend',
         isActive: home.isActive,
         position: Math.max(...pageLayout.tabs.map((tab) => tab.position)) + 1,

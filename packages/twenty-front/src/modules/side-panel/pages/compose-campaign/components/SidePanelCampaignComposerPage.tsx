@@ -1,3 +1,4 @@
+import { campaignInitialListIdComponentState } from '@/side-panel/pages/compose-campaign/states/campaignInitialListIdComponentState';
 import { StyledCampaignDraftSaveButton } from '@/activities/emails/components/StyledCampaignDraftSaveButton';
 import { type CampaignDraft } from 'twenty-shared/types';
 import { useCampaignDraft } from '@/activities/emails/hooks/useCampaignDraft';
@@ -134,6 +135,9 @@ export const SidePanelCampaignComposerPage = () => {
   const campaignToEdit = useAtomComponentStateValue(
     campaignToEditComponentState,
   );
+  const campaignInitialListId = useAtomComponentStateValue(
+    campaignInitialListIdComponentState,
+  );
   const initialDraft =
     campaignToEdit?.status === 'DRAFT' ? campaignToEdit.draftData : undefined;
   const isScheduledEdit = campaignToEdit?.status === 'SCHEDULED';
@@ -146,6 +150,7 @@ export const SidePanelCampaignComposerPage = () => {
   const campaignState = useCampaignComposerState({
     onSent: goBackFromSidePanel,
     campaign: campaignToEdit,
+    initialListId: campaignInitialListId,
     draftReference,
     savingDraft: saving,
   });

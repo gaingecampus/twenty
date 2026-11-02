@@ -5,7 +5,7 @@ import {
   StyledMessageListHeader,
   StyledMessageListCell,
 } from '@/activities/emails/components/message-lists/MessageListTableStyles';
-import { MessageListLinkCampaign } from '@/activities/emails/components/message-lists/MessageListLinkCampaign';
+import { MessageListAddCampaign } from '@/activities/emails/components/message-lists/MessageListAddCampaign';
 import { DateTimeDisplay } from '@/ui/field/display/components/DateTimeDisplay';
 import { useMessageListRecordPage } from '@/activities/emails/hooks/useMessageListRecordPage';
 import { RecordPaginationBar } from '@/object-record/record-index/components/RecordIndexPaginationBar';
@@ -29,6 +29,7 @@ import {
 type Campaign = ObjectRecord & {
   subject: string | null;
   status: string;
+  channel: string | null;
   fromAddress: { primaryEmail: string } | null;
   scheduledAt: string | null;
   sentAt: string | null;
@@ -56,7 +57,7 @@ const MessageListCampaignsPage = ({ listId }: { listId: string }) => {
   const [page, setPage] = useState(0);
   const tableId = `message-list-campaigns-${listId}`;
   const pageSize = 20;
-  const { records, totalCount, loading, error, refetch } =
+  const { records, totalCount, loading, error } =
     useMessageListRecordPage<Campaign>({
       page,
       pageSize,
@@ -66,6 +67,7 @@ const MessageListCampaignsPage = ({ listId }: { listId: string }) => {
         id: true,
         subject: true,
         status: true,
+        channel: true,
         fromAddress: true,
         scheduledAt: true,
         sentAt: true,
@@ -90,20 +92,14 @@ const MessageListCampaignsPage = ({ listId }: { listId: string }) => {
     FAILED: 'red',
   };
   return (
-    <StyledSection aria-label={t`연결된 심방콜 발송`}>
+    <StyledSection aria-label={t`심방콜 발송`}>
       <MessageListHeaderCount
         count={totalCount}
         loading={loading}
         error={Boolean(error)}
-        label={t`연결된 단체 발송`}
+        label={t`심방콜 발송`}
       />
-      <MessageListLinkCampaign
-        listId={listId}
-        onLinked={async () => {
-          if (page !== 0) setPage(0);
-          else await refetch();
-        }}
-      />
+      <MessageListAddCampaign listId={listId} />
       {loading && <p>{t`불러오는 중…`}</p>}
       {error && <p role="alert">{t`심방콜 발송을 불러오지 못했습니다.`}</p>}
       {!loading && !error && records.length === 0 && (
@@ -111,16 +107,16 @@ const MessageListCampaignsPage = ({ listId }: { listId: string }) => {
           <AnimatedPlaceholder type="emptyInbox" />
           <AnimatedPlaceholderEmptyTextContainer>
             <AnimatedPlaceholderEmptyTitle>
-              {t`연결된 심방콜 발송이 없습니다.`}
+              {t`심방콜 발송이 없습니다.`}
             </AnimatedPlaceholderEmptyTitle>
             <AnimatedPlaceholderEmptySubTitle>
-              {t`심방콜 발송을 연결해 주세요.`}
+              {t`심방콜을 추가해 주세요.`}
             </AnimatedPlaceholderEmptySubTitle>
           </AnimatedPlaceholderEmptyTextContainer>
         </StyledEmptyContainer>
       )}
       {records.length > 0 && (
-        <MessageListTableScroll tableId={tableId} label="연결된 심방콜 발송 표">
+        <MessageListTableScroll tableId={tableId} label="심방콜 발송 표">
           <StyledMessageListTable>
             <TableRow gridTemplateColumns={CAMPAIGN_GRID_COLUMNS}>
               <StyledMessageListHeader>{t`심방콜 발송`}</StyledMessageListHeader>
@@ -143,7 +139,11 @@ const MessageListCampaignsPage = ({ listId }: { listId: string }) => {
                   />
                 </StyledMessageListCell>
                 <StyledMessageListCell>
-                  <EmailDisplay value={campaign.fromAddress?.primaryEmail} />
+                  {campaign.channel === 'SMS' ? (
+                    '가인지캠퍼스'
+                  ) : (
+                    <EmailDisplay value={campaign.fromAddress?.primaryEmail} />
+                  )}
                 </StyledMessageListCell>
                 <StyledMessageListCell>
                   <Tag

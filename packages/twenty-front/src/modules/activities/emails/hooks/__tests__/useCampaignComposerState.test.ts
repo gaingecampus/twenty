@@ -43,6 +43,16 @@ const fillSendableFields = (result: {
 };
 
 describe('useCampaignComposerState', () => {
+  it('preselects the originating customer classification without sending', () => {
+    const { result } = renderHook(() =>
+      useCampaignComposerState({ initialListId: 'origin-list' }),
+    );
+    expect(result.current.listId).toBe('origin-list');
+    expect(result.current.recipientMode).toBe('list');
+    expect(result.current.canSend).toBe(false);
+    expect(sendMessageCampaignMock).not.toHaveBeenCalled();
+  });
+
   it('includes the personal signature once and allows opting out', () => {
     signatureMock = '<p>내 명함</p>';
     const { result } = renderHook(() => useCampaignComposerState({}));

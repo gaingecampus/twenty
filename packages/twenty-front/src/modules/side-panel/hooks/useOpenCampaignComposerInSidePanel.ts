@@ -1,3 +1,4 @@
+import { campaignInitialListIdComponentState } from '@/side-panel/pages/compose-campaign/states/campaignInitialListIdComponentState';
 import { useCallback } from 'react';
 import { useStore } from 'jotai';
 import { type ScheduledCampaign } from '@/activities/emails/types/ScheduledCampaign';
@@ -15,11 +16,18 @@ export const useOpenCampaignComposerInSidePanel = () => {
   const { navigateSidePanelMenu } = useSidePanelMenu();
 
   const openCampaignComposerInSidePanel = useCallback(
-    (campaign: ScheduledCampaign | null = null) => {
+    (
+      campaign: ScheduledCampaign | null = null,
+      initialListId: string | null = null,
+    ) => {
       const pageId = v4();
       store.set(
         campaignToEditComponentState.atomFamily({ instanceId: pageId }),
         campaign,
+      );
+      store.set(
+        campaignInitialListIdComponentState.atomFamily({ instanceId: pageId }),
+        initialListId,
       );
       navigateSidePanelMenu({
         page: SidePanelPages.ComposeCampaign,
