@@ -50,9 +50,9 @@ export const CampaignTestEmail = ({
   const [recipient, setRecipient] = useState('');
   const { sendTest, loading, result } = useSendCampaignTestEmail();
   const emailValid = z.email().safeParse(recipient.trim()).success;
+  const isTestSending = loading || campaignState.isTestSending;
   const busy =
-    loading ||
-    campaignState.isTestSending ||
+    isTestSending ||
     campaignState.loading ||
     campaignState.cancelling ||
     campaignState.isUploading;
@@ -81,7 +81,7 @@ export const CampaignTestEmail = ({
   };
 
   return (
-    <StyledContainer>
+    <StyledContainer aria-busy={isTestSending}>
       <StyledRow>
         <StyledInput>
           <TextInput
@@ -101,7 +101,8 @@ export const CampaignTestEmail = ({
         </StyledInput>
         <div>
           <Button
-            title={loading ? t`테스트 발송 중…` : t`테스트 발송`}
+            title={isTestSending ? t`테스트 발송 중…` : t`테스트 발송`}
+            isLoading={isTestSending}
             Icon={IconSend}
             variant="secondary"
             size="medium"
