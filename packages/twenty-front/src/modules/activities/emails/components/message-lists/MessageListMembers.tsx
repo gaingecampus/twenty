@@ -17,7 +17,7 @@ import {
 import { TableRow } from '@/ui/layout/table/components/TableRow';
 import { RecordChip } from '@/object-record/components/RecordChip';
 import { EmailDisplay } from '@/ui/field/display/components/EmailDisplay';
-import { MessageListAddCustomersModal } from '@/activities/emails/components/message-lists/MessageListAddCustomersModal';
+import { MessageListAddRecipientsDropdown } from '@/activities/emails/components/message-lists/MessageListAddRecipientsDropdown';
 import { useDeleteOneRecord } from '@/object-record/hooks/useDeleteOneRecord';
 import { useMessageListRecordPage } from '@/activities/emails/hooks/useMessageListRecordPage';
 import { RecordPaginationBar } from '@/object-record/record-index/components/RecordIndexPaginationBar';
@@ -165,9 +165,6 @@ const MessageListMembersPage = ({ listId }: { listId: string }) => {
   const refreshCounts = () =>
     Promise.allSettled([allMembers.refetch(), membersWithEmail.refetch()]);
   const permissions = useObjectPermissionsForObject(objectMetadataItem.id);
-  const [adding, setAdding] = useState<'person' | 'workspaceMember' | null>(
-    null,
-  );
   const { deleteOneRecord } = useDeleteOneRecord({
     objectNameSingular: 'messageListMember',
   });
@@ -186,25 +183,28 @@ const MessageListMembersPage = ({ listId }: { listId: string }) => {
       setBusy(false);
     }
   };
+  const onRecipientsAdded = async () => {
+    await refreshCounts();
+    if (page !== 0) setPage(0);
+    else await refetch();
+  };
   const actions = (
     <StyledActions>
       {permissions.canUpdateObjectRecords && (
-        <Button
-          title={t`고객 추가`}
-          size="small"
-          variant="primary"
-          accent="blue"
-          disabled={busy}
-          onClick={() => setAdding('person')}
-        />
-      )}
-      {permissions.canUpdateObjectRecords && (
-        <Button
-          title={t`워크스페이스 멤버 추가`}
-          size="small"
-          disabled={busy}
-          onClick={() => setAdding('workspaceMember')}
-        />
+        <>
+          <MessageListAddRecipientsDropdown
+            listId={listId}
+            recipientType="person"
+            disabled={busy}
+            onAdded={onRecipientsAdded}
+          />
+          <MessageListAddRecipientsDropdown
+            listId={listId}
+            recipientType="workspaceMember"
+            disabled={busy}
+            onAdded={onRecipientsAdded}
+          />
+        </>
       )}
     </StyledActions>
   );
@@ -217,18 +217,6 @@ const MessageListMembersPage = ({ listId }: { listId: string }) => {
         label={t`등록된 수신자`}
       />
       {headerActionTarget ? createPortal(actions, headerActionTarget) : actions}
-      {adding && (
-        <MessageListAddCustomersModal
-          initialListId={listId}
-          recipientType={adding}
-          onClose={() => setAdding(null)}
-          onAdded={async () => {
-            await refreshCounts();
-            if (page !== 0) setPage(0);
-            else await refetch();
-          }}
-        />
-      )}
       <StyledFilterRow>
         <StyledSearchContainer>
           <SearchInput

@@ -1,3 +1,9 @@
+import { MultipleSelectDropdown } from '@/object-record/select/components/MultipleSelectDropdown';
+import { DropdownContent } from '@/ui/layout/dropdown/components/DropdownContent';
+import { DropdownMenuSearchInput } from '@/ui/layout/dropdown/components/DropdownMenuSearchInput';
+import { DropdownMenuItemsContainer } from '@/ui/layout/dropdown/components/DropdownMenuItemsContainer';
+import { DropdownMenuSeparator } from '@/ui/layout/dropdown/components/DropdownMenuSeparator';
+import { MenuItem } from 'twenty-ui/navigation';
 import { useMessageListRecordPage } from '@/activities/emails/hooks/useMessageListRecordPage';
 import { RecordPaginationBar } from '@/object-record/record-index/components/RecordIndexPaginationBar';
 import {
@@ -223,7 +229,9 @@ export const MessageListAddCustomersModal = ({
   customerIds,
   onClose,
   onAdded,
+  dropdownId,
 }: {
+  dropdownId?: string;
   initialListId?: string;
   recipientType?: 'person' | 'workspaceMember';
   customerIds?: string[];
@@ -239,9 +247,10 @@ export const MessageListAddCustomersModal = ({
   const modalId = useId();
   const { openModal, closeModal } = useModal();
   useEffect(() => {
+    if (dropdownId) return;
     openModal(modalId);
     return () => closeModal(modalId);
-  }, [openModal, closeModal, modalId]);
+  }, [openModal, closeModal, modalId, dropdownId]);
   const [listId, setListId] = useState<string | null>(initialListId ?? null);
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(0);
@@ -341,7 +350,13 @@ export const MessageListAddCustomersModal = ({
     !customerIds && selectedOnly
       ? candidates.slice(visiblePage * pageSize, (visiblePage + 1) * pageSize)
       : records;
-  const ids = candidates.map((person) => person.id);
+  const ids = Array.from(
+    new Set(
+      (dropdownId ? [...records, ...candidates] : candidates).map(
+        (person) => person.id,
+      ),
+    ),
+  );
   const {
     objectMetadataItem: memberMetadata,
     records: existing,
@@ -455,6 +470,116 @@ export const MessageListAddCustomersModal = ({
       setBusy(false);
     }
   };
+  if (dropdownId) {
+    const existingIds = new Set(
+      existing.map((member) => member[recipientIdField]),
+    );
+    const items = (checking || moreExisting || checkError ? [] : records).map(
+      (person) => ({
+        id: person.id,
+        name: [
+          [person.name?.firstName, person.name?.lastName]
+            .filter(Boolean)
+            .join(' ') || t`이름 없음`,
+          ...(!isWorkspaceMember && person.company?.name
+            ? [person.company.name]
+            : []),
+        ].join(' · '),
+        description:
+          person.emails?.primaryEmail || person.userEmail || t`이메일 없음`,
+        avatarUrl: isWorkspaceMember
+          ? person.avatarUrl
+          : person.avatarFile?.[0]?.url,
+        avatarType: 'rounded' as const,
+        isSelected: existingIds.has(person.id) || selected.has(person.id),
+      }),
+    );
+    const selectedItems = items.filter((item) => item.isSelected);
+    return (
+      <DropdownContent widthInPixels={480}>
+        <DropdownMenuSearchInput
+          value={search}
+          placeholder={t`이름 또는 이메일 검색`}
+          disabled={busy}
+          onChange={(event) => {
+            setPage(0);
+            setSearch(event.target.value);
+          }}
+        />
+        <DropdownMenuSeparator />
+        <MultipleSelectDropdown
+          selectableListId={`${dropdownId}-recipients`}
+          focusId={dropdownId}
+          itemsToSelect={items.filter((item) => !item.isSelected)}
+          selectedItems={selectedItems}
+          filteredSelectedItems={selectedItems}
+          loadingItems={loading || checking || moreExisting}
+          searchFilter={search}
+          onChange={(item) => {
+            const person = records.find((record) => record.id === item.id);
+            if (person && !busy && !existingIds.has(person.id)) toggle(person);
+          }}
+        />
+        <DropdownMenuItemsContainer>
+          {error && (
+            <MenuItem text={t`수신자를 불러오지 못했습니다.`} disabled />
+          )}
+          {!loading && !error && records.length === 0 && !search && (
+            <MenuItem text={t`추가할 수신자가 없습니다.`} disabled />
+          )}
+          {page > 0 && (
+            <MenuItem
+              text={t`이전 50명`}
+              disabled={busy || loading}
+              onClick={() => setPage(page - 1)}
+            />
+          )}
+          {(page + 1) * pageSize < recipientPage.totalCount && (
+            <MenuItem
+              text={t`다음 50명`}
+              disabled={busy || loading}
+              onClick={() => setPage(page + 1)}
+            />
+          )}
+        </DropdownMenuItemsContainer>
+        <DropdownMenuSeparator />
+        <DropdownMenuItemsContainer>
+          {(checkError || preparationError) && (
+            <MenuItem
+              text={t`중복 확인 다시 시도`}
+              onClick={() => {
+                setPreparationError(false);
+                void refetch().catch(() => setPreparationError(true));
+              }}
+            />
+          )}
+          <MenuItem
+            text={
+              busy
+                ? t`추가 중…`
+                : checking || moreExisting
+                  ? t`등록된 수신자 확인 중…`
+                  : t`선택한 수신자 ${additions.length}명 추가`
+            }
+            disabled={
+              !canUpdateObjectRecords ||
+              busy ||
+              loading ||
+              checking ||
+              pendingPage ||
+              Boolean(error) ||
+              Boolean(checkError) ||
+              preparationError ||
+              moreExisting ||
+              !listId ||
+              additions.length === 0
+            }
+            onClick={() => void confirm()}
+          />
+        </DropdownMenuItemsContainer>
+      </DropdownContent>
+    );
+  }
   return (
     <ModalStatefulWrapper
       modalInstanceId={modalId}

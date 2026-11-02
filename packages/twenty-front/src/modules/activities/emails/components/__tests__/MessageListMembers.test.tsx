@@ -54,8 +54,18 @@ jest.mock('@/ui/field/display/components/EmailDisplay', () => ({
   EmailDisplay: ({ value }: { value: string }) => <span>{value}</span>,
 }));
 jest.mock(
-  '@/activities/emails/components/message-lists/MessageListAddCustomersModal',
-  () => ({ MessageListAddCustomersModal: () => null }),
+  '@/activities/emails/components/message-lists/MessageListAddRecipientsDropdown',
+  () => ({
+    MessageListAddRecipientsDropdown: ({
+      recipientType,
+    }: {
+      recipientType: string;
+    }) => (
+      <button>
+        {recipientType === 'person' ? '고객 추가' : '워크스페이스 멤버 추가'}
+      </button>
+    ),
+  }),
 );
 jest.mock(
   '@/object-record/record-index/components/RecordIndexPaginationBar',
