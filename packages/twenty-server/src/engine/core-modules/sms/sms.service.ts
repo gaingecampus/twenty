@@ -61,8 +61,12 @@ export class SmsService {
   }
 
   private async previewInContext(workspaceId: string, input: SmsPreviewInput) {
-    const { authContext, userWorkspaceRoleMap, apiKeyRoleMap } =
-      getWorkspaceContext();
+    const {
+      authContext,
+      userWorkspaceRoleMap,
+      apiKeyRoleMap,
+      objectIdByNameSingular,
+    } = getWorkspaceContext();
     const permissions = resolveRolePermissionConfig({
       authContext,
       userWorkspaceRoleMap,
@@ -110,11 +114,55 @@ export class SmsService {
           relations: { company: true },
         })
       : [];
+    const candidates = contacts.map((person) => ({
+      name: [person.name?.firstName, person.name?.lastName]
+        .filter(Boolean)
+        .join(' '),
+      phones: person.phones,
+      company: person.company?.name ?? '',
+    }));
+    const accountIds = rows.flatMap((row) =>
+      !row.personId && row.workspaceMemberId ? [row.workspaceMemberId] : [],
+    );
+    if (accountIds.length && objectIdByNameSingular.teamMember) {
+      const teamMembers = await this.orm.getRepository<{
+        id: string;
+        name: string;
+        workspaceMemberAccountId: string;
+        phoneNumber: PersonWorkspaceEntity['phones'];
+      }>(workspaceId, 'teamMember', permissions);
+      const linkedMembers = await teamMembers.find({
+        where: { workspaceMemberAccountId: In(accountIds) },
+        select: {
+          id: true,
+          name: true,
+          workspaceMemberAccountId: true,
+          phoneNumber: true,
+        },
+      });
+      const membersByAccount = new Map<string, typeof linkedMembers>();
+      for (const member of linkedMembers) {
+        const matches =
+          membersByAccount.get(member.workspaceMemberAccountId) ?? [];
+        matches.push(member);
+        membersByAccount.set(member.workspaceMemberAccountId, matches);
+      }
+      for (const accountId of accountIds) {
+        const matches = membersByAccount.get(accountId) ?? [];
+        // An explicit, unique account link is required; never infer recipients from names or emails.
+        if (matches.length !== 1) continue;
+        candidates.push({
+          name: matches[0].name ?? '',
+          phones: matches[0].phoneNumber,
+          company: '',
+        });
+      }
+    }
     const targets: SmsTarget[] = [];
     const seen = new Set<string>();
-    let missing = rows.length - contacts.length;
+    let missing = rows.length - candidates.length;
     let duplicates = 0;
-    for (const person of contacts) {
+    for (const person of candidates) {
       const raw = person.phones?.primaryPhoneNumber ?? '';
       const callingCode = person.phones?.primaryPhoneCallingCode;
       const to = normalizeSmsPhone(
@@ -131,23 +179,17 @@ export class SmsService {
         continue;
       }
       seen.add(to);
-      const name = [person.name?.firstName, person.name?.lastName]
-        .filter(Boolean)
-        .join(' ');
-      if (name.length > 100 || (person.company?.name?.length ?? 0) > 100)
+      const name = person.name;
+      if (name.length > 100 || person.company.length > 100)
         throw new BadRequestException(
           '개인화 이름·기업명은 100자까지 지원합니다.',
         );
-      const content = renderSms(
-        input.content,
-        name,
-        person.company?.name ?? '',
-      );
+      const content = renderSms(input.content, name, person.company);
       const renderedType = smsMessageType(content, input.subject, name);
       targets.push({
         to,
         name,
-        company: person.company?.name ?? '',
+        company: person.company,
         content,
         messageType:
           smsMessageType(

@@ -8,7 +8,11 @@ import { type MessageQueueService } from 'src/engine/core-modules/message-queue/
 
 jest.mock(
   'src/engine/twenty-orm/storage/orm-workspace-context.storage',
-  () => ({ getWorkspaceContext: () => ({}) }),
+  () => ({
+    getWorkspaceContext: () => ({
+      objectIdByNameSingular: { teamMember: 'team-member-object' },
+    }),
+  }),
 );
 jest.mock(
   'src/engine/twenty-orm/utils/resolve-role-permission-config.util',
@@ -140,7 +144,8 @@ describe('SMS recipient preview', () => {
           },
           { name: { firstName: '없음' }, phones: { primaryPhoneNumber: '' } },
         ],
-      });
+      })
+      .mockResolvedValueOnce({ find: async () => [] });
     const orm = {
       executeInWorkspaceContext: (callback: () => unknown) => callback(),
       getRepository,
@@ -177,6 +182,103 @@ describe('SMS recipient preview', () => {
     expect(
       getRepository.mock.calls.every((call) => call[0] === 'workspace'),
     ).toBe(true);
+  });
+});
+
+describe('linked team member SMS recipients', () => {
+  const input = {
+    listId: 'list',
+    subject: '',
+    content: '{{fullName}} 안내',
+    advertising: false,
+  };
+  const member = (accountId: string, phone: string) => ({
+    id: `team-${accountId}`,
+    name: `멤버 ${accountId}`,
+    workspaceMemberAccountId: accountId,
+    phoneNumber: { primaryPhoneNumber: phone, primaryPhoneCallingCode: '+82' },
+  });
+  const setup = () => {
+    const findMembers = jest
+      .fn()
+      .mockResolvedValue([
+        member('a', '1012345678'),
+        member('b', '01022223333'),
+        member('c', '01033334444'),
+        member('ambiguous', '01044445555'),
+        member('ambiguous', '01055556666'),
+        member('invalid', '0212345678'),
+      ]);
+    const getRepository = jest
+      .fn()
+      .mockResolvedValueOnce({ findOne: async () => ({ id: 'list' }) })
+      .mockResolvedValueOnce({
+        find: async () => [
+          { personId: 'customer' },
+          ...['a', 'b', 'c', 'unlinked', 'ambiguous', 'invalid'].map(
+            (workspaceMemberId) => ({ workspaceMemberId }),
+          ),
+        ],
+      })
+      .mockResolvedValueOnce({
+        find: async () => [
+          {
+            name: { firstName: '고객' },
+            phones: { primaryPhoneNumber: '010-1234-5678' },
+          },
+        ],
+      })
+      .mockResolvedValueOnce({ find: findMembers });
+    const service = new SmsService(
+      {} as Repository<SmsDispatchEntity>,
+      {
+        executeInWorkspaceContext: (callback: () => unknown) => callback(),
+        getRepository,
+      } as unknown as GlobalWorkspaceOrmManager,
+      { settings: jest.fn() } as unknown as GaingeSmsService,
+      {} as MessageQueueService,
+      {} as CampaignDraftService,
+    );
+    return { service, getRepository, findMembers };
+  };
+  it('uses explicit account links, normalizes phones and deduplicates against customer numbers', async () => {
+    const { service, getRepository, findMembers } = setup();
+    const result = await service.preview('workspace', input);
+    expect(result).toMatchObject({
+      total: 7,
+      missing: 3,
+      duplicates: 1,
+      sms: 3,
+    });
+    expect(result.targets).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          name: '멤버 b',
+          to: '01022223333',
+          content: '멤버 b 안내',
+        }),
+        expect.objectContaining({ name: '멤버 c', to: '01033334444' }),
+      ]),
+    );
+    expect(getRepository).toHaveBeenLastCalledWith('workspace', 'teamMember', {
+      shouldBypassPermissionChecks: false,
+    });
+    expect(findMembers).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          workspaceMemberAccountId: expect.objectContaining({
+            _value: ['a', 'b', 'c', 'unlinked', 'ambiguous', 'invalid'],
+          }),
+        },
+      }),
+    );
+  });
+  it('propagates denied member access instead of bypassing permissions', async () => {
+    const { service, findMembers } = setup();
+    findMembers.mockRejectedValueOnce(new Error('Permission denied'));
+    await expect(service.preview('workspace', input)).rejects.toThrow(
+      'Permission denied',
+    );
   });
 });
 
