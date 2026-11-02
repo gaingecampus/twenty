@@ -16,6 +16,11 @@ import { resolveRolePermissionConfig } from 'src/engine/twenty-orm/utils/resolve
 import { MessageListMemberWorkspaceEntity } from 'src/modules/emailing/standard-objects/message-list-member.workspace-entity';
 import { MessageListWorkspaceEntity } from 'src/modules/emailing/standard-objects/message-list.workspace-entity';
 import { PersonWorkspaceEntity } from 'src/modules/person/standard-objects/person.workspace-entity';
+import { MessageCampaignWorkspaceEntity } from 'src/modules/emailing/standard-objects/message-campaign.workspace-entity';
+import {
+  type SmsCampaignDeliveriesInput,
+  type SmsCampaignDeliveryPage,
+} from './sms-campaign-deliveries.dto';
 import {
   SmsDispatchEntity,
   type SmsBatch,
@@ -304,6 +309,58 @@ export class SmsService {
       take: 20,
     });
     return rows.map((row) => this.summary(row));
+  }
+
+  async campaignDeliveries(
+    workspaceId: string,
+    input: SmsCampaignDeliveriesInput,
+  ): Promise<SmsCampaignDeliveryPage> {
+    return this.orm.executeInWorkspaceContext(async () => {
+      const { authContext, userWorkspaceRoleMap, apiKeyRoleMap } =
+        getWorkspaceContext();
+      const permissions = resolveRolePermissionConfig({
+        authContext,
+        userWorkspaceRoleMap,
+        apiKeyRoleMap,
+      });
+      if (!permissions) throw new ForbiddenException();
+      const campaigns = await this.orm.getRepository(
+        workspaceId,
+        MessageCampaignWorkspaceEntity,
+        permissions,
+      );
+      const campaign = await campaigns.findOne({
+        where: { id: input.campaignId },
+        select: { id: true, channel: true, draftDispatchId: true },
+      });
+      if (!campaign)
+        throw new ForbiddenException('발송 내역을 조회할 권한이 없습니다.');
+      if (campaign.channel !== 'SMS' || !campaign.draftDispatchId) {
+        return { totalCount: 0, records: [] };
+      }
+      // The campaign may have a different id from its dispatch (saved drafts).
+      // Authorize the campaign before reading the workspace-scoped core snapshot.
+      const dispatch = await this.dispatches.findOneBy({
+        workspaceId,
+        requestId: campaign.draftDispatchId,
+      });
+      if (!dispatch) return { totalCount: 0, records: [] };
+      const records = dispatch.batches.flatMap((batch, batchIndex) =>
+        batch.targets.map((target, targetIndex) => ({
+          id: `${dispatch.id}:${batchIndex}:${targetIndex}`,
+          name: target.name,
+          phone: target.to,
+          messageType: target.messageType,
+          status: batch.status,
+          createdAt: dispatch.createdAt.toISOString(),
+          error: batch.error,
+        })),
+      );
+      return {
+        totalCount: records.length,
+        records: records.slice(input.offset, input.offset + input.limit),
+      };
+    });
   }
 
   summary(row: SmsDispatchEntity): SmsDispatchSummary {

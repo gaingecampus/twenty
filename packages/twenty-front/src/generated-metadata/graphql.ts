@@ -4308,6 +4308,10 @@ export type PublicWorkspaceDataSummary = {
   logo?: Maybe<Scalars['String']['output']>;
 };
 
+export type QuerySmsCampaignDeliveriesArgs = {
+  input: SmsCampaignDeliveriesInput;
+};
+
 export type Query = {
   __typename?: 'Query';
   agentTurns: Array<AgentTurn>;
@@ -4421,6 +4425,7 @@ export type Query = {
   couponDispatchHistory: Array<CouponDispatchSummary>;
   isSmsDispatchAvailable: Scalars['Boolean']['output'];
   previewSmsDispatch: SmsPreview;
+  smsCampaignDeliveries: SmsCampaignDeliveryPage;
   smsDispatchHistory: Array<SmsDispatchSummary>;
 };
 
@@ -9224,6 +9229,29 @@ export type SavedMessageCampaignDraft = {
   __typename?: 'SavedMessageCampaignDraft';
   id: Scalars['String']['output'];
   version: Scalars['String']['output'];
+};
+
+export type SmsCampaignDeliveriesInput = {
+  campaignId: Scalars['String']['input'];
+  limit: Scalars['Int']['input'];
+  offset: Scalars['Int']['input'];
+};
+
+export type SmsCampaignDelivery = {
+  __typename?: 'SmsCampaignDelivery';
+  createdAt: Scalars['String']['output'];
+  error?: Maybe<Scalars['String']['output']>;
+  id: Scalars['String']['output'];
+  messageType: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+  phone: Scalars['String']['output'];
+  status: Scalars['String']['output'];
+};
+
+export type SmsCampaignDeliveryPage = {
+  __typename?: 'SmsCampaignDeliveryPage';
+  records: Array<SmsCampaignDelivery>;
+  totalCount: Scalars['Int']['output'];
 };
 
 export type SmsDispatchSummary = {
