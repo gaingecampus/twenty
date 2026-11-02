@@ -3,6 +3,9 @@ import { CampaignDraftReferenceInput } from 'src/modules/emailing/drafts/campaig
 import { Field, InputType, Int, ObjectType } from '@nestjs/graphql';
 import {
   IsOptional,
+  IsArray,
+  ArrayMaxSize,
+  ArrayMinSize,
   ValidateNested,
   IsBoolean,
   IsString,
@@ -13,7 +16,19 @@ import {
 @InputType()
 export class SmsPreviewInput {
   @Field(() => String) @IsString() @Length(0, 15) subject: string;
-  @Field(() => String) @IsUUID('4') listId: string;
+  @Field(() => String, { nullable: true })
+  @IsOptional()
+  @IsUUID('4')
+  listId?: string;
+
+  @Field(() => [String], { nullable: true })
+  @IsOptional()
+  @IsArray()
+  @ArrayMinSize(1)
+  @ArrayMaxSize(100)
+  @IsString({ each: true })
+  @Length(1, 50, { each: true })
+  directPhones?: string[];
   @Field(() => String) @IsString() @Length(1, 2000) content: string;
   @Field(() => Boolean) @IsBoolean() advertising: boolean;
 }

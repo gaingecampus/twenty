@@ -4,6 +4,7 @@ import { styled } from '@linaria/react';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 import { type CampaignRecipientMode } from '@/activities/emails/types/CampaignRecipientMode';
 import { Select } from '@/ui/input/components/Select';
+import { TextArea } from '@/ui/input/components/TextArea';
 import { TextInput } from '@/ui/input/components/TextInput';
 
 const StyledFields = styled.div`
@@ -16,6 +17,12 @@ const StyledDirectField = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${themeCssVariables.spacing[2]};
+`;
+
+const StyledPhoneNumbers = styled(TextArea)`
+  && textarea {
+    font-size: ${themeCssVariables.font.size.sm};
+  }
 `;
 
 const StyledRecipientInput = styled(TextInput)`
@@ -65,17 +72,31 @@ export const CampaignRecipientSelector = ({
       />
       {mode === 'direct' ? (
         <StyledDirectField>
-          <StyledRecipientInput
-            aria-label={`수신자 ${contactLabel}`}
-            type={isEmail ? 'email' : 'tel'}
-            autoComplete="off"
-            placeholder={isEmail ? 'example@company.com' : '01012345678'}
-            value={directValue}
-            onChange={onDirectValueChange}
-            disabled={disabled}
-            fullWidth
-          />
-          {channel !== 'coupon' && (
+          {channel === 'sms' ? (
+            <StyledPhoneNumbers
+              textAreaId="sms-direct-phones"
+              aria-label="수신자 휴대폰번호"
+              placeholder="01012345678 (여러 번호는 쉼표 또는 줄바꿈으로 구분)"
+              value={directValue}
+              onChange={onDirectValueChange}
+              disabled={disabled}
+              minRows={3}
+              maxRows={6}
+              maxLength={1000}
+            />
+          ) : (
+            <StyledRecipientInput
+              aria-label={`수신자 ${contactLabel}`}
+              type={isEmail ? 'email' : 'tel'}
+              autoComplete="off"
+              placeholder={isEmail ? 'example@company.com' : '01012345678'}
+              value={directValue}
+              onChange={onDirectValueChange}
+              disabled={disabled}
+              fullWidth
+            />
+          )}
+          {channel === 'email' && (
             <StyledCampaignNotice role="alert">
               직접 입력 발송은 아직 지원하지 않습니다. 고객 분류를 선택해
               주세요.

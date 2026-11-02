@@ -144,19 +144,28 @@ export const SmsCampaignComposer = ({
   const bytes = new TextEncoder().encode(content).length;
   const busy = sending || reviewing || savingDraft;
   const recipientCount = (preview?.sms ?? 0) + (preview?.lms ?? 0);
+  const recipientInput =
+    recipientMode === 'list'
+      ? { listId }
+      : {
+          directPhones: directPhone
+            .split(/[,;\n\r]+/)
+            .map((phone) => phone.trim())
+            .filter(Boolean),
+        };
   const canSend =
-    recipientMode === 'list' &&
     !isSendingDisabled &&
     !isSendingBlocked &&
     !busy &&
     recipientCount > 0 &&
     !submitted;
   const canReview =
-    recipientMode === 'list' &&
     !isSendingDisabled &&
     !isSendingBlocked &&
     !busy &&
-    !!listId &&
+    (recipientMode === 'list'
+      ? !!listId
+      : !!recipientInput.directPhones?.length) &&
     !!content.trim() &&
     bytes <= 2000 &&
     !submitted;
@@ -168,7 +177,9 @@ export const SmsCampaignComposer = ({
     setPreview(null);
     try {
       const result = await loadPreview({
-        variables: { input: { listId, subject, content, advertising } },
+        variables: {
+          input: { ...recipientInput, subject, content, advertising },
+        },
       });
       setPreview(result.data?.previewSmsDispatch ?? null);
     } catch (failure) {
@@ -190,7 +201,7 @@ export const SmsCampaignComposer = ({
         variables: {
           input: {
             requestId,
-            listId,
+            ...recipientInput,
             content,
             advertising,
             subject,
@@ -227,7 +238,7 @@ export const SmsCampaignComposer = ({
       <CampaignRecipientHeader>
         <CampaignFieldLabel
           label="수신자"
-          help="고객 또는 워크스페이스 계정에 연결된 구성원의 휴대전화번호로 발송합니다. 번호 없음·중복 제외 · 가인지 문자 발송 요금 적용"
+          help="고객 분류 또는 직접 입력한 휴대전화번호로 발송합니다. 번호 없음·오류·중복 제외 · 가인지 문자 발송 요금 적용"
         />
       </CampaignRecipientHeader>
       <CampaignRecipientSelector
@@ -239,7 +250,11 @@ export const SmsCampaignComposer = ({
           setRecipientMode(mode);
         }}
         directValue={directPhone}
-        onDirectValueChange={setDirectPhone}
+        onDirectValueChange={(value) => {
+          if (busy) return;
+          reset();
+          setDirectPhone(value);
+        }}
         disabled={busy}
       >
         <FormSingleRecordPicker
@@ -315,9 +330,14 @@ export const SmsCampaignComposer = ({
         <StyledFieldSection>
           <CampaignFieldLabel
             label="메시지"
-            help="고객 정보 메뉴에서 이름·기업을 넣을 수 있어요. 정보가 없으면 빈칸으로 표시됩니다."
+            help={
+              recipientMode === 'list'
+                ? '고객 정보 메뉴에서 이름·기업을 넣을 수 있어요. 정보가 없으면 빈칸으로 표시됩니다.'
+                : '입력한 모든 번호에 같은 메시지를 발송합니다. 고객 이름·기업 변수는 사용할 수 없습니다.'
+            }
           />
           <SmsCampaignMessageEditor
+            showCustomerInfo={recipientMode === 'list'}
             value={content}
             disabled={busy}
             isLongMessage={!!subject.trim() || bytes > 90}

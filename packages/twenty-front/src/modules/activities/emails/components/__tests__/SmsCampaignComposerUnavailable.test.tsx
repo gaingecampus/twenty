@@ -295,14 +295,11 @@ it('reviews from the header only after required fields are filled without sendin
   fireEvent.change(screen.getByRole('textbox', { name: '수신자 휴대폰번호' }), {
     target: { value: '01012345678' },
   });
-  expect(reviewButton).toBeDisabled();
+  expect(reviewButton).toBeEnabled();
   expect(
     screen.queryByRole('dialog', { name: '문자 발송 전 검토' }),
   ).not.toBeInTheDocument();
-  expect(screen.getByRole('alert')).toHaveTextContent(
-    '직접 입력 발송은 아직 지원하지 않습니다.',
-  );
-  fireEvent.click(reviewButton);
+  expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   expect(loadPreview).toHaveBeenCalledTimes(1);
   expect(send).not.toHaveBeenCalled();
   fireEvent.click(screen.getByRole('button', { name: '고객 분류' }));
@@ -574,4 +571,133 @@ it('shows the excluded counts and the exact sendable total inside the review mod
   expect(
     within(dialog).getByLabelText('발송할 문자 미리보기').textContent,
   ).toBe('첫 줄\n둘째 줄');
+});
+
+it('reviews and sends direct numbers without the previously selected list, and clears review after editing', async () => {
+  const loadPreview = jest.fn().mockResolvedValue({
+    data: {
+      previewSmsDispatch: {
+        total: 4,
+        missing: 1,
+        duplicates: 1,
+        sms: 2,
+        lms: 0,
+        sample: '직접 입력 안내',
+      },
+    },
+  });
+  const send = jest
+    .fn()
+    .mockResolvedValue({ data: { sendSmsDispatch: { id: 'dispatch' } } });
+  jest
+    .mocked(useLazyQuery)
+    .mockReturnValue([loadPreview, { loading: false }] as never);
+  jest.mocked(useMutation).mockReturnValue([send, { loading: false }] as never);
+  render(
+    <SmsCampaignComposer
+      initialDraft={buildCampaignDraft({
+        channel: 'sms',
+        recipientMode: 'list',
+        listId: 'old-list',
+        body: '직접 입력 안내',
+      })}
+    />,
+  );
+  fireEvent.click(screen.getByRole('button', { name: '휴대폰번호 직접 입력' }));
+  const phoneInput = screen.getByRole('textbox', { name: '수신자 휴대폰번호' });
+  expect(
+    screen.queryByRole('button', { name: 'fullName' }),
+  ).not.toBeInTheDocument();
+  fireEvent.change(phoneInput, {
+    target: { value: '01012345678, +82 10-1234-5678\n잘못된 번호;01023456789' },
+  });
+  fireEvent.click(screen.getByRole('button', { name: /발송 전 검토/ }));
+  await screen.findByRole('dialog', { name: '문자 발송 전 검토' });
+  expect(loadPreview).toHaveBeenCalledWith({
+    variables: {
+      input: {
+        directPhones: [
+          '01012345678',
+          '+82 10-1234-5678',
+          '잘못된 번호',
+          '01023456789',
+        ],
+        subject: '',
+        content: '직접 입력 안내',
+        advertising: false,
+      },
+    },
+  });
+  expect(
+    screen.getByRole('button', { name: /2명에게 문자 발송/ }),
+  ).toBeEnabled();
+  fireEvent.click(screen.getByRole('button', { name: /수정/ }));
+  fireEvent.change(phoneInput, { target: { value: '01034567890' } });
+  expect(
+    screen.queryByRole('dialog', { name: '문자 발송 전 검토' }),
+  ).not.toBeInTheDocument();
+  loadPreview.mockResolvedValueOnce({
+    data: {
+      previewSmsDispatch: {
+        total: 1,
+        missing: 0,
+        duplicates: 0,
+        sms: 1,
+        lms: 0,
+        sample: '직접 입력 안내',
+      },
+    },
+  });
+  fireEvent.click(screen.getByRole('button', { name: /발송 전 검토/ }));
+  await screen.findByRole('dialog', { name: '문자 발송 전 검토' });
+  fireEvent.click(screen.getByRole('button', { name: /1명에게 문자 발송/ }));
+  await waitFor(() => expect(send).toHaveBeenCalledTimes(1));
+  expect(send.mock.calls[0][0].variables.input).toEqual(
+    expect.objectContaining({
+      directPhones: ['01034567890'],
+      content: '직접 입력 안내',
+    }),
+  );
+  expect(send.mock.calls[0][0].variables.input).not.toHaveProperty('listId');
+  await waitFor(() =>
+    expect(
+      screen.getByRole('button', { name: /발송 요청 완료/ }),
+    ).toBeDisabled(),
+  );
+});
+
+it('blocks direct dispatch when every entered number is invalid', async () => {
+  const loadPreview = jest.fn().mockResolvedValue({
+    data: {
+      previewSmsDispatch: {
+        total: 1,
+        missing: 1,
+        duplicates: 0,
+        sms: 0,
+        lms: 0,
+        sample: '테스트',
+      },
+    },
+  });
+  const send = jest.fn();
+  jest
+    .mocked(useLazyQuery)
+    .mockReturnValue([loadPreview, { loading: false }] as never);
+  jest.mocked(useMutation).mockReturnValue([send, { loading: false }] as never);
+  render(
+    <SmsCampaignComposer
+      initialDraft={buildCampaignDraft({
+        channel: 'sms',
+        recipientMode: 'direct',
+        directRecipient: '123',
+        body: '테스트',
+      })}
+    />,
+  );
+  fireEvent.click(screen.getByRole('button', { name: /발송 전 검토/ }));
+  await screen.findByRole('dialog', { name: '문자 발송 전 검토' });
+  expect(
+    screen.getByRole('button', { name: /0명에게 문자 발송/ }),
+  ).toBeDisabled();
+  expect(send).not.toHaveBeenCalled();
 });

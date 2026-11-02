@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
+import { type RolePermissionConfig } from 'src/engine/twenty-orm/types/role-permission-config';
 import { randomUUID } from 'crypto';
 import { InjectMessageQueue } from 'src/engine/core-modules/message-queue/decorators/message-queue.decorator';
 import { MessageQueue } from 'src/engine/core-modules/message-queue/message-queue.constants';
@@ -87,12 +88,113 @@ export class SmsService {
         '광고 문자는 (광고)로 시작하고 무료수신거부 080 번호를 포함해야 합니다.',
       );
     }
+    const hasList = Boolean(input.listId);
+    const hasDirect =
+      input.directPhones !== undefined && input.directPhones !== null;
+    if (hasList === hasDirect) {
+      throw new BadRequestException(
+        '고객 분류 또는 직접 입력 번호 중 하나를 선택해 주세요.',
+      );
+    }
+    if (
+      hasDirect &&
+      /\{\{(fullName|companyName)\}\}|\[\*(이름|1)\*\]/.test(input.content)
+    ) {
+      throw new BadRequestException(
+        '직접 입력 발송에서는 고객 이름·기업 변수를 사용할 수 없습니다. 메시지를 수정해 주세요.',
+      );
+    }
+    if (
+      hasDirect &&
+      (!input.directPhones?.length || input.directPhones.length > 100)
+    ) {
+      throw new BadRequestException(
+        '직접 입력 번호는 1~100개까지 입력할 수 있습니다.',
+      );
+    }
+    const { candidates, total } = hasDirect
+      ? {
+          total: input.directPhones!.length,
+          candidates: input.directPhones!.map((phone) => ({
+            personId: undefined,
+            name: '',
+            company: '',
+            phones: { primaryPhoneNumber: phone, primaryPhoneCallingCode: '' },
+          })),
+        }
+      : await this.listCandidates(
+          workspaceId,
+          input.listId!,
+          permissions,
+          objectIdByNameSingular,
+        );
+    const targets: SmsTarget[] = [];
+    const seen = new Set<string>();
+    let missing = total - candidates.length;
+    let duplicates = 0;
+    for (const person of candidates) {
+      const raw = person.phones?.primaryPhoneNumber ?? '';
+      const callingCode = person.phones?.primaryPhoneCallingCode;
+      const to = normalizeSmsPhone(
+        callingCode && !raw.startsWith('0') && !raw.startsWith('+')
+          ? `${callingCode}${raw}`
+          : raw,
+      );
+      if (!to) {
+        missing++;
+        continue;
+      }
+      if (seen.has(to)) {
+        duplicates++;
+        continue;
+      }
+      seen.add(to);
+      const name = person.name;
+      if (name.length > 100 || person.company.length > 100)
+        throw new BadRequestException(
+          '개인화 이름·기업명은 100자까지 지원합니다.',
+        );
+      const content = renderSms(input.content, name, person.company);
+      const renderedType = smsMessageType(content, input.subject, name);
+      targets.push({
+        personId: person.personId,
+        to,
+        name,
+        company: person.company,
+        content,
+        messageType:
+          smsMessageType(
+            toGaingeSmsContent(input.content),
+            input.subject,
+            name,
+          ) === 'LMS'
+            ? 'LMS'
+            : renderedType,
+      });
+    }
+    return {
+      targets,
+      total,
+      missing,
+      duplicates,
+      sms: targets.filter((target) => target.messageType === 'SMS').length,
+      lms: targets.filter((target) => target.messageType === 'LMS').length,
+      sample: targets[0]?.content ?? input.content,
+    };
+  }
+
+  private async listCandidates(
+    workspaceId: string,
+    listId: string,
+    permissions: RolePermissionConfig,
+    objectIdByNameSingular: Record<string, string>,
+  ) {
     const lists = await this.orm.getRepository(
       workspaceId,
       MessageListWorkspaceEntity,
       permissions,
     );
-    if (!(await lists.findOne({ where: { id: input.listId } })))
+    if (!(await lists.findOne({ where: { id: listId } })))
       throw new ForbiddenException('목록을 조회할 권한이 없습니다.');
     const members = await this.orm.getRepository(
       workspaceId,
@@ -105,7 +207,7 @@ export class SmsService {
       permissions,
     );
     const rows = await members.find({
-      where: { listId: input.listId },
+      where: { listId },
       take: 10001,
     });
     if (rows.length > 10000)
@@ -165,59 +267,7 @@ export class SmsService {
         });
       }
     }
-    const targets: SmsTarget[] = [];
-    const seen = new Set<string>();
-    let missing = rows.length - candidates.length;
-    let duplicates = 0;
-    for (const person of candidates) {
-      const raw = person.phones?.primaryPhoneNumber ?? '';
-      const callingCode = person.phones?.primaryPhoneCallingCode;
-      const to = normalizeSmsPhone(
-        callingCode && !raw.startsWith('0') && !raw.startsWith('+')
-          ? `${callingCode}${raw}`
-          : raw,
-      );
-      if (!to) {
-        missing++;
-        continue;
-      }
-      if (seen.has(to)) {
-        duplicates++;
-        continue;
-      }
-      seen.add(to);
-      const name = person.name;
-      if (name.length > 100 || person.company.length > 100)
-        throw new BadRequestException(
-          '개인화 이름·기업명은 100자까지 지원합니다.',
-        );
-      const content = renderSms(input.content, name, person.company);
-      const renderedType = smsMessageType(content, input.subject, name);
-      targets.push({
-        personId: person.personId,
-        to,
-        name,
-        company: person.company,
-        content,
-        messageType:
-          smsMessageType(
-            toGaingeSmsContent(input.content),
-            input.subject,
-            name,
-          ) === 'LMS'
-            ? 'LMS'
-            : renderedType,
-      });
-    }
-    return {
-      targets,
-      total: rows.length,
-      missing,
-      duplicates,
-      sms: targets.filter((target) => target.messageType === 'SMS').length,
-      lms: targets.filter((target) => target.messageType === 'LMS').length,
-      sample: targets[0]?.content ?? input.content,
-    };
+    return { candidates, total: rows.length };
   }
 
   async send(
@@ -262,7 +312,7 @@ export class SmsService {
     await this.drafts.claim(workspaceId, input.draft, 'sms', input.requestId, {
       subject: input.subject || '문자 발송',
       bodyTemplate: input.content,
-      listId: input.listId,
+      listId: input.listId ?? null,
     });
     const id = randomUUID();
     await this.dispatches
@@ -273,7 +323,7 @@ export class SmsService {
         workspaceId,
         userWorkspaceId,
         requestId: input.requestId,
-        listId: input.listId,
+        listId: input.listId ?? null,
         subject: input.subject,
         content: input.content,
         // Keep the API destination snapshot in the legacy sender column.

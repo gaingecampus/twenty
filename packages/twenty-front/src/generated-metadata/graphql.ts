@@ -9281,15 +9281,17 @@ export type SmsPreview = {
 export type SmsPreviewInput = {
   advertising: Scalars['Boolean']['input'];
   content: Scalars['String']['input'];
-  listId: Scalars['String']['input'];
+  directPhones?: InputMaybe<Array<Scalars['String']['input']>>;
+  listId?: InputMaybe<Scalars['String']['input']>;
   subject: Scalars['String']['input'];
 };
 
 export type SmsSendInput = {
   advertising: Scalars['Boolean']['input'];
   content: Scalars['String']['input'];
+  directPhones?: InputMaybe<Array<Scalars['String']['input']>>;
   draft?: InputMaybe<CampaignDraftReferenceInput>;
-  listId: Scalars['String']['input'];
+  listId?: InputMaybe<Scalars['String']['input']>;
   requestId: Scalars['String']['input'];
   subject: Scalars['String']['input'];
 };

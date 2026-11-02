@@ -5,17 +5,19 @@ export const SmsCampaignMessageEditor = ({
   onChange,
   disabled,
   isLongMessage,
+  showCustomerInfo = true,
 }: {
   value: string;
   onChange: (value: string) => void;
   disabled: boolean;
   isLongMessage: boolean;
+  showCustomerInfo?: boolean;
 }) => (
   <CampaignPlainTextMessageEditor
     value={value}
     onChange={onChange}
     disabled={disabled}
-    showCustomerInfo
+    showCustomerInfo={showCustomerInfo}
     counter={
       <>
         {new TextEncoder().encode(value).length.toLocaleString()} / 2,000바이트
