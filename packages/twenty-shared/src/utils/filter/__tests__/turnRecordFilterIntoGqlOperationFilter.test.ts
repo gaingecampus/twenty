@@ -181,6 +181,23 @@ describe('turnRecordFilterIntoRecordGqlOperationFilter', () => {
   });
 
   describe('TEXT filter', () => {
+    it.each(['2026-11', '', '100%_exact'])(
+      'preserves exact text %s',
+      (value) => {
+        for (const [operand, operator] of [
+          [RecordFilterOperand.IS, 'eq'],
+          [RecordFilterOperand.IS_NOT, 'neq'],
+        ] as const) {
+          expect(
+            turnRecordFilterIntoRecordGqlOperationFilter({
+              filterValueDependencies,
+              recordFilter: makeFilter('f-text', operand, value),
+              fieldMetadataItemById,
+            }),
+          ).toEqual({ name: { [operator]: value } });
+        }
+      },
+    );
     it('should handle CONTAINS operand', () => {
       const result = turnRecordFilterIntoRecordGqlOperationFilter({
         filterValueDependencies,

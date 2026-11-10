@@ -83,7 +83,14 @@ export const turnRecordFilterIntoRecordGqlOperationFilter = ({
     return;
   }
 
-  if (!isRecordFilterValueValid(recordFilter)) {
+  const isExactEmptyTextFilter =
+    sourceFieldMetadataItem.type === FieldMetadataType.TEXT &&
+    recordFilter.value === '' &&
+    [RecordFilterOperand.IS, RecordFilterOperand.IS_NOT].includes(
+      recordFilter.operand,
+    );
+
+  if (!isRecordFilterValueValid(recordFilter) && !isExactEmptyTextFilter) {
     return;
   }
 
@@ -162,6 +169,18 @@ const buildDirectFieldGqlOperationFilter = ({
   switch (filterType) {
     case 'TEXT':
       switch (recordFilter.operand) {
+        case RecordFilterOperand.IS:
+          return {
+            [fieldMetadataItem.name]: {
+              eq: recordFilter.value,
+            } as StringFilter,
+          };
+        case RecordFilterOperand.IS_NOT:
+          return {
+            [fieldMetadataItem.name]: {
+              neq: recordFilter.value,
+            } as StringFilter,
+          };
         case RecordFilterOperand.CONTAINS:
           return {
             [fieldMetadataItem.name]: {
