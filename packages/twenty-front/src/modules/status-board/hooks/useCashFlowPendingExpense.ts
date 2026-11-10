@@ -9,6 +9,7 @@ export const getCashFlowPendingExpenseFilter = (
 ): RecordGqlOperationFilter => ({
   and: [
     { expenseMonth: { eq: month } },
+    { paidAmount: { amountMicros: { eq: 0 } } },
     {
       or: [
         { sourceRecordType: { is: 'NULL' } },

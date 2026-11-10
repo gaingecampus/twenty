@@ -202,7 +202,7 @@ const CashFlowValues = ({
       label: '지출대기액',
       amount: balance.outgoing,
       Icon: getIcon('IconArrowUpRight'),
-      description: `CRM 지출대기액에서 귀속 월이 이번 달인 전체 지출 계획액을 합산합니다. 예정일이 지났거나 미입력인 항목도 포함하며, 원본 보충 행(제목·소계 등)은 제외합니다. 현금 지출금액(계획) 기준이며 지출금액(결과)은 차감하지 않습니다. 금액을 클릭하면 같은 조건의 근거 목록을 볼 수 있습니다.`,
+      description: `CRM 지출대기액에서 귀속 월이 이번 달이고 지출금액(결과)이 0원인 항목의 현금 지출금액(계획)을 합산합니다. 결과 금액이 0원이 아닌 항목(부분 지출 포함)과 결과 금액 미입력 항목, 원본 보충 행(제목·소계 등)은 제외합니다. 예정일이 지났거나 미입력이어도 위 조건을 만족하면 포함합니다. 금액을 클릭하면 같은 조건의 근거 목록을 볼 수 있습니다.`,
     },
     {
       label: '이번달 가용액',
@@ -429,6 +429,7 @@ export const StatusBoardCashFlowSection = ({
       'expenseMonth',
       'scheduledDate',
       'plannedCashAmount',
+      'paidAmount',
       'sourceRecordType',
     ].every((field) => hasStatusBoardField(pendingExpense, field)) &&
     cashFlowSnapshot &&

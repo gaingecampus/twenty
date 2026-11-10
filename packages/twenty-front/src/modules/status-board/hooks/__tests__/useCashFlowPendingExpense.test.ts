@@ -56,6 +56,7 @@ describe('CRM pending expense cash flow', () => {
     expect(result.current.filter).toEqual({
       and: [
         { expenseMonth: { eq: '2026-10' } },
+        { paidAmount: { amountMicros: { eq: 0 } } },
         {
           or: [
             { sourceRecordType: { is: 'NULL' } },
@@ -66,6 +67,14 @@ describe('CRM pending expense cash flow', () => {
     });
     expect(useAggregateRecords).toHaveBeenCalledWith(
       expect.objectContaining({ objectNameSingular: 'pendingExpense' }),
+    );
+    expect(useAggregateRecords).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filter: {
+          and: expect.arrayContaining([result.current.filter]),
+        },
+        recordGqlFieldsAggregate: { [TOTAL]: ['COUNT'] },
+      }),
     );
   });
 

@@ -29,6 +29,7 @@ it.each([
   expect(getCashFlowPendingExpenseFilter(today.slice(0, 7))).toEqual({
     and: [
       { expenseMonth: { eq: today.slice(0, 7) } },
+      { paidAmount: { amountMicros: { eq: 0 } } },
       {
         or: [
           { sourceRecordType: { is: 'NULL' } },
