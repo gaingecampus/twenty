@@ -66,12 +66,41 @@ export const buildStatusBoardListUrl = ({
         (item) => item.name === key || getRelationJoinColumnName(item) === key,
       );
       if (!field) throw new Error(`Unknown status board filter field: ${key}`);
+      const isCurrencyAmount =
+        field.type === 'CURRENCY' &&
+        Object.keys(condition).length === 1 &&
+        'amountMicros' in condition;
       for (const [operator, rawValue] of Object.entries(
-        condition as Record<string, unknown>,
+        (isCurrencyAmount ? condition.amountMicros : condition) as Record<
+          string,
+          unknown
+        >,
       )) {
         let op: ViewFilterOperand;
         let value = String(rawValue);
-        if (operator === 'ilike') {
+        if (
+          isCurrencyAmount &&
+          ['eq', 'neq', 'gte', 'lte'].includes(operator)
+        ) {
+          op =
+            operator === 'gte'
+              ? ViewFilterOperand.GREATER_THAN_OR_EQUAL
+              : operator === 'lte'
+                ? ViewFilterOperand.LESS_THAN_OR_EQUAL
+                : negated || operator === 'neq'
+                  ? ViewFilterOperand.IS_NOT
+                  : ViewFilterOperand.IS;
+          // List currency inputs use major units, while GraphQL uses micros.
+          value = String(Number(rawValue) / 1_000_000);
+        } else if (
+          field.type === 'TEXT' &&
+          (operator === 'eq' || operator === 'neq')
+        ) {
+          op =
+            negated || operator === 'neq'
+              ? ViewFilterOperand.IS_NOT
+              : ViewFilterOperand.IS;
+        } else if (operator === 'ilike') {
           op = ViewFilterOperand.CONTAINS;
           value = String(rawValue).slice(1, -1);
         } else if (operator === 'is' && rawValue === 'NULL') {
@@ -120,6 +149,7 @@ export const buildStatusBoardListUrl = ({
           field: field.name,
           op,
           value,
+          ...(isCurrencyAmount ? { subField: 'amountMicros' } : {}),
         } satisfies UrlSingleFilter);
       }
     }

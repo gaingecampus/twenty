@@ -1,11 +1,19 @@
 import { type EnrichedObjectMetadataItem } from '@/object-metadata/types/EnrichedObjectMetadataItem';
 import { buildStatusBoardListUrl } from '@/status-board/utils/buildStatusBoardListUrl';
 import { filterUrlQueryParamsSchema } from '@/views/schemas/filterUrlQueryParamsSchema';
+import { convertUrlSingleFilterToRecordFilter } from '@/views/utils/convertUrlSingleFilterToRecordFilter';
+import { getCashFlowPendingExpenseFilter } from '@/status-board/hooks/useCashFlowPendingExpense';
+import { deserializeUrlRecursiveFilterGroup } from '@/views/utils/deserializeUrlRecursiveFilterGroup';
+import { computeRecordGqlOperationFilter } from 'twenty-shared/utils';
 import qs from 'qs';
 import {
   FieldMetadataType,
   type RecordGqlOperationFilter,
 } from 'twenty-shared/types';
+
+jest.mock('@/object-record/hooks/useAggregateRecords', () => ({
+  useAggregateRecords: jest.fn(),
+}));
 
 const metadata = {
   namePlural: 'onboardings',
@@ -21,6 +29,22 @@ const metadata = {
     { name: 'revenueDept', type: FieldMetadataType.RELATION },
     { name: 'leadConsultant', type: FieldMetadataType.RELATION },
     { name: 'executionConsultantId', type: FieldMetadataType.UUID },
+    {
+      id: 'expense-month-field',
+      name: 'expenseMonth',
+      type: FieldMetadataType.TEXT,
+    },
+    {
+      id: 'source-type-field',
+      name: 'sourceRecordType',
+      type: FieldMetadataType.TEXT,
+    },
+    {
+      id: 'paid-amount-field',
+      name: 'paidAmount',
+      label: '지출금액(결과)',
+      type: FieldMetadataType.CURRENCY,
+    },
   ],
 } as EnrichedObjectMetadataItem;
 const parse = (filter: RecordGqlOperationFilter) => {
@@ -35,6 +59,84 @@ const parse = (filter: RecordGqlOperationFilter) => {
 };
 
 describe('buildStatusBoardListUrl', () => {
+  it('opens the pending expense list with the same unpaid and month filters', () => {
+    const group = parse(getCashFlowPendingExpenseFilter('2026-11'));
+    expect(group.filters).toEqual([
+      { field: 'expenseMonth', op: 'IS', value: '2026-11' },
+      {
+        field: 'paidAmount',
+        subField: 'amountMicros',
+        op: 'IS',
+        value: '0',
+      },
+    ]);
+    expect(group.groups?.[0]).toMatchObject({
+      operator: 'OR',
+      filters: [
+        { field: 'sourceRecordType', op: 'IS_EMPTY', value: '' },
+        { field: 'sourceRecordType', op: 'IS', value: '' },
+      ],
+    });
+  });
+
+  it('compiles every pending expense URL condition using the real list pipeline', () => {
+    const parsed = deserializeUrlRecursiveFilterGroup({
+      urlRecursiveFilterGroup: parse(
+        getCashFlowPendingExpenseFilter('2026-11'),
+      ),
+      objectMetadataItem: metadata,
+      positionInParent: 0,
+    });
+    expect(
+      computeRecordGqlOperationFilter({
+        ...parsed,
+        fieldMetadataItems: metadata.fields,
+        filterValueDependencies: { timeZone: 'Asia/Seoul' },
+      }),
+    ).toEqual({
+      and: [
+        { expenseMonth: { eq: '2026-11' } },
+        { paidAmount: { amountMicros: { eq: 0 } } },
+        {
+          or: [
+            {
+              or: [
+                { sourceRecordType: { ilike: '' } },
+                { sourceRecordType: { is: 'NULL' } },
+              ],
+            },
+            { sourceRecordType: { eq: '' } },
+          ],
+        },
+      ],
+    });
+  });
+
+  it.each([0, 125_500_000, -1_000_000])(
+    'preserves currency amount %s through the actual list filter parser',
+    (amountMicros) => {
+      const filter = { paidAmount: { amountMicros: { eq: amountMicros } } };
+      const urlSingleFilter = parse(filter).filters![0];
+      const recordFilter = convertUrlSingleFilterToRecordFilter({
+        urlSingleFilter,
+        objectMetadataItem: metadata,
+        positionInGroup: 0,
+      });
+      expect(recordFilter).not.toBeNull();
+      expect(
+        computeRecordGqlOperationFilter({
+          recordFilters: [recordFilter!],
+          recordFilterGroups: [],
+          fieldMetadataItems: metadata.fields,
+          filterValueDependencies: {
+            currentWorkspaceMemberId: 'member-id',
+            timeZone: 'Asia/Seoul',
+          },
+        }),
+      ).toEqual(filter);
+    },
+  );
+
   it('preserves a modal search alongside the status filter', () => {
     expect(
       parse({
