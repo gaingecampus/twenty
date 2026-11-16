@@ -91,3 +91,45 @@ it('does not render a curve for unavailable data', () => {
   expect(screen.getByRole('status')).toHaveTextContent('불러오지 못했습니다');
   expect(mockChart).not.toHaveBeenCalled();
 });
+
+it('filters the legend, series and tooltip totals by the selected groups and restores all groups', () => {
+  const { rerender } = render(
+    <StatusBoardSalesChart month="2026-10" departmentLabels={['AX센터']} />,
+  );
+  expect(screen.queryByRole('button', { name: '1BU' })).not.toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'AX센터' })).toBeInTheDocument();
+  const props = mockChart.mock.calls.at(-1)[0];
+  expect(props.data).toEqual([
+    {
+      id: 'AX센터',
+      data: [
+        { x: '2026-10-01', y: 0 },
+        { x: '2026-10-02', y: 50 },
+      ],
+    },
+  ]);
+  const tooltip = render(
+    props.sliceTooltip({
+      slice: { points: [{ data: { x: '2026-10-02' } }] },
+    }),
+  );
+  expect(screen.getAllByText('50원')).toHaveLength(2);
+  expect(screen.queryByText('200원')).not.toBeInTheDocument();
+  expect(screen.getAllByText('100.00%')).toHaveLength(2);
+  tooltip.unmount();
+  rerender(<StatusBoardSalesChart month="2026-10" />);
+  expect(screen.getByRole('button', { name: '1BU' })).toBeInTheDocument();
+  expect(mockChart.mock.calls.at(-1)[0].colors({ id: 'AX센터' })).toBe(
+    props.colors({ id: 'AX센터' }),
+  );
+});
+
+it('does not fall back to company-wide revenue for an unmatched selected group', () => {
+  render(
+    <StatusBoardSalesChart month="2026-10" departmentLabels={['없는 그룹']} />,
+  );
+  expect(screen.queryByTestId('chart')).not.toBeInTheDocument();
+  expect(
+    screen.getByText('선택한 그룹의 가캠 매출이 없습니다.'),
+  ).toBeInTheDocument();
+});

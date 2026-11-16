@@ -55,7 +55,13 @@ const StyledTooltip = styled.div`
   }
 `;
 
-export const StatusBoardSalesChart = ({ month }: { month: string }) => {
+export const StatusBoardSalesChart = ({
+  month,
+  departmentLabels,
+}: {
+  month: string;
+  departmentLabels?: string[];
+}) => {
   const { theme } = useContext(ThemeContext);
   const [hidden, setHidden] = useState<string[]>([]);
   const { data, loading, error } = useQuery<{
@@ -74,9 +80,32 @@ export const StatusBoardSalesChart = ({ month }: { month: string }) => {
       </StyledDashboardMuted>
     );
   }
-  const days = report.days;
-  const labels = Array.from(
-    new Set(days.flatMap((day) => day.departments.map((item) => item.label))),
+  const allLabels = Array.from(
+    new Set(
+      report.days.flatMap((day) => day.departments.map((item) => item.label)),
+    ),
+  );
+  const days = report.days.map((day) => {
+    const departments = day.departments.filter(
+      (department) =>
+        departmentLabels === undefined ||
+        departmentLabels.includes(department.label),
+    );
+    return {
+      ...day,
+      departments,
+      total:
+        departmentLabels === undefined
+          ? day.total
+          : departments.reduce(
+              (total, department) => total + department.amount,
+              0,
+            ),
+    };
+  });
+  const labels = allLabels.filter(
+    (label) =>
+      departmentLabels === undefined || departmentLabels.includes(label),
   );
   const colors = [
     theme.color.blue,
@@ -92,7 +121,7 @@ export const StatusBoardSalesChart = ({ month }: { month: string }) => {
     theme.color.lime,
   ];
   const colorFor = (label: string) =>
-    colors[labels.indexOf(label) % colors.length];
+    colors[allLabels.indexOf(label) % colors.length];
   const series = labels
     .filter((label) => !hidden.includes(label))
     .map((label) => ({
@@ -207,7 +236,9 @@ export const StatusBoardSalesChart = ({ month }: { month: string }) => {
         </StyledChart>
       ) : (
         <StyledDashboardMuted>
-          표시할 사업부를 선택해 주세요.
+          {labels.length
+            ? '표시할 사업부를 선택해 주세요.'
+            : '선택한 그룹의 가캠 매출이 없습니다.'}
         </StyledDashboardMuted>
       )}
     </div>

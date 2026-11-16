@@ -80,8 +80,10 @@ const STATUS_MESSAGES = {
 
 export const StatusBoardSalesSection = ({
   depositProps,
+  departmentLabels,
 }: {
   depositProps?: StatusBoardIssuedSalesProps;
+  departmentLabels?: string[];
 }) => {
   const [source, setSource] = useState<'all' | 'gainge' | 'deposit'>(
     depositProps ? 'all' : 'gainge',
@@ -91,10 +93,10 @@ export const StatusBoardSalesSection = ({
   const [chartVersion, setChartVersion] = useState(0);
   const description =
     source === 'all'
-      ? '가캠 결제 매출(VAT 제외)과 CRM 총 발행 매출을 함께 표시합니다. 중복 거래가 없다는 전제로 두 금액을 합산합니다. 원천별 VAT 기준이 다를 수 있으며 CRM 금액은 등록된 값을 사용합니다. CRM 입금은 발행일(필드가 없으면 등록일) 기준으로 그룹·구성원 필터를 적용하며 가캠은 전사 기준입니다.'
+      ? '가캠 결제 매출(VAT 제외)과 CRM 총 발행 매출을 함께 표시합니다. 중복 거래가 없다는 전제로 두 금액을 합산합니다. 원천별 VAT 기준이 다를 수 있으며 CRM 금액은 등록된 값을 사용합니다. CRM 입금은 발행일(필드가 없으면 등록일) 기준으로 그룹·구성원 필터를 적용하며 가캠은 상단 그룹과 같은 이름의 사업부를 집계합니다.'
       : source === 'deposit'
         ? 'CRM 입금 데이터의 총 발행 매출입니다. 발행일(없으면 등록일) 기준이며 상단 그룹·구성원 필터를 적용합니다. 입금 완료와 미입금·예정 금액을 포함하며 실제 입금 완료액과 다릅니다. 가캠 매출과 합산하지 않습니다.'
-        : '가캠의 PG·인앱·정기결제 매출을 사업부별로 표시합니다. 환불액 반영·VAT 제외 기준이며 CRM 입금액은 합산하지 않습니다. 상단 그룹·구성원 필터는 적용되지 않습니다. 조회 결과 중 합계는 최대 1분, 일별 그래프는 최대 5분간 유지됩니다. 범례로 사업부를 선택하고 그래프에서 날짜별 금액과 전체 대비 비중을 확인할 수 있습니다.';
+        : '가캠의 PG·인앱·정기결제 매출을 사업부별로 표시합니다. 환불액 반영·VAT 제외 기준이며 CRM 입금액은 합산하지 않습니다. 상단 그룹과 같은 이름의 사업부를 집계합니다. 구성원별 구분은 지원하지 않습니다. 조회 결과 중 합계는 최대 1분, 일별 그래프는 최대 5분간 유지됩니다. 범례로 사업부를 선택하고 그래프에서 날짜별 금액과 전체 대비 비중을 확인할 수 있습니다.';
   const currentMonth = new Intl.DateTimeFormat('sv-SE', {
     timeZone: 'Asia/Seoul',
     year: 'numeric',
@@ -110,6 +112,16 @@ export const StatusBoardSalesSection = ({
     notifyOnNetworkStatusChange: true,
   });
   const report = data?.gaingeMonthlySales;
+  const departments =
+    report?.departments.filter(
+      (department) =>
+        departmentLabels === undefined ||
+        departmentLabels.includes(department.label),
+    ) ?? [];
+  const gaingeAmount =
+    departmentLabels === undefined
+      ? report?.total
+      : departments.reduce((total, department) => total + department.amount, 0);
   const reportDescription =
     source !== 'deposit' &&
     report?.status === 'READY' &&
@@ -235,7 +247,7 @@ export const StatusBoardSalesSection = ({
           month={selectedMonth}
           gaingeLoading={source === 'all' && loading}
           gaingeAmount={
-            source === 'all' ? (isReady ? report.total : null) : undefined
+            source === 'all' ? (isReady ? gaingeAmount : null) : undefined
           }
           depositObjectMetadataItem={depositProps.depositObjectMetadataItem}
           memberIds={depositProps.memberIds}
@@ -254,14 +266,15 @@ export const StatusBoardSalesSection = ({
             <StatusBoardSalesChart
               key={`${selectedMonth}-${chartVersion}`}
               month={selectedMonth}
+              departmentLabels={departmentLabels}
             />
             <StyledAmounts>
               {[
                 {
                   label: source === 'all' ? '가캠 전체 매출' : '전체 매출',
-                  amount: report.total!,
+                  amount: gaingeAmount!,
                 },
-                ...report.departments,
+                ...departments,
               ].map((item, index) => (
                 <div key={`${index}-${item.label}`}>
                   <dt>{item.label}</dt>

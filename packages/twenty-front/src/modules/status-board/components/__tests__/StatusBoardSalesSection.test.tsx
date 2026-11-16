@@ -5,6 +5,19 @@ import { fireEvent, render, screen } from '@testing-library/react';
 
 import { StatusBoardSalesSection } from '@/status-board/components/StatusBoardSalesSection';
 
+const mockIssuedSales = jest.fn();
+jest.mock('@/status-board/components/StatusBoardIssuedSales', () => {
+  const actual = jest.requireActual(
+    '@/status-board/components/StatusBoardIssuedSales',
+  );
+  return {
+    ...actual,
+    StatusBoardIssuedSales: (props: unknown) => {
+      mockIssuedSales(props);
+      return actual.StatusBoardIssuedSales(props);
+    },
+  };
+});
 const mockQuery = jest.fn();
 const mockRefetch = jest.fn().mockResolvedValue({});
 
@@ -40,7 +53,7 @@ it('shows connection pending without inventing zero revenue', () => {
   expect(screen.getByRole('status')).toHaveTextContent('연결 대기');
   expect(screen.queryByText('0원')).not.toBeInTheDocument();
 });
-it('shows full won amounts, zero departments and a separate company-wide scope', () => {
+it('shows full won amounts, zero departments and explains group scope', () => {
   mockQuery.mockReturnValue({
     loading: false,
     refetch: mockRefetch,
@@ -63,7 +76,7 @@ it('shows full won amounts, zero departments and a separate company-wide scope',
   expect(screen.getAllByText('1,234,567원')).toHaveLength(2);
   expect(screen.getByText('0원')).toBeInTheDocument();
   expect(
-    screen.getByLabelText(/매출 집계 기준:.*상단 그룹·구성원 필터/),
+    screen.getByLabelText(/매출 집계 기준:.*상단 그룹과 같은 이름/),
   ).toBeInTheDocument();
 });
 it('does not display a previous month response when switching month', () => {
@@ -159,4 +172,77 @@ it('shows a loading skeleton without stale amounts or an error message', () => {
   );
   expect(screen.queryByText('1,234,567원')).not.toBeInTheDocument();
   expect(screen.queryByText(/조회 대기 또는 오류/)).not.toBeInTheDocument();
+});
+
+it('recalculates revenue for selected groups, multiple groups and all groups', () => {
+  mockQuery.mockReturnValue({
+    loading: false,
+    refetch: mockRefetch,
+    data: {
+      gaingeMonthlySales: {
+        status: 'READY',
+        month: '2026-10',
+        total: 300,
+        departments: [
+          { label: '1BU', amount: 100 },
+          { label: 'AX센터', amount: 200 },
+        ],
+      },
+    },
+  });
+  const { rerender } = render(
+    <StatusBoardSalesSection departmentLabels={['AX센터']} />,
+  );
+  expect(screen.getAllByText('200원')).toHaveLength(2);
+  expect(screen.queryByText('300원')).not.toBeInTheDocument();
+  expect(screen.queryByText('1BU')).not.toBeInTheDocument();
+  rerender(<StatusBoardSalesSection departmentLabels={['AX센터', '1BU']} />);
+  expect(screen.getByText('300원')).toBeInTheDocument();
+  rerender(<StatusBoardSalesSection departmentLabels={['없는 그룹']} />);
+  expect(screen.getByText('0원')).toBeInTheDocument();
+  expect(screen.queryByText('300원')).not.toBeInTheDocument();
+  rerender(<StatusBoardSalesSection />);
+  expect(screen.getByText('300원')).toBeInTheDocument();
+  expect(screen.getByText('1BU')).toBeInTheDocument();
+});
+
+it('passes the filtered Gainge amount to the combined deposit total', () => {
+  mockQuery.mockReturnValue({
+    loading: false,
+    refetch: mockRefetch,
+    data: {
+      gaingeMonthlySales: {
+        status: 'READY',
+        month: '2026-10',
+        total: 300,
+        departments: [
+          { label: '1BU', amount: 100 },
+          { label: 'AX센터', amount: 200 },
+        ],
+      },
+    },
+  });
+  const { rerender } = render(
+    <StatusBoardSalesSection
+      departmentLabels={['AX센터']}
+      depositProps={{
+        selectedGroupIds: ['ax-group'],
+        isGroupUnavailable: false,
+      }}
+    />,
+  );
+  expect(mockIssuedSales.mock.calls.at(-1)?.[0]).toEqual(
+    expect.objectContaining({
+      gaingeAmount: 200,
+      selectedGroupIds: ['ax-group'],
+    }),
+  );
+  rerender(
+    <StatusBoardSalesSection
+      depositProps={{ selectedGroupIds: [], isGroupUnavailable: false }}
+    />,
+  );
+  expect(mockIssuedSales.mock.calls.at(-1)?.[0]).toEqual(
+    expect.objectContaining({ gaingeAmount: 300 }),
+  );
 });

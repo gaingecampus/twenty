@@ -183,6 +183,15 @@ const StatusBoardContentBody = ({
           )}
           {!dummy.enabled && (
             <StatusBoardSalesSection
+              departmentLabels={
+                filters.selectedGroupIds.length > 0
+                  ? dummy.groups
+                      .filter((group) =>
+                        filters.selectedGroupIds.includes(group.id),
+                      )
+                      .map((group) => String(group.name))
+                  : undefined
+              }
               depositProps={{
                 depositObjectMetadataItem: metadata.deposit,
                 memberIds,
