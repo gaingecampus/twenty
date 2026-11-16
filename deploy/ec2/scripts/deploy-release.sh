@@ -39,6 +39,7 @@ if [ -f "${LIVE_COMPOSE}" ]; then
     previous_image="$(docker inspect --format '{{.Image}}' "${previous_container}")"
     rollback_image="twenty-rollback:$(basename "${RELEASE_DIR}")"
     docker tag "${previous_image}" "${rollback_image}"
+    export PROTECTED_ROLLBACK_IMAGE="${rollback_image}"
     set_image "${rollback_image}" "${LIVE_ENV}" "${PREVIOUS_ENV}"
     HAS_PREVIOUS=true
   fi

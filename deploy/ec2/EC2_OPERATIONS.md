@@ -417,3 +417,7 @@ cd /opt/twenty/deploy/ec2 && sudo bash scripts/run-upgrade.sh
 ## Daily database dump to S3
 
 See [DATABASE_BACKUP.md](DATABASE_BACKUP.md) for the 03:00 Asia/Seoul timer, 30-day backup-prefix retention, installation and restore verification. App deployment copies the backup scripts but does not enable the timer; install it once after the S3 lifecycle policy is configured.
+
+### 배포 이미지 디스크 정리 (AX-1376)
+
+이미지 pull 전에 같은 저장소의 과거 태그와 과거 `twenty-rollback` 태그를 정리합니다. 모든 컨테이너가 참조하는 이미지, 후보 이미지, 진행 중 배포의 복구 태그는 보존하며 강제 삭제와 볼륨 정리는 하지 않습니다. 과거 릴리스 설정 파일이 남아 있어도 해당 복구 이미지는 정리될 수 있으므로 오래된 릴리스 복구 시 ECR에서 원본 이미지를 다시 받아야 합니다.

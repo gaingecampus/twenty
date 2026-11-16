@@ -46,7 +46,29 @@ cleanup_docker_disk_usage() {
   echo "Docker disk usage before cleanup:"
   docker system df || true
 
-  docker container prune --force
+  # Keep every container image (including stopped containers) and the current
+  # rollback tag. Plain image prune leaves tagged releases on disk forever.
+  local container_ids protected_images image_id image_reference
+  container_ids="$(docker ps --all --quiet)"
+  protected_images=""
+  if [ -n "${container_ids}" ]; then
+    protected_images="$(docker inspect --format '{{.Image}}' ${container_ids})"
+  fi
+  local images
+  images="$(docker image ls --no-trunc --format '{{.ID}} {{.Repository}}:{{.Tag}}')"
+  while read -r image_id image_reference; do
+    case "${image_reference}" in
+      "${TWENTY_IMAGE%:*}:"*|twenty-rollback:*) ;;
+      *) continue ;;
+    esac
+    if [ "${image_reference}" = "${TWENTY_IMAGE}" ] ||
+      [ "${image_reference}" = "${PROTECTED_ROLLBACK_IMAGE:-}" ] ||
+      grep -Fxq "${image_id}" <<<"${protected_images}"; then
+      continue
+    fi
+    # Never force removal: Docker also protects newly referenced images.
+    docker image rm "${image_reference}"
+  done <<<"${images}"
   docker image prune --force
   docker builder prune --all --force
 
