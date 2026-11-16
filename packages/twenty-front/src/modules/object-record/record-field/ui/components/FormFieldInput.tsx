@@ -1,3 +1,4 @@
+import { useDepositStatusPolicy } from '@/deposit/hooks/useDepositStatusPolicy';
 import { FormAddressFieldInput } from '@/object-record/record-field/ui/form-types/components/FormAddressFieldInput';
 import { FormArrayFieldInput } from '@/object-record/record-field/ui/form-types/components/FormArrayFieldInput';
 import { FormBooleanFieldInput } from '@/object-record/record-field/ui/form-types/components/FormBooleanFieldInput';
@@ -87,6 +88,11 @@ export const FormFieldInput = ({
   onError,
   timeZone,
 }: FormFieldInputProps) => {
+  const depositPolicy = useDepositStatusPolicy({
+    objectNameSingular: field.metadata.objectMetadataNameSingular,
+    fieldName: field.metadata.fieldName,
+    value: defaultValue,
+  });
   return isFieldNumber(field) || field.type === FieldMetadataType.NUMERIC ? (
     <FormNumberFieldInput
       label={field.label}
@@ -129,10 +135,18 @@ export const FormFieldInput = ({
       label={field.label}
       defaultValue={defaultValue as string | undefined}
       onChange={onChange}
-      VariablePicker={VariablePicker}
-      options={field.metadata?.options}
-      readonly={readonly}
-      isNullable={field.metadata.isNullable}
+      VariablePicker={depositPolicy.isRestricted ? undefined : VariablePicker}
+      options={
+        depositPolicy.isRestricted
+          ? field.metadata.options.filter(
+              (option) =>
+                option.value ===
+                (depositPolicy.isReadOnly ? defaultValue : 'PENDING'),
+            )
+          : field.metadata.options
+      }
+      readonly={readonly || depositPolicy.isReadOnly}
+      isNullable={field.metadata.isNullable && !depositPolicy.isRestricted}
     />
   ) : isFieldFullName(field) ? (
     <FormFullNameFieldInput

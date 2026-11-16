@@ -1,3 +1,6 @@
+import { useDepositStatusPolicy } from '@/deposit/hooks/useDepositStatusPolicy';
+import { useAtomFamilySelectorValue } from '@/ui/utilities/state/jotai/hooks/useAtomFamilySelectorValue';
+import { recordStoreFamilySelector } from '@/object-record/record-store/states/selectors/recordStoreFamilySelector';
 import { useGetIsMetadataItemFromStandardApplication } from '@/object-metadata/hooks/useGetIsMetadataItemFromStandardApplication';
 import { useObjectMetadataItemById } from '@/object-metadata/hooks/useObjectMetadataItemById';
 import { formatFieldMetadataItemAsFieldDefinition } from '@/object-metadata/utils/formatFieldMetadataItemAsFieldDefinition';
@@ -24,6 +27,16 @@ export const useIsRecordFieldReadOnly = ({
   const fieldMetadataItem = objectMetadataItem.fields.find(
     (field) => field.id === fieldMetadataId,
   );
+
+  const currentValue = useAtomFamilySelectorValue(recordStoreFamilySelector, {
+    recordId,
+    fieldName: fieldMetadataItem?.name ?? '',
+  });
+  const depositPolicy = useDepositStatusPolicy({
+    objectNameSingular: objectMetadataItem.nameSingular,
+    fieldName: fieldMetadataItem?.name,
+    value: currentValue,
+  });
 
   const { objectPermissionsByObjectMetadataId } = useObjectPermissions();
   const getIsMetadataItemFromStandardApplication =
@@ -52,14 +65,18 @@ export const useIsRecordFieldReadOnly = ({
     objectMetadataItem.nameSingular === 'messageList' &&
     ['name', 'avatarEmoji', 'avatarColor'].includes(fieldMetadataItem.name);
 
-  return isRecordFieldReadOnly({
-    isRecordReadOnly,
-    isSystemObject: objectMetadataItem.isSystem && !isMessageListEditableField,
-    isFieldFromStandardApplication:
-      getIsMetadataItemFromStandardApplication(fieldMetadataItem),
-    objectPermissions,
-    fieldMetadataItem,
-    fieldDefinition,
-    objectPermissionsByObjectMetadataId,
-  });
+  return (
+    depositPolicy.isReadOnly ||
+    isRecordFieldReadOnly({
+      isRecordReadOnly,
+      isSystemObject:
+        objectMetadataItem.isSystem && !isMessageListEditableField,
+      isFieldFromStandardApplication:
+        getIsMetadataItemFromStandardApplication(fieldMetadataItem),
+      objectPermissions,
+      fieldMetadataItem,
+      fieldDefinition,
+      objectPermissionsByObjectMetadataId,
+    })
+  );
 };

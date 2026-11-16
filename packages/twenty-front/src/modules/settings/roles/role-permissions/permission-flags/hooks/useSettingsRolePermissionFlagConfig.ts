@@ -40,6 +40,16 @@ export const useSettingsRolePermissionFlagConfig = ({
   return useMemo(() => {
     const allPermissions: SettingsRolePermissionsSettingPermission[] = [
       {
+        key: PermissionFlagType.MANAGE_DEPOSIT_STATUS,
+        name: '입금 상태 관리',
+        description:
+          '입금의 모든 상태를 변경하고 발행·입금 완료 상태를 되돌립니다.',
+        Icon: IconCreditCard,
+        isRelevantForAgents: true,
+        isRelevantForApiKeys: true,
+        isRelevantForUsers: true,
+      },
+      {
         key: PermissionFlagType.API_KEYS_AND_WEBHOOKS,
         name: t`API Keys & Webhooks`,
         description: t`Manage API keys and webhooks`,

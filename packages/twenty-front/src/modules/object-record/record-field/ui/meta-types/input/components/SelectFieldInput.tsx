@@ -1,3 +1,4 @@
+import { useDepositStatusPolicy } from '@/deposit/hooks/useDepositStatusPolicy';
 import { t } from '@lingui/core/macro';
 import { FieldInputEventContext } from '@/object-record/record-field/ui/contexts/FieldInputEventContext';
 import { useClearField } from '@/object-record/record-field/ui/hooks/useClearField';
@@ -25,15 +26,28 @@ export const SelectFieldInput = () => {
     fieldDefinition?.metadata?.fieldName,
   );
 
+  const depositPolicy = useDepositStatusPolicy({
+    objectNameSingular: fieldDefinition.metadata.objectMetadataNameSingular,
+    fieldName: fieldDefinition.metadata.fieldName,
+    value: fieldValue,
+  });
+
   const { onCancel, onSubmit } = useContext(FieldInputEventContext);
 
-  const { filteredOptions: selectOptions, canSelectEmpty } =
+  const { filteredOptions: permittedOptions, canSelectEmpty } =
     useFilteredSelectOptionsFromRLSPredicates({
       fieldMetadataId: fieldDefinition.fieldMetadataId,
       objectMetadataNameSingular:
         fieldDefinition.metadata.objectMetadataNameSingular,
       options: fieldDefinition.metadata.options,
     });
+
+  const selectOptions = depositPolicy.isRestricted
+    ? permittedOptions.filter(
+        (option) =>
+          option.value === (depositPolicy.isReadOnly ? fieldValue : 'PENDING'),
+      )
+    : permittedOptions;
 
   const instanceId = useAvailableComponentInstanceIdOrThrow(
     RecordFieldComponentInstanceContext,
@@ -56,13 +70,18 @@ export const SelectFieldInput = () => {
   };
 
   const handleAddSelectOption = (optionName: string) => {
-    if (!canAddSelectOption) {
+    if (!canAddSelectOption || depositPolicy.isRestricted) {
       return;
     }
     addSelectOption(optionName);
   };
 
   const handleSubmit = (option: SelectOption) => {
+    if (
+      depositPolicy.isReadOnly ||
+      (depositPolicy.isRestricted && option.value !== 'PENDING')
+    )
+      return;
     onSubmit?.({ newValue: option.value });
 
     resetSelectedItem();
@@ -105,12 +124,16 @@ export const SelectFieldInput = () => {
       defaultOption={selectedOption}
       onFilterChange={setFilteredOptions}
       onClear={
-        fieldDefinition.metadata.isNullable && canSelectEmpty
+        fieldDefinition.metadata.isNullable &&
+        canSelectEmpty &&
+        !depositPolicy.isRestricted
           ? handleClearField
           : undefined
       }
       clearLabel={fieldDefinition.label}
-      onAddSelectOption={handleAddSelectOption}
+      onAddSelectOption={
+        depositPolicy.isRestricted ? undefined : handleAddSelectOption
+      }
     />
   );
 };

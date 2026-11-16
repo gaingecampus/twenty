@@ -1,3 +1,6 @@
+import { useDepositStatusPolicy } from '@/deposit/hooks/useDepositStatusPolicy';
+import { recordStoreFamilySelector } from '@/object-record/record-store/states/selectors/recordStoreFamilySelector';
+import { useAtomFamilySelectorValue } from '@/ui/utilities/state/jotai/hooks/useAtomFamilySelectorValue';
 import { useGetIsMetadataItemFromStandardApplication } from '@/object-metadata/hooks/useGetIsMetadataItemFromStandardApplication';
 import { getObjectPermissionsForObject } from '@/object-metadata/utils/getObjectPermissionsForObject';
 import { isLabelIdentifierField } from '@/object-metadata/utils/isLabelIdentifierField';
@@ -52,6 +55,16 @@ export const RecordTableCellFieldContextGeneric = ({
     recordField,
     fieldDefinitionByViewFieldId,
     fieldDefinitionByFieldMetadataItemId,
+  });
+
+  const currentValue = useAtomFamilySelectorValue(recordStoreFamilySelector, {
+    recordId,
+    fieldName: fieldDefinition?.metadata.fieldName ?? '',
+  });
+  const depositPolicy = useDepositStatusPolicy({
+    objectNameSingular: objectMetadataItem.nameSingular,
+    fieldName: fieldDefinition?.metadata.fieldName,
+    value: currentValue,
   });
 
   if (!isDefined(fieldDefinition)) {
@@ -122,6 +135,7 @@ export const RecordTableCellFieldContextGeneric = ({
         maxWidth: getRecordTableChipMaxWidth(recordField.size),
         isRecordFieldReadOnly:
           isRecordTableCellsNonEditable ||
+          depositPolicy.isReadOnly ||
           isRecordFieldReadOnly({
             isRecordReadOnly: isRecordReadOnly ?? false,
             isSystemObject: objectMetadataItem.isSystem,
