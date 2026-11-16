@@ -24,6 +24,12 @@ const STANDARD_PERMISSION_FLAG_METADATA: Record<
   PermissionFlagType,
   StandardPermissionFlagMetadata
 > = {
+  [PermissionFlagType.MANAGE_DEPOSIT_STATUS]: {
+    label: '입금 상태 관리',
+    description:
+      '입금의 모든 상태를 변경하고 발행·입금 완료 상태를 되돌립니다.',
+    icon: 'IconCash',
+  },
   [PermissionFlagType.API_KEYS_AND_WEBHOOKS]: {
     label: 'API Keys & Webhooks',
     description: 'Manage API keys and webhooks',

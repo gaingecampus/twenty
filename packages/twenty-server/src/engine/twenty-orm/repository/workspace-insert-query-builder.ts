@@ -1,3 +1,7 @@
+import {
+  canManageDepositStatus,
+  throwDepositStatusPermissionDenied,
+} from 'src/engine/twenty-orm/utils/deposit-status-permissions.util';
 import { type ObjectsPermissions } from 'twenty-shared/types';
 import { isDefined } from 'twenty-shared/utils';
 import {
@@ -172,6 +176,26 @@ export class WorkspaceInsertQueryBuilder<
       const entities = Array.isArray(this.expressionMap.valuesSet)
         ? this.expressionMap.valuesSet
         : [this.expressionMap.valuesSet];
+
+      if (
+        objectMetadata.nameSingular === 'deposit' &&
+        !(await canManageDepositStatus(
+          this.authContext,
+          this.internalContext.coreDataSource,
+        ))
+      ) {
+        // Upserts can overwrite a completed record without going through UPDATE.
+        if (this.expressionMap.onUpdate || this.expressionMap.onConflict)
+          throwDepositStatusPermissionDenied();
+        for (const entity of entities) {
+          if (
+            entity.depositStatus !== undefined &&
+            entity.depositStatus !== 'PENDING'
+          )
+            throwDepositStatusPermissionDenied();
+          entity.depositStatus = 'PENDING';
+        }
+      }
 
       const filesFieldDiffByEntityIndex =
         this.filesFieldSync.computeFilesFieldDiffBeforeInsert(

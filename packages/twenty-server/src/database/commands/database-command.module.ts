@@ -1,3 +1,6 @@
+import { SetupDepositManagerRoleCommand } from 'src/database/commands/setup-deposit-manager-role.command';
+import { RoleModule } from 'src/engine/metadata-modules/role/role.module';
+import { RolePermissionFlagModule } from 'src/engine/metadata-modules/role-permission-flag/role-permission-flag.module';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
@@ -57,6 +60,8 @@ import { AutomatedTriggerModule } from 'src/modules/workflow/workflow-trigger/au
 
 @Module({
   imports: [
+    RoleModule,
+    RolePermissionFlagModule,
     UpgradeVersionCommandModule,
     TypeOrmModule.forFeature([WorkspaceEntity, RoleEntity]),
     WorkspaceExportModule,
@@ -98,6 +103,7 @@ import { AutomatedTriggerModule } from 'src/modules/workflow/workflow-trigger/au
     TwentyStandardApplicationModule,
   ],
   providers: [
+    SetupDepositManagerRoleCommand,
     DataSeedWorkspaceCommand,
     ConfirmationQuestion,
     CronRegisterAllCommand,

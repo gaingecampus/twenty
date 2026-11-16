@@ -1,4 +1,6 @@
 export enum PermissionFlagType {
+  MANAGE_DEPOSIT_STATUS = 'MANAGE_DEPOSIT_STATUS',
+
   // Settings permissions
   API_KEYS_AND_WEBHOOKS = 'API_KEYS_AND_WEBHOOKS',
   WORKSPACE = 'WORKSPACE',

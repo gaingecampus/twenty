@@ -1,3 +1,7 @@
+import {
+  assertDepositStatusUpdateAllowed,
+  canManageDepositStatus,
+} from 'src/engine/twenty-orm/utils/deposit-status-permissions.util';
 import { msg } from '@lingui/core/macro';
 import { QUERY_MAX_RECORDS } from 'twenty-shared/constants';
 import { type ObjectsPermissions } from 'twenty-shared/types';
@@ -101,10 +105,54 @@ export class WorkspaceUpdateQueryBuilder<
     return workspaceUpdateQueryBuilder;
   }
 
+  private restrictDepositStatus = false;
+
   override async execute(): Promise<UpdateResult> {
+    const objectMetadata = getObjectMetadataFromEntityTarget(
+      this.getMainAliasTarget(),
+      this.internalContext,
+    );
+    const payloads =
+      this.manyInputs?.map((input) => input.partialEntity) ??
+      (Array.isArray(this.expressionMap.valuesSet)
+        ? this.expressionMap.valuesSet
+        : [this.expressionMap.valuesSet]);
+    this.restrictDepositStatus =
+      objectMetadata.nameSingular === 'deposit' &&
+      payloads.some(
+        (payload) =>
+          (payload as ObjectLiteral | undefined)?.depositStatus !== undefined,
+      ) &&
+      !(await canManageDepositStatus(
+        this.authContext,
+        this.internalContext.coreDataSource,
+      ));
+    if (!this.restrictDepositStatus) return this.executeMutation();
+
+    // Validate the previous status while holding the same row locks as the write.
+    const previousQueryRunner = this.queryRunner;
+    const runner = previousQueryRunner ?? this.connection.createQueryRunner();
+    this.queryRunner = runner;
+    const ownsTransaction = !runner.isTransactionActive;
+    try {
+      if (ownsTransaction) await runner.startTransaction();
+      const result = await this.executeMutation();
+      if (ownsTransaction) await runner.commitTransaction();
+      return result;
+    } catch (error) {
+      if (ownsTransaction && runner.isTransactionActive)
+        await runner.rollbackTransaction();
+      throw error;
+    } finally {
+      this.queryRunner = previousQueryRunner;
+      if (!previousQueryRunner) await runner.release();
+    }
+  }
+
+  private async executeMutation(): Promise<UpdateResult> {
     try {
       if (this.manyInputs) {
-        return this.executeMany();
+        return this.executeManyMutation();
       }
       validateQueryIsPermittedOrThrow({
         expressionMap: this.expressionMap,
@@ -133,6 +181,8 @@ export class WorkspaceUpdateQueryBuilder<
 
       const tableName = computeObjectTargetTable(objectMetadata);
 
+      if (this.restrictDepositStatus)
+        eventSelectQueryBuilder.setLock('pessimistic_write');
       const before = await eventSelectQueryBuilder.getMany({
         noFormatting: true,
       });
@@ -168,6 +218,13 @@ export class WorkspaceUpdateQueryBuilder<
         this.internalContext.flatObjectMetadataMaps,
         this.internalContext.flatFieldMetadataMaps,
       );
+
+      if (this.restrictDepositStatus) {
+        const payload = Array.isArray(this.expressionMap.valuesSet)
+          ? this.expressionMap.valuesSet[0]
+          : this.expressionMap.valuesSet;
+        assertDepositStatusUpdateAllowed(payload ?? {}, formattedBefore);
+      }
 
       let filesFieldDiffByEntityIndex = null;
       let filesFieldFileIds = null;
@@ -298,6 +355,10 @@ export class WorkspaceUpdateQueryBuilder<
   }
 
   public async executeMany(): Promise<UpdateResult> {
+    return this.execute();
+  }
+
+  private async executeManyMutation(): Promise<UpdateResult> {
     try {
       for (const input of this.manyInputs) {
         const fakeExpressionMapToValidatePermissions = Object.assign(
@@ -339,6 +400,8 @@ export class WorkspaceUpdateQueryBuilder<
         this.manyInputs.map((input) => input.criteria),
       );
 
+      if (this.restrictDepositStatus)
+        eventSelectQueryBuilder.setLock('pessimistic_write');
       const beforeRecords = await eventSelectQueryBuilder.getMany({
         noFormatting: true,
       });
@@ -349,6 +412,15 @@ export class WorkspaceUpdateQueryBuilder<
         this.internalContext.flatObjectMetadataMaps,
         this.internalContext.flatFieldMetadataMaps,
       );
+
+      if (this.restrictDepositStatus) {
+        for (const input of this.manyInputs) {
+          assertDepositStatusUpdateAllowed(
+            input.partialEntity,
+            formattedBefore.filter((record) => record.id === input.criteria),
+          );
+        }
+      }
 
       const results: UpdateResult[] = [];
 

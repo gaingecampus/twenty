@@ -1,6 +1,7 @@
 import type { PermissionFlagType } from './PermissionFlagType';
 
 export const SystemPermissionFlag = {
+  MANAGE_DEPOSIT_STATUS: '146f6879-02c0-4c0c-bd15-89bb21cf6a97',
   API_KEYS_AND_WEBHOOKS: 'beb99803-9a0e-588d-9c4b-3dd14d9cdf21',
   WORKSPACE: '86a58859-a539-5fa8-ba18-a6aaddc811b6',
   WORKSPACE_MEMBERS: 'ec342166-2df7-53e7-aa9b-64992d6cb35f',

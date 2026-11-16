@@ -103,6 +103,7 @@ export class PermissionsService {
   public getDefaultUserWorkspacePermissions = () =>
     ({
       permissionFlags: {
+        [PermissionFlagType.MANAGE_DEPOSIT_STATUS]: false,
         [PermissionFlagType.API_KEYS_AND_WEBHOOKS]: false,
         [PermissionFlagType.WORKSPACE]: false,
         [PermissionFlagType.WORKSPACE_MEMBERS]: false,
